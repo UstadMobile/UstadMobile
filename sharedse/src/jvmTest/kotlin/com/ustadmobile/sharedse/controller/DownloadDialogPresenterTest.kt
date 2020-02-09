@@ -43,7 +43,7 @@ class DownloadDialogPresenterTest {
 
     private val context = mock<DoorLifecycleOwner>() {
         on { currentState }.thenReturn(DoorLifecycleObserver.STARTED)
-    } as Any
+    }
 
     private lateinit var downloadJob: DownloadJob
 
@@ -109,7 +109,7 @@ class DownloadDialogPresenterTest {
 
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
-                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    mockedDialogView, context, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
                     impl = systemImpl)
 
             presenter.onCreate(mapOf())
@@ -150,7 +150,7 @@ class DownloadDialogPresenterTest {
 
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()),
-                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    mockedDialogView, context, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
                     impl = systemImpl)
 
             presenter.onCreate(mapOf())
@@ -208,7 +208,7 @@ class DownloadDialogPresenterTest {
             val preparerFn =  {downloadJobUid: Int, context: Any  -> Unit}
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to "1"),
-                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    mockedDialogView, context, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
                     systemImpl, preparerFn)
 
             presenter.onCreate(mapOf())
@@ -228,7 +228,7 @@ class DownloadDialogPresenterTest {
             val preparerFn =  {downloadJobUid: Int, context: Any  -> Unit}
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to "1"),
-                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    mockedDialogView, context, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
                     systemImpl, preparerFn)
 
             presenter.onCreate(mapOf())
@@ -248,7 +248,7 @@ class DownloadDialogPresenterTest {
             val preparerFn =  {downloadJobUid: Int, context: Any  -> Unit}
             presenter = DownloadDialogPresenter(context,
                     mapOf(ARG_CONTENT_ENTRY_UID to "1"),
-                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    mockedDialogView, context, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
                     systemImpl, preparerFn)
 
             presenter.onCreate(mapOf())
@@ -292,7 +292,7 @@ class DownloadDialogPresenterTest {
             preparerCountdownLatch.countDown()
         }
 
-        presenter = DownloadDialogPresenter(context, args, mockedDialogView,
+        presenter = DownloadDialogPresenter(context, args, mockedDialogView, context,
                 umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
                 systemImpl, downloadJobPreparerRequester)
         presenter.onCreate(mapOf())
@@ -381,7 +381,7 @@ class DownloadDialogPresenterTest {
                     .thenReturn(existingDownloadJobItemLiveData)
 
             val args = mapOf(ARG_CONTENT_ENTRY_UID to "1")
-            presenter = DownloadDialogPresenter(context, args, mockedDialogView,
+            presenter = DownloadDialogPresenter(context, args, mockedDialogView, context,
                     umAppDatabase, umAppDatabaseRepo, containerDownloadManager, systemImpl,
                     { Int, Any -> Unit })
             presenter.onCreate(HashMap<String, String>())
@@ -416,7 +416,7 @@ class DownloadDialogPresenterTest {
                     .thenReturn(existingDownloadJobItemLiveData)
 
             presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"),
-                    mockedDialogView, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
+                    mockedDialogView, context, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
                     systemImpl, {Int, Any -> Unit})
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()
@@ -448,7 +448,7 @@ class DownloadDialogPresenterTest {
                     .thenReturn(existingDownloadJobItemLiveData)
 
             presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"), mockedDialogView,
-                    umAppDatabase, umAppDatabaseRepo, containerDownloadManager, impl = systemImpl)
+                    context, umAppDatabase, umAppDatabaseRepo, containerDownloadManager, impl = systemImpl)
                     { Int, Any -> Unit }
             presenter.onCreate(HashMap<String, String>())
             presenter.onStart()

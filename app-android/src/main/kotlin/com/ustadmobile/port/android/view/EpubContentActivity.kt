@@ -206,7 +206,7 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterVie
                                             private val urlList: Array<String>) : FragmentStatePagerAdapter(fm) {
 
 
-        internal var pagesMap: WeakHashMap<Int, EpubContentPageFragment> = WeakHashMap()
+        internal var pagesMap: WeakHashMap<String, EpubContentPageFragment> = WeakHashMap()
 
         override
                 /**
@@ -218,14 +218,18 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterVie
                  * @param position Position in the list of fragment to create
                  */
         fun getItem(position: Int): Fragment {
-            val existingFrag = pagesMap[position]
+            //Using the simple integer key type does not seem to allow the entry to be garbage
+            // collected as expected and leads to a memory leak. Somehow the compiler or other
+            // uses the same key reference.
+            val strKey = "-${urlList[position]}"
+            val existingFrag = pagesMap[strKey]
 
             if (existingFrag != null) {
                 return existingFrag
             } else {
                 val frag = EpubContentPageFragment.newInstance(urlList[position], position)
 
-                this.pagesMap[position] = frag
+                this.pagesMap[strKey] = frag
                 return frag
             }
         }

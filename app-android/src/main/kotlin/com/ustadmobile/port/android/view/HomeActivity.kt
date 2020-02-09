@@ -167,7 +167,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     private fun updateElevation(optionUri: String) {
         val viewName = optionUri.substringBefore('?')
-        findViewById<AppBarLayout>(R.id.appBar).elevation = if(viewName == ContentEntryListView.VIEW_NAME) {
+        findViewById<AppBarLayout>(R.id.appBar).elevation = if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
             0f
         }else {
             10f
@@ -253,7 +253,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     companion object {
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf(
-                ContentEntryListView.VIEW_NAME to HomeContentEntryTabsFragment::class.java,
+                ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
+                HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java,
                 ReportDashboardView.VIEW_NAME to ReportDashboardFragment::class.java)
 
         /**
