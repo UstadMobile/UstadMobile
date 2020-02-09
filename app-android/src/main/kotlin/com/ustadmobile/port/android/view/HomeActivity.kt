@@ -235,6 +235,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun setOptions(options: List<Pair<Int, String>>) {
         this.options = options
 
+        println("debudebu: got options: " + options.size)
         options.forEach {
             val navIcon = BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP[it.first]
             if(navIcon != null){

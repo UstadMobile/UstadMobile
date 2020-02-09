@@ -19,7 +19,7 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
 
     //FIND ALL CATEGORIES
 
-    @Query(ALL_ACTIVE_QUERY_WITH_LE_FILTER + SORT_BY_NAME_ASC_QUERY)
+    @Query(ALL_ACTIVE_QUERY_WITH_LE_FILTER + SORT_BY_NAME_ENG_ASC_QUERY)
     abstract fun findAllActiveSNWIProviderByNameAsc(leUid: Long): DataSource.Factory<Int,SaleProduct>
 
     @Query(ALL_ACTIVE_QUERY_WITH_LE_FILTER + SORT_BY_NAME_DESC_QUERY)
@@ -46,18 +46,60 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
     //CATEGORY:
 
 
-    @Query(ACTIVE_CATEGORIES_QUERY +  SORT_BY_NAME_ASC_QUERY)
-    abstract fun findActiveCategoriesProviderByNameAsc(leUid: Long, query: String): DataSource.Factory<Int,SaleProduct>
+    @Query(ACTIVE_CATEGORIES_QUERY +  SORT_BY_NAME_ENG_ASC_QUERY)
+    abstract fun findActiveCategoriesProviderByNameAscEng(leUid: Long, query: String)
+            : DataSource.Factory<Int,SaleProduct>
 
-    @Query(ACTIVE_CATEGORIES_QUERY + SORT_BY_NAME_DESC_QUERY)
-    abstract fun findActiveCategoriesProviderByNameDesc(leUid: Long, query: String): DataSource.Factory<Int,SaleProduct>
+    @Query(ACTIVE_CATEGORIES_QUERY +  SORT_BY_NAME_DARI_ASC_QUERY)
+    abstract fun findActiveCategoriesProviderByNameAscDari(leUid: Long, query: String)
+            : DataSource.Factory<Int,SaleProduct>
 
-    fun sortAndFindActiveCategoriesProvider(leUid: Long, query: String, sortCode: Int): DataSource.Factory<Int, SaleProduct>{
+    @Query(ACTIVE_CATEGORIES_QUERY + SORT_BY_NAME_PASHTO_ASC_QUERY )
+    abstract fun findActiveCategoriesProviderByNameAscPashto(leUid: Long, query: String)
+            : DataSource.Factory<Int,SaleProduct>
+
+    @Query(ACTIVE_CATEGORIES_QUERY + SORT_BY_NAME_ENG_DESC_QUERY)
+    abstract fun findActiveCategoriesProviderByNameDescEng(leUid: Long, query: String)
+            : DataSource.Factory<Int,SaleProduct>
+
+    @Query(ACTIVE_CATEGORIES_QUERY + SORT_BY_NAME_DARI_DESC_QUERY)
+    abstract fun findActiveCategoriesProviderByNameDescDari(leUid: Long, query: String)
+            : DataSource.Factory<Int,SaleProduct>
+
+    @Query(ACTIVE_CATEGORIES_QUERY + SORT_BY_NAME_PASHTO_DESC_QUERY)
+    abstract fun findActiveCategoriesProviderByNameDescPashto(leUid: Long, query: String)
+            : DataSource.Factory<Int,SaleProduct>
+
+    fun sortAndFindActiveCategoriesProvider(leUid: Long, query: String, sortCode: Int, locale: String)
+            : DataSource.Factory<Int, SaleProduct>{
         when(sortCode){
-            SORT_ORDER_NAME_ASC -> return findActiveCategoriesProviderByNameAsc(leUid, query)
-            SORT_ORDER_NAME_DESC -> return findActiveCategoriesProviderByNameDesc(leUid, query)
+            SORT_ORDER_NAME_ASC -> {
+                if(locale.equals("ps")){
+                    return findActiveCategoriesProviderByNameAscPashto(leUid, query)
+                }else if(locale.equals("fa")){
+                    return findActiveCategoriesProviderByNameAscDari(leUid, query)
+                }else{
+                    return findActiveCategoriesProviderByNameAscEng(leUid, query)
+                }
+            }
+            SORT_ORDER_NAME_DESC -> {
+                if(locale.equals("ps")){
+                    return findActiveCategoriesProviderByNameDescPashto(leUid, query)
+                }else if(locale.equals("fa")){
+                    return findActiveCategoriesProviderByNameDescDari(leUid, query)
+                }else{
+                    return findActiveCategoriesProviderByNameDescEng(leUid, query)
+                }
+            }
         }
-        return findActiveCategoriesProviderByNameAsc(leUid, query)
+        if(locale.equals("ps")){
+            return findActiveCategoriesProviderByNameAscPashto(leUid, query)
+        }else if(locale.equals("fa")){
+            return findActiveCategoriesProviderByNameAscDari(leUid, query)
+        }else{
+            return findActiveCategoriesProviderByNameAscEng(leUid, query)
+        }
+
     }
 
     //Categories not existing already in Category
@@ -112,7 +154,15 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
 
         const val ALL_ACTIVE_QUERY_WITH_SEARCH = " AND SaleProduct.saleProductName LIKE :query "
 
-        const val SORT_BY_NAME_ASC_QUERY = " ORDER BY SaleProduct.saleProductName ASC "
+        const val SORT_BY_NAME_ENG_ASC_QUERY = " ORDER BY SaleProduct.saleProductName ASC "
+        const val SORT_BY_NAME_DARI_ASC_QUERY = " ORDER BY SaleProduct.saleProductNameDari ASC "
+        const val SORT_BY_NAME_PASHTO_ASC_QUERY = " ORDER BY SaleProduct.saleProductNamePashto ASC "
+
+        const val SORT_BY_NAME_ENG_DESC_QUERY = " ORDER BY SaleProduct.saleProductName DESC "
+        const val SORT_BY_NAME_DARI_DESC_QUERY = " ORDER BY SaleProduct.saleProductNameDari DESC "
+        const val SORT_BY_NAME_PASHTO_DESC_QUERY = " ORDER BY SaleProduct.saleProductNamePashto DESC "
+
+
 
         const val SORT_BY_NAME_DESC_QUERY = " ORDER BY SaleProduct.saleProductName DESC "
 

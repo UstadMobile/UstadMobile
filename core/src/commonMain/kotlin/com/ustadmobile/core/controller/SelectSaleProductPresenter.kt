@@ -138,7 +138,7 @@ class SelectSaleProductPresenter(context: Any,
     private fun updateCategoryProvider() {
 
         categoryProvider = saleProductDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid,
-                searchQuery,0)
+                searchQuery,0, impl.getLocale(context))
         view.setCategoryProvider(categoryProvider)
 
     }

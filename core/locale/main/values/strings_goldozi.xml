@@ -241,4 +241,9 @@
     <string name="add_inventory">Add inventory</string>
     <string name="create_new_product">Create a new product</string>
 
+    <!-- Sprint 10 -->
+    <string name="base_price">Base price</string>
+    <string name="manage_images">Manage images</string>
+    <string name="add_image">Add image</string>
+
 </resources>

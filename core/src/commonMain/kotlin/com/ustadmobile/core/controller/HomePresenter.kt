@@ -46,6 +46,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         showLocationPermission = impl.getAppConfigString(
                 AppConfig.KEY_SHOW_LOCATION_PERMISSION_PROMPT, null, context)!!.toBoolean()
 
+        println("debudebu: setting up")
         UmAccountManager.activeAccountLiveData.observeWithPresenter(this, ::onChanged)
     }
 

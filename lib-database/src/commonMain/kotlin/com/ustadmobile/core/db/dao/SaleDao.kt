@@ -586,7 +586,6 @@ abstract class SaleDao : BaseDao<Sale> {
             AND ( CASE WHEN (CAST(LE.admin as INTEGER) = 1) THEN 1 ELSE 0 END OR sl.salePersonUid = LE.personUid)
         """
 
-
         const val ALL_SALE_LIST = ALL_SALE_LIST_SELECT + ALL_SALE_LIST_LJ1 + ALL_SALE_LIST_LJ2 +
                 ALL_SALE_LIST_WHERE + ALL_SALE_LIST_WHERE_LE
 

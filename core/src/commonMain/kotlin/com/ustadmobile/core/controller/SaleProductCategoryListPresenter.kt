@@ -199,7 +199,8 @@ class SaleProductCategoryListPresenter(context: Any,
                 allMode = false
             } else {
                 itemProvider = productDao.sortAndFindAllActiveSNWIProvider(loggedInPersonUid, sortCode)
-                categoryProvider = productDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid,"", sortCode)
+                categoryProvider = productDao.sortAndFindActiveCategoriesProvider(
+                        loggedInPersonUid,"", sortCode, impl.getLocale(context))
                 allMode = true
             }
             view.setListProvider(itemProvider, allMode)
@@ -241,7 +242,8 @@ class SaleProductCategoryListPresenter(context: Any,
 
             view.hideEditMenu(true)
             itemProvider = productDao.sortAndFindAllActiveSNWIProvider(loggedInPersonUid, 0)
-            categoryProvider = productDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid, "" , 0)
+            categoryProvider = productDao.sortAndFindActiveCategoriesProvider(
+                    loggedInPersonUid, "" , 0, impl.getLocale(context))
         }
 
         if (showRecent)
