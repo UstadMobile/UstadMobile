@@ -12,4 +12,6 @@ expect abstract class DoorLiveData<T>() {
 
     open fun getValue(): T?
 
+    open fun hasActiveObservers(): Boolean
+
 }
