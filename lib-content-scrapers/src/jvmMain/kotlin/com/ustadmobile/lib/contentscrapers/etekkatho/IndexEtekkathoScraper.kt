@@ -92,7 +92,7 @@ class IndexEtekkathoScraper {
                 "http://www.etekkatho.org/img/logos/etekkatho-myanmar-lang.png",
                 EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, parentEtek, 7)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, parentEtek, 6)
 
         val document = Jsoup.connect(urlString).get()
 

@@ -69,7 +69,7 @@ abstract class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db:
             try {
 
                 val jsonString = readFileToString(file, ScraperConstants.UTF_ENCODING)
-                var youtubeData = gson.fromJson(jsonString, YoutubeData::class.java)
+                val youtubeData = gson.fromJson(jsonString, YoutubeData::class.java)
 
                 if (youtubeData.webpage_url == null) {
                     return@forEachIndexed

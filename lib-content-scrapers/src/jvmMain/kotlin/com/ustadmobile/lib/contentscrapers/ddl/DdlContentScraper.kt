@@ -33,7 +33,6 @@ import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.io.File
 import java.io.IOException
-import java.lang.IllegalArgumentException
 import java.net.URL
 import java.nio.file.Files
 import java.util.*
@@ -137,7 +136,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                 }
 
                 if (entry == null) {
-                    throw ScraperException(ERROR_TYPE_INVALID_SOURCE_URL, "no source url found in har entry")
+                    throw ScraperException(ERROR_TYPE_NO_SOURCE_URL_FOUND, "no source url found in har entry")
                 }
 
                 val doc = Jsoup.parse(entry.response.content.text)
@@ -329,14 +328,6 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             }
 
         }
-
-
-        const val ERROR_TYPE_INVALID_LICENSE = 100
-        const val ERROR_TYPE_LINK_NOT_FOUND = 101
-        const val ERROR_TYPE_INVALID_SOURCE_URL = 102
-
-        const val ERROR_TYPE_FILE_NOT_LOADED = 200
-        const val ERROR_TYPE_NO_FILE_AVAILABLE = 201
 
     }
 

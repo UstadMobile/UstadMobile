@@ -14,4 +14,5 @@ class YoutubeData {
 
     var thumbnail: String? = null
 
+    var upload_date: String? = null
 }

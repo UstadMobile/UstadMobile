@@ -238,7 +238,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
                     false, EMPTY_STRING, "https://learningenglish.voanews.com/Content/responsive/VOA/img/top_logo_news.png",
                     EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, parentVoa, 7)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, parentVoa, 18)
 
             val beginningUrl = "https://learningenglish.voanews.com/p/5609.html"
             val intermediateUrl = "https://learningenglish.voanews.com/p/5610.html"

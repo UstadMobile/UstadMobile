@@ -106,7 +106,7 @@ class IndexPrathamContentScraper {
                 "Every Child in School & Learning Well", false, EMPTY_STRING,
                 "https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png", EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, prathamParentEntry!!, 3)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, prathamParentEntry!!, 16)
 
         gson = GsonBuilder().disableHtmlEscaping().create()
 

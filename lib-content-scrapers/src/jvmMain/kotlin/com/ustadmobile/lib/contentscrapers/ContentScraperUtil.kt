@@ -937,7 +937,7 @@ object ContentScraperUtil {
     fun insertOrUpdateLanguageVariant(variantDao: LanguageVariantDao, variant: String?, language: Language): LanguageVariant? {
         var languageVariant: LanguageVariant? = null
         if (variant != null && variant.isNotEmpty()) {
-            var countryCode: CountryCode? = CountryCode.getByCode(variant)
+            var countryCode: CountryCode? = CountryCode.getByCode(variant.toUpperCase())
             if (countryCode == null) {
                 val countryList = CountryCode.findByName(variant)
                 if (countryList.isNotEmpty()) {

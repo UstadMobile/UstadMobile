@@ -137,7 +137,7 @@ class AsbScraper {
                 "https://www.africanstorybook.org/img/asb120.png", EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 4)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 0)
 
         val inputStreamOfBooks = africanBooksUrl.openStream()
         val africanBooksList = parseBooklist(inputStreamOfBooks)

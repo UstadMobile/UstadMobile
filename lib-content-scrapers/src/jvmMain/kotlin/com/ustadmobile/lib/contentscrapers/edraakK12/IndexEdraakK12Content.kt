@@ -132,7 +132,7 @@ class IndexEdraakK12Content {
                 EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
 
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, edraakParentEntry, 0)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, edraakParentEntry, 4)
 
 
         val scrapePrecessor = 1

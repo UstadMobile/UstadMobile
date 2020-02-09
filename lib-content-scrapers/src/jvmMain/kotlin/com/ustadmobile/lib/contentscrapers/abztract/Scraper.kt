@@ -5,6 +5,8 @@ import com.ustadmobile.core.util.MimeType
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 
 abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var contentEntryUid: Long) {
 
@@ -38,8 +40,29 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         return container
     }
 
-    fun hideContentEntry(){
+    fun hideContentEntry() {
         contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
+    }
+
+    fun showContentEntry() {
+        contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
+    }
+
+    fun isUrlContentUpdated(url: URL, container: Container): Boolean {
+        val conn = (url.openConnection() as HttpURLConnection)
+        val lastModified = conn.lastModified
+        val eTagHeaderValue = conn.getHeaderField(ETAG.toLowerCase())
+
+        if (lastModified != 0L) {
+            return lastModified > container.cntLastModified
+        }
+
+        if (eTagHeaderValue != null) {
+            val eTag = db.containerETagDao.getEtagOfContainer(container.containerUid)
+            return eTag != eTag
+        }
+        conn.disconnect()
+        return true
     }
 
     companion object {
@@ -47,6 +70,17 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         const val LAST_MODIFIED = "Last-Modified"
 
         const val ETAG = "ETag"
+
+        const val ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED = 100
+        const val ERROR_TYPE_INVALID_LICENSE = 101
+        const val ERROR_TYPE_NO_FILE_AVAILABLE = 102
+
+
+        const val ERROR_TYPE_FILE_NOT_LOADED = 200
+        const val ERROR_TYPE_NO_SOURCE_URL_FOUND = 201
+        const val ERROR_TYPE_LINK_NOT_FOUND = 203
+        const val ERROR_TYPE_YOUTUBE_ERROR = 210
+        const val ERROR_TYPE_MISSING_EXE = 230
 
     }
 

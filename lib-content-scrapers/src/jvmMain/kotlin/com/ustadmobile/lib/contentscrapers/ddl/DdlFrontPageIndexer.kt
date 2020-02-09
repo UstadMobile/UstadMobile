@@ -23,7 +23,7 @@ class DdlFrontPageIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase)
                 "Free and open educational resources for Afghanistan", false, ScraperConstants.EMPTY_STRING,
                 "https://ddl.af/storage/files/logo-dd.png", ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, parentDdl, 5)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, parentDdl, 2)
 
         createLangEntry("English", englishLang, parentDdl)
         createLangEntry("فارسی", farsiLang, parentDdl)

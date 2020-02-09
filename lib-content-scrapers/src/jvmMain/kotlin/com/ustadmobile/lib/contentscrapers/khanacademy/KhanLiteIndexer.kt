@@ -33,7 +33,7 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase) 
                 return@forEachIndexed
             }
 
-            val description = document.select("div.library-content-list p.topic-desc")?.text() ?: ""
+            val description = element.select("div.library-content-list p.topic-desc")?.text() ?: ""
 
             val headerEntry = ContentScraperUtil.createOrUpdateContentEntry(header, header, header,
                     ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,

@@ -12,11 +12,14 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid) {
 
     private val ytPath: String
     private val gson: Gson
+    private var tempDir: File? = null
 
     init {
         ContentScraperUtil.checkIfPathsToDriversExist()
@@ -24,48 +27,76 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
         gson = GsonBuilder().disableHtmlEscaping().create()
     }
 
-    fun scrapeYoutubeLink(sourceUrl: String, videoQualityOption: String = "worst[ext=webm]/worst"): ContainerManager {
+    fun scrapeYoutubeLink(sourceUrl: String, videoQualityOption: String = "worst[ext=webm]/worst"): ContainerManager? {
+
+        UMLogUtil.logTrace("starting youtube scrape for $sourceUrl")
 
         val ytExeFile = File(ytPath)
         if (!ytExeFile.exists()) {
-            throw IOException("Webp executable does not exist: $ytPath")
+            hideContentEntry()
+            close()
+            throw ScraperException(ERROR_TYPE_MISSING_EXE, "Webp executable does not exist: $ytPath")
         }
 
-        val tempDir = Files.createTempDirectory(sourceUrl.substringAfter("=")).toFile()
+        tempDir = Files.createTempDirectory(sourceUrl.substringAfter("=")).toFile()
 
-        val builder = ProcessBuilder(ytPath, "-f", videoQualityOption, "-o", "${tempDir.absolutePath}/%(id)s.%(ext)s", sourceUrl)
-        var process: Process? = null
-        try {
-            process = builder.start()
-            process!!.waitFor()
-            val exitValue = process.exitValue()
-            if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src $sourceUrl with error code  ${UMIOUtils.readStreamToString(process.errorStream)}")
-                println(UMIOUtils.readStreamToString(process.errorStream))
-                Thread.sleep(60000)
-                throw IOException()
+        youtubeLocker.withLock {
+
+            UMLogUtil.logTrace("starting youtube lock")
+
+            val builder = ProcessBuilder(ytPath, "-f", videoQualityOption, "-o", "${tempDir!!.absolutePath}/%(id)s.%(ext)s", sourceUrl)
+            var process: Process? = null
+            try {
+                process = builder.start()
+                process!!.waitFor()
+                val exitValue = process.exitValue()
+                if (exitValue != 0) {
+                    UMLogUtil.logError("Error Stream for src $sourceUrl with error code  ${UMIOUtils.readStreamToString(process.errorStream)}")
+                    println(UMIOUtils.readStreamToString(process.errorStream))
+                    Thread.sleep(60000)
+                    throw IOException()
+                }
+            } catch (e: Exception) {
+                hideContentEntry()
+                close()
+                throw ScraperException(ERROR_TYPE_YOUTUBE_ERROR, "${e.message} failed with youtube with ytUrl $sourceUrl")
+            } finally {
+                process?.destroy()
             }
-        } catch (e: Exception) {
-            throw e
-        } finally {
-            process?.destroy()
         }
+        UMLogUtil.logTrace("ending youtube lock")
 
-        val videoFile = tempDir.listFiles()[0]
+        val videoFile = tempDir!!.listFiles()[0]
         val mimetype = Files.probeContentType(videoFile.toPath())
 
         if (!VIDEO_MIME_MAP.keys.contains(mimetype)) {
-            throw IllegalStateException("Video type not supported for $mimetype")
+            hideContentEntry()
+            close()
+            throw ScraperException(ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED, "Video type not supported for $mimetype")
         }
+
+        val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+
+        if (recentContainer != null) {
+            val isUpdated = videoFile.lastModified() > recentContainer.cntLastModified
+            if (!isUpdated) {
+                showContentEntry()
+                close()
+                Thread.sleep(4000)
+
+                return null
+            }
+        }
+
 
         val containerManager = ContainerManager(createBaseContainer(mimetype), db, db, containerDir.absolutePath)
         runBlocking {
             containerManager.addEntries(ContainerManager.FileEntrySource(videoFile, videoFile.name))
         }
 
-        tempDir.deleteRecursively()
-
         Thread.sleep(4000)
+
+        close()
 
         return containerManager
 
@@ -73,5 +104,12 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
     }
 
     override fun close() {
+        tempDir?.deleteRecursively()
+    }
+
+    companion object {
+
+        private val youtubeLocker = ReentrantLock()
+
     }
 }

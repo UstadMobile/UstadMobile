@@ -103,7 +103,7 @@ class IndexPhetContentScraper {
                 "INTERACTIVE SIMULATIONS\nFOR SCIENCE AND MATH", false, EMPTY_STRING,
                 "https://phet.colorado.edu/images/phet-social-media-logo.png", EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, phetParentEntry, 1)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, phetParentEntry, 14)
 
         for (simulation in simulationList) {
 

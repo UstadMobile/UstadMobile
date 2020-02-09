@@ -1,25 +1,22 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_KHAN
-import com.ustadmobile.lib.contentscrapers.ShrinkerUtil
-import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
+import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer.Companion.KHAN_PREFIX
+import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.FilenameUtils
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.file.Files
-import java.util.HashMap
 
 
-class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid) {
+class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : YoutubeScraper(containerDir, db, contentEntryUid) {
 
 
     override fun scrapeUrl(sourceUrl: String) {
@@ -30,35 +27,73 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
         }
 
         if (entry == null) {
-            throw ScraperException(0, "Content Entry was not found for url $sourceUrl")
+            throw ScraperException(ERROR_TYPE_NO_SOURCE_URL_FOUND, "Content Entry was not found for url $sourceUrl")
         }
 
         val khanId = entry!!.sourceUrl!!.substringAfter(KHAN_PREFIX)
 
-        val tempDir = Files.createTempDirectory(khanId).toFile()
-        val tempFile = File(tempDir, khanId)
 
         val url = getValidUrl(khanId)
 
-        FileUtils.copyURLToFile(url, tempFile)
-        val webMFile = File(tempDir, FilenameUtils.getName(url.path))
-        ShrinkerUtil.convertKhanVideoToWebMAndCodec2(tempFile, webMFile)
+        if (url == null) {
 
+            hideContentEntry()
+            throw ScraperException(ERROR_TYPE_YOUTUBE_ERROR, "stopped youtube $sourceUrl")
 
-        val fileMap = HashMap<File, String>()
-        ContentScraperUtil.createContainerFromDirectory(tempDir, fileMap)
+          /*
+            val ytUrl = getYoutubeUrl(khanId)
+            try {
+                scrapeYoutubeLink(ytUrl)
+            } catch (e: Exception) {
+                hideContentEntry()
+                throw e
+            }*/
 
-        val containerManager = ContainerManager(createBaseContainer(MIMETYPE_KHAN), db, db, containerDir.absolutePath)
-        runBlocking {
-            fileMap.forEach {
-                containerManager.addEntries(ContainerManager.FileEntrySource(it.component1(), it.component2()))
+        } else {
+
+            val conn = (url.openConnection() as HttpURLConnection)
+            val eTag = conn.getHeaderField("etag")
+            val mimetype = conn.contentType
+            conn.disconnect()
+
+            if (!VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.contains(mimetype)) {
+                hideContentEntry()
+                throw ScraperException(ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED, "Video type not supported for $mimetype for url $url")
             }
+
+            val ext = VideoPlayerPresenterCommon.VIDEO_MIME_MAP[mimetype]
+
+            val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+
+            if (recentContainer != null) {
+                val isUpdated = isUrlContentUpdated(url, recentContainer)
+                if (!isUpdated) {
+                    showContentEntry()
+                    return
+                }
+            }
+
+            val tempDir = Files.createTempDirectory(khanId).toFile()
+            val tempFile = File(tempDir, khanId + ext)
+            FileUtils.copyURLToFile(url, tempFile)
+
+            val container = createBaseContainer(mimetype)
+            val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
+            runBlocking {
+                containerManager.addEntries(ContainerManager.FileEntrySource(tempFile, tempFile.name))
+            }
+            if (!eTag.isNullOrEmpty()) {
+                val etagContainer = ContainerETag(container.containerUid, eTag)
+                db.containerETagDao.insert(etagContainer)
+            }
+
+            tempDir.deleteRecursively()
+
         }
 
-        tempDir.deleteRecursively()
     }
 
-    private fun getValidUrl(khanId: String): URL {
+    private fun getValidUrl(khanId: String): URL? {
         val lowUrl = URL(getMp4LowUrl(khanId))
         val mp4Url = URL(getMp4Url(khanId))
         return when {
@@ -69,7 +104,7 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
                 mp4Url
             }
             else -> {
-                throw ScraperException(ERROR_TYPE_NO_URL_FOUND, "no valid url for khan id $khanId)")
+                null
             }
         }
     }
@@ -95,10 +130,8 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
         return "https://cdn.kastatic.org/ka-youtube-converted/$videoId.mp4/$videoId.mp4"
     }
 
-    companion object {
-
-        const val ERROR_TYPE_NO_URL_FOUND = 200
-
+    fun getYoutubeUrl(videoId: String): String {
+        return "https://www.youtube.com/watch?v=$videoId"
     }
 
 }
