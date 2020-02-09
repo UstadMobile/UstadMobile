@@ -53,8 +53,7 @@
     <string name="sort_by_most_used">بیشترین استفاده شده</string>
     <string name="sort_by_name_asc">اسم (asc)</string>
     <string name="sorT_by_name_desc">اسم (desc)</string>
-    <string name="feature_coming_soon">این بخش به زودی فعال خواهد شد</string>
-
+    <string name="feature_coming_soon">این بخش به زودی فعال خواهد شد.</string>
     <!--Sprint 2-->
     <string name="change_password">تغیر رمز</string>
     <string name="current_password">رمز عبور فعلی</string>
@@ -77,7 +76,6 @@
     <string name="camera">کامره</string>
     <string name="gallery">گالری</string>
     <string name="unable_open_image">این تصویر باز شده نتوانست</string>
-
     <!-- Sprint 3 -->
     <string name="create_new_subcategory">ایجاد یک کتگوری فرعی جدید</string>
     <string name="title">عنوان </string>
@@ -114,7 +112,6 @@
     <string name="category_deleted">کتگوری از کتلاگ حذف گردید</string>
     <string name="fingerprint_authentication">تایید نشان انگشت</string>
     <string name="fingerprint_instructions">اثر انگشت خود را روی حس گر اثر انگشت بگذارید تا هویت شما تایید گردد</string>
-
     <!--Sprint 4-->
     <string name="i_have_received_order">این فرمایش را دریافت نمودم</string>
     <string name="i_have_received_the_order">برایم این فرمایش رسیده است</string>
@@ -122,9 +119,7 @@
     <string name="delivery_signature">امضاْ تحویلی</string>
     <string name="record_signature">تسجیل امضأ</string>
     <string name="filter">فلتر</string>
-
     <string name="value">ارزش</string>
-
     <string name="to">الی</string>
     <string name="add_signature">علاوه نمودن امضاْ</string>
     <string name="add_reminder">علاوه نمودن یاد آور</string>
@@ -139,7 +134,6 @@
     <string name="days">روزها</string>
     <string name="is_sale">فروش است</string>
     <string name="product_name">نام محصول..</string>
-
     <!--Sprint 5-->
     <string name="tags">برچسبها</string>
     <string name="pinned">نشانی شد</string>
@@ -168,62 +162,88 @@
     <string name="products">محصولات</string>
     <string name="sale_value">ارزش فروش</string>
     <string name="set_title">انتخاب عنوان</string>
-
     <string name="this_language">دری</string>
-
     <string name="select_image_from_camera_or_gallery">تصویر را از کامره یا گالری انتخاب کنید</string>
     <string name="shake_feedback">برای بازخورد لرزش</string>
     <string name="feedback_hint">لطفا نظرات خود را وارد کنید</string>
     <string name="send_feedback">ارسال بازخورد</string>
     <string name="feedback_thanks">متشکرم</string>
-
     <!--Sprint 6-->
     <string name="my_women_entrepreneurs">My Women Entreprenrurs</string>
-    <string name="top_products">Top products</string>
-    <string name="summary">Summary</string>
-
+    <string name="top_products">محصولات عالی</string>
+    <string name="summary">خلاصه</string>
     <!--Untranslated -->
-    <string name="sales_performance_report_options">Sales Performance Report Options</string>
-    <string name="sales_log_report_options">Sales Log Report Options</string>
+    <string name="sales_performance_report_options">اختیارات گزارش کارآیی فروشات</string>
+    <string name="sales_log_report_options">اختیارات گزارش یادداشتهای فروشات</string>
     <string name="top_les_report_options">Top LEs Report Options</string>
-    <string name="show_average_desc">Select to display the average in your report.</string>
+    <string name="show_average_desc">برای نشان دادن حد اوسط در گزارش تان، انتخاب نمائید.</string>
     <string name="les">LEs</string>
-    <string name="week">Week</string>
-    <string name="selected_les">Selected LEs</string>
-    <string name="select_product_types">Select product types</string>
-
-
+    <string name="week">هفته</string>
+    <string name="selected_les">متشبثین پیشتاز انتخاب شده</string>
+    <string name="select_product_types">انتخاب انواع محصول</string>
     <!--Sprint 7-->
     <string name="users">Users</string>
     <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
     <string name="user">User</string>
     <string name="send_message">Send message</string>
     <string name="reset_password">Reset password</string>
-    <string name="deactivate">Deactivate</string>
+    <string name="deactivate">غیر فعال نمودن</string>
     <string name="groups">Groups</string>
-    <string name="group">Group</string>
+    <string name="group">گروپ</string>
     <string name="group_setting_desc">Add, remove, or modify groups</string>
     <string name="group_name">Group name</string>
     <string name="members">Members</string>
-    <string name="add_members">Add members</string>
-    <string name="remove">Remove</string>
-    <string name="subgroup">Subgroup</string>
+    <string name="add_members">علاوه ساختن اعضأ</string>
+    <string name="remove">حذف نمودن</string>
+    <string name="subgroup">گروپ فرعی</string>
     <string name="locations">Locations</string>
     <string name="locations_setting_desc">Manage locations</string>
-    <string name="account_last_synced">Account last synced</string>
+    <string name="account_last_synced">بار اخیر که حساب/اکاونت همگاه شد</string>
     <string name="ago">ago</string>
     <string name="minutes">minutes</string>
-    <string name="hours">hours</string>
-    <string name="weeks">weeks</string>
-    <string name="years">years</string>
-
-    <string name="customer">Customer</string>
-    <string name="customer_details">Customer Details</string>
+    <string name="hours">ساعات</string>
+    <string name="weeks">هفته ها</string>
+    <string name="years">سالها</string>
+    <string name="customer">مشتری</string>
+    <string name="customer_details">تفصیلات مشتری</string>
     <string name="select_customers">Select Customers</string>
-    <string name="new_customer">New Customer</string>
-    <string name="select">Select</string>
-
-
+    <string name="new_customer">مشتری جدید</string>
+    <string name="select">انتخاب</string>
     <string name="sort_by_text">نحوه ترتیب</string>
-
+    <string name="please_select_sale_as_pre_order_or_sale">لطفاً جنس را به حیث فروخته شده و یا فرمایش قبلی، انتخاب نمائید</string>
+    <string name="please_select_customer">لطفاً یک مشتری را انتخاب نمائید تا فروش ذخیره گردد</string>
+    <string name="please_enter_a_name">لطفاً یک اسم را وارد نمائید</string>
+    <string name="sort_by_inventory_asc">موجودی (بشکل صعودی)</string>
+    <string name="sort_by_inventory_desc">موجوی (بشکل نزولی)</string>
+    <string name="women_entrepreneurs_group">گروپ زنان گلدوز</string>
+    <string name="no_women_embroiderers_set">هیچ گروپ زنان گلدوز ترتیب نگردیده</string>
+    <string name="current_password_not_correct">رمز عبور درست نیست</string>
+    <string name="item_in_stock">جنس در ذخیر گاه</string>
+    <string name="sort_stock_asc">ذخیره گاه (صعودی)</string>
+    <string name="sort_stock_desc">ذخیره گاه (نزولی)</string>
+    <string name="sort_most_recent">جدید ترین</string>
+    <string name="select_type">نوع را انتخاب کنید</string>
+    <string name="select_producers">تولید کننده گان را انتخاب کنید</string>
+    <string name="sale_product_inventory">موجودی جنس</string>
+    <string name="sell">فروش</string>
+    <string name="by">به شکل</string>
+    <string name="sold_now">حالا فروخته شده</string>
+    <string name="in_stock">در ذخیره گاه</string>
+    <string name="by_you">توسط شما</string>
+    <string name="sale_list_sort_by_total_ascending">مجموع (بشکل صعودی)</string>
+    <string name="deliveries">تحویل داده شده ها</string>
+    <string name="add_delivery">علاوه ساختن تسلیمی</string>
+    <string name="record_delivery">ثبت نمودن تسلیم دهی</string>
+    <string name="already_delivered">قبلاً تسلیم شده است</string>
+    <string name="remaining">باقیمانده</string>
+    <string name="in_stock_selected">در ذخیره گاه برای این فروش</string>
+    <string name="delivered_here">درینجا تحویل داده شد</string>
+    <string name="save_sale">لطفاً قبل از علاوه ساختن تسلیم دهی، فروش را ثبت/ذخیره نمائید</string>
+    <string name="add_inventory">علاوه ساختن موجودی</string>
+    <string name="items_in_stock">اجناس در ذخیره گاه</string>
+    <string name="sort_lease_recent">بسیار جدید نیست</string>
+    <string name="select_sale_type">نوع فروش را انتخاب کنید</string>
+    <string name="sale_list_sort_by_total_descending">مجموع (بشکل نزولی)</string>
+    <string name="over_selected_delivery">لطفاً کمتر از اجناس باقیمانده در ذخیره گاه را برای محصول انتخاب نمائید</string>
+    <string name="create_new_product">ایجاد یک محصول جدید</string>
 </resources>
