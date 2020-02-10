@@ -25,6 +25,8 @@ import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ustadmobile.core.controller.SaleProductImageListPresenter
@@ -85,6 +87,8 @@ class SaleProductImageListActivity : UstadBaseActivity(), SaleProductImageListVi
         val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
         mRecyclerView!!.layoutManager = mRecyclerLayoutManager
 
+        itemTouchHelper.attachToRecyclerView(mRecyclerView)
+
         //Call the Presenter
         mPresenter = SaleProductImageListPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
@@ -95,7 +99,59 @@ class SaleProductImageListActivity : UstadBaseActivity(), SaleProductImageListVi
 
         fab.setOnClickListener { mPresenter!!.handleClickAddPicture() }
 
+    }
 
+    private val itemTouchHelper by lazy {
+
+        // 1. Note that I am specifying all 4 directions.
+        //    Specifying START and END also allows
+        //    more organic dragging than just specifying UP and DOWN.
+        val simpleItemTouchCallback = object
+            : ItemTouchHelper.SimpleCallback(UP or DOWN or START or END, 0) {
+
+                // 1. This callback is called when a ViewHolder is selected.
+                //    We highlight the ViewHolder here.
+                override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                    super.onSelectedChanged(viewHolder, actionState)
+
+                    if (actionState == ACTION_STATE_DRAG) {
+                        viewHolder?.itemView?.alpha = 0.5f
+                    }
+                }
+
+                // 2. This callback is called when the ViewHolder is
+                //    unselected (dropped). We unhighlight the ViewHolder here.
+                override fun clearView(recyclerView: RecyclerView,
+                                       viewHolder: RecyclerView.ViewHolder) {
+                    super.clearView(recyclerView, viewHolder)
+                    viewHolder?.itemView?.alpha = 1.0f
+                }
+
+                override fun onMove(recyclerView: RecyclerView,
+                                    viewHolder: RecyclerView.ViewHolder,
+                                    target: RecyclerView.ViewHolder): Boolean {
+
+                    val adapter = recyclerView.adapter as SaleProductImageListRecyclerAdapter
+                    val from = viewHolder.adapterPosition
+                    val to = target.adapterPosition      // 2. Update the backing model. Custom implementation in
+                    //    MainRecyclerViewAdapter. You need to implement
+                    //    reordering of the backing model inside the method.
+                    adapter.moveItem(from, to)      // 3. Tell adapter to render the model update.
+                    adapter.notifyItemMoved(from, to)
+
+                    return true
+                }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder,
+                                  direction: Int) {
+                        // 4. Code block for horizontal swipe.
+                        //    ItemTouchHelper handles horizontal swipe as well, but
+                        //    it is not relevant with reordering. Ignoring here.
+                    }
+                }
+
+
+        ItemTouchHelper(simpleItemTouchCallback)
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, SaleProductPicture>) {

@@ -143,6 +143,14 @@ class SaleProductImageListRecyclerAdapter internal constructor(
 
     }
 
+    fun moveItem(from: Int, to: Int) {
+        println("debudebu: move from: $from to $to")
+    }
+
+    fun movedItem(from: Int, to: Int) {
+        println("debudebu: Moved from: $from to $to")
+    }
+
     inner class SelectSaleProductPictureViewHolder(itemView: View, var imageLoadJob: Job? = null)
         : RecyclerView.ViewHolder(itemView)
 
