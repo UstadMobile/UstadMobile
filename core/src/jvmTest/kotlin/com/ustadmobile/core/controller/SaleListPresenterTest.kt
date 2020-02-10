@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.PersonWithSaleInfoDetailView.Companion.ARG_WE_U
 import com.ustadmobile.core.view.SaleDetailView
 import com.ustadmobile.core.view.SaleListSearchView
 import com.ustadmobile.core.view.SaleListView
+import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.util.test.AbstractSaleRelatedSetup
 import com.ustadmobile.util.test.checkJndiSetup
@@ -18,6 +19,7 @@ import org.mockito.Mockito
 class SaleListPresenterTest : AbstractSaleRelatedSetup() {
 
     lateinit var systemImplSpy: UstadMobileSystemImpl
+    private lateinit var context: DoorLifecycleOwner
 
     @Before
     fun setup(){
@@ -36,9 +38,14 @@ class SaleListPresenterTest : AbstractSaleRelatedSetup() {
 
         }
 
-        val mockContext = mock<DoorLifecycleOwner> {}
-        val presenter = SaleListPresenter(mockContext,
-                presenterArgs, mockView, UmAppDatabase.getInstance(mockContext), systemImplSpy)
+        context  = mock{
+            on{
+                currentState
+            }.thenReturn(DoorLifecycleObserver.STARTED)
+        }
+
+        val presenter = SaleListPresenter(context,
+                presenterArgs, mockView, UmAppDatabase.getInstance(context), systemImplSpy)
         return Pair(mockView, presenter)
     }
 
