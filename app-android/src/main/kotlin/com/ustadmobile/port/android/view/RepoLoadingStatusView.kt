@@ -4,19 +4,33 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.lifecycle.LifecycleOwner
 import com.toughra.ustadmobile.R
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_CONNECTION_ERR
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_NOCONNECTIVITYORPEERS
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_MIRROR
+import com.ustadmobile.door.ext.isRepositoryLiveData
 import kotlinx.android.synthetic.main.view_repo_loading_status.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCallback, FistItemLoadedListener {
+/**
+ * View that is used to show the status of a recyclerview loading from repository data.
+ *
+ * 1. Call reset() if this view might have shown loading status connected to a previous dataset
+ * 2. Set the RecyclerviewAdapter onFirstItemLoaded to this view
+ * 3. Call observeRepoStatus with the LiveData that has been returned from a RepositoryLoadHelper.wrapLiveData
+ * call. This LiveData also has a LiveData object with the loading status.
+ *
+ */
+class RepoLoadingStatusView: CoordinatorLayout, FistItemLoadedListener,
+        DoorObserver<RepositoryLoadHelper.RepoLoadStatus> {
 
     data class RepoLoadingStatusInfo(val progressVisible: Boolean,
                                      var imageResourceToShow: Int,
@@ -45,6 +59,8 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
             statusToStatusInfoMap[STATUS_LOADED_NODATA]?.imageResourceToShow = value
         }
 
+    private var statusLiveData: DoorLiveData<RepositoryLoadHelper.RepoLoadStatus>? = null
+
     constructor(context: Context) : super(context) {
         init()
     }
@@ -61,9 +77,17 @@ class RepoLoadingStatusView: CoordinatorLayout, RepositoryLoadHelper.RepoLoadCal
         View.inflate(context, R.layout.view_repo_loading_status, this)
     }
 
+    fun observerRepoStatus(liveData: DoorLiveData<*>, lifecycleOwner: LifecycleOwner){
+        if(liveData.isRepositoryLiveData()) {
+            statusLiveData?.removeObserver(this)
+            val newStatusLiveData = (liveData as RepositoryLoadHelper<*>.LiveDataWrapper2<*>).loadingStatus
+            newStatusLiveData.observe(lifecycleOwner, this)
+            statusLiveData = newStatusLiveData
+        }
+    }
 
-    override fun onLoadStatusChanged(status: Int, remoteDevice: String?) {
-        val loadingStatusInfo = statusToStatusInfoMap[status]
+    override fun onChanged(t: RepositoryLoadHelper.RepoLoadStatus?) {
+        val loadingStatusInfo = if(t != null) statusToStatusInfoMap[t.loadStatus] else null
         if(loadingStatusInfo != null){
             GlobalScope.launch(Dispatchers.Main) {
                 statusViewProgress.visibility = if(loadingStatusInfo.progressVisible) View.VISIBLE else View.GONE
