@@ -31,7 +31,7 @@ class SaleListPresenterTest : AbstractSaleRelatedSetup() {
         insert(db)
     }
 
-    fun createMockViewAndPresenter(presenterArgs: Map<String, String> =
+    fun createMockViewAndPresenter(presenterArgs: Map<String, String>? =
                                            mapOf(ARG_WE_UID to we1PersonUid.toString())
     ): Pair<SaleListView,SaleListPresenter> {
         val mockView = mock<SaleListView> {
@@ -44,8 +44,12 @@ class SaleListPresenterTest : AbstractSaleRelatedSetup() {
             }.thenReturn(DoorLifecycleObserver.STARTED)
         }
 
-        val presenter = SaleListPresenter(context,
-                presenterArgs, mockView, UmAppDatabase.getInstance(context), systemImplSpy)
+        val presenter = SaleListPresenter(
+                context,
+                presenterArgs,
+                mockView,
+                UmAppDatabase.getInstance(context),
+                systemImplSpy)
         return Pair(mockView, presenter)
     }
 
