@@ -20,9 +20,13 @@ interface SaleProductImageListView : UstadView {
      */
     fun setListProvider(listProvider: DataSource.Factory<Int, SaleProductPicture>)
 
+    fun showGetImageAlertDialog()
+
     companion object {
         // This defines the view name that is an argument value in the go() in impl.
         const val VIEW_NAME = "SaleProductImageList"
+
+        const val ARG_MANAGE_IMAGES_SALE_PRODUCT_UID = "SaleProductImageListSaleProductUid"
     }
 }
 

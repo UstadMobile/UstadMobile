@@ -661,7 +661,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     fun openPictureDialog(imagePath: String) {
         val args = HashMap<String, String>()
         args.put(ARG_PERSON_IMAGE_PATH, imagePath)
-        args.put(ARG_PERSON_UID, personUid.toString())
         impl.go(PersonPictureDialogView.VIEW_NAME, args, context)
     }
 

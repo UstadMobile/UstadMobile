@@ -25,16 +25,5 @@ PersonPictureDialogView) : UstadBaseController<PersonPictureDialogView>(context,
         if (arguments!!.containsKey(ARG_PERSON_UID)) {
             personUid = arguments!!.get(ARG_PERSON_UID)!!.toLong()
         }
-        checkPermissions()
     }
-
-    fun checkPermissions() {
-        val personDao = repository.personDao
-        GlobalScope.launch {
-            val result = personDao.personHasPermission(loggedInPersonUid, personUid,
-                    Role.PERMISSION_PERSON_PICTURE_UPDATE)
-            view.showUpdateImageButton(result!!)
-        }
-    }
-
 }

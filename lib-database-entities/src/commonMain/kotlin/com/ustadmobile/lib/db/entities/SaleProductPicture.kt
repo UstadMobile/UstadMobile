@@ -35,7 +35,7 @@ open class SaleProductPicture() {
     @LastChangedBy
     var saleProductPictureLCB: Int = 0
 
-    //Index for which picture. Default to zero
+    //Index for which picture. Default to zero. -1 is delete.
     var saleProductPictureIndex : Int = 0
 
     override fun equals(other: Any?): Boolean {

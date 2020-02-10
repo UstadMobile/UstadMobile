@@ -10,7 +10,6 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_IMAGE_PATH
-import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonWithSaleInfoListView.Companion.ARG_LE_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
@@ -129,10 +128,8 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
     fun openPictureDialog(imagePath: String) {
         //Open Dialog
         val args = HashMap<String, String>()
-        //TODO If needed:
-                args.put(ARG_PERSON_IMAGE_PATH, imagePath);
-                args.put(ARG_PERSON_UID, loggedInPersonUid.toString());
-                impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
+        args.put(ARG_PERSON_IMAGE_PATH, imagePath);
+        impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
     }
 
     fun handleCompressedImage(imageFilePath: String) {

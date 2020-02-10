@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_ASSIGN_TO_C
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_CATEGORY
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_TITLE
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
+import com.ustadmobile.core.view.SaleProductImageListView
 import com.ustadmobile.core.view.SelectProducersView
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
 import com.ustadmobile.core.view.SelectSaleProductView
@@ -92,7 +93,6 @@ class SaleProductDetailPresenter(context: Any,
         view.updateToolbarTitle(toolbarTitle)
         view.updateCategoryTitle(categoryTitle)
 
-        this
         //Get SaleProductSelected and update the view
         GlobalScope.launch {
             if (arguments.containsKey(ARG_SALE_PRODUCT_UID)) {
@@ -121,13 +121,15 @@ class SaleProductDetailPresenter(context: Any,
                 view.runOnUiThread(Runnable {
                     updateView(product)
                 })
-
             }
+
+            val imagesCount = pictureDao.findTotalNumberOfPicturesForAProduct(productUid)
+            view.updateImagesCounter(imagesCount)
         }
 
     }
 
-    fun updateView(saleProduct: SaleProduct?){
+    private fun updateView(saleProduct: SaleProduct?){
         currentSaleProduct = saleProduct
         updateView()
     }
@@ -224,6 +226,13 @@ class SaleProductDetailPresenter(context: Any,
         }
     }
 
+    fun goToManageImages(){
+        val args = HashMap<String, String>()
+        args.put(SaleProductImageListView.ARG_MANAGE_IMAGES_SALE_PRODUCT_UID,
+                currentSaleProduct!!.saleProductUid.toString())
+        impl.go(SaleProductImageListView.VIEW_NAME, args, context)
+    }
+
     fun handleCheckboxChanged(state: Boolean, saleProductUid: Long) {
         selectedToCategoriesUid.put(saleProductUid, state)
     }
@@ -286,11 +295,6 @@ class SaleProductDetailPresenter(context: Any,
             }
 
         }
-
     }
 
-    fun openPictureDialog(imagePath: String) {
-        //TODO if needed.
-        //open dialog
-    }
 }

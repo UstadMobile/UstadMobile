@@ -39,6 +39,8 @@ interface SaleProductDetailView : UstadView {
 
     fun sendMessage(messageId: Int)
 
+    fun updateImagesCounter(imagesCont: Int)
+
     companion object {
 
 

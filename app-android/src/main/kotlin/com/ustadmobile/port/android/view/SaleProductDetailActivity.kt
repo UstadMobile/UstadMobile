@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.app.Activity
-
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -16,12 +15,12 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
@@ -29,16 +28,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleProductDetailPresenter
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
@@ -49,16 +45,10 @@ import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleProduct
 import com.ustadmobile.lib.db.entities.SaleProductSelected
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.Objects
-
 import id.zelory.compressor.Compressor
+import java.io.*
 
-class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
+open class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
 
     private var toolbar: Toolbar? = null
     private var mPresenter: SaleProductDetailPresenter? = null
@@ -73,6 +63,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
     internal lateinit var titlePashto: EditText
     internal lateinit var descPastho: EditText
     internal lateinit var categoryTitle: TextView
+    private lateinit var imagesCounter : TextView
 
     internal lateinit var productImageView: ImageView
     internal var IMAGE_MAX_HEIGHT = 1024
@@ -81,6 +72,15 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
 
     private var imagePathFromCamera: String? = null
 
+    override fun updateImagesCounter(imagesCont: Int) {
+        if(imagesCont > 1) {
+            val extra = imagesCont - 1
+            imagesCounter.visibility = View.VISIBLE
+            imagesCounter.text = "+$extra"
+        }else{
+            imagesCounter.visibility = View.GONE
+        }
+    }
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -149,6 +149,8 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
 
         productImageView = findViewById(R.id.activity_sale_product_detail_imageview)
 
+        imagesCounter = findViewById(R.id.activity_sale_product_detail_image_count)
+
         //Call the Presenter
         mPresenter = SaleProductDetailPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
@@ -211,11 +213,11 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
             }
         })
 
-        productImageView.setOnClickListener { v -> showGetImageAlertDialog() }
+        productImageView.setOnClickListener { mPresenter!!.goToManageImages() }
 
     }
 
-    fun showGetImageAlertDialog() {
+    private fun showGetImageAlertDialog() {
 
         val adb = AlertDialog.Builder(this)
                 .setTitle("")
@@ -415,9 +417,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
                         .resize(iconDimen, iconDimen)
                         .centerCrop()
                         .into(productImageView)
-
             }
-
         }
     }
 
@@ -450,7 +450,7 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
      * Compress the image set using Compressor.
      *
      */
-    fun compressImage() {
+    private fun compressImage() {
         val imageFile = File(imagePathFromCamera)
         try {
             val c = Compressor(this)
@@ -468,14 +468,13 @@ class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailView {
                 imagePathFromCamera = compressedImageFile.getAbsolutePath()
             }
 
-
         } catch (e: IOException) {
             e.printStackTrace()
         }
 
     }
 
-    protected fun doInBackground(vararg fileUris: Uri): String? {
+    private fun doInBackground(vararg fileUris: Uri): String? {
         var cursor: Cursor? = null
         var fileIn: InputStream? = null
         var tmpOut: OutputStream? = null

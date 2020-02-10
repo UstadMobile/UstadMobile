@@ -46,12 +46,22 @@
                         android:layout_width="wrap_content"
                         android:layout_height="200dp"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="0dp"
                         android:layout_marginEnd="8dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:srcCompat="@drawable/ic_add_photo_round_background_24dp" />
+
+                    <TextView
+                        android:id="@+id/activity_sale_product_detail_image_count"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="25dp"
+                        android:background="@color/color_gray_transparent"
+                        android:text="+0"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                        app:layout_constraintBottom_toBottomOf="@+id/activity_sale_product_detail_imageview"
+                        app:layout_constraintEnd_toEndOf="@+id/activity_sale_product_detail_imageview" />
 
                     <View
                         android:id="@+id/view8"

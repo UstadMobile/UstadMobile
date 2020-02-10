@@ -197,6 +197,10 @@
             android:name="com.ustadmobile.port.android.view.NewInventoryItemActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/add_inventory" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.SaleProductImageListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/manage_images" />
 
 
         <!-- End of Goldozi-->

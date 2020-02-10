@@ -106,11 +106,4 @@ class PersonPictureDialogFragment : UstadDialogFragment(), PersonPictureDialogVi
                 .into(theImage)
 
     }
-
-    override fun showUpdateImageButton(show: Boolean) {
-        runOnUiThread(Runnable{
-            //This button is hidden at the moment. We update picture from the Person Edit/Detail
-            // screens.
-        })
-    }
 }
