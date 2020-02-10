@@ -161,13 +161,13 @@ class SaleListPresenter(context: Any,
 
     }
 
-    private fun handlePreOrderCountUpdate(count: Int?) {
+    fun handlePreOrderCountUpdate(count: Int?) {
         if (count != null) {
             view.updatePreOrderCounter(count)
         }
     }
 
-    private fun handlePaymentDueCountUpdate(count: Int?) {
+    fun handlePaymentDueCountUpdate(count: Int?) {
         if (count != null) {
             view.updatePaymentDueCounter(count)
         }
@@ -193,7 +193,7 @@ class SaleListPresenter(context: Any,
         view.setListProvider(umProvider!!, paymentsDueTab = true, preOrderTab = false)
     }
 
-    private fun handleClickSale(saleUid: Long, saleName: String?) {
+    fun handleClickSale(saleUid: Long, saleName: String?) {
         val args = HashMap<String, String>()
         args[ARG_SALE_UID] = saleUid.toString()
         if (saleName != null && saleName.isNotEmpty())
