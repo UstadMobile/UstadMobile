@@ -46,7 +46,7 @@ android {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
-        versionName "6.10.95.2"
+        versionName "6.10.96.0"
 
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + rootProject.ext.buildConfigProperties["android.acra.url"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""

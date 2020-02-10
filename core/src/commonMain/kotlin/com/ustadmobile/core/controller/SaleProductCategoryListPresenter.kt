@@ -40,7 +40,7 @@ class SaleProductCategoryListPresenter(context: Any,
 
     private lateinit var itemProvider: DataSource.Factory<Int, SaleProduct>
     private lateinit var categoryProvider: DataSource.Factory<Int, SaleProduct>
-    internal var repository: UmAppDatabase
+    internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
     private val productDao: SaleProductDao
     private var currentSaleProductCategory: SaleProduct? = null
     private val productParentJoinDao: SaleProductParentJoinDao
@@ -66,8 +66,6 @@ class SaleProductCategoryListPresenter(context: Any,
 
     init {
 
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
-
         //Get provider Dao
         productDao = repository.saleProductDao
         productParentJoinDao = repository.saleProductParentJoinDao
@@ -76,20 +74,20 @@ class SaleProductCategoryListPresenter(context: Any,
         //Populate itemProvider and categoryProvider
 
         if (arguments!!.containsKey(ARG_SELECT_PRODUCT)) {
-            if (arguments!!.get(ARG_SELECT_PRODUCT) == "true") {
+            if (arguments[ARG_SELECT_PRODUCT] == "true") {
                 selectProductMode = true
             }
         }
-        if (arguments!!.containsKey(ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE)) {
-            if (arguments!!.get(ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE) == "true") {
+        if (arguments.containsKey(ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE)) {
+            if (arguments[ARG_SALEPRODUCT_CATEGORY_INVENTORY_MODE] == "true") {
                 selectInventoryMode = true
             }
         }
         if (arguments.containsKey(ARG_PASS_PRODUCER_UID)) {
-            producerUid = arguments.get(ARG_PASS_PRODUCER_UID).toString()
+            producerUid = arguments[ARG_PASS_PRODUCER_UID].toString()
         }
         if (arguments.containsKey(ARG_PASS_SALE_ITEM_UID)) {
-            saleItemUid = arguments.get(ARG_PASS_SALE_ITEM_UID).toString()
+            saleItemUid = arguments[ARG_PASS_SALE_ITEM_UID].toString()
         }
         if (arguments.containsKey(ARG_MORE_RECENT)) {
             moreRecent = true
@@ -97,8 +95,8 @@ class SaleProductCategoryListPresenter(context: Any,
         if (arguments.containsKey(ARG_MORE_CATEGORY)) {
             moreCategory = true
         }
-        if (arguments!!.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID)) {
-            saleUid = (arguments.get(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID)!!.toLong())
+        if (arguments.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID)) {
+            saleUid = (arguments[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID]!!.toLong())
         }
 
         if(arguments.containsKey(SelectProducersView.ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER)){
@@ -226,11 +224,10 @@ class SaleProductCategoryListPresenter(context: Any,
         var allMode : Boolean = false
         if (currentSaleProductCategory!!.saleProductUid != 0L) {
 
-            //view.hideEditMenu(false)
             if(loggedInPerson != null) {
                 view.hideEditMenu(!loggedInPerson!!.admin)
             }else{
-                view.hideEditMenu(false)
+                view.hideEditMenu(true)
             }
             itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(loggedInPersonUid, 0,
                     currentSaleProductCategory!!.saleProductUid)
@@ -248,12 +245,10 @@ class SaleProductCategoryListPresenter(context: Any,
 
         if (showRecent)
             view.runOnUiThread(Runnable{
-                //view.updateToolbar(impl.getString(MessageID.most_recent, context))
                 view.setListProvider(itemProvider, allMode)
             })
         if (showCategory)
             view.runOnUiThread(Runnable{
-                //view.updateToolbar(impl.getString(MessageID.categories, context))
                 view.setCategoriesListProvider(categoryProvider, allMode)
             })
 
