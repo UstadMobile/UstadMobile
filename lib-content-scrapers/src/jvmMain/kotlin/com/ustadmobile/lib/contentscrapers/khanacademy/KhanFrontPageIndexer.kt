@@ -30,6 +30,18 @@ class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatab
 
         createLiteLangEntry("ar","العربية")
         createLiteLangEntry("fa-af", "داري")
+        createLiteLangEntry("el", "Ελληνικά")
+        createLiteLangEntry("he", "עברית")
+        createLiteLangEntry("zlm", "BahasaMalaysian")
+        createLiteLangEntry("fa", "فارسی")
+        createLiteLangEntry("sw", "Kiswahili")
+        createLiteLangEntry("te", "తెలుగు")
+        createLiteLangEntry("th", "ไทย")
+        createLiteLangEntry("uk", "українська")
+        createLiteLangEntry("ur", "اردو")
+        createLiteLangEntry("xh", "isiXhosa")
+        createLiteLangEntry("zu", "Zulu")
+
     }
 
     private fun createFullLangEntry(langCode: String, langName: String) {

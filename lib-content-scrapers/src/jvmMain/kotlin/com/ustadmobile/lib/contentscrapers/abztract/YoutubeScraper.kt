@@ -42,6 +42,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
 
         youtubeLocker.withLock {
 
+            Thread.sleep(10000)
             UMLogUtil.logTrace("starting youtube lock")
 
             val builder = ProcessBuilder(ytPath, "-f", videoQualityOption, "-o", "${tempDir!!.absolutePath}/%(id)s.%(ext)s", sourceUrl)
@@ -63,6 +64,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
             } finally {
                 process?.destroy()
             }
+
         }
         UMLogUtil.logTrace("ending youtube lock")
 
@@ -82,8 +84,6 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
             if (!isUpdated) {
                 showContentEntry()
                 close()
-                Thread.sleep(4000)
-
                 return null
             }
         }
@@ -93,8 +93,6 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
         runBlocking {
             containerManager.addEntries(ContainerManager.FileEntrySource(videoFile, videoFile.name))
         }
-
-        Thread.sleep(4000)
 
         close()
 
