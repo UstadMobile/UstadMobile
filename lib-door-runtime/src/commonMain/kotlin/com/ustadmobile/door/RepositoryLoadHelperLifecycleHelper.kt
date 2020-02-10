@@ -12,6 +12,11 @@ package com.ustadmobile.door
 expect class RepositoryLoadHelperLifecycleHelper(lifecycleOwner: DoorLifecycleOwner) {
 
     /**
+     * Returns the current state as an Int as per DoorLifecycleObserver constants
+     */
+    val currentState: Int
+
+    /**
      * Function to run when the given lifecycleOwner becomes active
      */
     var onActive: (() -> Unit)?
@@ -21,11 +26,15 @@ expect class RepositoryLoadHelperLifecycleHelper(lifecycleOwner: DoorLifecycleOw
      */
     var onInactive: (() -> Unit)?
 
+    var onDestroyed: (() -> Unit)?
+
     /**
      * Function to call to start actively observing the lifecycleOwner
      */
     fun addObserver()
 
     fun removeObserver()
+
+    fun dispose()
 
 }

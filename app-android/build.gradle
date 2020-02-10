@@ -327,7 +327,7 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$version_androidx_support_lib"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
 
-    implementation "com.google.android.gms:play-services-safetynet:17.0.0"
+    implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"

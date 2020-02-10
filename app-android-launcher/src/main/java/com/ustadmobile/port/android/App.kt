@@ -6,6 +6,7 @@ import com.github.aakira.napier.Napier
 
 import com.toughra.ustadmobile.launcher.BuildConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.port.android.generated.MessageIDMap
 
 import org.acra.ACRA
@@ -32,6 +33,7 @@ class App : UmBaseApplication() {
     override fun onCreate() {
         super.onCreate()
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
+        initPicasso(applicationContext)
     }
 
     override fun attachBaseContext(base: Context) {

@@ -75,6 +75,8 @@ actual abstract class DoorLiveData<T> {
         }
     }
 
+
+
     actual open fun getValue(): T?  = value.get()
 
     protected open fun onActive() {
@@ -90,4 +92,6 @@ actual abstract class DoorLiveData<T> {
         initialValueLoaded = true
         activeObservers.forEach { it.onChanged(value) }
     }
+
+    actual open fun hasActiveObservers(): Boolean = activeObservers.isNotEmpty()
 }

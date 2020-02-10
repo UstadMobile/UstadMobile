@@ -8,6 +8,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
+import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +28,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
+import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.door.ext.isRepositoryLiveData
@@ -100,7 +102,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
     internal class LocalAvailabilityPagedListCallback(private val localAvailabilityManager: LocalAvailabilityManager,
                                                       var pagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?,
-                                                      private val onEntityAvailabilityChanged: (Map<Long, Boolean>) -> Unit) : PagedList.Callback() {
+                                                      private var onEntityAvailabilityChanged: ((Map<Long, Boolean>) -> Unit)?) : PagedList.Callback() {
 
         private val availabilityMonitorRequest = AtomicReference<AvailabilityMonitorRequest?>()
 
@@ -135,8 +137,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
                             }
                             uidList
                         })
-                val newRequest = if (containerUidsToMonitor.isNotEmpty()) {
-                    AvailabilityMonitorRequest(containerUidsToMonitor, onEntityAvailabilityChanged)
+                val entityAvailabilityChangeVal = onEntityAvailabilityChanged
+                val newRequest = if (containerUidsToMonitor.isNotEmpty() && entityAvailabilityChangeVal != null) {
+                    AvailabilityMonitorRequest(containerUidsToMonitor, entityAvailabilityChangeVal)
                 } else {
                     null
                 }
@@ -156,6 +159,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
             if (currentRequest != null) {
                 localAvailabilityManager.removeMonitoringRequest(currentRequest)
             }
+            pagedList = null
+            onEntityAvailabilityChanged = null
+            println("")
         }
     }
 
@@ -336,20 +342,21 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
         val localAvailabilityCallback = LocalAvailabilityPagedListCallback(
                 managerAndroidBle.localAvailabilityManager, null) { availabilityMap ->
-            runOnUiThread(Runnable {
+            GlobalScope.launch(Dispatchers.Main) {
                 recyclerAdapter.updateLocalAvailability(availabilityMap)
-            })
+            }
         }
 
         val data = entryProvider.asRepositoryLiveData(
-                UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao,
-                repoLoadingStatusView)
+                UmAccountManager.getRepositoryForActiveAccount(ustadBaseActivity).contentEntryDao)
+
+        repoLoadingStatusView.observerRepoStatus(data, this)
 
         //LiveData that is not linked to a repository (e.g. the Downloads) will not trigger status updates)
         //Therefor we should manually set the state to loaded no data. The view will be hidden if/when
         //any items are loaded
         if(!data.isRepositoryLiveData()) {
-            repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADED_NODATA, null)
+            repoLoadingStatusView.onChanged(RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA))
         }
 
         data.observe(this, Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>> {
@@ -361,6 +368,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         recyclerView.adapter = recyclerAdapter
         lastRecyclerViewAdapter = recyclerAdapter
         lastLocalAvailabilityPagedListCallback = localAvailabilityCallback
+
     }
 
     override fun setToolbarTitle(title: String) {

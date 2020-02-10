@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.os.Bundle
+import android.os.Build
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
@@ -107,7 +108,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     }
 
     override fun loadProfileIcon(profileUrl: String) {
-        UMAndroidUtil.loadImage(profileUrl,R.drawable.ic_account_circle_white_24dp,profileImage)
+        if(Build.VERSION.SDK_INT > 21) {
+            UMAndroidUtil.loadImage(profileUrl,R.drawable.ic_account_circle_white_24dp, profileImage)
+        }
     }
 
     override fun showDownloadAllButton(show: Boolean) {
@@ -166,8 +169,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     }
 
     private fun updateElevation(optionUri: String) {
+        if(Build.VERSION.SDK_INT < 21)
+            return //this is not applicable pre-Android 5
+
         val viewName = optionUri.substringBefore('?')
-        findViewById<AppBarLayout>(R.id.appBar).elevation = if(viewName == ContentEntryListView.VIEW_NAME) {
+        findViewById<AppBarLayout>(R.id.appBar).elevation = if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
             0f
         }else {
             10f
@@ -253,7 +259,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     companion object {
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf(
-                ContentEntryListView.VIEW_NAME to HomeContentEntryTabsFragment::class.java,
+                ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
+                HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java,
                 ReportDashboardView.VIEW_NAME to ReportDashboardFragment::class.java)
 
         /**
