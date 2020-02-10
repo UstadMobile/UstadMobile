@@ -10,18 +10,14 @@ package com.ustadmobile.door
  * removeObserver to stop observing the given lifecycleOwner.
  */
 actual class RepositoryLoadHelperLifecycleHelper actual constructor(lifecycleOwner: DoorLifecycleOwner) {
-    /**
-     * Function to run when the given lifecycleOwner becomes active
-     */
-    actual var onActive: (() -> Unit)?
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-        set(value) {}
-    /**
-     * Function to run when the given lifecycleOwner becomes inActive
-     */
-    actual var onInactive: (() -> Unit)?
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-        set(value) {}
+
+    var actLifecycleOwner: DoorLifecycleOwner? = lifecycleOwner
+
+    actual var onActive: (() -> Unit)? = null
+
+    actual var onInactive: (() -> Unit)? = null
+
+    actual var onDestroyed: (() -> Unit)? = null
 
     /**
      * Function to call to start actively observing the lifecycleOwner
@@ -30,6 +26,16 @@ actual class RepositoryLoadHelperLifecycleHelper actual constructor(lifecycleOwn
     }
 
     actual fun removeObserver() {
+    }
+
+    /**
+     * Returns the current state as an Int as per DoorLifecycleObserver constants
+     */
+    actual val currentState: Int
+        get() = if(actLifecycleOwner != null) DoorLifecycleObserver.RESUMED else DoorLifecycleObserver.DESTROYED
+
+    actual fun dispose() {
+        actLifecycleOwner = null
     }
 
 }

@@ -17,4 +17,21 @@ actual open class DoorMutableLiveData<T> : DoorLiveData<T> {
         postValue(value)
     }
 
+    override fun onActive() {
+        super.onActive()
+        onActive2()
+    }
+
+    override fun onInactive() {
+        super.onInactive()
+        onInactive2()
+    }
+
+
+    protected actual open fun onActive2() {
+    }
+
+    protected actual open fun onInactive2() {
+    }
+
 }

@@ -347,7 +347,9 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
         val localAvailabilityCallback = LocalAvailabilityPagedListCallback(
                 managerAndroidBle.localAvailabilityManager, null) { availabilityMap ->
-            recyclerAdapter.updateLocalAvailability(availabilityMap)
+            GlobalScope.launch(Dispatchers.Main) {
+                recyclerAdapter.updateLocalAvailability(availabilityMap)
+            }
         }
 
         val data = entryProvider.asRepositoryLiveData(

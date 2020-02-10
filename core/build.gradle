@@ -260,7 +260,7 @@ kotlin {
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 //Image loading library
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"
-
+                implementation "io.ktor:ktor-client-android:$version_ktor"
             }
             dependsOn commonJvmMain
         }

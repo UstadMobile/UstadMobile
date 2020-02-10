@@ -21,7 +21,7 @@
     <TextView
         android:visibility="gone"
         android:layout_marginTop="@dimen/dimen_16dp"
-        android:drawableStart="@drawable/ic_error_black_24dp"
+        android:drawableStart="@drawable/icpng_error_black_24dp"
         android:drawablePadding="@dimen/dimen_8dp"
         android:id="@+id/download_warning_text"
         android:textSize="@dimen/text_title_medium"

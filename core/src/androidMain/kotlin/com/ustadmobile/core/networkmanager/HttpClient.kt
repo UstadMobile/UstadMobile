@@ -1,7 +1,11 @@
 package com.ustadmobile.core.networkmanager
 
+import android.content.Context
 import android.os.Build
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.android.Android
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.json.GsonSerializer
@@ -29,7 +33,7 @@ private val okHttpClient = if(Build.VERSION.SDK_INT > OK_HTTP_MIN_SDKVERSION) {
 private val defaultGsonSerializer = GsonSerializer()
 
 private val httpClient = if(Build.VERSION.SDK_INT < 21) {
-    HttpClient(CIO) {
+    HttpClient(Android) {
         install(JsonFeature)
     }
 }else {
@@ -58,3 +62,18 @@ fun defaultOkHttpClient() = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) 
 }
 
 fun defaultGsonSerializer() = defaultGsonSerializer
+
+fun initPicasso(context: Context) {
+    /**
+     * OKHttp does not work on any version of Android less than 5.0 .
+     */
+    val downloader = if(Build.VERSION.SDK_INT >= 21) {
+        OkHttp3Downloader(okHttpClient)
+    }else {
+        PicassoUrlConnectionDownloader()
+    }
+
+    Picasso.setSingletonInstance(Picasso.Builder(context.applicationContext)
+            .downloader(downloader)
+            .build())
+}
