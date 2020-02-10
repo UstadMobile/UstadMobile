@@ -33,7 +33,7 @@ class SaleListPresenter(context: Any,
                         arguments: Map<String, String>?,
                         view: SaleListView,
                         var repository: UmAppDatabase,
-                        val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
+                        var impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : CommonHandlerPresenter<SaleListView>(context, arguments!!, view) {
 
     private var umProvider: DataSource.Factory<Int, SaleListDetail>? = null
