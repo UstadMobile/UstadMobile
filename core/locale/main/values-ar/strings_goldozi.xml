@@ -200,7 +200,6 @@
     <string name="locations">Locations</string>
     <string name="locations_setting_desc">Manage locations</string>
     <string name="account_last_synced">Account last synced</string>
-    <string name="ago">ago</string>
     <string name="minutes">minutes</string>
     <string name="days">days</string>
     <string name="hours">hours</string>

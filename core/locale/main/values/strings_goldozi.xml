@@ -23,7 +23,6 @@
     <string name="total_colon">Total:</string>
     <string name="sold">Sold</string>
     <string name="pre_order">Pre-order</string>
-    <string name="save">Save</string>
     <string name="price">Price</string>
     <string name="delivered">Delivered</string>
     <string name="payments">payments</string>
@@ -50,8 +49,6 @@
     <string name="feature_coming_soon">This feature is coming soon.</string>
 
     <!--Sprint 2-->
-    <string name="change_password">Change password</string>
-    <string name="current_password">Current password</string>
     <string name="confirm_new_password">Confirm new password</string>
     <string name="choose_language">Choose language</string>
     <string name="language_english">English</string>
@@ -64,10 +61,6 @@
     <string name="payment_date">Payment date</string>
     <string name="order_due_date">Order due date</string>
     <string name="not_delivered">Not delivered</string>
-    <string name="unable_to_update_password">Unable to reset password.</string>
-    <string name="camera">Camera</string>
-    <string name="gallery">Gallery</string>
-    <string name="unable_open_image">Unable to open that image</string>
 
     <!-- Sprint 3 -->
     <string name="create_new_subcategory">Create a new subcategory</string>
@@ -163,9 +156,6 @@
 
     <string name="this_language">English</string>
 
-    <!-- Issue fixes-->
-    <string name="select_image_from_camera_or_gallery">Select image from Camera or Gallery</string>
-
     <!--Sprint 6-->
     <string name="my_women_entrepreneurs">My Women Embroiderers</string>
     <string name="women_entrepreneurs_group">Women Embroiderers Group</string>
@@ -195,8 +185,6 @@
     <string name="new_customer">New Customer</string>
     <string name="select">Select</string>
 
-    <string name="current_password_not_correct">The current password is incorrect</string>
-
     <string name="please_select_sale_as_pre_order_or_sale">Please select item as Sold or Pre-order</string>
     <string name="please_select_customer">Please select a customer to save the sale</string>
     <string name="please_enter_a_name">Please enter in a name</string>
@@ -210,6 +198,7 @@
     <string name="sort_stock_asc">Stock (ascending)</string>
     <string name="sort_stock_desc">Stock (descending)</string>
     <string name="sort_most_recent">most recent</string>
+    <string name="most_recent">Most recent</string>
     <string name="sort_lease_recent">least recent</string>
 
     <string name="select_type">Select type</string>
@@ -245,5 +234,11 @@
     <string name="base_price">Base price</string>
     <string name="manage_images">Manage images</string>
     <string name="add_image">Add image</string>
+
+    <string name="catalog">Catalog</string>
+    <string name="content">Content</string>
+    <string name="courses">Courses</string>
+    <string name="receive">Receive</string>
+
 
 </resources>

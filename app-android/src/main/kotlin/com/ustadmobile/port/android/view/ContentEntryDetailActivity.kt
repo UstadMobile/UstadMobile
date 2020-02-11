@@ -21,7 +21,6 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -41,7 +40,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.android.synthetic.main.activity_entry_detail.*
+import kotlinx.android.synthetic.main.activity_content_entry_detail.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -116,7 +115,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         umAppRepository = UmAccountManager.getRepositoryForActiveAccount(this)
         showControls = UstadMobileSystemImpl.instance.getAppConfigString(
                 AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, "false", this)!!.toBoolean()
-        setContentView(R.layout.activity_entry_detail)
+        setContentView(R.layout.activity_content_entry_detail)
 
         localAvailabilityStatusText = findViewById(R.id.content_status_text)
         localAvailabilityStatusIcon = findViewById(R.id.content_status_icon)
