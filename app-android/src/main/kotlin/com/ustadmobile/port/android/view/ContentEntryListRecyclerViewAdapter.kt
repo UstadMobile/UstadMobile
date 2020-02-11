@@ -207,7 +207,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
     }
 
     inner class EntryViewHolder internal constructor(val view: View) : RecyclerView.ViewHolder(view),
-        Observer<DownloadJobItem?> {
+            Observer<DownloadJobItem?> {
         internal val entryTitle: TextView = view.findViewById(R.id.content_entry_item_title)
         internal val entryDescription: TextView = view.findViewById(R.id.content_entry_item_description)
         private val entrySize: TextView = view.findViewById(R.id.content_entry_item_library_size)
@@ -255,7 +255,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 var contentDescription = if (t.isStatusQueuedOrDownloading()) {
                     context.getString(R.string.downloading)
                 } else {
-                    context.getString(R.string.download_entry_state_queued)
+                    context.getString(R.string.queued)
                 }
 
                 when {
@@ -264,7 +264,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                         contentDescription = context.getString(R.string.download_entry_state_paused)
                     }
                     t.isStatusCompletedSuccessfully() -> {
-        //                    localAvailabilityVisible = false
+                        //                    localAvailabilityVisible = false
                         downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
                         contentDescription = context.getString(R.string.downloaded)
                     }
