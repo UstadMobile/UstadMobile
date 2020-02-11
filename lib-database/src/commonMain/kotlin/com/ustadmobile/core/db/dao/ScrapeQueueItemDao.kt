@@ -28,7 +28,7 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
     @Query("UPDATE ScrapeQueueItem SET timeFinished = :timeFinished WHERE sqiUid = :uid")
     abstract fun setTimeFinished(uid: Int, timeFinished: Long)
 
-    @Query("SELECT COUNT(*) FROM ScrapeQueueItem WHERE status = 1 OR status = 2 AND runId = :runUid")
+    @Query("SELECT COUNT(*) FROM ScrapeQueueItem WHERE (status = $STATUS_PENDING OR status = $STATUS_RUNNING) AND runId = :runUid")
     abstract fun getQueueCount(runUid: Int): Int
 
     companion object {

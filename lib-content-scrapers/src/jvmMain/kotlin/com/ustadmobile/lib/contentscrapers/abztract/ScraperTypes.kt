@@ -2,10 +2,7 @@ import com.ustadmobile.lib.contentscrapers.ddl.*
 import com.ustadmobile.lib.contentscrapers.habaybna.HabFrontPageIndexer
 import com.ustadmobile.lib.contentscrapers.habaybna.HabPlaylistIndexer
 import com.ustadmobile.lib.contentscrapers.habaybna.HabVideoScraper
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanFrontPageIndexer
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanFullIndexer
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanLiteIndexer
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanLiteVideoScraper
+import com.ustadmobile.lib.contentscrapers.khanacademy.*
 
 data class IndexerMap(var clazz: Class<*>, var defaultUrl: String?)
 
@@ -41,7 +38,7 @@ object ScraperTypes {
             KHAN_FRONT_PAGE_INDEXER to IndexerMap(KhanFrontPageIndexer::class.java, "https://www.khanacademy.org/"),
             KHAN_LITE_INDEXER to IndexerMap(KhanLiteIndexer::class.java, null),
             KHAN_FULL_INDEXER to IndexerMap(KhanFullIndexer::class.java, null),
-            KHAN_TOPIC_INDEXER to IndexerMap(KhanLiteIndexer::class.java, null))
+            KHAN_TOPIC_INDEXER to IndexerMap(KhanTopicIndexer::class.java, null))
 
 
     const val DDL_ARTICLE_SCRAPER = "ddlArticleScraper"
@@ -49,6 +46,12 @@ object ScraperTypes {
     const val HAB_YOUTUBE_SCRAPER = "habVideoScraper"
 
     const val KHAN_LITE_VIDEO_SCRAPER = "khanLiteVideoScraper"
+
+    const val KHAN_FULL_VIDEO_SCRAPER = "khanFullVideoScraper"
+
+    const val KHAN_FULL_EXERCISE_SCRAPER = "khanFullExerciseScraper"
+
+    const val KHAN_FULL_ARTICLE_SCRAPER = "khanFullArticleScraper"
 
     val scraperTypeMap = mapOf(
             DDL_ARTICLE_SCRAPER to DdlContentScraper::class.java,

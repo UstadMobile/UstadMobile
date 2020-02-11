@@ -9,10 +9,10 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import kotlinx.coroutines.runBlocking
 
-abstract class Indexer(parentContentEntry: Long, val runUid: Int, val db: UmAppDatabase) {
+abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db: UmAppDatabase) {
 
 
-    var contentEntry: ContentEntry? = null
+    var parentcontentEntry: ContentEntry? = null
     val contentEntryDao = db.contentEntryDao
     val contentEntryParentChildJoinDao = db.contentEntryParentChildJoinDao
     val queueDao = db.scrapeQueueItemDao
@@ -26,7 +26,7 @@ abstract class Indexer(parentContentEntry: Long, val runUid: Int, val db: UmAppD
 
     init {
         runBlocking {
-            contentEntry = db.contentEntryDao.findByUidAsync(parentContentEntry)
+            parentcontentEntry = db.contentEntryDao.findByUidAsync(parentContentEntryUid)
         }
         LanguageList().addAllLanguages()
     }

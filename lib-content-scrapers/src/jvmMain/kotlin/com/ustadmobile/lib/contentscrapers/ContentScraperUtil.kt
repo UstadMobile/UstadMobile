@@ -844,7 +844,7 @@ object ContentScraperUtil {
                 }
             }
             var isChanged = false
-            if (language.iso_639_1_standard == null || language.iso_639_1_standard != changedLang.iso_639_1_standard) {
+            if (language.iso_639_3_standard == null || language.iso_639_3_standard != changedLang.iso_639_3_standard) {
                 isChanged = true
             }
             if (language.name == null || language.name == changedLang.name) {

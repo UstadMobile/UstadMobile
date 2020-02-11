@@ -40,12 +40,12 @@ class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase) :
             UMLogUtil.logInfo("with subject url $subjectUrl")
 
             val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subjectId, title,
-                    subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, contentEntry!!.primaryLanguageUid, null,
+                    subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentcontentEntry!!.primaryLanguageUid, null,
                     ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
                     ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
             contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, contentEntry!!, subjectEntry, i)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, subjectEntry, i)
 
             subjectSubTopicMap[subjectId] = subjectEntry
 
@@ -80,7 +80,7 @@ class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase) :
                 UMLogUtil.logInfo("with subtopic url $subjectUrl")
 
                 val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subTopicId, title,
-                        subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, contentEntry!!.primaryLanguageUid, null,
+                        subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentcontentEntry!!.primaryLanguageUid, null,
                         ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
                         ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
                 contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)

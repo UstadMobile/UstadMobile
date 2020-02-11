@@ -6,7 +6,6 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubePlaylistIndexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import java.io.File
 
 class HabPlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase) : YoutubePlaylistIndexer(parentContentEntry, runUid, db) {
 
@@ -22,7 +21,7 @@ class HabPlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabas
                     it.description, true, ScraperConstants.EMPTY_STRING, it.thumbnail,
                     ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ContentEntry.VIDEO_TYPE, contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, contentEntry!!, youtubeEntry, counter++)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, youtubeEntry, counter++)
 
             createQueueItem(it.webpage_url!!, youtubeEntry, ScraperTypes.HAB_YOUTUBE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
 

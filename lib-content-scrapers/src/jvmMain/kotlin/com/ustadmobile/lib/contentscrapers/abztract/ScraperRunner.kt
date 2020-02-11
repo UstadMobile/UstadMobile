@@ -34,7 +34,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
     }
 
 
-    fun start(startingUrl: String, scraperType: String) {
+    fun start(startingUrl: String, scraperType: String, parentUid: Long) {
 
         val runId = runDao.insert(ScrapeRun(scraperType,
                 ScrapeQueueItemDao.STATUS_PENDING)).toInt()
@@ -43,6 +43,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             this.runId = runId
             contentType = scraperType
             scrapeUrl = startingUrl
+            sqiContentEntryParentUid = parentUid
             status = ScrapeQueueItemDao.STATUS_PENDING
             itemType = ScrapeQueueItem.ITEM_TYPE_INDEX
             timeAdded = System.currentTimeMillis()
@@ -112,7 +113,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
 
             } catch (e: Exception) {
-                errorCode = if(e is ScraperException) e.errorCode else 0
+                errorCode = if (e is ScraperException) e.errorCode else 0
                 UMLogUtil.logError("Exception running scrapeContent ${it.scrapeUrl}")
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
             }
@@ -144,6 +145,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
         private const val INDEXER_ARGS = "indexer"
         private const val SCRAPER_ARGS = "scraper"
         private const val START_URL_ARGS = "url"
+        private const val PARENT_ENTRY_UID_ARGS = "parentUid"
 
         const val ERROR_TYPE_UNKNOWN = 10
 
@@ -173,6 +175,13 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                     .desc("starting url for scrape")
                     .build()
             options.addOption(startUrlOption)
+
+            val parentUidOption = Option.builder(PARENT_ENTRY_UID_ARGS)
+                    .argName(PARENT_ENTRY_UID_ARGS)
+                    .hasArg()
+                    .desc("parentUid for indexer to start from")
+                    .build()
+            options.addOption(parentUidOption)
 
             val debugOption = Option.builder(LOG_ARGS)
                     .argName("level")
@@ -225,12 +234,13 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                 runner.resume(cmd.getOptionValue(RUN_ID_ARGS).toInt())
             } else {
 
+                val parentUid = cmd?.getOptionValue(PARENT_ENTRY_UID_ARGS)?.toLongOrNull() ?: 0
                 val scraperType = cmd.getOptionValue(CLAZZ_ARGS)
                 val startingUrl = cmd.getOptionValue(START_URL_ARGS)
                         ?: ScraperTypes.indexerTypeMap[scraperType]?.defaultUrl
                         ?: throw IllegalArgumentException("No default url for this scraperType, please provide")
 
-                runner.start(startingUrl, scraperType)
+                runner.start(startingUrl, scraperType, parentUid)
             }
 
         }

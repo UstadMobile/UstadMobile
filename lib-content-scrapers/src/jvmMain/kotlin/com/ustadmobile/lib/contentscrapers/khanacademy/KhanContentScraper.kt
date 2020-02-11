@@ -105,7 +105,7 @@ class KhanContentScraper : Runnable {
     private lateinit var url: URL
     private var driver: ChromeDriver? = null
 
-    private val regexUrlPrefix = "https://(www.khanacademy.org|cdn.kastatic.org)/(.*)"
+    private val regexUrlPrefix = "https://((.*).khanacademy.org|cdn.kastatic.org)/(.*)"
 
     private val secondExerciseUrl = "https://www.khanacademy.org/api/internal/user/exercises/"
 

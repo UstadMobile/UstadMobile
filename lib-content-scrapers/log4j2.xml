@@ -6,8 +6,8 @@
         <MarkerFilter onMatch="ACCEPT" onMisMatch="DENY" marker="FLOW" />
     </Console>
     <RollingFile name="RollingFileAppender"
-        fileName="ddlindexlog"
-        filePattern="ddlindex-%i.log.gz">
+        fileName="scraper"
+        filePattern="scraper-%i.log.gz">
         <PatternLayout pattern="%d [%t] %-5level: %msg%n%throwable" />
         <Policies>
             <CronTriggeringPolicy schedule="0 0 0 * * ?" />

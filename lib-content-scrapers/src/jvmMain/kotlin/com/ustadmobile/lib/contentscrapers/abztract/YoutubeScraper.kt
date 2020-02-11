@@ -45,7 +45,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
             Thread.sleep(10000)
             UMLogUtil.logTrace("starting youtube lock")
 
-            val builder = ProcessBuilder(ytPath, "-f", videoQualityOption, "-o", "${tempDir!!.absolutePath}/%(id)s.%(ext)s", sourceUrl)
+            val builder = ProcessBuilder(ytPath,"--retries", "1", "--limit-rate", "2M", "-f", videoQualityOption, "-o", "${tempDir!!.absolutePath}/%(id)s.%(ext)s", sourceUrl)
             var process: Process? = null
             try {
                 process = builder.start()
@@ -54,7 +54,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
                 if (exitValue != 0) {
                     UMLogUtil.logError("Error Stream for src $sourceUrl with error code  ${UMIOUtils.readStreamToString(process.errorStream)}")
                     println(UMIOUtils.readStreamToString(process.errorStream))
-                    Thread.sleep(60000)
+                    Thread.sleep(180000)
                     throw IOException()
                 }
             } catch (e: Exception) {
