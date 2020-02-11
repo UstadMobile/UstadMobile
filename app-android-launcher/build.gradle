@@ -149,7 +149,11 @@ dependencies {
     implementation "com.github.aakira:napier-android:$version_napier"
     implementation "com.github.aakira:napier:$version_napier"
 
+    implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
+
     vanillamultidexApi 'androidx.multidex:multidex:2.0.0'
+
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
 
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"

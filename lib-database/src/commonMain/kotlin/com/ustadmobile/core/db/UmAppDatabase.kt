@@ -3,6 +3,7 @@ package com.ustadmobile.core.db
 import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
+import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
@@ -22,11 +23,13 @@ import kotlin.jvm.Volatile
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
-    SyncNode::class, LocallyAvailableContainer::class
+    SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
+    SyncResult::class
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 30)
+], version = 32)
+@MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     var attachmentsDir: String? = null
@@ -169,8 +172,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     //#DOORDB_SYNCDAO
 
-    //abstract val syncablePrimaryKeyDao: SyncablePrimaryKeyDao
-
     companion object {
 
         @Volatile
@@ -244,13 +245,40 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_30_31 = object : DoorMigration(30, 31) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
+                }
+            }
+        }
+
+        val MIGRATION_31_32 = object : DoorMigration(31, 32) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (  
+                        |tableId  INTEGER NOT NULL, status  INTEGER NOT NULL, localCsn  INTEGER NOT NULL, 
+                        |remoteCsn  INTEGER NOT NULL, syncType  INTEGER NOT NULL, timestamp  INTEGER NOT NULL, 
+                        |sent  INTEGER NOT NULL, received  INTEGER NOT NULL, 
+                        |srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (
+                        |  tableId  INTEGER , status  INTEGER , localCsn  INTEGER , 
+                        |  remoteCsn  INTEGER , syncType  INTEGER , 
+                        |  timestamp  BIGINT , sent  INTEGER , received  INTEGER , 
+                        |  srUid  SERIAL  PRIMARY KEY  NOT NULL )""".trimMargin())
+                }
+            }
+        }
 
         /**
          * Fix SQLite update triggers
          */
-        val MIGRATION_28_29 = object: DoorMigration(28, 29) {
+        val MIGRATION_28_29 = object : DoorMigration(28, 29) {
             override fun migrate(database: DoorSqlDatabase) {
-                if(database.dbType() == DoorDbType.SQLITE) {
+                if (database.dbType() == DoorDbType.SQLITE) {
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_9")
                     database.execSQL("""
         |CREATE TRIGGER UPD_9
@@ -1473,7 +1501,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         val MIGRATION_29_30 = object : DoorMigration(29, 30) {
             override fun migrate(database: DoorSqlDatabase) {
 
-                if(database.dbType() == DoorDbType.SQLITE){
+                if (database.dbType() == DoorDbType.SQLITE) {
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
@@ -1528,8 +1556,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     """.trimMargin())
 
 
-
-                }else if(database.dbType() == DoorDbType.POSTGRES){
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_mcsn_seq")
@@ -1575,7 +1602,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
-            builder.addMigrations(object : DoorMigration(26,27){
+            builder.addMigrations(object : DoorMigration(26, 27) {
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN status, ADD COLUMN contentFlags INTEGER NOT NULL DEFAULT 0, ADD COLUMN ceInactive BOOL")
                 }
@@ -1583,14 +1610,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             })
 
 
-            builder.addMigrations(object : DoorMigration(25,26){
+            builder.addMigrations(object : DoorMigration(25, 26) {
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 0")
                 }
 
             })
 
-            builder.addMigrations(object :DoorMigration(24, 25){
+            builder.addMigrations(object : DoorMigration(24, 25) {
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
                 }
@@ -2622,7 +2649,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             })
 
-            builder.addMigrations(object : DoorMigration(25,26){
+            builder.addMigrations(object : DoorMigration(25, 26) {
                 override fun migrate(database: DoorSqlDatabase) {
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
                 }
@@ -2635,12 +2662,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30)
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32)
 
             return builder
         }
     }
-
 
 
 }

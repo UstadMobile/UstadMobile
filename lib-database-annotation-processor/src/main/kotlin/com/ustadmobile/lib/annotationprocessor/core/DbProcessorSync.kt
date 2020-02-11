@@ -6,6 +6,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.door.annotation.SyncableEntity
 import io.ktor.client.HttpClient
@@ -312,12 +313,20 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addRepositoryHelperDelegateCalls("_repo")
 
         val syncFnCodeBlock = CodeBlock.builder()
+                .add("val _allResults = mutableListOf<%T>()\n", SyncResult::class)
 
         repoTypeSpec.addFunction(FunSpec.builder("_findSyncNodeClientId")
                 .addModifiers(KModifier.OVERRIDE)
                 .returns(INT)
                 .addCode("return _dao._findSyncNodeClientId()\n")
                 .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("_insertSyncResult")
+                .addParameter("result", SyncResult::class)
+                .addModifiers(KModifier.OVERRIDE)
+                .addCode("_dao._insertSyncResult(result)\n")
+                .build())
+
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
@@ -390,6 +399,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .add("append(%T.ContentLength, _attachFile.length())\n", HttpHeaders::class)
                         .add("append(%T.ContentDisposition,·\"form-data;·name=\\\"\$_pkStr\\\";·filename=\\\"\$_pkStr\\\"\")\n",
                                 HttpHeaders::class)
+                        .add("%M(_db)\n",
+                                MemberName("com.ustadmobile.door.ext", "appendDbVersionHeader"))
+
                         .endControlFlow()
                         .add("append(_attachFile.name,·%T(_attachFile.length()){%T(_attachFile).%M()}, _mpHeaders)\n",
                                 InputProvider::class, FileInputStream::class,
@@ -412,17 +424,43 @@ class DbProcessorSync: AbstractDbProcessor() {
                             entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
                             reqIdVarName = "0", processingEnv = processingEnv))
                     .endControlFlow()
+
+            entitySyncCodeBlock.add("""return %T(tableId = ${syncableEntityInfo.tableId},
+                |status = %T.STATUS_SUCCESS, timestamp = %M())
+                """.trimMargin(), SyncResult::class, SyncResult::class, SYSTEMTIME_MEMBER_NAME)
+
+            entitySyncCodeBlock.add("\n")
+
             val entitySyncFn = FunSpec.builder("sync${entityType.simpleName}")
                     .addModifiers(KModifier.SUSPEND, KModifier.PRIVATE)
+                    .returns(SyncResult::class)
                     .addCode(entitySyncCodeBlock.build())
 
             syncFnCodeBlock.beginControlFlow("if(entities == null || %T::class in entities)",
                             entityType)
-                    .add("sync${entityType.simpleName}()\n")
+                    .beginControlFlow("try")
+                    .add("val _syncResult = sync${entityType.simpleName}()\n")
+                    .add("_insertSyncResult(_syncResult)\n")
+                    .nextControlFlow("catch(e: %T)", Exception::class)
+                    .add("""_insertSyncResult(%T(tableId = ${syncableEntityInfo.tableId}, 
+                        |status = %T.STATUS_FAILED, timestamp = %M()))
+                        |""".trimMargin(),
+                            SyncResult::class, SyncResult::class, SYSTEMTIME_MEMBER_NAME)
+                    .endControlFlow()
                     .endControlFlow()
             repoTypeSpec.addFunction(entitySyncFn.build())
         }
 
+
+        syncFnCodeBlock.beginControlFlow(
+                "val _syncRunStatus = if(_allResults.all { it.status == %T.STATUS_SUCCESS })",
+                SyncResult::class)
+                .add("%T.STATUS_SUCCESS\n", SyncResult::class)
+                .nextControlFlow("else")
+                .add("%T.STATUS_FAILED\n", SyncResult::class)
+                .endControlFlow()
+                .add("_insertSyncResult(%T(tableId = 0, status = _syncRunStatus, timestamp = %M()))\n",
+                        SyncResult::class, SYSTEMTIME_MEMBER_NAME)
 
         repoTypeSpec.addFunction(FunSpec.builder("sync")
                 .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
@@ -482,6 +520,16 @@ class DbProcessorSync: AbstractDbProcessor() {
                 INT, listOf(), addReturnStmt = true)
         abstractDaoTypeSpec.addFunction(abstractDaoFindSyncClientIdFn)
         implDaoTypeSpec.addFunction(implFindSyncClientIdFn)
+
+        val syncResultTypeSpec = processingEnv.elementUtils.getTypeElement(
+                SyncResult::class.qualifiedName) as TypeElement
+        val (abstractInsertSyncResultFn, implInsertSyncResultFn, abstractInterfaceInsertSyncResultFn)
+                = generateAbstractAndImplUpsertFuns("_insertSyncResult",
+                ParameterSpec.builder("result", SyncResult::class).build(),
+                syncResultTypeSpec.asEntityTypeSpec(), implDaoTypeSpec, abstractFunIsOverride = true)
+        abstractDaoTypeSpec.addFunction(abstractInsertSyncResultFn)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceInsertSyncResultFn)
+        implDaoTypeSpec.addFunction(implInsertSyncResultFn)
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
@@ -642,6 +690,8 @@ class DbProcessorSync: AbstractDbProcessor() {
         const val TRACKER_REQUESTID_FIELDNAME = "reqId"
 
         const val TRACKER_TIMESTAMP_FIELDNAME = "ts"
+
+        val SYSTEMTIME_MEMBER_NAME = MemberName("com.ustadmobile.door.util", "systemTimeInMillis")
     }
 
 }

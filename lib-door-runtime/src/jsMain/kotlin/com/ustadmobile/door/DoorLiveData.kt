@@ -35,6 +35,10 @@ actual abstract class DoorLiveData<T> {
         observers.add(observer)
         if(observers.size == 1)
             onActive()
+
+        if(initialValueLoaded) {
+            observer.onChanged(value as T)
+        }
     }
 
     protected open fun onActive() {
@@ -52,4 +56,6 @@ actual abstract class DoorLiveData<T> {
     }
 
     actual open fun getValue() = value
+
+    actual open fun hasActiveObservers(): Boolean = observers.isNotEmpty()
 }

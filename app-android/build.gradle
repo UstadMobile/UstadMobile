@@ -279,6 +279,7 @@ dependencies {
     implementation project(":lib-database-annotations")
     implementation project(':lib-util')
 
+    implementation "com.github.aakira:napier-android:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
@@ -326,7 +327,7 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$version_androidx_support_lib"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
 
-    implementation "com.google.android.gms:play-services-safetynet:17.0.0"
+    implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
@@ -416,6 +417,9 @@ dependencies {
     //extended fab
     implementation "com.github.dimorinny:floating-text-button:$version_android_fab_extended"
 
+    //bottom navigation
+    implementation "com.aurelhubert:ahbottomnavigation:$version_android_bottom_nav"
+    
     //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
     androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 }

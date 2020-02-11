@@ -3,11 +3,17 @@ package com.ustadmobile.core.controller
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -35,23 +41,29 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     private var noIframe: Boolean = false
 
+    /*
+     List of Strings - possible values are: ARG_DOWNLOADED_CONTENT, ARG_LIBRARIES_CONTENT,
+     ARG_RECYCLED_CONTENT
+     */
+    private var filterButtons = listOf<String>()
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        when {
-            arguments.containsKey(ARG_LIBRARIES_CONTENT) -> showContentByParent()
-            arguments.containsKey(ARG_DOWNLOADED_CONTENT) -> showDownloadedContent()
-            arguments.containsKey(ARG_RECYCLED_CONTENT) -> showRecycledEntries()
-        }
+
+        filterButtons = arguments[ARG_FILTER_BUTTONS]?.split(",") ?: listOf()
+        parentUid = arguments[ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
+
+        view.setFilterButtons(filterButtons.map { systemImpl.getString(
+            FILTERBUTTON_TO_MESSAGEIDMAP[it] ?: MessageID.error, context) }, 0)
+        view.setEmptyView(ARG_LIBRARIES_CONTENT)
 
         GlobalScope.launch {
-
 
             if (activeAccount != null) {
                 val person = umRepo.personDao.findByUid(activeAccount.personUid)
                 if (person?.admin == true) {
 
-                    var contentEditFlags: Int = arguments[ARG_EDIT_BUTTONS_CONTROL_FLAG]?.toInt()
-                            ?: 0
+                    val contentEditFlags: Int = arguments[ARG_EDIT_BUTTONS_CONTROL_FLAG]?.toInt() ?: 0
                     view.runOnUiThread(Runnable {
                         view.setEditButtonsVisibility(contentEditFlags)
                     })
@@ -59,6 +71,14 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
             }
         }
 
+        when {
+            arguments.containsKey(ARG_LIBRARIES_CONTENT) && arguments.containsKey(ARG_CONTENT_ENTRY_UID) ->
+                showContentByParent()
+
+            arguments.containsKey(ARG_RECYCLED_CONTENT) -> showRecycledEntries()
+
+            arguments.containsKey(ARG_DOWNLOADED_CONTENT) -> showDownloadedContent()
+        }
     }
 
 
@@ -81,14 +101,13 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
 
     private fun showContentByParent() {
-        parentUid = arguments.getValue(ARG_CONTENT_ENTRY_UID)?.toLong() ?: 0L
         val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0, activeAccount?.personUid
                 ?: 0)
         viewContract.setContentEntryProvider(provider)
 
         try {
             val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid)
-            entryLiveData.observe(this, this::onContentEntryChanged)
+            entryLiveData.observeWithPresenter(this, this::onContentEntryChanged)
         } catch (e: Exception) {
             viewContract.runOnUiThread(Runnable { viewContract.showError() })
         }
@@ -170,6 +189,16 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         viewContract.setContentEntryProvider(contentEntryDaoRepo.recycledItems())
     }
 
+    @JsName("handleClickFilterButton")
+    fun handleClickFilterButton(buttonPos: Int){
+        val filterButton = filterButtons[buttonPos]
+        view.setEmptyView(filterButton)
+        when(filterButton){
+            ARG_LIBRARIES_CONTENT -> showContentByParent()
+            ARG_DOWNLOADED_CONTENT -> showDownloadedContent()
+            ARG_RECYCLED_CONTENT -> showRecycledEntries()
+        }
+    }
 
     @JsName("handleContentEntryClicked")
     fun handleContentEntryClicked(entry: ContentEntry) {
@@ -177,6 +206,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
         args.putAll(arguments)
         val entryUid = entry.contentEntryUid
         args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
+        args.remove(ARG_FILTER_BUTTONS)
         args[ARG_NO_IFRAMES] = noIframe.toString()
         args[ARG_EDIT_BUTTONS_CONTROL_FLAG] = (EDIT_BUTTONS_ADD_CONTENT or EDIT_BUTTONS_EDITOPTION).toString()
         val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
@@ -186,16 +216,18 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
+        viewContract.takeIf { filterByLang != langUid }?.setContentEntryProvider(
+                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, langUid,
+                        filterByCategory, activeAccount?.personUid ?: 0))
         this.filterByLang = langUid
-        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
-                ?: 0))
     }
 
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
+        viewContract.takeIf{ contentCategoryUid != filterByCategory }?.setContentEntryProvider(
+                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang,
+                        contentCategoryUid, activeAccount?.personUid ?: 0))
         this.filterByCategory = contentCategoryUid
-        viewContract.setContentEntryProvider(contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang, filterByCategory, activeAccount?.personUid
-                ?: 0))
     }
 
     @JsName("handleUpNavigation")
@@ -252,10 +284,9 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
         const val ARG_NO_IFRAMES = "noiframe"
 
-        const val ARG_DOWNLOADED_CONTENT = "downloaded"
+        val FILTERBUTTON_TO_MESSAGEIDMAP = mapOf(ARG_DOWNLOADED_CONTENT to MessageID.downloaded,
+                ARG_LIBRARIES_CONTENT to MessageID.libraries,
+                ARG_RECYCLED_CONTENT to MessageID.recycled)
 
-        const val ARG_RECYCLED_CONTENT = "recycled"
-
-        const val ARG_LIBRARIES_CONTENT = "libraries"
     }
 }

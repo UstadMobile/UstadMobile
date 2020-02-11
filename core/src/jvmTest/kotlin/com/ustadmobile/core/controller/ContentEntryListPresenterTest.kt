@@ -1,21 +1,23 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -24,8 +26,6 @@ class ContentEntryListPresenterTest {
     private lateinit var adminAccount: UmAccount
     private lateinit var rootEntry: ContentEntry
     private lateinit var mockView: ContentEntryListView
-
-    private var args = HashMap<String, String>()
 
     private val context = mock<DoorLifecycleOwner>() {
         on { currentState }.thenReturn(DoorLifecycleObserver.STARTED)
@@ -42,6 +42,9 @@ class ContentEntryListPresenterTest {
     private lateinit var systemImpl: UstadMobileSystemImpl
 
     private var mockAccount: UmAccount? = null
+
+    private val args = mutableMapOf(
+            ARG_FILTER_BUTTONS to "$ARG_LIBRARIES_CONTENT,$ARG_DOWNLOADED_CONTENT,$ARG_RECYCLED_CONTENT")
 
 
     @Before
@@ -65,12 +68,16 @@ class ContentEntryListPresenterTest {
         mockAccount = mock()
         adminAccount = UmAccount(1, "test", "", "")
 
-        systemImpl = mock()
+        systemImpl = mock {
+            on {
+                getAppConfigString(AppConfig.KEY_NO_IFRAME, "", context)
+            }.thenReturn("example.com")
+        }
 
         rootEntry = ContentEntry()
         rootEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(rootEntry)
 
-        args[UstadView.ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        args[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
     }
 
 
@@ -78,10 +85,9 @@ class ContentEntryListPresenterTest {
     fun givenArgToViewDownloadedContent_whenOnCreateCalled_thenShouldSetListOfDownloadedContent() {
 
         val contentEntryDaoSpy = spy(umAppDatabase.contentEntryDao)
-
-        args[ARG_DOWNLOADED_CONTENT] = ""
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDaoSpy, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDaoSpy, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
         presenter.onCreate(null)
+        presenter.handleClickFilterButton(1)
 
         verify(contentEntryDaoSpy, timeout(5000)).downloadedRootItems()
         verify(mockView, timeout(5000)).setContentEntryProvider(any())
@@ -91,10 +97,9 @@ class ContentEntryListPresenterTest {
     fun givenArgToViewRecycledContent_whenOnCreateCalled_thenShouldSetListOfRecycledContent() {
 
         val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao)
-
-        args[ARG_RECYCLED_CONTENT] = ""
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
         presenter.onCreate(null)
+        presenter.handleClickFilterButton(2)
 
         verify(repoContentEntryDaoSpy, timeout(5000)).recycledItems()
         verify(mockView, timeout(5000)).setContentEntryProvider(any())
@@ -105,13 +110,13 @@ class ContentEntryListPresenterTest {
     fun givenArgToViewLibraryContent_whenOnCreateCalled_thenShouldSetListOfLibraryContentAndShowFiltersOfLanguagesAndCategory() {
         runBlocking {
 
-            var categoryTest = DistinctCategorySchema()
+            val categoryTest = DistinctCategorySchema()
             categoryTest.contentCategorySchemaUid = 2323L
             categoryTest.schemaName = "Test"
 
-            var englishLang = LangUidAndName()
+            val englishLang = LangUidAndName()
 
-            var spanishLang = LangUidAndName()
+            val spanishLang = LangUidAndName()
 
             val contentEntryLiveData = spy(DoorMutableLiveData(rootEntry as ContentEntry?))
 
@@ -160,9 +165,9 @@ class ContentEntryListPresenterTest {
             allSchema.contentCategorySchemaUid = 0
 
 
-            args[ARG_LIBRARIES_CONTENT] = ""
             var presenter = ContentEntryListPresenter(context, args, mockView, dbContentEntryDaoSpy, repoContentEntryDaoSpy, mockAccount, systemImpl, repoSpy)
             presenter.onCreate(null)
+            presenter.handleClickFilterButton(0)
 
             verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(rootEntry.contentEntryUid), eq(0), eq(0), eq(0))
             verify(mockView, timeout(5000)).setContentEntryProvider(any())
@@ -184,11 +189,23 @@ class ContentEntryListPresenterTest {
 
         val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao)
 
-        args[ARG_LIBRARIES_CONTENT] = ""
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
+        val englishLang = LangUidAndName()
 
+        val spanishLang = LangUidAndName()
+
+        val dbContentEntryDaoSpy = spy(umAppDatabase.contentEntryDao) {
+            on {
+                runBlocking {
+                    findUniqueLanguageWithParentUid(rootEntry.contentEntryUid)
+                }
+            }.thenReturn(listOf(englishLang, spanishLang))
+        }
+
+
+        val presenter = ContentEntryListPresenter(context, args, mockView, dbContentEntryDaoSpy, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
+        presenter.onCreate(null)
         presenter.handleClickFilterByLanguage(1L)
-        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(0L), eq(1L), eq(0), eq(0))
+        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(any(), eq(1L), eq(0), eq(0))
         verify(mockView, timeout(5000)).setContentEntryProvider(any())
 
     }
@@ -198,36 +215,33 @@ class ContentEntryListPresenterTest {
 
         val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao)
 
-        args[ARG_LIBRARIES_CONTENT] = ""
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
-
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
+        presenter.onCreate(null)
         presenter.handleClickFilterByCategory(1L)
-        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(0L), eq(0), eq(1L), eq(0))
+        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(rootEntry.contentEntryUid), eq(0), eq(1L), eq(0))
         verify(mockView, timeout(5000)).setContentEntryProvider(any())
     }
 
     @Test
     fun givenListOfContent_whenUserClicksOnDownloadIcon_thenShouldOpenDownloadDialog() {
-
-        args[ARG_LIBRARIES_CONTENT] = ""
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
-
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
+        presenter.onCreate(null)
         presenter.handleDownloadStatusButtonClicked(rootEntry)
-        verify(systemImpl, timeout(5000)).go(eq("DownloadDialog"), eq(mapOf(UstadView.ARG_CONTENT_ENTRY_UID to rootEntry.contentEntryUid.toString())), eq(context))
+        verify(systemImpl, timeout(5000)).go(eq("DownloadDialog"), eq(mapOf(ARG_CONTENT_ENTRY_UID to rootEntry.contentEntryUid.toString())), eq(context))
     }
 
     @Test
     fun givenListOfContent_whenUserClicksOnLeafContent_thenShouldOpenContentEntryDetail() {
-        args[ARG_LIBRARIES_CONTENT] = ""
 
-        var arguments = mutableMapOf<String, String>()
+        val arguments = mutableMapOf<String, String>()
+        args.remove(ARG_FILTER_BUTTONS)
         arguments.putAll(args)
-        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        arguments[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
         arguments[ContentEntryListPresenter.ARG_NO_IFRAMES] = "false"
         arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
 
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
-
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
+        presenter.onCreate(null)
         rootEntry.leaf = true
         presenter.handleContentEntryClicked(rootEntry)
 
@@ -237,14 +251,14 @@ class ContentEntryListPresenterTest {
     @Test
     fun givenListOfContent_whenUserClicksOnEntryNotLeaf_thenShouldOpenContentEntryListActivity() {
 
-        args[ARG_LIBRARIES_CONTENT] = ""
-        var arguments = mutableMapOf<String, String>()
+        val arguments = mutableMapOf<String, String>()
+        args.remove(ARG_FILTER_BUTTONS)
         arguments.putAll(args)
-        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        arguments[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
         arguments[ContentEntryListPresenter.ARG_NO_IFRAMES] = "false"
         arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
 
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, mockAccount, systemImpl, umAppRepository)
 
         presenter.handleContentEntryClicked(rootEntry)
 
@@ -255,29 +269,27 @@ class ContentEntryListPresenterTest {
     @Test
     fun givenUserIsAdmin_whenClicksOnAddContentIconAndSelectsCreateFolder_thenShouldOpenContentEntryEditActivity() {
 
-        var personDaoSpy = spy(umAppRepository.personDao)
+        val personDaoSpy = spy(umAppRepository.personDao)
 
-        var repo = spy(umAppRepository){
+        val repo = spy(umAppRepository){
             on { personDao }.thenReturn(personDaoSpy)
         }
 
         runBlocking {
-            var person = Person()
+            val person = Person()
             person.admin = true
             whenever(personDaoSpy.findByUid(any())).thenReturn(person)
 
         }
-
-        args[ARG_LIBRARIES_CONTENT] = ""
         args[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG] = (ContentEntryListView.EDIT_BUTTONS_ADD_CONTENT or ContentEntryListView.EDIT_BUTTONS_EDITOPTION).toString()
-        var arguments = mutableMapOf<String, String>()
+        val arguments = mutableMapOf<String, String>()
         arguments.putAll(args)
+        arguments[ARG_CONTENT_ENTRY_UID] = 0.toString()
         arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
-        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = 0.toString()
         arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
         arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
 
-        var presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, adminAccount, systemImpl, repo)
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, contentEntryRepoDao, adminAccount, systemImpl, repo)
         presenter.onCreate(null)
 
         verify(mockView, timeout(5000)).setEditButtonsVisibility(eq(arguments[ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG]!!.toInt()))
@@ -310,7 +322,7 @@ class ContentEntryListPresenterTest {
         var arguments = mutableMapOf<String, String>()
         arguments.putAll(args)
         arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
-        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = 0.toString()
+        arguments[ARG_CONTENT_ENTRY_UID] = 0.toString()
         arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_IMPORT_LINK.toString()
         arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
 
@@ -345,7 +357,7 @@ class ContentEntryListPresenterTest {
         var arguments = mutableMapOf<String, String>()
         arguments.putAll(args)
         arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
-        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = 0.toString()
+        arguments[ARG_CONTENT_ENTRY_UID] = 0.toString()
         arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_IMPORT_FILE.toString()
         arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
 
@@ -383,7 +395,7 @@ class ContentEntryListPresenterTest {
         var arguments = mutableMapOf<String, String>()
         arguments.putAll(args)
         arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
-        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = 0.toString()
+        arguments[ARG_CONTENT_ENTRY_UID] = 0.toString()
         arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_CONTENT.toString()
         arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = true.toString()
 
@@ -421,7 +433,7 @@ class ContentEntryListPresenterTest {
         var arguments = mutableMapOf<String, String>()
         arguments.putAll(args)
         arguments[ContentEntryImportLinkView.CONTENT_ENTRY_PARENT_UID] = rootEntry.contentEntryUid.toString()
-        arguments[UstadView.ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        arguments[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
         arguments[ContentEntryEditView.CONTENT_TYPE] = ContentEntryListView.CONTENT_CREATE_FOLDER.toString()
         arguments[ContentEntryEditView.CONTENT_ENTRY_LEAF] = false.toString()
 

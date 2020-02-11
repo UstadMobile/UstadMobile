@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import com.ustadmobile.core.util.ext.makeRootDownloadJobItem
+import com.ustadmobile.core.util.ext.isStatusCompleted
 
 typealias ContainerDownloaderMaker = suspend (downloadJob: DownloadJobItem, downloadJobManager: ContainerDownloadManager) -> ContainerDownloadRunner
 
@@ -228,7 +229,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         jobsToCommit.clear()
     }
 
-    override suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Long): DoorLiveData<DownloadJobItem?> {
+    override suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Long): DoorLiveData<DownloadJobItem?> = withContext(singleThreadContext){
         var currentHolder = contentEntryHolders[contentEntryUid]?.get()
         if(currentHolder == null) {
             var currentDownloadJob = jobItemUidToHolderMap.values.firstOrNull {
@@ -243,7 +244,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
             contentEntryHolders[contentEntryUid] = WeakReference(currentHolder)
         }
 
-        return currentHolder.liveData
+        return@withContext currentHolder.liveData
     }
 
     override suspend fun getDownloadJob(jobUid: Int): DoorLiveData<DownloadJob?> = withContext(singleThreadContext) {
