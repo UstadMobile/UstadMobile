@@ -27,7 +27,7 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_entry_list)
+        setContentView(R.layout.activity_content_entry_list)
 
         setUMToolbar(R.id.content_entry_list_toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
