@@ -8,7 +8,7 @@ apply plugin: "jacoco"
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
 def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
 def keystoreProperties = new Properties()
-def baseAppId = "org.rescue.classbookng"
+def baseAppId = "com.toughra.ustadmobile"
 
 if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))

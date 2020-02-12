@@ -40,11 +40,11 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         super.onCreate(savedState)
 
         showDownloadAll = impl.getAppConfigString(
-                AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, context)!!.toBoolean()
+                AppConfig.KEY_SHOW_DOWNLOAD_ALL_BTN, null, context)?.toBoolean() ?: false
         handleShowDownloadButton(showDownloadAll)
 
         showLocationPermission = impl.getAppConfigString(
-                AppConfig.KEY_SHOW_LOCATION_PERMISSION_PROMPT, null, context)!!.toBoolean()
+                AppConfig.KEY_SHOW_LOCATION_PERMISSION_PROMPT, null, context)?.toBoolean() ?: false
 
         UmAccountManager.activeAccountLiveData.observeWithPresenter(this, ::onChanged)
     }
