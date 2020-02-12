@@ -61,7 +61,7 @@ abstract class LocationDao : BaseDao<Location> {
     @Query("SELECT * FROM Location WHERE locationUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Location?>
 
-    @Query("SELECT * FROM Location WHERE parentLocationUid = 0")
+    @Query("SELECT * FROM Location WHERE parentLocationUid = 0 AND CAST(locationActive AS INTEGER) = 1")
     abstract fun findTopLocationsLive(): DoorLiveData<List<Location>>
 
     @JsName("findTopLocationsAsync")

@@ -54,7 +54,9 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         Picasso
                 .get()
                 .load(imageUri)
-                .resize(0, dpToPxImagePerson())
+                //.resize(0, dpToPxImagePerson())
+                .fit()
+                .centerCrop()
                 .noFade()
                 .into(theImage)
     }

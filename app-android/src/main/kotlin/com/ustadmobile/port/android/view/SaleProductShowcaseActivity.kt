@@ -23,9 +23,8 @@ import com.ustadmobile.lib.db.entities.SaleProductPicture
 
 class SaleProductShowcaseActivity : UstadBaseActivity(), SaleProductShowcaseView {
 
-
     private var toolbar: Toolbar? = null
-    private var mPresenter: SaleProductShowcasePresenter? = null
+    private lateinit var mPresenter: SaleProductShowcasePresenter
 
     // If you have a recycler view 
     private var mRecyclerView: RecyclerView? = null
@@ -45,6 +44,9 @@ class SaleProductShowcaseActivity : UstadBaseActivity(), SaleProductShowcaseView
                 onBackPressed()
                 return true
             }
+            R.id.menu_save_edit -> {
+                mPresenter.handleClickEdit()
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -63,8 +65,9 @@ class SaleProductShowcaseActivity : UstadBaseActivity(), SaleProductShowcaseView
         //RecyclerView
         mRecyclerView = findViewById(
                 R.id.activity_saleproduct_showcase_pictures_rv)
-        val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
-        mRecyclerView!!.layoutManager = mRecyclerLayoutManager
+        val cRecyclerLayoutManager = LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false)
+        mRecyclerView!!.layoutManager = cRecyclerLayoutManager
 
         descText = findViewById(R.id.textView32)
         chip = findViewById(R.id.activity_saleproduct_showcase_chip)
@@ -72,9 +75,7 @@ class SaleProductShowcaseActivity : UstadBaseActivity(), SaleProductShowcaseView
         //Call the Presenter
         mPresenter = SaleProductShowcasePresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
-
-
+        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
     }
 
     override fun updateSaleProductOnView(saleProduct: SaleProduct) {
@@ -96,6 +97,10 @@ class SaleProductShowcaseActivity : UstadBaseActivity(), SaleProductShowcaseView
         mRecyclerView!!.adapter = recyclerAdapter
     }
 
+    override fun updateCreatorOnView(creator: String) {
+        chip.text = creator
+    }
+
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
      * @param menu  The menu options
@@ -104,13 +109,11 @@ class SaleProductShowcaseActivity : UstadBaseActivity(), SaleProductShowcaseView
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_save, menu)
+        menu.findItem(R.id.menu_save_edit).setVisible(true)
         return true
     }
 
-
-
     companion object {
-
 
         /**
          * The DIFF CALLBACK

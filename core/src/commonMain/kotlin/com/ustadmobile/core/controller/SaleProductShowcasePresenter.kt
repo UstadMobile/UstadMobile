@@ -2,11 +2,14 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.SaleProductDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.PersonPictureDialogView
+import com.ustadmobile.core.view.SaleProductDetailView
 import com.ustadmobile.core.view.SaleProductShowcaseView
 import com.ustadmobile.core.view.SaleProductShowcaseView.Companion.ARG_SALE_PRODUCT_SHOWCASE_SALE_PRODUCT_UID
 import com.ustadmobile.lib.db.entities.SaleProductPicture
@@ -27,6 +30,7 @@ class SaleProductShowcasePresenter(context: Any,
 
     private var productPictureDao: SaleProductPictureDao = repository.saleProductPictureDao
     private var productDao : SaleProductDao = repository.saleProductDao
+    private var personDao : PersonDao = repository.personDao
 
     private lateinit var factory: DataSource.Factory<Int, SaleProductPicture>
     var productUid : Long = 0
@@ -44,6 +48,20 @@ class SaleProductShowcasePresenter(context: Any,
             view.runOnUiThread(Runnable {
                 view.updateSaleProductOnView(product!!)
             })
+
+            val creator = personDao.findByUidAsync(product!!.saleProductPersonAdded)
+            val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+            if(creator!= null){
+                var creatorName = impl.getString(MessageID.by, context).capitalize() + ": " +
+                        creator.fullName()
+                if(loggedInPersonUid == creator.personUid){
+                    creatorName = impl.getString(MessageID.by_you, context).capitalize()
+                }
+                view.runOnUiThread(Runnable {
+                    view.updateCreatorOnView(creatorName)
+                })
+            }
+
         }
         getAndSetProvider()
     }
@@ -60,4 +78,9 @@ class SaleProductShowcasePresenter(context: Any,
         impl.go(PersonPictureDialogView.VIEW_NAME, args, context)
     }
 
+    fun handleClickEdit(){
+        val args = HashMap<String, String>()
+        args[SaleProductDetailView.ARG_SALE_PRODUCT_UID] = productUid.toString()
+        impl.go(SaleProductDetailView.VIEW_NAME, args, context)
+    }
 }

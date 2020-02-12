@@ -7,4 +7,13 @@
         android:iconTint="@color/icons"
         android:visible="false"
         app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menu_save_edit"
+        android:icon="@drawable/ic_edit_white_24dp"
+        android:title="@string/search"
+        app:showAsAction="always"
+        android:iconTint="@color/icons"
+        android:visible="false"
+        />
 </menu>

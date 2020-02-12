@@ -22,6 +22,7 @@ import com.ustadmobile.core.view.SaleProductCategoryListView.Companion.ARG_SELEC
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_CATEGORY
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_NEW_TITLE
 import com.ustadmobile.core.view.SaleProductDetailView.Companion.ARG_SALE_PRODUCT_UID
+import com.ustadmobile.core.view.SaleProductShowcaseView.Companion.ARG_SALE_PRODUCT_SHOWCASE_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.SelectProducerView.Companion.ARG_PRODUCER_UID
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
 import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION
@@ -200,13 +201,20 @@ class SelectSaleProductPresenter(context: Any,
                 if(editMode){
                     args[ARG_SALE_PRODUCT_UID] = productUid.toString()
                     impl.go(SaleProductDetailView.VIEW_NAME, args, context)
+//                    args[ARG_SALE_PRODUCT_SHOWCASE_SALE_PRODUCT_UID] = productUid.toString()
+//                    impl.go(SaleProductShowcaseView.VIEW_NAME, args, context)
                 }else {
                     args[ARG_SALEPRODUCT_UID] = productUid.toString()
                     impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)
                 }
             } else {
                 args[ARG_SALE_PRODUCT_UID] = productUid.toString()
-                impl.go(SaleProductDetailView.VIEW_NAME, args, context)
+                if(editMode) {
+                    impl.go(SaleProductDetailView.VIEW_NAME, args, context)
+                }else {
+                    args[ARG_SALE_PRODUCT_SHOWCASE_SALE_PRODUCT_UID] = productUid.toString()
+                    impl.go(SaleProductShowcaseView.VIEW_NAME, args, context)
+                }
             }
         } else {
             //Need to select the product.

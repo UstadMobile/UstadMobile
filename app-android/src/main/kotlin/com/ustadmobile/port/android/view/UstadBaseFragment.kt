@@ -89,7 +89,7 @@ open class UstadBaseFragment : Fragment() {
         //TODO: Get and set from app pref
         if (timeoutExceeded > logoutTimeout)
         {
-            handleLogout()
+            //handleLogout()
             return false
         }else{
             return true
