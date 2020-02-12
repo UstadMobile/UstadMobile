@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.PersonWithSaleInfoListView.Companion.ARG_LE_UID
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.staging.core.util.TimeZoneUtil
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -92,7 +93,10 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
     fun updateLastSyncTime(latestTimeStamp: Long?){
         if(latestTimeStamp != null) {
             val lastSyncedText = impl.getString(MessageID.last_synced_at, context)
-            val lastSyncedText2 = UMCalendarUtil.getPrettyDateWithTimeFromLongSimple(latestTimeStamp)
+//            val lastSyncedText2 = UMCalendarUtil.getPrettyDateWithTimeFromLongSimple(latestTimeStamp)
+            val tzu = TimeZoneUtil()
+            val lastSyncedText2 = tzu.getPrettyDateWithTimeFromLongSimple(latestTimeStamp,
+                    impl.getLocale(context))
             val lastSynced = lastSyncedText + " " + lastSyncedText2
             view.updateLastSyncedText(lastSynced)
         }

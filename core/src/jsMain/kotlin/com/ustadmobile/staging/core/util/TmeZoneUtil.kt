@@ -11,4 +11,8 @@ actual class TimeZoneUtil {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    actual fun getPrettyDateWithTimeFromLongSimple(thisDate: Long, locale: String): String{
+        TODO("not implemented")
+    }
+
 }
