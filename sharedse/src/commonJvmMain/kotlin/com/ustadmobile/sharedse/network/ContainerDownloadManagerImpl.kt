@@ -30,7 +30,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
      * this live data. This is used to ensure that holders are not garbage collected as long as
      * anything else holds a reference to the livedata in that holder
      */
-    private inner class MutableLiveDataWithRef<T>: DoorMutableLiveData<T> {
+    inner class MutableLiveDataWithRef<T>: DoorMutableLiveData<T> {
 
         val reference: Any?
 
@@ -44,7 +44,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     }
 
-    private inner class DownloadJobItemHolder(val downloadJobItemUid: Int,
+    inner class DownloadJobItemHolder(val downloadJobItemUid: Int,
                                               var downloadJobItem: DownloadJobItem?,
                                               val parents: MutableList<DownloadJobItemHolder>) {
 
@@ -209,6 +209,10 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         val newHolder = DownloadJobItemHolder(jobItemUid, downloadJobItem, parentHolders.toMutableList())
         jobItemUidToHolderMap[jobItemUid] = WeakReference(newHolder)
         return newHolder
+    }
+
+    suspend fun getDownloadJobItemHolder(jobItemUid: Int) = withContext(singleThreadContext) {
+        loadDownloadJobItemHolder(jobItemUid)
     }
 
     private fun loadDownloadJobHolder(jobUid: Int): DownloadJobHolder {

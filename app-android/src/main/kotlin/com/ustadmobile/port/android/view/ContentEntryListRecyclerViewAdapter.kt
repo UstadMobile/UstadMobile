@@ -102,6 +102,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
             holder.downloadJobItemLiveData?.removeObserver(holder)
             GlobalScope.launch(Dispatchers.Main.immediate) {
+                holder.downloadJobItemLiveData?.removeObserver(holder)
                 holder.downloadJobItemLiveData = containerDownloadManager
                         .getDownloadJobItemByContentEntryUid(entry?.contentEntryUid ?: 0).also {
                             it.observe(activity, holder)
