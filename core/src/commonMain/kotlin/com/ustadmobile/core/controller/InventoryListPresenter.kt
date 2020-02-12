@@ -66,7 +66,7 @@ class InventoryListPresenter(context: Any,
 
     fun handleSortChanged(order: Long) {
         var order = order
-        order = order + 1
+        order += 1
 
         if (idToOrderInteger!!.containsKey(order)) {
             currentSortOrder = idToOrderInteger!![order]!!

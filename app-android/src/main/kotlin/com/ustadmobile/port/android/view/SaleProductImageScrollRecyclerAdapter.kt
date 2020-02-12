@@ -8,13 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.PopupMenu
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleProductImageListPresenter
+import com.ustadmobile.core.controller.SaleProductShowcasePresenter
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.SaleProductPicture
@@ -24,13 +24,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import java.io.File
 
-class SaleProductImageListRecyclerAdapter internal constructor(
+class SaleProductImageScrollRecyclerAdapter internal constructor(
         diffCallback: DiffUtil.ItemCallback<SaleProductPicture>,
-        internal var mPresenter: SaleProductImageListPresenter,
-        private val theActivity: Activity?,
+        internal var mPresenter: SaleProductShowcasePresenter,
         private val theContext: Context)
     : PagedListAdapter<SaleProductPicture,
-        SaleProductImageListRecyclerAdapter.SelectSaleProductPictureViewHolder>(diffCallback) {
+        SaleProductImageScrollRecyclerAdapter.SelectSaleProductPictureViewHolder>(diffCallback) {
 
     private lateinit var productPictureDaoRepo : SaleProductPictureDao
     private lateinit var productPictureDao : SaleProductPictureDao
@@ -39,7 +38,7 @@ class SaleProductImageListRecyclerAdapter internal constructor(
 
 
         val list = LayoutInflater.from(theContext).inflate(
-                R.layout.item_sale_product_picture, parent, false)
+                R.layout.item_saleproductimagescroll, parent, false)
         return SelectSaleProductPictureViewHolder(list)
 
     }
@@ -59,9 +58,8 @@ class SaleProductImageListRecyclerAdapter internal constructor(
     override fun onBindViewHolder(holder: SelectSaleProductPictureViewHolder, position: Int) {
 
         val entity = getItem(position)
-        val imageView = holder.itemView.findViewById<ImageView>(R.id.item_sale_product_picture_image)
-        val dots = holder.itemView.findViewById<ImageView>(R.id.item_sale_product_picture_dots)
-        val hamburger = holder.itemView.findViewById<ImageView>(R.id.item_sale_product_picture_hamburger)
+        val imageView = holder.itemView.findViewById<ImageView>(R.id.item_saleproductimagescroll)
+
 
         assert(entity != null)
 
@@ -90,7 +88,7 @@ class SaleProductImageListRecyclerAdapter internal constructor(
 
             //Get the server image
             val saleProductPictureServer =
-                    productPictureDaoRepo.findByUidAsync(entity!!.saleProductPictureUid)
+                    productPictureDaoRepo.findByUidAsync(entity.saleProductPictureUid)
             imagePathServer =
                     productPictureDaoRepo.getAttachmentPath(saleProductPictureServer!!)!!;
 
@@ -106,43 +104,10 @@ class SaleProductImageListRecyclerAdapter internal constructor(
             }
         }
 
-        dots.setOnClickListener { v: View ->
-            if (theActivity != null) {
-                //creating a popup menu
-                val popup = PopupMenu(theActivity.applicationContext, v)
-                popup.setOnMenuItemClickListener { item ->
-                    val i = item.itemId
-                    if (i == R.id.edit) {
-                        mPresenter.editProductPicture(entity!!.saleProductPictureUid)
-                        true
-                    } else if (i == R.id.delete) {
-                        mPresenter.deleteProductPicture(entity!!.saleProductPictureUid)
-                        true
-                    } else {
-                        false
-                    }
-                }
-
-                //inflating menu from xml resource
-                popup.inflate(R.menu.menu_edit_delete)
-                popup.menu.findItem(R.id.edit).isVisible = true
-                //displaying the popup
-                popup.show()
-            }
-
-        }
 
         holder.itemView.setOnClickListener { v ->
             mPresenter.openPictureDialog(imagePathLocal) }
 
-    }
-
-    fun moveItem(from: Int, to: Int) {
-        println("debudebu: move from: $from to $to")
-    }
-
-    fun movedItem(from: Int, to: Int) {
-        println("debudebu: Moved from: $from to $to")
     }
 
     inner class SelectSaleProductPictureViewHolder(itemView: View, var imageLoadJob: Job? = null)

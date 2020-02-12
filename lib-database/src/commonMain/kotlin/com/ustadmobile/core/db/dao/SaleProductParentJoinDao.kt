@@ -40,44 +40,44 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     abstract fun findAllSelectedCategoriesForSaleProductProvider(
             saleProductUid: Long): DataSource.Factory<Int,SaleProductSelected>
 
-    @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
+    @Query(QUERY_SELECT_ALL_SALE_PRODUCT + SEARCH_WHERE +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
             " AND CAST(child.saleProductCategory AS INTEGER) = 0 " + QUERY_SORT_BY_NAME_ASC )
-    abstract fun findAllItemsInACategoryByNameAsc(leUid: Long, saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
+    abstract fun findAllItemsInACategoryByNameAsc(leUid: Long, saleProductCategoryUid: Long, query: String): DataSource.Factory<Int,SaleProduct>
 
-    @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
+    @Query(QUERY_SELECT_ALL_SALE_PRODUCT + SEARCH_WHERE +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
             " AND CAST(child.saleProductCategory AS INTEGER) = 0 " + QUERY_SORT_BY_NAME_DESC )
-    abstract fun findAllItemsInACategoryByNameDesc(leUid: Long, saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
+    abstract fun findAllItemsInACategoryByNameDesc(leUid: Long, saleProductCategoryUid: Long, query: String): DataSource.Factory<Int,SaleProduct>
 
 
-    fun sortAndFindAllItemsInACategory(leUid: Long, sort: Int, saleProductCategoryUid: Long)
+    fun sortAndFindAllItemsInACategory(leUid: Long, sort: Int, saleProductCategoryUid: Long, query: String)
             : DataSource.Factory<Int, SaleProduct>{
         when(sort){
-            SORT_ORDER_NAME_ASC -> return findAllItemsInACategoryByNameAsc(leUid, saleProductCategoryUid)
-            SORT_ORDER_NAME_DESC -> return findAllItemsInACategoryByNameDesc(leUid, saleProductCategoryUid)
+            SORT_ORDER_NAME_ASC -> return findAllItemsInACategoryByNameAsc(leUid, saleProductCategoryUid, query)
+            SORT_ORDER_NAME_DESC -> return findAllItemsInACategoryByNameDesc(leUid, saleProductCategoryUid, query)
         }
-        return findAllItemsInACategoryByNameAsc(leUid, saleProductCategoryUid)
+        return findAllItemsInACategoryByNameAsc(leUid, saleProductCategoryUid, query)
     }
 
-    @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
+    @Query(QUERY_SELECT_ALL_SALE_PRODUCT + SEARCH_WHERE +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
             " AND CAST(child.saleProductCategory AS INTEGER) = 1 ")
-    abstract fun findAllCategoriesInACategoryByNameAsc(leUid: Long, saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
+    abstract fun findAllCategoriesInACategoryByNameAsc(leUid: Long, saleProductCategoryUid: Long, query: String): DataSource.Factory<Int,SaleProduct>
 
-    @Query(QUERY_SELECT_ALL_SALE_PRODUCT +
+    @Query(QUERY_SELECT_ALL_SALE_PRODUCT + SEARCH_WHERE +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
             " AND CAST(child.saleProductCategory AS INTEGER) = 1 ")
-    abstract fun findAllCategoriesInACategoryByNameDesc(leUid: Long, saleProductCategoryUid: Long): DataSource.Factory<Int,SaleProduct>
+    abstract fun findAllCategoriesInACategoryByNameDesc(leUid: Long, saleProductCategoryUid: Long, query: String): DataSource.Factory<Int,SaleProduct>
 
 
-    fun sortAndFindAllCategoriesInACategory(leUid: Long, sort: Int, saleProductCategoryUid: Long)
+    fun sortAndFindAllCategoriesInACategory(leUid: Long, sort: Int, saleProductCategoryUid: Long, query: String)
             :DataSource.Factory<Int, SaleProduct>{
         when(sort){
-            SORT_ORDER_NAME_ASC -> return findAllCategoriesInACategoryByNameAsc(leUid, saleProductCategoryUid)
-            SORT_ORDER_NAME_DESC -> return findAllCategoriesInACategoryByNameDesc(leUid, saleProductCategoryUid)
+            SORT_ORDER_NAME_ASC -> return findAllCategoriesInACategoryByNameAsc(leUid, saleProductCategoryUid, query)
+            SORT_ORDER_NAME_DESC -> return findAllCategoriesInACategoryByNameDesc(leUid, saleProductCategoryUid, query)
         }
-        return findAllCategoriesInACategoryByNameAsc(leUid, saleProductCategoryUid)
+        return findAllCategoriesInACategoryByNameAsc(leUid, saleProductCategoryUid, query)
     }
 
 
@@ -167,11 +167,19 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
                     LEFT JOIN Person as LE on LE.personUid = :leUid 
                     LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid 
                     LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid 
-                    LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid 
+                    LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid
                     WHERE CAST(SaleProductParentJoin.saleProductParentJoinActive AS INTEGER) = 1
                     AND CAST(child.saleProductActive AS INTEGER) = 1 
-                    AND (CAST(LE.admin AS INTEGER) = 1 OR child.saleProductPersonAdded = LE.personUid) 
+                    AND (CAST(LE.admin AS INTEGER) = 1 OR child.saleProductPersonAdded = LE.personUid)
+                    AND productPicture.saleProductPictureIndex = 
+                    (SELECT MAX(SaleProductPicture.saleproductpictureIndex) from saleproductpicture 
+                    where SaleProductPicture.saleProductPictureSaleProductUid = child.saleProductUid ) 
                 """
+
+        const val SEARCH_WHERE =
+                """ AND (lower(child.saleProductName) like :query OR
+                         lower(child.saleProductNameDari) like :query OR 
+                        lower(child.saleProductNamePashto) like :query )"""
 
         const val QUERY_WHERE_SEARCH = " AND parent.saleProductName LIKE :query "
 

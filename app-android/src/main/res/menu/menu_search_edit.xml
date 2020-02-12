@@ -19,6 +19,7 @@
         android:title="@string/search"
         android:iconTint="@color/icons"
         app:showAsAction="always"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
         android:visible="true"
         />
 

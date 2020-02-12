@@ -64,6 +64,8 @@ class SaleProductCategoryListPresenter(context: Any,
     private var loggedInPersonUid: Long = 0
     private var loggedInPerson : Person ? = null
 
+    private var searchQuery : String = "%%"
+
     init {
 
         //Get provider Dao
@@ -107,6 +109,14 @@ class SaleProductCategoryListPresenter(context: Any,
 
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
+    }
+
+    fun isLoggedInPersonAdmin(): Boolean{
+        return if(loggedInPerson == null){
+            false
+        }else{
+            loggedInPerson!!.admin
+        }
     }
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -156,6 +166,11 @@ class SaleProductCategoryListPresenter(context: Any,
         setCategoryOnView(true, true)
     }
 
+    fun handleSearchQuery(query: String){
+        searchQuery = "%$query%"
+        getAndSetProvider()
+    }
+
     /**
      * Updates the sort by drop down (spinner) on the Class list. For now the sort options are
      * defined within this method and will automatically update the sort options without any
@@ -181,24 +196,24 @@ class SaleProductCategoryListPresenter(context: Any,
 
         if (idToOrderInteger!!.containsKey(orderI)) {
             currentSortOrder = idToOrderInteger!![orderI]!!
-            getAndSetProvider(currentSortOrder)
+            getAndSetProvider()
         }
     }
 
-    private fun getAndSetProvider(sortCode: Int) {
-
+    private fun getAndSetProvider() {
+        val sortCode = currentSortOrder
         var allMode : Boolean = false
         if(currentSaleProductCategory != null) {
             if (currentSaleProductCategory!!.saleProductUid != 0L) {
                 itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(loggedInPersonUid, sortCode,
-                        currentSaleProductCategory!!.saleProductUid)
+                        currentSaleProductCategory!!.saleProductUid, searchQuery)
                 categoryProvider = productParentJoinDao.sortAndFindAllCategoriesInACategory(loggedInPersonUid, sortCode,
-                        currentSaleProductCategory!!.saleProductUid)
+                        currentSaleProductCategory!!.saleProductUid, searchQuery)
                 allMode = false
             } else {
-                itemProvider = productDao.sortAndFindAllActiveSNWIProvider(loggedInPersonUid, sortCode)
+                itemProvider = productDao.sortAndFindAllActiveSNWIProvider(loggedInPersonUid, sortCode, searchQuery)
                 categoryProvider = productDao.sortAndFindActiveCategoriesProvider(
-                        loggedInPersonUid,"", sortCode, impl.getLocale(context))
+                        loggedInPersonUid,searchQuery, sortCode, impl.getLocale(context))
                 allMode = true
             }
             view.setListProvider(itemProvider, allMode)
@@ -230,15 +245,15 @@ class SaleProductCategoryListPresenter(context: Any,
                 view.hideEditMenu(true)
             }
             itemProvider = productParentJoinDao.sortAndFindAllItemsInACategory(loggedInPersonUid, 0,
-                    currentSaleProductCategory!!.saleProductUid)
+                    currentSaleProductCategory!!.saleProductUid, searchQuery)
             categoryProvider = productParentJoinDao.sortAndFindAllCategoriesInACategory(loggedInPersonUid, 0,
-                    currentSaleProductCategory!!.saleProductUid)
+                    currentSaleProductCategory!!.saleProductUid , searchQuery)
             allMode = false
         } else {
             allMode = true
 
             view.hideEditMenu(true)
-            itemProvider = productDao.sortAndFindAllActiveSNWIProvider(loggedInPersonUid, 0)
+            itemProvider = productDao.sortAndFindAllActiveSNWIProvider(loggedInPersonUid, 0, searchQuery)
             categoryProvider = productDao.sortAndFindActiveCategoriesProvider(
                     loggedInPersonUid, "" , 0, impl.getLocale(context))
         }

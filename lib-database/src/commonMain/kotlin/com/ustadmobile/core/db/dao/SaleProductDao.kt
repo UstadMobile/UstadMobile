@@ -19,18 +19,18 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
 
     //FIND ALL CATEGORIES
 
-    @Query(ALL_ACTIVE_QUERY_WITH_LE_FILTER + SORT_BY_NAME_ENG_ASC_QUERY)
-    abstract fun findAllActiveSNWIProviderByNameAsc(leUid: Long): DataSource.Factory<Int,SaleProduct>
+    @Query(ALL_ACTIVE_QUERY_WITH_LE_FILTER + ALL_ACTIVE_QUERY_WITH_SEARCH + SORT_BY_NAME_ENG_ASC_QUERY)
+    abstract fun findAllActiveSNWIProviderByNameAsc(leUid: Long, query: String): DataSource.Factory<Int,SaleProduct>
 
-    @Query(ALL_ACTIVE_QUERY_WITH_LE_FILTER + SORT_BY_NAME_DESC_QUERY)
-    abstract fun findAllActiveSNWIProviderByNameDesc(leUid: Long): DataSource.Factory<Int,SaleProduct>
+    @Query(ALL_ACTIVE_QUERY_WITH_LE_FILTER + ALL_ACTIVE_QUERY_WITH_SEARCH + SORT_BY_NAME_DESC_QUERY)
+    abstract fun findAllActiveSNWIProviderByNameDesc(leUid: Long, query: String): DataSource.Factory<Int,SaleProduct>
 
-    fun sortAndFindAllActiveSNWIProvider(leUid: Long, sortCode: Int): DataSource.Factory<Int, SaleProduct>{
+    fun sortAndFindAllActiveSNWIProvider(leUid: Long, sortCode: Int, query: String): DataSource.Factory<Int, SaleProduct>{
         when(sortCode){
-            SORT_ORDER_NAME_ASC -> return findAllActiveSNWIProviderByNameAsc(leUid)
-            SORT_ORDER_NAME_DESC -> return findAllActiveSNWIProviderByNameDesc(leUid)
+            SORT_ORDER_NAME_ASC -> return findAllActiveSNWIProviderByNameAsc(leUid, query)
+            SORT_ORDER_NAME_DESC -> return findAllActiveSNWIProviderByNameDesc(leUid, query)
         }
-        return findAllActiveSNWIProviderByNameAsc(leUid)
+        return findAllActiveSNWIProviderByNameAsc(leUid, query)
 
     }
     //ITEMS(PRODUCTS):
@@ -152,7 +152,10 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
             WHERE CAST(saleProductActive AS INTEGER) = 1
         """
 
-        const val ALL_ACTIVE_QUERY_WITH_SEARCH = " AND SaleProduct.saleProductName LIKE :query "
+        const val ALL_ACTIVE_QUERY_WITH_SEARCH =
+                """ AND (lower(SaleProduct.saleProductName) like :query OR
+                 lower(SaleProduct.saleProductNameDari) like :query OR 
+                lower(SaleProduct.saleProductNamePashto) like :query )"""
 
         const val SORT_BY_NAME_ENG_ASC_QUERY = " ORDER BY SaleProduct.saleProductName ASC "
         const val SORT_BY_NAME_DARI_ASC_QUERY = " ORDER BY SaleProduct.saleProductNameDari ASC "

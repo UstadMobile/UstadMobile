@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.view
 
+import android.app.SearchManager
+import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -8,10 +10,11 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,20 +33,21 @@ import java.security.AccessController.getContext
 
 class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategoryListView {
 
-    private var toolbar: Toolbar? = null
-    private var mPresenter: SaleProductCategoryListPresenter? = null
-    private var mRecyclerView: RecyclerView? = null
-    private var cRecyclerView: RecyclerView? = null
+    private lateinit var toolbar: Toolbar
+    private lateinit var mPresenter: SaleProductCategoryListPresenter
+    private lateinit var mRecyclerView: RecyclerView
+    private lateinit var cRecyclerView: RecyclerView
 
-    private var itemActionButton: FloatingActionButton? = null
-    private var subCategoryActionButton: FloatingActionButton? = null
-    private var floatingActionMenu: FloatingActionMenu? = null
+    private lateinit var itemActionButton: FloatingActionButton
+    private lateinit var subCategoryActionButton: FloatingActionButton
+    private lateinit var floatingActionMenu: FloatingActionMenu
 
     private var menu: Menu? = null
     private var hideEdit = false
 
-    private var sortSpinner: Spinner? = null
+    private lateinit var sortSpinner: Spinner
     internal lateinit var sortSpinnerPresets: Array<String?>
+    private lateinit var searchView:SearchView
 
     /**
      * Creates the options on the toolbar - specifically the Done tick menu item
@@ -58,6 +62,39 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         menu.findItem(R.id.action_search).isVisible = true
 
         //menu.findItem(R.id.action_edit).isVisible = !hideEdit
+
+        // Associate searchable configuration with the SearchView
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        searchView = menu.findItem(R.id.action_search).actionView as SearchView
+
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(componentName))
+        searchView.queryHint = getText(R.string.name)
+
+        searchView.maxWidth = Integer.MAX_VALUE
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+
+                // filter recycler view when query submitted
+                mPresenter.handleSearchQuery(query)
+                return false
+            }
+
+            override fun onQueryTextChange(query: String): Boolean {
+                // filter recycler view when query submitted
+                mPresenter.handleSearchQuery(query)
+                return false
+            }
+        })
+
+        searchView.setOnCloseListener {
+            val query=""
+            // filter recycler view when query submitted
+            mPresenter.handleSearchQuery(query)
+            false
+        }
         return true
     }
 
@@ -69,19 +106,19 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
      * @return true if accounted for
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val i = item.itemId
-        if (i == android.R.id.home) {
-            onBackPressed()
-            return true
-
-        } else if (i == R.id.action_search) {
-            //TODO: Handle search
-            return true
-        } else if (i == R.id.action_edit) {
-            mPresenter!!.handleClickEditThisCategory()
-            return true
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            R.id.action_search -> //TODO: Handle search
+                true
+            R.id.action_edit -> {
+                mPresenter.handleClickEditThisCategory()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
     }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,7 +129,7 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
 
         //Toolbar:
         toolbar = findViewById(R.id.activity_sale_product_category_list_toolbar)
-        toolbar!!.title = getText(R.string.category)
+        toolbar.title = getText(R.string.category)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -103,56 +140,59 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         //RecyclerView
         mRecyclerView = findViewById(R.id.activity_sale_product_category_list_items_recyclerview)
         val mRecyclerLayoutManager = LinearLayoutManager(applicationContext)
-        mRecyclerView!!.layoutManager = mRecyclerLayoutManager
+        mRecyclerView.layoutManager = mRecyclerLayoutManager
 
         //categories RecyclerView
         cRecyclerView = findViewById(R.id.activity_sale_product_category_list_categories_recyclerview)
-        val cRecyclerLayoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        cRecyclerView!!.layoutManager = cRecyclerLayoutManager
+        val cRecyclerLayoutManager = LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false)
+        cRecyclerView.layoutManager = cRecyclerLayoutManager
 
         sortSpinner = findViewById(R.id.activity_sale_product_category_list_sort_by_spinner)
 
         //Call the Presenter
         mPresenter = SaleProductCategoryListPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //Listeners
-        itemActionButton!!.setOnClickListener { v ->
-            floatingActionMenu!!.close(true)
-            mPresenter!!.handleClickAddItem()
+        itemActionButton.setOnClickListener {
+            floatingActionMenu.close(true)
+            mPresenter.handleClickAddItem()
         }
 
-        subCategoryActionButton!!.setOnClickListener { v ->
-            floatingActionMenu!!.close(true)
-            mPresenter!!.handleClickAddSubCategory()
+        subCategoryActionButton.setOnClickListener {
+            floatingActionMenu.close(true)
+            mPresenter.handleClickAddSubCategory()
         }
+
+        subCategoryActionButton.isVisible = mPresenter.isLoggedInPersonAdmin()
 
         //Sort handler
-        sortSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        sortSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                mPresenter!!.handleChangeSortOrder(id)
+                mPresenter.handleChangeSortOrder(id)
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 
-    override fun setListProvider(factory: DataSource.Factory<Int, SaleProduct>, allMode: Boolean) {
+    override fun setListProvider(listProvider: DataSource.Factory<Int, SaleProduct>,
+                                 allMode: Boolean) {
 
-        val recyclerAdapter = SelectSaleProductWithDescRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
+        val recyclerAdapter = SelectSaleProductWithDescRecyclerAdapter(DIFF_CALLBACK, mPresenter,
                 this, false, applicationContext)
 
-        var boundaryCallback: PagedList.BoundaryCallback<SaleProduct>? = null
-
         if(allMode){
-
-            val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductDao)
+            val data = listProvider.asRepositoryLiveData(
+                    UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductDao)
             //Observe the data:
             data.observe(this,
                     Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
 
         }else{
-            val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductParentJoinDao)
+            val data = listProvider.asRepositoryLiveData(
+                    UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductParentJoinDao)
             //Observe the data:
             data.observe(this,
                     Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
@@ -160,36 +200,36 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         }
 
         //set the adapter
-        mRecyclerView!!.adapter = recyclerAdapter
+        mRecyclerView.adapter = recyclerAdapter
     }
 
-    override fun setCategoriesListProvider(factory: DataSource.Factory<Int, SaleProduct>, allMode: Boolean) {
+    override fun setCategoriesListProvider(listProvider: DataSource.Factory<Int, SaleProduct>,
+                                           allMode: Boolean) {
 
-        val recyclerAdapter = SelectSaleCategoryRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this, false,
-                true, applicationContext)
+        val recyclerAdapter = SelectSaleCategoryRecyclerAdapter(DIFF_CALLBACK, mPresenter,
+                this, showContextMenu = false,
+                listCategory = true, theContext = applicationContext)
 
-        var boundaryCallback: PagedList.BoundaryCallback<SaleProduct>? = null
         if(allMode){
-            val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductDao)
+            val data = listProvider.asRepositoryLiveData(
+                    UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductDao)
             //Observe the data:
             data.observe(this,
                     Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
-
         }else{
-            val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductParentJoinDao)
+            val data = listProvider.asRepositoryLiveData(
+                    UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductParentJoinDao)
             //Observe the data:
             data.observe(this,
                     Observer<PagedList<SaleProduct>> { recyclerAdapter.submitList(it) })
-
         }
-
         //set the adapter
-        cRecyclerView!!.adapter = recyclerAdapter
+        cRecyclerView.adapter = recyclerAdapter
     }
 
-    override fun setMessageOnView(messageId: Int) {
+    override fun setMessageOnView(messageCode: Int) {
         val impl = UstadMobileSystemImpl.instance
-        val message = impl.getString(messageId, getContext())
+        val message = impl.getString(messageCode, getContext())
 
         runOnUiThread {
             Toast.makeText(
@@ -202,14 +242,12 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
 
     override fun updateToolbar(title: String?) {
         if(title != null) {
-            toolbar!!.title = title
+            toolbar.title = title
         }
     }
 
     override fun initFromSaleCategory(saleProductCategory: SaleProduct) {
-        if (saleProductCategory != null) {
-            runOnUiThread { updateToolbar(saleProductCategory.saleProductName) }
-        }
+        runOnUiThread { updateToolbar(saleProductCategory.saleProductName) }
     }
 
     override fun updateSortPresets(presets: Array<String?>) {
@@ -217,11 +255,11 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         val adapter = ArrayAdapter(this,
                 R.layout.item_simple_spinner_gray, sortSpinnerPresets)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        sortSpinner!!.adapter = adapter
+        sortSpinner.adapter = adapter
     }
 
     override fun hideFAB(hide: Boolean) {
-        runOnUiThread { floatingActionMenu!!.visibility = if (hide) View.GONE else View.VISIBLE }
+        runOnUiThread { floatingActionMenu.visibility = if (hide) View.GONE else View.VISIBLE }
     }
 
     override fun hideEditMenu(hide: Boolean) {

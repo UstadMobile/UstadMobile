@@ -128,7 +128,6 @@ class InventoryListFragment : UstadBaseFragment, InventoryListView, SearchableLi
 
     override fun setListProvider(factory: DataSource.Factory<Int, SaleProductWithInventoryCount>) {
 
-
         val recyclerAdapter = InventoryListRecyclerAdapter(
                 DIFF_SALEPRODUCTWITHINVENTORYCOUNT_CALLBACK, mPresenter!!,
                 activity!!, context!!)

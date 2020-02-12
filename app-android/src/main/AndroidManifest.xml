@@ -201,6 +201,10 @@
             android:name="com.ustadmobile.port.android.view.SaleProductImageListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/manage_images" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.SaleProductShowcaseActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/sale_product" />
 
 
         <!-- End of Goldozi-->
