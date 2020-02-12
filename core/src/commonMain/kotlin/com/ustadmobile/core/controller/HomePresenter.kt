@@ -62,8 +62,9 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
             var profilePicturePath = ""
             if(t != null) {
                 account = t
-                val person = personDao.findByUid(t.personUid)
+                val person = personDao.findByUidAsync(t.personUid)
                 if(person != null){
+                    println("debudebu: person not null")
                     if(person.admin){
                         contentEntryListTabsArgs["2"] =  "${MessageID.recycled};$ARG_RECYCLED_CONTENT"
                         options.add(Pair(MessageID.reports, ReportDashboardView.VIEW_NAME))
@@ -99,6 +100,8 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                             profilePicturePath=imagePath
                         }
                     }
+                }else{
+                    println("debudebu: person null")
                 }
             }
 

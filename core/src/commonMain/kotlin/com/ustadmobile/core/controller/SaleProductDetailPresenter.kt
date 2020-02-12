@@ -124,7 +124,9 @@ class SaleProductDetailPresenter(context: Any,
             }
 
             val imagesCount = pictureDao.findTotalNumberOfPicturesForAProduct(productUid)
-            view.updateImagesCounter(imagesCount)
+            view.runOnUiThread(Runnable {
+                view.updateImagesCounter(imagesCount)
+            })
         }
 
     }
@@ -290,7 +292,10 @@ class SaleProductDetailPresenter(context: Any,
                 val productPicture =
                         pictureDao.findBySaleProductUidAsync2(currentSaleProduct!!.saleProductUid)
                 if (productPicture != null) {
-                    view.updateImageOnView(pictureDao.getAttachmentPath(productPicture)!!)
+                    val imgPath = pictureDao.getAttachmentPath(productPicture)!!
+                    view.runOnUiThread(Runnable {
+                        view.updateImageOnView(imgPath)
+                    })
                 }
             }
 
