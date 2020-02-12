@@ -17,6 +17,8 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import com.ustadmobile.core.util.ext.makeRootDownloadJobItem
 import com.ustadmobile.core.util.ext.isStatusCompleted
+import com.github.aakira.napier.Napier
+
 
 typealias ContainerDownloaderMaker = suspend (downloadJob: DownloadJobItem, downloadJobManager: ContainerDownloadManager) -> ContainerDownloadRunner
 
@@ -29,6 +31,11 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
      * This class ensures that a reference is kept as long as anything still holds a reference to
      * this live data. This is used to ensure that holders are not garbage collected as long as
      * anything else holds a reference to the livedata in that holder
+     *
+     * TODO: BUG:  the reference field here is never accessed. The obfuscator figures that out,
+     * and that prevents this from working as intended to avoid garbage collection using the reference field
+     * That is why progress was never missing on the debug variant, but regularly acting up on the release variant.
+     *
      */
     inner class MutableLiveDataWithRef<T>: DoorMutableLiveData<T> {
 
@@ -42,6 +49,10 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
             this.reference = reference
         }
 
+        override fun toString(): String {
+            return "MutableLiveDataRef@" + System.identityHashCode(this)
+        }
+
     }
 
     inner class DownloadJobItemHolder(val downloadJobItemUid: Int,
@@ -52,7 +63,14 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
         private var downloadJobHolder = loadDownloadJobHolder(downloadJobItem?.djiDjUid ?: -1)
 
+        private val contentEntryHolder = loadContentEntryHolder(downloadJobItem?.djiContentEntryUid ?: -1)
+
+        init {
+            Napier.i("DLUFIX: DownloadJobItemHolder Init - loaded contentEntryHolder with LiveData ${contentEntryHolder.liveData}")
+        }
+
         fun postUpdate(updated: DownloadJobItem, bubble: Boolean = true) {
+            Napier.i("DLUFIX PostUpdate to DJ #${updated.djiUid}}")
             val deltaDownloadedSoFar = updated.downloadedSoFar - (downloadJobItem?.downloadedSoFar ?: 0L)
             val deltaDownloadLength = updated.downloadLength - (downloadJobItem?.downloadLength ?: 0L)
             val statusChanged = updated.djiStatus != downloadJobItem?.djiStatus
@@ -65,7 +83,18 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
                     updated.djiStatus)
 
             liveData.sendValue(updated)
-            contentEntryHolders[updated.djiContentEntryUid]?.get()?.liveData?.sendValue(updated)
+
+//            val contentEntryHolderLiveData = contentEntryHolders[updated.djiContentEntryUid]?.get()?.liveData
+//            if(contentEntryHolderLiveData != null) {
+//                Napier.i("DLUFIX PostUpdate to DJ #${updated.djiUid}} -> ContentEntry ${updated.djiContentEntryUid} : Sent")
+//                contentEntryHolderLiveData.sendValue(updated)
+//            }else {
+//                Napier.i("DLUFIX PostUpdate to DJ #${updated.djiUid}} -> ContentEntry ${updated.djiContentEntryUid} : Not loaded")
+//            }
+            Napier.i("DLUFIX PostUpdate to DJ #${updated.djiUid}} -> ContentEntry ${updated.djiContentEntryUid} : Sent to ${contentEntryHolder.liveData}")
+            contentEntryHolder.liveData.sendValue(updated)
+
+            //contentEntryHolders[updated.djiContentEntryUid]?.get()?.liveData?.sendValue(updated)
 
             entriesToCommit.add(updated)
 
@@ -126,7 +155,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         }
     }
 
-    private inner class ContentEntryHolder(val contentEntryUid: Long, var downloadJobItem: DownloadJobItem?) {
+    inner class ContentEntryHolder(val contentEntryUid: Long, var downloadJobItem: DownloadJobItem?) {
 
         val liveData = MutableLiveDataWithRef<DownloadJobItem?>(this, downloadJobItem)
 
@@ -203,6 +232,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         if(currentHolder != null)
             return currentHolder
 
+        Napier.i("DLUFIX Load DownloadJobItem DJ #$jobItemUid from database")
         val downloadJobItem = loadFn()
         val parents = appDb.downloadJobItemParentChildJoinDao.findParentsByChildUid(jobItemUid)
         val parentHolders = parents.map { loadDownloadJobItemHolder(it.djiParentDjiUid) }
@@ -233,22 +263,36 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         jobsToCommit.clear()
     }
 
+
     override suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Long): DoorLiveData<DownloadJobItem?> = withContext(singleThreadContext){
+        loadContentEntryHolder(contentEntryUid).liveData
+    }
+
+    private fun loadContentEntryHolder(contentEntryUid: Long, initDownloadJob: DownloadJobItem? = null): ContentEntryHolder {
         var currentHolder = contentEntryHolders[contentEntryUid]?.get()
-        if(currentHolder == null) {
-            var currentDownloadJob = jobItemUidToHolderMap.values.firstOrNull {
-                it.get()?.downloadJobItem?.djiContentEntryUid == contentEntryUid
-            }?.get()?.downloadJobItem
+        Napier.i("DLUFIX getDownloadJobItemByContentEntry: Ref = ${contentEntryHolders[contentEntryUid]} holder = $currentHolder")
+        if(currentHolder != null)
+            return currentHolder
 
-            if(currentDownloadJob == null) {
-                currentDownloadJob = appDb.downloadJobItemDao.findByContentEntryUid(contentEntryUid)
-            }
+        var currentDownloadJob = initDownloadJob ?: jobItemUidToHolderMap.values.firstOrNull {
+            it.get()?.downloadJobItem?.djiContentEntryUid == contentEntryUid
+        }?.get()?.downloadJobItem
 
-            currentHolder = ContentEntryHolder(contentEntryUid, currentDownloadJob)
-            contentEntryHolders[contentEntryUid] = WeakReference(currentHolder)
+        if(currentDownloadJob == null) {
+            Napier.i("DLUFIX: Load DownloadJobItem for ContentEntryUid #$contentEntryUid from database")
+            currentDownloadJob = appDb.downloadJobItemDao.findByContentEntryUid(contentEntryUid)
+        }else {
+            Napier.i("DLUFIX Load DownloadJobItem for ContentEntryUid #$contentEntryUid from DownloadJobItem")
         }
 
-        return@withContext currentHolder.liveData
+        currentHolder = ContentEntryHolder(contentEntryUid, currentDownloadJob)
+        Napier.i("DLUFIX: Create new ContentEntryHolder #$contentEntryUid from database - LiveData = ${currentHolder.liveData}")
+        contentEntryHolders[contentEntryUid] = WeakReference(currentHolder)
+        return currentHolder
+    }
+
+    suspend fun getContentEntryHolder(contentEntryUid: Long) = withContext(singleThreadContext){
+        loadContentEntryHolder(contentEntryUid)
     }
 
     override suspend fun getDownloadJob(jobUid: Int): DoorLiveData<DownloadJob?> = withContext(singleThreadContext) {

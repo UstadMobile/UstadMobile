@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.RecyclerView
+import com.github.aakira.napier.Napier
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -35,14 +36,18 @@ import com.ustadmobile.core.util.ext.toStatusString
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
+import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_content_entry_detail.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
@@ -87,6 +92,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var currentDownloadJobItemStatus: Int = -1
 
+    private var logMeVar: Any? = null
+
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
         if (networkManagerBle.isVersionKitKatOrBelow) {
@@ -95,6 +102,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         }
 
         managerAndroidBle = networkManagerBle
+        val argsMap = bundleToMap(intent.extras)
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this, true,
                 umAppRepository, UmAccountManager.getActiveDatabase(this),
@@ -103,7 +111,14 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 UmAccountManager.getActiveAccount(viewContext),
                 UstadMobileSystemImpl.instance, ::goToContentEntry)
         presenter.handleShowEditControls(showControls)
-        presenter.onCreate(bundleToMap(Bundle()))
+        GlobalScope.launch(Dispatchers.Main.immediate) {
+            val contentEntryUid = argsMap[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
+            logMeVar = (networkManagerBle.containerDownloadManager as ContainerDownloadManagerImpl)
+                    .getContentEntryHolder(contentEntryUid)
+
+            presenter.onCreate(bundleToMap(Bundle()))
+        }
+
 
         managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(
                 findViewById(R.id.coordinationLayout), this)
@@ -318,6 +333,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onDestroy() {
         presenter.onDestroy()
+        Napier.i(logMeVar?.toString() ?: "")
         super.onDestroy()
     }
 
