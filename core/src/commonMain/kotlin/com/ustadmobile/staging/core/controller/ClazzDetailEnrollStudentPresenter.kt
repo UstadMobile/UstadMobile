@@ -219,7 +219,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
             if(personGroup == null){
                 println(">>PERSON's GROUP NOT CREATED> ARE YOU SURE ITS NOT CREATED?>")
                 personGroup = PersonGroup()
-                personGroup.groupName = person.fullName() + "'s Individual group"
+                personGroup.groupName = person.fullName(impl.getLocale(context)) + "'s Individual group"
                 personGroup.groupActive = true
                 personGroup.groupPersonUid = person.personUid
                 personGroup.groupUid = personGroupDao.insert(personGroup)

@@ -19,8 +19,12 @@ class CustomField {
 
     //name of field eg: Department
     var customFieldName: String? = null
-    //Name alt of field eg : in Arabic
+    //Name alt of field eg : in Arabic or Dari
     var customFieldNameAlt: String? = null
+
+    //Pashto
+    var customFieldNameAltTwo : String? = null
+
     //Title in message id
     var customFieldLabelMessageID: Int = 0
     //Icon string
@@ -42,6 +46,16 @@ class CustomField {
 
     @LastChangedBy
     var customFieldLCB: Int = 0
+
+    fun getNameByLocale(locale: String): String{
+        if(locale.equals("fa")){
+            return customFieldNameAlt as String
+        }else if(locale.equals("ps")){
+            return customFieldNameAltTwo as String
+        }else{
+            return customFieldName as String
+        }
+    }
 
     companion object {
 

@@ -205,6 +205,14 @@
             android:name="com.ustadmobile.port.android.view.SaleProductShowcaseActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/sale_product" />
+        <activity
+            android:name="com.ustadmobile.staging.port.android.view.CustomFieldPersonListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/custom_fields" />
+        <activity
+            android:name="com.ustadmobile.staging.port.android.view.CustomFieldPersonDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/custom_field" />
 
 
         <!-- End of Goldozi-->

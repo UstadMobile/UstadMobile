@@ -49,6 +49,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.*
+import com.ustadmobile.staging.core.view.CustomFieldPersonDetailView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.InputStream
@@ -217,7 +218,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SaleDeliveryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleDeliveryDetailActivity"),
             NewInventoryItemView.VIEW_NAME to Class.forName("${PACKAGE_NAME}NewInventoryItemActivity"),
             SaleProductImageListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleProductImageListActivity"),
-            SaleProductShowcaseView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleProductShowcaseActivity")
+            SaleProductShowcaseView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SaleProductShowcaseActivity"),
+            CustomFieldPersonListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CustomFieldPersonListActivity"),
+            CustomFieldPersonDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CustomFieldPersonDetailActivity")
     )
 
 

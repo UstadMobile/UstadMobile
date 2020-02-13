@@ -21,11 +21,14 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FATHER_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FIRST_NAMES
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FIRST_NAMES_ALT
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FULL_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_LAST_NAME
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_LAST_NAME_ALT
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NUMBER
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PHONE_NUM
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_USERNAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_TEXT
@@ -156,7 +159,8 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                             finalValueString[0] = "-"
                         }
                         //view.addCustomFieldText(c, finalValueString);
-                        view.addComponent(finalValueString[0], c.customFieldName!!)
+                        val cfName = c.getNameByLocale(impl.getLocale(context))
+                        view.addComponent(finalValueString[0], cfName!!)
                     })
 
                 } else if (c.customFieldType == CustomField.FIELD_TYPE_DROPDOWN) {
@@ -182,7 +186,8 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                     }
                     val finalValueString = valueString
                     view.runOnUiThread(Runnable{
-                        view.addComponent(finalValueString, c.customFieldName!!)
+                        val cfName = c.getNameByLocale(impl.getLocale(context))
+                        view.addComponent(finalValueString, cfName)
 
                     })
                 }
@@ -233,8 +238,8 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     }
 
     private fun handleDropoutAndEnrollLive(result:Boolean?){
-        view.showDropout(result!!)
-        view.showEnrollInClass(result)
+        //view.showDropout(result!!)
+        view.showEnrollInClass(result!!)
     }
 
     /**
@@ -394,6 +399,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 PersonField.FIELD_HEADING_CONFIRM_PASSWORD -> { labelMessageId = MessageID.confirm_password }
                 PersonField.FIELD_HEADING_PASSWORD -> { labelMessageId = MessageID.password }
                 PersonField.FIELD_HEADING_ROLE_ASSIGNMENTS -> { labelMessageId = MessageID.role_assignments }
+                PersonField.FIELD_HEADING_PHONE_NUMBER -> { labelMessageId = MessageID.phone_number }
 
             }
 
@@ -414,6 +420,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 PersonField.FIELD_HEADING_MOTHER -> { headerMessageId = MessageID.mother }
                 PersonField.FIELD_HEADING_CLASSES -> { headerMessageId = MessageID.classes }
                 PersonField.FIELD_HEADING_ROLE_ASSIGNMENTS -> { headerMessageId = MessageID.role_assignments }
+                PersonField.FIELD_HEADING_PHONE_NUMBER -> { headerMessageId = MessageID.phone_number }
             }
 
 
@@ -426,10 +433,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
             }
 
             if (field.fieldUid == PERSON_FIELD_UID_FULL_NAME.toLong()) {
-                if (person.firstNames != null && person.lastName != null)
-                    thisValue = person.firstNames + " " + person.lastName
-                else
-                    thisValue = ""
+                thisValue = person.fullName(impl.getLocale(context))
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
                         labelMessageId, field.fieldIcon!!), thisValue)
 
@@ -443,7 +447,25 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
                         labelMessageId, field.fieldIcon!!), thisValue)
 
-            } else if (field.fieldUid == PERSON_FIELD_UID_ATTENDANCE.toLong()) {
+            }
+
+            else if (field.fieldUid == PERSON_FIELD_UID_FIRST_NAMES_ALT.toLong()) {
+                thisValue = person.personFirstNamesAlt
+                view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
+                        labelMessageId, field.fieldIcon!!), thisValue)
+
+            } else if (field.fieldUid == PERSON_FIELD_UID_LAST_NAME_ALT.toLong()) {
+                thisValue = person.personLastNameAlt
+                view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
+                        labelMessageId, field.fieldIcon!!), thisValue)
+            }
+            else if (field.fieldUid == PERSON_FIELD_UID_PHONE_NUM.toLong()) {
+                thisValue = person.phoneNum
+                view.setField(field.fieldIndex, PersonDetailViewField(FIELD_TYPE_TEXT,
+                        labelMessageId, field.fieldIcon!!), thisValue)
+            }
+
+            else if (field.fieldUid == PERSON_FIELD_UID_ATTENDANCE.toLong()) {
                 if (attendanceAverage != null) {
                     thisValue = attendanceAverage
                 }

@@ -26,6 +26,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonHandlerPresenter
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.staging.port.android.view.PersonEditActivity.Companion.DEFAULT_PADDING
@@ -297,7 +298,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         if (personWithEnrollment.lastName != null) {
             lastName = personWithEnrollment.lastName
         }
-        val studentName = "$firstName $lastName"
+        val studentName = personWithEnrollment.fullName(UstadMobileSystemImpl.instance.getLocale(theContext))
         studentNameTextView.text = studentName
 
         //Name click listener:

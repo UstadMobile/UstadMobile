@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectProducerPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.Person
 
 class SelectProducerRecyclerAdapter(
@@ -35,7 +36,7 @@ class SelectProducerRecyclerAdapter(
         val entity = getItem(position)
         if (entity != null) {
             val title = holder.itemView.findViewById<TextView>(R.id.item_title_simple_title)
-            title.text = entity.fullName()
+            title.text = entity.fullName(UstadMobileSystemImpl.instance.getLocale(theContext))
 
             title.setOnClickListener { v -> mPresenter.handleClickProducer(entity.personUid) }
         }

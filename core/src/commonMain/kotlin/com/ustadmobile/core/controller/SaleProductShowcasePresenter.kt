@@ -53,7 +53,7 @@ class SaleProductShowcasePresenter(context: Any,
             val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
             if(creator!= null){
                 var creatorName = impl.getString(MessageID.by, context).capitalize() + ": " +
-                        creator.fullName()
+                        creator.fullName(impl.getLocale(context))
                 if(loggedInPersonUid == creator.personUid){
                     creatorName = impl.getString(MessageID.by_you, context).capitalize()
                 }

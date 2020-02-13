@@ -53,7 +53,7 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: Set
 
     fun goToCustomFieldsList() {
         val args = HashMap<String, String>()
-        impl.go(CustomFieldListView.VIEW_NAME, args, context)
+        impl.go(CustomFieldPersonListView.VIEW_NAME, args, context)
 
     }
 

@@ -631,7 +631,8 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
         fieldEditText.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         fieldEditText.setText(value)
 
-        fieldEditText.hint = label.customFieldName
+//        fieldEditText.hint = label.customFieldName
+        fieldEditText.hint = label.getNameByLocale(UstadMobileSystemImpl.instance.getLocale(this))
 
         fieldTextInputLayout.addView(fieldEditText, textInputLayoutParams)
         fieldTextInputLayout.setPadding(dpToPx(8), 0, 0, 0)
@@ -659,7 +660,8 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
 
         //Spinner label
         val labelTV = TextView(this)
-        labelTV.text = label.customFieldName
+//        labelTV.text = label.customFieldName
+        labelTV.text = label.getNameByLocale(UstadMobileSystemImpl.instance.getLocale(this))
 
         val viewId = View.generateViewId()
         mPresenter!!.addToMap(viewId, label.customFieldUid)

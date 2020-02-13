@@ -13,14 +13,17 @@ import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FIRST_NAMES
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FIRST_NAMES_ALT
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FULL_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ROLE_ASSIGNMENTS
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_HOME_ADDRESS
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_NAME_ALT
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PASSWORD
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PROFILE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_USERNAME
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_MNE
@@ -586,12 +589,38 @@ class LoadInitialData {
                 true
         ))
 
+        //ALT
+        allTheFields.add(HeadersAndFields(
+                "ic_person_black_24dp",
+                "First Names Alt",
+                FIELD_HEADING_FIRST_NAMES_ALT,
+                PersonDetailPresenterField.PERSON_FIELD_UID_FIRST_NAMES_ALT,
+                5,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                false,
+                true
+        ))
+        allTheFields.add(HeadersAndFields(
+                "",
+                "Last Name Alt",
+                FIELD_HEADING_LAST_NAME_ALT,
+                PersonDetailPresenterField.PERSON_FIELD_UID_LAST_NAME_ALT,
+                6,
+                PersonField.FIELD_TYPE_TEXT,
+                0,
+                false,
+                false,
+                true
+        ))
+
         allTheFields.add(HeadersAndFields(
                 "",
                 "Username",
                 FIELD_HEADING_USERNAME, //Field Label (for lookup)
                 PersonDetailPresenterField.PERSON_FIELD_UID_USERNAME, //field Uid
-                5,
+                7,
                 PersonField.FIELD_TYPE_USERNAME,
                 0,
                 false,
@@ -604,7 +633,7 @@ class LoadInitialData {
                 "Password",
                 FIELD_HEADING_PASSWORD, //Field Label (for lookup)
                 PersonDetailPresenterField.PERSON_FIELD_UID_PASSWORD, //field Uid
-                6,
+                8,
                 PersonField.FIELD_TYPE_PASSWORD,
                 0,
                 false,
@@ -617,11 +646,24 @@ class LoadInitialData {
                 "Confirm password",
                 FIELD_HEADING_CONFIRM_PASSWORD, //Field Label (for lookup)
                 PersonDetailPresenterField.PERSON_FIELD_UID_CONFIRM_PASSWORD, //field Uid
-                7,
+                9,
                 PersonField.FIELD_TYPE_PASSWORD,
                 0,
                 false,
                 false,
+                true
+        ))
+
+        allTheFields.add(HeadersAndFields(
+                "ic_local_phone_black_24dp",
+                "Phone number",
+                FIELD_HEADING_PHONE_NUMBER,
+                PersonDetailPresenterField.PERSON_FIELD_UID_PHONE_NUM,
+                10,
+                PersonField.FIELD_TYPE_PHONE_NUMBER,
+                0,
+                false,
+                true,
                 true
         ))
 
@@ -631,7 +673,7 @@ class LoadInitialData {
                 "Date of Birth",
                 FIELD_HEADING_BIRTHDAY,
                 PersonDetailPresenterField.PERSON_FIELD_UID_BIRTHDAY,
-                8,
+                11,
                 PersonField.FIELD_TYPE_DATE,
                 0,
                 false,
@@ -644,127 +686,127 @@ class LoadInitialData {
                 "Home Address",
                 FIELD_HEADING_HOME_ADDRESS,
                 PersonDetailPresenterField.PERSON_FIELD_UID_ADDRESS,
-                9,
-                PersonField.FIELD_TYPE_TEXT,
-                0,
-                false,
-                true,
-                true
-        ))
-
-        //ATTENDANCE
-        allTheFields.add(HeadersAndFields(
-                "",
-                "",
-                0,
-                0,
-                10,
-                PersonField.FIELD_TYPE_HEADER,
-                FIELD_HEADING_ATTENDANCE,
-                false,
-                true,
-                false
-        ))
-        allTheFields.add(HeadersAndFields(
-                "ic_lens_black_24dp",
-                "Total Attendance for student and days",
-                FIELD_HEADING_ATTENDANCE,
-                PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE,
-                11,
-                PersonField.FIELD_TYPE_TEXT,
-                0,
-                false,
-                true,
-                false
-        ))
-
-        //PARENTS
-        allTheFields.add(HeadersAndFields(
-                "ic_person_black_24dp",
-                "Father with number",
-                FIELD_HEADING_FATHER,
-                PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER,
                 12,
-                PersonField.FIELD_TYPE_PHONE_NUMBER,
-                0,
-                false,
-                true,
-                false
-        ))
-        allTheFields.add(HeadersAndFields(
-                "ic_person_black_24dp",
-                "Father name",
-                FIELD_HEADING_FATHERS_NAME,
-                PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME,
-                13,
-                PersonField.FIELD_TYPE_TEXT,
-                0,
-                false,
-                false,
-                true
-        ))
-        allTheFields.add(HeadersAndFields(
-                "ic_person_black_24dp",
-                "Father  number",
-                FIELD_HEADING_FATHERS_NUMBER,
-                PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NUMBER,
-                14,
-                PersonField.FIELD_TYPE_PHONE_NUMBER,
-                0,
-                false,
-                false,
-                true
-        ))
-        allTheFields.add(HeadersAndFields(
-                "ic_person_black_24dp",
-                "Mother name",
-                FIELD_HEADING_MOTHERS_NAME,
-                PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME,
-                15,
-                PersonField.FIELD_TYPE_TEXT,
-                0,
-                false,
-                false,
-                true
-        ))
-        allTheFields.add(HeadersAndFields(
-                "ic_person_black_24dp",
-                "Mother number",
-                FIELD_HEADING_MOTHERS_NUMBER,
-                PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER,
-                16,
-                PersonField.FIELD_TYPE_PHONE_NUMBER,
-                0,
-                false,
-                false,
-                true
-        ))
-        allTheFields.add(HeadersAndFields(
-                "ic_person_black_24dp",
-                "Mother with number",
-                FIELD_HEADING_MOTHER,
-                PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER,
-                17,
                 PersonField.FIELD_TYPE_TEXT,
                 0,
                 false,
                 true,
-                false
+                true
         ))
 
-        //CLASSES
-        allTheFields.add(HeadersAndFields(
-                "",
-                "",
-                0,
-                0,
-                18,
-                PersonField.FIELD_TYPE_HEADER,
-                FIELD_HEADING_CLASSES,
-                false,
-                true,
-                true
-        ))
+//        //ATTENDANCE
+//        allTheFields.add(HeadersAndFields(
+//                "",
+//                "",
+//                0,
+//                0,
+//                12,
+//                PersonField.FIELD_TYPE_HEADER,
+//                FIELD_HEADING_ATTENDANCE,
+//                false,
+//                true,
+//                false
+//        ))
+//        allTheFields.add(HeadersAndFields(
+//                "ic_lens_black_24dp",
+//                "Total Attendance for student and days",
+//                FIELD_HEADING_ATTENDANCE,
+//                PersonDetailPresenterField.PERSON_FIELD_UID_ATTENDANCE,
+//                13,
+//                PersonField.FIELD_TYPE_TEXT,
+//                0,
+//                false,
+//                true,
+//                false
+//        ))
+//
+//        //PARENTS
+//        allTheFields.add(HeadersAndFields(
+//                "ic_person_black_24dp",
+//                "Father with number",
+//                FIELD_HEADING_FATHER,
+//                PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER,
+//                14,
+//                PersonField.FIELD_TYPE_PHONE_NUMBER,
+//                0,
+//                false,
+//                true,
+//                false
+//        ))
+//        allTheFields.add(HeadersAndFields(
+//                "ic_person_black_24dp",
+//                "Father name",
+//                FIELD_HEADING_FATHERS_NAME,
+//                PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NAME,
+//                15,
+//                PersonField.FIELD_TYPE_TEXT,
+//                0,
+//                false,
+//                false,
+//                true
+//        ))
+//        allTheFields.add(HeadersAndFields(
+//                "ic_person_black_24dp",
+//                "Father  number",
+//                FIELD_HEADING_FATHERS_NUMBER,
+//                PersonDetailPresenterField.PERSON_FIELD_UID_FATHER_NUMBER,
+//                16,
+//                PersonField.FIELD_TYPE_PHONE_NUMBER,
+//                0,
+//                false,
+//                false,
+//                true
+//        ))
+//        allTheFields.add(HeadersAndFields(
+//                "ic_person_black_24dp",
+//                "Mother name",
+//                FIELD_HEADING_MOTHERS_NAME,
+//                PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME,
+//                17,
+//                PersonField.FIELD_TYPE_TEXT,
+//                0,
+//                false,
+//                false,
+//                true
+//        ))
+//        allTheFields.add(HeadersAndFields(
+//                "ic_person_black_24dp",
+//                "Mother number",
+//                FIELD_HEADING_MOTHERS_NUMBER,
+//                PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NUMBER,
+//                18,
+//                PersonField.FIELD_TYPE_PHONE_NUMBER,
+//                0,
+//                false,
+//                false,
+//                true
+//        ))
+//        allTheFields.add(HeadersAndFields(
+//                "ic_person_black_24dp",
+//                "Mother with number",
+//                FIELD_HEADING_MOTHER,
+//                PersonDetailPresenterField.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER,
+//                19,
+//                PersonField.FIELD_TYPE_TEXT,
+//                0,
+//                false,
+//                true,
+//                false
+//        ))
+//
+//        //CLASSES
+//        allTheFields.add(HeadersAndFields(
+//                "",
+//                "",
+//                0,
+//                0,
+//                20,
+//                PersonField.FIELD_TYPE_HEADER,
+//                FIELD_HEADING_CLASSES,
+//                false,
+//                true,
+//                true
+//        ))
 
         //ROLE ASSIGNMENTS
         allTheFields.add(HeadersAndFields(
@@ -772,7 +814,7 @@ class LoadInitialData {
                 "",
                 0,
                 0,
-                19,
+                21,
                 PersonField.FIELD_TYPE_HEADER,
                 FIELD_HEADING_ROLE_ASSIGNMENTS,
                 false,

@@ -46,6 +46,9 @@ open class SaleProduct() {
     //If it is a category it is true. If it is a product it is false (default)
     var saleProductCategory: Boolean = false
 
+    //Base price. Could be 4242.42
+    var saleProductBasePrice : Float = 0F
+
     @MasterChangeSeqNum
     var saleProductMCSN: Long = 0
 

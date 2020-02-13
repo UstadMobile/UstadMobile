@@ -17,6 +17,7 @@ class SettingsActivity : UstadBaseActivity(), SettingsView {
     private lateinit var userCL: ConstraintLayout
     private lateinit var groupCL: ConstraintLayout
     private lateinit var locationCL: ConstraintLayout
+    private lateinit var customFieldsCL: ConstraintLayout
 
 
     /**
@@ -57,10 +58,12 @@ class SettingsActivity : UstadBaseActivity(), SettingsView {
         userCL = findViewById(R.id.activity_settings_users_cl)
         groupCL = findViewById(R.id.activity_settings_groups_cl)
         locationCL = findViewById(R.id.activity_settings_locations_cl)
+        customFieldsCL = findViewById(R.id.activity_settings_customfields_cl)
 
 
         userCL.setOnClickListener { mPresenter.goToPeopleList() }
         groupCL.setOnClickListener { mPresenter.goToGroupsList() }
         locationCL.setOnClickListener { mPresenter.goToLocationsList() }
+        customFieldsCL.setOnClickListener{ mPresenter.goToCustomFieldsList() }
     }
 }

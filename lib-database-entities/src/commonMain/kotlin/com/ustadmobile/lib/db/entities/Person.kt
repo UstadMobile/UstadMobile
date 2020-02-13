@@ -27,6 +27,12 @@ open class Person() {
 
     var lastName: String? = null
 
+    var personFirstNamesAlt : String ? = null
+
+    var personLastNameAlt: String ? = null
+
+    var personAltLocale : String ? = null
+
     var emailAddr: String? = null
 
     var phoneNum: String? = null
@@ -136,7 +142,7 @@ open class Person() {
         this.phoneNum = phone
     }
 
-    fun fullName():String{
+    private fun fullName():String{
         var f = ""
         var l = ""
         if(firstNames != null){
@@ -147,6 +153,26 @@ open class Person() {
         }
 
         return f + " " + l
+    }
+
+    fun fullName(locale: String): String{
+        if (locale == "fa" || locale == "ps"){
+            var f = ""
+            var l = ""
+            if(personFirstNamesAlt != null){
+                f = personFirstNamesAlt as String
+            }
+            if(personLastNameAlt != null){
+                l = personLastNameAlt as String
+            }
+            if(f.isEmpty() && l.isEmpty()){
+                return fullName()
+            }else {
+                return "$f $l"
+            }
+        }else{
+            return fullName()
+        }
     }
 
     companion object {

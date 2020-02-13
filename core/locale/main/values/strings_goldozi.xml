@@ -239,6 +239,13 @@
     <string name="content">Content</string>
     <string name="courses">Courses</string>
     <string name="receive">Receive</string>
+    <string name="field_name_dari">Field name (Dari)</string>
+    <string name="field_name_pashto">Field name (Pashto)</string>
+
+    <string name="field_first_names_alternative">First names (alternative language)</string>
+    <string name="last_name_alternative">Last name (alternative language)</string>
+    <string name="call_person">Call person</string>
+    <string name="text_person">Text person</string>
 
 
 </resources>

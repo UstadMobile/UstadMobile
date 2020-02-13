@@ -15,6 +15,7 @@ import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonInventorySelectionPresenter
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.PersonWithInventory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -81,7 +82,7 @@ class PersonWithInventorySelectionView : ConstraintLayout {
         if(personWithInventory != null){
             updateProfilePictureOnView()
 
-            producerNameTV.setText(personWithInventory!!.fullName())
+            producerNameTV.text = personWithInventory!!.fullName(UstadMobileSystemImpl.instance.getLocale(context))
 
             seekBar.progress = 0
 

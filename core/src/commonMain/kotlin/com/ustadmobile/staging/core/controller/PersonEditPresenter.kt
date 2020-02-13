@@ -24,12 +24,15 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FATHER_NAME_AND_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FATHER_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FIRST_NAMES
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FIRST_NAMES_ALT
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FULL_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_LAST_NAME
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_LAST_NAME_ALT
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NAME_AND_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_MOTHER_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PASSWORD
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PHONE_NUM
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_USERNAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ATTENDANCE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_BIRTHDAY
@@ -39,13 +42,16 @@ import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FIRST_NAMES
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FIRST_NAMES_ALT
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FULL_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_HOME_ADDRESS
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_NAME
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_NAME_ALT
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PASSWORD
+import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PROFILE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ROLE_ASSIGNMENTS
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_USERNAME
@@ -502,6 +508,8 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                 FIELD_HEADING_FULL_NAME -> { labelMessageId = MessageID.field_fullname }
                 FIELD_HEADING_FIRST_NAMES -> { labelMessageId = MessageID.first_names }
                 FIELD_HEADING_LAST_NAME -> { labelMessageId = MessageID.last_name }
+                FIELD_HEADING_FIRST_NAMES_ALT -> { labelMessageId = MessageID.field_first_names_alternative }
+                FIELD_HEADING_LAST_NAME_ALT -> { labelMessageId = MessageID.last_name_alternative }
                 FIELD_HEADING_BIRTHDAY -> { labelMessageId = MessageID.birthday }
                 FIELD_HEADING_HOME_ADDRESS -> { labelMessageId = MessageID.home_address }
                 FIELD_HEADING_ATTENDANCE -> { labelMessageId = MessageID. attendance}
@@ -513,6 +521,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                 FIELD_HEADING_MOTHER -> { labelMessageId = MessageID.mother }
                 FIELD_HEADING_CLASSES -> { labelMessageId = MessageID.classes }
                 FIELD_HEADING_USERNAME -> { labelMessageId = MessageID.username }
+                FIELD_HEADING_PHONE_NUMBER -> { labelMessageId = MessageID.phone_number}
                 FIELD_HEADING_PASSWORD -> {
                     if (newPersonString == "true") {
                         labelMessageId = MessageID.password
@@ -535,6 +544,8 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                 FIELD_HEADING_FULL_NAME -> { headerMessageId = MessageID.field_fullname }
                 FIELD_HEADING_FIRST_NAMES -> { headerMessageId = MessageID.first_names }
                 FIELD_HEADING_LAST_NAME -> { headerMessageId = MessageID.last_name }
+                FIELD_HEADING_FIRST_NAMES_ALT -> { labelMessageId = MessageID.field_first_names_alternative }
+                FIELD_HEADING_LAST_NAME_ALT -> { labelMessageId = MessageID.last_name_alternative }
                 FIELD_HEADING_BIRTHDAY -> { headerMessageId = MessageID.birthday }
                 FIELD_HEADING_HOME_ADDRESS -> { headerMessageId = MessageID.home_address }
                 FIELD_HEADING_ATTENDANCE -> { headerMessageId = MessageID. attendance}
@@ -546,6 +557,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                 FIELD_HEADING_MOTHER -> { headerMessageId = MessageID.mother }
                 FIELD_HEADING_CLASSES -> { headerMessageId = MessageID.classes }
                 FIELD_HEADING_USERNAME -> { headerMessageId = MessageID.username }
+                FIELD_HEADING_PHONE_NUMBER -> { headerMessageId = MessageID.phone_number }
 
                 FIELD_HEADING_PASSWORD -> {
                     if (newPersonString == "true") {
@@ -591,7 +603,30 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                         PersonDetailViewField(field.fieldType,
                                 labelMessageId, field.fieldIcon), thisValue)
 
-            } else if (field.fieldUid == PERSON_FIELD_UID_ATTENDANCE.toLong()) {
+            }
+
+            else if (field.fieldUid == PERSON_FIELD_UID_FIRST_NAMES_ALT.toLong()) {
+                thisValue = thisPerson.personFirstNamesAlt
+                thisView.setField(field.fieldIndex, field.fieldUid,
+                        PersonDetailViewField(field.fieldType,
+                                labelMessageId, field.fieldIcon), thisValue)
+
+            } else if (field.fieldUid == PERSON_FIELD_UID_LAST_NAME_ALT.toLong()) {
+                thisValue = thisPerson.personLastNameAlt
+                thisView.setField(field.fieldIndex, field.fieldUid,
+                        PersonDetailViewField(field.fieldType,
+                                labelMessageId, field.fieldIcon), thisValue)
+
+            }
+
+            else if (field.fieldUid == PERSON_FIELD_UID_PHONE_NUM.toLong()) {
+                thisValue = thisPerson.phoneNum
+                thisView.setField(field.fieldIndex, field.fieldUid,
+                        PersonDetailViewField(field.fieldType,
+                                labelMessageId, field.fieldIcon), thisValue)
+            }
+
+            else if (field.fieldUid == PERSON_FIELD_UID_ATTENDANCE.toLong()) {
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 labelMessageId, field.fieldIcon), thisValue)
@@ -690,8 +725,18 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
 
         } else if (fieldcode == PERSON_FIELD_UID_LAST_NAME.toLong()) {
             personToUpdate!!.lastName = value as String
+        }
 
-        } else if (fieldcode == PERSON_FIELD_UID_FATHER_NAME.toLong()) {
+        else if (fieldcode == PERSON_FIELD_UID_FIRST_NAMES_ALT.toLong()) {
+            personToUpdate!!.personFirstNamesAlt = value as String
+
+        } else if (fieldcode == PERSON_FIELD_UID_LAST_NAME_ALT.toLong()) {
+            personToUpdate!!.personLastNameAlt = value as String
+        } else if (fieldcode == PERSON_FIELD_UID_PHONE_NUM.toLong()){
+            personToUpdate!!.phoneNum = value as String
+        }
+
+        else if (fieldcode == PERSON_FIELD_UID_FATHER_NAME.toLong()) {
             personToUpdate!!.fatherName = (value as String)
 
         } else if (fieldcode == PERSON_FIELD_UID_FATHER_NUMBER.toLong()) {
@@ -835,7 +880,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
             generateFeedsForPersonUpdate(repository, database, updatedPerson!!)
 
             //Update person's individual group to  set the right name of the group
-            val fullName = updatedPerson!!.fullName()
+            val fullName = updatedPerson!!.fullName(impl.getLocale(context))
             val personGroup = personGroupDaoDB.findPersonIndividualGroup(updatedPerson!!.personUid)
             if(personGroup != null){
                 personGroup.groupName = fullName + "'s individual person group"

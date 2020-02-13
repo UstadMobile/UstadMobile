@@ -81,5 +81,9 @@ open class PersonField {
         const val FIELD_HEADING_PASSWORD = 16
         const val FIELD_HEADING_CONFIRM_PASSWORD = 17
         const val FIELD_HEADING_ROLE_ASSIGNMENTS = 18
+
+        const val FIELD_HEADING_FIRST_NAMES_ALT = 19
+        const val FIELD_HEADING_LAST_NAME_ALT = 20
+        const val FIELD_HEADING_PHONE_NUMBER = 21
     }
 }

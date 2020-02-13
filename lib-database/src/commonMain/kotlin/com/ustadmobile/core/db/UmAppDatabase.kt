@@ -44,7 +44,7 @@ import kotlin.jvm.Volatile
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
-    ], version = 102032)
+    ], version = 103032)
 
 @MinSyncVersion(102032)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
@@ -422,6 +422,140 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         |  remoteCsn  INTEGER , syncType  INTEGER , 
                         |  timestamp  BIGINT , sent  INTEGER , received  INTEGER , 
                         |  srUid  SERIAL  PRIMARY KEY  NOT NULL )""".trimMargin())
+                }
+            }
+        }
+
+        val MIGRATION_102032_103032 = object : DoorMigration(102032, 103032) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                //1. Person add 3 new columns
+                //2. Sale Product has 1 new column
+                //3. Custom Field 1 new column
+                if(database.dbType() == DoorDbType.SQLITE){
+
+                    //1. Person has 3 new columns
+                    database.execSQL("""ALTER TABLE Person RENAME to Person_OLD""")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Person (
+                        |username  TEXT , 
+                        |firstNames  TEXT , 
+                        |lastName  TEXT , 
+                        |emailAddr  TEXT , 
+                        |phoneNum  TEXT , 
+                        |gender  INTEGER NOT NULL , 
+                        |active  INTEGER NOT NULL , 
+                        |admin  INTEGER NOT NULL , 
+                        |personNotes  TEXT , 
+                        |personAddress  TEXT , 
+                        |mPersonGroupUid  INTEGER NOT NULL , 
+                        |fatherName  TEXT , 
+                        |fatherNumber  TEXT , 
+                        |motherName  TEXT , 
+                        |motherNum  TEXT , 
+                        |dateOfBirth  INTEGER NOT NULL , 
+                        |personRoleUid  INTEGER NOT NULL , 
+                        |personLocationUid  INTEGER NOT NULL , 
+                        |personAddedByUid INTEGER NOT NULL,
+                        |personMasterChangeSeqNum  INTEGER NOT NULL , 
+                        |personLocalChangeSeqNum  INTEGER NOT NULL , 
+                        |personLastChangedBy  INTEGER NOT NULL , 
+                        |personUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL,
+                        |personFirstNamesAlt TEXT,
+                        |personLastNameAlt TEXT,
+                        |personAltLocale TEXT
+                        |)""".trimMargin())
+                    database.execSQL("""INSERT INTO Person (
+                        |personUid, username, firstNames, lastName, emailAddr, phoneNum, gender, 
+                        |active, admin, personNotes, personAddress, mPersonGroupUid, fatherName, 
+                        |fatherNumber, motherName, motherNum, dateOfBirth, personRoleUid, 
+                        |personLocationUid, personMasterChangeSeqNum, personLocalChangeSeqNum, 
+                        |personLastChangedBy, personAddedByUid) 
+                        |SELECT personUid, username, firstNames, lastName, emailAddr, phoneNum, 
+                        |gender, active, admin, personNotes, personAddress, mPersonGroupUid, 
+                        |fatherName, fatherNumber, motherName, motherNum, dateOfBirth, 
+                        |personRoleUid, personLocationUid, personMasterChangeSeqNum, 
+                        |personLocalChangeSeqNum, personLastChangedBy, personAddedByUid FROM Person_OLD""".trimMargin())
+                    database.execSQL("""DROP TABLE Person_OLD""")
+
+                    //2. SaleProduct has 1 extra column
+                    database.execSQL("""ALTER TABLE SaleProduct RENAME to SaleProduct_OLD""")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SaleProduct (
+                        |saleProductUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL,
+                        |saleProductName  TEXT ,
+                        |saleProductNameDari  TEXT , 
+                        |saleProductDescDari  TEXT , 
+                        |saleProductNamePashto  TEXT , 
+                        |saleProductDescPashto  TEXT ,
+                        |saleProductDesc  TEXT , 
+                        |saleProductDateAdded INTEGER NOT NULL DEFAULT 0,
+                        |saleProductPersonAdded INTEGER NOT NULL DEFAULT 0,
+                        |saleProductPictureUid INTEGER NOT NULL DEFAULT 0,
+                        |saleProductActive  INTEGER NOT NULL ,
+                        |saleProductCategory  INTEGER NOT NULL ,
+                        |saleProductBasePrice REAL NOT NULL,
+                        |saleProductMCSN  INTEGER NOT NULL , 
+                        |saleProductLCSN  INTEGER NOT NULL , 
+                        |saleProductLCB  INTEGER NOT NULL
+                        |)""".trimMargin())
+                    database.execSQL("""INSERT INTO SaleProduct (
+                        |saleProductUid, saleProductName, saleProductNameDari, saleProductDescDari,
+                        |saleProductNamePashto, saleProductDescPashto, saleProductDesc, 
+                        |saleProductDateAdded, saleProductPersonAdded, saleProductPictureUid, 
+                        |saleProductActive, saleProductCategory, saleProductBasePrice, 
+                        |saleProductMCSN, saleProductLCSN, saleProductLCB) 
+                        |SELECT saleProductUid, saleProductName, saleProductNameDari, saleProductDescDari,
+                        |saleProductNamePashto, saleProductDescPashto, saleProductDesc, 
+                        |saleProductDateAdded, saleProductPersonAdded, saleProductPictureUid, 
+                        |saleProductActive, saleProductCategory, 0.0, 
+                        |saleProductMCSN, saleProductLCSN, saleProductLCB FROM SaleProduct_OLD""".trimMargin())
+                    database.execSQL("""DROP TABLE SaleProduct_OLD""")
+
+                    //3. Custom field new name ish
+                    database.execSQL("""ALTER TABLE CustomField RENAME to CustomField_OLD""")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS CustomField (
+                        |customFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL,
+                        |customFieldName  TEXT ,
+                        |customFieldNameAlt  TEXT , 
+                        |customFieldNameAltTwo  TEXT ,
+                        |customFieldLabelMessageID INTEGER NOT NULL DEFAULT 0,
+                        |customFieldIcon TEXT, 
+                        |customFieldType INTEGER NOT NULL DEFAULT 0,
+                        |customFieldEntityType INTEGER NOT NULL DEFAULT 0,
+                        |customFieldActive INTEGER NOT NULL,
+                        |customFieldDefaultValue TEXT,
+                        |customFieldMCSN  INTEGER NOT NULL , 
+                        |customFieldLCSN  INTEGER NOT NULL , 
+                        |customFieldLCB  INTEGER NOT NULL
+                        |)""".trimMargin())
+                    database.execSQL("""INSERT INTO CustomField (
+                        customFieldUid, customFieldName,customFieldNameAlt,customFieldNameAltTwo,
+                        |customFieldLabelMessageID,customFieldIcon,customFieldType,
+                        |customFieldEntityType,customFieldActive,customFieldDefaultValue,customFieldMCSN,
+                        |customFieldLCSN ,customFieldLCB) 
+                        |SELECT customFieldUid, customFieldName,customFieldNameAlt,"",
+                        |customFieldLabelMessageID,customFieldIcon,customFieldType,
+                        |customFieldEntityType,customFieldActive,customFieldDefaultValue,customFieldMCSN,
+                        |customFieldLCSN ,customFieldLCB FROM CustomField_OLD""".trimMargin())
+                    database.execSQL("""DROP TABLE CustomField_OLD""")
+
+
+                }else if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("""
+                        ALTER TABLE SaleProduct ADD COLUMN saleProductBasePrice decimal NOT NULL DEFAULT 0.0
+                    """)
+                    database.execSQL("""
+                        ALTER TABLE Person ADD COLUMN personFirstNamesAlt TEXT 
+                    """)
+                    database.execSQL("""
+                        ALTER TABLE Person ADD COLUMN personLastNameAlt TEXT 
+                    """)
+                    database.execSQL("""
+                        ALTER TABLE Person ADD COLUMN personAltLocale TEXT
+                    """)
+
+                    database.execSQL("""
+                        ALTER TABLE CustomField ADD COLUMN customFieldNameAltTwo TEXT
+                    """.trimIndent())
                 }
             }
         }
@@ -4962,7 +5096,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             builder.addMigrations(MIGRATION_27_100028,
                     MIGRATION_100028_100029, MIGRATION_100029_101029, MIGRATION_101029_102029,
-                    MIGRATION_102029_102030, MIGRATION_102030_102031, MIGRATION_102031_102032)
+                    MIGRATION_102029_102030, MIGRATION_102030_102031, MIGRATION_102031_102032,
+                    MIGRATION_102032_103032)
 
             return builder
         }
