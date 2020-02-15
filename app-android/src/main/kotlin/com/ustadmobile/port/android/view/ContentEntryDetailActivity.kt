@@ -92,7 +92,6 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var currentDownloadJobItemStatus: Int = -1
 
-    private var logMeVar: Any? = null
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
@@ -102,7 +101,6 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         }
 
         managerAndroidBle = networkManagerBle
-        val argsMap = bundleToMap(intent.extras)
         presenter = ContentEntryDetailPresenter(this,
                 bundleToMap(intent.extras), this, true,
                 umAppRepository, UmAccountManager.getActiveDatabase(this),
@@ -111,14 +109,7 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
                 UmAccountManager.getActiveAccount(viewContext),
                 UstadMobileSystemImpl.instance, ::goToContentEntry)
         presenter.handleShowEditControls(showControls)
-        GlobalScope.launch(Dispatchers.Main.immediate) {
-            val contentEntryUid = argsMap[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
-            logMeVar = (networkManagerBle.containerDownloadManager as ContainerDownloadManagerImpl)
-                    .getContentEntryHolder(contentEntryUid)
-
-            presenter.onCreate(bundleToMap(Bundle()))
-        }
-
+        presenter.onCreate(bundleToMap(Bundle()))
 
         managerAndroidBle.enablePromptsSnackbarManager.makeSnackbarIfRequired(
                 findViewById(R.id.coordinationLayout), this)
@@ -333,7 +324,6 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     override fun onDestroy() {
         presenter.onDestroy()
-        Napier.i(logMeVar?.toString() ?: "")
         super.onDestroy()
     }
 
