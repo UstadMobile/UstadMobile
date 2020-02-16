@@ -1,204 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name='app_name'>‫أستاد موبايل‬</string>
-
-    <string name='dir'>ltr</string>
-    <string name='login'>Login</string>
-    <string name='error'>Error</string>
-    <string name='err_registering_new_user'>Error registering new user:</string>
-    <string name='registering'>Registering</string>
-    <string name="register_empty_fields">Please fill out all required fields</string>
-    <string name="register_incorrect_email">Wrong email address</string>
-
-    <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
-    <string name='login_network_error'>Network error: please check you are online.</string>
-    <string name='authenticating'>Authenticating</string>
-    <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
-    <string name="download">Download</string>
-    <string name="downloaded" value="81">Downloaded</string>
-    <string name="recycled" >Recycled</string>
-    <string name="libraries">Libraries</string>
-    <string name="pause_download">Pause download</string>
-    <string name='ok'>OK</string>
-    <string name="confirm">Confirm</string>
-    <string name='cancel'>Cancel</string>
-    <string name='delete'>Delete</string>
-    <string name='error_loading_catalog'>Sorry! Error loading catalog: </string>
-    <string name='loading'>Loading</string>
-    <string name='error_opening_file'>Error opening file: </string>
-    <string name='download_in_progress'>Download in progress...</string>
-    <string name='save_to'>Save to...</string>
-    <string name='all_users'>All users</string>
-    <string name='only_me'>Only me</string>
-    <string name='mycourses'>My courses</string>
-    <string name='onthisdevice'>On this device</string>
-    <string name='logout'>Logout</string>
-    <string name='about'>About</string>
-    <string name='download_for'>Download for...</string>
-    <string name='refresh'>Refresh</string>
-    <string name='download_all'>Download all</string>
-    <string name='nothing_selected'>Nothing selected!</string>
-    <string name='next'>Next</string>
-    <string name='previous'>Previous</string>
-    <string name='back'>Back</string>
-    <string name='username'>Username</string>
-    <string name='password'>Password</string>
-    <string name="confirm_password">Confirm password</string>
-    <string name="last_name">Last name</string>
-    <string name="first_name">First name</string>
-    <string name="create_new_account">Register Now</string>
-    <string name="new_password">New password</string>
-    <string name='phone_memory'>Phone memory</string>
-    <string name='memory_card'>Memory card</string>
-    <string name='device'>Device</string>
-    <string name='register'>Register</string>
-    <string name='phone_number'>Phone number</string>
-    <string name='name'>Name</string>
-    <string name='male'>Male</string>
-    <string name='female'>Female</string>
-    <string name='could_not_open_file'>Sorry! Could not open file.</string>
-    <string name='settings'>Settings</string>
-    <string name='lang_sys'>System Language</string>
-    <string name='lang_en'>English</string>
-    <string name='lang_ar'>Arabic</string>
-    <string name='my_resources'>My Resources</string>
-    <string name='browse_feeds'>Browse Libraries</string>
-    <string name='choose_format'>Choose Format:</string>
-    <string name='language'>Language</string>
-    <string name='advanced'>Advanced</string>
-    <string name='server'>Server</string>
-    <string name='optional'>Optional</string>
-    <string name='email'>Email</string>
-    <string name='regcode'>Signup Code</string>
-    <string name='home'>Home</string>
-    <string name='add'>Add</string>
-    <string name='enter_phone_num'>Please enter phone number</string>
-    <string name="phone">Phone</string>
-    <string name="tablet">Tablet</string>
-    <string name='enter_name'>Please enter name</string>
-    <string name='attendance'>Attendance</string>
-    <string name='processing'>Processing</string>
-    <string name='classes'>Classes</string>
-    <string name='exams'>Exams</string>
-    <string name='reports'>Reports</string>
-    <string name='contents'>Contents</string>
-    <string name='students'>Account</string>
-    <string name='forgot_password'>Forgot password</string>
-    <string name='connections'>Connection</string>
-    <string name='notifications'>Notifications</string>
-    <string name='connection'>General Connection</string>
-    <string name='data_usage_label'>Total mobile data usage</string>
-    <string name='account'>Account</string>
-    <string name='data_usage'>Data usage</string>
-    <string name='app_interface_language'>App interface language</string>
-    <string name="share_application">Share App</string>
-    <string name="share_via">Share via...</string>
-    <string name="share">Share</string>
-    <string name="receive">Receive</string>
-    <string name="sent">Sent</string>
-    <string name="sending">Sending</string>
-    <string name="send">Send</string>
-    <string name="size">Size</string>
-    <string name="see_also">See also</string>
-    <string name="download_in_another_language">Download in another language</string>
-    <string name="modify">Modify</string>
-    <string name='open'>فتح</string>
-    <string name="passed">Passed</string>
-    <string name="in_progress">In progress</string>
-    <string name="downloading">Downloading</string>
-    <string name="waiting">Waiting</string>
-    <string name="waiting_for_sender">Waiting for sender</string>
-    <string name="queued">Queued</string>
-    <string name="failed">Failed</string>
-    <string name="success">Success</string>
-
-
-    <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
-
-    <string name="share_offline_zip_checkbox_label">Send in zip file</string>
-    <string name="share_offline_dialog_message">You can share this app offline. On the device that you want to share with:
-        \n1. Open Settings > Bluetooth Settings.
-        \n2. Make sure that the device is visible.</string>
-    <string name="preparing">Preparing</string>
-
-
-    <string name="select_language">Select language</string>
-    <!-- For language selector where %s is replaced by the device type name -->
-    <string name="device_language">Use device language</string>
-    <string name="ok_got_it">OK, got it!</string>
-    <string name="dont_show_this_next_time">Don\'t show this next time</string>
-
-    <string name="login_successful">Login successful</string>
-    <string name="registration_successful">Registration successful</string>
-
-    <string name="send_course_instructions">1. On the other device, open the app, and select receive from the top right menu.
-        \n2. Select the other device from the list below:</string>
-
-    <string name="cancel_invite">Cancel invite</string>
-    <string name="inviting">Inviting</string>
-    <string name="try_again">Try again</string>
-
-
-    <!-- Registration dialog feedback -->
-    <string name="field_required_prompt">This field is required</string>
-    <string name="field_password_min">Minimum 5 characters</string>
-    <string name="field_password_error_min">Password should be at least 5 characters</string>
-    <string name="filed_password_no_match">Password doesn\'t match, try again</string>
-
-    <!-- Update student details action button -->
-    <string name="update">Update</string>
-    <string name="profile">Profile</string>
-    <string name="dialog_download_from_playstore_message">Access &amp; Share Educational Content Offline</string>
-    <string name="dialog_download_from_playstore_ok">Download now (free)</string>
-    <string name="dialog_download_from_playstore_cancel">Stay on website</string>
-
-    <string name="catalog">Catalog</string>
-    <string name="closed">Closed</string>
-
-    <string name="cannot_update">Cannot update</string>
-
-    <string name="error_unsupported_content_type">Error: unsupported content type</string>
-
-    <string name="accept">Accept</string>
-    <string name="decline">Decline</string>
-    <string name="send_in_zip_file">Send in zip file</string>
-
-    <string name="also_available_in">Also available in</string>
-
-    <string name="onboarding_get_started_label">Get Started</string>
-    <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
-    <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
-    <string name="onboarding_offline_sharing">Share offline</string>
-    <string name="onboarding_offline_sharing_subheading">Share content at high speed with any other user nearby.</string>
-    <string name='location_permission_title'>مطلوب اذن للحصول على الموقع</string>
-
-    <string name="download_delete_btn_label">Delete</string>
-    <string name="download_continue_stacked_label">Continue download</string>
-    <string name="download_continue_btn_label">Continue</string>
-    <string name="download_wifi_only">WiFi only</string>
-    <string name="download_calculating">Calculating...</string>
-    <string name="download_state_download"><![CDATA[<b>Download</b>]]> total of %1$s items, they will use total of %2$s on your device storage.</string>
-    <string name="download_state_downloading"><![CDATA[<b>Downloading</b>]]> total of %1$s items, which will be using total of %2$s on your device storage.</string>
-    <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
-    <string name="download_downloading_placeholder">Downloading %1$s of %2$s</string>
-    <string name="download_summary_title">%1$s active downloads</string>
-    <string name="download_cancel_all">CANCEL ALL</string>
-    <string name="download_cancel_label">Cancel download</string>
-    <string name="download_pause_all">PAUSE ALL</string>
-    <string name="download_pause_download">Pause</string>
-    <string name="download_locally_availability">Available nearby</string>
-    <string name="download_cloud_availability">Available on cloud</string>
-    <string name="clear_history">Clear History</string>
-    <string name="download_entry_state_paused">Paused</string>
-    <string name="download_entry_state_queued">Queued</string>
-    <string name="get_app">Get app</string>
-    <string name="no_app_found">"No app found to open file"</string>
-    <string name="entry_details_author">Author</string>
-    <string name="entry_details_license">License</string>
-    <string name="entry_details_description">Description</string>
-    <string name="library_reading_level">Reading Level</string>
-    <string name="file_not_found">File Not Found</string>
-
+    <string name="app_name">‫أستاد موبايل‬</string>
+    <string name="location_permission_title">مطلوب اذن للحصول على الموقع</string>
     <!--Content editor-->
     <string name="content_type_multimedia">وسائط متعددة (صوت و صورة)</string>
     <string name="content_type_multiple_choice">متعدد الخيارات</string>
@@ -219,15 +22,15 @@
     <string name="content_source_camera">من الكاميرا</string>
     <string name="content_source_device">من الجهاز</string>
     <string name="content_choose_file">اختر ملف</string>
-    <string name="content_prepare_file">تحضير الملف</string>
-    <string name="content_preview_title">معاينة</string>
+    <string name="content_prepare_file">تحضير الملف...</string>
+    <string name="content_preview_title">معاينة...</string>
     <string name="content_media_photo">صورة</string>
     <string name="content_media_video">فيديو</string>
-    <string name="content_media_message">ما نوع الملف الذي تريد إختياره </string>
+    <string name="content_media_message">ما نوع الملف الذي تريد إختياره؟</string>
     <string name="content_media_title">نوع الملف</string>
     <string name="content_blank_page_title">صفحة فارغة</string>
     <string name="content_blank_doc_click_label">انقر</string>
-    <string name="content_blank_doc_start_label">لتبدأ التعديل</string>
+    <string name="content_blank_doc_start_label">لبدأ التعديل.</string>
     <string name="content_option_page">صفحة جديدة</string>
     <string name="content_untitled_page">صفحة بدون عنوان</string>
     <string name="content_untitled_document">ملف بدون عنوان</string>
@@ -239,93 +42,270 @@
     <string name="content_editor_page_delete_failure_message">للأسف، لا يمكنك إلغاء هذه الصفحة</string>
     <string name="content_entry_not_found">المحتوى غير موجود</string>
     <string name="content_editor_directionality">اتجاهية</string>
-    <string name='content_editor_menu_undo'>تراجع</string>
-    <string name='content_editor_menu_redo'>اعادة</string>
-    <string name='content_editor_menu_text_formatting'>تنسيق النص</string>
-    <string name='content_editor_menu_pages'>صفحات</string>
-    <string name='content_editor_menu_indent'>المسافة البادئة</string>
-    <string name='content_editor_menu_outdent'>تحريك لليسار</string>
-    <string name='content_editor_menu_unorderd_list'>قائمة غير مرتبة</string>
-    <string name='content_editor_menu_orderd_list'>قائمة مرتبة</string>
-    <string name='content_editor_menu_strikesthrough'>يتوسطه خط</string>
-    <string name='content_editor_menu_underline'>تسطير</string>
-    <string name='content_editor_menu_italic'>مائل</string>
-    <string name='content_editor_menu_bold'>غامق</string>
-    <string name='content_editor_menu_fontsize'>حجم الخط</string>
-    <string name='content_editor_menu_align_center'>يوسّط</string>
-    <string name='content_editor_menu_align_left'>‏‏محاذاة إلى اليسار</string>
-    <string name='content_editor_menu_align_right'>‏‏محاذاة إلى الييمين</string>
-    <string name='content_editor_menu_superscript'>مرتفع</string>
-    <string name='content_editor_menu_subscript'>منخفض</string>
-    <string name='content_editor_preview'>عرض</string>
-    <string name='content_editor_link_text'>نص الارتباط</string>
-    <string name='content_editor_link_url'>موقع ويب الارتباط</string>
-    <string name='content_editor_link_error'>نص الارتباط او موقع ويب الارتباط لا يمكن ان يكون فارغ، حاول مرة اخرى</string>
-    <string name='content_editor_link_insert'>منخفض</string>
-    <string name='content_editor_link_remove'>إزالة الرابط</string>
-    <string name='permission_camera_title'>يلزم وجود إذن الكاميرا</string>
-    <string name='permission_camera_message'>التطبيق يلزم إذن لالتقاط صور و فيديو من الكاميرا</string>
-    <string name='content_editor_create_new'>اضافة جديد</string>
-    <string name='content_editor_create_new_import'>استيراد من ملف</string>
-    <string name='content_editor_create_new_content'>إنشاء محتوى جديد</string>
-    <string name='content_editor_create_new_category'>إنشاء مجلد جديد</string>
-    <string name='content_editor_edit_category'>تحرير</string>
-    <string name='content_editor_create_new_title'>اضافة محتوى</string>
-    <string name='content_editor_action_done'>انتهاء</string>
-    <string name='content_entry_label_title'>عنوان</string>
-    <string name='content_entry_label_desc'> الوصف</string>
-    <string name='content_entry_label_save'>حفظ</string>
-    <string name='content_entry_label_update'>تحديث المستند</string>
-    <string name='content_entry_label_select_file'>اختيار ملف</string>
-    <string name='content_entry_label_update_file'>تحديث الملف</string>
-    <string name='content_entry_label_licence'>رخصة</string>
-    <string name="content_entry_label_visibility">Make content public</string>
-    <string name="content_entry_label_active">Make content active</string>
-    <string name='content_import_success_message'>تم استيراد الملف بنجاح</string>
-    <string name='content_import_failure_message'>الملف المحدد غير معتمد، الرجاء اختيار ملف اخر</string>
-    <string name='content_creation_empty_field_error'>الرجاء تعبئة الحقول المطلوبة ثم حاول مرة اخرى</string>
-    <string name='content_creation_storage_option_title'>خيار التخزين</string>
-    <string name='content_creation_file_required_error'>الرجاء اختيار الملف المراد استيراده و المحاولة مرة اخرى</string>
-    <string name='content_creation_folder_new_message'>تم اضافة مستند جديد بنجاح</string>
-    <string name='content_creation_folder_update_message'>تم تحديث المستند بنجاح</string>
-    <string name='empty_state_libraries'>لا يوجد مجلدات</string>
-    <string name='empty_state_downloaded'>لا يوجد تنزيلات</string>
-    <string name="empty_state_recycle">No recycled items</string>
-    <string name='error_message_load_page'>فشل تحميل الصفحة</string>
-    <string name='error_message_update_document'>فشل تحديث المستند</string>
-    <string name='content_update_massage'>تم التحديث بنجاح</string>
-    <string name="content_entry_export">Export</string>
-    <string name="content_entry_export_inprogress">Exporting</string>
-    <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
-    <string name="content_entry_label_update_content">Update Content</string>
-    <string name="content_from_file">From file</string>
-    <string name="content_from_link">From link</string>
-    <string name="content_editor_create_new_import_link">Import from link</string>
-    <string name='location_permission_message'>التطبيق يلزم اذن للحصول على الموقع حتى تتمكن من تحميل المحتوى و مشاركته مع الاخرين من حولك دون اتصال. لن نقوم بحفظ او قراءة الموقع، بل سنقوم باستخدام المسح عن طريق ال Bluetooth للبحث عن الاجهزة القريبة</string>
-    <string name='download_storage_permission_title'>مطلوب أذن للحصول على الملف</string>
-    <string name='download_storage_permission_message'>التطبيق يلزم اذن لتحميل و حفظ المحتوى</string>
-    <string name='download_storage_option_device'>التخزين على ذاكرة الهاتف %1$s جيجابيت متوفر
+    <string name="content_editor_menu_undo">تراجع</string>
+    <string name="content_editor_menu_redo">اعادة</string>
+    <string name="content_editor_menu_text_formatting">تنسيق النص</string>
+    <string name="content_editor_menu_pages">صفحات</string>
+    <string name="content_editor_menu_indent">المسافة البادئة</string>
+    <string name="content_editor_menu_outdent">تحريك لليسار</string>
+    <string name="content_editor_menu_unorderd_list">قائمة غير مرتبة</string>
+    <string name="content_editor_menu_orderd_list">قائمة مرتبة</string>
+    <string name="content_editor_menu_strikesthrough">يتوسطه خط</string>
+    <string name="content_editor_menu_underline">تسطير</string>
+    <string name="content_editor_menu_italic">مائل</string>
+    <string name="content_editor_menu_bold">غامق</string>
+    <string name="content_editor_menu_fontsize">حجم الخط</string>
+    <string name="content_editor_menu_align_center">يوسّط</string>
+    <string name="content_editor_menu_align_left">‏‏محاذاة إلى اليسار</string>
+    <string name="content_editor_menu_align_right">‏‏محاذاة إلى اليمين</string>
+    <string name="content_editor_menu_superscript">مرتفع</string>
+    <string name="content_editor_menu_subscript">منخفض</string>
+    <string name="content_editor_preview">عرض</string>
+    <string name="content_editor_link_text">نص الارتباط</string>
+    <string name="content_editor_link_url">رابط URL</string>
+    <string name="content_editor_link_error">نص الارتباط او URL لا يمكن ان يكون فارغ، حاول مرة اخرى</string>
+    <string name="content_editor_link_insert">ادخل الرابط</string>
+    <string name="content_editor_link_remove">إزالة الرابط</string>
+    <string name="permission_camera_title">يلزم وجود إذن للكاميرا و الملف</string>
+    <string name="permission_camera_message">التطبيق يلزم إذن لالتقاط صور و فيديو من الكاميرا</string>
+    <string name="content_editor_create_new">اضافة جديد</string>
+    <string name="content_editor_create_new_import">استيراد من ملف</string>
+    <string name="content_editor_create_new_content">إنشاء محتوى جديد</string>
+    <string name="content_editor_create_new_category">إنشاء مجلد جديد</string>
+    <string name="content_editor_edit_category">تحرير</string>
+    <string name="content_editor_create_new_title">اضافة محتوى</string>
+    <string name="content_editor_action_done">انتهاء</string>
+    <string name="content_entry_label_title">عنوان</string>
+    <string name="content_entry_label_desc"> الوصف</string>
+    <string name="content_entry_label_save">حفظ</string>
+    <string name="content_entry_label_update">تحديث المستند</string>
+    <string name="content_entry_label_select_file">اختيار ملف</string>
+    <string name="content_entry_label_update_file">تحديث الملف</string>
+    <string name="content_entry_label_licence">رخصة</string>
+    <string name="content_entry_label_visibility">انشر المحتوى</string>
+    <string name="content_entry_label_active">فعل المحتوى</string>
+    <string name="content_import_success_message">تم استيراد الملف بنجاح</string>
+    <string name="content_import_failure_message">الملف المحدد غير معتمد، الرجاء اختيار ملف اخر</string>
+    <string name="content_creation_empty_field_error">الرجاء تعبئة الحقول المطلوبة ثم حاول مرة اخرى</string>
+    <string name="content_creation_storage_option_title">خيار التخزين</string>
+    <string name="content_creation_file_required_error">الرجاء اختيار الملف المراد استيراده و المحاولة مرة اخرى</string>
+    <string name="content_creation_folder_new_message">تم اضافة مستند جديد بنجاح</string>
+    <string name="content_creation_folder_update_message">تم تحديث المستند بنجاح</string>
+    <string name="empty_state_libraries">لا يوجد مجلدات</string>
+    <string name="empty_state_downloaded">لا يوجد تنزيلات</string>
+    <string name="error_message_load_page">فشل تحميل الصفحة</string>
+    <string name="error_message_update_document">فشل تحديث المستند</string>
+    <string name="content_update_massage">تم التحديث بنجاح</string>
+    <string name="location_permission_message">التطبيق يلزم اذن للحصول على الموقع حتى تتمكن من تحميل المحتوى و مشاركته مع الاخرين من حولك دون اتصال. لن نقوم بحفظ او قراءة الموقع، بل سنقوم باستخدام المسح عن طريق البلوتوث للبحث عن الاجهزة القريبة.</string>
+    <string name="download_storage_permission_title">مطلوب أذن للحصول على الملف</string>
+    <string name="download_storage_permission_message">التطبيق يلزم اذن لتحميل و حفظ المحتوى</string>
+    <string name="download_storage_option_device">التخزين على ذاكرة الهاتف %1$s جيجابيت متوفر
 التخزين على بطاقة ذاكرة %2$s جيجابيت متوفر</string>
-    <string name="content_entry_importing">Importing, please wait</string>
-    <string name="content_folder_image_message">Support for adding an image is coming soon</string>
-    <string name="content_supported_files">Supported files: <![CDATA[<b>Epub, TinCan (XAPI) Zip</b>]]></string>
-    <string name="content_editor_save_error">Error while saving, try again</string>
-    <string name="no_account">You do not have an account?</string>
-
-    <string name="xapi_clear" >Clear</string>
-    <string name="xapi_today" >Today</string>
-
-    <string name="done">Done</string>
-    <string name="select_locations">Select Locations</string>
-    <string name="select_entries">Select Entries</string>
-    <string name='new_tab'>Displaying on new Tab</string>
-    <string name="error_not_found_status">404 !</string>
-    <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
-
-    <string name="repo_loading_status_loading_cloud">Loading from cloud</string>
-    <string name="repo_loading_status_loading_mirror">Loading from mirror</string>
-    <string name="repo_loading_status_loaded_empty">No content found</string>
-    <string name="repo_loading_status_failed_noconnection">No connection</string>
-    <string name="repo_loading_status_failed_connection_error">Connection error</string>
-
+    <string name="content_from_file">من الملف</string>
+    <string name="confirm">تأكيد</string>
+    <string name="content_entry_importing">جاري الاستيراد، الرجاء الانتظار</string>
+    <string name="new_tab">العرض على شاشة جديدة</string>
+    <string name="loading">تحميل</string>
+    <string name="error_opening_file">خطأ في فتح الملف:</string>
+    <string name="content_supported_files">الملفات المدعمة: <b>Epub, TinCan (XAPI) Zip</b>
+    </string>
+    <string name="logout">تسجيل الخروج</string>
+    <string name="about">حول</string>
+    <string name="download_all">تنزيل الكل</string>
+    <string name="previous">السابق</string>
+    <string name="back">رجوع</string>
+    <string name="username">اسم المستخدم</string>
+    <string name="confirm_password">تأكيد كلمة السر</string>
+    <string name="last_name">اسم العائلة</string>
+    <string name="create_new_account">سجل الآن</string>
+    <string name="phone_memory">ذاكرة الهاتف</string>
+    <string name="memory_card">كرت الذاكرة</string>
+    <string name="device">جهاز</string>
+    <string name="register">تسجيل</string>
+    <string name="phone_number">رقم الهاتف</string>
+    <string name="language">لغة</string>
+    <string name="advanced">المتقدم</string>
+    <string name="optional">اختياري</string>
+    <string name="regcode">رمز التسجيل</string>
+    <string name="phone">الهاتف</string>
+    <string name="tablet">كمبيوتر لوحي</string>
+    <string name="attendance">الحضور</string>
+    <string name="classes">الحصص</string>
+    <string name="exams">اختبارات</string>
+    <string name="forgot_password">نسيت كلمة المرور</string>
+    <string name="share_application">شارك التطبيق</string>
+    <string name="share">مشاركة</string>
+    <string name="downloading">جاري التنزيل</string>
+    <string name="waiting">بالانتظار</string>
+    <string name="passed">نجح</string>
+    <string name="queued">في الدور</string>
+    <string name="failed">فشل</string>
+    <string name="success">نجاح</string>
+    <string name="error_this_device_doesnt_support_bluetooth_sharing">نأسف، هذا الجهاز لا يدعم ارسال ملفات باستخدام البلوتوث.</string>
+    <string name="share_offline_dialog_message">يمكنك مشاركة التطبيق من غير انترنت:
+\n1- الاعدادات - اعدادات البلوتوث.
+\n2- التأكد من ان الجهاز مرئي.</string>
+    <string name="preparing">تحضير</string>
+    <string name="field_required_prompt">هذا الحقل مطلوب</string>
+    <string name="login">تسجيل دخول</string>
+    <string name="error">خطأ</string>
+    <string name="register_empty_fields">الرجاء تعبئة جميع الحقول الألزامية</string>
+    <string name="register_incorrect_email">البريد الألكتروني خاطئ</string>
+    <string name="err_registering_new_user">خطأ تعريف المستخدم الجديد:</string>
+    <string name="wrong_user_pass_combo">كلمة المرور/المستخدم خطأ: حاول مرة اخرى.</string>
+    <string name="login_network_error">خطأ في الشبكة: الرجاء التحقق من الاتصال بالانترنت.</string>
+    <string name="download">تنزيل</string>
+    <string name="libraries">مكتبات</string>
+    <string name="field_password_min">الحد الادنى 5 احرف</string>
+    <string name="recycled">تم تدويره</string>
+    <string name="downloaded" value="81">تم تنزيلها</string>
+    <string name="pause_download">ايقاف مؤقت للتنزيل</string>
+    <string name="ok">موافق</string>
+    <string name="delete">حذف</string>
+    <string name="deleted">تم حذفه</string>
+    <string name="deleting">يتم الحذف</string>
+    <string name="next">التالي</string>
+    <string name="password">كلمة مرور</string>
+    <string name="new_password">كلمة مرور جديدة</string>
+    <string name="name">الأسم</string>
+    <string name="male">ذكر</string>
+    <string name="other">آخر</string>
+    <string name="unset">غير محدد</string>
+    <string name="email">بريد إلكتروني</string>
+    <string name="home">الصفحة الرئيسية</string>
+    <string name="field_password_error_min">كلمة المرور يجب ان تتكون من 5 احرف على الاقل</string>
+    <string name="filed_password_no_match">كلمة المرور غير متطابقة، حاول مرة اخرى</string>
+    <string name="profile">ملف تعريف</string>
+    <string name="dialog_download_from_playstore_message">الدخول و المشاركة في محتوى تعليمي من غير الاتصال بالانترنت</string>
+    <string name="canceled">تم الغائه</string>
+    <string name="reports">تقارير</string>
+    <string name="notifications">إشعارات</string>
+    <string name="account">حساب</string>
+    <string name="send">ارسال</string>
+    <string name="open">فتح</string>
+    <string name="in_progress">قيد التقدم</string>
+    <string name="completed">مكتمل</string>
+    <string name="select_subtitle_video">اختار لغة الترجمة</string>
+    <string name="no_subtitle">من غير ترجمة</string>
+    <string name="no_video_file_found">لا يوجد ملف الفيلم</string>
+    <string name="share_offline_zip_checkbox_label">ارسل في ملف مضغوط</string>
+    <string name="dialog_download_from_playstore_ok">نزل الان (من غير دفع)</string>
+    <string name="dialog_download_from_playstore_cancel">البقاء على الموقع</string>
+    <string name="accept">القبول</string>
+    <string name="also_available_in">متوفر ايضا في</string>
+    <string name="onboarding_no_internet_headline">لا يوجد انترنت؟ لا يوجد مشكلة.</string>
+    <string name="onboarding_no_internet_subheadline">نزل افلام تعليمية و مقالات و نشاطات تفاعلية لتستخدمها في وقت لاحق.</string>
+    <string name="onboarding_offline_sharing">شارك دون اتصال</string>
+    <string name="onboarding_offline_sharing_subheading">شارك المحتوى بسرعة عالية مع اي مستخدم قريب.</string>
+    <string name="download_summary_title">%1$s تنزيل نشط</string>
+    <string name="update">تحديث</string>
+    <string name="location_permission_details">التطبيق يستخدم المسح عن طريق البلوتوث و ال WiFi لايجاد مستخدمين قريبين. التطبيق سوق يقوم بوصل المستخدمين القرب لتنزيل المحتوى بسرعة عالية دون الحاجة لانترنت. يجب عليك اعطاء اذن الموقع لانه يعتمد على نتائج المسح. هذا التطبيق لا يحفظ نتائج المسح و الموقع.
+\nهذا التطبيق مبني على خاصية المصدر المفتوح، التي ممكن الأطلاع عليها هنا github.com/UstadMobile/UstadMobile</string>
+    <string name="download_continue_stacked_label">استمر بالتنزيل</string>
+    <string name="download_continue_btn_label">استمرار</string>
+    <string name="download_calculating">يتم الحساب…</string>
+    <string name="download_wifi_only">WiFi فقط</string>
+    <string name="download_state_download">
+        <b>تنزيل</b> ما مجموعه %1$s بند، الذي سيستخدم %2$s من مساحة التخزين.</string>
+    <string name="download_state_downloading">
+        <b>جاري تحميل</b> ما مجموعه %1$s بند، الذي سيستخدم %2$s من مساحة التخزين.</string>
+    <string name="download_cancel_all">الغاء الكل</string>
+    <string name="download_pause_download">إيقاف مؤقت</string>
+    <string name="download_downloading_placeholder">جاري تحميل %1$s من %2$s</string>
+    <string name="download_locally_availability">متوفر عن قرب</string>
+    <string name="download_cloud_availability">متوفر على السحابة</string>
+    <string name="insufficient_space">مساحة التخزين المتوفرة غير كافية</string>
+    <string name="clear_history">إلغاء السجل</string>
+    <string name="download_entry_state_paused">متوقف مؤقتا</string>
+    <string name="no_app_found">لا يوجد تطبيق لفتح الملف</string>
+    <string name="entry_details_author">المؤلف</string>
+    <string name="entry_details_license">رخصة</string>
+    <string name="entry_details_description">وصف</string>
+    <string name="library_reading_level">مستوى القراءة</string>
+    <string name="female">انثى</string>
+    <string name="get_app">الحصول على التطبيق</string>
+    <string name="cancel">الغاء</string>
+    <string name="settings">الإعدادات</string>
+    <string name="onboarding_get_started_label">بدء الاستخدام</string>
+    <string name="download_cancel_label">الغاء التنزيل</string>
+    <string name="file_not_found">الملف غير موجود</string>
+    <string name="first_name">الاسم الأول</string>
+    <string name="download_state_downloaded">
+        <b>تم تنزيل</b> ما مجموعه %1$s بند، الذي سيستخدم %2$s من مساحة التخزين.</string>
+    <string name="content_entry_label_update_content">تحديث المحتوى</string>
+    <string name="empty_state_recycle">لا يوجد ملفات معاد تدويرها</string>
+    <string name="content_folder_image_message">سيتوفر الدعم لاضافة الصور قريبا</string>
+    <string name="content_editor_save_error">خطأ اثناء الحفظ، حاول مرة اخرى</string>
+    <string name="content_entry_export">تصدير</string>
+    <string name="content_entry_export_inprogress">جاري التصدير</string>
+    <string name="invalid_register_code">رمز التسجيل غير صحيح</string>
+    <string name="enter_register_code">ادخل رمز التسجيل</string>
+    <string name="bar_chart" value="100">شريط تخطيط</string>
+    <string name="content_entry_export_message">سوف تقوم بتصدير %1$s لسعة تخزين جهازك. هل تريد الاستمرار؟</string>
+    <string name="line_graph" value="101">خط المخطط</string>
+    <string name="score" value="200">معدل الناتج</string>
+    <string name="total_duration" value="201">المدة الإجمالية</string>
+    <string name="average_duration" value="202">معدل المدة</string>
+    <string name="count_activity" value="203">عدد النشاطات</string>
+    <string name="xapi_day" value="300">يوم</string>
+    <string name="xapi_week" value="301">اسبوع</string>
+    <string name="xapi_month" value="302">شهر</string>
+    <string name="xapi_custom_date" value="303">تاريخ مخصص</string>
+    <string name="xapi_content_entry" value="304">ادخال المحتوى</string>
+    <string name="xapi_gender" value="306">الجنس</string>
+    <string name="xapi_clear">إلغاء تحديد</string>
+    <string name="from">من</string>
+    <string name="tocao">الى</string>
+    <string name="date_range">نطاق التاريخ</string>
+    <string name="done">انهاء</string>
+    <string name="select_locations">تحديد المواقع</string>
+    <string name="select_entries">تحديد المدخلات</string>
+    <string name="xapi_options_general">عام</string>
+    <string name="xapi_options_report_title">عنوان التقرير</string>
+    <string name="xapi_options_visual_type">نوع العرض المصوّر</string>
+    <string name="xapi_options_axes">احداثيات</string>
+    <string name="xapi_options_y_axes">احداثي ص</string>
+    <string name="xapi_options_x_axes">احداثي س</string>
+    <string name="xapi_options_subgroup">مجموعة فرعية</string>
+    <string name="xapi_options_filters">تصفية</string>
+    <string name="xapi_options_who">من</string>
+    <string name="xapi_options_did">قام بعمل</string>
+    <string name="xapi_options_what">ماذا</string>
+    <string name="xapi_options_when">متى</string>
+    <string name="xapi_options_where">اين</string>
+    <string name="activity_preview_xapi">عرض</string>
+    <string name="add_to_dashboard">اضف الى لوحة المعلومات</string>
+    <string name="activity_import_link">استيراد الرابط</string>
+    <string name="xapi_hours">ساعات</string>
+    <string name="xapi_minutes">دقائق</string>
+    <string name="xapi_seconds">ثواني</string>
+    <string name="xapi_person_header">شخص</string>
+    <string name="xapi_verb_header">فعل ماذا</string>
+    <string name="xapi_result_header">نتيجة</string>
+    <string name="xapi_when_header">متى</string>
+    <string name="xapi_score">نتيجة (%)</string>
+    <string name="import_link_video">عنوان</string>
+    <string name="import_title_not_entered">عنوان غير مدخل</string>
+    <string name="no_account">ليس لديك حساب؟</string>
+    <string name="enter_url">ادخل URL</string>
+    <string name="import_link_invalid_url">URL غير صالح</string>
+    <string name="import_link_content_not_supported">المحتوى غير مدعم</string>
+    <string name="import_link_big_size">حجم الملف كبير</string>
+    <string name="import_link_error">خطأ استيراد</string>
+    <string name="error_not_found_status">404!</string>
+    <string name="error_not_found_tag">نأسف، الصفحة المرادة غير متوفرة.</string>
+    <string name="offline_sharing_enable_bluetooth_prompt">المشاركة من غير انترنت يتطلب البلوتوث</string>
+    <string name="offline_sharing_enable_wifi_promot">المشاركة من غير انترنت يتطلب ان يكون ال WiFi مفعل</string>
+    <string name="enable">تمكين</string>
+    <string name="more_information">معلومات اكثر</string>
+    <string name="less_information">معلومات اقل</string>
+    <string name="repo_loading_status_loading_cloud">التحميل جاري من السحابة</string>
+    <string name="repo_loading_status_loading_mirror">التحميل من النظير</string>
+    <string name="content_editor_create_new_import_link">استيراد من رابط</string>
+    <string name="xapi_location" value="305">موقع</string>
+    <string name="repo_loading_status_loaded_empty">المحتوى غير موجود</string>
+    <string name="repo_loading_status_failed_noconnection">لا يوجد اتصال أو نظير</string>
+    <string name="repo_loading_status_failed_connection_error">خطأ بالأتصال</string>
+    <string name="content_from_link">من الرابط</string>
+    <string name="xapi_today">اليوم</string>
 </resources>

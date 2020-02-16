@@ -357,7 +357,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onAttachFragment(fragment: Fragment?) {
+    override fun onAttachFragment(fragment: Fragment) {
         super.onAttachFragment(fragment)
         fragmentList!!.add(WeakReference<Fragment>(fragment))
     }

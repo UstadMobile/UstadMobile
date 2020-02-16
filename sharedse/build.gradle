@@ -139,6 +139,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "com.github.aakira:napier:$version_napier"
 
             }
         }

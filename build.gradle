@@ -4,8 +4,8 @@ buildscript {
     ext.version_kotlin = '1.3.61'
     ext.version_shadow = "5.1.0"
     repositories {
-        jcenter()
         google()
+        jcenter()
         mavenCentral()
         maven {
             url 'https://plugins.gradle.org/m2/'
@@ -14,7 +14,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.3'
-        classpath 'com.google.gms:google-services:4.3.2'
+        classpath 'com.google.gms:google-services:4.3.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
         classpath "com.github.jengelman.gradle.plugins:shadow:$version_shadow"
@@ -26,8 +26,8 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
         google()
+        jcenter()
 
         maven {
             url "https://devserver2.ustadmobile.com/repo-mvn"
@@ -59,12 +59,12 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.2.18"
+version = "0.2.19"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 174
+    ustadVersionCode = 175
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.4"
@@ -125,13 +125,24 @@ ext {
     version_android_min_sdk = 18
     version_android_picasso = 2.71828
 
-    version_androidx_support_lib = "1.0.0"
-    version_androidx_core = '1.0.2'
-    version_androidx_lifecycle = "2.1.0"
-    version_android_room = "2.1.0"
+    //Androidx versions as per https://developer.android.com/jetpack/androidx/versions
+    version_androidx_support_lib = "1.1.0"
+    version_androidx_annotation = "1.1.0"
+
+    //As per https://maven.google.com/web/index.html
+    version_android_material = "1.1.0"
+    version_androidx_appcompat = "1.1.0"
+    version_androidx_core = '1.2.0'
+    version_androidx_cardview = "1.0.0"
+    version_androidx_coordinatorlayout = "1.1.0"
+    version_androidx_lifecycle = "2.2.0"
+    version_androidx_legacy = "1.0.0"
+    version_android_room = "2.2.3"
+    version_androidx_arch = "2.1.0"
+    version_androidx_recyclerview = "1.1.0"
     version_android_multidex = "2.0.0"
     version_android_workmanager = "2.2.0"
-    version_androidx_paging = "2.1.0"
+    version_androidx_paging = "2.1.1"
     version_android_constraint_layout = "1.1.3"
     version_android_flexbox = "0.3.2"
     version_android_espresso = "3.1.0"

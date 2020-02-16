@@ -13,6 +13,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 
@@ -63,6 +65,39 @@ class RepositoryLoadHelperTest  {
         }
 
         repoLoadHelper.statusLiveData.removeObserver(loadObserver)
+    }
+
+    @Test
+    fun givenLoadSuccessful_whenDoRequestCalledAgainLoadAgainParamSet_thenShouldLoadAgain() {
+        val mockRepository = mock<DoorDatabaseRepository> {
+            on {connectivityStatus}.thenReturn(DoorDatabaseRepository.STATUS_CONNECTED)
+        }
+
+        val countDownLatch2 = CountDownLatch(2)
+        val countDownLatch1 = CountDownLatch(1)
+        val repoLoadHelper = RepositoryLoadHelper<DummyEntity>(mockRepository,
+                lifecycleHelperFactory = mock {  }) {endpoint ->
+            val entity = DummyEntity(100, "Bob", "Jones$endpoint")
+            countDownLatch1.countDown()
+            countDownLatch2.countDown()
+            entity
+        }
+
+        var mockLiveData = repoLoadHelper.wrapLiveData(mock<DoorLiveData<DummyEntity>> {  })
+
+        runBlocking {
+            val mockLiveDataObserver = mock<DoorObserver<DummyEntity>>{}
+            mockLiveData.observeForever(mockLiveDataObserver)
+
+            //make sure that the first load happened before the second request
+            countDownLatch1.await(5, TimeUnit.SECONDS)
+
+            repoLoadHelper.doRequest(true, true)
+
+            countDownLatch2.await(5, TimeUnit.SECONDS)
+            Assert.assertEquals("LoadHelper ran twice when told to reload: count = 0", 0,
+                    countDownLatch2.count)
+        }
     }
 
     @Test
@@ -164,20 +199,20 @@ class RepositoryLoadHelperTest  {
             currentConnectivityStatus.set(DoorDatabaseRepository.STATUS_CONNECTED)
             repoLoadHelper.onConnectivityStatusChanged(DoorDatabaseRepository.STATUS_CONNECTED)
 
-            val entityWithTimeout = withTimeout(5000 * 5000) { completableDeferred.await() }
+            val entityWithTimeout = withTimeout(5000) { completableDeferred.await() }
 
             Assert.assertEquals("After connectivity is restored and the obserer is active, " +
                     "the loadhelper automatically calls the request function", entity,
                     entityWithTimeout)
 
             argumentCaptor<RepositoryLoadHelper.RepoLoadStatus>() {
-                verify(loadObserver, timeout(5000 * 5000).atLeast(3))
+                verify(loadObserver, timeout(5000).atLeast(4))
                         .onChanged(capture())
                 Assert.assertEquals("First status value is 0 (didnt start)", 0,
                         firstValue.loadStatus)
                 Assert.assertEquals("Second value is STATUS_FAILED_NOCONNECTIVITYORPEERS after first fail",
                         STATUS_FAILED_NOCONNECTIVITYORPEERS, allValues[1].loadStatus)
-                Assert.assertEquals("Fourth status is LOADING_FROM_CLOUD again when connectivity is restored",
+                Assert.assertEquals("Third status is LOADING_FROM_CLOUD again when connectivity is restored",
                         STATUS_LOADING_CLOUD, allValues[2].loadStatus)
                 Assert.assertEquals("Last value was loaded successfully", STATUS_LOADED_WITHDATA,
                         lastValue.loadStatus)

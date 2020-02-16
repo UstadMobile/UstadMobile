@@ -56,4 +56,6 @@ actual abstract class DoorLiveData<T> {
     }
 
     actual open fun getValue() = value
+
+    actual open fun hasActiveObservers(): Boolean = observers.isNotEmpty()
 }
