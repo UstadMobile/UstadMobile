@@ -113,21 +113,7 @@ class SelectSaleProductRecyclerAdapter
 
 
         val currentLocale = impl.getLocale(theContext)
-        var saleProductNameLocale: String?=null
-
-        if(currentLocale.equals("fa")){
-            saleProductNameLocale = entity!!.saleProductNameDari
-        }else if(currentLocale.equals("ps")){
-            saleProductNameLocale = entity!!.saleProductNamePashto
-        }else{
-            saleProductNameLocale = entity!!.saleProductName
-        }
-        if(saleProductNameLocale == null && entity!!.saleProductName != null) {
-            saleProductNameLocale = entity!!.saleProductName
-
-        }
-        name.text = saleProductNameLocale
-
+        name.text = entity!!.getNameLocale(currentLocale)
 
         if (isCatalog) {
 

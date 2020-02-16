@@ -109,31 +109,8 @@ class SelectSaleProductToSaleCategoryRecyclerAdapter internal constructor(
         }
 
 
-        var saleProductNameLocale = entity!!.saleProductName
-        var saleProductDescLocale = entity!!.saleProductName
-        val currentLocale = impl.getLocale(theContext)
-
-        if(currentLocale.equals("fa")){
-            saleProductNameLocale = entity.saleProductNameDari
-        }else if(currentLocale.equals("ps")){
-            saleProductNameLocale = entity.saleProductNamePashto
-            saleProductDescLocale = entity.saleProductDescPashto
-        }else{
-            saleProductNameLocale = entity.saleProductName
-            saleProductDescLocale = entity.saleProductDesc
-        }
-        if(saleProductNameLocale.equals("")){
-            saleProductNameLocale = entity.saleProductName
-        }
-        if(saleProductDescLocale.equals("")){
-            saleProductDescLocale = entity.saleProductDesc
-        }
-        if(saleProductNameLocale == null ){
-            saleProductNameLocale = ""
-            saleProductDescLocale = ""
-        }
-        name.text = saleProductNameLocale
-        desc.text = saleProductDescLocale
+        name.text = entity!!.getNameLocale(impl.getLocale(theContext))
+        desc.text = entity!!.getDescLocale(impl.getLocale(theContext))
 
         holder.itemView.setOnClickListener { v -> mPresenter.handleCommonPressed(entity!!.saleProductUid) }
 

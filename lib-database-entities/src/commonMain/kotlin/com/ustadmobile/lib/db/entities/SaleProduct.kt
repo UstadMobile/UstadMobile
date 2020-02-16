@@ -100,6 +100,23 @@ open class SaleProduct() {
         if(saleProductNameLocale == null ){
             saleProductNameLocale = ""
         }
+        if(saleProductNameLocale.isEmpty() && saleProductName != null &&
+                saleProductName!!.isNotEmpty()){
+            saleProductNameLocale = saleProductName
+        }
+        if(saleProductNameLocale != null && saleProductNameLocale.isEmpty() &&
+                saleProductNameDari != null &&
+                saleProductNameDari!!.isNotEmpty()) {
+            saleProductNameLocale = saleProductNameDari
+        }
+        if(saleProductNameLocale != null && saleProductNameLocale.isEmpty() &&
+                saleProductNamePashto != null &&
+                saleProductNamePashto!!.isNotEmpty()) {
+            saleProductNameLocale = saleProductNamePashto
+        }
+        if(saleProductNameLocale == null ){
+            saleProductNameLocale = ""
+        }
         return saleProductNameLocale
     }
 
@@ -118,6 +135,25 @@ open class SaleProduct() {
         if(saleProductDescLocale == null ){
             saleProductDescLocale = ""
         }
+
+        if(saleProductDescLocale.isEmpty() && saleProductDesc != null &&
+                saleProductName!!.isNotEmpty()){
+            saleProductDescLocale = saleProductDesc
+        }
+        if(saleProductDescLocale != null && saleProductDescLocale.isEmpty() &&
+                saleProductDescDari != null &&
+                saleProductDescDari!!.isNotEmpty()) {
+            saleProductDescLocale = saleProductDescDari
+        }
+        if(saleProductDescLocale != null && saleProductDescLocale.isEmpty() &&
+                saleProductDescPashto != null &&
+                saleProductDescPashto!!.isNotEmpty()) {
+            saleProductDescLocale = saleProductDescPashto
+        }
+        if(saleProductDescLocale == null ){
+            saleProductDescLocale = ""
+        }
+
         return saleProductDescLocale
     }
 

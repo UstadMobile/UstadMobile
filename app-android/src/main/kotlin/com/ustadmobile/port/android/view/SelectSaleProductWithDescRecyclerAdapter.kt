@@ -110,35 +110,17 @@ class SelectSaleProductWithDescRecyclerAdapter internal constructor(
 
         val currentLocale = impl.getLocale(theContext)
 
+        name.text = entity!!.getNameLocale(currentLocale)
+        desc.text = entity!!.getDescLocale(currentLocale)
 
-        var saleProductNameLocale: String?=null
-        var saleProductDescLocale: String?=null
-
-        if(currentLocale.equals("fa")){
-            saleProductNameLocale = entity!!.saleProductNameDari
-            saleProductDescLocale = entity!!.saleProductDescDari
-        }else if(currentLocale.equals("ps")){
-            saleProductNameLocale = entity!!.saleProductNamePashto
-            saleProductDescLocale = entity!!.saleProductDescPashto
-        }else{
-            saleProductNameLocale = entity!!.saleProductName
-            saleProductDescLocale = entity!!.saleProductDesc
+        holder.itemView.setOnClickListener {
+            mPresenter.handleClickProduct(entity.saleProductUid, listCategory)
         }
-        if(saleProductNameLocale == null && entity!!.saleProductName != null) {
-            saleProductNameLocale = entity!!.saleProductName
-        }
-        if(saleProductDescLocale == null && entity!!.saleProductDesc != null) {
-            saleProductDescLocale = entity!!.saleProductDesc
-        }
-
-        name.text = saleProductNameLocale
-        desc.text = saleProductDescLocale
-
-        holder.itemView.setOnClickListener { v -> mPresenter.handleClickProduct(entity.saleProductUid, listCategory) }
 
     }
 
-    inner class SelectSaleProductViewHolder(itemView: View, var imageLoadJob: Job? = null) : RecyclerView.ViewHolder(itemView)
+    inner class SelectSaleProductViewHolder(itemView: View, var imageLoadJob: Job? = null)
+        : RecyclerView.ViewHolder(itemView)
 
     companion object {
 

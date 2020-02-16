@@ -21,6 +21,7 @@ import com.ustadmobile.core.controller.SaleProductCategoryListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.SaleProduct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -115,7 +116,7 @@ class SelectSaleCategoryRecyclerAdapter internal constructor(
             }
         }
 
-        name.text = entity!!.saleProductName
+        name.text = entity!!.getNameLocale(UstadMobileSystemImpl.instance.getLocale(theContext))
 
         //Options to Edit/Delete every schedule in the list
         if (showContextMenu!!) {
