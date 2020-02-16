@@ -62,6 +62,7 @@ open class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailVie
     internal lateinit var descDari: EditText
     internal lateinit var titlePashto: EditText
     internal lateinit var descPastho: EditText
+    internal lateinit var basePrice : EditText
     internal lateinit var categoryTitle: TextView
     private lateinit var imagesCounter : TextView
 
@@ -140,6 +141,7 @@ open class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailVie
         titleEng = findViewById(R.id.activity_sale_product_detail_title_english)
         titleDari = findViewById(R.id.activity_sale_product_detail_title_dari)
         titlePashto = findViewById(R.id.activity_sale_product_detail_title_pashto)
+        basePrice = findViewById(R.id.activity_sale_product_detail_base_price)
 
         descEng = findViewById(R.id.activity_sale_product_detail_desc_english)
         descDari = findViewById(R.id.activity_sale_product_detail_desc_dari)
@@ -212,29 +214,18 @@ open class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailVie
                 mPresenter!!.updateDescPashto(s.toString())
             }
         })
+        basePrice.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                mPresenter!!.updateBasePrice(s.toString())
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        })
 
         productImageView.setOnClickListener { mPresenter!!.goToManageImages() }
 
-    }
-
-    private fun showGetImageAlertDialog() {
-
-        val adb = AlertDialog.Builder(this)
-                .setTitle("")
-                .setMessage("Select image from Camera or Gallery")
-
-                .setPositiveButton(R.string.camera) { dialog, which ->
-                    addImageFromCamera()
-                    dialog.dismiss()
-                }
-
-                .setNegativeButton(R.string.gallery) { dialog, which ->
-                    addImageFromGallery()
-                    dialog.dismiss()
-                }
-
-        adb.create()
-        adb.show()
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, SaleProductSelected>) {
@@ -278,6 +269,9 @@ open class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailVie
             }
             if (saleProduct.saleProductDescPashto != null && !saleProduct.saleProductDescPashto!!.isEmpty()) {
                 descPastho.setText(saleProduct.saleProductDescPashto)
+            }
+            if(saleProduct.saleProductBasePrice != null ){
+                basePrice.setText(saleProduct.saleProductBasePrice.toString())
             }
 
             if (saleProduct.saleProductCategory) {

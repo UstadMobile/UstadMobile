@@ -167,6 +167,18 @@
                         app:layout_constraintStart_toStartOf="@+id/activity_sale_product_detail_title_pashto"
                         app:layout_constraintTop_toBottomOf="@+id/activity_sale_product_detail_title_pashto" />
 
+                    <EditText
+                        android:id="@+id/activity_sale_product_detail_base_price"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:ems="10"
+                        android:hint="@string/base_price"
+                        android:inputType="numberDecimal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/activity_sale_product_detail_desc_pashto"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_sale_product_detail_desc_pashto" />
+
                     <ImageView
                         android:id="@+id/imageView6"
                         android:layout_width="wrap_content"
@@ -174,7 +186,7 @@
                         android:layout_marginStart="40dp"
                         android:layout_marginTop="16dp"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/activity_sale_product_detail_desc_pashto"
+                        app:layout_constraintTop_toBottomOf="@+id/activity_sale_product_detail_base_price"
                         app:srcCompat="@drawable/ic_tag_text_outline_black_24dp" />
 
                     <TextView
@@ -186,7 +198,7 @@
                         android:text="@string/parent_categories"
                         android:textAppearance="@style/TextAppearance.AppCompat.Large"
                         app:layout_constraintStart_toEndOf="@+id/imageView6"
-                        app:layout_constraintTop_toBottomOf="@+id/activity_sale_product_detail_desc_pashto" />
+                        app:layout_constraintTop_toBottomOf="@+id/activity_sale_product_detail_base_price" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/activity_sale_product_detail_categories_rv"

@@ -263,6 +263,18 @@ class SaleProductDetailPresenter(context: Any,
         currentSaleProduct!!.saleProductDescPashto = desc
     }
 
+    fun updateBasePrice(basePriceString: String){
+        if(basePriceString.isNotEmpty()){
+            try{
+                val basePrice = basePriceString.toFloat()
+                currentSaleProduct!!.saleProductBasePrice = basePrice
+            } catch (e: ClassCastException){
+                currentSaleProduct!!.saleProductBasePrice = 0F
+            }
+        }
+
+    }
+
     fun handleCompressedImage(imageFilePath: String) {
 
         //Create picture entry

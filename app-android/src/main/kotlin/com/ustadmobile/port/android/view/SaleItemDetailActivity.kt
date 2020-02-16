@@ -59,6 +59,10 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
     private lateinit var addReminderTV: TextView
     private lateinit var remindersRV: RecyclerView
 
+    override fun updateItemPrice(itemPrice: Float) {
+        pppNP.value = itemPrice.toInt()
+    }
+
     override fun showQuantityTextView(show: Boolean) {
 
         runOnUiThread(Runnable {
@@ -210,7 +214,7 @@ class SaleItemDetailActivity : UstadBaseActivity(), SaleItemDetailView {
                 if(s.toString().isNotEmpty()) {
                     newVal = Integer.valueOf(s.toString())
                 }
-                mPresenter.handleChangePPP(newVal.toLong())
+            mPresenter.handleChangePPP(newVal.toLong())
                 mPresenter.updateTotal(q, newVal.toLong())
             }
         })

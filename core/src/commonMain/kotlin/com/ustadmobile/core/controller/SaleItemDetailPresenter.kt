@@ -156,7 +156,7 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
 
                 //Notification observer
                 val provider =
-                        reminderDao!!.findBySaleItemUid(saleItemUid)
+                        reminderDao.findBySaleItemUid(saleItemUid)
 
                 view.runOnUiThread(Runnable { view.setReminderProvider(provider) })
             }
@@ -191,9 +191,19 @@ class SaleItemDetailPresenter : UstadBaseController<SaleItemDetailView> {
     private fun handleSaleProductLive(saleProduct : SaleProduct?){
         if(saleProduct!=null) {
             var productName: String? = ""
-            productName = saleProduct!!.saleProductName
+            productName = saleProduct.saleProductName
             saleProductName = productName
             view.updateProductTitleOnView(productName!!)
+
+            GlobalScope.launch {
+                val saleItem = saleItemDao.findByUidAsync(saleItemUid)
+                if(saleItem != null && saleItem.saleItemPricePerPiece == 0F ){
+                    view.runOnUiThread(Runnable {
+                        view.updateItemPrice(saleProduct.saleProductBasePrice)
+                    })
+
+                }
+            }
         }
     }
 

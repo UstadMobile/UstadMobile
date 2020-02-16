@@ -33,6 +33,8 @@ interface SaleItemDetailView : UstadView {
 
     fun showQuantityTextView(show: Boolean)
 
+    fun updateItemPrice(itemPrice: Float)
+
     companion object {
 
 
