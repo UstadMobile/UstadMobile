@@ -33,6 +33,8 @@ class ScrapeQueueItem() {
 
     var timeFinished: Long = 0
 
+    var backOffTime: Long = 0
+
     companion object {
 
         const val ITEM_TYPE_INDEX = 1
