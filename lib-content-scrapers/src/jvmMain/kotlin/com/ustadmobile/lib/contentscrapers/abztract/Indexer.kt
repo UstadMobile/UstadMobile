@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import kotlinx.coroutines.runBlocking
 
-abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db: UmAppDatabase) {
+abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db: UmAppDatabase, val sqiUid: Int) {
 
 
     var parentcontentEntry: ContentEntry? = null

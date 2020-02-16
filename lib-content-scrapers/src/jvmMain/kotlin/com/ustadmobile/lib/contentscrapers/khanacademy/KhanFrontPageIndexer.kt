@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.LanguageVariant
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
-class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase) : Indexer(parentContentEntry, runUid, db) {
+class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, 0) {
 
     private var langCount = 0
 

@@ -15,7 +15,7 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.support.ui.WebDriverWait
 
-abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase) : Indexer(parentContentEntry, runUid, db) {
+abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
 
     protected var chromeDriver: ChromeDriver
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()

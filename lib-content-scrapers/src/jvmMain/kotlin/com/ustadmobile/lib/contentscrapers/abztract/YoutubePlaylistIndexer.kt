@@ -2,7 +2,6 @@ package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
@@ -20,7 +19,7 @@ import java.nio.file.Files
 
 typealias ModifyYoutubeJson = (jsonFile: YoutubeData) -> YoutubeData
 
-abstract class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase) : Indexer(parentContentEntry, runUid, db) {
+abstract class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
 
     private val ytPath: String
     private val gson: Gson

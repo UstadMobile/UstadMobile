@@ -16,7 +16,7 @@ import java.net.URL
 import java.nio.file.Files
 
 
-class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : YoutubeScraper(containerDir, db, contentEntryUid) {
+class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid) {
 
 
     override fun scrapeUrl(sourceUrl: String) {
@@ -37,16 +37,16 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
 
         if (url == null) {
 
-          /*  hideContentEntry()
-            throw ScraperException(ERROR_TYPE_YOUTUBE_ERROR, "stopped youtube $sourceUrl")*/
-
+            hideContentEntry()
+            throw ScraperException(ERROR_TYPE_YOUTUBE_ERROR, "stopped youtube $sourceUrl")
+/*
             val ytUrl = getYoutubeUrl(khanId)
             try {
                 scrapeYoutubeLink(ytUrl)
             } catch (e: Exception) {
                 hideContentEntry()
                 throw e
-            }
+            }*/
 
         } else {
 

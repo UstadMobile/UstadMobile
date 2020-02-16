@@ -7,7 +7,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.YoutubePlaylistIndexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
-class HabPlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase) : YoutubePlaylistIndexer(parentContentEntry, runUid, db) {
+class HabPlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : YoutubePlaylistIndexer(parentContentEntry, runUid, db, sqiUid) {
 
     val arabicLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "ar")
 

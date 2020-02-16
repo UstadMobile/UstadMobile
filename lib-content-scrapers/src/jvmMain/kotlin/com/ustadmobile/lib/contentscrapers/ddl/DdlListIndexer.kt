@@ -8,7 +8,7 @@ import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.Companion.DDL
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.Jsoup
 
-class DdlListIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase) : Indexer(contentEntryUid, runUid, db) {
+class DdlListIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(contentEntryUid, runUid, db, sqiUid) {
 
     override fun indexUrl(sourceUrl: String) {
 

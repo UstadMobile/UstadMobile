@@ -5,7 +5,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.Jsoup
 
-class DdlPageIndexer(contentEntryUid: Long, runId: Int, db: UmAppDatabase) : Indexer(contentEntryUid, runId, db) {
+class DdlPageIndexer(contentEntryUid: Long, runId: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(contentEntryUid, runId, db, sqiUid) {
 
     override fun indexUrl(sourceUrl: String) {
 

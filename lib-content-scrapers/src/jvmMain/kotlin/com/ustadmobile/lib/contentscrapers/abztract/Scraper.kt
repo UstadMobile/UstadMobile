@@ -8,7 +8,7 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
-abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var contentEntryUid: Long) {
+abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var contentEntryUid: Long, val sqiUid: Int) {
 
     val mimeTypeToContentFlag: Map<String, Int> = mapOf(
             MimeType.PDF to ContentEntry.DOCUMENT_TYPE,

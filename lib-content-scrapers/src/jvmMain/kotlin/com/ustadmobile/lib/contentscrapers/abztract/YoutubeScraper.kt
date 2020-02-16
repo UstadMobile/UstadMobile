@@ -14,8 +14,9 @@ import java.io.IOException
 import java.nio.file.Files
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.math.pow
 
-abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid) {
+abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : Scraper(containerDir, db, contentEntryUid, sqiUid) {
 
     private val ytPath: String
     private val gson: Gson
@@ -54,6 +55,10 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
                 if (exitValue != 0) {
                     UMLogUtil.logError("Error Stream for src $sourceUrl with error code  ${UMIOUtils.readStreamToString(process.errorStream)}")
                     println(UMIOUtils.readStreamToString(process.errorStream))
+                    val numberOfFailures = 1 + failureAttempts.count {
+                        it >= (System.currentTimeMillis() - YOUTUBE_TIME_OUT)
+                    }
+                    var delay = baseRetry.pow(numberOfFailures)
                     Thread.sleep(180000)
                     throw IOException()
                 }
@@ -106,6 +111,14 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
     }
 
     companion object {
+
+        const val YOUTUBE_TIME_OUT = 1800000
+
+        var failureAttempts = mutableListOf<Long>()
+
+        var lockedUntil: Float = 0f
+
+        const val baseRetry: Float = 10f
 
         private val youtubeLocker = ReentrantLock()
 

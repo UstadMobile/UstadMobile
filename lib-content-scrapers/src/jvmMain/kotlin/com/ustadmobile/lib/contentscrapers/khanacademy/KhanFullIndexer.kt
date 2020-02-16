@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import java.net.URL
 
-class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase) : HarIndexer(parentContentEntry, runUid, db) {
+class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : HarIndexer(parentContentEntry, runUid, db, sqiUid) {
 
     override fun indexUrl(sourceUrl: String) {
 

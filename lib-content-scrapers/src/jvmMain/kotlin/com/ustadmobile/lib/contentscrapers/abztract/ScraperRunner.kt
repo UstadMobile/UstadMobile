@@ -70,8 +70,8 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
             try {
                 val indexerClazz = ScraperTypes.indexerTypeMap[it.contentType]
-                val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, UmAppDatabase::class.java)
-                val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, db) as Indexer?
+                val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, UmAppDatabase::class.java, Int::class.java)
+                val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, db, it.sqiUid) as Indexer?
                 obj?.indexUrl(it.scrapeUrl!!)
                 successful = true
 
@@ -106,8 +106,8 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             try {
 
                 val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
-                val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java)
-                val obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid)
+                val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java, Int::class.java)
+                val obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid, it.sqiUid)
                 obj?.scrapeUrl(it.scrapeUrl!!)
                 successful = true
 

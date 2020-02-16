@@ -33,7 +33,7 @@ typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
 typealias WaitConditionFn = (waitCondition: WebDriverWait) -> Unit
 
 
-abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid) {
+abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : Scraper(containerDir, db, contentEntryUid, sqiUid) {
 
     protected var chromeDriver: ChromeDriver
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
