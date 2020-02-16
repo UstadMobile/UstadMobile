@@ -729,5 +729,38 @@
     <string name="add">Add</string>
     <string name="refresh">Refresh</string>
 
+    <string name="schools">Schools</string>
+    <string name="add_school">Add school</string>
+
+    <!-- Assignments e.g. homework for a class -->
+    <string name="assignments">Assignments</string>
+    <string name="new_assignment">Add assignment</string>
+
+    <!-- How an assignment is graded e.g. by letter, numerical, etc -->
+    <string name="grading">Grading</string>
+    <!-- Grading by letter e.g. A-F -->
+    <string name="grading_letter">Letter</string>
+    <string name="None">None</string>
+    <!-- e.g. Numerical assignment grading -->
+    <string name="numerical">Numerical</string>
+
+    <string name="instructions_for_students">Instructions for students</string>
+
+
+    <string name="not_started">Not started</string>
+
+    <!-- Used to show what percentage of an assignment a student has completed. The %1$s will be
+    replaced with the percentage the student completed e.g. "75% complete"-->
+    <string name="percentage_complete">%1$s% complete</string>
+
+    <!-- used to show when an assignment (or other work item) was started by the assignee. The
+    %1$s% will be replaced with the date that they started.-->
+    <string name="started_date">Started %1$s%</string>
+
+    <!-- Used to indicate that something (e.g. an assigment) has been started -->
+    <string name="started">Started</string>
+
+    <!-- E.g. for a mixed gender school which has both boys and girls-->
+    <string name="mixed">Mixed</string>
 
 </resources>
