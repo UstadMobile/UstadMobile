@@ -7,8 +7,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.toughra.ustadmobile.R
-import com.txusballesteros.widgets.FitChart
-import com.txusballesteros.widgets.FitChartValue
+//import com.txusballesteros.widgets.FitChart
+//import com.txusballesteros.widgets.FitChartValue
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.CourseProgress
@@ -22,7 +22,7 @@ class LearnerProgressView : LinearLayout {
 
     private var progress: CourseProgress? = null
 
-    internal lateinit var chart: FitChart
+    //internal lateinit var chart: FitChart
 
 
     constructor(context: Context) : super(context) {
@@ -40,35 +40,35 @@ class LearnerProgressView : LinearLayout {
 
     private fun init() {
         View.inflate(context, R.layout.view_learner_progress, this)
-        this.chart = findViewById(R.id.opds_item_learner_progress_fitchart)
-        chart.minValue = 0f
-        chart.maxValue = 100f
+//        this.chart = findViewById(R.id.opds_item_learner_progress_fitchart)
+//        chart.minValue = 0f
+//        chart.maxValue = 100f
     }
 
 
     fun setProgress(progress: CourseProgress) {
-        this.progress = progress
-
-        val percentageToShow = if (progress.status == MessageID.in_progress)
-            progress.progress
-        else
-            Math.round(progress.score * 100)
-
-        val statusColorId = ContextCompat.getColor(context,
-                STATUS_TO_COLOR_MAP[progress.status]!!)
-        val chartValue = FitChartValue(percentageToShow.toFloat(), statusColorId)
-        val chartValues = ArrayList<FitChartValue>()
-        chartValues.add(chartValue)
-        chart.setValues(chartValues)
-        val progressNumTextView = findViewById<View>(
-                R.id.opds_item_learner_progress_text) as TextView
-        progressNumTextView.text = "$percentageToShow%"
-        progressNumTextView.setTextColor(statusColorId)
-
-        val progressTextView = findViewById<View>(R.id.opds_item_learner_progress_status_text) as TextView
-        progressTextView.text = UstadMobileSystemImpl.instance.getString(
-                progress.status, context)
-        progressTextView.setTextColor(statusColorId)
+//        this.progress = progress
+//
+//        val percentageToShow = if (progress.status == MessageID.in_progress)
+//            progress.progress
+//        else
+//            Math.round(progress.score * 100)
+//
+//        val statusColorId = ContextCompat.getColor(context,
+//                STATUS_TO_COLOR_MAP[progress.status]!!)
+//        val chartValue = FitChartValue(percentageToShow.toFloat(), statusColorId)
+//        val chartValues = ArrayList<FitChartValue>()
+//        chartValues.add(chartValue)
+//        chart.setValues(chartValues)
+//        val progressNumTextView = findViewById<View>(
+//                R.id.opds_item_learner_progress_text) as TextView
+//        progressNumTextView.text = "$percentageToShow%"
+//        progressNumTextView.setTextColor(statusColorId)
+//
+//        val progressTextView = findViewById<View>(R.id.opds_item_learner_progress_status_text) as TextView
+//        progressTextView.text = UstadMobileSystemImpl.instance.getString(
+//                progress.status, context)
+//        progressTextView.setTextColor(statusColorId)
     }
 
     companion object {

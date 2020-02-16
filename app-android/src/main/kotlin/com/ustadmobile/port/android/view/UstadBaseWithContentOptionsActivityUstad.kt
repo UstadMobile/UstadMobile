@@ -124,7 +124,7 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
 
     override fun updateDocument(title: String, description: String) {}
 
-    override fun onAttachFragment(fragment: Fragment?) {
+    override fun onAttachFragment(fragment: Fragment) {
         if (fragment is ContentEntryEditFragment) {
             entryFragment = fragment
             entryFragment!!.setActionListener(this)

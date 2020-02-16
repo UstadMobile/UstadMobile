@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -15,6 +16,7 @@ import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.ext.observeWithPresenter
+import com.ustadmobile.core.util.ext.toStatusString
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -82,12 +84,11 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
         if (containerDownloadManager != null) {
             GlobalScope.launch(liveDataObserverDispatcher()) {
-                downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).also {
-                    it.observeWithPresenter(this@ContentEntryDetailPresenter, this@ContentEntryDetailPresenter::onDownloadJobItemChanged)
+                downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).apply {
+                    Napier.i("ContentEntryDetailPresenter: DLUFIX: Observing $this")
+                    observeWithPresenter(this@ContentEntryDetailPresenter, this@ContentEntryDetailPresenter::onDownloadJobItemChanged)
                 }
             }
-        } else {
-            view.setDownloadJobItemStatus(null)
         }
 
 
@@ -129,6 +130,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     private fun onDownloadJobItemChanged(downloadJobItem: DownloadJobItem?) {
+        Napier.i("DLUFIX: Received update for ${downloadJobItem?.djiUid} = ${downloadJobItem?.toStatusString(impl, context)}")
         view.setDownloadJobItemStatus(downloadJobItem)
 
         if (availabilityMonitorRequest == null && !downloadJobItem.isStatusCompletedSuccessfully()) {

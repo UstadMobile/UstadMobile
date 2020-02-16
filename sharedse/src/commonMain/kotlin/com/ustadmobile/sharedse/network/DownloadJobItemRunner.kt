@@ -43,6 +43,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
+import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -123,6 +124,8 @@ class DownloadJobItemRunner
     private var downloadCalled: Boolean = false
 
     private var startDownloadFnJob: Deferred<Int>? = null
+
+    private var downloadManagerHolderRef: ContainerDownloadManagerImpl.DownloadJobItemHolder? = null
 
     private val timeSinceStart
         get() = getSystemTimeInMillis() - startTime
@@ -209,6 +212,12 @@ class DownloadJobItemRunner
         if(downloadCalled) {
             throw IllegalStateException("Can only call download() once on DownloadJobItemRunner!")
         }
+        downloadManagerHolderRef = if(containerDownloadManager is ContainerDownloadManagerImpl) {
+            containerDownloadManager.getDownloadJobItemHolder(downloadItem.djiUid)
+        }else {
+            null
+        }
+
         downloadCalled = true
 
         startTime = getSystemTimeInMillis()

@@ -244,7 +244,7 @@ class SelectMultipleEntriesTreeDialogFragment : UstadDialogFragment(), SelectMul
         dialog.dismiss()
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         this.mAttachedContext = context
         this.selectedOptions = mutableMapOf()
