@@ -181,7 +181,7 @@ gradle.taskGraph.useFilter { task ->
 }
 
 task generateCoreStringToAndroidResMap {
-    inputs.files("../core/locale/main/**/*.xml")
+    inputs.files("../core/locale/main/values/*.xml")
     onlyIf {
         /*
          Only run this task if the input files have been updated since the task was last run.
@@ -189,7 +189,7 @@ task generateCoreStringToAndroidResMap {
          */
         long inputLastModified = 0L
 
-        rootProject.fileTree(dir: "core/locale/main", include: "**/*.xml").each() { File file ->
+        rootProject.fileTree(dir: "core/locale/main", include: "values/*.xml").each() { File file ->
             if (file.lastModified() > inputLastModified)
                 inputLastModified = file.lastModified()
         }
@@ -213,7 +213,7 @@ task generateCoreStringToAndroidResMap {
         genSrcHeader += "\tinit {\n"
 
         System.out.println("Looking in: core/locale/main")
-        rootProject.fileTree(dir: "core/locale/main", include: "**/*.xml").each() { File file ->
+        rootProject.fileTree(dir: "core/locale/main", include: "values/*.xml").each() { File file ->
             System.out.println("Found: " + file.getAbsolutePath())
             def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
             xmlDoc.string.each() { str ->
