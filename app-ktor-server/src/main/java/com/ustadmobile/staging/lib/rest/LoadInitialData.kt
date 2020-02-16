@@ -3,15 +3,9 @@ package com.ustadmobile.staging.lib.rest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
 import com.ustadmobile.lib.db.entities.Role.Companion.ROLE_NAME_CUSTOMER
-import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ATTENDANCE
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_BIRTHDAY
-import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_CLASSES
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_CONFIRM_PASSWORD
-import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHER
-import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NAME
-import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FATHERS_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FIRST_NAMES
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FIRST_NAMES_ALT
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_FULL_NAME
@@ -19,9 +13,6 @@ import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ROLE_
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_HOME_ADDRESS
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_NAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_LAST_NAME_ALT
-import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHER
-import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NAME
-import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_MOTHERS_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PASSWORD
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_PROFILE
@@ -133,7 +124,7 @@ class LoadInitialData {
             GlobalScope.launch {
                 val result = personGroupMemberDao.findAllGroupWherePersonIsIn(selPerson.personUid)
 
-                if (!result!!.isEmpty()) {
+                if (result.isNotEmpty()) {
 
                     val selGroupUid = result[0].groupMemberGroupUid
 
@@ -166,7 +157,7 @@ class LoadInitialData {
 
     private fun createOfficer() {
 
-        var officerPerson = personDao!!.findByUsername("officer")
+        var officerPerson = personDao.findByUsername("officer")
         if (officerPerson == null) {
             officerPerson = Person()
             officerPerson.active = false
@@ -176,7 +167,7 @@ class LoadInitialData {
 
             GlobalScope.launch {
                 val personWithGroup = personDao.createPersonWithGroupAsync(officerPerson)
-                val officerPersonUid = personWithGroup!!.personUid
+                val officerPersonUid = personWithGroup.personUid
 
                 //Create password
                 val officerPersonAuth = PersonAuth(officerPersonUid,
@@ -384,12 +375,19 @@ class LoadInitialData {
 
     }
 
+    private fun disableAllPersonFields(){
+        GlobalScope.launch {
+            personCustomFieldDao.findAllCustomFields()
+        }
+    }
+
     private fun addNextField() {
 
-        if (fieldIndex >= allFields!!.size) {
+        //If reached end, its done.
+        if (fieldIndex >= allFields.size) {
             return
         }
-        val field = allFields!![fieldIndex]
+        val field = allFields[fieldIndex]
 
         var isHeader = false
         if (field.fieldType == PersonField.FIELD_TYPE_HEADER) {
@@ -400,60 +398,51 @@ class LoadInitialData {
 
         GlobalScope.launch {
 
-            val resultList = personCustomFieldDao!!.findByFieldNameAsync(field.fieldName)
+            //Find if the person field exists in the system:
+            val existingPersonField = personCustomFieldDao.findByUidAsync(field.fieldUid.toLong())
 
-            //Create the custom fields - basically label & icon .
-            val personField = PersonField()
+            //Create the PersonField
+            val newPersonField = PersonField()
+            newPersonField.fieldIcon = field.fieldIcon //Icon
+            newPersonField.fieldName = field.fieldName //Internal name
+            newPersonField.labelMessageId = field.fieldLabel    //Label
+            //Set PersonFields' Uid (PersonCustomFieldUid) (No auto generation)
+            newPersonField.personCustomFieldUid = field.fieldUid.toLong()   //Field's uid
 
-            if (resultList!!.isEmpty()) {
+
+            //If the field does no exists in the sytem, persist it.
+            if (existingPersonField == null) {
 
                 //Create the field only if it is a field (ie not a header)
                 if (!finalIsHeader) {
-                    personField.fieldIcon = field.fieldIcon //Icon
-                    personField.fieldName = field.fieldName //Internal name
-                    personField.labelMessageId = field.fieldLabel    //Label
 
-                    //Set PersonFields' Uid (PersonCustomFieldUid) (No auto generation)
-                    //If field not set ie its a Custom Field
-                    if (field.fieldUid == 0) {
-                        //It is a custom field
-                        val lastPersonCustomFieldUidUsed = personCustomFieldDao.findLatestUid()
-                        var newCustomPersonCustomFieldUid = lastPersonCustomFieldUidUsed + 1
-                        if (lastPersonCustomFieldUidUsed < CUSTOM_FIELD_MIN_UID) {
-                            //first Custom field
-                            newCustomPersonCustomFieldUid = CUSTOM_FIELD_MIN_UID + 1
-                        }
-                        personField.personCustomFieldUid = newCustomPersonCustomFieldUid.toLong()
-                        field.fieldUid = newCustomPersonCustomFieldUid
+                    //Save the Person Field.
+                    personCustomFieldDao.insertAsync(newPersonField)
 
-                    } else {
-                        //Not a custom field.
-                        personField.personCustomFieldUid = field.fieldUid.toLong()   //Field's uid
-                    }
-
-                    //Persist
-                    val result = personCustomFieldDao.insertAsync(personField)
-                    //Persist 2
-                    createPersonDetailPresenterField(field, finalIsHeader, personField,
-                            personDetailPresenterFieldDao!!, true)
+                    //Continue to create the Detail Fields
+                    createPersonDetailPresenterField(field, finalIsHeader, newPersonField,
+                            personDetailPresenterFieldDao)
 
                 } else {
-
-                    //Persist 2
-                    createPersonDetailPresenterField(field, finalIsHeader, personField,
-                            personDetailPresenterFieldDao!!, true)
+                    //Continue to create the Details Field
+                    createPersonDetailPresenterField(field, finalIsHeader, newPersonField,
+                            personDetailPresenterFieldDao)
                 }
 
             } else {
-                //Persist 2
-                createPersonDetailPresenterField(field, finalIsHeader, personField,
-                        personDetailPresenterFieldDao!!, true)
+
+                //The Person Field exists in the system. we should now check if anything is different:
+                if(!existingPersonField.equals(newPersonField)){
+                    //Update PersonField
+                    personCustomFieldDao.updateAsync(newPersonField)
+                }
+
+                //Variable already exists. Continue to create Details Field.
+                createPersonDetailPresenterField(field, finalIsHeader, newPersonField,
+                        personDetailPresenterFieldDao)
             }
-
         }
-
     }
-
 
     /**
      * Adds dummy data in the start of the application here. It also sets a key so that we don't
@@ -461,7 +450,29 @@ class LoadInitialData {
      * the server.
      */
     private fun addFieldData() {
+        val fieldUids = ArrayList<Long>()
+        val headerUids = ArrayList<Long>()
         allFields = getAllFields()
+        val size = allFields.size
+        var iter = 0
+        while(iter < size){
+            if(allFields[iter].headerMessageId > 0){
+                headerUids.add(allFields[iter].headerMessageId.toLong())
+            }else {
+                fieldUids.add(allFields[iter].fieldUid.toLong())
+            }
+            iter++
+        }
+
+        println("fieldUids : " + fieldUids)
+        println("headerUids : " + headerUids)
+
+        //Disable Other fields.
+        GlobalScope.launch {
+            personDetailPresenterFieldDao.disableAllDetailFieldsExcept(fieldUids)
+            personDetailPresenterFieldDao.disableAllDetailFieldsExceptHeader(headerUids)
+        }
+        println("Disabled other fields")
 
         println("Adding PersonFields and PersonDetailPresenter entities. \n")
         //Start with next field (1st field really)
@@ -469,53 +480,77 @@ class LoadInitialData {
 
     }
 
-    private fun createPersonDetailPresenterField(field: HeadersAndFields, isHeader: Boolean,
-                                                 pcf: PersonField, personDetailPresenterFieldDao: PersonDetailPresenterFieldDao,
-                                                 gotoNext: Boolean?) {
+    private fun createPersonDetailPresenterField(field: HeadersAndFields,
+                                                 isHeader: Boolean, pcf: PersonField,
+                                                 personDetailPresenterFieldDao: PersonDetailPresenterFieldDao) {
 
+        //Create the Mapping between the fields and extra information like :
+        //  type(header / field)
+        //  index (for ordering)
+        //  Header String Id (if header)
+        //
+        val newDetailField = PersonDetailPresenterField()
+        newDetailField.fieldType = field.fieldType
+        newDetailField.fieldIndex = field.fieldIndex
+        println("fieldUid: " + field.fieldUid + " messageId: " +
+                field.headerMessageId + " index: " + field.fieldIndex)
+
+        newDetailField.fieldIcon = field.fieldIcon
+        newDetailField.labelMessageId = field.fieldLabel
+
+        //Set Visibility
+        newDetailField.isReadyOnly = field.readOnly
+        newDetailField.viewModeVisible = field.viewMode
+        newDetailField.editModeVisible = field.editMode
+
+        //If not a header set the field. If is header, set the header label.
+        if (!isHeader) {
+            val pcfUid = pcf.personCustomFieldUid
+            newDetailField.fieldUid = pcfUid
+        } else {
+            newDetailField.headerMessageId = field.headerMessageId
+        }
 
         GlobalScope.launch {
-            val resultList2 = personDetailPresenterFieldDao.findAllByFieldIndex(field.fieldIndex)
 
-            val resultList3 = personDetailPresenterFieldDao.findAllByFieldUid(field.fieldUid.toLong())
+            var existingDetailField : PersonDetailPresenterField? = null
+            existingDetailField = if(isHeader){
+                personDetailPresenterFieldDao.findByHeaderUidAsync(field.headerMessageId.toLong())
+            }else{
+                personDetailPresenterFieldDao.findByFieldUidAsync(field.fieldUid.toLong())
+            }
 
-            if (resultList2!!.isEmpty()) {
-                println("Adding field : " + field.fieldUid)
-
-                //Create the Mapping between the fields and extra information like :
-                //  type(header / field)
-                //  index (for ordering)
-                //  Header String Id (if header)
-                //
-                val pdpf1 = PersonDetailPresenterField()
-                pdpf1.fieldType = field.fieldType
-                pdpf1.fieldIndex = field.fieldIndex
-
-                pdpf1.fieldIcon = field.fieldIcon
-                pdpf1.labelMessageId = field.fieldLabel
-
-                //Set Visibility
-                pdpf1.isReadyOnly = field.readOnly
-                pdpf1.viewModeVisible = field.viewMode
-                pdpf1.editModeVisible = field.editMode
-
-                //If not a header set the field. If is header, set the header label.
-                if (!isHeader) {
-                    val pcfUid = pcf.personCustomFieldUid
-                    pdpf1.fieldUid = pcfUid
-                } else {
-                    pdpf1.headerMessageId = field.headerMessageId
+            //Field does not exist, adding new
+            if (existingDetailField == null) {
+                if(isHeader){
+                    println("Adding header: " + field.headerMessageId)
+                }else {
+                    println("Adding field : " + field.fieldUid)
                 }
 
                 //persist:
-                personDetailPresenterFieldDao.insert(pdpf1)
+                personDetailPresenterFieldDao.insertAsync(newDetailField)
             }else{
+                //Field does exist.
+                if(!existingDetailField.equals(newDetailField)){
+                    println("Updating field : " + field.fieldUid)
+                    existingDetailField.fieldUid = newDetailField.fieldUid
+                    existingDetailField.fieldType = newDetailField.fieldType
+                    existingDetailField.fieldIndex = newDetailField.fieldIndex
+                    existingDetailField.labelMessageId = newDetailField.labelMessageId
+                    existingDetailField.fieldIcon = newDetailField.fieldIcon
+                    existingDetailField.headerMessageId = newDetailField.headerMessageId
+                    existingDetailField.viewModeVisible = newDetailField.viewModeVisible
+                    existingDetailField.editModeVisible = newDetailField.editModeVisible
+                    existingDetailField.isReadyOnly = newDetailField.isReadyOnly
+                    //Needs an update
+                    personDetailPresenterFieldDao.updateAsync(existingDetailField)
+                }
             }
 
-            if (gotoNext!!) {
-                fieldIndex++
-                addNextField()
-            }
+            fieldIndex++
+            addNextField()
+
         }
     }
 
@@ -720,6 +755,7 @@ class LoadInitialData {
 //                false
 //        ))
 //
+
 //        //PARENTS
 //        allTheFields.add(HeadersAndFields(
 //                "ic_person_black_24dp",
@@ -757,6 +793,7 @@ class LoadInitialData {
 //                false,
 //                true
 //        ))
+
 //        allTheFields.add(HeadersAndFields(
 //                "ic_person_black_24dp",
 //                "Mother name",

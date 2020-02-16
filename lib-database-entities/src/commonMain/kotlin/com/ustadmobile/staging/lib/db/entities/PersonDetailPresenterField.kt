@@ -65,6 +65,8 @@ class PersonDetailPresenterField {
 
         /* Begin constants that represent Person core fields */
 
+        val PERSON_FIELD_UID_PROFILE = 0
+
         val PERSON_FIELD_UID_FULL_NAME = 1
 
         val PERSON_FIELD_UID_FIRST_NAMES = 2
@@ -104,4 +106,40 @@ class PersonDetailPresenterField {
         /* Field Uid constants for Person Custom fields begin at this value */
         val CUSTOM_FIELD_MIN_UID = 1000
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as PersonDetailPresenterField
+
+        if (personDetailPresenterFieldUid != other.personDetailPresenterFieldUid) return false
+        if (fieldUid != other.fieldUid) return false
+        if (fieldType != other.fieldType) return false
+        if (fieldIndex != other.fieldIndex) return false
+        if (labelMessageId != other.labelMessageId) return false
+        if (fieldIcon != other.fieldIcon) return false
+        if (headerMessageId != other.headerMessageId) return false
+        if (viewModeVisible != other.viewModeVisible) return false
+        if (editModeVisible != other.editModeVisible) return false
+        if (isReadyOnly != other.isReadyOnly) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = personDetailPresenterFieldUid.hashCode()
+        result = 31 * result + fieldUid.hashCode()
+        result = 31 * result + fieldType
+        result = 31 * result + fieldIndex
+        result = 31 * result + labelMessageId
+        result = 31 * result + (fieldIcon?.hashCode() ?: 0)
+        result = 31 * result + headerMessageId
+        result = 31 * result + viewModeVisible.hashCode()
+        result = 31 * result + editModeVisible.hashCode()
+        result = 31 * result + isReadyOnly.hashCode()
+        return result
+    }
+
+
 }

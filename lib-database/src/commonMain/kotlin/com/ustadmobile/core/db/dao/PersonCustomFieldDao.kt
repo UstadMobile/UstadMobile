@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.CustomFieldWrapper
@@ -46,4 +47,7 @@ abstract class PersonCustomFieldDao : BaseDao<PersonField> {
             "FROM PersonField " +
             "WHERE personCustomFieldUid > :minCustomFieldUid ")
     abstract fun findAllCustomFieldsProvider(minCustomFieldUid: Int): DataSource.Factory<Int, CustomFieldWrapper>
+
+    @Update
+    abstract suspend fun updateAsync(entity: PersonField): Int
 }

@@ -86,4 +86,28 @@ open class PersonField {
         const val FIELD_HEADING_LAST_NAME_ALT = 20
         const val FIELD_HEADING_PHONE_NUMBER = 21
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as PersonField
+
+        if (personCustomFieldUid != other.personCustomFieldUid) return false
+        if (fieldName != other.fieldName) return false
+        if (labelMessageId != other.labelMessageId) return false
+        if (fieldIcon != other.fieldIcon) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = personCustomFieldUid.hashCode()
+        result = 31 * result + (fieldName?.hashCode() ?: 0)
+        result = 31 * result + labelMessageId
+        result = 31 * result + (fieldIcon?.hashCode() ?: 0)
+        return result
+    }
+
+
 }
