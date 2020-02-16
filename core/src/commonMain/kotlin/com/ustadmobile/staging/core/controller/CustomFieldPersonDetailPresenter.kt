@@ -62,7 +62,9 @@ class CustomFieldPersonDetailPresenter(context: Any, arguments: Map<String, Stri
         GlobalScope.launch {
             val result = customFieldDao.findByUidAsync(uid)
             updatedField = result
-            view.setCustomFieldOnView(updatedField!!)
+            view.runOnUiThread(Runnable {
+                view.setCustomFieldOnView(updatedField!!)
+            })
 
             getSetOptionProvider()
         }
@@ -71,7 +73,8 @@ class CustomFieldPersonDetailPresenter(context: Any, arguments: Map<String, Stri
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        fieldTypePresets = arrayOf(impl.getString(MessageID.text, context), impl.getString(MessageID.dropdown, context))
+        fieldTypePresets = arrayOf(impl.getString(MessageID.text, context),
+                impl.getString(MessageID.dropdown, context))
         view.setDropdownPresetsOnView(fieldTypePresets!!)
 
         if (customFieldUid == 0L) {
@@ -105,13 +108,19 @@ class CustomFieldPersonDetailPresenter(context: Any, arguments: Map<String, Stri
         when (type) {
             FIELD_TYPE_TEXT -> {
                 fieldType = CustomField.FIELD_TYPE_TEXT
-                view.showOptions(false)
+                view.runOnUiThread(Runnable {
+                    view.showOptions(false)
+                })
             }
             FIELD_TYPE_DROPDOWN -> {
                 fieldType = CustomField.FIELD_TYPE_DROPDOWN
-                view.showOptions(true)
+                view.runOnUiThread(Runnable {
+                    view.showOptions(true)
+                })
             }
-            else -> view.showOptions(false)
+            else -> view.runOnUiThread(Runnable {
+                view.showOptions(false)
+            })
         }
 
         if (updatedField != null) {
