@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 34,
-    "identityHash": "79357dc7871b33ba7c42ba22e078b460",
+    "identityHash": "901210d37cc2280e783595f2c2f70381",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -3046,6 +3046,32 @@
         "foreignKeys": []
       },
       {
+        "tableName": "ScraperTime",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`timeUid` INTEGER NOT NULL, `time` INTEGER NOT NULL, PRIMARY KEY(`timeUid`))",
+        "fields": [
+          {
+            "fieldPath": "timeUid",
+            "columnName": "timeUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "timeUid"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "Person_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -4885,7 +4911,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '79357dc7871b33ba7c42ba22e078b460')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '901210d37cc2280e783595f2c2f70381')"
     ]
   }
 }

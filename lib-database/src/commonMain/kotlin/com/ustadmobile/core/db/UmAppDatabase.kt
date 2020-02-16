@@ -24,7 +24,7 @@ import kotlin.jvm.Volatile
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class
+    SyncResult::class, ScraperTime::class
 
     //#DOORDB_TRACKER_ENTITIES
 
@@ -281,6 +281,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         val MIGRATION_33_34 = object : DoorMigration(33, 34) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("""ALTER TABLE ScrapeQueueItem ADD COLUMN backOffTime BIGINT NOT NULL DEFAULT 0""".trimMargin())
+                database.execSQL("""CREATE TABLE IF NOT EXISTS ScraperTime (  timeUid  BIGINT PRIMARY KEY NOT NULL, time BIGINT NOT NULL DEFAULT 0 )""".trimMargin())
             }
         }
 
