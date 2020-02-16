@@ -28,7 +28,7 @@ import kotlin.jvm.Volatile
 
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 33)
+], version = 34)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -250,11 +250,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         val MIGRATION_30_31 = object : DoorMigration(30, 31) {
             override fun migrate(database: DoorSqlDatabase) {
-                if (database.dbType() == DoorDbType.SQLITE) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
-                } else if (database.dbType() == DoorDbType.POSTGRES){
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
-                }
+                database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
             }
         }
 
@@ -266,7 +262,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         |remoteCsn  INTEGER NOT NULL, syncType  INTEGER NOT NULL, timestamp  INTEGER NOT NULL, 
                         |sent  INTEGER NOT NULL, received  INTEGER NOT NULL, 
                         |srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
-                } else if (database.dbType() == DoorDbType.POSTGRES){
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (
                         |  tableId  INTEGER , status  INTEGER , localCsn  INTEGER , 
                         |  remoteCsn  INTEGER , syncType  INTEGER , 
@@ -278,11 +274,13 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         val MIGRATION_32_33 = object : DoorMigration(32, 33) {
             override fun migrate(database: DoorSqlDatabase) {
-                if (database.dbType() == DoorDbType.SQLITE) {
-                    database.execSQL("""ALTER TABLE ScrapeQueueItem ADD COLUMN errorCode INTEGER NOT NULL DEFAULT 0""".trimMargin())
-                } else if (database.dbType() == DoorDbType.POSTGRES){
-                    database.execSQL("""ALTER TABLE ScrapeQueueItem ADD COLUMN errorCode INTEGER NOT NULL DEFAULT 0""".trimMargin())
-                }
+                database.execSQL("""ALTER TABLE ScrapeQueueItem ADD COLUMN errorCode INTEGER NOT NULL DEFAULT 0""".trimMargin())
+            }
+        }
+
+        val MIGRATION_33_34 = object : DoorMigration(33, 34) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("""ALTER TABLE ScrapeQueueItem ADD COLUMN backOffTime BIGINT NOT NULL DEFAULT 0""".trimMargin())
             }
         }
 
@@ -2675,7 +2673,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33)
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34)
 
             return builder
         }
