@@ -23,6 +23,7 @@ import com.ustadmobile.core.controller.SelectMultipleProductTypeTreeDialogPresen
 import com.ustadmobile.core.db.dao.SaleProductParentJoinDao
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.SelectMultipleProductTypeTreeDialogView
 import com.ustadmobile.lib.db.entities.SaleProduct
@@ -148,7 +149,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(),
     private fun initView() {
         //Set recycler view
         recyclerView = rootView.findViewById(R.id.fragment_select_multiple_tree_dialog_recyclerview)
-        recyclerView!!.layoutManager = LinearLayoutManager(context)
+        recyclerView.layoutManager = LinearLayoutManager(context)
     }
 
 
@@ -186,7 +187,8 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(),
             }
             val app = TreeNode(
                     EntityLayoutType(
-                            everyProductType.saleProductName!!, everyProductType.saleProductUid,
+                            everyProductType.getNameLocale(UstadMobileSystemImpl.instance.getLocale(activity!!.applicationContext)),
+                            everyProductType.saleProductUid,
                             selected, false
                     )
             )

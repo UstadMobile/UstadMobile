@@ -284,17 +284,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/activity_report_options_detail_sales_price_heading" />
 
-        <com.ustadmobile.port.android.view.RangeSeekCustom
+        <com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
             android:id="@+id/activity_report_options_detail_sales_price_rangeseekcustom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="visible"
             app:bar_color="@color/color_gray"
             app:bar_height="1dp"
             app:bar_highlight_color="@color/fab"
             app:corner_radius="2"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -304,9 +307,19 @@
             app:max_value="100"
             app:min_value="0"
             app:right_thumb_color="@color/fab"
-            app:right_thumb_color_pressed="@color/fab" />
+            app:right_thumb_color_pressed="@color/fab"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="invisible"
+        app:layout_constraintTop_toBottomOf="@+id/activity_report_options_detail_sales_price_cl" />
 
 
 

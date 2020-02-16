@@ -13,6 +13,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportOptionsDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -35,6 +36,7 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
     internal lateinit var lesCL: ConstraintLayout
     internal lateinit var locationCL: ConstraintLayout
     internal lateinit var dateRangeCL: ConstraintLayout
+    internal lateinit var salesPriceCL : ConstraintLayout
     internal lateinit var productTypesTV: TextView
     internal lateinit var lesHeading : TextView
     internal lateinit var lesTV: TextView
@@ -42,7 +44,7 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
     internal lateinit var dateRangeTV: TextView
     internal lateinit var salesPriceTV: TextView
     internal lateinit var groupBySpinner: Spinner
-    internal lateinit var rangeSeek: RangeSeekCustom
+    internal lateinit var rangeSeek: CrystalRangeSeekbar
     internal lateinit var showAverageCB: CheckBox
 
     internal var menu: Menu? = null
@@ -123,6 +125,7 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
         dateRangeCL = findViewById(R.id.activity_report_options_detail_date_range_cl)
         rangeSeek = findViewById(R.id.activity_report_options_detail_sales_price_rangeseekcustom)
         showAverageCB = findViewById(R.id.activity_report_options_detail_show_average_cb)
+        salesPriceCL = findViewById(R.id.activity_report_options_detail_sales_price_cl)
 
 
         productTypesTV = findViewById(R.id.activity_report_options_detail_product_types_value)

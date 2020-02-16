@@ -28,7 +28,7 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
     init {
 
         if (arguments!!.containsKey(ARG_PRODUCT_SELECTED_SET)) {
-            val productTypesArrayString = arguments!!.get(ARG_PRODUCT_SELECTED_SET).toString()
+            val productTypesArrayString = arguments.get(ARG_PRODUCT_SELECTED_SET).toString()
             selectedProductTypeUidsList = convertCSVStringToLongList(productTypesArrayString)
         }
 
@@ -37,12 +37,12 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
 
     }
 
-    fun convertCSVStringToLongList(csString:String):List<Long> {
+    private fun convertCSVStringToLongList(csString:String):List<Long> {
         val list = ArrayList<Long>()
         for (s in csString.split((",").
                 toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()){
             val p = s.trim()
-            list.add(p as Long)
+            list.add(p.toLong())
         }
 
         return list
@@ -52,7 +52,7 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
         val parentJoinDao = repository.saleProductParentJoinDao
         val thisP=this
         GlobalScope.launch {
-            val resultLive = parentJoinDao.findTopSaleProductsLive()
+            val resultLive = parentJoinDao.findTopSaleProductsLive(UmAccountManager.getActivePersonUid(context))
             GlobalScope.launch(Dispatchers.Main) {
                 resultLive.observeWithPresenter(thisP, thisP::handleProductTypes)
             }
@@ -83,22 +83,11 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
 
     override fun entityChecked(entityName: String, entityUid: Long, checked: Boolean) {
         if (checked) {
-            if (entityUid != null) {
-                selectedOptions.put(entityName, entityUid)
-            }
+            selectedOptions.put(entityName, entityUid)
         } else {
             selectedOptions.remove(entityName)
         }
     }
 
-    companion object {
-
-        internal fun convertLongArray(array: LongArray): ArrayList<Long> {
-            val result = ArrayList<Long>(array.size)
-            for (item in array)
-                result.add(item)
-            return result
-        }
-    }
 
 }

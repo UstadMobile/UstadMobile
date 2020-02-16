@@ -126,24 +126,18 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     }
 
     //Find Top
-    @Query("SELECT Parent.* FROM SaleProductParentJoin " +
-            "LEFT JOIN SaleProduct as Parent ON " +
-            "   Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
-            " WHERE CAST(SaleProductParentJoinActive  AS INTEGER) = 1 " +
-            "   AND (SELECT COUNT(*) FROM SaleProductParentJoin AS sp " +
-            "       WHERE sp.saleProductParentJoinChildUid = Parent.saleProductUid ) = 0 " +
-            " GROUP BY saleProductParentJoinParentUid")
-    abstract suspend fun findTopSaleProductsAsync():List<SaleProduct>
 
+    @Query("""
+        SELECT Parent.* FROM SaleProductParentJoin 
+            LEFT JOIN SaleProduct as Parent ON 
+               Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid 
+             LEFT JOIN Person as LE ON LE.personUid = :leUid 
+             WHERE CAST(SaleProductParentJoinActive  AS INTEGER) = 1 
+			 AND CAST(Parent.saleProductActive AS INTEGER) = 1
 
-    @Query("SELECT Parent.* FROM SaleProductParentJoin " +
-            "LEFT JOIN SaleProduct as Parent ON " +
-            "   Parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid " +
-            " WHERE CAST(SaleProductParentJoinActive  AS INTEGER) = 1 " +
-            "   AND (SELECT COUNT(*) FROM SaleProductParentJoin AS sp " +
-            "       WHERE sp.saleProductParentJoinChildUid = Parent.saleProductUid ) = 0 " +
-            " GROUP BY saleProductParentJoinParentUid")
-    abstract fun findTopSaleProductsLive():DoorLiveData<List<SaleProduct>>
+             GROUP BY saleProductParentJoinParentUid
+    """)
+    abstract fun findTopSaleProductsLive(leUid: Long):DoorLiveData<List<SaleProduct>>
 
 
     //Find categories in a category uid

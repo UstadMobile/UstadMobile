@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.SaleProduct
  */
 interface SelectMultipleProductTypeTreeDialogView : UstadView {
 
-    fun populateTopProductType(locations: List<SaleProduct>)
+    fun populateTopProductType(productTypes: List<SaleProduct>)
 
     fun setTitle(title: String)
 
