@@ -10,7 +10,7 @@ import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
-import kotlinx.android.synthetic.main.activity_entry_detail.view.*
+import kotlinx.android.synthetic.main.activity_content_entry_detail.view.*
 import kotlinx.android.synthetic.main.view_repo_loading_status.view.*
 import org.junit.Before
 import org.junit.Test

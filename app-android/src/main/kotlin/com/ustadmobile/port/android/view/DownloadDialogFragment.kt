@@ -59,7 +59,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     private lateinit var activity: UstadBaseActivity
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         if (context is UstadBaseActivity) {
             activity = context
         }
@@ -231,7 +231,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
     }
 
 
-    override fun onCancel(dialog: DialogInterface?) {
+    override fun onCancel(dialog: DialogInterface) {
         mPresenter?.handleClickNegative(false)
         super.onCancel(dialog)
     }

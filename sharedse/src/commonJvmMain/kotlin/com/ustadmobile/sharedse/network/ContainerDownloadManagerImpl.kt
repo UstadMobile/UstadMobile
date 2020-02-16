@@ -18,6 +18,7 @@ import kotlin.collections.HashSet
 import com.ustadmobile.core.util.ext.makeRootDownloadJobItem
 import com.ustadmobile.core.util.ext.isStatusCompleted
 
+
 typealias ContainerDownloaderMaker = suspend (downloadJob: DownloadJobItem, downloadJobManager: ContainerDownloadManager) -> ContainerDownloadRunner
 
 class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineContext = newSingleThreadContext("UstadDownloadManager"),
@@ -28,9 +29,15 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
     /**
      * This class ensures that a reference is kept as long as anything still holds a reference to
      * this live data. This is used to ensure that holders are not garbage collected as long as
-     * anything else holds a reference to the livedata in that holder
+     * anything else holds a reference to the livedata in that holder.
+     *
+     * IMPORTANT: This requires a proguard rule to keep the reference field. The reference field
+     * is otherwise unused. Without a keep rule, shrinking will detect that the reference field
+     * is otherwise unused and it will be stripped out. Once it is stripped out, the reference
+     * will not prevent garbage collection of the holder when the LiveData is in use as intended.
+     *
      */
-    private inner class MutableLiveDataWithRef<T>: DoorMutableLiveData<T> {
+    inner class MutableLiveDataWithRef<T>: DoorMutableLiveData<T> {
 
         val reference: Any?
 
@@ -42,15 +49,21 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
             this.reference = reference
         }
 
+        override fun toString(): String {
+            return "MutableLiveDataRef@" + System.identityHashCode(this)
+        }
+
     }
 
-    private inner class DownloadJobItemHolder(val downloadJobItemUid: Int,
+    inner class DownloadJobItemHolder(val downloadJobItemUid: Int,
                                               var downloadJobItem: DownloadJobItem?,
                                               val parents: MutableList<DownloadJobItemHolder>) {
 
         val liveData = MutableLiveDataWithRef<DownloadJobItem?>(this, downloadJobItem)
 
         private var downloadJobHolder = loadDownloadJobHolder(downloadJobItem?.djiDjUid ?: -1)
+
+        private val contentEntryHolder = loadContentEntryHolder(downloadJobItem?.djiContentEntryUid ?: -1)
 
         fun postUpdate(updated: DownloadJobItem, bubble: Boolean = true) {
             val deltaDownloadedSoFar = updated.downloadedSoFar - (downloadJobItem?.downloadedSoFar ?: 0L)
@@ -65,7 +78,8 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
                     updated.djiStatus)
 
             liveData.sendValue(updated)
-            contentEntryHolders[updated.djiContentEntryUid]?.get()?.liveData?.sendValue(updated)
+
+            contentEntryHolder.liveData.sendValue(updated)
 
             entriesToCommit.add(updated)
 
@@ -126,7 +140,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         }
     }
 
-    private inner class ContentEntryHolder(val contentEntryUid: Long, var downloadJobItem: DownloadJobItem?) {
+    inner class ContentEntryHolder(val contentEntryUid: Long, var downloadJobItem: DownloadJobItem?) {
 
         val liveData = MutableLiveDataWithRef<DownloadJobItem?>(this, downloadJobItem)
 
@@ -211,6 +225,10 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         return newHolder
     }
 
+    suspend fun getDownloadJobItemHolder(jobItemUid: Int) = withContext(singleThreadContext) {
+        loadDownloadJobItemHolder(jobItemUid)
+    }
+
     private fun loadDownloadJobHolder(jobUid: Int): DownloadJobHolder {
         val currentHolder = downloadJobMap[jobUid]?.get()
         if(currentHolder != null)
@@ -229,22 +247,31 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         jobsToCommit.clear()
     }
 
+
     override suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Long): DoorLiveData<DownloadJobItem?> = withContext(singleThreadContext){
+        loadContentEntryHolder(contentEntryUid).liveData
+    }
+
+    private fun loadContentEntryHolder(contentEntryUid: Long, initDownloadJob: DownloadJobItem? = null): ContentEntryHolder {
         var currentHolder = contentEntryHolders[contentEntryUid]?.get()
-        if(currentHolder == null) {
-            var currentDownloadJob = jobItemUidToHolderMap.values.firstOrNull {
-                it.get()?.downloadJobItem?.djiContentEntryUid == contentEntryUid
-            }?.get()?.downloadJobItem
+        if(currentHolder != null)
+            return currentHolder
 
-            if(currentDownloadJob == null) {
-                currentDownloadJob = appDb.downloadJobItemDao.findByContentEntryUid(contentEntryUid)
-            }
+        var currentDownloadJob = initDownloadJob ?: jobItemUidToHolderMap.values.firstOrNull {
+            it.get()?.downloadJobItem?.djiContentEntryUid == contentEntryUid
+        }?.get()?.downloadJobItem
 
-            currentHolder = ContentEntryHolder(contentEntryUid, currentDownloadJob)
-            contentEntryHolders[contentEntryUid] = WeakReference(currentHolder)
+        if(currentDownloadJob == null) {
+            currentDownloadJob = appDb.downloadJobItemDao.findByContentEntryUid(contentEntryUid)
         }
 
-        return@withContext currentHolder.liveData
+        currentHolder = ContentEntryHolder(contentEntryUid, currentDownloadJob)
+        contentEntryHolders[contentEntryUid] = WeakReference(currentHolder)
+        return currentHolder
+    }
+
+    suspend fun getContentEntryHolder(contentEntryUid: Long) = withContext(singleThreadContext){
+        loadContentEntryHolder(contentEntryUid)
     }
 
     override suspend fun getDownloadJob(jobUid: Int): DoorLiveData<DownloadJob?> = withContext(singleThreadContext) {

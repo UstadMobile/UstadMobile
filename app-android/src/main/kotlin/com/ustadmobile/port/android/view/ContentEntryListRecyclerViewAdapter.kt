@@ -12,11 +12,13 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.github.aakira.napier.Napier
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
 import com.google.android.material.chip.ChipGroup
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.door.DoorLiveData
@@ -66,6 +68,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             synchronized(boundViewHolders) {
                 boundViewHolders.remove(holder)
             }
+
+            holder.downloadJobItemLiveData?.removeObserver(holder)
         }
         super.onViewRecycled(holder)
     }
@@ -100,7 +104,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 boundViewHolders.add(holder)
             }
 
-            holder.downloadJobItemLiveData?.removeObserver(holder)
             GlobalScope.launch(Dispatchers.Main.immediate) {
                 holder.downloadJobItemLiveData = containerDownloadManager
                         .getDownloadJobItemByContentEntryUid(entry?.contentEntryUid ?: 0).also {
@@ -246,6 +249,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
         override fun onChanged(t: DownloadJobItem?) {
+            Napier.i("DLUFIX: Received update for ${t?.djiUid} = ${t?.toStatusString(UstadMobileSystemImpl.instance, activity)}")
             if(t?.djiStatus != currentDownloadStatus) {
                 currentDownloadStatus = t?.djiStatus ?: 0
                 val context = view.context
@@ -255,7 +259,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 var contentDescription = if (t.isStatusQueuedOrDownloading()) {
                     context.getString(R.string.downloading)
                 } else {
-                    context.getString(R.string.download_entry_state_queued)
+                    context.getString(R.string.queued)
                 }
 
                 when {

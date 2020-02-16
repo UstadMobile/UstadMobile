@@ -251,7 +251,11 @@ kotlin {
             dependencies {
                 implementation "com.github.aakira:napier-android:$version_napier"
                 implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
-                implementation "androidx.legacy:legacy-support-v4:$version_androidx_support_lib"
+                implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
+
+                //Seems to fix things when we put a specific dependency here
+                implementation "androidx.coordinatorlayout:coordinatorlayout:$version_androidx_coordinatorlayout"
+                implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
                 implementation "com.soywiz:klock-android:$version_klock"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"

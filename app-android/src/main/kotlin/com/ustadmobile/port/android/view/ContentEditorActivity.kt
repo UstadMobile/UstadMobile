@@ -802,7 +802,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
     }
 
 
-    override fun onAttachFragment(fragment: Fragment?) {
+    override fun onAttachFragment(fragment: Fragment) {
         if (fragment is ContentEditorPageListFragment) {
             fragment.setUmFileHelper(presenter)
             fragment.setCurrentPage(presenter.currentPage)

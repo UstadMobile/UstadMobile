@@ -115,7 +115,7 @@ dependencies {
 
 
     implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
-    implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_support_lib"
+    implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
 
     testImplementation "junit:junit:$version_junit"
     androidTestImplementation "androidx.room:room-testing:$version_android_room"
