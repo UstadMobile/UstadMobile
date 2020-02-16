@@ -18,7 +18,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
     val queueDao = db.scrapeQueueItemDao
     val languageDao = db.languageDao
     val englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
-    val masterRootParent =  ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE,
+    val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE,
             ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, ContentEntry.LICENSE_TYPE_CC_BY, englishLang.langUid, null,
             ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
             ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
@@ -31,7 +31,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
         LanguageList().addAllLanguages()
     }
 
-    fun createQueueItem(queueUrl: String, contentEntry: ContentEntry, contentType: String, scraperType: Int){
+    fun createQueueItem(queueUrl: String, contentEntry: ContentEntry, contentType: String, scraperType: Int) {
         var item = queueDao.getExistingQueueItem(runUid, queueUrl)
         if (item == null) {
             item = ScrapeQueueItem()
@@ -44,6 +44,10 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
             item.timeAdded = System.currentTimeMillis()
             queueDao.insert(item)
         }
+    }
+
+    fun setIndexerDone(successful: Boolean, errorCode: Int) {
+        queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
     }
 
     abstract fun indexUrl(sourceUrl: String)

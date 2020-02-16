@@ -12,8 +12,8 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 import kotlin.math.pow
 
 abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : Scraper(containerDir, db, contentEntryUid, sqiUid) {
@@ -41,35 +41,37 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
 
         tempDir = Files.createTempDirectory(sourceUrl.substringAfter("=")).toFile()
 
-        youtubeLocker.withLock {
-
-            Thread.sleep(10000)
-            UMLogUtil.logTrace("starting youtube lock")
-
-            val builder = ProcessBuilder(ytPath,"--retries", "1", "--limit-rate", "2M", "-f", videoQualityOption, "-o", "${tempDir!!.absolutePath}/%(id)s.%(ext)s", sourceUrl)
+        if (youtubeLocker.tryLock(2, TimeUnit.MINUTES)) {
             var process: Process? = null
             try {
+                Thread.sleep(10000)
+                UMLogUtil.logTrace("starting youtube lock")
+                val builder = ProcessBuilder(ytPath, "--retries", "1", "--limit-rate", "2M", "-f", videoQualityOption, "-o", "${tempDir!!.absolutePath}/%(id)s.%(ext)s", sourceUrl)
                 process = builder.start()
-                process!!.waitFor()
+                process.waitFor()
                 val exitValue = process.exitValue()
                 if (exitValue != 0) {
                     UMLogUtil.logError("Error Stream for src $sourceUrl with error code  ${UMIOUtils.readStreamToString(process.errorStream)}")
+                    failureAttempts.add(System.currentTimeMillis())
                     println(UMIOUtils.readStreamToString(process.errorStream))
                     val numberOfFailures = 1 + failureAttempts.count {
-                        it >= (System.currentTimeMillis() - YOUTUBE_TIME_OUT)
+                        it >= (System.currentTimeMillis() - THRESHOLD_TIMEOUT)
                     }
-                    var delay = baseRetry.pow(numberOfFailures)
-                    Thread.sleep(180000)
-                    throw IOException()
+                    lockedUntil = baseRetry.pow(numberOfFailures) + System.currentTimeMillis()
+                    setScrapeQueueDelay(lockedUntil.toLong())
+                    setScrapeDone(false, ERROR_TYPE_YOUTUBE_ERROR)
+
+                    throw IOException("failed with youtube with ytUrl $sourceUrl")
                 }
             } catch (e: Exception) {
                 hideContentEntry()
                 close()
-                throw ScraperException(ERROR_TYPE_YOUTUBE_ERROR, "${e.message} failed with youtube with ytUrl $sourceUrl")
+                setScrapeDone(false, ERROR_TYPE_YOUTUBE_ERROR)
+                throw e
             } finally {
                 process?.destroy()
+                youtubeLocker.unlock()
             }
-
         }
         UMLogUtil.logTrace("ending youtube lock")
 
@@ -112,7 +114,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
 
     companion object {
 
-        const val YOUTUBE_TIME_OUT = 1800000
+        const val THRESHOLD_TIMEOUT = 1800000
 
         var failureAttempts = mutableListOf<Long>()
 

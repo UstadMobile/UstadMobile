@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.util.MimeType
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -24,6 +25,7 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
     val contentEntryParentChildJoinDao = db.contentEntryParentChildJoinDao
     val contentEntryDao = db.contentEntryDao
     val containerDao = db.containerDao
+    val scrapeQueueDao = db.scrapeQueueItemDao
 
     abstract fun scrapeUrl(sourceUrl: String)
 
@@ -46,6 +48,14 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
 
     fun showContentEntry() {
         contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
+    }
+
+    fun setScrapeQueueDelay(delay: Long) {
+        scrapeQueueDao.setBackOffTimeAndStatusToQueue(delay, sqiUid)
+    }
+
+    fun setScrapeDone(successful: Boolean, errorCode: Int){
+        scrapeQueueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
     }
 
     fun isUrlContentUpdated(url: URL, container: Container): Boolean {
