@@ -530,7 +530,8 @@
     <string name="age">Age</string>
     <string name="days">Days</string>
     <string name="onboarding_easily_record_student_attendance">Easily record student attendance</string>
-    <string name="get_started">Get started</string>
+    <!-- Get started - e.g. as used in the button when the app first runs-->
+    <string name="get_started2">Get started</string>
     <string name="select_file">Select file</string>
     <string name="bulk_upload_master">Bulk Upload Master</string>
     <string name="apply">Apply</string>
