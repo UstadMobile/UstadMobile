@@ -764,4 +764,29 @@
     <!-- E.g. for a mixed gender school which has both boys and girls-->
     <string name="mixed">Mixed</string>
 
+    <!-- App store descriptions are placed here so that they appear in the translation system. They
+    will be automatically removed from the final app by resource shrinking -->
+
+
+    <!-- App store title - max 50 characters -->
+    <string name="store_title">Ustad Mobile - Offline Open Educational Resources</string>
+
+    <!-- Short description - max 80 characters -->
+    <string name="store_description_short">Access and share educational content offline</string>
+
+    <!-- Full app store description - max 4000 characters-->
+    <string name="store_description_full">Ustad Mobile is an open-source app that enables users to access a wide variety of open educational resources, online or offline. Both the app and content can be shared offline between devices.\n
+\n
+Ustad Mobile features openly licensed content from some of the Internet\'s leading Open Educational Resources (OER) sites:\n
+\n
+African Story Books\n
+ETakkatho\n
+Global Digital Library\n
+Khan Academy (including offline access to both videos and exercises)\n
+PHET\n
+Pratham Books\n
+Voice of America\n
+\n
+Content is provided under license by external content providers. Ustad Mobile, unless explicitly mentioned otherwise, is not endorsed by any such content provider.</string>
+
 </resources>
