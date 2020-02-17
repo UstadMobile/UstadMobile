@@ -33,7 +33,7 @@ class ScrapeQueueItem() {
 
     var timeFinished: Long = 0
 
-    var backOffTime: Long = 0
+    var priority: Int = 0
 
     companion object {
 
