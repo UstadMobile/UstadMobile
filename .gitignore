@@ -210,3 +210,7 @@ app-android/src/main/assets/cache
 build/
 build/
 .vscode/
+
+#File output by utility script to find unused ids
+string_ids.txt
+unused_strings.txt

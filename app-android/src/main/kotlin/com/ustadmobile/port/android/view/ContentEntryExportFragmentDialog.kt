@@ -55,7 +55,7 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
 
     private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         if(context is UstadBaseActivity){
             presenter = ContentEntryExportPresenter(activity!!, UMAndroidUtil.bundleToMap(arguments),
                     this,UmAccountManager.getRepositoryForActiveAccount(activity!!),

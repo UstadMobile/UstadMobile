@@ -45,7 +45,7 @@ open class UstadBaseFragment : Fragment() {
         }
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
         val runnables = runOnAttach.iterator()

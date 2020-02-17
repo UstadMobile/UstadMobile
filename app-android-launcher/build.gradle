@@ -132,9 +132,24 @@ configurations.all {
 //        force "android.arch.core:runtime:$lifecycle_version"
 //    }
 
+    resolutionStrategy {
+        force "androidx.lifecycle:lifecycle-livedata-core:$version_androidx_lifecycle"
+        force "androidx.lifecycle:lifecycle-runtime:$version_androidx_lifecycle"
+        force "androidx.arch.core:core-runtime:$version_androidx_arch"
+        force "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
+    }
+
+//    resolutionStrategy.eachDependency { details ->
+//        if(details.request.group == 'androidx.recyclerview'){
+//            details.useVersion "2.2.3"
+//        }
+//    }
+
+
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
 }
+
 
 
 dependencies {
@@ -151,7 +166,7 @@ dependencies {
 
     implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
 
-    vanillamultidexApi 'androidx.multidex:multidex:2.0.0'
+    vanillamultidexApi 'androidx.multidex:multidex:2.0.1'
 
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
 
@@ -161,8 +176,8 @@ dependencies {
 
 
     api fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.1.0'
+//    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+//    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.2.0'
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 
     testImplementation "junit:junit:$version_junit"

@@ -236,8 +236,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         super.onPrepareOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             R.id.edit_category_content -> {
                 presenter?.handleClickEditButton()
                 return true
@@ -300,7 +300,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         }
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         if (context is ContentEntryListHostActivity) {
             this.contentEntryListHostActivity = context
         }
