@@ -12,8 +12,8 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import kotlin.math.pow
 
 abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : Scraper(containerDir, db, contentEntryUid, sqiUid) {
@@ -41,7 +41,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
 
         tempDir = Files.createTempDirectory(sourceUrl.substringAfter("=")).toFile()
 
-        if (youtubeLocker.tryLock(2, TimeUnit.MINUTES)) {
+        youtubeLocker.withLock {
             var process: Process? = null
             try {
                 Thread.sleep(10000)
@@ -58,13 +58,13 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
                         it >= (System.currentTimeMillis() - THRESHOLD_TIMEOUT)
                     }
                     lockedUntil = (baseRetry.pow(numberOfFailures) * 1000) + System.currentTimeMillis()
+                    Thread.sleep(lockedUntil.toLong())
                     throw IOException("failed with youtube with ytUrl $sourceUrl")
                 }
             } catch (e: Exception) {
                 hideContentEntry()
                 close()
-                setScrapeQueueDelay(lockedUntil.toLong())
-                setScrapeDone(false, ERROR_TYPE_YOUTUBE_ERROR)
+                UMLogUtil.logError("caught youtube exception with lockedUntil value of ${lockedUntil.toLong()}")
                 throw e
             } finally {
                 process?.destroy()
