@@ -8,7 +8,6 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
-import com.ustadmobile.lib.db.entities.ScraperTime
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -57,24 +56,6 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
     }
 
     fun resume(runId: Int) {
-
-        val timer = db.scraperTimeDao.getTime()
-        if(timer == null){
-            val time = ScraperTime().apply {
-                timeUid = 1
-                time = System.currentTimeMillis()
-            }
-            db.scraperTimeDao.insert(time)
-        }
-
-        GlobalScope.launch {
-
-            while (true){
-                db.scraperTimeDao.updateTime(System.currentTimeMillis())
-                delay(30000)
-            }
-
-        }
 
         val indexWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX),
                 { item1, item2 -> item1.sqiUid == item2.sqiUid },

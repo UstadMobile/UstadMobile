@@ -50,10 +50,6 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
     }
 
-    fun setScrapeQueueDelay(delay: Long) {
-        scrapeQueueDao.setBackOffTimeAndStatusToQueue(delay, sqiUid)
-    }
-
     fun setScrapeDone(successful: Boolean, errorCode: Int){
         scrapeQueueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
     }

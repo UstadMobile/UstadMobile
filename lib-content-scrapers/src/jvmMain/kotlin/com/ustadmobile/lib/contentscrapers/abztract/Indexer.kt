@@ -31,7 +31,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
         LanguageList().addAllLanguages()
     }
 
-    fun createQueueItem(queueUrl: String, contentEntry: ContentEntry, contentType: String, scraperType: Int) {
+    fun createQueueItem(queueUrl: String, contentEntry: ContentEntry, contentType: String, scraperType: Int, priority: Int = 1) {
         var item = queueDao.getExistingQueueItem(runUid, queueUrl)
         if (item == null) {
             item = ScrapeQueueItem()
@@ -42,6 +42,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
             item.runId = runUid
             item.itemType = scraperType
             item.timeAdded = System.currentTimeMillis()
+            item.priority = priority
             queueDao.insert(item)
         }
     }

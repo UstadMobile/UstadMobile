@@ -13,7 +13,7 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
     @Query("SELECT * FROM ScrapeQueueItem")
     abstract fun findAll(): List<ScrapeQueueItem>
 
-    @Query("SELECT * FROM ScrapeQueueItem WHERE status = 1 AND runId = :runId AND itemType = :itemType AND (SELECT time FROM ScraperTime ORDER BY time DESC LIMIT 1) >= backOffTime LIMIT 10")
+    @Query("SELECT * FROM ScrapeQueueItem WHERE status = 1 AND runId = :runId AND itemType = :itemType ORDER BY priority ASC LIMIT 10")
     abstract fun findNextQueueItems(runId: Int, itemType: Int): DoorLiveData<List<ScrapeQueueItem>>
 
     @Query("UPDATE ScrapeQueueItem SET status = :status, errorCode = :errorCode WHERE sqiUid = :uid")
@@ -21,9 +21,6 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
 
     @Query("SELECT * from ScrapeQueueItem WHERE runId = :runId AND scrapeUrl = :indexUrl LIMIT 1")
     abstract fun getExistingQueueItem(runId: Int, indexUrl: String): ScrapeQueueItem?
-
-    @Query("UPDATE ScrapeQueueItem SET backOffTime = :delay, status = $STATUS_PENDING WHERE sqiUid = :uid")
-    abstract fun setBackOffTimeAndStatusToQueue(delay: Long, uid: Int)
 
     @Query("UPDATE ScrapeQueueItem SET timeStarted = :timeStarted WHERE sqiUid = :uid")
     abstract fun setTimeStarted(uid: Int, timeStarted: Long)
