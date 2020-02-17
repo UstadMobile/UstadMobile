@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
 import java.io.File
 
-class TestChildHarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid) {
+class TestChildHarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid, 0) {
 
     override fun scrapeUrl(sourceUrl: String) {
         startHarScrape(sourceUrl, null){

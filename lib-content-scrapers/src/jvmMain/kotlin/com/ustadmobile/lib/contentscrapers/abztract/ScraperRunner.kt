@@ -8,8 +8,10 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
+import com.ustadmobile.lib.db.entities.ScraperTime
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.commons.cli.*
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -56,6 +58,24 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
     fun resume(runId: Int) {
 
+        val timer = db.scraperTimeDao.getTime()
+        if(timer == null){
+            val time = ScraperTime().apply {
+                timeUid = 1
+                time = System.currentTimeMillis()
+            }
+            db.scraperTimeDao.insert(time)
+        }
+
+        GlobalScope.launch {
+
+            while (true){
+                db.scraperTimeDao.updateTime(System.currentTimeMillis())
+                delay(30000)
+            }
+
+        }
+
         val indexWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX),
                 { item1, item2 -> item1.sqiUid == item2.sqiUid },
                 indexTotal) {
@@ -66,22 +86,17 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             UMLogUtil.logInfo("Started indexer url ${it.scrapeUrl} at start time: $startTime")
 
             queueDao.setTimeStarted(it.sqiUid, startTime)
-            var successful = false
-
             try {
                 val indexerClazz = ScraperTypes.indexerTypeMap[it.contentType]
                 val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, UmAppDatabase::class.java, Int::class.java)
                 val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, db, it.sqiUid) as Indexer?
                 obj?.indexUrl(it.scrapeUrl!!)
-                successful = true
 
             } catch (e: Exception) {
-                //Must never happen
                 UMLogUtil.logError("Exception running indexer ${it.scrapeUrl}")
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
             }
 
-            queueDao.updateSetStatusById(it.sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, 0)
             queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
             val duration = System.currentTimeMillis() - startTime
             UMLogUtil.logInfo("Ended indexer for url ${it.scrapeUrl} in duration: $duration")
@@ -101,24 +116,17 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             UMLogUtil.logInfo("Started scraper url ${it.scrapeUrl} at start time: $startTime")
 
             queueDao.setTimeStarted(it.sqiUid, startTime)
-            var successful = false
-            var errorCode = 0
             try {
 
                 val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
                 val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java, Int::class.java)
                 val obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid, it.sqiUid)
                 obj?.scrapeUrl(it.scrapeUrl!!)
-                successful = true
-
-
             } catch (e: Exception) {
-                errorCode = if (e is ScraperException) e.errorCode else 0
                 UMLogUtil.logError("Exception running scrapeContent ${it.scrapeUrl}")
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
             }
 
-            queueDao.updateSetStatusById(it.sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
             queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
             val duration = System.currentTimeMillis() - startTime
             UMLogUtil.logInfo("Ended scrape for url ${it.scrapeUrl} in duration: $duration")

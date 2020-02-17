@@ -57,15 +57,13 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
                     val numberOfFailures = 1 + failureAttempts.count {
                         it >= (System.currentTimeMillis() - THRESHOLD_TIMEOUT)
                     }
-                    lockedUntil = baseRetry.pow(numberOfFailures) + System.currentTimeMillis()
-                    setScrapeQueueDelay(lockedUntil.toLong())
-                    setScrapeDone(false, ERROR_TYPE_YOUTUBE_ERROR)
-
+                    lockedUntil = (baseRetry.pow(numberOfFailures) * 1000) + System.currentTimeMillis()
                     throw IOException("failed with youtube with ytUrl $sourceUrl")
                 }
             } catch (e: Exception) {
                 hideContentEntry()
                 close()
+                setScrapeQueueDelay(lockedUntil.toLong())
                 setScrapeDone(false, ERROR_TYPE_YOUTUBE_ERROR)
                 throw e
             } finally {
@@ -81,6 +79,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
         if (!VIDEO_MIME_MAP.keys.contains(mimetype)) {
             hideContentEntry()
             close()
+            setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
             throw ScraperException(ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED, "Video type not supported for $mimetype")
         }
 
@@ -90,6 +89,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
             val isUpdated = videoFile.lastModified() > recentContainer.cntLastModified
             if (!isUpdated) {
                 showContentEntry()
+                setScrapeDone(true, 0)
                 close()
                 return null
             }
@@ -101,6 +101,9 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
             containerManager.addEntries(ContainerManager.FileEntrySource(videoFile, videoFile.name))
         }
 
+
+        showContentEntry()
+        setScrapeDone(true, 0)
         close()
 
         return containerManager

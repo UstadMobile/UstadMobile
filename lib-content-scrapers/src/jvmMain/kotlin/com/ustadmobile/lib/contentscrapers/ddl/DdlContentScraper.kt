@@ -45,7 +45,7 @@ import java.util.*
  * Check if the file was downloaded before with etag or last modified
  * Create the content entry
  */
-class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid) {
+class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
 
     private val categorySchemaDao: ContentCategorySchemaDao
     private val contentCategoryDao: ContentCategoryDao
@@ -321,7 +321,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             UMLogUtil.logInfo(args[0])
             UMLogUtil.logInfo(args[1])
             try {
-                DdlContentScraper(File(args[1]), UmAppDatabase.Companion.getInstance(Any()), 0).scrapeUrl(args[0])
+                DdlContentScraper(File(args[1]), UmAppDatabase.Companion.getInstance(Any()), 0, 0).scrapeUrl(args[0])
             } catch (e: IOException) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logError("$DDL Exception running scrapeContent ddl")

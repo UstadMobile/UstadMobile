@@ -96,6 +96,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("scrapeQueueItemDao")
     abstract val scrapeQueueItemDao: ScrapeQueueItemDao
 
+    @JsName("scraperTime")
+    abstract val scraperTimeDao: ScraperTimeDao
+
     @JsName("personAuthDao")
     abstract val personAuthDao: PersonAuthDao
 

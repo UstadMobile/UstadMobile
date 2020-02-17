@@ -150,7 +150,7 @@ class IndexDdlContent {
                     contentEntry.contentEntryUid = db.contentEntryDao.insert(contentEntry)
                 }
 
-                val scraper = DdlContentScraper(containerDir, db, contentEntry.contentEntryUid)
+                val scraper = DdlContentScraper(containerDir, db, contentEntry.contentEntryUid, 0)
                 try {
                     scraper.scrapeUrl(url)
                     UMLogUtil.logTrace("$DDL scraped url: $url")

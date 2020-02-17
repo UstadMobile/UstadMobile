@@ -44,7 +44,7 @@ class TestYoutubeDownload {
 
         var scraper = ChildYtIndexer(entry.contentEntryUid, 5, db)
 
-        scraper.startPlayListIndexer("https://www.youtube.com/playlist?list=PLFhWybf5UzoyuW6kiro3Y4KtFmQpzxrLD", containerFolder)
+        scraper.startPlayListIndexer("https://www.youtube.com/playlist?list=PLFhWybf5UzoyuW6kiro3Y4KtFmQpzxrLD")
 
     }
 

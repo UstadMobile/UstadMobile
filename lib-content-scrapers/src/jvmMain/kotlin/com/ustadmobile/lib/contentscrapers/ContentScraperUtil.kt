@@ -1396,13 +1396,13 @@ object ContentScraperUtil {
     fun waitForQueueToFinish(queueDao: ScrapeQueueItemDao, runId: Int) {
         var count: Int
         do {
-            Thread.sleep(3000)
+            Thread.sleep(60000)
             count = queueDao.getQueueCount(runId)
         } while (count != 0)
     }
 
     fun insertOrUpdateLanguageManual(langDao: LanguageDao, langName: String, langCode: String) {
-        var lang = langDao.findByName(langName)
+        val lang = langDao.findByName(langName)
 
         val newLang = Language()
         newLang.name = langName
