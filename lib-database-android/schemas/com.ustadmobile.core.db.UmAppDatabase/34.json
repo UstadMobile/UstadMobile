@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 34,
-    "identityHash": "901210d37cc2280e783595f2c2f70381",
+    "identityHash": "72ab025afa00e92cc6ff9d263170bee1",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1833,7 +1833,7 @@
       },
       {
         "tableName": "ScrapeQueueItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sqiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sqiContentEntryParentUid` INTEGER NOT NULL, `destDir` TEXT, `scrapeUrl` TEXT, `status` INTEGER NOT NULL, `runId` INTEGER NOT NULL, `itemType` INTEGER NOT NULL, `errorCode` INTEGER NOT NULL, `contentType` TEXT, `timeAdded` INTEGER NOT NULL, `timeStarted` INTEGER NOT NULL, `timeFinished` INTEGER NOT NULL, `backOffTime` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sqiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sqiContentEntryParentUid` INTEGER NOT NULL, `destDir` TEXT, `scrapeUrl` TEXT, `status` INTEGER NOT NULL, `runId` INTEGER NOT NULL, `itemType` INTEGER NOT NULL, `errorCode` INTEGER NOT NULL, `contentType` TEXT, `timeAdded` INTEGER NOT NULL, `timeStarted` INTEGER NOT NULL, `timeFinished` INTEGER NOT NULL, `priority` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "sqiUid",
@@ -1908,8 +1908,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "backOffTime",
-            "columnName": "backOffTime",
+            "fieldPath": "priority",
+            "columnName": "priority",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -3041,32 +3041,6 @@
             "srUid"
           ],
           "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ScraperTime",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`timeUid` INTEGER NOT NULL, `time` INTEGER NOT NULL, PRIMARY KEY(`timeUid`))",
-        "fields": [
-          {
-            "fieldPath": "timeUid",
-            "columnName": "timeUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "time",
-            "columnName": "time",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "timeUid"
-          ],
-          "autoGenerate": false
         },
         "indices": [],
         "foreignKeys": []
@@ -4911,7 +4885,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '901210d37cc2280e783595f2c2f70381')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '72ab025afa00e92cc6ff9d263170bee1')"
     ]
   }
 }
