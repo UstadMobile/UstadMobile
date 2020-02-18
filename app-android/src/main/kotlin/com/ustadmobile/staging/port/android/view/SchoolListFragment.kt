@@ -124,7 +124,7 @@ class SchoolListFragment : UstadBaseFragment(), SchoolListView, SearchableListen
     
 
     companion object {
-        val icon = R.drawable.ic_person_black_24dp
+        val icon = R.drawable.ic_school_black_24dp
         val title = R.string.schools
 
         /**
