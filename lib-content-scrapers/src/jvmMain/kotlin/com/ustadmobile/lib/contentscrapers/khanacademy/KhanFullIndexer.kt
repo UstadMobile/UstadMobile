@@ -25,8 +25,6 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
                 ?: throw ScraperException(0, "Do not have support for lite language: $lang")
 
 
-
-
         val harEntryList = startHarIndexer(sourceUrl, listOf(Regex("learnMenuTopicsQuery"))) {
             true
         }
@@ -47,9 +45,11 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
                     ScraperConstants.EMPTY_STRING,
                     0, contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, topicEntry, topicCount)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao,
+                    parentcontentEntry!!, topicEntry, topicCount)
 
-            createQueueItem(topicUrl.toString(), topicEntry, KHAN_TOPIC_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
+            createQueueItem(topicUrl.toString(), topicEntry, KHAN_TOPIC_INDEXER,
+                    ScrapeQueueItem.ITEM_TYPE_INDEX)
         }
 
     }

@@ -11,6 +11,8 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper
+import com.ustadmobile.lib.contentscrapers.ytindexer.ChildYoutubeScraper
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -83,7 +85,7 @@ class TestPrathamContentScraper {
     @Before
     fun clearDb() {
         db = UmAppDatabase.getInstance(Any())
-        db.clearAllTables()
+       // db.clearAllTables()
     }
 
 
@@ -152,7 +154,7 @@ class TestPrathamContentScraper {
         mockWebServer.setDispatcher(dispatcher)
 
         val scraper = DdlContentScraper(
-                containerDir, db, 0)
+                containerDir, db, 0, 0)
         scraper.scrapeUrl(mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString())
 
         val contentFolder = File(tmpDir, "ddlcontent")
@@ -168,13 +170,16 @@ class TestPrathamContentScraper {
     fun test() {
         val containerDir = Files.createTempDirectory("container").toFile()
 
-        /*val entry = ContentEntry()
-        entry.sourceUrl = "https://ddl.af/resource/9350"
+        val entry = ContentEntry()
+        entry.sourceUrl = "https://www.youtube.com/watch?v=wWFFK9EE6tQ"
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
-        val scraper = DdlContentScraper(
+       /* val scraper = DdlContentScraper(
                 containerDir, "en", db, entry.contentEntryUid)
         scraper.scrapeUrl(entry.sourceUrl!!)*/
+
+        val child = ChildYoutubeScraper(containerDir, db,  entry.contentEntryUid, 0)
+        child.scrapeYoutubeLink(entry.sourceUrl!!)
 
         val document = Jsoup.connect("https://ddl.af/fa/resource/9398/")
                 .header("X-Requested-With", "XMLHttpRequest").get()

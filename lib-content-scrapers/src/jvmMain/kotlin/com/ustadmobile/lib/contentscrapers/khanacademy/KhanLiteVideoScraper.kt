@@ -118,9 +118,6 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
     }
 
 
-    override fun close() {
-    }
-
     fun getMp4LowUrl(videoId: String): String {
         return "https://cdn.kastatic.org/ka-youtube-converted/$videoId.mp4-low/$videoId-low.mp4"
     }

@@ -15,6 +15,7 @@ import java.nio.file.Files
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.math.pow
+import kotlin.random.Random
 import kotlin.system.exitProcess
 
 abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : Scraper(containerDir, db, contentEntryUid, sqiUid) {
@@ -43,20 +44,20 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
         tempDir = Files.createTempDirectory(sourceUrl.substringAfter("=")).toFile()
 
         youtubeLocker.withLock {
+            UMLogUtil.logTrace("starting youtube lock")
             var retryFlag = true
             var numberOfFailures = 1
             while (retryFlag) {
 
                 var process: Process? = null
                 try {
-                    Thread.sleep(10000)
-                    UMLogUtil.logTrace("starting youtube lock")
-                    val builder = ProcessBuilder(ytPath, "--retries", "1", "--limit-rate", "2M", "-f", videoQualityOption, "-o", "${tempDir!!.absolutePath}/%(id)s.%(ext)s", sourceUrl)
+                    Thread.sleep(Random.nextLong(10000, 30000))
+                    val builder = ProcessBuilder(ytPath, "--retries", "1", "--limit-rate", "1M", "-f", videoQualityOption, "-o", "${tempDir!!.absolutePath}/%(id)s.%(ext)s", sourceUrl)
                     process = builder.start()
                     process.waitFor()
                     val exitValue = process.exitValue()
                     if (exitValue != 0) {
-                         UMLogUtil.logError("Error Stream for src $sourceUrl with error code  ${UMIOUtils.readStreamToString(process.errorStream)}")
+                        UMLogUtil.logError("Error Stream for src $sourceUrl with error code  ${UMIOUtils.readStreamToString(process.errorStream)}")
                         throw IOException("Failed $numberOfFailures for  $sourceUrl")
                     }
                     retryFlag = false
@@ -115,13 +116,16 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
         setScrapeDone(true, 0)
         close()
 
+        UMLogUtil.logError("end of scrape")
+
         return containerManager
 
 
     }
 
     override fun close() {
-        tempDir?.deleteRecursively()
+        val deleted = tempDir?.deleteRecursively() ?: false
+        UMLogUtil.logError("did it delete: $deleted for ${tempDir?.name} ")
     }
 
     companion object {
