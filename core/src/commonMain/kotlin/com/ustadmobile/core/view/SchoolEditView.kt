@@ -12,7 +12,9 @@ interface SchoolEditView : UstadView {
      */
     fun finish()
 
-    fun updateSchoolOnView(school: School)
+    fun setSchool(school: School)
+
+    fun setPicture(picturePath: String)
 
     //Add any other view bits here..
 

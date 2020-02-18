@@ -25,16 +25,8 @@ open class School() {
 
     var schoolAddress : String? = null
 
-    var schoolAttendanceAverage: Float = 0.toFloat()
-
-    //Gives the schedule calendar uid
-    var schoolScheuleUMCalendarUid: Long = 0
-
     //Active
     var schoolActive: Boolean = false
-
-    //Location
-    var schoolLocationUid: Long = 0
 
     // Features - bit mask
     var schoolFeatures: Long = 0
@@ -64,6 +56,11 @@ open class School() {
         const val TABLE_ID = 174
 
         const val SCHOOL_FEATURE_ATTENDANCE: Long  = 1
+
+        const val SCHOOL_GENDER_MALE : Int = 1
+        const val SCHOOL_GENDER_FEMALE : Int = 2
+        const val SCHOOL_GENDER_MIXED : Int = 3
+
     }
 
     override fun equals(other: Any?): Boolean {
@@ -75,10 +72,7 @@ open class School() {
         if (schoolUid != other.schoolUid) return false
         if (schoolName != other.schoolName) return false
         if (schoolDesc != other.schoolDesc) return false
-        if (schoolAttendanceAverage != other.schoolAttendanceAverage) return false
-        if (schoolScheuleUMCalendarUid != other.schoolScheuleUMCalendarUid) return false
         if (schoolActive != other.schoolActive) return false
-        if (schoolLocationUid != other.schoolLocationUid) return false
         if (schoolFeatures != other.schoolFeatures) return false
         if (schoolLocationLong != other.schoolLocationLong) return false
         if (schoolLocationLatt != other.schoolLocationLatt) return false
@@ -91,10 +85,7 @@ open class School() {
         var result = schoolUid.hashCode()
         result = 31 * result + (schoolName?.hashCode() ?: 0)
         result = 31 * result + (schoolDesc?.hashCode() ?: 0)
-        result = 31 * result + schoolAttendanceAverage.hashCode()
-        result = 31 * result + schoolScheuleUMCalendarUid.hashCode()
         result = 31 * result + schoolActive.hashCode()
-        result = 31 * result + schoolLocationUid.hashCode()
         result = 31 * result + schoolFeatures.hashCode()
         result = 31 * result + schoolLocationLong.hashCode()
         result = 31 * result + schoolLocationLatt.hashCode()

@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -28,6 +29,11 @@ abstract class SchoolDao : BaseDao<School> {
         return findAllActiveSchoolsNameAsc(searchBit)
     }
 
+    //TODO:
+//    @Query("""""")
+//    abstract fun checkPermission(permission: Long, personUid: Long): Boolean
+
     @Update
     abstract suspend fun updateAsync(entity: School): Int
+
 }

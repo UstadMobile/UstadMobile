@@ -106,7 +106,7 @@ class SchoolListFragment : UstadBaseFragment(), SchoolListView, SearchableListen
     }
 
 
-    override fun updateSortSpinner(presets: Array<String?>) {
+    override fun setSortOptions(presets: Array<String?>) {
         this.sortSpinnerPresets = presets
         val adapter = ArrayAdapter(context!!,
                 R.layout.item_simple_spinner_gray, sortSpinnerPresets)

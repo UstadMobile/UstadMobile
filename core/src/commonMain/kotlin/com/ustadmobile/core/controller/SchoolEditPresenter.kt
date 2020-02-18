@@ -32,37 +32,22 @@ class SchoolEditPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        if(arguments.containsKey(SchoolEditView.ARG_SCHOOL_DETAIL_SCHOOL_UID)){
-            GlobalScope.launch {
-                val schoolUid = arguments[SchoolEditView.ARG_SCHOOL_DETAIL_SCHOOL_UID]!!.toLong()
-                val school = schoolDao.findByUidAsync(schoolUid)
-                if(school!= null) {
-                    currentSchool = school
-                    view.runOnUiThread(Runnable {
-                        view.updateSchoolOnView(currentSchool)
-                    })
-                }
-            }
-        }else if(arguments.containsKey(SchoolEditView.ARG_SCHOOL_NEW)){
-            GlobalScope.launch {
-
-                currentSchool = School()
-                currentSchool.schoolName = "Test School A"
-                currentSchool.schoolUid = schoolDao.insertAsync(currentSchool)
+        GlobalScope.launch {
+            val schoolUid = arguments[SchoolEditView.ARG_SCHOOL_DETAIL_SCHOOL_UID]?.toLong() ?: 0
+            val school = if(schoolUid != 0L) schoolDao.findByUidAsync(schoolUid) else School()
+            if(school!= null) {
+                currentSchool = school
                 view.runOnUiThread(Runnable {
-                    view.updateSchoolOnView(currentSchool)
+                    view.setSchool(currentSchool)
                 })
             }
         }
+
     }
 
-    fun updateName(name: String){
-        currentSchool.schoolName = name
-    }
-
-    fun handleClickSave(){
+    fun handleClickSave(school: School){
         GlobalScope.launch {
-            schoolDao.updateAsync(currentSchool)
+            schoolDao.insertAsync(school)
         }
     }
 

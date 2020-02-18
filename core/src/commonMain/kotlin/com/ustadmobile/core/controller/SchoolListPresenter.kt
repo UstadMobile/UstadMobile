@@ -71,39 +71,20 @@ class SchoolListPresenter(context: Any,
      * database call.
      */
     private fun updateSortSpinnerPreset() {
-        val presetAL = ArrayList<String>()
-        val impl = UstadMobileSystemImpl.instance
 
         idToOrderInteger = HashMap()
+        idToOrderInteger!![1L] = SORT_ORDER_NAME_ASC
+        idToOrderInteger!![2L] = SORT_ORDER_NAME_DESC
 
-        presetAL.add(impl.getString(MessageID.sort_by_name_asc, context))
-        idToOrderInteger!![presetAL.size.toLong()] = SORT_ORDER_NAME_ASC
-        presetAL.add(impl.getString(MessageID.sort_by_name_desc, context))
-        idToOrderInteger!![presetAL.size.toLong()] = SORT_ORDER_NAME_DESC
-
-        val sortPresets = arrayListToStringArray(presetAL)
-
-        view.updateSortSpinner(sortPresets)
+        val sortOptions = listOf(MessageID.sort_by_name_asc, MessageID.sort_by_name_desc)
+                .map { impl.getString(it, context) }
+        view.setSortOptions(sortOptions.toTypedArray())
     }
 
-    /**
-     * Common method to convert Array List to String Array
-     *
-     * @param presetAL The array list of string type
-     * @return  String array
-     */
-    private fun arrayListToStringArray(presetAL: ArrayList<String>): Array<String?> {
-        val objectArr = presetAL.toTypedArray()
-        val strArr = arrayOfNulls<String>(objectArr.size)
-        for (j in objectArr.indices) {
-            strArr[j] = objectArr[j]
-        }
-        return strArr
-    }
+
 
     fun handleClickAddSchool(){
-        val args = HashMap<String, String>()
-        args[ARG_SCHOOL_NEW] = "true"
+        val args = mapOf(ARG_SCHOOL_NEW to "true")
         impl.go(SchoolEditView.VIEW_NAME, args, view.viewContext)
     }
 

@@ -12,7 +12,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.lib.db.entities.School
 
-
 class SchoolEditActivity : UstadBaseActivity(), SchoolEditView {
 
     private var toolbar: Toolbar? = null

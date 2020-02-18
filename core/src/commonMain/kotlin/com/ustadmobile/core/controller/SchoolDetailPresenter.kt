@@ -5,11 +5,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SchoolDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ClazzListView
+import com.ustadmobile.core.view.ClazzStudentListView
 import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.core.view.SchoolEditView.Companion.ARG_SCHOOL_DETAIL_SCHOOL_UID
 import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.lib.db.entities.School.Companion.SCHOOL_FEATURE_ATTENDANCE
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -39,11 +40,9 @@ class SchoolDetailPresenter(context: Any,
                 if (school != null) {
                     currentSchool = school
                     view.runOnUiThread(Runnable {
-                        view.updateSchoolOnView(school)
-                        view.setAttendanceVisibility(
-                                school.schoolFeatures and SCHOOL_FEATURE_ATTENDANCE > 0 )
-                        //Only set up the view pager after we get the school object
-                        view.setupViewPager()
+                        view.setSchool(school)
+                        view.setUpTabs(listOf(ClazzListView.VIEW_NAME,
+                                ClazzStudentListView.VIEW_NAME))
                     })
                 }
             }
