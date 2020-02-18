@@ -189,7 +189,7 @@ class FeedListFragment : UstadBaseFragment, FeedListView,
         //updateTitle(getText(R.string.feed).toString())
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         //updateTitle(getText(R.string.feed).toString())
     }

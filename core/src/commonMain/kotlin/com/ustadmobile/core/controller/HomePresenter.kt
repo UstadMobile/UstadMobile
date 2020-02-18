@@ -72,11 +72,13 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                     options.clear()
                     options.add(0, Pair(MessageID.bottomnav_feed_title,
                             FeedListView.VIEW_NAME))
-                    options.add(1, Pair(MessageID.bottomnav_classes_title,
+                    options.add(1, Pair(MessageID.schools,
+                            SchoolListView.VIEW_NAME))
+                    options.add(2, Pair(MessageID.bottomnav_classes_title,
                             ClazzListView.VIEW_NAME))
-                    options.add(2, Pair(MessageID.bottomnav_people_title,
+                    options.add(3, Pair(MessageID.bottomnav_people_title,
                             PeopleListView.VIEW_NAME))
-                    options.add(3, Pair(MessageID.bottomnav_reports_title,
+                    options.add(4, Pair(MessageID.bottomnav_reports_title,
                             BaseReportView.VIEW_NAME))
 
                     homeView.runOnUiThread(Runnable {
@@ -91,14 +93,18 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                         }
                     }
                 }
+            }else{
+                options.add(0, Pair(MessageID.contents,
+                        HOME_CONTENTENTRYLIST_TABS_VIEWNAME + "?" +
+                                UMFileUtil.mapToQueryString(contentEntryListTabsArgs)))
             }
 
             homeView.runOnUiThread(Runnable {
 
                 homeView.loadProfileIcon(if(account == null) "" else "")
-                options.add(0, Pair(MessageID.contents,
-                        HOME_CONTENTENTRYLIST_TABS_VIEWNAME + "?" +
-                                UMFileUtil.mapToQueryString(contentEntryListTabsArgs)))
+//                options.add(0, Pair(MessageID.contents,
+//                        HOME_CONTENTENTRYLIST_TABS_VIEWNAME + "?" +
+//                                UMFileUtil.mapToQueryString(contentEntryListTabsArgs)))
                 homeView.setOptions(options)
             })
 

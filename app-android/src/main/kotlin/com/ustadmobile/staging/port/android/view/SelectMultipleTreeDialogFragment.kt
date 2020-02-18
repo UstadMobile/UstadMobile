@@ -111,10 +111,10 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
         }
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?) {
+    override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
 
-        val item = menu!!.findItem(R.id.menu_done)
+        val item = menu.findItem(R.id.menu_done)
 
         //Get the icon itself.
         val itemIcon = resources.getDrawable(R.drawable.ic_check_white_24dp)
@@ -312,7 +312,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
         dialog.dismiss()
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         this.mAttachedContext = context
         this.selectedOptions = HashMap()

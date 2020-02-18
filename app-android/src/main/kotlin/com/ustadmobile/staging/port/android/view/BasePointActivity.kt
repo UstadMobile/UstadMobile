@@ -622,7 +622,7 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
          * @param position  position of item
          * @return  the fragment
          */
-        override fun getItem(position: Int): Fragment? {
+        override fun getItem(position: Int): Fragment {
             var thisFragment = positionMap[position]
 
             if(thisFragment!=null){
@@ -635,26 +635,26 @@ class BasePointActivity : UstadBaseActivity(), BasePointView {
             when (position) {
 
                 VIEW_POSITION_POSITION_FEED -> {
-                    return f
+                    return f!!
                 }
                 VIEW_POSITION_POSITION_CLASSES -> {
                     classesFragment = f as ClazzListFragment?
-                    return f
+                    return f!!
                 }
                 VIEW_POSITION_POSITION_PEOPLE -> {
                     peopleListFragment = f as PeopleListFragment?
-                    return f
+                    return f!!
                 }
                 VIEW_POSITION_POSITION_REPORTS -> {
-                    return f
+                    return f!!
                 }
 
                 position -> {
-                    return f
+                    return f!!
                 }
 
             }
-            return thisFragment
+            return thisFragment!!
         }
     }
 

@@ -170,7 +170,7 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView, SearchableListener {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         mOptionsMenu = menu
         showSettings()

@@ -13,7 +13,6 @@ interface ClazzDetailView : UstadView {
      */
     fun setToolbarTitle(toolbarTitle: String)
 
-
     fun setAttendanceVisibility(visible: Boolean)
 
     fun setActivityVisibility(visible: Boolean)

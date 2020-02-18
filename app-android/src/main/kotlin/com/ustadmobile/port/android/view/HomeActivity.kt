@@ -295,7 +295,11 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     private fun updateSearchVisibility(){
         //Set visibility based on current fragment
         val currentFragment = fragmentPosMap[currentFragmentPosition]
-        searchView.isVisible = currentFragment is SearchableListener
+        if(currentFragment is SearchableListener){
+            searchView.visibility = View.VISIBLE
+        }else{
+            searchView.visibility = View.INVISIBLE
+        }
         val searchViewMenuItem = mOptionsMenu.findItem(R.id.menu_home_activity_search)
         if(searchViewMenuItem != null){
             searchViewMenuItem.isVisible = currentFragment is SearchableListener
@@ -405,9 +409,12 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             val bulkUploadMenuItem = mOptionsMenu.findItem(R.id.menu_action_bulk_upload_master)
             if(bulkUploadMenuItem != null){
                 val bulkUploadVisibility = impl.getAppConfigString(
-                        AppConfig.BULK_UPLOAD_VISIBILITY, null, this)!!.toBoolean()
-                if(bulkUploadVisibility){
-                    bulkUploadMenuItem.isVisible = show
+                        AppConfig.BULK_UPLOAD_VISIBILITY, null, this)
+                if(bulkUploadVisibility != null){
+                    val bulkUploadBoolean = bulkUploadVisibility.toBoolean()
+                    if(bulkUploadBoolean){
+                        bulkUploadMenuItem.isVisible = show
+                    }
                 }
             }
         }
@@ -418,6 +425,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                 ContentEntryListView.VIEW_NAME to HomeContentEntryTabsFragment::class.java,
                 ReportDashboardView.VIEW_NAME to ReportDashboardFragment::class.java,
                 FeedListView.VIEW_NAME to FeedListFragment::class.java,
+                SchoolListView.VIEW_NAME to SchoolListFragment::class.java,
                 ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
                 ContentEntryListView.VIEW_NAME to ContentListFragment::class.java,
                 ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
@@ -431,6 +439,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         private val BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP = mapOf(
                 MessageID.reports to R.drawable.ic_pie_chart_black_24dp,
                 MessageID.contents to R.drawable.ic_local_library_black_24dp,
+                MessageID.schools to SchoolListFragment.icon,
                 MessageID.bottomnav_feed_title to FeedListFragment.icon,
                 MessageID.bottomnav_content_title to ContentListFragment.icon,
                 MessageID.bottomnav_classes_title to ClazzListFragment.icon,

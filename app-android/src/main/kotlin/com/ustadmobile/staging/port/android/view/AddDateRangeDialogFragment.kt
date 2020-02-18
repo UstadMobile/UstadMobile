@@ -42,7 +42,7 @@ class AddDateRangeDialogFragment : UstadDialogFragment(), AddDateRangeDialogView
 
     private var mAttachedContext: Context? = null
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         this.mAttachedContext = context
     }

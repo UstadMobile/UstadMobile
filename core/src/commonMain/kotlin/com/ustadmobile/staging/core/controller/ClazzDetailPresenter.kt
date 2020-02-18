@@ -95,11 +95,8 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
                 //Setup view pager after all permissions
                 view.setupViewPager()
             }
-
         }
-
     }
-
 
     /**
      * Handles what happens when Class Edit is clicked. This takes the class to the edit page.

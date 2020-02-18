@@ -102,7 +102,7 @@ class ContentListFragment : UstadBaseFragment(), ContentListView,
         }
 
         // Returns the fragment to display for that page
-        override fun getItem(position: Int): Fragment? {
+        override fun getItem(position: Int): Fragment {
             val bundle = Bundle()
 
             return when (position) {
@@ -118,7 +118,10 @@ class ContentListFragment : UstadBaseFragment(), ContentListView,
                     ContentEntryListFragment.newInstance(bundle)
 
                 }
-                else -> null
+
+                else -> {
+                    ContentEntryListFragment.newInstance(bundle)
+                }
             }
         }
 

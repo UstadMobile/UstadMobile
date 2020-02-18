@@ -257,7 +257,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
          * @param position The position of the fragment to generate
          * @return void
          */
-        override fun getItem(position: Int): Fragment? {
+        override fun getItem(position: Int): Fragment {
             val thisFragment = positionMap[position]
             if (thisFragment != null) {
                 return thisFragment
@@ -274,7 +274,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
                 } else if (fragClass == SELAnswerListFragment::class.java) {
                     SELAnswerListFragment.newInstance(bundle) as Fragment
                 } else {
-                    null
+                    ClazzStudentListFragment.newInstance(bundle)
                 }
             }
         }

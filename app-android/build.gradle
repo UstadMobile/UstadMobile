@@ -55,6 +55,10 @@ tasks.whenTaskAdded { task ->
 }
 
 android {
+    dataBinding {
+        enabled = true
+    }
+
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
         main.res.srcDirs += "../core/locale/main/"
@@ -161,10 +165,6 @@ android {
             useProguard false
             testCoverageEnabled = true
         }
-    }
-
-    dataBinding {
-        enabled = true
     }
 }
 

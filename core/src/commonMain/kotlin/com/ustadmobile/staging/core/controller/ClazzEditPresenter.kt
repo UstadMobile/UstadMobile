@@ -570,9 +570,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         }
     }
 
-
     var selectedLocation : Location ? = null
-
 
     /**
      * Handles when the Class Edit screen's done/tick button is pressed. This intent denotes

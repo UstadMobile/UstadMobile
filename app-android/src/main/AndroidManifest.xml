@@ -298,6 +298,11 @@
             android:label="@string/people"
             android:theme="@style/Theme.UstadTheme"/>
 
+        <activity android:name="com.ustadmobile.port.android.view.SchoolEditActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/add_school"
+            android:theme="@style/Theme.UstadTheme"/>
+
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
