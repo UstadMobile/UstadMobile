@@ -2,7 +2,7 @@
 
 buildscript {
     ext.version_kotlin = '1.3.61'
-    ext.version_shadow = "5.1.0"
+    ext.version_shadow = "5.2.0"
     repositories {
         google()
         jcenter()
