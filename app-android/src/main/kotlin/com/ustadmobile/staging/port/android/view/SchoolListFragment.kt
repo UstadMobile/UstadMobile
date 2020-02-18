@@ -51,22 +51,22 @@ class SchoolListFragment : UstadBaseFragment(), SchoolListView, SearchableListen
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
-        rootContainer = inflater.inflate(R.layout.fragment_people_list, container, false)
+        rootContainer = inflater.inflate(R.layout.fragment_school_list, container, false)
         setHasOptionsMenu(true)
 
-        mRecyclerView = rootContainer.findViewById(R.id.fragment_people_list_recyclerview)
+        mRecyclerView = rootContainer.findViewById(R.id.fragment_school_list_recyclerview)
         val mRecyclerLayoutManager = LinearLayoutManager(context)
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager)
 
-        fab = rootContainer.findViewById(R.id.fragment_people_list_fab)
-        sortSpinner = rootContainer.findViewById(R.id.fragment_people_list_sort_spinner2)
+        fab = rootContainer.findViewById(R.id.fragment_school_list_fab)
+        sortSpinner = rootContainer.findViewById(R.id.fragment_school_list_sort_spinner2)
 
         //set up Presenter
         mPresenter = SchoolListPresenter(context!!,
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        pullToRefresh = rootContainer.findViewById(R.id.fragment_people_list_swiperefreshlayout)
+        pullToRefresh = rootContainer.findViewById(R.id.fragment_school_list_swiperefreshlayout)
 
         fab.setOnClickListener { v -> mPresenter.handleClickAddSchool() }
         
