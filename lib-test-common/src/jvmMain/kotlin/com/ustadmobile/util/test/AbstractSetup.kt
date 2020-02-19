@@ -25,6 +25,8 @@ abstract class AbstractSetup {
         val personDao = db.personDao
         val personGroupDao = db.personGroupDao
         val personGroupMemberDao = db.personGroupMemberDao
+        val clazzassignmentDao = db.clazzAssignmentDao
+        val clazzDao = db.clazzDao
 
 
         //Create two LEs
@@ -82,6 +84,18 @@ abstract class AbstractSetup {
         //Set active account to le1
         umAccount = UmAccount(le1Uid, "le1",
                 "auth", "endpoint")
+
+
+        val clazz = Clazz()
+        clazz.clazzName = "Class A"
+        clazz.clazzDesc = "Desc Class"
+        clazz.clazzUid = 42L
+        clazzDao.insert(clazz)
+
+        val clazzAssignment = ClazzAssignment()
+        clazzAssignment.clazzAssignmentClazzUid = clazz.clazzUid
+        clazzAssignment.clazzAssignmentUid = 42L
+        clazzassignmentDao.insert(clazzAssignment)
 
     }
 }
