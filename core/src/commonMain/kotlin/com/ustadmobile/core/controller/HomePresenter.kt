@@ -9,8 +9,10 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -42,7 +44,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         GlobalScope.launch {
             val contentEntryListTabsArgs = mutableMapOf(
                     "0" to "${MessageID.libraries};$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID" +
-                            "&$ARG_LIBRARIES_CONTENT",
+                            "&$ARG_LIBRARIES_CONTENT&$ARG_EDIT_BUTTONS_CONTROL_FLAG=$EDIT_BUTTONS_NEWFOLDER",
                     "1" to "${MessageID.downloaded};$ARG_DOWNLOADED_CONTENT")
 
             val options = mutableListOf<Pair<Int, String>>()

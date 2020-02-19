@@ -56,12 +56,13 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     private class HomePagerAdapter(fm: FragmentManager,
                                    val options: List<Pair<Int, String>>): FragmentStatePagerAdapter(fm) {
 
-        private val weakFragmentMap: MutableMap<Int, Fragment> = WeakHashMap()
+        private val weakFragmentMap: MutableMap<String, Fragment> = WeakHashMap()
 
         override fun getItem(position: Int): Fragment {
-            var thisFragment = weakFragmentMap[position]
+            val viewUri = options[position].second // the ViewName followed by ? and any arguments
+            var thisFragment = weakFragmentMap[":$viewUri"]
             if(thisFragment == null) {
-                val viewUri = options[position].second // the ViewName followed by ? and any arguments
+
                 val viewName = viewUri.substringBefore('?')
                 val fragmentClass = VIEW_NAME_TO_FRAGMENT_CLASS[viewName]
                 if(fragmentClass == null) {
@@ -70,7 +71,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
                 thisFragment = fragmentClass.newInstance()
                 thisFragment.arguments = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(viewUri))
-                weakFragmentMap[position] = thisFragment
+                weakFragmentMap[":$viewUri"] = thisFragment
             }
 
             return thisFragment
@@ -127,6 +128,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun setOptions(options: List<Pair<Int, String>>) {
         this.options = options
 
+        umBottomNavigation.removeAllItems()
         options.forEach {
             val navIcon = BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP[it.first]
             if(navIcon != null){
