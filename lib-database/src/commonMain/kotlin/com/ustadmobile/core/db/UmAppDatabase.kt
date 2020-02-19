@@ -37,7 +37,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 33)
+], version = 34)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -197,6 +197,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
     abstract val umCalendarDao : UMCalendarDao
     abstract val schoolDao : SchoolDao
+    abstract val clazzAssignmentDao : ClazzAssignmentDao
+    abstract val clazzAssignmentContentJoinDao : ClazzAssignmentContentJoinDao
 
     @JsName("xLangMapEntryDao")
     abstract val xLangMapEntryDao: XLangMapEntryDao

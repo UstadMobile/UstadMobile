@@ -47,7 +47,12 @@ class SchoolEditPresenter(context: Any,
 
     fun handleClickSave(school: School){
         GlobalScope.launch {
-            schoolDao.insertAsync(school)
+            if(school.schoolUid != 0L){
+                schoolDao.insertAsync(school)
+            }else{
+                schoolDao.updateAsync(school)
+            }
+
         }
     }
 

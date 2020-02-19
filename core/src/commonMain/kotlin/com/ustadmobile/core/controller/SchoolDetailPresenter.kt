@@ -53,8 +53,7 @@ class SchoolDetailPresenter(context: Any,
      * Handle what happens when the gear edit button is clicked - should go to schooledit page
      */
     fun handleClickSchoolEdit(){
-        val args = HashMap<String, String>()
-        args[ARG_SCHOOL_DETAIL_SCHOOL_UID] = currentSchool.schoolUid.toString()
+        val args = mapOf(ARG_SCHOOL_DETAIL_SCHOOL_UID to currentSchool.schoolUid.toString())
         impl.go(SchoolEditView.VIEW_NAME, args, context)
     }
 

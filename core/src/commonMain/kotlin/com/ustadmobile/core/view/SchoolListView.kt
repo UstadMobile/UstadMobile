@@ -4,7 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.School
 
 /**
- * Core View. Screen is for SaleList's View
+ * Core View. Screen is for SchoolList's View
  */
 interface SchoolListView : UstadView {
     /**
