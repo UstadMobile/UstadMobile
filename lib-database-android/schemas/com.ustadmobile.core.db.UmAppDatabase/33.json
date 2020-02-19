@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 33,
-    "identityHash": "9d9efdfc6e02341ed7667bbe2cb798d7",
+    "identityHash": "e4d97a9f0541c65ea13b74d7264dcbfe",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4703,7 +4703,7 @@
       },
       {
         "tableName": "School",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolAttendanceAverage` REAL NOT NULL, `schoolScheuleUMCalendarUid` INTEGER NOT NULL, `schoolActive` INTEGER NOT NULL, `schoolLocationUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "schoolUid",
@@ -4730,26 +4730,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "schoolAttendanceAverage",
-            "columnName": "schoolAttendanceAverage",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolScheuleUMCalendarUid",
-            "columnName": "schoolScheuleUMCalendarUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "schoolActive",
             "columnName": "schoolActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolLocationUid",
-            "columnName": "schoolLocationUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8271,7 +8253,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9d9efdfc6e02341ed7667bbe2cb798d7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e4d97a9f0541c65ea13b74d7264dcbfe')"
     ]
   }
 }

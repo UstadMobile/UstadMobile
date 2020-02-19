@@ -19,6 +19,8 @@ class SchoolEditActivity : UstadBaseActivity(), SchoolEditView {
 
     private lateinit var binding: ActivitySchoolDetailBinding
 
+    private var currentSchool : School ? = null
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -37,13 +39,6 @@ class SchoolEditActivity : UstadBaseActivity(), SchoolEditView {
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-    }
-
-    override fun updateSchoolOnView(school: School) {
-        binding.school = school
-
-        val view = binding.root
-        setContentView(view)
     }
 
     /**
@@ -74,14 +69,24 @@ class SchoolEditActivity : UstadBaseActivity(), SchoolEditView {
         val i = item.itemId
         //If this activity started from other activity
         if (i == R.id.menu_done) {
-            mPresenter.handleClickSave()
-
+            var school = currentSchool!!
+            mPresenter.handleClickSave(school)
             return super.onOptionsItemSelected(item)
         } else {
             return super.onOptionsItemSelected(item)
         }
     }
 
+    override fun setSchool(school: School) {
+        binding.school = school
+
+        val view = binding.root
+        setContentView(view)
+    }
+
+    override fun setPicture(picturePath: String) {
+        //TODO:
+    }
 
 
 }

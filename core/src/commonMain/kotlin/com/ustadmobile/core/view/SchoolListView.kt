@@ -7,7 +7,6 @@ import com.ustadmobile.lib.db.entities.School
  * Core View. Screen is for SaleList's View
  */
 interface SchoolListView : UstadView {
-
     /**
      * Sets the given provider to the view's provider adapter.
      *
