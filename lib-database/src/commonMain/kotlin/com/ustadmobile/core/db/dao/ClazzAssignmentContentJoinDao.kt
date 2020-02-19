@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzAssignmentContentJoin
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
 
 @UmDao
 @UmRepository
@@ -30,12 +31,12 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     abstract fun findJoinsByAssignmentUid(clazzAssignmentUid: Long)
             : DataSource.Factory<Int, ClazzAssignmentContentJoin>
 
-    @Query("""SELECT ContentEntry.* FROM ClazzAssignmentContentJoin 
+    @Query("""SELECT ContentEntry.*, 0.0 as contentEntryWithMetricsProgress FROM ClazzAssignmentContentJoin 
         |LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = clazzAssignmentContentJoinContentUid
         |WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid 
         |AND CAST(clazzAssignmentContentJoinInactive AS INTEGER) = 0""")
     abstract fun findContentByAssignmentUid(clazzAssignmentUid: Long)
-            : DataSource.Factory<Int, ContentEntry>
+            : DataSource.Factory<Int, ContentEntryWithMetrics>
 
     @Update
     abstract suspend fun updateAsync(entity: ClazzAssignmentContentJoin): Int

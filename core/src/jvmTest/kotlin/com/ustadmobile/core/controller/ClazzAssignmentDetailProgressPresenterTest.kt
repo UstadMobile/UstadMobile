@@ -4,7 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -13,10 +13,9 @@ import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
 import org.junit.After
 import org.junit.Test
-import org.junit.Assert
 
 
-class ClazzAssignmentDetailPresenterTest : AbstractSetup() {
+class ClazzAssignmentDetailProgressPresenterTest : AbstractSetup() {
 
     lateinit var systemImplSpy: UstadMobileSystemImpl
 
@@ -43,15 +42,15 @@ class ClazzAssignmentDetailPresenterTest : AbstractSetup() {
 
 
     fun createMockViewAndPresenter(presenterArgs: Map<String, String> = mapOf())
-            : Pair<ClazzAssignmentDetailView, ClazzAssignmentDetailPresenter> {
-        val mockView = mock<ClazzAssignmentDetailView> {
+            : Pair<ClazzAssignmentDetailProgressView, ClazzAssignmentDetailProgressPresenter> {
+        val mockView = mock<ClazzAssignmentDetailProgressView> {
             on { runOnUiThread(any()) }.doAnswer {
                 Thread(it.getArgument<Any>(0) as Runnable).start()
                 Unit
             }
         }
         val mockContext = mock<DoorLifecycleOwner> {}
-        val presenter = ClazzAssignmentDetailPresenter(mockContext,
+        val presenter = ClazzAssignmentDetailProgressPresenter(mockContext,
                 presenterArgs, mockView, systemImplSpy)
         return Pair(mockView, presenter)
     }

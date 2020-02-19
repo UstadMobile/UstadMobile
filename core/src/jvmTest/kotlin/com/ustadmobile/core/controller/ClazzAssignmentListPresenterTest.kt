@@ -4,7 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
 import com.ustadmobile.core.view.ClazzAssignmentListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -13,7 +13,6 @@ import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
 import org.junit.After
 import org.junit.Test
-import org.junit.Assert
 
 
 class ClazzAssignmentListPresenterTest : AbstractSetup() {
@@ -64,7 +63,7 @@ class ClazzAssignmentListPresenterTest : AbstractSetup() {
 
         presenter.handleClickAssignment(42L)
 
-        verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentDetailView.VIEW_NAME,
+        verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentDetailProgressView.VIEW_NAME,
                 mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "42"))
 
     }

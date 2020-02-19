@@ -2,8 +2,6 @@ package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
-import com.ustadmobile.lib.db.entities.PersonWithAssignmentMetrics
 
 /**
  * Core View. Screen is for ClazzAssignmentDetail's View
@@ -15,9 +13,11 @@ interface ClazzAssignmentDetailView : UstadView {
      *
      * @param factory The factory to set to the view
      */
-    fun setListProvider(factory: DataSource.Factory<Int, PersonWithAssignmentMetrics>)
+    fun setListProvider(factory: DataSource.Factory<Int, ClazzAssignment>)
 
-    fun setClazzAssignment(clazzAssignment: ClazzAssignmentWithMetrics)
+    fun setClazzAssignment(clazzAssignment: ClazzAssignment)
+
+    fun setupTabs(tabs : List<String>)
 
     companion object {
         // This defines the view name that is an argument value in the go() in impl.

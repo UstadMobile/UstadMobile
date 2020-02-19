@@ -36,7 +36,7 @@ class SchoolDetailPresenter(context: Any,
         if(arguments.containsKey(ARG_SCHOOL_DETAIL_SCHOOL_UID)){
             GlobalScope.launch {
                 val school =
-                        schoolDao.findByUidAsync(arguments[ARG_SCHOOL_DETAIL_SCHOOL_UID]!!.toLong())
+                        schoolDao.findByUidAsync(arguments[ARG_SCHOOL_DETAIL_SCHOOL_UID]?.toLong() ?: 0)
                 if (school != null) {
                     currentSchool = school
                     view.runOnUiThread(Runnable {

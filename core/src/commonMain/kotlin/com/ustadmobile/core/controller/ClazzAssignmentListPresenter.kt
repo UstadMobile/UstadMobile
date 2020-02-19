@@ -4,15 +4,14 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
 import com.ustadmobile.core.view.ClazzAssignmentListView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 
 /**
- *  Presenter for MyWomenEntrepreneurs view
+ *  Presenter for ClazzAssignmentList view
  **/
 class ClazzAssignmentListPresenter(context: Any,
                                    arguments: Map<String, String>?,
@@ -32,6 +31,9 @@ class ClazzAssignmentListPresenter(context: Any,
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             clazzUid = arguments[ARG_CLAZZ_UID]!!.toLong()
             getAndSetProvider()
+
+            //TODO: Figure out the visibliliy of edit
+            view.setEditVisibility(true)
         }
     }
 
@@ -42,7 +44,7 @@ class ClazzAssignmentListPresenter(context: Any,
 
     fun handleClickAssignment(clazzAssignmentUid: Long){
         val args = mapOf(ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignmentUid.toString())
-        impl.go(ClazzAssignmentDetailView.VIEW_NAME, args, view.viewContext)
+        impl.go(ClazzAssignmentDetailProgressView.VIEW_NAME, args, view.viewContext)
     }
 
 }

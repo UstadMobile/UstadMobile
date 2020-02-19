@@ -2,24 +2,25 @@ package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.PersonWithAssignmentMetrics
 
 /**
- * Core View. Screen is for ClazzAssignmentList's View
+ * Core View. Screen is for ClazzAssignmentDetail's View
  */
-interface ClazzAssignmentListView : UstadView {
+interface ClazzAssignmentDetailProgressView : UstadView {
 
     /**
      * Sets the given provider to the view's provider adapter.
      *
      * @param factory The factory to set to the view
      */
-    fun setListProvider(factory: DataSource.Factory<Int, ClazzAssignmentWithMetrics>)
+    fun setListProvider(factory: DataSource.Factory<Int, PersonWithAssignmentMetrics>)
 
-    fun setEditVisibility(visible: Boolean)
+    fun setClazzAssignment(clazzAssignment: ClazzAssignmentWithMetrics)
 
     companion object {
         // This defines the view name that is an argument value in the go() in impl.
-        const val VIEW_NAME = "ClazzAssignmentList"
+        const val VIEW_NAME = "ClazzAssignmentDetail"
     }
 
 }
