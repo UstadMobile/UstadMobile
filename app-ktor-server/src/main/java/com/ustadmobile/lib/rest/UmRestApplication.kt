@@ -127,6 +127,10 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
     }
 }
 
+private fun Application.initLamsustad(db: UmAppDatabase, containerDirPath: String) {
+
+}
+
 private suspend fun handleInvalidRequest(call: ApplicationCall){
     val resourceName = call.request.queryParameters["resource"]
     val entryId = call.request.queryParameters["entryid"]
