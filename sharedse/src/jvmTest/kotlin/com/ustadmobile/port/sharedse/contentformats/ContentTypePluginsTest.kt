@@ -1,14 +1,59 @@
 package com.ustadmobile.port.sharedse.contentformats
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import org.junit.Assert
 import org.junit.Test
 import java.io.File
+import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
+import kotlinx.coroutines.runBlocking
+import java.nio.file.Files
 
 class ContentTypePluginsTest {
 
     private val context = Any()
+
+    @Test
+    fun givenValidEpubFormatFile_whenExtractEntryMetaDataFromFile_thenDataShouldMatch() {
+        val inputStream = UstadMobileSystemImpl.instance.getAssetSync(context,
+                "/com/ustadmobile/port/sharedse/contentformats/childrens-literature.epub")
+        val tempEpubFile = File.createTempFile("importFile", "epub")
+        tempEpubFile.copyInputStreamToFile(inputStream)
+
+        val contentEntryExtracted = extractContentEntryMetadataFromFile(tempEpubFile)
+        Assert.assertNotNull(contentEntryExtracted)
+        Assert.assertEquals("Title received as expected", contentEntryExtracted,
+                "A Textbook of Sources for Teachers and Teacher-Training Classes")
+    }
+
+    @Test
+    fun givenValidEpubFormatFile_whenImportContentEntryFromFile_thenContentEntryAndContainerShouldExist() {
+        val inputStream = UstadMobileSystemImpl.instance.getAssetSync(context,
+                "/com/ustadmobile/port/sharedse/contentformats/childrens-literature.epub")
+        val tempEpubFile = File.createTempFile("importFile", "epub")
+        tempEpubFile.copyInputStreamToFile(inputStream)
+
+        val containerTmpDir = Files.createTempDirectory("containerTmpDir").toFile()
+
+        val db = UmAppDatabase.getInstance(context)
+        db.clearAllTables()
+        val dbRepo = db.asRepository<UmAppDatabase>(context, "http://localhost/dummy", "",
+                defaultHttpClient(), containerTmpDir.absolutePath)
+
+        runBlocking {
+            //TODO: Make this more rigorous
+            val (contentEntry, container) = importContentEntryFromFile(tempEpubFile, db, dbRepo,
+                    containerTmpDir.absolutePath)!!
+            Assert.assertNotNull(contentEntry)
+            Assert.assertNotNull(container)
+        }
+
+        containerTmpDir.deleteRecursively()
+        tempEpubFile.delete()
+    }
 
     @Test
     fun givenValidEpubFormatFile_whenImported_shouldCreateNewEntry() {
