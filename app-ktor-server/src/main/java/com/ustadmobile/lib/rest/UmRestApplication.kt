@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.encryptPassword
+import com.ustadmobile.port.sharedse.contentformats.importContentEntryFromFile
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -27,6 +28,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.get
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
 import java.io.File
 import java.nio.file.Files
@@ -40,6 +42,9 @@ private val _restApplicationDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase
 fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase = _restApplicationDb) {
 
     val adminuser = db.personDao.findByUsername("admin")
+    val iContext = InitialContext()
+    val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
+
     if(adminuser == null) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
@@ -50,8 +55,8 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
                 PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(adminPass)))
 
 
-        val iContext = InitialContext()
-        val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
+
+
         val adminPassFile = File(containerDirPath, "admin.txt")
         if(!adminPassFile.parentFile.isDirectory) {
             adminPassFile.parentFile.mkdirs()
@@ -79,6 +84,10 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
             register(ContentType.Application.Json, GsonConverter())
             register(ContentType.Any, GsonConverter())
         }
+    }
+
+    runBlocking {
+        initLamsustadContent(db, containerDirPath)
     }
 
     install(Routing) {
@@ -131,17 +140,35 @@ suspend fun Application.initLamsustadContent(db: UmAppDatabase, containerPath: S
     val folderSrcUrl = "http://www.ustadmobile.com/lamsustad/stories"
     val storiesEntry = db.contentEntryDao.findBySourceUrl(folderSrcUrl)
     if(storiesEntry == null) {
-        val parentChildJoins = mutableListOf<ContentEntryParentChildJoin>()
-        val storiesContentEntry = ContentEntry("قصص", "", false, false)
+        val storiesContentEntry = ContentEntry("قصص", "", false, false).apply {
+            sourceUrl = folderSrcUrl
+            publik = true
+            thumbnailUrl = "https://www.ustadmobile.com/files/lamsustad/stories.webp"
+        }
+
         storiesContentEntry.contentEntryUid = db.contentEntryDao.insert(storiesContentEntry)
-        parentChildJoins += ContentEntryParentChildJoin().apply {
+        db.contentEntryParentChildJoinDao.insert(ContentEntryParentChildJoin().apply {
             cepcjChildContentEntryUid = storiesContentEntry.contentEntryUid
             cepcjParentContentEntryUid = HomePresenter.MASTER_SERVER_ROOT_ENTRY_UID
             childIndex = 0
-        }
+        })
 
-        for(i in 0..4) {
-            val storyContentEntry = ContentTypeUtil.importContentEntryFromFile(Any(), )
+        for(i in 1..5) {
+            val file = File("build/lamsustad/Book${i}_xapi.zip")
+            if(!file.exists()) {
+                println("Lamsustad file $file does not exist")
+                continue
+            }
+            val importedEntry = importContentEntryFromFile(file, db, db, containerPath)
+            if(importedEntry != null) {
+                importedEntry.first.thumbnailUrl = "https://www.ustadmobile.com/files/lamsustad/story${i}.webp"
+                db.contentEntryDao.update(importedEntry.first)
+                db.contentEntryParentChildJoinDao.insert(
+                        ContentEntryParentChildJoin(storiesContentEntry, importedEntry.first, i))
+                println("Imported and joined \"${importedEntry.first.title}\"")
+            }else {
+                println("Error importing content")
+            }
         }
 
 
