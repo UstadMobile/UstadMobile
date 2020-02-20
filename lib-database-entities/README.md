@@ -22,6 +22,9 @@ e.g. in ClazzMember.kt
 var clazzMemberUid: Long
 ```
 
+When using a variable to mark an entity as active or inactive, it should be called prefixInactive.
+This way an entity is active by default.
+
 **Join fields**: entity name that holds the relationship field, followed by the foreign key field name.
 
 Eg. in ClazzMember.kt:
