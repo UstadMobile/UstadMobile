@@ -25,8 +25,9 @@ class ContentTypePluginsTest {
 
         val contentEntryExtracted = extractContentEntryMetadataFromFile(tempEpubFile)
         Assert.assertNotNull(contentEntryExtracted)
-        Assert.assertEquals("Title received as expected", contentEntryExtracted,
-                "A Textbook of Sources for Teachers and Teacher-Training Classes")
+        Assert.assertEquals("Title received as expected",
+                "A Textbook of Sources for Teachers and Teacher-Training Classes",
+                contentEntryExtracted!!.contentEntry!!.title)
     }
 
     @Test
