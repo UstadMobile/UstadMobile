@@ -13,6 +13,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LoginView
 import android.widget.LinearLayout
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UmAccountManager
 
 
 class LoginActivity : UstadBaseActivity(), LoginView {
@@ -47,7 +48,8 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         registerNow = findViewById(R.id.activity_register_now)
 
         mPresenter = LoginPresenter(this, bundleToMap(intent.extras),
-                this, UstadMobileSystemImpl.instance)
+                this, UstadMobileSystemImpl.instance,
+                UmAccountManager.getRepositoryForActiveAccount(this).personDao)
         mPresenter.onCreate(bundleToMap(savedInstanceState))
         mUsernameTextView = findViewById(R.id.activity_login_username)
         mPasswordTextView = findViewById(R.id.activity_login_password)
