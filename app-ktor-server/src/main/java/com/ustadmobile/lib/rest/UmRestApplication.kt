@@ -1,14 +1,14 @@
 package com.ustadmobile.lib.rest
 
+import ch.qos.logback.core.util.ContentTypeUtil
 import com.google.gson.Gson
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.dao.PersonAuthDao
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonAuth
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.application.Application
@@ -124,6 +124,27 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
                 call.respond(containerUid)
             }
         }
+    }
+}
+
+suspend fun Application.initLamsustadContent(db: UmAppDatabase, containerPath: String) {
+    val folderSrcUrl = "http://www.ustadmobile.com/lamsustad/stories"
+    val storiesEntry = db.contentEntryDao.findBySourceUrl(folderSrcUrl)
+    if(storiesEntry == null) {
+        val parentChildJoins = mutableListOf<ContentEntryParentChildJoin>()
+        val storiesContentEntry = ContentEntry("قصص", "", false, false)
+        storiesContentEntry.contentEntryUid = db.contentEntryDao.insert(storiesContentEntry)
+        parentChildJoins += ContentEntryParentChildJoin().apply {
+            cepcjChildContentEntryUid = storiesContentEntry.contentEntryUid
+            cepcjParentContentEntryUid = HomePresenter.MASTER_SERVER_ROOT_ENTRY_UID
+            childIndex = 0
+        }
+
+        for(i in 0..4) {
+            val storyContentEntry = ContentTypeUtil.importContentEntryFromFile(Any(), )
+        }
+
+
     }
 }
 
