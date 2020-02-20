@@ -41,6 +41,9 @@ class ClazzAssignmentDetailPresenter(context: Any,
                         view.setupTabs(listOf(ClazzAssignmentDetailAssignmentView.VIEW_NAME,
                                 ClazzAssignmentDetailProgressView.VIEW_NAME))
                     })
+
+                    //TODO : Get permission and check if logged in person has progress access/ etc
+
                 }
             }
         }
