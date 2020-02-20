@@ -22,16 +22,20 @@ class TinCanTypePlugin : TinCanType(), ContentTypePlugin {
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
 
                     val fileName = zipEntry?.name
-                    if (fileName!!.toLowerCase() == TINCAN_XML) {
+                    if (fileName?.toLowerCase() == TINCAN_XML) {
                         val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
-                        val activity = TinCanXML.loadFromXML(xpp).launchActivity!!
-                        contentEntry = ContentEntry()
-                        contentEntry!!.contentFlags = ContentEntry.FLAG_IMPORTED
-                        contentEntry!!.licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                        contentEntry!!.title = activity.name
-                        contentEntry!!.author = ""
-                        contentEntry!!.description = activity.desc
-                        contentEntry!!.leaf = true
+                        val activity = TinCanXML.loadFromXML(xpp).launchActivity
+                        if(activity == null)
+                            throw IOException("TinCanXml from ${file.absolutePath} has no launchActivity!")
+
+                        contentEntry = ContentEntry().apply {
+                            contentFlags = ContentEntry.FLAG_IMPORTED
+                            licenseType = ContentEntry.LICENSE_TYPE_OTHER
+                            title = activity.name
+                            author = ""
+                            description = activity.desc
+                            leaf = true
+                        }
                         break
                     }
 

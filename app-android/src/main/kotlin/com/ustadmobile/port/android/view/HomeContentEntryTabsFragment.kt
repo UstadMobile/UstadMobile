@@ -32,18 +32,18 @@ class HomeContentEntryTabsFragment : UstadBaseFragment(){
 
     lateinit var mPager: ViewPager
 
-    val weakFragmentMap = WeakHashMap<Int, Fragment>()
+    val weakFragmentMap = WeakHashMap<String, Fragment>()
 
     private inner class ContentEntryTabsPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
         override fun getItem(position: Int): Fragment {
-            return weakFragmentMap[position] ?: ContentEntryListFragment().also {
-                var positionArgs = arguments?.getString(position.toString()) ?:
-                throw IllegalArgumentException("HomeContentEntryTabsFragment: did not find " +
-                        "argument for position: $position")
+            var positionArgs = arguments?.getString(position.toString()) ?:
+            throw IllegalArgumentException("HomeContentEntryTabsFragment: did not find " +
+                    "argument for position: $position")
+            positionArgs = positionArgs.substringAfter(';')
 
-                positionArgs = positionArgs.substringAfter(';')
+            return weakFragmentMap[":$positionArgs"] ?: ContentEntryListFragment().also {
                 it.arguments = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(positionArgs))
-                weakFragmentMap[position] = it
+                weakFragmentMap[":$positionArgs"] = it
             }
         }
 

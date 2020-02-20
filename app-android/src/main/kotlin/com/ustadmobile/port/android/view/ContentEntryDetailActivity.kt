@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.Html
+import android.text.Spanned
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -13,11 +14,14 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.widget.NestedScrollView
+import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.github.aakira.napier.Napier
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.ActivityContentEntryDetailBinding
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_AVAILABLE_ICON
 import com.ustadmobile.core.controller.ContentEntryDetailPresenter.Companion.LOCALLY_NOT_AVAILABLE_ICON
@@ -35,14 +39,18 @@ import com.ustadmobile.core.util.ext.toStatusString
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.port.android.view.ext.makeSnackbarIfRequired
+import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_content_entry_detail.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
@@ -87,6 +95,19 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
 
     private var currentDownloadJobItemStatus: Int = -1
 
+    private lateinit var viewBinding: ActivityContentEntryDetailBinding
+
+    class ContentEntryModel(val contentEntry: ContentEntry) {
+
+        val descriptionHtml: CharSequence
+            get() {
+                val descriptionVal = contentEntry.description
+                return if(descriptionVal != null) { Html.fromHtml(descriptionVal) } else { "" }
+            }
+
+    }
+
+
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
         if (networkManagerBle.isVersionKitKatOrBelow) {
@@ -115,7 +136,9 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         umAppRepository = UmAccountManager.getRepositoryForActiveAccount(this)
         showControls = UstadMobileSystemImpl.instance.getAppConfigString(
                 AppConfig.KEY_SHOW_CONTENT_EDITOR_CONTROLS, "false", this)!!.toBoolean()
-        setContentView(R.layout.activity_content_entry_detail)
+
+        viewBinding = DataBindingUtil.setContentView(this,
+                R.layout.activity_content_entry_detail)
 
         localAvailabilityStatusText = findViewById(R.id.content_status_text)
         localAvailabilityStatusIcon = findViewById(R.id.content_status_icon)
@@ -216,10 +239,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun setContentEntry(contentEntry: ContentEntry) {
-        entryDetailsTitle!!.text = contentEntry.title
-        supportActionBar!!.title = contentEntry.title
-        entryDetailsDesc!!.text = if(!contentEntry.description.isNullOrBlank()) Html.fromHtml(contentEntry.description) else ""
-        entryDetailsAuthor!!.text = contentEntry.author
+        viewBinding.contentEntryModel = ContentEntryModel(contentEntry)
+        supportActionBar?.title = contentEntry.title
 
         UMAndroidUtil.loadImage(contentEntry.thumbnailUrl,R.drawable.img_placeholder,
                 findViewById<View>(R.id.entry_detail_thumbnail) as ImageView)

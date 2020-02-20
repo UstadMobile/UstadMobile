@@ -43,7 +43,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     val requestLock = Mutex()
 
-    val loadedVal = CompletableDeferred<T>()
+    @Volatile
+    var loadedVal = CompletableDeferred<T>()
 
     val repoHelperId = ID_ATOMICINT.getAndIncrement()
 
@@ -152,13 +153,19 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         }
     }
 
-    suspend fun doRequest(resetAttemptCount: Boolean = false) : T{
+    suspend fun doRequest(resetAttemptCount: Boolean = false, runAgain: Boolean = false) : T{
         requestLock.withLock {
             Napier.d("$logPrefix doRequest: resetAttemptCount = $resetAttemptCount")
             if(resetAttemptCount) {
                 attemptCount = 0
                 triedMainEndpoint = false
             }
+
+            if(runAgain) {
+                loadedVal = CompletableDeferred()
+                completed.value = false
+            }
+
             var mirrorToUse: MirrorEndpoint? = null
             while(!completed.value && coroutineContext.isActive && attemptCount <= maxAttempts) {
                 var endpointToUse: String? = null

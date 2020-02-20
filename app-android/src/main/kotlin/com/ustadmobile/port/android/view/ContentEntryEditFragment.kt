@@ -119,7 +119,7 @@ class ContentEntryEditFragment : UstadDialogFragment(), ContentEntryEditView {
         }
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         if(context is UstadBaseWithContentOptionsActivity){
             optionsActivity = context
         }
