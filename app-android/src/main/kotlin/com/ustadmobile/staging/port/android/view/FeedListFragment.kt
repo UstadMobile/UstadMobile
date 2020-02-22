@@ -1,19 +1,16 @@
 package com.ustadmobile.staging.port.android.view
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.*
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.FeedListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -23,16 +20,13 @@ import com.ustadmobile.core.view.FeedListView.Companion.FEED_LIST_ATTENDANCE_TRE
 import com.ustadmobile.core.view.FeedListView.Companion.FEED_LIST_ATTENDANCE_TREND_UP
 import com.ustadmobile.lib.db.entities.FeedEntry
 import com.ustadmobile.port.android.view.UstadBaseFragment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.util.*
 
 /**
  * FeedListFragment Android fragment extends UstadBaseFragment - fragment responsible for displaying
  * the feed page and actions on them depending on the feed.
  */
-class FeedListFragment : UstadBaseFragment, FeedListView,
+class FeedListFragment : UstadBaseFragment(), FeedListView,
         RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
     override val viewContext: Any
@@ -100,15 +94,11 @@ class FeedListFragment : UstadBaseFragment, FeedListView,
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int, position: Int) {
-        println("hi")
-        val adapter = mRecyclerView!!.adapter as FeedListRecyclerAdapter?
+        val adapter = mRecyclerView?.adapter as FeedListRecyclerAdapter?
         val feedUid = adapter!!.positionToFeedUid[position]!!
         if (feedUid != 0L) {
-            mPresenter!!.markFeedAsDone(feedUid)
+            mPresenter?.handleMarkFeedDone(feedUid)
         }
-        //adapter.notifyItemRemoved(position);
-
-
     }
 
     override fun setFeedEntryProvider(feedEntryUmProvider: DataSource.Factory<Int, FeedEntry>) {
@@ -185,32 +175,6 @@ class FeedListFragment : UstadBaseFragment, FeedListView,
         })
     }
 
-    override fun onResume() {
-        super.onResume()
-        //updateTitle(getText(R.string.feed).toString())
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        //updateTitle(getText(R.string.feed).toString())
-    }
-
-    // This event is triggered soon after onCreateView().
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Setup any handles to view objects here
-        //updateTitle(getText(R.string.feed).toString())
-
-    }
-
-    constructor()  {
-        val args = Bundle()
-        arguments = args
-    }
-
-    constructor(args:Bundle) : this() {
-        arguments = args
-    }
-
     companion object {
 
         /**
@@ -229,19 +193,7 @@ class FeedListFragment : UstadBaseFragment, FeedListView,
         }
 
         val icon = R.drawable.ic_today_black_48dp
+
         val title = R.string.bottomnav_feed_title
-
-        /**
-         * Generates a new Fragment for a page fragment
-         *
-         * @return A new instance of fragment ContainerPageFragment.
-         */
-        fun newInstance(): FeedListFragment {
-
-            val fragment = FeedListFragment()
-            val args = Bundle()
-            fragment.arguments = args
-            return fragment
-        }
     }
 }

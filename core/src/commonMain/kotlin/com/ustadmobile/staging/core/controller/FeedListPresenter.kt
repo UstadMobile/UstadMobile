@@ -25,17 +25,18 @@ import kotlinx.coroutines.launch
  * This presenter is also responsible for generating required feeds when required.
  *
  */
-class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: FeedListView,
+class FeedListPresenter(context: Any, arguments: Map<String, String>, view: FeedListView,
                         private val lifecycleOwner: DoorLifecycleOwner,
                         val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
-        UstadBaseController<FeedListView>(context, arguments!!, view) {
+        UstadBaseController<FeedListView>(context, arguments, view) {
 
     private var loggedInPersonUid = 0L
 
     private var feedEntryUmProvider: DataSource.Factory<Int, FeedEntry>? = null
 
-    private var repository: UmAppDatabase? = null
-    private var database: UmAppDatabase? = null
+    private lateinit var repository: UmAppDatabase
+
+    private lateinit var database: UmAppDatabase
 
     /**
      * Overridden onCreate in order:
@@ -46,15 +47,16 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context)?.personUid ?: 0L
 
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
+
         database = UmAccountManager.getActiveDatabase(context)
+        repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         updateFeedEntries()
 
         //All clazz's average live data
-        val averageLiveData = repository!!.clazzDao.getClazzSummaryLiveData()
+        val averageLiveData = repository.clazzDao.getClazzSummaryLiveData()
         averageLiveData.observeWithLifecycleOwner(lifecycleOwner, this::handleAveragesChanged)
 
         //Check permissions
@@ -62,8 +64,9 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
     }
 
     private fun updateFeedEntries() {
-        feedEntryUmProvider = repository!!.feedEntryDao.findByPersonUid(loggedInPersonUid)
-        view.setFeedEntryProvider(feedEntryUmProvider!!)
+        feedEntryUmProvider = repository.feedEntryDao.findByPersonUid(loggedInPersonUid).apply {
+            view.setFeedEntryProvider(this)
+        }
     }
 
     /**
@@ -71,26 +74,25 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      * @param average   The ClazzAverage POJO that changed.
      */
     private fun handleAveragesChanged(average: ClazzAverage?) {
-        val attendanceAverage = kotlin.math.round(average!!.attendanceAverage * 100)
+        if(average == null)
+            return
+
+        val attendanceAverage = kotlin.math.round(average.attendanceAverage * 100)
         view.updateAttendancePercentage(attendanceAverage.toInt())
         view.updateNumClasses(average.numClazzes)
         view.updateNumStudents(average.numStudents)
-
     }
 
     /**
      * Checks permission and updates the view.
      */
     private fun checkPermissions() {
-        val clazzDao = repository!!.clazzDao
         GlobalScope.launch {
-            if(loggedInPersonUid != 0L) {
-                val result = clazzDao.personHasPermission(loggedInPersonUid,
-                        Role.PERMISSION_REPORTS_VIEW)
-                if (result != null) {
-                    view.showReportOptionsOnSummaryCard(result)
-                }
-            }
+            val hasPermission = repository.clazzDao.personHasPermission(loggedInPersonUid,
+                    Role.PERMISSION_REPORTS_VIEW)
+            view.runOnUiThread(Runnable {
+                view.showReportOptionsOnSummaryCard(hasPermission)
+            })
         }
 
     }
@@ -99,36 +101,11 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      * Mark feed as done so it can be dismissed from the feed list.
      * @param feedUid   the feed uid
      */
-    fun markFeedAsDone(feedUid: Long) {
-        val feedEntryDao = repository!!.feedEntryDao
+    fun handleMarkFeedDone(feedUid: Long) {
         GlobalScope.launch {
-            val thisFeed = feedEntryDao.findByUidAsync(feedUid)
-            if (thisFeed != null) {
-                thisFeed.feedEntryDone = true
-                feedEntryDao.update(thisFeed)
-                updateFeedEntries()
-            }
+            repository.feedEntryDao.markEntryAsDoneByFeedEntryUid(feedUid, true)
         }
-
     }
-
-    /**
-     * Splits the string query without host name and returns a hash map of it.
-     *
-     * @param query The string get query without host. eg: clazzuid=22&logdate=123456789
-     * @return  A hash table all the query
-     */
-    private fun splitQuery(query: String): Map<String, String>? {
-        val query_pairs = HashMap<String, String>()
-
-        val pairs = query.split("&".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        for (pair in pairs) {
-            val idx = pair.indexOf("=")
-            query_pairs.put(pair.substring(0, idx), pair.substring(idx + 1))
-        }
-        return query_pairs
-    }
-
 
     /**
      * Goes to Report selection
@@ -146,11 +123,8 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
      * @param feedEntry The FeedEntry object that was clicked.
      */
     fun handleClickFeedEntry(feedEntry: FeedEntry) {
-        val feedLink = feedEntry.link
-        val linkViewName = feedLink!!.split("\\?".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-        val args = splitQuery(feedLink.split("\\?".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1])
-        impl.go(linkViewName, args!!, view.viewContext)
-
+        val feedLink = feedEntry.link ?: return
+        impl.go(feedLink, context)
     }
 
 }
