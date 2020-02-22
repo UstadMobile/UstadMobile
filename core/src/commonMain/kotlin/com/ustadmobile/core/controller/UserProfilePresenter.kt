@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_IMAGE_PATH
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_UID
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -24,70 +25,36 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
     : UstadBaseController<UserProfileView>(context, arguments, view){
 
     private val languageOptions = impl.getAllUiLanguage(context)
-    private var personPictureDao: PersonPictureDao
+
+    private var personPictureDao: PersonPictureDao = repository.personPictureDao
+
     private var loggedInPerson: Person? = null
 
     private val personDao = repository.personDao
 
     var loggedInPersonUid = 0L
 
-    init {
-
-        //Get provider Dao
-        personPictureDao = repository.personPictureDao
-
-    }
-
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         val account = UmAccountManager.getActiveAccount(context)
-        view.setUsername(account!!.username!!)
-        view.setCurrentLanguage(languageOptions[impl.getDisplayedLocale(context)!!])
-
-        if (account != null) {
-            loggedInPersonUid = account.personUid
+        if(account != null) {
             GlobalScope.launch {
-                val result = personDao.findByUidAsync(loggedInPersonUid)
-                loggedInPerson = result
-
-                if (loggedInPerson != null) {
-
-                    var firstNames = ""
-                    var lastName = ""
-                    if(result!!.firstNames!=null){
-                        firstNames = result!!.firstNames!!
-                    }
-                    if(result!!.lastName != null){
-                        lastName = result!!.lastName!!
-                    }
-
-                    val personName = firstNames + " " + lastName
+                val loggedInPersonVal = personDao.findByUidAsync(loggedInPersonUid)
+                if(loggedInPersonVal != null) {
                     view.runOnUiThread(Runnable {
-                        view.updateToolbarTitle(personName)
+                        view.person = loggedInPersonVal
                     })
+                }
 
-                    val personPicture =
-                            personPictureDao.findByPersonUidAsync(loggedInPerson!!.personUid)
-                    if (personPicture != null) {
-                        val picturePath = personPictureDao.getAttachmentPath(personPicture)
-                        view.updateImageOnView(picturePath!!, true)
+                personPictureDao.findByPersonUidAsync(account.personUid)?.also {personPicture ->
+                    personPictureDao.getAttachmentPath(personPicture)?.also {picPath ->
+                        view.runOnUiThread(Runnable { view.updateImageOnView(picPath, true) })
                     }
                 }
             }
         }
 
-        val lastSyncedText = impl.getString(MessageID.last_synced_at,
-                context)
-        GlobalScope.launch {
-
-            val latestTimeStamp =
-                    UmAccountManager.getActiveDatabase(context).syncresultDao.getLatestTimeStamp()
-            val lastSyncedText2 = UMCalendarUtil.getPrettyDateWithTimeFromLongSimple(latestTimeStamp)
-            val lastSynced = lastSyncedText + " " + lastSyncedText2
-            view.runOnUiThread(Runnable {
-                view.updateLastSyncedText(lastSynced)
-            })
-        }
+        view.setCurrentLanguage(languageOptions[impl.getDisplayedLocale(context)])
     }
 
     fun handleClickChangePassword() {
@@ -99,14 +66,8 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
     fun handleUserLogout(){
         UmAccountManager.setActiveAccount(UmAccount(0,
                 "", "", ""), context)
-        UmAccountManager.setActiveAccount(null, context)
-
-        val args = HashMap<String, String>()
-        view.runOnUiThread(Runnable {
-            view.callFinishAffinity()
-        })
-
-        impl.go(LoginView.VIEW_NAME, args, context)
+        view.callFinishAffinity()
+        impl.go(LoginView.VIEW_NAME, mapOf(), context)
     }
 
     /**
@@ -116,7 +77,7 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
         //TODO Start the sync process.
     }
 
-    fun handleShowLanguageOptions(){
+    fun handleClickLanguage(){
         view.setLanguageOption(languageOptions.values.sorted().toMutableList())
     }
 
@@ -144,22 +105,19 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
         impl.go(PersonPictureDialogView.VIEW_NAME, args, context);
     }
 
-    fun handleCompressedImage(imageFilePath: String) {
-
+    fun handleProfileImageSelected(imageFilePath: String) {
         GlobalScope.launch {
             try {
-
                 var existingPP = personPictureDao.findByPersonUidAsync(loggedInPersonUid)
                 if(existingPP == null){
                     existingPP = PersonPicture()
                     existingPP.personPicturePersonUid = loggedInPersonUid
-                    existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
-                    val personPictureUid = personPictureDao.insertAsync(existingPP)
-                    existingPP.personPictureUid = personPictureUid
+                    existingPP.picTimestamp = systemTimeInMillis()
+                    existingPP.personPictureUid = personPictureDao.insertAsync(existingPP)
                 }
 
                 personPictureDao.setAttachment(existingPP, imageFilePath)
-                existingPP.picTimestamp = UMCalendarUtil.getDateInMilliPlusDays(0)
+                existingPP.picTimestamp = systemTimeInMillis()
                 personPictureDao.update(existingPP)
 
                 //Update person and generate feeds for person

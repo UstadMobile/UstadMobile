@@ -5,10 +5,13 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.FeedListView
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_REPORT_NAME
 import com.ustadmobile.core.view.ReportSelectionView
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.ClazzAverage
 import com.ustadmobile.lib.db.entities.FeedEntry
 import com.ustadmobile.lib.db.entities.Role
@@ -23,6 +26,7 @@ import kotlinx.coroutines.launch
  *
  */
 class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: FeedListView,
+                        private val lifecycleOwner: DoorLifecycleOwner,
                         val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
         UstadBaseController<FeedListView>(context, arguments!!, view) {
 
@@ -51,7 +55,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
 
         //All clazz's average live data
         val averageLiveData = repository!!.clazzDao.getClazzSummaryLiveData()
-        averageLiveData.observeWithPresenter(this, this::handleAveragesChanged)
+        averageLiveData.observeWithLifecycleOwner(lifecycleOwner, this::handleAveragesChanged)
 
         //Check permissions
         checkPermissions()
@@ -59,7 +63,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
 
     private fun updateFeedEntries() {
         feedEntryUmProvider = repository!!.feedEntryDao.findByPersonUid(loggedInPersonUid)
-        updateFeedProviderToView()
+        view.setFeedEntryProvider(feedEntryUmProvider!!)
     }
 
     /**
@@ -106,13 +110,6 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>?, view: Fee
             }
         }
 
-    }
-
-    /**
-     * Updates the View with the feed provider set on the Presenter
-     */
-    private fun updateFeedProviderToView() {
-        view.runOnUiThread(Runnable{ view.setFeedEntryProvider(feedEntryUmProvider!!) })
     }
 
     /**

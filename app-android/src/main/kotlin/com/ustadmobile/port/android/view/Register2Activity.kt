@@ -61,14 +61,12 @@ class Register2Activity : UstadBaseActivity(), Register2View {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeButtonEnabled(true)
         }
-        fieldToViewIdMap[Register2View.FIELD_FIRST_NAME] =
-                R.id.activity_create_account_firstname_text
+        fieldToViewIdMap[Register2View.FIELD_FIRST_NAME] = R.id.activity_create_account_firstname_text
         fieldToViewIdMap[Register2View.FIELD_LAST_NAME] = R.id.activity_create_account_lastname_text
         fieldToViewIdMap[Register2View.FIELD_EMAIL] = R.id.activity_create_account_email_text
         fieldToViewIdMap[Register2View.FIELD_USERNAME] = R.id.activity_create_account_username_text
         fieldToViewIdMap[Register2View.FIELD_PASSWORD] = R.id.activity_create_account_password_text
-        fieldToViewIdMap[Register2View.FIELD_CONFIRM_PASSWORD] =
-                R.id.activity_create_account_password_confirmpassword_text
+        fieldToViewIdMap[Register2View.FIELD_CONFIRM_PASSWORD] = R.id.activity_create_account_password_confirmpassword_text
 
         registerUser = findViewById(R.id.activity_create_account_create_account_button)
         errorMessageView = findViewById(R.id.activity_create_account_error_text)
@@ -96,24 +94,21 @@ class Register2Activity : UstadBaseActivity(), Register2View {
     private fun checkAccountFields() {
         for (fieldCode in fieldToViewIdMap.keys) {
             if (getFieldValue(fieldCode).isEmpty()) {
-                setErrorMessageView(systemImpl!!.getString(MessageID.register_empty_fields,
-                        this))
+                setErrorMessageView(systemImpl!!.getString(MessageID.register_empty_fields, this))
                 return
             }
         }
 
         checkRegisterButtonStatus()
 
-        if (getFieldValue(Register2View.FIELD_PASSWORD) ==
-                getFieldValue(Register2View.FIELD_CONFIRM_PASSWORD)) {
+        if (getFieldValue(Register2View.FIELD_PASSWORD) == getFieldValue(Register2View.FIELD_CONFIRM_PASSWORD)) {
 
             val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
 
             if (getFieldValue(Register2View.FIELD_EMAIL).matches(emailPattern.toRegex())) {
                 if (getFieldValue(Register2View.FIELD_PASSWORD).length < 5) {
                     disableButton(true)
-                    setErrorMessageView(systemImpl!!.getString(MessageID.field_password_error_min,
-                            this))
+                    setErrorMessageView(systemImpl!!.getString(MessageID.field_password_error_min, this))
                 } else {
                     val person = Person()
                     person.firstNames = getFieldValue(Register2View.FIELD_FIRST_NAME)
@@ -121,24 +116,17 @@ class Register2Activity : UstadBaseActivity(), Register2View {
                     person.emailAddr = getFieldValue(Register2View.FIELD_EMAIL)
                     person.username = getFieldValue(Register2View.FIELD_USERNAME)
                     Thread {
-                        //TODO: New way before Delegate works
-//                        presenter!!.handleClickRegister(person,
-//                                getFieldValue(Register2View.FIELD_PASSWORD), serverUrl!!)
-
-                        presenter!!.handleClickRegister2(person.firstNames!!, person.lastName!!,
-                                person.emailAddr!!, person.username!!,
+                        presenter!!.handleClickRegister(person,
                                 getFieldValue(Register2View.FIELD_PASSWORD), serverUrl!!)
                     }.start()
                 }
             } else {
                 disableButton(true)
-                setErrorMessageView(systemImpl!!.getString(MessageID.register_incorrect_email,
-                        this))
+                setErrorMessageView(systemImpl!!.getString(MessageID.register_incorrect_email, this))
             }
         } else {
             disableButton(true)
-            setErrorMessageView(systemImpl!!.getString(MessageID.filed_password_no_match,
-                    this))
+            setErrorMessageView(systemImpl!!.getString(MessageID.filed_password_no_match, this))
         }
     }
 
@@ -171,8 +159,7 @@ class Register2Activity : UstadBaseActivity(), Register2View {
     }
 
     private fun getFieldValue(fieldCode: Int): String {
-        return (findViewById<View>(fieldToViewIdMap[fieldCode]!!) as
-                TextInputEditText).text!!.toString()
+        return (findViewById<View>(fieldToViewIdMap[fieldCode]!!) as TextInputEditText).text!!.toString()
     }
 
     private fun checkRegisterButtonStatus() {

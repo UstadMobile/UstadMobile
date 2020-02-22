@@ -135,7 +135,7 @@ class SelectPeopleDialogFragment : UstadDialogFragment(), SelectPeopleDialogView
         mRecyclerView!!.layoutManager = LinearLayoutManager(context)
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         this.mAttachedContext = context
         this.selectedPeople = HashMap()

@@ -130,7 +130,7 @@ class SelectClazzesDialogFragment : UstadDialogFragment(), SelectClazzesDialogVi
         mRecyclerView!!.layoutManager = LinearLayoutManager(context)
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         this.mAttachedContext = context
         this.selectedClazzes = HashMap()

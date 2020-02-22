@@ -1,35 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-        Helped by using:
-        http://www.materialpalette.com/blue-grey/light-blue
-        -->
-    <color name="primary">#FDC82F</color>
-    <color name="toolbar">#000</color>
-
-    <color name="bottomnav_background">@color/primary</color>
-    <color name="bottomnav_accent">@color/just_black</color>
-    <color name="bottomnav_inactive">#C69800</color>
-    <color name="primary_dark">#C69800</color>
-    <color name="primary_light">#000</color>
-    <color name="accent">#CC6600</color>
-    <color name="primary_text">#000</color>
-    <color name="secondary_text">#666666</color>
+    Helped by using:
+    http://www.materialpalette.com/blue-grey/light-blue
+    -->
+    <color name="primary">#009688</color>
+    <color name="primary_dark">#00796B</color>
+    <color name="primary_light">#B2DFDB</color>
+    <color name="accent">#FF9800</color>
+    <color name="primary_text">#FFFFFF</color>
+    <color name="secondary_text">#727272</color>
     <color name="secondary_text_light">#41727272</color>
     <color name="red">#FF0000</color>
-    <color name="just_black">#000000</color>
-    <color name="color_gray">#FF888888</color>
-    <color name="traffic_green">#009900</color>
-    <color name="traffic_orange">#FFCC00</color>
-    <color name="traffic_red">#FF0000</color>
+
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
-    <color name="icons">#000000</color>
-    <color name="fab_text">#FFFF</color>
-    <color name="icons_light">#000</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="icons_light">#ABFFFFFF</color>
     <color name="divider">#BDBDBD</color>
     <color name="divider_faint">#50BDBDBD</color>
     <color name="divider_faint_blank">#50b4b4b4</color>
+
     <color name="background_light">#E8EAED</color>
 
     <item name="umblue" type="color">#FF3F31B5</item>
@@ -49,6 +40,8 @@
 
     <item name="catalog_entry_display_mode_normal_background" type="color">#FFFFFF</item>
     <item name="catalog_entry_display_mode_banner_background" type="color">@color/background_light</item>
+
+
 
     <!--
     Text only button background color: Used when we want something that looks like hyperlink
@@ -70,6 +63,16 @@
     <color name="content_icon_active">#263238</color>
     <color name="content_white_fab_pressed">#fcfcfc</color>
     <color name="colorTextSecondaryTransparent">#21757575</color>
+
+
+    <color name="just_black">#000000</color>
+    <color name="color_gray">#FF888888</color>
+    <color name="traffic_green">#009900</color>
+    <color name="traffic_orange">#FFCC00</color>
+    <color name="traffic_red">#FF0000</color>
+
+    <color name="fab_text">#FFFF</color>
+    <color name="toolbar">#000</color>
 
 
 </resources>

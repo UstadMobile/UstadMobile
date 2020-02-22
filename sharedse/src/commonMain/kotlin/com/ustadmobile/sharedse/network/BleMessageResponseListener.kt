@@ -6,7 +6,7 @@ package com.ustadmobile.sharedse.network
 interface BleMessageResponseListener {
     /**
      * Invoked when new response is received, after collecting the packages into a message.
-     * @param sourceDeviceAddress Server device bluetooth MAC personAddress
+     * @param sourceDeviceAddress Server device bluetooth MAC address
      * @param response Message received as a response from the server device (if successful)
      * @param error
      */

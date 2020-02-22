@@ -18,11 +18,14 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
         classpath "com.github.jengelman.gradle.plugins:shadow:$version_shadow"
+        classpath "com.gradle:gradle-enterprise-gradle-plugin:3.1.1"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
+
+apply plugin: "com.gradle.build-scan"
 
 allprojects {
     repositories {
@@ -180,7 +183,6 @@ ext.findCommand = {String command, String buildConfigVarName ->
     }else {
         def pathDirs = System.getenv("PATH").split(File.pathSeparator)
         for(path in pathDirs) {
-
             if(file("$path/$command").exists()) {
                 return "$path/$command"
             }

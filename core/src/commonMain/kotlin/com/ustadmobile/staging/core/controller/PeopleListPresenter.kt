@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
 import com.ustadmobile.core.view.PeopleListView
@@ -15,6 +16,7 @@ import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_NAME_DESC
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
@@ -30,6 +32,7 @@ import kotlinx.coroutines.launch
  * going to PersonDetail View to see more information about that Person.
  */
 class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: PeopleListView,
+                          private val lifecycleOwner: DoorLifecycleOwner,
                           val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
         CommonHandlerPresenter<PeopleListView>(context, arguments!!, view) {
 
@@ -124,7 +127,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
         val loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
         val personLive = repository.personDao.findByUidLive(loggedInPersonUid)
-        personLive.observeWithPresenter(this, this::handlePersonValueChanged)
+        personLive.observeWithLifecycleOwner(lifecycleOwner, this::handlePersonValueChanged)
     }
 
     /**

@@ -25,8 +25,8 @@ import java.util.*
 
 
 class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
-        DialogInterface.OnClickListener, View.OnClickListener,
-        CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
+        DialogInterface.OnClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
+        AdapterView.OnItemSelectedListener {
 
     override val viewContext: Any
         get() = context!!

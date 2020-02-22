@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
@@ -26,24 +27,14 @@ import java.util.*
  */
 class HomeContentEntryTabsFragment : UstadBaseFragment(){
 
-    lateinit var rootContainer: View
-
-    lateinit var mTabLayout : TabLayout
-
-    lateinit var mPager: ViewPager
-
-    val weakFragmentMap = WeakHashMap<String, Fragment>()
-
-    private inner class ContentEntryTabsPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    private inner class ContentEntryTabsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         override fun getItem(position: Int): Fragment {
             var positionArgs = arguments?.getString(position.toString()) ?:
             throw IllegalArgumentException("HomeContentEntryTabsFragment: did not find " +
                     "argument for position: $position")
             positionArgs = positionArgs.substringAfter(';')
-
-            return weakFragmentMap[":$positionArgs"] ?: ContentEntryListFragment().also {
+            return ContentEntryListFragment().also {
                 it.arguments = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(positionArgs))
-                weakFragmentMap[":$positionArgs"] = it
             }
         }
 
@@ -59,11 +50,10 @@ class HomeContentEntryTabsFragment : UstadBaseFragment(){
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        rootContainer = inflater.inflate(R.layout.fragment_contententrytabs, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_contententrytabs, container, false)
 
-
-        mTabLayout = rootContainer.findViewById(R.id.home_contententry_tabs)
-        mPager = rootContainer.findViewById(R.id.home_contententry_viewpager)
+        val mTabLayout: TabLayout = rootView.findViewById(R.id.home_contententry_tabs)
+        val mPager: ViewPager = rootView.findViewById(R.id.home_contententry_viewpager)
 
         //Unfortunately if we dont use a Handler here then the first tab will not show up on first load
         Handler().post {
@@ -71,6 +61,7 @@ class HomeContentEntryTabsFragment : UstadBaseFragment(){
             mTabLayout.setupWithViewPager(mPager)
         }
 
-        return rootContainer
+        return rootView
     }
+
 }

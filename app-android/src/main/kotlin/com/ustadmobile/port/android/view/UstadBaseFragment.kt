@@ -11,9 +11,6 @@ open class UstadBaseFragment : Fragment() {
 
     private val runOnAttach = Vector<Runnable>()
 
-    var icon: Int?=null
-    var title: Int?=null
-
     override fun onDestroy() {
         super.onDestroy()
     }

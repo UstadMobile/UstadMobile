@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -31,8 +32,8 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 
-class ContentEntryListRecyclerViewAdapter internal constructor(private val activity: FragmentActivity,
-                                                               private val listener: AdapterViewListener,
+class ContentEntryListRecyclerViewAdapter internal constructor(private var lifecycleOwner: LifecycleOwner?,
+                                                               private var listener: AdapterViewListener?,
                                                                private val containerDownloadManager: ContainerDownloadManager)
     : RepoLoadingPageListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, RecyclerView.ViewHolder>(DIFF_CALLBACK){
 
@@ -55,6 +56,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
     }
 
     interface AdapterViewListener {
+
         fun contentEntryClicked(entry: ContentEntry?)
 
         fun downloadStatusClicked(entry: ContentEntry)
@@ -91,6 +93,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val lifecycleVal = lifecycleOwner ?: return
+
         val dataIndex = position + if(isTopEntryList) -1 else 0
         if(dataIndex >= 0)
             super.onBindViewHolder(holder, dataIndex)
@@ -107,7 +111,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
             GlobalScope.launch(Dispatchers.Main.immediate) {
                 holder.downloadJobItemLiveData = containerDownloadManager
                         .getDownloadJobItemByContentEntryUid(entry?.contentEntryUid ?: 0).also {
-                            it.observe(activity, holder)
+                            it.observe(lifecycleVal, holder)
                         }
             }
 
@@ -155,8 +159,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 }
 
                 holder.downloadView.imageResource!!.contentDescription = contentDescription
-                holder.view.setOnClickListener { listener.contentEntryClicked(entry) }
-                holder.downloadView.setOnClickListener { listener.downloadStatusClicked(entry) }
+                holder.view.setOnClickListener { listener?.contentEntryClicked(entry) }
+                holder.downloadView.setOnClickListener { listener?.downloadStatusClicked(entry) }
                 holder.downloadView.progress = 0
                 holder.updateLocallyAvailableStatus(
                         localAvailabilityMap.get(entry.mostRecentContainer?.containerUid ?: 0L) ?: false)
@@ -188,7 +192,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                         chip.isCheckable = chip.id != umChipGroup.checkedChipId
                         if(isSelected){
                             activeIndex = i
-                            listener.contentFilterClicked(i)
+                            listener?.contentFilterClicked(i)
                         }
                         updateChipAppearance(chip, isSelected)
                     }
@@ -210,7 +214,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
     }
 
     inner class EntryViewHolder internal constructor(val view: View) : RecyclerView.ViewHolder(view),
-            Observer<DownloadJobItem?> {
+        Observer<DownloadJobItem?> {
         internal val entryTitle: TextView = view.findViewById(R.id.content_entry_item_title)
         internal val entryDescription: TextView = view.findViewById(R.id.content_entry_item_description)
         private val entrySize: TextView = view.findViewById(R.id.content_entry_item_library_size)
@@ -249,7 +253,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
 
 
         override fun onChanged(t: DownloadJobItem?) {
-            Napier.i("DLUFIX: Received update for ${t?.djiUid} = ${t?.toStatusString(UstadMobileSystemImpl.instance, activity)}")
+            Napier.i("DLUFIX: Received update for ${t?.djiUid} = ${t?.toStatusString(UstadMobileSystemImpl.instance, view.context)}")
             if(t?.djiStatus != currentDownloadStatus) {
                 currentDownloadStatus = t?.djiStatus ?: 0
                 val context = view.context
@@ -268,7 +272,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                         contentDescription = context.getString(R.string.download_entry_state_paused)
                     }
                     t.isStatusCompletedSuccessfully() -> {
-                        //                    localAvailabilityVisible = false
+        //                    localAvailabilityVisible = false
                         downloadView.setImageResource(R.drawable.ic_offline_pin_black_24dp)
                         contentDescription = context.getString(R.string.downloaded)
                     }
@@ -344,5 +348,12 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private val activ
                 return true
             }
         }
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+
+        lifecycleOwner = null
+        listener = null
     }
 }

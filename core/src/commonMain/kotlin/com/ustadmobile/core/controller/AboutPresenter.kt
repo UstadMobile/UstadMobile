@@ -6,6 +6,9 @@ import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.AboutView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 import kotlinx.io.IOException
 import kotlinx.io.InputStream
 
@@ -17,37 +20,21 @@ class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
                      val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<AboutView>(context, args!!, view) {
 
-    private var aboutHTMLStr: String? = null
-
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        impl.getAsset(context, "com/ustadmobile/core/about.html",
-                object : UmCallback<InputStream> {
-            override fun onSuccess(result: InputStream?) {
-                if (result != null) {
-                    try {
-                        aboutHTMLStr = UMIOUtils.readStreamToString(result)
-                        view.setAboutHTML(aboutHTMLStr!!)
-                    } catch (e: IOException) {
-                        dumpException(e)
-                    }
-                }
+        GlobalScope.launch {
+            var aboutInputStream : InputStream? = null
+            try {
+                aboutInputStream = impl.getAssetInputStreamAsync(context, "com/ustadmobile/core/about.html")
+                val aboutText = UMIOUtils.readStreamToString(aboutInputStream)
+                view.runOnUiThread(Runnable {
+                    view.setAboutHTML(aboutText)
+                })
+            }finally {
+                aboutInputStream?.close()
             }
-
-            override fun onFailure(exception: Throwable?) {
-                if (exception != null) {
-                    dumpException(exception)
-                }
-            }
-        })
-
-        view.setVersionInfo(impl.getVersion(context) + " - " +
-                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)))
-
-        view.setVersionInfo(impl.getVersion(context) + " - " +
-                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(context)))
-        view.setAboutHTML(aboutHTMLStr!!)
+        }
 
         val currentApiUrl:String = impl.getAppConfigString("apiUrl",
                 "http://localhost", context).toString()

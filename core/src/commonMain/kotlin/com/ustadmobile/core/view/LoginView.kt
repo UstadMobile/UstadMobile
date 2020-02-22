@@ -25,19 +25,10 @@ interface LoginView : UstadViewWithSnackBar {
     @JsName("setRegistrationLinkVisible")
     fun setRegistrationLinkVisible(visible: Boolean)
 
-    fun setMessage(message:String)
-
-    fun setFinishAfficinityOnView()
-
-    fun forceSync()
-
-    fun updateVersionOnLogin(version: String)
-
     companion object {
 
         const val VIEW_NAME = "Login"
-        const val ARG_LOGIN_USERNAME = "LoginUsername"
-        val ARG_STARTSYNCING = "argStatSync"
+
     }
 
 }

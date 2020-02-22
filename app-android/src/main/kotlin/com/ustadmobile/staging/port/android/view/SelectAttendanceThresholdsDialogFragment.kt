@@ -119,7 +119,7 @@ class SelectAttendanceThresholdsDialogFragment : UstadDialogFragment(),
         return dialog
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         this.mAttachedContext = context
         selectedValues = ReportAttendanceGroupedByThresholdsPresenter.ThresholdValues()

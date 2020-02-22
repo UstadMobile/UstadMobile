@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.controller.AddScheduleDialogPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
@@ -212,7 +213,7 @@ open abstract class UstadMobileSystemCommon {
      *
      * @return The locale as the user sees it.
      */
-    open fun getDisplayedLocale(context: Any): String? {
+    open fun getDisplayedLocale(context: Any): String {
         var locale = getLocale(context)
         if (locale == LOCALE_USE_SYSTEM)
             locale = getSystemLocale(context)
@@ -225,14 +226,10 @@ open abstract class UstadMobileSystemCommon {
      */
     @JsName("getAllUiLanguage")
     open fun getAllUiLanguage(context: Any): Map<String,String>{
-        val languageList = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
-                "",context)!!.split(",")
-        val languageMap = HashMap<String,String>()
-        for(language in languageList){
-            languageMap[language] = UstadMobileConstants.LANGUAGE_NAMES[language] ?:
-                    UstadMobileConstants.LANGUAGE_NAMES["en"]!!
-        }
-        return languageMap
+        val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
+                "",context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
+        val languageList =languagesConfigVal.split(",")
+        return languageList.map { it to (LANGUAGE_NAMES[it] ?: it) }.toMap()
     }
 
 

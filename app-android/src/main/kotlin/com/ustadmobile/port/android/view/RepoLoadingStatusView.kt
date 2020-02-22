@@ -29,8 +29,7 @@ import kotlinx.coroutines.launch
  * call. This LiveData also has a LiveData object with the loading status.
  *
  */
-class RepoLoadingStatusView: CoordinatorLayout, FistItemLoadedListener,
-        DoorObserver<RepositoryLoadHelper.RepoLoadStatus> {
+class RepoLoadingStatusView: CoordinatorLayout, DoorObserver<RepositoryLoadHelper.RepoLoadStatus>, FistItemLoadedListener {
 
     data class RepoLoadingStatusInfo(val progressVisible: Boolean,
                                      var imageResourceToShow: Int,
@@ -105,6 +104,13 @@ class RepoLoadingStatusView: CoordinatorLayout, FistItemLoadedListener,
                 }
             }
         }
+    }
+
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        statusLiveData?.removeObserver(this)
+        statusLiveData = null
     }
 
     override fun onFirstItemLoaded() {

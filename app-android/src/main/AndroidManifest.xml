@@ -103,9 +103,6 @@
             android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
-        <!-- IRC -->
-        <activity android:name="com.ustadmobile.staging.port.android.view.BasePointActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <activity android:name="com.ustadmobile.port.android.view.DownloadDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />

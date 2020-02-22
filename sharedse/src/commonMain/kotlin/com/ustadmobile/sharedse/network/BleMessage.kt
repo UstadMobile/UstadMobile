@@ -345,7 +345,7 @@ class BleMessage {
 
         /**
          * Generate next message identifier for the node
-         * @param receiverAddr bluetooth personAddress
+         * @param receiverAddr bluetooth address
          * @return unique message identifier
          */
         @Synchronized

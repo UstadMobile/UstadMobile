@@ -92,8 +92,6 @@ class ReportSelectionFragment : UstadBaseFragment, BaseReportView {
     constructor()  {
         val args = Bundle()
         arguments = args
-        icon = R.drawable.ic_insert_chart_black_24dp
-        title = R.string.bottomnav_reports_title
     }
 
     constructor(args:Bundle) : this() {
