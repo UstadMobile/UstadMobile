@@ -114,7 +114,7 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
 
-        val item = menu!!.findItem(R.id.menu_done)
+        val item = menu.findItem(R.id.menu_done)
 
         //Get the icon itself.
         val itemIcon = resources.getDrawable(R.drawable.ic_check_white_24dp)

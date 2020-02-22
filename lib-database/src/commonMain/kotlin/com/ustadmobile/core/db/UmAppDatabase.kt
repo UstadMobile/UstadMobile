@@ -32,12 +32,12 @@ import kotlin.jvm.Volatile
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class
+    SyncResult::class, School::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 32)
+], version = 33)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -196,6 +196,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val selQuestionSetDao : SelQuestionSetDao
     abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
     abstract val umCalendarDao : UMCalendarDao
+    abstract val schoolDao : SchoolDao
 
     @JsName("xLangMapEntryDao")
     abstract val xLangMapEntryDao: XLangMapEntryDao

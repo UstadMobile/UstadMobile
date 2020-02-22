@@ -55,6 +55,10 @@ tasks.whenTaskAdded { task ->
 }
 
 android {
+    dataBinding {
+        enabled = true
+    }
+
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
         main.res.srcDirs += "../core/locale/main/"

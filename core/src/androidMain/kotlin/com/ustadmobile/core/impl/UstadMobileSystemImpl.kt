@@ -181,7 +181,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             PeopleListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PeopleListActivity"),
 
             ContentEntryExportView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryExportFragmentDialog"),
-            ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"))
+            ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
+
+            SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"))
 
 
 
