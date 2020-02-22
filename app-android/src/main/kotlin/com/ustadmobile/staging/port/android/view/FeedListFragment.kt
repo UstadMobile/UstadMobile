@@ -93,12 +93,16 @@ class FeedListFragment : UstadBaseFragment(), FeedListView,
         summaryCard = null
     }
 
+    //TODO: It would be better if the viewHolder kept a reference to the object (it receives this in onBound)
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int, position: Int) {
         val adapter = mRecyclerView?.adapter as FeedListRecyclerAdapter?
-        val feedUid = adapter!!.positionToFeedUid[position]!!
-        if (feedUid != 0L) {
-            mPresenter?.handleMarkFeedDone(feedUid)
+        val feedUid = if(adapter != null) {
+            adapter.positionToFeedUid[position] ?: 0L
+        }else {
+            0L
         }
+
+        mPresenter?.handleMarkFeedDone(feedUid)
     }
 
     override fun setFeedEntryProvider(feedEntryUmProvider: DataSource.Factory<Int, FeedEntry>) {
