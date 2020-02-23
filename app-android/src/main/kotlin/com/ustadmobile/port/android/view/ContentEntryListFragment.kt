@@ -8,7 +8,6 @@ import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -59,9 +58,15 @@ import java.util.concurrent.atomic.AtomicReference
  * fragment (e.g. upon screen orientation changes).
  */
 
-class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
-        ContentEntryListRecyclerViewAdapter.AdapterViewListener {
+/**
+ *
+ */
+interface IContentEntryListPresenterWithPermissionCheck {
 
+    fun checkPermissionAndHandleDownloadStatusButtonClicked(entry: ContentEntry)
+}
+
+class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView, IContentEntryListPresenterWithPermissionCheck {
 
     interface ContentEntryListHostActivity {
 
@@ -72,6 +77,8 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         fun setLanguageFilterSpinner(result: List<LangUidAndName>)
 
     }
+
+
 
     private var buttonVisibilityFlags: Int = 0
 
@@ -96,7 +103,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
 
     private lateinit var buttonFilterLabels: List<String>
 
-    private var activeFilterIndex = 0
+    //private var activeFilterIndex = 0
 
     private var lastRecyclerViewAdapter: ContentEntryListRecyclerViewAdapter? = null
 
@@ -331,11 +338,11 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
         val ustadBaseActivityVal = ustadBaseActivity ?: return
         val networkManagerBleVal = managerAndroidBle ?: return
 
-        val recyclerAdapter = ContentEntryListRecyclerViewAdapter(this, this,
+        val recyclerAdapter = ContentEntryListRecyclerViewAdapter(this, presenter, this,
                 networkManagerBleVal.containerDownloadManager).apply {
             isTopEntryList = buttonFilterLabels.isNotEmpty()
             filterButtons = buttonFilterLabels
-            activeIndex = activeFilterIndex
+            activeIndex = presenter?.activeFilterIndex ?: 0
         }
         recyclerAdapter.firstItemLoadedListener = repoLoadingStatusView
 
@@ -384,15 +391,11 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
     }
 
 
-    override fun contentEntryClicked(entry: ContentEntry?) {
-        runOnUiThread(Runnable {
-            if (entry != null) {
-                presenter?.handleContentEntryClicked(entry)
-            }
-        })
-    }
-
-    override fun downloadStatusClicked(entry: ContentEntry) {
+    /**
+     * Handle this here first because we need to ensure that we have permission before passing this
+     * to the presenter
+     */
+    override fun checkPermissionAndHandleDownloadStatusButtonClicked(entry: ContentEntry) {
         val impl = UstadMobileSystemImpl.instance
         val ustadBaseActivityVal = ustadBaseActivity
         if (ustadBaseActivityVal != null) {
@@ -402,11 +405,6 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView,
                     impl.getString(MessageID.download_storage_permission_title, ustadBaseActivityVal),
                     impl.getString(MessageID.download_storage_permission_message, ustadBaseActivityVal))
         }
-    }
-
-    override fun contentFilterClicked(index: Int) {
-        activeFilterIndex = index
-        presenter?.handleClickFilterButton(index)
     }
 
 

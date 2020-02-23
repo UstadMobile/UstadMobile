@@ -41,6 +41,9 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     private var noIframe: Boolean = false
 
+    var activeFilterIndex: Int = 0
+        private set
+
     /*
      List of Strings - possible values are: ARG_DOWNLOADED_CONTENT, ARG_LIBRARIES_CONTENT,
      ARG_RECYCLED_CONTENT
@@ -192,6 +195,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
     @JsName("handleClickFilterButton")
     fun handleClickFilterButton(buttonPos: Int){
         val filterButton = filterButtons[buttonPos]
+        activeFilterIndex = buttonPos
         view.setEmptyView(filterButton)
         when(filterButton){
             ARG_LIBRARIES_CONTENT -> showContentByParent()

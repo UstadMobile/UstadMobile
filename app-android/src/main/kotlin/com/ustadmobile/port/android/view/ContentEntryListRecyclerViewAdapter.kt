@@ -18,6 +18,8 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
 import com.google.android.material.chip.ChipGroup
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.ListItemContentEntryBinding
+import com.ustadmobile.core.controller.ContentEntryListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -33,7 +35,8 @@ import java.util.*
 
 
 class ContentEntryListRecyclerViewAdapter internal constructor(private var lifecycleOwner: LifecycleOwner?,
-                                                               private var listener: AdapterViewListener?,
+                                                               private var presenter: ContentEntryListPresenter?,
+                                                               private var presenterWithPermissionCheck: IContentEntryListPresenterWithPermissionCheck?,
                                                                private val containerDownloadManager: ContainerDownloadManager)
     : RepoLoadingPageListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, RecyclerView.ViewHolder>(DIFF_CALLBACK){
 
@@ -55,24 +58,12 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
         }
     }
 
-    interface AdapterViewListener {
-
-        fun contentEntryClicked(entry: ContentEntry?)
-
-        fun downloadStatusClicked(entry: ContentEntry)
-
-        fun contentFilterClicked(index : Int)
-    }
-
-
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         if(holder is EntryViewHolder){
-            synchronized(boundViewHolders) {
-                boundViewHolders.remove(holder)
-            }
-
+            boundViewHolders.remove(holder)
             holder.downloadJobItemLiveData?.removeObserver(holder)
         }
+
         super.onViewRecycled(holder)
     }
 
@@ -82,9 +73,16 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(if(viewType == VIEW_TYPE_ENTRIES)
-            R.layout.list_item_content_entry else R.layout.list_item_content_filter, parent, false)
-        return if(viewType == VIEW_TYPE_ENTRIES) EntryViewHolder(view) else FilterViewHolder(view)
+        if(viewType == VIEW_TYPE_ENTRIES) {
+            val contentEntryBinding = ListItemContentEntryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            contentEntryBinding.presenter = this.presenter
+            contentEntryBinding.presenterWithPermissionCheck = presenterWithPermissionCheck
+
+            return EntryViewHolder(contentEntryBinding)
+        }else {
+            return FilterViewHolder(LayoutInflater.from(parent.context)
+                    .inflate(R.layout.list_item_content_filter, parent, false))
+        }
     }
 
     override fun getItemCount(): Int {
@@ -104,9 +102,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
                 holder.entry = it
             }
 
-            synchronized(boundViewHolders) {
-                boundViewHolders.add(holder)
-            }
+            boundViewHolders.add(holder)
 
             GlobalScope.launch(Dispatchers.Main.immediate) {
                 holder.downloadJobItemLiveData = containerDownloadManager
@@ -115,25 +111,18 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
                         }
             }
 
+            holder.binding.contentEntry = entry
+
             if (entry == null) {
                 holder.containerUid = 0L
-                holder.contentEntryUid = 0L
-                holder.entryTitle.text = ""
-                holder.entryDescription.text = ""
                 holder.thumbnailView.setImageDrawable(null)
                 holder.downloadView.progress = 0
                 holder.downloadView.setImageResource(R.drawable.ic_file_download_black_24dp)
-                holder.view.setOnClickListener(null)
-                holder.downloadView.setOnClickListener(null)
                 holder.availabilityStatus.text = ""
                 holder.availabilityIcon.setImageDrawable(null)
             } else {
                 holder.containerUid = entry.mostRecentContainer?.containerUid ?: 0L
-                holder.contentEntryUid = entry.contentEntryUid
 
-                holder.view.tag = entry.contentEntryUid
-                holder.entryTitle.text = entry.title
-                holder.entryDescription.text = entry.description
                 if (entry.thumbnailUrl == null || entry.thumbnailUrl!!.isEmpty()) {
                     holder.thumbnailView.setImageDrawable(null)
                 } else {
@@ -159,8 +148,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
                 }
 
                 holder.downloadView.imageResource!!.contentDescription = contentDescription
-                holder.view.setOnClickListener { listener?.contentEntryClicked(entry) }
-                holder.downloadView.setOnClickListener { listener?.downloadStatusClicked(entry) }
                 holder.downloadView.progress = 0
                 holder.updateLocallyAvailableStatus(
                         localAvailabilityMap.get(entry.mostRecentContainer?.containerUid ?: 0L) ?: false)
@@ -192,7 +179,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
                         chip.isCheckable = chip.id != umChipGroup.checkedChipId
                         if(isSelected){
                             activeIndex = i
-                            listener?.contentFilterClicked(i)
+                            presenter?.handleClickFilterButton(i)
                         }
                         updateChipAppearance(chip, isSelected)
                     }
@@ -213,10 +200,10 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
         }
     }
 
-    inner class EntryViewHolder internal constructor(val view: View) : RecyclerView.ViewHolder(view),
+    inner class EntryViewHolder internal constructor(val binding: ListItemContentEntryBinding) : RecyclerView.ViewHolder(binding.root),
         Observer<DownloadJobItem?> {
-        internal val entryTitle: TextView = view.findViewById(R.id.content_entry_item_title)
-        internal val entryDescription: TextView = view.findViewById(R.id.content_entry_item_description)
+        val view = binding.root
+
         private val entrySize: TextView = view.findViewById(R.id.content_entry_item_library_size)
         internal val thumbnailView: ImageView = view.findViewById(R.id.content_entry_item_thumbnail)
         val availabilityIcon: ImageView = view.findViewById(R.id.content_entry_local_availability_icon)
@@ -225,8 +212,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
         val iconView: ImageView = view.findViewById(R.id.content_entry_item_imageview)
 
         internal var containerUid: Long = 0
-
-        var contentEntryUid: Long = 0
 
         private var currentDownloadStatus = -1
 
@@ -246,11 +231,6 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
             availabilityIcon.setImageResource(icon)
             availabilityStatus.text = view.context.getString(status)
         }
-
-        override fun toString(): String {
-            return super.toString() + " '" + entryDescription.text + "'"
-        }
-
 
         override fun onChanged(t: DownloadJobItem?) {
             Napier.i("DLUFIX: Received update for ${t?.djiUid} = ${t?.toStatusString(UstadMobileSystemImpl.instance, view.context)}")
@@ -354,6 +334,7 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
         super.onDetachedFromRecyclerView(recyclerView)
 
         lifecycleOwner = null
-        listener = null
+        presenter = null
+        presenterWithPermissionCheck = null
     }
 }

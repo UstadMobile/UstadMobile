@@ -35,7 +35,7 @@ class SchoolListFragment : UstadBaseFragment(), SchoolListView, SearchableListen
     private lateinit var fab: FloatingTextButton
 
     internal lateinit var sortSpinner: Spinner
-    internal lateinit var sortSpinnerPresets: Array<String?>
+    internal lateinit var sortSpinnerPresets: Array<String>
 
     private lateinit var pullToRefresh: SwipeRefreshLayout
 
@@ -99,14 +99,13 @@ class SchoolListFragment : UstadBaseFragment(), SchoolListView, SearchableListen
         mPresenter.handleSearchQuery(searchValue)
     }
 
-    override fun finish() {    }
 
     override fun setListProvider(listProvider: DataSource.Factory<Int, School>) {
         //TODO
     }
 
 
-    override fun setSortOptions(presets: Array<String?>) {
+    override fun setSortOptions(presets: Array<String>) {
         this.sortSpinnerPresets = presets
         val adapter = ArrayAdapter(context!!,
                 R.layout.item_simple_spinner_gray, sortSpinnerPresets)
