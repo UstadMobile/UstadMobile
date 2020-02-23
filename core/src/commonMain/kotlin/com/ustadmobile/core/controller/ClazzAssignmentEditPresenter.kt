@@ -3,12 +3,10 @@ package com.ustadmobile.core.controller
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.db.dao.ClazzAssignmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -41,22 +39,24 @@ class ClazzAssignmentEditPresenter(context: Any,
                         arguments[UstadView.ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0)
                 if (assignment != null) {
                     clazzAssignment = assignment
-                    view.runOnUiThread(Runnable {
-                        view.setClazzAssignment(clazzAssignment)
-                    })
-                    getAndSetProvider()
+                }else{
+                    clazzAssignment = ClazzAssignment()
                 }
+                view.runOnUiThread(Runnable {
+                    view.setClazzAssignment(clazzAssignment)
+                })
+                getAndSetProvider()
             }
         }
     }
 
     private fun getAndSetProvider() {
-        factory = clazzAssignmentContentJoinDao.findContentByAssignmentUid(clazzAssignment.clazzAssignmentUid)
+        factory = clazzAssignmentContentJoinDao.findContentByAssignmentUid(
+                clazzAssignment.clazzAssignmentUid)
         view.runOnUiThread(Runnable {
             view.setListProvider(factory)
         })
     }
-
 
     fun handleSaveAssignment(assignment: ClazzAssignment){
         GlobalScope.launch {

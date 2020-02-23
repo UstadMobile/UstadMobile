@@ -47,4 +47,8 @@ class ClazzAssignmentListPresenter(context: Any,
         impl.go(ClazzAssignmentDetailProgressView.VIEW_NAME, args, view.viewContext)
     }
 
+    fun handleClickNewAssignment(){
+        impl.go(ClazzAssignmentDetailProgressView.VIEW_NAME, mapOf(), view.viewContext)
+    }
+
 }

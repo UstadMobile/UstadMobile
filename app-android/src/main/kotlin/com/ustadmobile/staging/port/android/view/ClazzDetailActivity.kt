@@ -39,6 +39,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
     private var activityVisibility: Boolean = false
     private var selVisibility: Boolean = false
     private var settingsVisibility: Boolean = false
+    private var assignmentVisibility: Boolean = true
     internal lateinit var menu: Menu
 
     var previousPosition = -1
@@ -73,6 +74,12 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
                 mPagerAdapter.addFragments(fragCount, SELAnswerListFragment.newInstance(bundle))
                 fragPosMap[fragCount++] = SELAnswerListFragment::class.java
             }
+
+            if(assignmentVisibility){
+                mPagerAdapter.addFragments(fragCount, ClazzAssignmentListFragment.newInstance(bundle))
+                fragPosMap[fragCount++] = ClazzAssignmentListFragment::class.java
+            }
+
 
             mPager.adapter = mPagerAdapter
 
@@ -252,6 +259,8 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
                     ClazzActivityListFragment.newInstance(bundle) as Fragment
                 } else if (fragClass == SELAnswerListFragment::class.java) {
                     SELAnswerListFragment.newInstance(bundle) as Fragment
+                } else if (fragClass == ClazzAssignmentListFragment::class.java){
+                    ClazzAssignmentListFragment.newInstance(bundle) as Fragment
                 } else {
                     throw IllegalArgumentException("Not available")
                 }
@@ -274,6 +283,8 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
                 (getText(R.string.activity) as String).toUpperCase()
             } else if (fragClass == SELAnswerListFragment::class.java) {
                 (getText(R.string.sel) as String).toUpperCase()
+            } else if (fragClass == ClazzAssignmentListFragment::class.java){
+                (getText(R.string.assignments) as String).toUpperCase()
             } else {
                 ""
             }

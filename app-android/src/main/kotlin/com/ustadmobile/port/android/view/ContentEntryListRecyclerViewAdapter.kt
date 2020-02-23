@@ -34,11 +34,13 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 
-class ContentEntryListRecyclerViewAdapter internal constructor(private var lifecycleOwner: LifecycleOwner?,
-                                                               private var presenter: ContentEntryListPresenter?,
-                                                               private var presenterWithPermissionCheck: IContentEntryListPresenterWithPermissionCheck?,
-                                                               private val containerDownloadManager: ContainerDownloadManager)
-    : RepoLoadingPageListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, RecyclerView.ViewHolder>(DIFF_CALLBACK){
+class ContentEntryListRecyclerViewAdapter internal
+    constructor(private var lifecycleOwner: LifecycleOwner?,
+       private var presenter: ContentEntryListPresenter?,
+       private var presenterWithPermissionCheck: IContentEntryListPresenterWithPermissionCheck?,
+       private val containerDownloadManager: ContainerDownloadManager)
+    : RepoLoadingPageListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
+        RecyclerView.ViewHolder>(DIFF_CALLBACK){
 
     private val boundViewHolders: MutableSet<EntryViewHolder> = HashSet()
 
@@ -74,7 +76,8 @@ class ContentEntryListRecyclerViewAdapter internal constructor(private var lifec
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if(viewType == VIEW_TYPE_ENTRIES) {
-            val contentEntryBinding = ListItemContentEntryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val contentEntryBinding = ListItemContentEntryBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false)
             contentEntryBinding.presenter = this.presenter
             contentEntryBinding.presenterWithPermissionCheck = presenterWithPermissionCheck
 
