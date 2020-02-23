@@ -47,7 +47,6 @@ import java.util.*
 class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollment,
         PersonWithEnrollmentRecyclerAdapter.ClazzLogDetailViewHolder> {
 
-    private var theContext: Context
     private var theActivity: Activity? = null
     private var theFragment: Fragment? = null
     private var mPresenter: CommonHandlerPresenter<*>? = null
@@ -103,7 +102,6 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
             activity: Activity, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
             enrollment: Boolean, enrollToGroup: Boolean) : super(diffCallback) {
-        theContext = context
         theActivity = activity
         mPresenter = presenter
         showAttendance = attendance
@@ -115,7 +113,6 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
             fragment: Fragment, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
             enrollment: Boolean) : super(diffCallback) {
-        theContext = context
         theFragment = fragment
         mPresenter = presenter
         showAttendance = attendance
@@ -126,7 +123,6 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
             fragment: Fragment, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
             enrollment: Boolean, addTeacherButton:Boolean, addStudentButton: Boolean ) : super(diffCallback) {
-        theContext = context
         theFragment = fragment
         mPresenter = presenter
         showAttendance = attendance
@@ -140,7 +136,6 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             fragment: Fragment, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
             enrollment: Boolean)
             : super(diffCallback as DiffUtil.ItemCallback<PersonWithEnrollment>) {
-        theContext = context
         theFragment = fragment
         mPresenter = presenter
         showAttendance = attendance
@@ -151,7 +146,6 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
             activity: Activity, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
             enrollment: Boolean, rmode: Boolean, classGrouped: Boolean) : super(diffCallback) {
-        theContext = context
         theActivity = activity
         mPresenter = presenter
         showAttendance = attendance
@@ -165,7 +159,6 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             activity: Activity, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
             enrollment: Boolean, rmode: Boolean, classGrouped: Boolean, hideHeading: Boolean)
             : super(diffCallback) {
-        theContext = context
         theActivity = activity
         mPresenter = presenter
         showAttendance = attendance
@@ -186,7 +179,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzLogDetailViewHolder {
 
-        val clazzLogDetailListItem = LayoutInflater.from(theContext).inflate(
+        val clazzLogDetailListItem = LayoutInflater.from(parent.context).inflate(
                 R.layout.item_studentlistenroll_student, parent, false)
         return ClazzLogDetailViewHolder(
                 clazzLogDetailListItem)
@@ -234,7 +227,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @param dp the pixels
      * @return  The dp
      */
-    private fun getDp(dp: Int): Int {
+    private fun getDp(context: Context, dp: Int): Int {
         return if (theActivity != null) {
             Math.round(
                     dp * theActivity!!.resources.displayMetrics.density)
@@ -318,8 +311,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
 
             personPictureDaoRepo =
-                    UmAccountManager.getRepositoryForActiveAccount(theContext).personPictureDao
-            val personPictureDao = UmAccountManager.getActiveDatabase(theContext).personPictureDao
+                    UmAccountManager.getRepositoryForActiveAccount(holder.itemView.context).personPictureDao
+            val personPictureDao = UmAccountManager.getActiveDatabase(holder.itemView.context).personPictureDao
 
             val personPictureLocal = personPictureDao.findByPersonUidAsync(personUid)
             imgPath = personPictureDaoRepo!!.getAttachmentPath(personPictureLocal!!)!!
@@ -394,13 +387,13 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
             trafficLight.visibility = View.VISIBLE
             if (attendancePercentage > 75L) {
-                trafficLight.setColorFilter(ContextCompat.getColor(theContext,
+                trafficLight.setColorFilter(ContextCompat.getColor(holder.itemView.context,
                         R.color.traffic_green))
             } else if (attendancePercentage > 50L) {
-                trafficLight.setColorFilter(ContextCompat.getColor(theContext,
+                trafficLight.setColorFilter(ContextCompat.getColor(holder.itemView.context,
                         R.color.traffic_orange))
             } else {
-                trafficLight.setColorFilter(ContextCompat.getColor(theContext,
+                trafficLight.setColorFilter(ContextCompat.getColor(holder.itemView.context,
                         R.color.traffic_red))
             }
 
@@ -492,15 +485,15 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             removeHeading(cl, headingCLId, holder)
 
             if (position == 0) {
-                addHeading(cl, personWithEnrollment.clazzName!!, holder)
+                addHeading(holder.itemView.context, cl, personWithEnrollment.clazzName!!, holder)
             } else {
                 val previousPersonWithEnrollment = getItem(position - 1)
                 val previousClazzUid = previousPersonWithEnrollment!!.clazzUid
 
                 if (thisClazzUid != previousClazzUid) {
-                    addHeading(cl, personWithEnrollment.clazzName!!, holder)
+                    addHeading(holder.itemView.context, cl, personWithEnrollment.clazzName!!, holder)
                 } else {
-                    addHeading(cl, "", holder)
+                    addHeading(holder.itemView.context, cl, "", holder)
                 }
 
             }
@@ -625,7 +618,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @param mainCL    The Constraint layout where the list will be in.
      * @param heading  The heading
      */
-    private fun addHeading(mainCL: ConstraintLayout, heading: String,
+    private fun addHeading(context: Context, mainCL: ConstraintLayout, heading: String,
                            holder: ClazzLogDetailViewHolder) {
 
 
@@ -636,11 +629,11 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             return
         }
 
-        val headingCL = ConstraintLayout(theContext)
-        val defaultPaddingBy2 = getDp(DEFAULT_PADDING / 2)
+        val headingCL = ConstraintLayout(context)
+        val defaultPaddingBy2 = getDp(context,DEFAULT_PADDING / 2)
 
         //The Heading TextView
-        val headingTV = TextView(theContext)
+        val headingTV = TextView(context)
         headingTV.setTextColor(Color.BLACK)
         headingTV.textSize = 16f
         headingTV.left = 8
@@ -709,30 +702,30 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         }
 
         //Create the Constraint layout wrapper, the heading, icon and button
-        val addCL = ConstraintLayout(theContext)
-        val defaultPadding = getDp(DEFAULT_PADDING)
-        val defaultPaddingBy2 = getDp(DEFAULT_PADDING / 2)
+        val addCL = ConstraintLayout(holder.itemView.context)
+        val defaultPadding = getDp(holder.itemView.context, DEFAULT_PADDING)
+        val defaultPaddingBy2 = getDp(holder.itemView.context, DEFAULT_PADDING / 2)
 
         //"Teachers/Students" heading
-        val headingTV = TextView(theContext)
+        val headingTV = TextView(holder.itemView.context)
         headingTV.setTextColor(Color.BLACK)
         headingTV.textSize = 16f
         headingTV.left = 8
 
         //Add person icon
-        val iconIV = AppCompatImageView(theContext)
+        val iconIV = AppCompatImageView(holder.itemView.context)
         iconIV.setImageResource(addPersonIconRes)
 
         //"Add Student/Teacher"
-        val buttonTV = TextView(theContext)
+        val buttonTV = TextView(holder.itemView.context)
         buttonTV.setTextColor(Color.BLACK)
         buttonTV.textSize = 16f
         buttonTV.left = 8
 
         //Horizontal line
-        val hLine = View(theContext)
+        val hLine = View(holder.itemView.context)
         hLine.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                getDp(1))
+                getDp(holder.itemView.context, 1))
         hLine.setBackgroundColor(Color.parseColor("#EAEAEA"))
 
         //Get ids for all components.
@@ -756,7 +749,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             if (showAdd)
                 addCL.addView(buttonTV)
             else {
-                val blankView = View(theContext)
+                val blankView = View(holder.itemView.context)
                 blankView.visibility = View.GONE
                 addCL.addView(blankView)
             }
@@ -767,7 +760,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
             if (showAdd)
                 addCL.addView(buttonTV)
             else {
-                val blankView = View(theContext)
+                val blankView = View(holder.itemView.context)
                 blankView.visibility = View.GONE
                 addCL.addView(blankView)
             }
@@ -1049,8 +1042,12 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
     }
 
 
-
-
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        theActivity = null
+        theFragment = null
+        mPresenter = null
+        personPictureDaoRepo = null
+    }
 
     companion object {
 

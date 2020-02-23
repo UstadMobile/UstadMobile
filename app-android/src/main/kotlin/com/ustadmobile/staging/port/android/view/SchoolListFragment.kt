@@ -99,6 +99,7 @@ class SchoolListFragment : UstadBaseFragment(), SchoolListView, SearchableListen
         mPresenter.handleSearchQuery(searchValue)
     }
 
+
     override fun setListProvider(listProvider: DataSource.Factory<Int, School>) {
         //TODO
     }

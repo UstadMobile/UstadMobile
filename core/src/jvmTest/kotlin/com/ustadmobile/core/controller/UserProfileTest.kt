@@ -71,7 +71,7 @@ class UserProfileTest {
 
         presenter.onCreate(mapOf())
 
-        presenter.handleShowLanguageOptions()
+        presenter.handleClickLanguage()
 
         verify(view).setLanguageOption(any())
     }

@@ -1,136 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:id="@+id/entry_holder"
-    android:layout_height="wrap_content"
-    android:background="?android:selectableItemBackground"
-    android:padding="@dimen/dimen_10dp">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <ImageView
-        android:scaleType="fitCenter"
-        android:id="@+id/content_entry_item_thumbnail"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <data>
+        <variable
+            name="contentEntry"
+            type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer" />
 
-    <TextView
-        android:id="@+id/content_entry_item_title"
-        android:layout_width="0dp"
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ContentEntryListPresenter" />
+
+        <variable
+            name="presenterWithPermissionCheck"
+            type="com.ustadmobile.port.android.view.IContentEntryListPresenterWithPermissionCheck" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:id="@+id/entry_holder"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/dimen_8dp"
-        android:layout_marginEnd="@dimen/dimen_4dp"
-        android:layout_marginBottom="@dimen/dimen_4dp"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
-        app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Content Title"
-        android:layout_marginLeft="@dimen/dimen_8dp"
-        android:layout_marginRight="@dimen/dimen_4dp" />
+        android:background="?android:selectableItemBackground"
+        android:onClick="@{() -> presenter.handleContentEntryClicked(contentEntry)}"
+        android:tag="@{contentEntry.contentEntryUid}"
+        android:padding="@dimen/dimen_10dp">
 
-    <TextView
-        android:id="@+id/content_entry_item_description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dimen_4dp"
-        android:layout_marginStart="@dimen/dimen_8dp"
-        android:layout_marginEnd="@dimen/dimen_4dp"
-        android:layout_marginBottom="@dimen/dimen_4dp"
-        android:textSize="12sp"
-        android:maxLines="3"
-        app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
-        app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
-        app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
-        tools:text="Content Description"
-        android:layout_marginLeft="@dimen/dimen_8dp"
-        android:layout_marginRight="@dimen/dimen_4dp" />
+        <ImageView
+            android:scaleType="fitCenter"
+            android:id="@+id/content_entry_item_thumbnail"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/content_entry_item_imageview"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginTop="@dimen/dimen_4dp"
-        android:layout_marginStart="@dimen/dimen_8dp"
-        android:layout_marginEnd="@dimen/dimen_4dp"
-        android:layout_marginBottom="@dimen/dimen_4dp"
-        android:tint="@color/text_secondary"
-        app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
-        app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
-        android:layout_marginLeft="@dimen/dimen_8dp"
-        android:layout_marginRight="@dimen/dimen_4dp" />
+        <TextView
+            android:id="@+id/content_entry_item_title"
+            android:text="@{contentEntry.title}"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Content Title"
+            android:layout_marginLeft="@dimen/dimen_8dp"
+            android:layout_marginRight="@dimen/dimen_4dp" />
 
-    <TextView
-        android:id="@+id/content_entry_item_library_size"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dimen_4dp"
-        android:layout_marginStart="@dimen/dimen_8dp"
-        android:layout_marginEnd="@dimen/dimen_4dp"
-        android:layout_marginBottom="@dimen/dimen_4dp"
-        android:gravity="start"
-        android:textSize="13sp"
-        android:tint="@color/text_secondary"
-        app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
-        app:layout_constraintStart_toEndOf="@id/content_entry_item_imageview"
-        app:layout_constraintTop_toBottomOf="@id/content_entry_item_description"
-        tools:text="Content Library (50 Mb)"
-        android:layout_marginLeft="@dimen/dimen_8dp"
-        android:layout_marginRight="@dimen/dimen_4dp" />
+        <TextView
+            android:id="@+id/content_entry_item_description"
+            android:text="@{contentEntry.description}"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:textSize="12sp"
+            android:maxLines="3"
+            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
+            tools:text="Content Description"
+            android:layout_marginLeft="@dimen/dimen_8dp"
+            android:layout_marginRight="@dimen/dimen_4dp" />
 
-    <ImageView
-        android:visibility="gone"
-        android:layout_marginTop="@dimen/dimen_4dp"
-        android:layout_marginStart="@dimen/dimen_8dp"
-        android:layout_marginEnd="@dimen/dimen_4dp"
-        android:layout_marginBottom="@dimen/dimen_4dp"
-        android:id="@+id/content_entry_local_availability_icon"
-        tools:src="@drawable/ic_location_pin_24dp"
-        android:layout_width="@dimen/dimen_20dp"
-        android:layout_height="@dimen/dimen_16dp"
-        app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
-        app:layout_constraintEnd_toStartOf="@id/content_entry_local_availability_status"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/content_entry_item_library_size"
-        android:layout_marginLeft="@dimen/dimen_8dp"
-        android:layout_marginRight="@dimen/dimen_4dp" />
+        <ImageView
+            android:id="@+id/content_entry_item_imageview"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:tint="@color/text_secondary"
+            app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
+            android:layout_marginLeft="@dimen/dimen_8dp"
+            android:layout_marginRight="@dimen/dimen_4dp" />
 
-    <TextView
-        android:visibility="gone"
-        android:id="@+id/content_entry_local_availability_status"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dimen_4dp"
-        android:layout_marginStart="@dimen/dimen_8dp"
-        android:layout_marginEnd="@dimen/dimen_4dp"
-        android:layout_marginBottom="@dimen/dimen_4dp"
-        android:gravity="start"
-        tools:text="Available locally"
-        android:textSize="13sp"
-        android:tint="@color/text_secondary"
-        app:layout_constraintStart_toEndOf="@id/content_entry_local_availability_icon"
-        app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/content_entry_item_library_size"
-        android:layout_marginLeft="@dimen/dimen_8dp"
-        android:layout_marginRight="@dimen/dimen_4dp" />
+        <TextView
+            android:id="@+id/content_entry_item_library_size"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:gravity="start"
+            android:textSize="13sp"
+            android:tint="@color/text_secondary"
+            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintStart_toEndOf="@id/content_entry_item_imageview"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_item_description"
+            tools:text="Content Library (50 Mb)"
+            android:layout_marginLeft="@dimen/dimen_8dp"
+            android:layout_marginRight="@dimen/dimen_4dp" />
 
-    <com.ustadmobile.port.android.view.DownloadStatusButton
-        android:id="@+id/content_entry_item_download"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="@dimen/dimen_8dp"
-        android:contentDescription="@string/download"
-        android:tint="@color/text_secondary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_file_download_black_24dp" />
+        <ImageView
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:id="@+id/content_entry_local_availability_icon"
+            tools:src="@drawable/ic_location_pin_24dp"
+            android:layout_width="@dimen/dimen_20dp"
+            android:layout_height="@dimen/dimen_16dp"
+            app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
+            app:layout_constraintEnd_toStartOf="@id/content_entry_local_availability_status"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_item_library_size"
+            android:layout_marginLeft="@dimen/dimen_8dp"
+            android:layout_marginRight="@dimen/dimen_4dp" />
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/content_entry_local_availability_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:gravity="start"
+            tools:text="Available locally"
+            android:textSize="13sp"
+            android:tint="@color/text_secondary"
+            app:layout_constraintStart_toEndOf="@id/content_entry_local_availability_icon"
+            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_item_library_size"
+            android:layout_marginLeft="@dimen/dimen_8dp"
+            android:layout_marginRight="@dimen/dimen_4dp" />
+
+        <com.ustadmobile.port.android.view.DownloadStatusButton
+            android:id="@+id/content_entry_item_download"
+            style="?android:attr/borderlessButtonStyle"
+            android:onClick="@{() -> presenterWithPermissionCheck.checkPermissionAndHandleDownloadStatusButtonClicked(contentEntry)}"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="@dimen/dimen_8dp"
+            android:contentDescription="@string/download"
+            android:tint="@color/text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_file_download_black_24dp" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

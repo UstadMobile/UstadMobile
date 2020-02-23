@@ -15,7 +15,6 @@ import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
@@ -26,7 +25,6 @@ import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UserProfilePresenter
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -38,6 +36,7 @@ import com.ustadmobile.staging.port.android.view.CircleTransform
 import id.zelory.compressor.Compressor
 import java.io.*
 
+@Suppress("DIFFERENT_NAMES_FOR_THE_SAME_PARAMETER_IN_SUPERTYPES")
 class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
     private lateinit var presenter: UserProfilePresenter
@@ -95,23 +94,13 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         }
 
         languageOption.setOnClickListener {
-            presenter.handleShowLanguageOptions()
+            presenter.handleClickLanguage()
         }
 
         changePasswordLL!!.setOnClickListener { v -> presenter.handleClickChangePassword() }
         pictureEdit.setOnClickListener { v -> showGetImageAlertDialog() }
     }
 
-    override fun setUsername(username: String) {
-        supportActionBar!!.title = username
-    }
-
-    override fun loadProfileIcon(profile: String) {
-    }
-
-    override fun setLoggedPerson(person: Person) {
-        setUsername(person.username!!)
-    }
 
     override fun showLanguageOptions() {
 
@@ -120,6 +109,13 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     override fun callFinishAffinity(){
         finishAffinity()
     }
+
+    override var person: Person = Person()
+        get() = field
+        set(value) {
+            field = value
+            supportActionBar?.title = "${value.firstNames} ${value.lastName}"
+        }
 
     override fun updateToolbarTitle(personName: String) {
         supportActionBar!!.title = personName
@@ -143,17 +139,15 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
             popupMenu.menu.add(it)
         }
 
-        popupMenu.setOnMenuItemClickListener { item: MenuItem? ->
-            presenter.handleLanguageSelected(languages.indexOf(item!!.title))
+        popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+            presenter.handleLanguageSelected(languages.indexOf(item.title))
             true
         }
         popupMenu.show()
-
     }
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         if(item.itemId == android.R.id.home){
             finish()
         }
@@ -215,13 +209,13 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
 
                 //Click on image - open dialog to show bigger picture
                 personEditImage.setOnClickListener { view ->
-                    presenter!!.openPictureDialog(imagePath) }
+                    presenter.openPictureDialog(imagePath) }
             }
 
         }
     }
 
-    override fun addImageFromCamera() {
+    fun addImageFromCamera() {
         if (ContextCompat.checkSelfPermission(applicationContext,
                         Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this@UserProfileActivity,
@@ -233,17 +227,16 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     }
 
 
-    override fun addImageFromGallery() {
-        //READ_EXTERNAL_STORAGE
+    fun addImageFromGallery() {
         if (ContextCompat.checkSelfPermission(applicationContext,
-                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            startGalleryIntent()
+        }else {
             ActivityCompat.requestPermissions(this@UserProfileActivity,
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                     GALLERY_REQUEST_CODE)
-            return
         }
 
-        startGalleryIntent()
     }
 
     private fun startGalleryIntent() {
@@ -367,23 +360,19 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 CAMERA_IMAGE_CAPTURE_REQUEST -> {
-
                     //Compress the image:
                     compressImage()
 
                     val imageFile = File(imagePathFromCamera)
-                    presenter.handleCompressedImage(imageFile.canonicalPath)
+                    presenter.handleProfileImageSelected(imageFile.canonicalPath)
                 }
 
                 GALLERY_REQUEST_CODE -> {
-
                     val selectedImage = data!!.data
-
-
                     val picPath = doInBackground(selectedImage!!)
                     imagePathFromCamera = picPath
                     if (imagePathFromCamera == null) {
-                        sendMessage(MessageID.unable_open_image)
+                        showSnackBarNotification(getString(R.string.unable_open_image), {}, 0)
                         return
                     }
 
@@ -391,21 +380,9 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     compressImage()
 
                     val galleryFile = File(imagePathFromCamera)
-                    presenter.handleCompressedImage(galleryFile.canonicalPath)
+                    presenter.handleProfileImageSelected(galleryFile.canonicalPath)
                 }
             }
-        }
-    }
-
-    override fun sendMessage(messageId: Int) {
-        val impl = UstadMobileSystemImpl.instance
-        val toast = impl.getString(messageId, this)
-        runOnUiThread {
-            Toast.makeText(
-                    this,
-                    toast,
-                    Toast.LENGTH_SHORT
-            ).show()
         }
     }
 

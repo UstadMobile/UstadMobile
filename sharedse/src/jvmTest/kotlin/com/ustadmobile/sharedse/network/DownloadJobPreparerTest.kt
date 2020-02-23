@@ -40,6 +40,7 @@ class DownloadJobPreparerTest {
         mockedNetworkManager.onCreate()
     }
 
+
     @Test
     fun givenContentEntriesExistOnServerNotClient_whenPrepareCalled_thenDownloadJobtemsAreCreated() = runBlocking{
         val contentEntrySet = insertTestContentEntries(serverDb, System.currentTimeMillis())

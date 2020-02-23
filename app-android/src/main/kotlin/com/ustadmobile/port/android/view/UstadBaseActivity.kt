@@ -149,6 +149,9 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
 
+    /**
+     * TODO: This should not be done on every onResume of every activity. It could go to HomeActivity
+     */
     private fun checkForAppUpdate() {
         appUpdateManager = AppUpdateManagerFactory.create(this);
         // Returns an intent object that you use to check for an update.
@@ -332,7 +335,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         if (shakeDetector != null && sensorManager != null) {
             shakeDetector!!.start(sensorManager)
         }
-        checkForAppUpdate()
     }
 
     override fun onPause() {

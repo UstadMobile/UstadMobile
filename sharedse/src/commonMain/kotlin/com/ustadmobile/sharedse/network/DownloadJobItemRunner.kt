@@ -543,7 +543,7 @@ class DownloadJobItemRunner
         if (wiFiDirectGroupBle.value == null) {
             UMLog.l(UMLog.ERROR, 699, mkLogPrefix() +
                     "Requested group network" +
-                    "from bluetooth personAddress " + currentNetworkNode!!.bluetoothMacAddress +
+                    "from bluetooth address " + currentNetworkNode!!.bluetoothMacAddress +
                     "but did not receive group network credentials")
             return@withContext false
         }

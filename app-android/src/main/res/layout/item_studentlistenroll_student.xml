@@ -68,6 +68,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginLeft="16dp" />
 
+    <!-- TODO: check this this previously had android:textColorHighlight="@color/default_back_color" -->
     <CheckBox
         android:id="@+id/item_studentlist_student_simple_student_checkbox"
         style="@style/Widget.AppCompat.CompoundButton.CheckBox"
@@ -75,7 +76,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
 
-        android:textColorHighlight="@color/primary_text"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="@string/enroll_in_class"

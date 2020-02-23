@@ -12,7 +12,7 @@ import com.ustadmobile.core.view.AboutView
 
 class AboutActivity : UstadBaseActivity(), AboutView {
 
-    private var mAboutPresenter: AboutPresenter? = null
+    private lateinit var mAboutPresenter: AboutPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +22,7 @@ class AboutActivity : UstadBaseActivity(), AboutView {
         mAboutPresenter = AboutPresenter(this,
                 bundleToMap(intent.extras),
                 this)
-        mAboutPresenter!!.onCreate(bundleToMap(savedInstanceState))
+        mAboutPresenter.onCreate(bundleToMap(savedInstanceState))
 
         setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
@@ -33,12 +33,10 @@ class AboutActivity : UstadBaseActivity(), AboutView {
         runOnUiThread { (findViewById<View>(R.id.about_version_text) as TextView).text = versionInfo }
     }
 
-    override fun setAboutHTML(aboutHTML: String?) {
-        if(aboutHTML != null) {
-            runOnUiThread {
-                (findViewById<View>(R.id.about_html) as WebView)
-                        .loadData(aboutHTML, "text/html", "UTF-8")
-            }
+    override fun setAboutHTML(aboutHTML: String) {
+        runOnUiThread {
+            (findViewById<View>(R.id.about_html) as WebView)
+                    .loadData(aboutHTML, "text/html", "UTF-8")
         }
     }
 

@@ -32,6 +32,9 @@ abstract class FeedEntryDao : BaseDao<FeedEntry> {
     @Query("UPDATE FeedEntry SET feedEntryDone = :done WHERE feedEntryClazzLogUid = :clazzLogUid " + "AND feedEntryCheckType = :taskType")
     abstract fun markEntryAsDoneByClazzLogUidAndTaskType(clazzLogUid: Long, taskType: Int, done: Boolean)
 
+    @Query("UPDATE FeedEntry SET feedEntryDone = :entryDone WHERE feedEntryUid = :feedEntryUid")
+    abstract fun markEntryAsDoneByFeedEntryUid(feedEntryUid: Long, entryDone: Boolean)
+
     companion object {
 
         fun generateFeedEntryHash(personUid: Long, clazzLogUid: Long, alertType: Int,

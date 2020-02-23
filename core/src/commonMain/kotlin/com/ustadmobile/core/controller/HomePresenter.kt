@@ -11,8 +11,10 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -53,7 +55,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
         GlobalScope.launch {
             val contentEntryListTabsArgs = mutableMapOf(
                     "0" to "${MessageID.libraries};$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID" +
-                            "&$ARG_LIBRARIES_CONTENT",
+                            "&$ARG_LIBRARIES_CONTENT&$ARG_EDIT_BUTTONS_CONTROL_FLAG=$EDIT_BUTTONS_NEWFOLDER",
                     "1" to "${MessageID.downloaded};$ARG_DOWNLOADED_CONTENT")
 
             val options = mutableListOf<Pair<Int, String>>()
@@ -63,23 +65,17 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                 account = t
                 val person = personDao.findByUid(t.personUid)
                 if(person != null){
-                    if(person.admin){
-                        contentEntryListTabsArgs["2"] =  "${MessageID.recycled};$ARG_RECYCLED_CONTENT"
-                        options.add(Pair(MessageID.reports, ReportDashboardView.VIEW_NAME))
-                    }
-
-                    //For ClassBook removing reports for the ClassBook's own report
-                    options.clear()
                     options.add(0, Pair(MessageID.bottomnav_feed_title,
                             FeedListView.VIEW_NAME))
-                    options.add(1, Pair(MessageID.schools,
-                            SchoolListView.VIEW_NAME))
-                    options.add(2, Pair(MessageID.bottomnav_classes_title,
+                    options.add(1, Pair(MessageID.bottomnav_classes_title,
                             ClazzListView.VIEW_NAME))
-                    options.add(3, Pair(MessageID.bottomnav_people_title,
+                    options.add(2, Pair(MessageID.bottomnav_people_title,
                             PeopleListView.VIEW_NAME))
-                    options.add(4, Pair(MessageID.bottomnav_reports_title,
-                            BaseReportView.VIEW_NAME))
+                    options.add(Pair(MessageID.reports, ReportDashboardView.VIEW_NAME))
+
+                    if(person.admin){
+                        contentEntryListTabsArgs["2"] =  "${MessageID.recycled};$ARG_RECYCLED_CONTENT"
+                    }
 
                     homeView.runOnUiThread(Runnable {
                         homeView.setLoggedPerson(person)
@@ -93,22 +89,15 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                         }
                     }
                 }
-            }else{
-                options.add(0, Pair(MessageID.contents,
-                        HOME_CONTENTENTRYLIST_TABS_VIEWNAME + "?" +
-                                UMFileUtil.mapToQueryString(contentEntryListTabsArgs)))
             }
 
             homeView.runOnUiThread(Runnable {
-
                 homeView.loadProfileIcon(if(account == null) "" else "")
-//                options.add(0, Pair(MessageID.contents,
-//                        HOME_CONTENTENTRYLIST_TABS_VIEWNAME + "?" +
-//                                UMFileUtil.mapToQueryString(contentEntryListTabsArgs)))
+                options.add(0, Pair(MessageID.contents,
+                        HOME_CONTENTENTRYLIST_TABS_VIEWNAME + "?" +
+                                UMFileUtil.mapToQueryString(contentEntryListTabsArgs)))
                 homeView.setOptions(options)
             })
-
-
         }
     }
 
@@ -140,21 +129,9 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
     /**
      * When settings gear clicked in the menu options - Goes to the settings activity.
      */
-    fun handleClickSettings(){
-        val args = HashMap<String, String>()
-        impl.go(SettingsView.VIEW_NAME, args, context)
-    }
-
-    /**
-     * For ClassBook - Goes to Bulk upload screen.
-     */
-    fun handleClickBulkUpload(){
-        val args = HashMap<String, String>()
-        impl.go(BulkUploadMasterView.VIEW_NAME, args, context)
-    }
+    fun handleClickSettings()  = impl.go(SettingsView.VIEW_NAME, mapOf(), context)
 
     override fun handleNavigation() {}
-
 
     companion object {
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")

@@ -22,9 +22,8 @@ import java.util.*
 /**
  * The Recycler Adapter for Feed Entries.
  */
-internal class FeedListRecyclerAdapter(private val feedListFragment: FeedListFragment,
-                                       diffCallback: DiffUtil.ItemCallback<FeedEntry>,
-                                       var context: Context, var mPresenter: FeedListPresenter)
+internal class FeedListRecyclerAdapter(diffCallback: DiffUtil.ItemCallback<FeedEntry>,
+                                       var mPresenter: FeedListPresenter?)
     : PagedListAdapter<FeedEntry, FeedListRecyclerAdapter.FeedViewHolder>(diffCallback) {
     var positionToFeedUid = HashMap<Int, Long>()
 
@@ -39,7 +38,7 @@ internal class FeedListRecyclerAdapter(private val feedListFragment: FeedListFra
      * @return              New ViewHolder for the ClazzStudent type
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeedViewHolder {
-        val feedEntryListItem = LayoutInflater.from(feedListFragment.context).inflate(
+        val feedEntryListItem = LayoutInflater.from(parent.context).inflate(
                 R.layout.item_feedlist_feed, parent, false)
         return FeedViewHolder(feedEntryListItem)
     }
@@ -74,7 +73,7 @@ internal class FeedListRecyclerAdapter(private val feedListFragment: FeedListFra
         feedTitle.text = feedEntry.title
 
         if (feedEntry.deadline > 0 && UMCalendarUtil.getDateInMilliPlusDays(0) > feedEntry.deadline) {
-            feedText.setTextColor(ContextCompat.getColor(feedListFragment.context!!,
+            feedText.setTextColor(ContextCompat.getColor(holder.itemView.context,
                     R.color.accent))
             feedText.text = feedEntry.description
         }
@@ -86,11 +85,12 @@ internal class FeedListRecyclerAdapter(private val feedListFragment: FeedListFra
             recordAttendanceButton.setText(R.string.view_student)
             //Change feedIcon as needed
         }
-        recordAttendanceButton.setOnClickListener { v -> mPresenter.handleClickFeedEntry(feedEntry) }
-        holder.itemView.setOnClickListener { v -> mPresenter.handleClickFeedEntry(feedEntry) }
-
-
+        recordAttendanceButton.setOnClickListener { v -> mPresenter?.handleClickFeedEntry(feedEntry) }
+        holder.itemView.setOnClickListener { v -> mPresenter?.handleClickFeedEntry(feedEntry) }
     }
 
-
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        mPresenter = null
+    }
 }

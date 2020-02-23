@@ -16,6 +16,63 @@ import java.io.IOException
 import java.util.*
 import java.util.zip.ZipException
 
+private val CONTENT_PLUGINS = listOf(EpubTypePlugin(), TinCanTypePlugin())
+
+/**
+ *
+ */
+data class ImportedContentEntryMetaData(var contentEntry: ContentEntry, var mimeType: String)
+
+fun extractContentEntryMetadataFromFile(file: File, plugins: List<ContentTypePlugin> = CONTENT_PLUGINS): ImportedContentEntryMetaData? {
+    plugins.forEach {
+        val pluginResult = it.getContentEntry(file)
+        if(pluginResult != null) {
+            pluginResult.contentFlags = ContentEntry.FLAG_IMPORTED
+            return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0])
+        }
+    }
+
+    return null
+}
+
+suspend fun importContainerFromZippedFile(contentEntryUid: Long, mimeType: String?, containerBaseDir: String,
+                                  file: File, db: UmAppDatabase, dbRepo: UmAppDatabase): Container {
+
+    val container = Container().apply {
+        containerContentEntryUid = contentEntryUid
+    }
+
+    container.cntLastModified = System.currentTimeMillis()
+    container.fileSize = file.length()
+    container.mimeType = mimeType
+    container.containerUid = dbRepo.containerDao.insert(container)
+
+    val containerManager = ContainerManager(container, db, dbRepo, containerBaseDir)
+    try {
+        addEntriesFromZipToContainer(file.absolutePath, containerManager)
+    } catch (e: ZipException) {
+        e.printStackTrace()
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+
+    return container
+}
+
+suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: UmAppDatabase,
+                                       containerBaseDir: String, plugins: List<ContentTypePlugin> = CONTENT_PLUGINS): Pair<ContentEntry, Container>? {
+    val (contentEntry, mimeType) = extractContentEntryMetadataFromFile(file, plugins) ?: return null
+
+    contentEntry.contentEntryUid = dbRepo.contentEntryDao.insert(contentEntry)
+    val container = importContainerFromZippedFile(contentEntry.contentEntryUid, mimeType, containerBaseDir, file,
+            db, dbRepo)
+
+    return Pair(contentEntry, container)
+}
+
+
+
+
 /**
  * Class which handles entries and containers for all imported content
  *
@@ -23,11 +80,10 @@ import java.util.zip.ZipException
  */
 object ContentTypeUtil {
 
-    private val CONTENT_PLUGINS = listOf(EpubTypePlugin(), TinCanTypePlugin())
-
     /**
      * Get generated content entry from the imported content
      */
+    @Deprecated("This should be a toplevel function and should just return a nullable ContentEntry")
     fun getContent(file: File): HashMap<String, Any?> {
         val content = HashMap<String, Any?>()
         for (plugin in CONTENT_PLUGINS) {

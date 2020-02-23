@@ -244,22 +244,16 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
                 val fragClass = fragPosMap[position]
                 val bundle = Bundle()
                 bundle.putString(ARG_CLAZZ_UID, currentClazzUid.toString())
-                return when (fragClass) {
-                    ClazzStudentListFragment::class.java -> {
-                        ClazzStudentListFragment.newInstance(bundle)
-                    }
-                    ClazzLogListFragment::class.java -> {
-                        ClazzLogListFragment.newInstance(bundle)
-                    }
-                    ClazzActivityListFragment::class.java -> {
-                        ClazzActivityListFragment.newInstance(bundle) as Fragment
-                    }
-                    SELAnswerListFragment::class.java -> {
-                        SELAnswerListFragment.newInstance(bundle) as Fragment
-                    }
-                    else -> {
-                        ClazzStudentListFragment.newInstance(bundle)
-                    }
+                return if (fragClass == ClazzStudentListFragment::class.java) {
+                    ClazzStudentListFragment.newInstance(bundle)
+                } else if (fragClass == ClazzLogListFragment::class.java) {
+                    ClazzLogListFragment.newInstance(bundle)
+                } else if (fragClass == ClazzActivityListFragment::class.java) {
+                    ClazzActivityListFragment.newInstance(bundle) as Fragment
+                } else if (fragClass == SELAnswerListFragment::class.java) {
+                    SELAnswerListFragment.newInstance(bundle) as Fragment
+                } else {
+                    throw IllegalArgumentException("Not available")
                 }
             }
         }

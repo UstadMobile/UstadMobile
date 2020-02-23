@@ -35,7 +35,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView, SearchableListener
 
 
     override val viewContext: Any
-        get() = context!!
+        get() = requireContext()
 
     internal var rootContainer: View ? = null
     private var mRecyclerView: RecyclerView? = null
@@ -44,12 +44,6 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView, SearchableListener
 
     internal var sortSpinner: Spinner? = null
     internal lateinit var sortSpinnerPresets: Array<String?>
-
-    private lateinit var pullToRefresh: SwipeRefreshLayout
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     private var activityMode : Boolean = false
 
@@ -76,17 +70,15 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView, SearchableListener
         sortSpinner = rootContainer!!.findViewById(R.id.fragment_people_list_sort_spinner2)
 
         //set up Presenter
-        mPresenter = PeopleListPresenter(context!!,
-                UMAndroidUtil.bundleToMap(arguments), this)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
-
-        pullToRefresh = rootContainer!!.findViewById(R.id.fragment_people_list_swiperefreshlayout)
+        mPresenter = PeopleListPresenter(requireContext(),
+                UMAndroidUtil.bundleToMap(arguments), this, this)
+        mPresenter?.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         fab!!.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
 
         if(activityMode){
             val layout = rootContainer!!.findViewById<SwipeRefreshLayout>(
-                    R.id.fragment_people_list_swiperefreshlayout)
+                    R.id.fragment_people_list_root)
             layout.setPadding(0,0,0,24)
         }
 
@@ -100,50 +92,33 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView, SearchableListener
             }
         }
 
-        pullToRefresh.setOnRefreshListener{
-            try {
-                Thread.sleep(300)
-                if(activity is BasePointActivity) {
-                    //TODO: Replace with repo random access sync when it is ready.
-                }
-
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-
-            pullToRefresh.setRefreshing(false)
-        }
-
         return rootContainer
     }
 
     fun searchPeople(searchValue: String) {
-        mPresenter!!.updateProviderWithSearch(searchValue)
+        mPresenter?.updateProviderWithSearch(searchValue)
     }
 
     override fun setPeopleListProvider(factory : DataSource.Factory<Int, PersonWithEnrollment>) {
 
-        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(context!!, DIFF_CALLBACK,
+        val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(requireContext(), DIFF_CALLBACK,
                 this, mPresenter!!, false, false)
 
         //personDao.findAllPeopleWithEnrollmentBySearch
         val data = factory.asRepositoryLiveData(
-                UmAccountManager.getRepositoryForActiveAccount(context!!).personDao)
+                UmAccountManager.getRepositoryForActiveAccount(requireContext()).personDao)
 
-        //Observe the data:
-        val thisP = this
-        GlobalScope.launch(Dispatchers.Main) {
-            data.observe(thisP,
-                    Observer<PagedList<PersonWithEnrollment>> { recyclerAdapter.submitList(it) })
-        }
-        mRecyclerView!!.setAdapter(recyclerAdapter)
 
+        data.observe(this@PeopleListFragment,
+                Observer<PagedList<PersonWithEnrollment>> { recyclerAdapter.submitList(it) })
+
+        mRecyclerView?.setAdapter(recyclerAdapter)
     }
 
     override fun showFAB(show: Boolean) {
         runOnUiThread (Runnable{
-            fab!!.visibility = if (show) View.VISIBLE else View.INVISIBLE
-            fab!!.isEnabled = show
+            fab?.visibility = if (show) View.VISIBLE else View.INVISIBLE
+            fab?.isEnabled = show
         })
 
     }
@@ -167,12 +142,20 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView, SearchableListener
     constructor()  {
         val args = Bundle()
         arguments = args
-        icon = R.drawable.ic_person_black_24dp
-        title = R.string.bottomnav_people_title
     }
 
     constructor(args:Bundle) : this() {
         arguments = args
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        this.fab = null
+        this.mPresenter = null
+        this.mRecyclerView?.adapter = null
+        this.mRecyclerView = null
+        this.rootContainer = null
+        this.sortSpinner = null
     }
 
     companion object {
@@ -206,7 +189,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView, SearchableListener
             : DiffUtil.ItemCallback<PersonWithEnrollment>() {
             override fun areItemsTheSame(oldItem: PersonWithEnrollment,
                                          newItem: PersonWithEnrollment): Boolean {
-                return oldItem == newItem
+                return oldItem.personUid == newItem.personUid
             }
 
             override fun areContentsTheSame(oldItem: PersonWithEnrollment,

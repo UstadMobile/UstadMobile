@@ -47,7 +47,6 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView, SearchableListener {
 
     private var showAllClazzSettingsButton = false
 
-    private lateinit var pullToRefresh: SwipeRefreshLayout
 
     fun searchClasses(searchValue: String) {
         mPresenter!!.updateProviderWithSearch(searchValue)
@@ -77,8 +76,6 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView, SearchableListener {
         fab = rootContainer.findViewById(R.id.fragment_clazz_list_fab)
         fab!!.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
 
-        pullToRefresh = rootContainer.findViewById(R.id.fragment_clazz_list_swipe_refresh_layout)
-
         //set up Presenter
         mPresenter = ClazzListPresenter(context!!,
                 UMAndroidUtil.bundleToMap(arguments), this)
@@ -92,17 +89,6 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView, SearchableListener {
             override fun onNothingSelected(parent: AdapterView<*>) {
 
             }
-        }
-
-        pullToRefresh.setOnRefreshListener {
-            try {
-                Thread.sleep(300)
-                //TODO: Replace with repo random access sync when it is ready.
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-
-            pullToRefresh.isRefreshing = false
         }
 
         return rootContainer
@@ -200,8 +186,6 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView, SearchableListener {
     constructor()  {
         val args = Bundle()
         arguments = args
-        icon = R.drawable.ic_group_black_24dp
-        title = R.string.bottomnav_classes_title
     }
 
     constructor(args:Bundle) : this() {
@@ -209,7 +193,6 @@ class ClazzListFragment : UstadBaseFragment, ClazzListView, SearchableListener {
     }
 
     companion object {
-
         val icon = R.drawable.ic_group_black_24dp
         val title = R.string.bottomnav_classes_title
 
