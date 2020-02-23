@@ -1,11 +1,14 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.lib.db.entities.DistinctCategorySchema
-import com.ustadmobile.lib.db.entities.LangUidAndName
-import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
+
+enum class ContentEntryListViewMode(val viewMode: Int) {
+    NORMAL(1),
+    PICKER(2)
+
+}
 
 interface ContentEntryListView : UstadView {
 
@@ -42,6 +45,8 @@ interface ContentEntryListView : UstadView {
      */
     fun setEditButtonsVisibility(buttonVisibilityFlags: Int)
 
+    fun finishWithPickResult(contentEntry: ContentEntry)
+
     companion object {
 
         const val ARG_FILTER_BUTTONS = "filterbuttons"
@@ -51,6 +56,12 @@ interface ContentEntryListView : UstadView {
         const val ARG_RECYCLED_CONTENT = "recycled"
 
         const val ARG_LIBRARIES_CONTENT = "libraries"
+
+        /**
+         * When used in picker mode, the result will container this extra which will contain a
+         * JSON string of the ContentEntry selected by the user
+         */
+        const val EXTRA_RESULT_CONTENTENTRY = "contentEntry"
 
         /**
          * show controls to allow adding content
@@ -69,6 +80,8 @@ interface ContentEntryListView : UstadView {
 
         const val ARG_EDIT_BUTTONS_CONTROL_FLAG = "EditControlFlag"
 
+        const val ARG_VIEWMODE = "viewMode"
+
         const val VIEW_NAME = "ContentEntryList"
 
         const val CONTENT_CREATE_FOLDER = 1
@@ -78,5 +91,7 @@ interface ContentEntryListView : UstadView {
         const val CONTENT_CREATE_CONTENT = 3
 
         const val CONTENT_IMPORT_LINK = 4
+
+
     }
 }
