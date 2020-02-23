@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="clazzassignmentwithmetrics"
+            type="com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics" />
+
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzAssignmentListPresenter" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:id="@+id/entry_holder"
+        android:layout_height="wrap_content"
+        android:background="?android:selectableItemBackground"
+        android:onClick="@{() -> presenter.handleClickAssignment(clazzassignmentwithmetrics)}"
+        android:tag="@{clazzassignmentwithmetrics.clazzAssignmentUid}"
+        android:padding="@dimen/dimen_10dp">
+
+        <ImageView
+            android:scaleType="fitCenter"
+            android:id="@+id/item_clazz_assignment_with_metrics_thumbnail"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_collections_bookmark_black_24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_clazz_assignment_with_metrics_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:text="@{clazzassignmentwithmetrics.storiesTitle}"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_clazz_assignment_with_metrics_thumbnail"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Story 1, Story 2" />
+
+        <TextView
+            android:id="@+id/item_clazz_assignment_with_metrics_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:maxLines="3"
+            android:textSize="12sp"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_clazz_assignment_with_metrics_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazz_assignment_with_metrics_title"
+            tools:text="5 students not started, 10 started, 15 completed" />
+
+        <ImageView
+            android:id="@+id/item_clazz_assignment_with_metrics_calendar_icon"
+            android:layout_width="16dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
+            android:src="@drawable/ic_date_range_black_24dp"
+            android:tint="@color/text_secondary"
+            app:layout_constraintStart_toEndOf="@+id/item_clazz_assignment_with_metrics_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazz_assignment_with_metrics_description" />
+
+        <TextView
+            android:id="@+id/item_clazz_assignment_with_metrics_date"
+            android:layout_width="0dp"
+            android:layout_height="21dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:gravity="start"
+            android:textSize="13sp"
+            android:tint="@color/text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_clazz_assignment_with_metrics_calendar_icon"
+            app:layout_constraintTop_toBottomOf="@id/item_clazz_assignment_with_metrics_description"
+            tools:text="23/Feb/2020" />
+
+
+        <ProgressBar
+            android:id="@+id/item_clazz_assignment_with_metrics_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:visibility="visible"
+            tools:progress="77"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/item_clazz_assignment_with_metrics_thumbnail"
+            app:layout_constraintEnd_toEndOf="@+id/item_clazz_assignment_with_metrics_thumbnail"
+            app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_with_metrics_thumbnail" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -32,7 +32,7 @@ class ClazzAssignmentListPresenter(context: Any,
             clazzUid = arguments[ARG_CLAZZ_UID]?.toLong() ?: 0L
             getAndSetProvider()
 
-            //TODO: Figure out the visibliliy of edit
+            //TODO: Figure out the visiblity of edit via permissions
             view.setEditVisibility(true)
         }
     }
@@ -42,8 +42,8 @@ class ClazzAssignmentListPresenter(context: Any,
         view.setListProvider(factory)
     }
 
-    fun handleClickAssignment(clazzAssignmentUid: Long){
-        val args = mapOf(ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignmentUid.toString())
+    fun handleClickAssignment(clazzAssignment: ClazzAssignmentWithMetrics){
+        val args = mapOf(ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignment.clazzAssignmentUid.toString())
         impl.go(ClazzAssignmentDetailProgressView.VIEW_NAME, args, view.viewContext)
     }
 

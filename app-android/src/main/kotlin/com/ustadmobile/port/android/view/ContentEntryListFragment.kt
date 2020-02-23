@@ -361,7 +361,7 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView, ICon
         repoLoadingStatusView?.observerRepoStatus(data, this)
 
         //LiveData that is not linked to a repository (e.g. the Downloads) will not trigger status updates)
-        //Therefor we should manually set the state to loaded no data. The view will be hidden if/when
+        //Therefor we should manually set the state  to loaded no data. The view will be hidden if/when
         //any items are loaded
         if(!data.isRepositoryLiveData()) {
             repoLoadingStatusView?.onChanged(RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA))

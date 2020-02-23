@@ -63,4 +63,8 @@ class ClazzAssignmentDetailProgressPresenter(context: Any,
         impl.go(ClazzAssignmentEditView.VIEW_NAME, args, context)
     }
 
+    fun handleClickStudent(student: PersonWithAssignmentMetrics){
+        //TODO:
+    }
+
 }
