@@ -24,8 +24,8 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     abstract suspend fun updateAsync(entity: ClazzAssignment): Int
 
     @Query("""SELECT * FROM ClazzAssignment WHERE 
-        |clazzAssignmentClazzUid = :clazzUid 
-        |AND CAST(clazzAssignmentInactive AS INTEGER) = 0
+        clazzAssignmentClazzUid = :clazzUid 
+        AND CAST(clazzAssignmentInactive AS INTEGER) = 0
     """)
     abstract fun findByClazzUidFactory(clazzUid: Long): DataSource.Factory<Int, ClazzAssignment>
 
@@ -54,7 +54,7 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     @Query(""" SELECT ClazzAssignment.*,
          0 as totalStudents, 
          0 as startedStudents, 
-         0 as nonStartedStudents, 
+         0 as notStartedStudents, 
          0 as completedStudents,
          "" as storiesTitle, 
          (SELECT clazzAssignmentContentJoinContentUid FROM ClazzAssignmentContentJoin

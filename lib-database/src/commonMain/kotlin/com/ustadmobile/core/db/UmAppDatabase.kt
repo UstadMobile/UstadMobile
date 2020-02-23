@@ -41,6 +41,13 @@ import kotlin.jvm.Volatile
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
+    /*
+        Changes in 34:
+        Added School and Assignment based entities
+        Updated Clazz : added clazzFeatures and removed individual feature bits
+     */
+
+
     var attachmentsDir: String? = null
 
     override val master: Boolean

@@ -102,9 +102,9 @@ class SelectClazzFeaturesDialogFragment : UstadDialogFragment(), SelectClazzFeat
     override fun updateFeaturesOnView(clazz: Clazz) {
         runOnUiThread (Runnable{
             //Set toggle
-            attendanceSwitch.isChecked = clazz.isAttendanceFeature
-            activitySwitch.isChecked = clazz.isActivityFeature
-            selSwitch.isChecked = clazz.isSelFeature
+            attendanceSwitch.isChecked = clazz.isAttendanceFeature()
+            activitySwitch.isChecked = clazz.isActivityFeature()
+            selSwitch.isChecked = clazz.isSelFeature()
         })
 
     }

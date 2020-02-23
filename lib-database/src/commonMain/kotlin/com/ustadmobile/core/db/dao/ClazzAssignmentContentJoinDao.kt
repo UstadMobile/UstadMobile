@@ -21,20 +21,20 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     abstract suspend fun findByUidAsync(clazzAssignmentContentJoinUid: Long): ClazzAssignmentContentJoin?
 
     @Query("""UPDATE ClazzAssignmentContentJoin SET clazzAssignmentContentJoinInactive = 1 
-        |WHERE clazzAssignmentContentJoinUid = :clazzAssignmentContentJoinUid
+        WHERE clazzAssignmentContentJoinUid = :clazzAssignmentContentJoinUid
     """)
     abstract suspend fun deactivateJoin(clazzAssignmentContentJoinUid : Long ): Int
 
     @Query("""SELECT * FROM ClazzAssignmentContentJoin 
-        |WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid 
-        |AND CAST(clazzAssignmentContentJoinInactive AS INTEGER) = 0""")
+        WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid 
+        AND CAST(clazzAssignmentContentJoinInactive AS INTEGER) = 0""")
     abstract fun findJoinsByAssignmentUid(clazzAssignmentUid: Long)
             : DataSource.Factory<Int, ClazzAssignmentContentJoin>
 
     @Query("""SELECT ContentEntry.*, 0.0 as contentEntryWithMetricsProgress FROM ClazzAssignmentContentJoin 
-        |LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = clazzAssignmentContentJoinContentUid
-        |WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid 
-        |AND CAST(clazzAssignmentContentJoinInactive AS INTEGER) = 0""")
+        LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = clazzAssignmentContentJoinContentUid
+        WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid 
+        AND CAST(clazzAssignmentContentJoinInactive AS INTEGER) = 0""")
     abstract fun findContentByAssignmentUid(clazzAssignmentUid: Long)
             : DataSource.Factory<Int, ContentEntryWithMetrics>
 

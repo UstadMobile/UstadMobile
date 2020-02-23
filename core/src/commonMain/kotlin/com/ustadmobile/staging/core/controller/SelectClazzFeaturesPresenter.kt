@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_CLAZZUID
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_SEL_ENABLED
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -16,11 +17,11 @@ import kotlinx.coroutines.launch
 /**
  * Presenter for SelectClazzFeatures view
  */
-class SelectClazzFeaturesPresenter(context: Any, arguments: Map<String, String>?, view:
-SelectClazzFeaturesView) : UstadBaseController<SelectClazzFeaturesView>(context, arguments!!,
+class SelectClazzFeaturesPresenter(context: Any, arguments: Map<String, String>, view:
+SelectClazzFeaturesView) : UstadBaseController<SelectClazzFeaturesView>(context, arguments,
         view) {
 
-    internal var repository: UmAppDatabase
+    internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
     internal var clazzDao: ClazzDao
     private var currentClazzUid: Long = 0
     private var givenValues = false
@@ -31,29 +32,27 @@ SelectClazzFeaturesView) : UstadBaseController<SelectClazzFeaturesView>(context,
 
     var currentClazz: Clazz? = null
 
-
     init {
 
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
         clazzDao = repository.clazzDao
 
-        if (arguments!!.containsKey(CLAZZ_FEATURE_CLAZZUID)) {
-            currentClazzUid = arguments!!.get(CLAZZ_FEATURE_CLAZZUID)!!.toLong()
+        if (arguments.containsKey(CLAZZ_FEATURE_CLAZZUID)) {
+            currentClazzUid = arguments[CLAZZ_FEATURE_CLAZZUID]!!.toLong()
         }
-        if (arguments!!.containsKey(CLAZZ_FEATURE_ATTENDANCE_ENABLED)) {
-            if (arguments!!.get(CLAZZ_FEATURE_ATTENDANCE_ENABLED) == "yes") {
+        if (arguments.containsKey(CLAZZ_FEATURE_ATTENDANCE_ENABLED)) {
+            if (arguments[CLAZZ_FEATURE_ATTENDANCE_ENABLED] == "yes") {
                 attendanceFeature = true
                 givenValues = true
             }
         }
-        if (arguments!!.containsKey(CLAZZ_FEATURE_ACTIVITY_ENABLED)) {
-            if (arguments!!.get(CLAZZ_FEATURE_ACTIVITY_ENABLED) == "yes") {
+        if (arguments.containsKey(CLAZZ_FEATURE_ACTIVITY_ENABLED)) {
+            if (arguments[CLAZZ_FEATURE_ACTIVITY_ENABLED] == "yes") {
                 activityFeature = true
                 givenValues = true
             }
         }
-        if (arguments!!.containsKey(CLAZZ_FEATURE_SEL_ENABLED)) {
-            if (arguments!!.get(CLAZZ_FEATURE_SEL_ENABLED) == "yes") {
+        if (arguments.containsKey(CLAZZ_FEATURE_SEL_ENABLED)) {
+            if (arguments[CLAZZ_FEATURE_SEL_ENABLED] == "yes") {
                 selFeature = true
                 givenValues = true
             }
@@ -75,16 +74,31 @@ SelectClazzFeaturesView) : UstadBaseController<SelectClazzFeaturesView>(context,
     }
 
     fun updateAttendanceFeature(enabled: Boolean) {
-        currentClazz!!.isAttendanceFeature = enabled
+        if(!currentClazz!!.isAttendanceFeature()){
+            if(enabled){
+                currentClazz!!.clazzFeatures =
+                        currentClazz!!.clazzFeatures or CLAZZ_FEATURE_ATTENDANCE
+            }
+        }else{
+            if(!enabled){
+                //remove: TODO
+            }
+        }
+
+        //currentClazz!!.isAttendanceFeature = enabled
+
     }
 
     fun updateActivityFeature(enabled: Boolean) {
-        currentClazz!!.isActivityFeature = enabled
+        currentClazz?.updateActivityFeature(enabled)
     }
 
     fun updateSELFeature(enabled: Boolean) {
-        currentClazz!!.isSelFeature = enabled
+        currentClazz?.updateSelFeature(enabled)
     }
 
+    fun updateAssignmentFeature(enabled: Boolean){
+        currentClazz?.updateAssignmentFeature(enabled)
+    }
 
 }

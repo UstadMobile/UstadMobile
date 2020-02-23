@@ -15,6 +15,12 @@ interface ClazzAssignmentListView : UstadView {
      */
     fun setListProvider(factory: DataSource.Factory<Int, ClazzAssignmentWithMetrics>)
 
+    /**
+     * Edit visibility is the ability to add a new assignment, edit an assignment.
+     * We show/hide the + Assignment floating action button on the list view.
+     * We also show/hide the ability to edit a story if such an option exists in the
+     * Assignment list recycler view.
+     */
     fun setEditVisibility(visible: Boolean)
 
     companion object {

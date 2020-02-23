@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.db.entities
 
-
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.LastChangedBy
@@ -9,7 +8,6 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
-
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
@@ -25,7 +23,6 @@ open class Clazz() {
 
     var attendanceAverage: Float = 0.toFloat()
 
-
     //Gives the DateRange calendar Uid
     var clazzHolidayUMCalendarUid: Long = 0
 
@@ -38,19 +35,12 @@ open class Clazz() {
     //Location
     var clazzLocationUid: Long = 0
 
-    //Attendance
-    var isAttendanceFeature: Boolean = true
-
-    //Activity
-    var isActivityFeature: Boolean = true
-
-    //SEL
-    var isSelFeature: Boolean = true
-
     var clazzStartTime: Long = 0
 
     var clazzEndTime: Long = 0
 
+    //Clazz features
+    var clazzFeatures: Long = 0
 
     @MasterChangeSeqNum
     var clazzMasterChangeSeqNum: Long = 0
@@ -62,40 +52,58 @@ open class Clazz() {
     var clazzLastChangedBy: Int = 0
 
 
+    fun isAttendanceFeature() : Boolean{
+        return clazzFeatures and CLAZZ_FEATURE_ATTENDANCE > 0
+    }
+    fun isSelFeature() : Boolean{
+        return clazzFeatures and CLAZZ_FEATURE_SEL > 0
+    }
+    fun isActivityFeature() : Boolean{
+        return clazzFeatures and CLAZZ_FEATURE_ACTIVITY > 0
+    }
+    fun isAssignmentFeature() : Boolean{
+        return clazzFeatures and CLAZZ_FEATURE_ASSIGNMENT > 0
+    }
+    //TODO:
+    fun updateAttendanceFeature(enabled: Boolean){
+        if(enabled){
+
+        }
+    }
+    //TODO
+    fun updateSelFeature(enabled: Boolean){
+
+    }
+    //TODO
+    fun updateActivityFeature(enabled: Boolean){
+
+    }
+    //TODO
+    fun updateAssignmentFeature(enabled: Boolean){
+
+    }
+
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
-        this.isAttendanceFeature = true
-        this.isActivityFeature = true
-        this.isSelFeature = true
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or
+                CLAZZ_FEATURE_SEL or CLAZZ_FEATURE_ASSIGNMENT
         this.isClazzActive = false
     }
 
     constructor(clazzName: String, clazzLocationUid: Long) : this() {
         this.clazzName = clazzName
         this.clazzLocationUid = clazzLocationUid
-        this.isAttendanceFeature = true
-        this.isActivityFeature = true
-        this.isSelFeature = true
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or
+                CLAZZ_FEATURE_SEL or CLAZZ_FEATURE_ASSIGNMENT
         this.isClazzActive = false
-    }
-
-
-    fun hasPermissionsChanged(previousClazz: Clazz):Boolean{
-
-        if(previousClazz.isActivityFeature != isActivityFeature){
-            return true
-        }
-        if(previousClazz.isAttendanceFeature != isAttendanceFeature){
-            return true
-        }
-        if(previousClazz.isSelFeature != isSelFeature){
-            return true
-        }
-        return false
     }
 
     companion object {
 
         const val TABLE_ID = 6
+        const val CLAZZ_FEATURE_ATTENDANCE = 1L
+        const val CLAZZ_FEATURE_SEL = 2L
+        const val CLAZZ_FEATURE_ACTIVITY = 4L
+        const val CLAZZ_FEATURE_ASSIGNMENT = 8L
     }
 }

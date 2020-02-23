@@ -127,7 +127,7 @@ class RoleDetailActivity : UstadBaseActivity(), RoleDetailView {
         }
     }
 
-    fun calcualtePermissionFromView(): Long {
+    private fun calcualtePermissionFromView(): Long {
 
         return (if (viewPeople!!.isChecked) Role.PERMISSION_PERSON_SELECT else 0) or
                 (if (addPeople!!.isChecked) Role.PERMISSION_PERSON_INSERT else 0) or
@@ -154,7 +154,7 @@ class RoleDetailActivity : UstadBaseActivity(), RoleDetailView {
                 if (updateSEL!!.isChecked) Role.PERMISSION_SEL_QUESTION_RESPONSE_UPDATE else 0
     }
 
-    fun updateCheckBoxes(permission: Long) {
+    private fun updateCheckBoxes(permission: Long) {
         viewPeople!!.isChecked = permission and Role.PERMISSION_PERSON_SELECT > 0
         addPeople!!.isChecked = permission and Role.PERMISSION_PERSON_INSERT > 0
         updatePeople!!.isChecked = permission and Role.PERMISSION_PERSON_UPDATE > 0

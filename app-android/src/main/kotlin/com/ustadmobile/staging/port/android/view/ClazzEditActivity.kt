@@ -402,21 +402,21 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         }
 
         var featuresText = ""
-        if (updatedClazz.isAttendanceFeature) {
+        if (updatedClazz.isAttendanceFeature()) {
             var addComma = ""
             if (featuresText != "") {
                 addComma = ","
             }
             featuresText = featuresText + addComma + " " + getText(R.string.attendance)
         }
-        if (updatedClazz.isActivityFeature) {
+        if (updatedClazz.isActivityFeature()) {
             var addComma = ""
             if (featuresText != "") {
                 addComma = ","
             }
             featuresText = featuresText + addComma + " " + getText(R.string.activity_change)
         }
-        if (updatedClazz.isSelFeature) {
+        if (updatedClazz.isSelFeature()) {
             var addComma = ""
             if (featuresText != "") {
                 addComma = ","
@@ -584,21 +584,21 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         featuresTextView!!.text = ""
         var featuresText = ""
 
-        if (clazz!!.isAttendanceFeature) {
+        if (clazz!!.isAttendanceFeature()) {
             var addComma = ""
             if (featuresText != "") {
                 addComma = ","
             }
             featuresText = featuresText + addComma + " " + getText(R.string.attendance)
         }
-        if (clazz.isActivityFeature) {
+        if (clazz.isActivityFeature()) {
             var addComma = ""
             if (featuresText != "") {
                 addComma = ","
             }
             featuresText = featuresText + addComma + " " + getText(R.string.activity_change)
         }
-        if (clazz.isSelFeature) {
+        if (clazz.isSelFeature()) {
             var addComma = ""
             if (featuresText != "") {
                 addComma = ","

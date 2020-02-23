@@ -32,8 +32,8 @@ class ClazzAssignmentDetailPresenter(context: Any,
 
         if(arguments.containsKey(ARG_CLAZZ_ASSIGNMENT_UID)){
             GlobalScope.launch {
-                val assignment =
-                        clazzAssignmentDao.findByUidAsync(arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0)
+                val assignment = clazzAssignmentDao.findByUidAsync(
+                                arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0)
                 if (assignment != null) {
                     clazzAssignment = assignment
                     view.runOnUiThread(Runnable {
