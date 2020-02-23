@@ -61,5 +61,9 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
         })
     }
 
+    fun handleClickEdit(){
+        //TODO
+    }
+
 
 }
