@@ -16,6 +16,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailAssignmentBinding
 import com.ustadmobile.core.controller.ClazzAssignmentDetailAssignmentPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzAssignmentDetailAssignmentView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
@@ -40,6 +41,10 @@ class ClazzAssignmentDetailAssignmentFragment : UstadBaseFragment(), ClazzAssign
 
     override fun setClazzAssignment(clazzAssignment: ClazzAssignment) {
         rootContainer?.clazzassignment = clazzAssignment
+        rootContainer?.fragmentClazzAssignmentDetailAssignmentDate?.text =
+                UMCalendarUtil.getPrettyDateSimpleFromLong(clazzAssignment.clazzAssignmentDueDate,
+                        null)
+
     }
 
     override val viewContext: Any

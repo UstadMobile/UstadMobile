@@ -21,10 +21,9 @@ class PersonWithAssignmentMetricsRecyclerAdapter(
         clazzAssignmentListBinding.presenter = mPresenter
 
         return PersonWithAssignmentMetricsViewHolder(clazzAssignmentListBinding)
-
     }
 
-        override fun onBindViewHolder(holder: PersonWithAssignmentMetricsViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PersonWithAssignmentMetricsViewHolder, position: Int) {
 
         val entity = getItem(position)
         holder.binding.personwithassignmentmetrics = entity

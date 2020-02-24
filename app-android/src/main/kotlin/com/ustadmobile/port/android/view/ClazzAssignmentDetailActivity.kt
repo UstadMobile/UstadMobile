@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -14,7 +15,6 @@ import com.toughra.ustadmobile.databinding.ActivityClazzAssignmentDetailBinding
 import com.ustadmobile.core.controller.ClazzAssignmentDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.staging.port.android.view.ClazzAssignmentDetailAssignmentFragment
 import com.ustadmobile.staging.port.android.view.ClazzAssignmentDetailProgressFragment
@@ -37,10 +37,23 @@ class ClazzAssignmentDetailActivity : UstadBaseActivity(), ClazzAssignmentDetail
     private var mPresenter: ClazzAssignmentDetailPresenter?= null
     internal var menu: Menu? = null
     private val fragPosMap = HashMap<Int, Class<*>>()
-    private var currentClazzUid : Long = 0L
-    private var clazzAssignmentUid : Long = 0L
     private var previousPosition = 0
 
+    /**
+     * Handles Action Bar menu button click.
+     * @param item  The MenuItem clicked.
+     * @return  Boolean if handled or not.
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     override fun setClazzAssignment(clazzAssignment: ClazzAssignmentWithMetrics){
         rootView?.clazzassignmentwithmetrics = clazzAssignment
@@ -101,18 +114,6 @@ class ClazzAssignmentDetailActivity : UstadBaseActivity(), ClazzAssignmentDetail
 
         rootView = DataBindingUtil.setContentView(
                 this, R.layout.activity_clazz_assignment_detail)
-
-        if (intent!!.extras!!.get(UstadView.ARG_CLAZZ_UID) is String) {
-            currentClazzUid = intent.getStringExtra(UstadView.ARG_CLAZZ_UID).toString().toLong()
-        } else {
-            currentClazzUid = intent.getLongExtra(UstadView.ARG_CLAZZ_UID, 0L)
-        }
-
-        if (intent!!.extras!!.get(UstadView.ARG_CLAZZ_ASSIGNMENT_UID) is String) {
-            clazzAssignmentUid = intent.getStringExtra(UstadView.ARG_CLAZZ_ASSIGNMENT_UID).toString().toLong()
-        } else {
-            clazzAssignmentUid = intent.getLongExtra(UstadView.ARG_CLAZZ_ASSIGNMENT_UID, 0L)
-        }
 
         toolbar = rootView?.clazzAssignmentDetailToolbar
         setSupportActionBar(toolbar)
@@ -194,5 +195,4 @@ class ClazzAssignmentDetailActivity : UstadBaseActivity(), ClazzAssignmentDetail
             }
         }
     }
-
 }

@@ -59,7 +59,7 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
                     android:hint="@string/title"
-                    android:text="@{clazzassignment.clazzAssignmentInstructions}"
+                    android:text="@={clazzassignment.clazzAssignmentInstructions}"
                     app:hintEnabled="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
@@ -95,6 +95,18 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_start_date" />
 
+                <EditText
+                    android:id="@+id/activity_clazz_assignment_edit_start_date_edittext_val"
+                    android:layout_width="97dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:visibility="invisible"
+                    android:text="@={`` + clazzassignment.clazzAssignmentStartDate}"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_start_date" />
+
+
+
                 <ImageView
                     android:id="@+id/imageView9"
                     android:layout_width="wrap_content"
@@ -124,6 +136,16 @@
                     app:layout_constraintStart_toStartOf="@+id/imageView9"
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_end_date" />
 
+                <EditText
+                    android:id="@+id/activity_clazz_assignment_edit_end_date_edittext_val"
+                    android:layout_width="97dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="@+id/imageView9"
+                    android:text="@={`` + clazzassignment.clazzAssignmentDueDate}"
+                    android:visibility="invisible"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_end_date" />
+
+
                 <TextView
                     android:id="@+id/activity_clazz_assignment_edit_content_heading"
                     android:layout_width="wrap_content"
@@ -140,10 +162,13 @@
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="37dp"
+                    android:layout_marginStart="30dp"
+                    android:background="?android:selectableItemBackground"
                     android:backgroundTint="@android:color/transparent"
                     android:drawableStart="@drawable/ic_add_circle"
                     android:drawableLeft="@drawable/ic_add_circle"
                     android:drawablePadding="@dimen/dimen_16dp"
+                    android:paddingTop="@dimen/dimen_16dp"
                     android:gravity="start"
                     android:onClick="@{() -> presenter.handleClickAddContent()}"
                     android:text="@string/content"
@@ -158,9 +183,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_marginStart="32dp"
-                    android:layout_marginLeft="32dp"
+                    android:layout_marginTop="4dp"
                     android:layout_marginEnd="8dp"
-                    android:layout_marginRight="8dp"
                     android:scrollbars="vertical"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
