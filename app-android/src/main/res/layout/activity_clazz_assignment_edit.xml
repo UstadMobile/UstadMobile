@@ -59,7 +59,7 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
                     android:hint="@string/title"
-                    android:text="@={clazzassignment.clazzAssignmentInstructions}"
+                    android:text="@={clazzassignment.clazzAssignmentTitle}"
                     app:hintEnabled="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
@@ -146,6 +146,21 @@
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_end_date" />
 
 
+                <EditText
+                    android:id="@+id/activity_clazz_assignment_edit_instructions"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:hint="@string/instructions_for_students"
+                    android:text="@={clazzassignment.clazzAssignmentInstructions}"
+                    app:hintEnabled="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_end_date_edittext_val" />
+
                 <TextView
                     android:id="@+id/activity_clazz_assignment_edit_content_heading"
                     android:layout_width="wrap_content"
@@ -154,7 +169,7 @@
                     android:layout_marginTop="16dp"
                     android:text="@string/content"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_start_date_edittext" />
+                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_instructions" />
 
 
                 <androidx.appcompat.widget.AppCompatButton

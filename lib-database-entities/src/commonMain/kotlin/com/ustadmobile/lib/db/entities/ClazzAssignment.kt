@@ -17,6 +17,8 @@ open class ClazzAssignment() {
     @PrimaryKey(autoGenerate = true)
     var clazzAssignmentUid: Long = 0
 
+    var clazzAssignmentTitle : String ?= null
+
     //The clazz
     var clazzAssignmentClazzUid : Long = 0
 
