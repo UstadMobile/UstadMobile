@@ -13,7 +13,9 @@ import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 
 class ClazzAssignmentListRecyclerAdapter(
         diffCallback: DiffUtil.ItemCallback<ClazzAssignmentWithMetrics>,
-        internal var mPresenter: ClazzAssignmentListPresenter?) : PagedListAdapter<ClazzAssignmentWithMetrics, ClazzAssignmentListRecyclerAdapter.ClazzAssignmentListViewHolder>(diffCallback) {
+        internal var mPresenter: ClazzAssignmentListPresenter?)
+    : PagedListAdapter<ClazzAssignmentWithMetrics,
+        ClazzAssignmentListRecyclerAdapter.ClazzAssignmentListViewHolder>(diffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzAssignmentListViewHolder {
         val clazzAssignmentListBinding = ItemClazzAssignmentWithMetricsBinding.inflate(
@@ -27,6 +29,7 @@ class ClazzAssignmentListRecyclerAdapter(
     override fun onBindViewHolder(holder: ClazzAssignmentListViewHolder, position: Int) {
 
         val entity = getItem(position)
+        holder.binding.clazzassignmentwithmetrics = entity
 
         if(entity != null) {
             holder.binding.itemClazzAssignmentWithMetricsDate.text =
@@ -39,8 +42,6 @@ class ClazzAssignmentListRecyclerAdapter(
 
         }
     }
-
-    //inner class ClazzAssignmentListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     inner class ClazzAssignmentListViewHolder
     internal constructor(val binding: ItemClazzAssignmentWithMetricsBinding)

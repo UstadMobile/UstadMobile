@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
@@ -28,6 +29,7 @@ class ClazzAssignmentEditPresenter(context: Any,
     private var clazzAssignmentContentJoinDao  = repository.clazzAssignmentContentJoinDao
     private lateinit var clazzAssignment : ClazzAssignment
     private lateinit var factory: DataSource.Factory<Int, ContentEntryWithMetrics>
+    private var clazzUid: Long = 0L
 
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -48,6 +50,10 @@ class ClazzAssignmentEditPresenter(context: Any,
                 getAndSetProvider()
             }
         }
+
+        if(arguments.containsKey(UstadView.ARG_CLAZZ_UID)){
+            clazzUid = arguments[UstadView.ARG_CLAZZ_UID]?.toLong()?:0
+        }
     }
 
     private fun getAndSetProvider() {
@@ -59,12 +65,18 @@ class ClazzAssignmentEditPresenter(context: Any,
     }
 
     fun handleSaveAssignment(assignment: ClazzAssignment){
+        assignment.clazzAssignmentClazzUid = clazzUid
+        assignment.clazzAssignmentInactive = false
+        assignment.clazzAssignmentUpdateDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+
         GlobalScope.launch {
             if(assignment.clazzAssignmentUid != 0L){
-                clazzAssignmentDao.insertAsync(assignment)
-            }else{
                 clazzAssignmentDao.updateAsync(assignment)
+            }else{
+                assignment.clazzAssignmentCreationDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+                clazzAssignmentDao.insertAsync(assignment)
             }
+            view.finish()
         }
     }
 

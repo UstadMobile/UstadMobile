@@ -25,6 +25,10 @@ interface ClazzAssignmentEditView : UstadView {
     companion object {
         // This defines the view name that is an argument value in the go() in impl.
         const val VIEW_NAME = "ClazzAssignmentEdit"
+
+        const val GRADING_NONE = 0
+        const val GRADING_NUMERICAL = 1
+        const val GRADING_LETTERS = 2
     }
 
 }

@@ -7,7 +7,7 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailAssignmentView
 import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
-import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -25,14 +25,14 @@ class ClazzAssignmentDetailPresenter(context: Any,
 
 
     private var clazzAssignmentDao = repository.clazzAssignmentDao
-    private lateinit var clazzAssignment: ClazzAssignment
+    private lateinit var clazzAssignment: ClazzAssignmentWithMetrics
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         if(arguments.containsKey(ARG_CLAZZ_ASSIGNMENT_UID)){
             GlobalScope.launch {
-                val assignment = clazzAssignmentDao.findByUidAsync(
+                val assignment = clazzAssignmentDao.findWithMetricsByUid(
                                 arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0)
                 if (assignment != null) {
                     clazzAssignment = assignment
@@ -48,5 +48,4 @@ class ClazzAssignmentDetailPresenter(context: Any,
             }
         }
     }
-
 }

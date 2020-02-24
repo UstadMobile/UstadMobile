@@ -20,6 +20,20 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
             "AND CAST(clazzAssignmentInactive AS INTEGER) = 0")
     abstract fun findByUidAsync(clazzAssignmentUid: Long): ClazzAssignment?
 
+    @Query("""
+        SELECT ClazzAssignment.*,
+        0 as totalStudents, 
+        0 as startedStudents,
+        0 as notStartedStudents,
+        0 as completedStudents,
+        0 as firstContentEntryUid,
+        '' as storiesTitle
+         
+         FROM ClazzAssignment WHERE clazzAssignmentUid = :clazzAssignmentUid 
+        AND CAST(clazzAssignmentInactive AS INTEGER) = 0
+    """)
+    abstract fun findWithMetricsByUid(clazzAssignmentUid: Long): ClazzAssignmentWithMetrics?
+
     @Update
     abstract suspend fun updateAsync(entity: ClazzAssignment): Int
 

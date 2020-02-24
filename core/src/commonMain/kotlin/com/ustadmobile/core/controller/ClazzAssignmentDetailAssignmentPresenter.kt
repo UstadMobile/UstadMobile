@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzAssignmentDetailAssignmentView
+import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
@@ -62,7 +63,9 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
     }
 
     fun handleClickEdit(){
-        //TODO
+        val args = mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID
+                to clazzAssignment.clazzAssignmentUid.toString())
+        impl.go(ClazzAssignmentEditView.VIEW_NAME, args, context)
     }
 
 

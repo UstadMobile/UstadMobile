@@ -5,6 +5,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
+import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.ClazzAssignmentListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_UID
@@ -43,12 +45,15 @@ class ClazzAssignmentListPresenter(context: Any,
     }
 
     fun handleClickAssignment(clazzAssignment: ClazzAssignmentWithMetrics){
-        val args = mapOf(ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignment.clazzAssignmentUid.toString())
-        impl.go(ClazzAssignmentDetailProgressView.VIEW_NAME, args, view.viewContext)
+        val args = mapOf(ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignment.clazzAssignmentUid.toString(),
+                ARG_CLAZZ_UID to clazzUid.toString())
+        impl.go(ClazzAssignmentDetailView.VIEW_NAME, args, view.viewContext)
     }
 
     fun handleClickNewAssignment(){
-        impl.go(ClazzAssignmentDetailProgressView.VIEW_NAME, mapOf(), view.viewContext)
+        val args = mapOf(ARG_CLAZZ_ASSIGNMENT_UID to "0",
+                ARG_CLAZZ_UID to clazzUid.toString())
+        impl.go(ClazzAssignmentEditView.VIEW_NAME, args , view.viewContext)
     }
 
 }

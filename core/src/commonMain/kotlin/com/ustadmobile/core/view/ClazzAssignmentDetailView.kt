@@ -2,20 +2,15 @@ package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 
 /**
  * Core View. Screen is for ClazzAssignmentDetail's View
  */
 interface ClazzAssignmentDetailView : UstadView {
 
-    /**
-     * Sets the given provider to the view's provider adapter.
-     *
-     * @param factory The factory to set to the view
-     */
-    fun setListProvider(factory: DataSource.Factory<Int, ClazzAssignment>)
 
-    fun setClazzAssignment(clazzAssignment: ClazzAssignment)
+    fun setClazzAssignment(clazzAssignment: ClazzAssignmentWithMetrics)
 
     fun setupTabs(tabs : List<String>)
 

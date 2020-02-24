@@ -302,7 +302,12 @@
 
         <activity android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/assignments"
+            android:label="@string/assignment"
+            android:theme="@style/Theme.UstadTheme"/>
+
+        <activity android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/assignment"
             android:theme="@style/Theme.UstadTheme"/>
 
         <activity

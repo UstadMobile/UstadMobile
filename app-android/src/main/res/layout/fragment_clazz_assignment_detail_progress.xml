@@ -2,8 +2,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <data>
+
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzAssignmentDetailProgressPresenter" />
+    </data>
     <androidx.constraintlayout.widget.ConstraintLayout
-        tools:context="com.ustadmobile.staging.port.android.view.PeopleListFragment"
         android:id="@+id/fragment_clazz_assignment_detail_progress_root"
         android:layout_height="match_parent"
         android:layout_width="match_parent">

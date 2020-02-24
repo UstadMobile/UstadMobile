@@ -16,6 +16,7 @@ import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import java.util.*
 import com.ustadmobile.port.android.view.UstadBaseActivity
@@ -57,6 +58,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
             var fragCount = 0
             val bundle = Bundle()
             bundle.putString(ARG_CLAZZ_UID, currentClazzUid.toString())
+            bundle.putString(UstadView.ARG_CLAZZ_UID, currentClazzUid.toString())
             mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(bundle))
             fragPosMap[fragCount++] = ClazzStudentListFragment::class.java
 
@@ -79,7 +81,6 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
                 mPagerAdapter.addFragments(fragCount, ClazzAssignmentListFragment.newInstance(bundle))
                 fragPosMap[fragCount++] = ClazzAssignmentListFragment::class.java
             }
-
 
             mPager.adapter = mPagerAdapter
 
@@ -131,11 +132,6 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
         mPresenter = ClazzDetailPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
-
-    }
-
-    public override fun onResume() {
-        super.onResume()
         mPresenter.checkPermissions()
 
     }
@@ -251,6 +247,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
                 val fragClass = fragPosMap[position]
                 val bundle = Bundle()
                 bundle.putString(ARG_CLAZZ_UID, currentClazzUid.toString())
+                bundle.putString(UstadView.ARG_CLAZZ_UID, currentClazzUid.toString())
                 return if (fragClass == ClazzStudentListFragment::class.java) {
                     ClazzStudentListFragment.newInstance(bundle)
                 } else if (fragClass == ClazzLogListFragment::class.java) {
