@@ -18,6 +18,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -448,5 +449,67 @@ class ContentEntryListPresenterTest {
         verify(systemImpl, timeout(5000)).go(eq(ContentEntryEditView.VIEW_NAME), eq(arguments), eq(context))
 
     }
+
+    @Test
+    fun givenViewModeIsPicker_whenHandleClickContentEntryFolder_thenShouldOpenFolder() {
+        val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao)
+        args[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        args[ContentEntryListView.ARG_VIEWMODE] = ContentEntryListViewMode.PICKER.toString()
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao,
+                repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
+        presenter.onCreate(null)
+
+        presenter.handleContentEntryClicked(ContentEntry("Test Folder", "desc", false, true).also {
+            it.contentEntryUid = 42L
+        })
+
+        verify(repoContentEntryDaoSpy, timeout(5000))
+                .getChildrenByParentUidWithCategoryFilter(eq(42L), any(), any(), any())
+    }
+
+    @Test
+    fun givenViewModeIsPicker_whenHandleClickContentEntryLeaf_thenShouldFinishWithResult() {
+        val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao)
+        args[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        args[ContentEntryListView.ARG_VIEWMODE] = ContentEntryListViewMode.PICKER.toString()
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao,
+                repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
+        presenter.onCreate(null)
+
+        presenter.handleContentEntryClicked(ContentEntry("Test Folder", "desc", true, true).also {
+            it.contentEntryUid = 42L
+        })
+
+        verify(mockView, timeout(5000)).finishWithPickResult(argThat { contentEntryUid == 42L })
+    }
+
+
+    @Test
+    fun givenViewModeIsPicker_whenBackedClickedAfterSelectionsMade_thenShouldGoBack() {
+        val repoContentEntryDaoSpy = spy(umAppRepository.contentEntryDao)
+        args[ARG_CONTENT_ENTRY_UID] = rootEntry.contentEntryUid.toString()
+        args[ARG_LIBRARIES_CONTENT] = ""
+        args[ContentEntryListView.ARG_VIEWMODE] = ContentEntryListViewMode.PICKER.toString()
+        val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao,
+                repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
+        presenter.onCreate(null)
+
+        presenter.handleContentEntryClicked(ContentEntry("Test Folder", "desc", false, true).also {
+            it.contentEntryUid = 42L
+        })
+
+        val canGoBack = presenter.handleClickBack()
+
+        Assert.assertTrue("Presenter returns true when handleClickBack is called in pick " +
+                "mode after navigating to an item", canGoBack)
+
+        //Should be one query against the
+        verify(repoContentEntryDaoSpy, timeout(5000))
+                .getChildrenByParentUidWithCategoryFilter(eq(42L), any(), any(), any())
+
+        verify(repoContentEntryDaoSpy, timeout(5000).times(2))
+                .getChildrenByParentUidWithCategoryFilter(eq(rootEntry.contentEntryUid), any(), any(), any())
+    }
+
 
 }

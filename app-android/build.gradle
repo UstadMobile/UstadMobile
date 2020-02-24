@@ -120,6 +120,7 @@ android {
             excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module"]
         }
 
+        missingDimensionStrategy 'api', 'api18'
     }
 
     flavorDimensions "config"

@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
+import android.app.Activity.RESULT_OK
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
@@ -20,6 +22,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
+import com.ustadmobile.core.networkmanager.defaultGsonSerializer
 import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
@@ -27,6 +30,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.CONTENT_CREATE_F
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_NEWFOLDER
+import com.ustadmobile.core.view.ContentEntryListView.Companion.EXTRA_RESULT_CONTENTENTRY
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.ext.asRepositoryLiveData
@@ -42,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
@@ -407,6 +412,16 @@ class ContentEntryListFragment : UstadBaseFragment(), ContentEntryListView, ICon
         }
     }
 
+
+    fun handleBackPressed() = presenter?.handleClickBack() ?: false
+
+    override fun finishWithPickResult(contentEntry: ContentEntry) {
+        val returnIntent = Intent()
+        returnIntent.putExtra(EXTRA_RESULT_CONTENTENTRY,
+                Json.stringify(ContentEntry.serializer(), contentEntry))
+        activity?.setResult(RESULT_OK, returnIntent)
+        activity?.finish()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

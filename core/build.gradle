@@ -23,7 +23,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
-        missingDimensionStrategy 'config', 'vanilla'
+        missingDimensionStrategy 'api', 'api18'
     }
     compileOptions {
         sourceCompatibility = '1.8'

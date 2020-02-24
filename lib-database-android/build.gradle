@@ -37,21 +37,22 @@ android {
 
     }
 
-    flavorDimensions "config"
+    //We only have an additional flaovr so that the test variant can target the higher api required to run Room testing
+    flavorDimensions "api"
 
     productFlavors {
-        vanilla {
-            dimension "config"
+        /**
+         * This dimension if the default that should be used by all dependencies
+         */
+        api18 {
+            dimension "api"
         }
 
-        vanillamultidex {
-            dimension "config"
-            minSdkVersion 18
-            multiDexEnabled true
-        }
-
-        devMinApi21 {
-            dimension "config"
+        /**
+         * This dimension is only here because of Room's migration tester requirements
+         */
+        api21 {
+            dimension "api"
             minSdkVersion 21
         }
     }
@@ -98,7 +99,7 @@ dependencies {
 
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
-    kapt "androidx.lifecycle:lifecycle-compiler:$version_androidx_lifecycle"
+    kapt "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
     //Room persistence

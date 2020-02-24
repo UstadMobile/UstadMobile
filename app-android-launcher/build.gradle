@@ -60,7 +60,7 @@ android {
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
+        missingDimensionStrategy 'api', 'api18'
     }
 
     signingConfigs {
