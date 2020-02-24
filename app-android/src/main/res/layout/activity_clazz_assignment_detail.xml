@@ -27,7 +27,7 @@
                 android:id="@+id/clazz_assignment_detail_toolbar"
                 android:background="@color/primary"
                 android:layout_width="match_parent"
-                app:title="@{clazzassignmentwithmetrics.storiesTitle}"
+                app:title="@{clazzassignmentwithmetrics.clazzAssignmentTitle}"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_scrollFlags="scroll|enterAlways" />
 
