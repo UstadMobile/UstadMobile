@@ -8,9 +8,6 @@
             name="contententrywithmetrics"
             type="com.ustadmobile.lib.db.entities.ContentEntryWithMetrics" />
 
-        <variable
-            name="presenter"
-            type="com.ustadmobile.core.controller.ClazzAssignmentDetailAssignmentPresenter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

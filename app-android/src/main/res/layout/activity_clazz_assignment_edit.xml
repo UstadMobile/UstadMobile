@@ -158,7 +158,7 @@
 
 
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/activity_clazz_assignment_edit_add_schedule"
+                    android:id="@+id/activity_clazz_assignment_edit_add_content"
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="37dp"
@@ -170,7 +170,6 @@
                     android:drawablePadding="@dimen/dimen_16dp"
                     android:paddingTop="@dimen/dimen_16dp"
                     android:gravity="start"
-                    android:onClick="@{() -> presenter.handleClickAddContent()}"
                     android:text="@string/content"
                     android:textAlignment="textStart"
                     android:textSize="14sp"
@@ -188,7 +187,7 @@
                     android:scrollbars="vertical"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_add_schedule" />
+                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_add_content" />
 
                 <TextView
                     android:id="@+id/activity_clazz_assignment_edit_grading_title"

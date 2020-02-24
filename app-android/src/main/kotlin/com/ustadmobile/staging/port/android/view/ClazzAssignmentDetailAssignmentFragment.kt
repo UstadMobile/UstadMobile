@@ -84,7 +84,7 @@ class ClazzAssignmentDetailAssignmentFragment : UstadBaseFragment(), ClazzAssign
     }
 
     override fun setListProvider(factory: DataSource.Factory<Int, ContentEntryWithMetrics>) {
-        val recyclerAdapter = ContentEntryWithMetricsRecyclerAdapter(DIFF_CALLBACK_CONTENT_WITH_METRICS, mPresenter)
+        val recyclerAdapter = ContentEntryWithMetricsRecyclerAdapter(DIFF_CALLBACK_CONTENT_WITH_METRICS)
 
         // a warning is expected.
         val data = LivePagedListBuilder(factory, 20).build()

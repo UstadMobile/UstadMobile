@@ -10,15 +10,13 @@ import com.ustadmobile.core.controller.ClazzAssignmentDetailAssignmentPresenter
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
 
 class ContentEntryWithMetricsRecyclerAdapter(
-        diffCallback: DiffUtil.ItemCallback<ContentEntryWithMetrics>,
-        internal var mPresenter: ClazzAssignmentDetailAssignmentPresenter?)
+        diffCallback: DiffUtil.ItemCallback<ContentEntryWithMetrics>)
     : PagedListAdapter<ContentEntryWithMetrics,
         ContentEntryWithMetricsRecyclerAdapter.ClazzAssignmentListViewHolder>(diffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzAssignmentListViewHolder {
         val clazzAssignmentListBinding = ItemContentWithMetricsBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
-        clazzAssignmentListBinding.presenter = mPresenter
 
         return ClazzAssignmentListViewHolder(clazzAssignmentListBinding)
 
@@ -36,6 +34,5 @@ class ContentEntryWithMetricsRecyclerAdapter(
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        mPresenter = null
     }
 }

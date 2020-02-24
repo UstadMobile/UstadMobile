@@ -6,8 +6,12 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzAssignmentEditView
+import com.ustadmobile.core.view.ContentEntryListView
+import com.ustadmobile.core.view.ContentEntryListViewMode
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -30,6 +34,8 @@ class ClazzAssignmentEditPresenter(context: Any,
     private lateinit var clazzAssignment : ClazzAssignment
     private lateinit var factory: DataSource.Factory<Int, ContentEntryWithMetrics>
     private var clazzUid: Long = 0L
+
+    private var allContent = DoorMutableLiveData<MutableList<ContentEntry>>(mutableListOf())
 
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -80,11 +86,16 @@ class ClazzAssignmentEditPresenter(context: Any,
         }
     }
 
-    /**
-     * Handle what happens when you click add Content button
-     */
-    fun handleClickAddContent(){
-        //TODO: Figure this
+    fun handleContentEntryAdded(contentEntry: ContentEntry){
+        //TODO: Update RV for the selected.
+
+        val currentList = allContent.getValue()
+        val newList = currentList?.toMutableList().also {
+            it?.add(contentEntry)
+        }?: mutableListOf<ContentEntry>()
+
+        allContent.sendValue(newList)
+
     }
 
 }

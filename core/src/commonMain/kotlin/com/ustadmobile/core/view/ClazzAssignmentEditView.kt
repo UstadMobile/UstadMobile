@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
@@ -10,6 +11,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
  */
 interface ClazzAssignmentEditView : UstadView {
 
+    var contentEntryList : DoorMutableLiveData<ContentEntry>?
 
     fun finish()
 
