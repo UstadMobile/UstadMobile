@@ -35,7 +35,7 @@ class ClazzAssignmentEditPresenter(context: Any,
     private lateinit var factory: DataSource.Factory<Int, ContentEntryWithMetrics>
     private var clazzUid: Long = 0L
 
-    private var allContent = DoorMutableLiveData<MutableList<ContentEntry>>(mutableListOf())
+    private var allContent = DoorMutableLiveData<MutableList<ContentEntryWithMetrics>>(mutableListOf())
 
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -66,7 +66,7 @@ class ClazzAssignmentEditPresenter(context: Any,
         factory = clazzAssignmentContentJoinDao.findContentByAssignmentUid(
                 clazzAssignment.clazzAssignmentUid)
         view.runOnUiThread(Runnable {
-            view.setListProvider(factory)
+            //view.setListProvider(factory)
         })
     }
 
@@ -87,12 +87,13 @@ class ClazzAssignmentEditPresenter(context: Any,
     }
 
     fun handleContentEntryAdded(contentEntry: ContentEntry){
-        //TODO: Update RV for the selected.
+
+        var contentEntryWithMetrics = ContentEntryWithMetrics(contentEntry)
 
         val currentList = allContent.getValue()
         val newList = currentList?.toMutableList().also {
-            it?.add(contentEntry)
-        }?: mutableListOf<ContentEntry>()
+            it?.add(contentEntryWithMetrics)
+        }?: mutableListOf<ContentEntryWithMetrics>()
 
         allContent.sendValue(newList)
 

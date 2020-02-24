@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter
 import android.widget.DatePicker
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
@@ -214,10 +215,14 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
         mRecyclerView?.adapter = recyclerAdapter
     }
 
-    override var contentEntryList: DoorMutableLiveData<ContentEntry>? = null
+    override var contentEntryList: DoorMutableLiveData<ContentEntryWithMetrics>? = null
         get() = field
         set(value) {
 
+            val recyclerAdapter = ContentEntryWithMetricsListRecyclerAdapter(DIFF_CALLBACK_CONTENT_WITH_METRICS)
+            value?.observe(this, Observer { list -> recyclerAdapter.submitList(listOf(list))})
+                    mRecyclerView?.adapter = recyclerAdapter
+                    field = value
         }
 
     override fun setClazzAssignment(clazzAssignment: ClazzAssignment) {
@@ -282,6 +287,22 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
 
             override fun areContentsTheSame(oldItem: ContentEntryWithMetrics,
                                             newItem: ContentEntryWithMetrics): Boolean {
+                return oldItem == newItem
+            }
+        }
+
+        /**
+         * The DIFF Callback.
+         */
+        val DIFF_CALLBACK_CONTENT: DiffUtil.ItemCallback<ContentEntry> = object
+            : DiffUtil.ItemCallback<ContentEntry>() {
+            override fun areItemsTheSame(oldItem: ContentEntry,
+                                         newItem: ContentEntry): Boolean {
+                return oldItem == newItem
+            }
+
+            override fun areContentsTheSame(oldItem: ContentEntry,
+                                            newItem: ContentEntry): Boolean {
                 return oldItem == newItem
             }
         }

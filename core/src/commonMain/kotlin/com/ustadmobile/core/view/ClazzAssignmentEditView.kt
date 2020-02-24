@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
  */
 interface ClazzAssignmentEditView : UstadView {
 
-    var contentEntryList : DoorMutableLiveData<ContentEntry>?
+    var contentEntryList : DoorMutableLiveData<ContentEntryWithMetrics>?
 
     fun finish()
 
