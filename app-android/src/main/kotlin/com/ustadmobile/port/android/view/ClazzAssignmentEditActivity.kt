@@ -121,6 +121,7 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
         //From, to
         val fromET = rootView?.activityClazzAssignmentEditStartDateEdittext
         val toET = rootView?.activityClazzAssignmentEditEndDateEdittext
+
         //Date preparation
         val myCalendarEnd = Calendar.getInstance()
         val myCalendarStart = Calendar.getInstance()
@@ -222,6 +223,15 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
     override fun setClazzAssignment(clazzAssignment: ClazzAssignment) {
         rootView?.clazzassignment = clazzAssignment
         rootView?.presenter = mPresenter
+
+        //From, to
+        val fromET = rootView?.activityClazzAssignmentEditStartDateEdittext
+        val toET = rootView?.activityClazzAssignmentEditEndDateEdittext
+
+        fromET?.setText(UMCalendarUtil.getPrettyDateFromLong(
+                rootView?.clazzassignment?.clazzAssignmentStartDate?:0L, null))
+        toET?.setText(UMCalendarUtil.getPrettyDateFromLong(
+                rootView?.clazzassignment?.clazzAssignmentDueDate?:0L, null))
     }
 
     override fun onDestroy() {
