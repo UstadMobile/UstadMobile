@@ -23,6 +23,7 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUST
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_PERSON_INSERT
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
@@ -136,8 +137,10 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
      * @param loggedInPerson    The person changed.
      */
     private fun handlePersonValueChanged(loggedInPerson: Person?) {
-        if (loggedInPerson != null)
-            view.showFAB(loggedInPerson.admin)
+        view.runOnUiThread(Runnable {
+            view.showFAB(loggedInPerson?.admin ?: false)
+        })
+
     }
 
     /**
@@ -147,7 +150,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
         val clazzDao = repository.clazzDao
         GlobalScope.launch {
             val result = clazzDao.personHasPermission(loggedInPersonUid!!, PERMISSION_PERSON_INSERT)
-            view.showFAB(result!!)
+            view.runOnUiThread(Runnable { view.showFAB(result) })
         }
     }
 

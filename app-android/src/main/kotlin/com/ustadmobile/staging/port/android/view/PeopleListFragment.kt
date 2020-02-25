@@ -116,11 +116,8 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView, SearchableListener
     }
 
     override fun showFAB(show: Boolean) {
-        runOnUiThread (Runnable{
-            fab?.visibility = if (show) View.VISIBLE else View.INVISIBLE
-            fab?.isEnabled = show
-        })
-
+        fab?.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        fab?.isEnabled = show
     }
 
     override fun updateSortSpinner(presets: Array<String?>) {
