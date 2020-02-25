@@ -203,12 +203,12 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
     @JsName("handleContentEntryClicked")
     fun handleContentEntryClicked(entry: ContentEntry) {
         val args = hashMapOf<String, String?>()
-        args.putAll(arguments)
         val entryUid = entry.contentEntryUid
         args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
         args.remove(ARG_FILTER_BUTTONS)
         args[ARG_NO_IFRAMES] = noIframe.toString()
         args[ARG_EDIT_BUTTONS_CONTROL_FLAG] = (EDIT_BUTTONS_ADD_CONTENT or EDIT_BUTTONS_EDITOPTION).toString()
+        args[ARG_LIBRARIES_CONTENT] = ""
         val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
         systemImpl.go(destView, args, context)
 
