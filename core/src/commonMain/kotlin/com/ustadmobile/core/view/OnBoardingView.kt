@@ -4,7 +4,7 @@ interface OnBoardingView : UstadView {
 
     fun setScreenList()
 
-    fun setLanguageOptions(languages: MutableList<String>)
+    fun setLanguageOptions(languages: List<String>)
 
     fun restartUI()
 

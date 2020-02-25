@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">لمسة الاستاذ</string>
+    <string name='default_str'>افتراضي</string>
     <string name="location_permission_title">مطلوب اذن للحصول على الموقع</string>
     <!--Content editor-->
     <string name="content_type_multimedia">وسائط متعددة (صوت و صورة)</string>
@@ -483,4 +484,10 @@
     <string name="people">الناس</string>
     <string name="feed">تغذية</string>
     <string name="node_title_list">قائمة عقد الإتصال</string>
+
+    <string name="onboarding_lamsustad_headline1">احصل على قصص تفاعلية لتقرأها مع طفلك</string>
+    <string name="onboarding_lamsustad_headline2">احصل على المزيد من الألعاب لتشارك طفلك متعة اللعب بها</string>
+    <string name="onboarding_lamsustad_headline3">جميع القصص والألعاب مصممة لتدعيم المنهاج المدرسي الذي يدرسه الطفل بالمدرسة</string>
+    <string name="emptyspace"> </string>
+
 </resources>

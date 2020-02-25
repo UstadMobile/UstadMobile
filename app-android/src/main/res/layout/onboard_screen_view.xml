@@ -19,7 +19,7 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:textColor="@color/text_primary"
         android:gravity="center"
-        android:minHeight="@dimen/dimen_30dp"
+        android:minHeight="60dp"
         android:layout_above="@+id/sub_heading"
         android:id="@+id/heading"
         android:autoSizeTextType="uniform"

@@ -1,19 +1,22 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.OnBoardingView.Companion.PREF_TAG
 
-class OnBoardingPresenter(context: Any, arguments: Map<String, String>?, view: OnBoardingView, val impl: UstadMobileSystemImpl) :
-        UstadBaseController<OnBoardingView>(context, arguments!!, view) {
+class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: OnBoardingView, val impl: UstadMobileSystemImpl) :
+        UstadBaseController<OnBoardingView>(context, arguments, view) {
 
-    private val languageOptions = impl.getAllUiLanguage(context)
+    private lateinit var  languageOptions: List<Pair<String, String>>
 
     override fun onCreate(savedState: Map<String, String?> ?) {
         super.onCreate(savedState)
 
-        view.setLanguageOptions(languageOptions.values.sorted().toMutableList())
+        languageOptions = impl.getUiLanguageOptions(context)
+
+        view.setLanguageOptions(languageOptions.map { it.second} )
         view.setScreenList()
 
         val wasShown = impl.getAppPref(PREF_TAG, view.viewContext)
@@ -30,18 +33,12 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>?, view: O
     }
 
     fun handleLanguageSelected(position: Int){
-        val languageName = languageOptions.values.sorted().toMutableList()[position]
-        val localeCode = getLocaleCode(languageName)
-        if(impl.getDisplayedLocale(context) != localeCode){
+        val localeCode = languageOptions[position].first
+        //val localeCode = getLocaleCode(languageName)
+        if(position > 0 && impl.getDisplayedLocale(context) != localeCode){
             impl.setLocale(localeCode, context)
             view.restartUI()
         }
     }
 
-    private fun getLocaleCode(name: String): String{
-        for(pair in languageOptions){
-            if(name == pair.value) return pair.key
-        }
-        return "en"
-    }
 }

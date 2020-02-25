@@ -3,6 +3,7 @@
     <string name="app_name">Lamsustad</string>
     <string name='login'>Login</string>
     <string name='error'>Error</string>
+    <string name='default_str'>Default</string>
     <string name='err_registering_new_user'>Error registering new user:</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
     <string name="register_incorrect_email">Wrong email address</string>
@@ -789,4 +790,9 @@ Voice of America\n
 \n
 Content is provided under license by external content providers. Ustad Mobile, unless explicitly mentioned otherwise, is not endorsed by any such content provider.</string>
 
+
+    <string name="onboarding_lamsustad_headline1">Receive interactive stories to read with your child</string>
+    <string name="onboarding_lamsustad_headline2">Receive extra activities to play to play with your child</string>
+    <string name="onboarding_lamsustad_headline3">All stories and activities are designed to reinforce what your child is learning at school!</string>
+    <string name="emptyspace"> </string>
 </resources>

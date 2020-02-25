@@ -11,6 +11,7 @@ import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
 import kotlin.js.JsName
 import kotlin.jvm.JvmOverloads
+import com.ustadmobile.core.generated.locale.MessageID
 
 /**
  * Class has all the shared function across all supported platforms
@@ -199,6 +200,8 @@ open abstract class UstadMobileSystemCommon {
     @JsName("getSystemLocale")
     abstract fun getSystemLocale(context: Any): String
 
+    abstract fun getString(messageId: Int, context: Any): String
+
 
     /**
      * Provides the language code of the currently active locale. This is different to getLocale. If
@@ -230,6 +233,19 @@ open abstract class UstadMobileSystemCommon {
                     UstadMobileConstants.LANGUAGE_NAMES["en"]!!
         }
         return languageMap
+    }
+
+    /**
+     * Get a list of UI language options (including the option to use the system's UI language)
+     */
+    open fun getUiLanguageOptions(context: Any): List<Pair<String, String>> {
+        val languageList = listOf("") + getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
+                "",context)!!.split(",").sorted()
+        return languageList.map { it to if(it == "") {
+            getString(MessageID.default_str, context)
+        }else {
+            UstadMobileConstants.LANGUAGE_NAMES[it] ?: it
+        } }
     }
 
 

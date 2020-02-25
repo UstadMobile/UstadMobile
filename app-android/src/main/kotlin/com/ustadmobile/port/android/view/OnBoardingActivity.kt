@@ -38,12 +38,15 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
      */
     private enum class OnBoardScreen(val headlineStringResId: Int, val subHeadlineStringResId: Int,
                                      val layoutResId: Int, val drawableResId: Int){
-        SCREEN_1(R.string.onboarding_no_internet_headline,
-                R.string.onboarding_no_internet_subheadline,
-                R.layout.onboard_screen_view, R.drawable.downloading_data),
-        SCREEN_2(R.string.onboarding_offline_sharing,
-                R.string.onboarding_offline_sharing_subheading,
-                R.layout.onboard_screen_view, R.drawable.sharing_data)
+        SCREEN_1(R.string.onboarding_lamsustad_headline1,
+                R.string.emptyspace,
+                R.layout.onboard_screen_view, R.drawable.ic_story),
+        SCREEN_2(R.string.onboarding_lamsustad_headline2,
+                R.string.emptyspace,
+                R.layout.onboard_screen_view, R.drawable.ic_mobile_like),
+        SCREEN_3(R.string.onboarding_lamsustad_headline3,
+            R.string.emptyspace,
+            R.layout.onboard_screen_view, R.drawable.ic_noun_blended_learning_1561442)
     }
 
 
@@ -89,14 +92,14 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
         presenter = OnBoardingPresenter(this,
                 bundleToMap(intent.extras), this, UstadMobileSystemImpl.instance)
-        presenter!!.onCreate(bundleToMap(savedInstanceState))
-        pageIndicatorView!!.setAnimationType(AnimationType.WORM)
+        presenter?.onCreate(bundleToMap(savedInstanceState))
+        pageIndicatorView?.setAnimationType(AnimationType.WORM)
 
-        getStartedBtn!!.setOnClickListener { presenter!!.handleGetStarted() }
+        getStartedBtn?.setOnClickListener { presenter?.handleGetStarted() }
 
     }
 
-    override fun setLanguageOptions(languages: MutableList<String>) {
+    override fun setLanguageOptions(languages: List<String>) {
         val adapter = ArrayAdapter(this,android.R.layout.simple_spinner_item, languages)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         languageOptions.adapter = adapter
