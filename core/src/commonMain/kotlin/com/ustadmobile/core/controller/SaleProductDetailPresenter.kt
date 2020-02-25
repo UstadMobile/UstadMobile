@@ -41,6 +41,7 @@ class SaleProductDetailPresenter(context: Any,
     internal var repository: UmAppDatabase
     private val saleProductDao: SaleProductDao
     private val productParentJoinDao: SaleProductParentJoinDao
+    private val productParentJoinDaoDb: SaleProductParentJoinDao
     private val impl: UstadMobileSystemImpl
     var currentSaleProduct: SaleProduct? = null
         private set
@@ -66,6 +67,7 @@ class SaleProductDetailPresenter(context: Any,
         //Get provider Dao
         saleProductDao = repository.saleProductDao
         productParentJoinDao = repository.saleProductParentJoinDao
+        productParentJoinDaoDb = UmAccountManager.getActiveDatabase(context).saleProductParentJoinDao
         pictureDao = UmAccountManager.getRepositoryForActiveAccount(context).saleProductPictureDao
 
         impl = UstadMobileSystemImpl.instance
@@ -152,7 +154,7 @@ class SaleProductDetailPresenter(context: Any,
         }
 
         //Update provider:
-        categoriesProvider = productParentJoinDao.findAllSelectedCategoriesForSaleProductProvider(
+        categoriesProvider = productParentJoinDaoDb.findAllSelectedCategoriesForSaleProductProvider(
                 itemUid)
         GlobalScope.launch(Dispatchers.Main) {
             view.runOnUiThread(Runnable {
@@ -166,7 +168,9 @@ class SaleProductDetailPresenter(context: Any,
             val productPicture =
                     pictureDao.findBySaleProductUidAsync2(currentSaleProduct!!.saleProductUid)
             if (productPicture != null) {
-                view.updateImageOnView(pictureDao.getAttachmentPath(productPicture)!!)
+                view.runOnUiThread(Runnable {
+                    view.updateImageOnView(pictureDao.getAttachmentPath(productPicture)!!)
+                })
             }
         }
 

@@ -39,26 +39,11 @@ class SaleProductCategorySelectorRecyclerAdapter internal constructor(
         val checkBox = holder.itemView.findViewById<CheckBox>(R.id.item_category_selector_checkbox)
 
         val currentLocale = impl.getLocale(theContext)
-        var saleProductNameLocale: String?=null
-
-        if(currentLocale.equals("fa")){
-            saleProductNameLocale = saleProductCategory!!.saleProductNameDari
-        }else if(currentLocale.equals("ps")){
-            saleProductNameLocale = saleProductCategory!!.saleProductNamePashto
-        }else{
-            saleProductNameLocale = saleProductCategory!!.saleProductName
-        }
-        if(saleProductNameLocale == null && saleProductCategory.saleProductName != null) {
-            saleProductNameLocale = saleProductCategory.saleProductName
-        }else if(saleProductNameLocale!!.isEmpty()){
-            saleProductNameLocale = saleProductCategory.saleProductName
-        }
-
-
-        checkBox.text = saleProductNameLocale
+        checkBox.text = saleProductCategory!!.getNameLocale(currentLocale)
         checkBox.isChecked = saleProductCategory.isSelected
 
-        checkBox.setOnCheckedChangeListener { buttonView, isChecked -> mPresenter.handleCheckboxChanged(isChecked, saleProductCategory.saleProductUid) }
+        checkBox.setOnCheckedChangeListener { _, isChecked ->
+            mPresenter.handleCheckboxChanged(isChecked, saleProductCategory.saleProductUid) }
     }
 
     inner class SaleProductDetailViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

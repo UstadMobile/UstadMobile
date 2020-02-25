@@ -230,9 +230,10 @@ open class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailVie
 
     override fun setListProvider(factory: DataSource.Factory<Int, SaleProductSelected>) {
         val recyclerAdapter = SaleProductCategorySelectorRecyclerAdapter(DIFF_CALLBACK, mPresenter!!,
-                this)
+                applicationContext)
 
-        val data = factory.asRepositoryLiveData(UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductParentJoinDao)
+        val data = factory.asRepositoryLiveData(
+                UmAccountManager.getRepositoryForActiveAccount(applicationContext!!).saleProductParentJoinDao)
 
         //Observe the data:
         data.observe(this,
@@ -284,20 +285,10 @@ open class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailVie
             var saleProductNameLocale: String ? = null
 
             val currentLocale = impl.getLocale(this)
-
-            if(currentLocale.equals("fa")){
-                saleProductNameLocale = saleProduct.saleProductNameDari
-            }else if(currentLocale.equals("ps")){
-                saleProductNameLocale = saleProduct.saleProductNamePashto
-            }else{
-                saleProductNameLocale = saleProduct.saleProductName
-            }
-            if(saleProductNameLocale == null && saleProduct.saleProductName != null) {
-                saleProductNameLocale = saleProduct.saleProductName
-            }
+            saleProductNameLocale = saleProduct.getNameLocale(currentLocale)
 
             if(!isNew) {
-                updateToolbarTitle(saleProductNameLocale!!)
+                updateToolbarTitle(saleProductNameLocale)
             }
         }
     }
@@ -529,7 +520,8 @@ open class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailVie
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleProductSelected> = object : DiffUtil.ItemCallback<SaleProductSelected>() {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleProductSelected> = object
+            : DiffUtil.ItemCallback<SaleProductSelected>() {
             override fun areItemsTheSame(oldItem: SaleProductSelected,
                                          newItem: SaleProductSelected): Boolean {
                 return oldItem == newItem
