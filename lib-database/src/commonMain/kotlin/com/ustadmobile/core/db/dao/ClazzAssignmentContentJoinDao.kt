@@ -6,8 +6,8 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.db.entities.ClazzAssignmentContentEntryJoinWithContentEntry
 import com.ustadmobile.lib.db.entities.ClazzAssignmentContentJoin
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
 
 @UmDao
@@ -37,6 +37,15 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
         AND CAST(clazzAssignmentContentJoinInactive AS INTEGER) = 0""")
     abstract fun findContentByAssignmentUid(clazzAssignmentUid: Long)
             : DataSource.Factory<Int, ContentEntryWithMetrics>
+
+    @Query("""
+        SELECT ClazzAssignmentContentJoin.*, ContentEntry.* FROM ClazzAssignmentContentJoin 
+        LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = ClazzAssignmentContentJoin.clazzAssignmentContentJoinContentUid
+        WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid 
+        AND CAST(clazzAssignmentContentJoinInactive AS INTEGER) = 0
+    """)
+    abstract suspend fun findContentEntryJoinWithContentByAssignment(clazzAssignmentUid: Long)
+        : List<ClazzAssignmentContentEntryJoinWithContentEntry>
 
     @Update
     abstract suspend fun updateAsync(entity: ClazzAssignmentContentJoin): Int

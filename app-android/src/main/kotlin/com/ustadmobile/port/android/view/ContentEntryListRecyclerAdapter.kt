@@ -2,21 +2,19 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemContentWithMetricsBinding
-import com.ustadmobile.core.controller.ClazzAssignmentDetailAssignmentPresenter
-import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
+import com.toughra.ustadmobile.databinding.ItemContentEntryBinding
+import com.ustadmobile.lib.db.entities.ClazzAssignmentContentEntryJoinWithContentEntry
 
-class ContentEntryWithMetricsListRecyclerAdapter(
-        diffCallback: DiffUtil.ItemCallback<ContentEntryWithMetrics>)
-    : ListAdapter<ContentEntryWithMetrics,
-        ContentEntryWithMetricsListRecyclerAdapter.ClazzAssignmentListViewHolder>(diffCallback) {
+class ContentEntryListRecyclerAdapter(
+        diffCallback: DiffUtil.ItemCallback<ClazzAssignmentContentEntryJoinWithContentEntry>)
+    : ListAdapter<ClazzAssignmentContentEntryJoinWithContentEntry,
+        ContentEntryListRecyclerAdapter.ClazzAssignmentListViewHolder>(diffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzAssignmentListViewHolder {
-        val clazzAssignmentListBinding = ItemContentWithMetricsBinding.inflate(
+        val clazzAssignmentListBinding = ItemContentEntryBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
 
         return ClazzAssignmentListViewHolder(clazzAssignmentListBinding)
@@ -26,11 +24,11 @@ class ContentEntryWithMetricsListRecyclerAdapter(
     override fun onBindViewHolder(holder: ClazzAssignmentListViewHolder, position: Int) {
 
         val entity = getItem(position)
-        holder.binding.contententrywithmetrics = entity
+        holder.binding.contententry = entity.contentEntry
     }
 
     inner class ClazzAssignmentListViewHolder
-    internal constructor(val binding: ItemContentWithMetricsBinding)
+    internal constructor(val binding: ItemContentEntryBinding)
         : RecyclerView.ViewHolder(binding.root)
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

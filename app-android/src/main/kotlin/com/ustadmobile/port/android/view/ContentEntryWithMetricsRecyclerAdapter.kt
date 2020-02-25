@@ -5,8 +5,7 @@ import android.view.ViewGroup
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemContentWithMetricsBinding
-import com.ustadmobile.core.controller.ClazzAssignmentDetailAssignmentPresenter
+import com.toughra.ustadmobile.databinding.ItemContentEntryWithMetricsBinding
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
 
 class ContentEntryWithMetricsRecyclerAdapter(
@@ -15,7 +14,7 @@ class ContentEntryWithMetricsRecyclerAdapter(
         ContentEntryWithMetricsRecyclerAdapter.ClazzAssignmentListViewHolder>(diffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzAssignmentListViewHolder {
-        val clazzAssignmentListBinding = ItemContentWithMetricsBinding.inflate(
+        val clazzAssignmentListBinding = ItemContentEntryWithMetricsBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
 
         return ClazzAssignmentListViewHolder(clazzAssignmentListBinding)
@@ -29,7 +28,7 @@ class ContentEntryWithMetricsRecyclerAdapter(
     }
 
     inner class ClazzAssignmentListViewHolder
-    internal constructor(val binding: ItemContentWithMetricsBinding)
+    internal constructor(val binding: ItemContentEntryWithMetricsBinding)
         : RecyclerView.ViewHolder(binding.root)
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

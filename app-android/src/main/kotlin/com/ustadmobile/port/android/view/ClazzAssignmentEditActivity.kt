@@ -11,11 +11,7 @@ import android.widget.ArrayAdapter
 import android.widget.DatePicker
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
-import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,11 +30,8 @@ import com.ustadmobile.core.view.ContentEntryListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.ClazzAssignmentContentEntryJoinWithContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.*
 import kotlin.collections.HashMap
@@ -88,8 +81,7 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
         val adapter = ArrayAdapter(this,
                 R.layout.item_simple_spinner_gray, options)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        rootView?.activityClazzAssignmentEditGradingSpinner?.adapter = adapter
-        rootView?.activityClazzAssignmentEditGradingSpinner?.setSelection(0)
+
     }
 
     private fun handleClickDone(){
@@ -105,7 +97,7 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
         //Toolbar:
         toolbar = rootView?.activityClazzAssignmentEditToolbar
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         //Presets
         setGroupSpinner()
@@ -128,7 +120,7 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
         val myCalendarStart = Calendar.getInstance()
 
         //START DATE:
-        fromET!!.isFocusable = false
+        fromET?.isFocusable = false
 
         val startDateListener = { view: DatePicker, year: Int, month:Int, dayOfMonth: Int ->
             myCalendarStart.set(Calendar.YEAR, year)
@@ -140,10 +132,13 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
             rootView?.activityClazzAssignmentEditStartDateEdittextVal?.setText(startDate.toString())
 
             if (startDate == 0L) {
-                fromET.setText("-")
+                if (fromET != null) {
+                    fromET.setText("-")
+                }
             } else {
-                fromET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(startDate,
-                        null))
+                if (fromET != null) {
+                    fromET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(startDate,                            null))
+                }
             }
         }
 
@@ -152,12 +147,11 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
                 this, startDateListener, myCalendarStart.get(Calendar.YEAR),
                 myCalendarStart.get(Calendar.MONTH), myCalendarStart.get(Calendar.DAY_OF_MONTH))
 
-        fromET.setOnClickListener { v -> startDatePicker.show() }
+        fromET?.setOnClickListener { v -> startDatePicker.show() }
 
 
         //END DATE:
-
-        toET!!.isFocusable = false
+        toET?.isFocusable = false
 
         //Date pickers's on click listener - sets text
         val endDateListener = { view: DatePicker, year: Int, month:Int, dayOfMonth:Int ->
@@ -169,9 +163,13 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
             rootView?.activityClazzAssignmentEditEndDateEdittextVal?.setText(endDate.toString())
 
             if (endDate == 0L) {
-                toET.setText("-")
+                if (toET != null) {
+                    toET.setText("-")
+                }
             } else {
-                toET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(endDate, null))
+                if (toET != null) {
+                    toET.setText(UMCalendarUtil.getPrettyDateSuperSimpleFromLong(endDate, null))
+                }
             }
         }
 
@@ -180,12 +178,12 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
                 this, endDateListener, myCalendarEnd.get(Calendar.YEAR),
                 myCalendarEnd.get(Calendar.MONTH), myCalendarEnd.get(Calendar.DAY_OF_MONTH))
 
-        toET.setOnClickListener { v -> endDatePicker.show() }
+        toET?.setOnClickListener { v -> endDatePicker.show() }
 
         //Call the Presenter
         mPresenter = ClazzAssignmentEditPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+        mPresenter?.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         rootView?.setLifecycleOwner(this)
     }
@@ -201,26 +199,11 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
         return true
     }
 
-    override fun setListProvider(factory: DataSource.Factory<Int, ContentEntryWithMetrics>) {
-        val recyclerAdapter = ContentEntryWithMetricsRecyclerAdapter(DIFF_CALLBACK_CONTENT_WITH_METRICS)
-
-        // a warning is expected.
-        val data = LivePagedListBuilder(factory, 20).build()
-        //Observe the data:
-        val thisP = this
-        GlobalScope.launch(Dispatchers.Main) {
-            data.observe(thisP,
-                    Observer<PagedList<ContentEntryWithMetrics>> { recyclerAdapter.submitList(it) })
-        }
-        mRecyclerView?.adapter = recyclerAdapter
-    }
-
-    override var contentEntryList: DoorMutableLiveData<ContentEntryWithMetrics>? = null
+    override var contentEntryList: DoorMutableLiveData<List<ClazzAssignmentContentEntryJoinWithContentEntry>>? = null
         get() = field
         set(value) {
-
-            val recyclerAdapter = ContentEntryWithMetricsListRecyclerAdapter(DIFF_CALLBACK_CONTENT_WITH_METRICS)
-            value?.observe(this, Observer { list -> recyclerAdapter.submitList(listOf(list))})
+            val recyclerAdapter = ContentEntryListRecyclerAdapter(DIFF_CALLBACK_CONTENT_ENTRY_JOIN_WITH_CONTENT_ENTRY)
+            value?.observe(this, Observer { list -> recyclerAdapter.submitList(list)})
                     mRecyclerView?.adapter = recyclerAdapter
                     field = value
         }
@@ -233,10 +216,19 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
         val fromET = rootView?.activityClazzAssignmentEditStartDateEdittext
         val toET = rootView?.activityClazzAssignmentEditEndDateEdittext
 
-        fromET?.setText(UMCalendarUtil.getPrettyDateFromLong(
-                rootView?.clazzassignment?.clazzAssignmentStartDate?:0L, null))
-        toET?.setText(UMCalendarUtil.getPrettyDateFromLong(
-                rootView?.clazzassignment?.clazzAssignmentDueDate?:0L, null))
+        if (rootView?.clazzassignment?.clazzAssignmentStartDate ?: 0L > 0L) {
+            fromET?.setText(UMCalendarUtil.getPrettyDateFromLong(
+                    rootView?.clazzassignment?.clazzAssignmentStartDate ?: 0L, null))
+        } else {
+            fromET?.setText("-")
+        }
+
+        if (rootView?.clazzassignment?.clazzAssignmentDueDate ?: 0L > 0L) {
+            toET?.setText(UMCalendarUtil.getPrettyDateFromLong(
+                    rootView?.clazzassignment?.clazzAssignmentDueDate ?: 0L, null))
+        } else {
+            toET?.setText("-")
+        }
     }
 
     override fun onDestroy() {
@@ -250,7 +242,7 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
     /**
      * Handle what happens when you click add Content button
      */
-    fun handleClickAddContent(){
+    private fun handleClickAddContent(){
         val args = mapOf(
                 ContentEntryListView.ARG_VIEWMODE to  ContentEntryListViewMode.PICKER.toString(),
                 UstadView.ARG_CONTENT_ENTRY_UID to HomePresenter.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
@@ -278,15 +270,15 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
         /**
          * The DIFF Callback.
          */
-        val DIFF_CALLBACK_CONTENT_WITH_METRICS: DiffUtil.ItemCallback<ContentEntryWithMetrics> = object
-            : DiffUtil.ItemCallback<ContentEntryWithMetrics>() {
-            override fun areItemsTheSame(oldItem: ContentEntryWithMetrics,
-                                         newItem: ContentEntryWithMetrics): Boolean {
+        val DIFF_CALLBACK_CONTENT_ENTRY_JOIN_WITH_CONTENT_ENTRY: DiffUtil.ItemCallback<ClazzAssignmentContentEntryJoinWithContentEntry> = object
+            : DiffUtil.ItemCallback<ClazzAssignmentContentEntryJoinWithContentEntry>() {
+            override fun areItemsTheSame(oldItem: ClazzAssignmentContentEntryJoinWithContentEntry,
+                                         newItem: ClazzAssignmentContentEntryJoinWithContentEntry): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: ContentEntryWithMetrics,
-                                            newItem: ContentEntryWithMetrics): Boolean {
+            override fun areContentsTheSame(oldItem: ClazzAssignmentContentEntryJoinWithContentEntry,
+                                            newItem: ClazzAssignmentContentEntryJoinWithContentEntry): Boolean {
                 return oldItem == newItem
             }
         }

@@ -121,11 +121,14 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
                 personPictureDao.update(existingPP)
 
                 //Update person and generate feeds for person
-                personDao.updatePersonAsync(loggedInPerson!!, loggedInPersonUid)
+                if(loggedInPerson != null) {
+                    val person = loggedInPerson?:Person()
+                    personDao.updatePersonAsync(person, loggedInPersonUid)
+                }
 
                 //Update view with path
-                val picturePath = personPictureDao.getAttachmentPath(existingPP)
-                view.updateImageOnView(picturePath!!, true)
+                val picturePath = personPictureDao.getAttachmentPath(existingPP)?:""
+                view.updateImageOnView(picturePath, true)
             }catch(e:Exception){
                 throw e
             }

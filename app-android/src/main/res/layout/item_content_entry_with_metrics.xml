@@ -62,6 +62,7 @@
             android:layout_width="0dp"
             android:visibility="visible"
             tools:progress="77"
+            android:progress="@{0+(int)contententrywithmetrics.contentEntryWithMetricsProgress}"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="@+id/item_clazz_assignment_with_metrics_thumbnail"
             app:layout_constraintEnd_toEndOf="@+id/item_clazz_assignment_with_metrics_thumbnail"

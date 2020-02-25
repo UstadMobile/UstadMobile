@@ -1,26 +1,17 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
+import com.ustadmobile.lib.db.entities.ClazzAssignmentContentEntryJoinWithContentEntry
 
 /**
  * Core View. Screen is for ClazzAssignmentEdit's View
  */
 interface ClazzAssignmentEditView : UstadView {
 
-    var contentEntryList : DoorMutableLiveData<ContentEntryWithMetrics>?
+    var contentEntryList : DoorMutableLiveData<List<ClazzAssignmentContentEntryJoinWithContentEntry>>?
 
     fun finish()
-
-    /**
-     * Sets the given provider to the view's provider adapter.
-     *
-     * @param factory The factory to set to the view
-     */
-    fun setListProvider(factory: DataSource.Factory<Int, ContentEntryWithMetrics>)
 
     fun setClazzAssignment(clazzAssignment: ClazzAssignment)
 
