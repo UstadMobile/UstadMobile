@@ -51,7 +51,6 @@ open class Clazz() {
     @LastChangedBy
     var clazzLastChangedBy: Int = 0
 
-
     fun isAttendanceFeature() : Boolean{
         return clazzFeatures and CLAZZ_FEATURE_ATTENDANCE > 0
     }
@@ -64,23 +63,53 @@ open class Clazz() {
     fun isAssignmentFeature() : Boolean{
         return clazzFeatures and CLAZZ_FEATURE_ASSIGNMENT > 0
     }
-    //TODO:
-    fun updateAttendanceFeature(enabled: Boolean){
-        if(enabled){
 
+    fun updateAttendanceFeature(enabled: Boolean){
+        if(!isAttendanceFeature()){
+            if(enabled){
+                clazzFeatures = clazzFeatures or CLAZZ_FEATURE_ATTENDANCE
+            }
+        }else{
+            if(!enabled){
+                clazzFeatures = clazzFeatures xor CLAZZ_FEATURE_ATTENDANCE
+            }
         }
     }
-    //TODO
+
     fun updateSelFeature(enabled: Boolean){
-
+        if(!isSelFeature()){
+            if(enabled){
+                clazzFeatures = clazzFeatures or CLAZZ_FEATURE_SEL
+            }
+        }else{
+            if(!enabled){
+                clazzFeatures = clazzFeatures xor CLAZZ_FEATURE_SEL
+            }
+        }
     }
-    //TODO
+
     fun updateActivityFeature(enabled: Boolean){
-
+        if(!isActivityFeature()){
+            if(enabled){
+                clazzFeatures = clazzFeatures or CLAZZ_FEATURE_ACTIVITY
+            }
+        }else{
+            if(!enabled){
+                clazzFeatures = clazzFeatures xor CLAZZ_FEATURE_ACTIVITY
+            }
+        }
     }
-    //TODO
-    fun updateAssignmentFeature(enabled: Boolean){
 
+    fun updateAssignmentFeature(enabled: Boolean){
+        if(!isAssignmentFeature()){
+            if(enabled){
+                clazzFeatures = clazzFeatures or CLAZZ_FEATURE_ASSIGNMENT
+            }
+        }else{
+            if(!enabled){
+                clazzFeatures = clazzFeatures xor CLAZZ_FEATURE_ASSIGNMENT
+            }
+        }
     }
 
     constructor(clazzName: String) : this() {

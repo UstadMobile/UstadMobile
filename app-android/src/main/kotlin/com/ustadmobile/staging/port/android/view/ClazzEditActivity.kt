@@ -423,6 +423,13 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
             }
             featuresText = featuresText + addComma + " " + getText(R.string.sel_caps)
         }
+        if (updatedClazz.isAttendanceFeature()) {
+            var addComma = ""
+            if (featuresText != "") {
+                addComma = ","
+            }
+            featuresText = featuresText + addComma + " " + getText(R.string.attendance)
+        }
         featuresTextView!!.text = featuresText
 
         val finalClazzName = clazzName
@@ -604,6 +611,14 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
                 addComma = ","
             }
             featuresText = featuresText + addComma + " " + getText(R.string.sel_caps)
+        }
+
+        if(clazz.isAssignmentFeature()){
+            var addComma = ""
+            if (featuresText != "") {
+                addComma = ","
+            }
+            featuresText = featuresText  + addComma + " " + getText(R.string.assignments)
         }
         featuresTextView!!.text = featuresText
         mPresenter!!.updateFeatures(clazz)

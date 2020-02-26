@@ -74,19 +74,7 @@ SelectClazzFeaturesView) : UstadBaseController<SelectClazzFeaturesView>(context,
     }
 
     fun updateAttendanceFeature(enabled: Boolean) {
-        if(!currentClazz!!.isAttendanceFeature()){
-            if(enabled){
-                currentClazz!!.clazzFeatures =
-                        currentClazz!!.clazzFeatures or CLAZZ_FEATURE_ATTENDANCE
-            }
-        }else{
-            if(!enabled){
-                //remove: TODO
-            }
-        }
-
-        //currentClazz!!.isAttendanceFeature = enabled
-
+        currentClazz?.updateAttendanceFeature(enabled)
     }
 
     fun updateActivityFeature(enabled: Boolean) {

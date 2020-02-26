@@ -35,7 +35,7 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
     private lateinit var toolbar: Toolbar
     private lateinit var mTabLayout: TabLayout
     private lateinit var mPresenter: ClazzDetailPresenter
-    internal var currentClazzUid: Long = 0
+    internal var currentClazzUid: Long = 0L
     private var attendanceVisibility: Boolean = false
     private var activityVisibility: Boolean = false
     private var selVisibility: Boolean = false
@@ -89,13 +89,13 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
             mTabLayout.setupWithViewPager(mPager)
 
             mTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-                override fun onTabSelected(tab: TabLayout.Tab?) {
+                override fun onTabSelected(tab: TabLayout.Tab) {
                     if(previousPosition < 1) {
-                        previousPosition = tab!!.position
+                        previousPosition = tab.position
                     }
                 }
-                override fun onTabUnselected(tab: TabLayout.Tab?) {}
-                override fun onTabReselected(tab: TabLayout.Tab?) {}
+                override fun onTabUnselected(tab: TabLayout.Tab) {}
+                override fun onTabReselected(tab: TabLayout.Tab) {}
             })
 
             if(previousPosition != -1){
@@ -118,15 +118,12 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
         //Setting layout:
         setContentView(R.layout.activity_clazz_detail)
 
-        if (intent!!.extras!!.get(ARG_CLAZZ_UID) is String) {
-            currentClazzUid = intent.getStringExtra(ARG_CLAZZ_UID).toString().toLong()
-        } else {
-            currentClazzUid = intent.getLongExtra(ARG_CLAZZ_UID, 0L)
+        if (intent?.extras?.containsKey(ARG_CLAZZ_UID) == true) {
+            currentClazzUid = intent.extras?.get(ARG_CLAZZ_UID).toString().toLong()
         }
-
         toolbar = findViewById(R.id.class_detail_toolbar)
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         //Presenter
         mPresenter = ClazzDetailPresenter(this,
@@ -253,9 +250,9 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
                 } else if (fragClass == ClazzLogListFragment::class.java) {
                     ClazzLogListFragment.newInstance(bundle)
                 } else if (fragClass == ClazzActivityListFragment::class.java) {
-                    ClazzActivityListFragment.newInstance(bundle) as Fragment
+                    ClazzActivityListFragment.newInstance(bundle)
                 } else if (fragClass == SELAnswerListFragment::class.java) {
-                    SELAnswerListFragment.newInstance(bundle) as Fragment
+                    SELAnswerListFragment.newInstance(bundle)
                 } else if (fragClass == ClazzAssignmentListFragment::class.java){
                     ClazzAssignmentListFragment.newInstance(bundle) as Fragment
                 } else {
@@ -273,15 +270,15 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
         override fun getPageTitle(position: Int): CharSequence {
             val fragClass = fragPosMap[position]
             return if (fragClass == ClazzStudentListFragment::class.java) {
-                (getText(R.string.students_literal) as String).toUpperCase()
+                (getText(R.string.students_literal) as String).toUpperCase(Locale.getDefault())
             } else if (fragClass == ClazzLogListFragment::class.java) {
-                (getText(R.string.attendance) as String).toUpperCase()
+                (getText(R.string.attendance) as String).toUpperCase(Locale.getDefault())
             } else if (fragClass == ClazzActivityListFragment::class.java) {
-                (getText(R.string.activity) as String).toUpperCase()
+                (getText(R.string.activity) as String).toUpperCase(Locale.getDefault())
             } else if (fragClass == SELAnswerListFragment::class.java) {
-                (getText(R.string.sel) as String).toUpperCase()
+                (getText(R.string.sel) as String).toUpperCase(Locale.getDefault())
             } else if (fragClass == ClazzAssignmentListFragment::class.java){
-                (getText(R.string.assignments) as String).toUpperCase()
+                (getText(R.string.assignments) as String).toUpperCase(Locale.getDefault())
             } else {
                 ""
             }

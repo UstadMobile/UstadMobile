@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.ClazzEditView.Companion.ARG_SCHEDULE_UID
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.SelectClazzFeaturesView
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_ACTIVITY_ENABLED
+import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_ASSIGNMENT_ENABLED
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_ATTENDANCE_ENABLED
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_CLAZZUID
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_SEL_ENABLED
@@ -650,6 +651,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         args[CLAZZ_FEATURE_ATTENDANCE_ENABLED] = if (mUpdatedClazz!!.isAttendanceFeature()) "yes" else "no"
         args[CLAZZ_FEATURE_ACTIVITY_ENABLED] = if (mUpdatedClazz!!.isActivityFeature()) "yes" else "no"
         args[CLAZZ_FEATURE_SEL_ENABLED] = if (mUpdatedClazz!!.isSelFeature()) "yes" else "no"
+        args[CLAZZ_FEATURE_ASSIGNMENT_ENABLED] = if (mUpdatedClazz!!.isAssignmentFeature()) "yes" else "no"
         impl.go(SelectClazzFeaturesView.VIEW_NAME, args, context)
     }
 

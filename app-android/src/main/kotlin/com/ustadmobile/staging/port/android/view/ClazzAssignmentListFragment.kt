@@ -49,7 +49,6 @@ class ClazzAssignmentListFragment : UstadBaseFragment(), ClazzAssignmentListView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        //val rootContainer = inflater.inflate(R.layout.fragment_clazz_assignment_list, container, false)
 
         rootContainer = FragmentClazzAssignmentListBinding.inflate(
                 LayoutInflater.from(context), container, false)
