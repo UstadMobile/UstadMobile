@@ -4,6 +4,7 @@ package com.ustadmobile.core.controller
 //import com.ustadmobile.core.controller.ReportOptionsDetailPresenter.convertCSVStringToLongList
 import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectMultiplePeopleView
 import com.ustadmobile.core.view.SelectMultiplePeopleView.Companion.ARG_SELECTED_PEOPLE
 import com.ustadmobile.lib.db.entities.Person
@@ -36,16 +37,14 @@ class SelectMultiplePeoplePresenter(context: Any, arguments: Map<String, String>
     }
 
     fun addToPeople(person: Person) {
-        val personName = person.firstNames + " " +
-                person.lastName
+        val personName = person.fullName(UstadMobileSystemImpl.instance.getLocale(context))
         if (!people!!.containsKey(personName)) {
             people!![personName] = person.personUid
         }
     }
 
     fun removePeople(person: Person) {
-        val personName = person.firstNames + " " +
-                person.lastName
+        val personName = person.fullName(UstadMobileSystemImpl.instance.getLocale(context))
         if (people!!.containsKey(personName)) {
             people!!.remove(personName)
         }

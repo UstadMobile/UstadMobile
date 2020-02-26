@@ -25,6 +25,7 @@ import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonHandlerPresenter
 import com.ustadmobile.core.db.dao.PersonPictureDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ClazzMember
@@ -56,6 +57,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
     private var showEnrollment: Boolean = false
     private var groupEnrollment = false
 
+    private var enrollString = ""
     private var showAddStudent = false
     private var showAddTeacher = false
 
@@ -110,6 +112,19 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         showAttendance = attendance
         showEnrollment = enrollment
         groupEnrollment = enrollToGroup
+    }
+
+    internal constructor(
+            diffCallback: DiffUtil.ItemCallback<PersonWithEnrollment>, context: Context,
+            activity: Activity, presenter: CommonHandlerPresenter<*>, attendance: Boolean,
+            enrollment: Boolean, enrollToGroup: Boolean, enrollmentString: String) : super(diffCallback) {
+        theContext = context
+        theActivity = activity
+        mPresenter = presenter
+        showAttendance = attendance
+        showEnrollment = enrollment
+        groupEnrollment = enrollToGroup
+        enrollString = enrollmentString
     }
 
     internal constructor(
@@ -281,23 +296,17 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         val checkBox = holder.itemView.findViewById<CheckBox>(
                 R.id.item_studentlist_student_simple_student_checkbox)
 
-        if (groupEnrollment) {
-            checkBox.setText(R.string.enroll_group_member)
-        } else {
-            checkBox.setText(R.string.enroll_in_class)
-        }
+        checkBox.text = enrollString
+//        if (groupEnrollment) {
+//            checkBox.text = UstadMobileSystemImpl.instance.getString(MessageID.enroll_group_member,
+//                    holder.itemView.context)
+//        } else {
+//            checkBox.setText(R.string.enroll_in_class)
+//        }
         val callImageView = holder.itemView.findViewById<ImageView>(
                 R.id.item_studentlist_student_simple_call_iv)
 
         //Update person name :
-        var firstName: String? = ""
-        var lastName: String? = ""
-        if (personWithEnrollment.firstNames != null) {
-            firstName = personWithEnrollment.firstNames
-        }
-        if (personWithEnrollment.lastName != null) {
-            lastName = personWithEnrollment.lastName
-        }
         val studentName = personWithEnrollment.fullName(UstadMobileSystemImpl.instance.getLocale(theContext))
         studentNameTextView.text = studentName
 

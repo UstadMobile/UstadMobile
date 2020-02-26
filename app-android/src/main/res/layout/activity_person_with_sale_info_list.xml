@@ -14,7 +14,8 @@
         <androidx.appcompat.widget.Toolbar android:id="@+id/activity_person_with_saleinfo_list_toolbar"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:background="@color/primary" app:layout_constraintStart_toStartOf="parent"
-            app:layout_scrollFlags="scroll|enterAlways" app:title="@string/my_women_entrepreneurs"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:title="@string/women_entrepreneurs_group"
             tools:layout_editor_absoluteY="0dp" />
     </com.google.android.material.appbar.AppBarLayout>
 

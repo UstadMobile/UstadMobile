@@ -51,14 +51,13 @@ class CallPersonRelatedDialogPresenter(context: Any, arguments: Map<String, Stri
         putThisMap[NUMBER_MOTHER] = NameWithNumber(impl.getString(MessageID.mother, context) +
                 "(" + personToCall.motherName + ")", personToCall.motherNum.toString())
         putThisMap[NUMBER_TEACHER] = NameWithNumber(impl.getString(MessageID.teacher, context) +
-                "(" + teacherToCall.person!!.firstNames + " " +
-                teacherToCall.person!!.lastName + ")",
+                "(" + teacherToCall.person!!.fullName(impl.getLocale(context)) + ")",
                 teacherToCall.person!!.phoneNum!!)
 
 
         if (mainOfficer != null) {
             putThisMap[NUMBER_RETENTION_OFFICER] = NameWithNumber(impl.getString(MessageID.retention_officer, context) +
-                    "(" + mainOfficer.firstNames + " " + mainOfficer.lastName + ")",
+                    "(" + mainOfficer.fullName(impl.getLocale(context)) + ")",
                     personToCall.phoneNum.toString())
             view.showRetention(true)
         } else {

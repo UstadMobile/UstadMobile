@@ -18,6 +18,7 @@ import androidx.core.content.FileProvider
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportSELPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ReportSELView
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 import com.ustadmobile.port.android.view.UstadBaseActivity
@@ -522,8 +523,9 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
             aStudentTopRowTV.layoutParams = everyItemParam
             aStudentTopRowTV.textSize = 12f
             aStudentTopRowTV.setTextColor(Color.BLACK)
-            val personName = everyClazzMember.person!!.firstNames + " " +
-                    everyClazzMember.person!!.lastName
+            val personName = everyClazzMember.person!!.fullName(
+                    UstadMobileSystemImpl.instance.getLocale(viewContext)
+            )
             aStudentTopRowTV.text = personName
 
             selTableTopRow.addView(aStudentTopRowTV)
@@ -551,8 +553,9 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
 
             //Set tags on the rows so we can find these rows when populating the sel results
             nominationRow.setTag(TAG_NOMINATOR_CLAZZMEMBER_UID, everyClazzMember.clazzMemberUid)
-            nominationRow.setTag(TAG_NOMINATOR_NAME, everyClazzMember.person!!.firstNames
-                    + " " + everyClazzMember.person!!.lastName)
+            nominationRow.setTag(TAG_NOMINATOR_NAME, everyClazzMember.person!!.fullName(
+                    UstadMobileSystemImpl.instance.getLocale(viewContext)
+            ))
             //vertical line after nominator name
             nominationRow.addView(verticalLine)
             //Loop through All Students again to addd the default tick/cross/dash image views and

@@ -322,18 +322,10 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         currentPerson = person
 
         var personName = ""
-        var personFirstNames = ""
-        var personLastName = ""
 
         if(currentPerson != null ){
-            if(currentPerson!!.firstNames!=null){
-                personFirstNames = currentPerson!!.firstNames!! + " "
-            }
-            if(currentPerson!!.lastName != null){
-                personLastName = currentPerson!!.lastName!!
-            }
+            personName = currentPerson?.fullName(impl.getLocale(context))?:""
         }
-        personName = personFirstNames + personLastName
 
         view.runOnUiThread(Runnable {
             view.updateToolbar(personName)

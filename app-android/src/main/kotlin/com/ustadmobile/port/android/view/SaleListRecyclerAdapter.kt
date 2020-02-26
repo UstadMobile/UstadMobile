@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonHandlerPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.SaleListDetail
@@ -85,7 +86,7 @@ class SaleListRecyclerAdapter
         }
 
         val saleAmountWithCurrency = Math.round(entity.saleAmount).toString() + " " +
-                entity.saleCurrency
+                impl.getString(MessageID.currency_afs, theContext)
         saleLocation.text = entity.locationName
 
         val creationDatePretty = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(entity.saleCreationDate)
@@ -136,7 +137,7 @@ class SaleListRecyclerAdapter
         if (paymentsDueTab) {
             //Also change amount to remaining amount and change its color
             val saleAmountRemainingWithCurrency = Math.round(entity.saleAmountDue).toString() + " " +
-                    entity.saleCurrency
+                    impl.getString(MessageID.currency_afs, theContext)
             saleAmount.text = saleAmountRemainingWithCurrency
             saleAmount.setTextColor(ContextCompat.getColor(theContext, R.color.primary_dark))
         }

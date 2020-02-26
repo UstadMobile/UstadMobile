@@ -388,29 +388,31 @@ abstract class SaleDao : BaseDao<Sale> {
         }
     }
 
-    @Query("SELECT " +
-            "  SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
-            "   'Product list goes here' AS topProducts, " +
-            "    (SELECT CASE WHEN " +
-            "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
-            "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
-            "       ORDER BY PersonPicture.picTimestamp DESC LIMIT 1 ) " +
-            "   is NULL THEN 0 ELSE " +
-            "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
-            "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
-            "    ORDER BY PersonPicture.picTimestamp DESC LIMIT 1) " +
-            "   END ) as personPictureUid,"+
-            "   Members.* " +
-            " FROM PersonGroupMember " +
-            "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active " +
-            "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive " +
-            "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1" +
-            "   LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = Members.personUid " +
-            " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
-            "   AND (Members.firstNames like :searchBit OR Members.lastName LIKE :searchBit " +
-            " OR Members.firstNames||' '||Members.lastName LIKE :searchBit) " +
-            " GROUP BY(Members.personUid)")
-    abstract fun getMyWomenEntrepreneursSearch(groupUid :Long, searchBit:String):DataSource.Factory<Int, PersonWithSaleInfo>
+//    @Query("SELECT " +
+//            "  SUM((SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - SaleItem.saleItemDiscount) AS totalSale, " +
+//            "   'Product list goes here' AS topProducts, " +
+//            "    (SELECT CASE WHEN " +
+//            "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
+//            "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
+//            "       ORDER BY PersonPicture.picTimestamp DESC LIMIT 1 ) " +
+//            "   is NULL THEN 0 ELSE " +
+//            "   (SELECT PersonPicture.PersonPictureUid FROM PersonPicture " +
+//            "    WHERE PersonPicture.personPicturePersonUid = Members.personUid " +
+//            "    ORDER BY PersonPicture.picTimestamp DESC LIMIT 1) " +
+//            "   END ) as personPictureUid,"+
+//            "   Members.* " +
+//            " FROM PersonGroupMember " +
+//            "   LEFT JOIN Person AS Members ON Members.personUid = PersonGroupMember.groupMemberPersonUid AND Members.active " +
+//            "   LEFT JOIN SaleItem ON SaleItem.saleItemProducerUid = Members.personUid AND SaleItem.saleItemActive " +
+//            "   LEFT JOIN Sale ON Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1" +
+//            "   LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = Members.personUid " +
+//            " WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
+//            "   AND (Members.firstNames like :searchBit OR Members.lastName LIKE :searchBit " +
+//            " OR Members.firstNames||' '||Members.lastName LIKE :searchBit) " +
+//            " GROUP BY(Members.personUid)")
+
+    @Query(MY_WE_BY_LEUID_WITH_NAME)
+    abstract fun getMyWomenEntrepreneursSearch(leUid :Long, searchBit:String):DataSource.Factory<Int, PersonWithSaleInfo>
 
     companion object {
 
@@ -733,6 +735,45 @@ abstract class SaleDao : BaseDao<Sale> {
                         LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid AND CAST(SaleProduct.saleProductActive AS INTEGER) = 1
                     WHERE PersonGroupMember.groupMemberGroupUid = LE.mPersonGroupUid 
                     AND CAST(WE.active AS INTEGER) = 1  
+                    GROUP BY(WE.personUid)  
+                """
+
+        const val MY_WE_BY_LEUID_WITH_NAME =
+                """
+                    SELECT 
+                        SUM((SaleItem.saleItemPricePerPiece)) - coalesce(SaleItem.saleItemDiscount, 0) AS totalSale, 
+                        GROUP_CONCAT(DISTINCT SaleProduct.saleProductName) AS topProducts, 
+                        (SELECT CASE WHEN 
+                            (SELECT PersonPicture.PersonPictureUid FROM PersonPicture 
+                            WHERE PersonPicture.personPicturePersonUid = WE.personUid 
+                            ORDER BY PersonPicture.picTimestamp DESC LIMIT 1 ) 
+                            is NULL THEN 0 ELSE 
+                            (SELECT PersonPicture.PersonPictureUid FROM PersonPicture 
+                            WHERE PersonPicture.personPicturePersonUid = WE.personUid 
+                            ORDER BY PersonPicture.picTimestamp DESC LIMIT 1) 
+                            END ) as personPictureUid ,
+                        WE.* 
+                    FROM PersonGroupMember 
+                        LEFT JOIN Person AS LE ON LE.personUid = :leUid
+                        LEFT JOIN Person AS WE ON WE.personUid = PersonGroupMember.groupMemberPersonUid 
+                        LEFT JOIN InventoryItem ON 
+                            InventoryItem.InventoryItemWeUid = WE.personUid 
+                            AND InventoryItem.InventoryItemLeUid = LE.personUid AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                        LEFT JOIN InventoryTransaction ON 
+                            InventoryTransaction.InventoryTransactionInventoryItemUid = InventoryItem.InventoryItemUid 
+                            AND InventoryTransaction.inventoryTransactionFromLeUid = LE.personUid AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
+                        LEFT JOIN SaleItem ON 
+                            SaleItem.saleItemUid = InventoryTransaction.inventoryTransactionSaleItemUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1
+                        LEFT JOIN Sale ON 
+                            Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1 
+                        LEFT JOIN PersonPicture ON PersonPicture.personPicturePersonUid = WE.personUid 
+                        LEFT JOIN SaleProduct ON SaleProduct.saleProductUid = SaleItem.saleItemProductUid AND CAST(SaleProduct.saleProductActive AS INTEGER) = 1
+                    WHERE PersonGroupMember.groupMemberGroupUid = LE.mPersonGroupUid 
+                    AND CAST(WE.active AS INTEGER) = 1  
+                    AND ( 
+                        (WE.firstNames || ' ' || WE.lastName) LIKE :searchBit OR 
+                        (WE.personFirstNamesAlt||' '||WE.personLastNameAlt) LIKE :searchBit
+                        )
                     GROUP BY(WE.personUid)  
                 """
 

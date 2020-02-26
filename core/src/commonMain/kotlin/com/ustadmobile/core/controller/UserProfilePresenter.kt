@@ -56,16 +56,7 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
 
                 if (loggedInPerson != null) {
 
-                    var firstNames = ""
-                    var lastName = ""
-                    if(result!!.firstNames!=null){
-                        firstNames = result!!.firstNames!!
-                    }
-                    if(result!!.lastName != null){
-                        lastName = result!!.lastName!!
-                    }
-
-                    val personName = "$firstNames $lastName"
+                    val personName = result!!.fullName(impl.getLocale(context))
                     view.runOnUiThread(Runnable {
                         view.updateToolbarTitle(personName)
                     })

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectCustomerPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.Person
 
 class PersonSelectedRecyclerAdapter internal constructor(
@@ -37,23 +38,8 @@ class PersonSelectedRecyclerAdapter internal constructor(
     override fun onBindViewHolder(holder: PersonViewHolder, position: Int) {
         val person = getItem(position) ?: return
 
-        var fullName = ""
-        var firstNames = ""
-        var lastName = ""
-        if(person.firstNames==null){
-            firstNames = ""
-        }else{
-            firstNames = person.firstNames!!
-        }
-        if(person.lastName == null){
-            lastName = ""
-        }else{
-            lastName = person.lastName!!
-        }
-
-        fullName = firstNames + " " + lastName
         val name = holder.itemView.findViewById<TextView>(R.id.item_peoplelist_name)
-        name.text = fullName
+        name.text = person.fullName(UstadMobileSystemImpl.instance.getLocale(holder.itemView.context))
 
         val cl = holder.itemView.findViewById<ConstraintLayout>(R.id.item_peoplelist_cl)
         cl.setOnClickListener{

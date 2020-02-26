@@ -20,6 +20,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.GroupDetailPresenter
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -58,20 +59,13 @@ class GroupDetailRecyclerAdapter(
                 R.id.item_image_with_title_with_desc_and_dots_dots)
 
 
-        //NAME:
-        var firstName: String? = ""
-        var lastName: String? = ""
         if (personWithEnrollment == null) {
             return
         }
-        if (personWithEnrollment.firstNames != null) {
-            firstName = personWithEnrollment.firstNames
-        }
-        if (personWithEnrollment.lastName != null) {
-            lastName = personWithEnrollment.lastName
-        }
 
-        val studentName = "$firstName $lastName"
+        val studentName = personWithEnrollment.fullName(
+                UstadMobileSystemImpl.instance.getLocale(holder.itemView.context)
+        )
         studentNameTextView.setText(studentName)
         val personUid = personWithEnrollment.personUid
         studentNameTextView.setOnClickListener({ v -> mPresenter.handleClickStudent(personUid) })

@@ -81,9 +81,8 @@ class PersonWithSaleInfoDetailActivity :UstadBaseActivity(), PersonWithSaleInfoD
     }
 
     override fun updatePersonOnView(person: Person) {
-        if(person.firstNames != null && person.lastName != null){
-            supportActionBar!!.setTitle(person.firstNames + " " + person.lastName)
-        }
+        supportActionBar?.setTitle(person.fullName(
+                UstadMobileSystemImpl.instance.getLocale(viewContext)))
     }
 
 

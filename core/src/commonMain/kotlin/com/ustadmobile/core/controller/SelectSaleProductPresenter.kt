@@ -132,6 +132,11 @@ class SelectSaleProductPresenter(context: Any,
     private fun updateRecentProvider() {
 
         recentProvider = saleProductDao.findActiveProductsProvider(loggedInPersonUid, searchQuery)
+        view.runOnUiThread(Runnable {
+            if(loggedInPerson!=null) {
+                view.setAddCategoryVisibility(loggedInPerson?.admin?:false)
+            }
+        })
         view.setRecentProvider(recentProvider)
 
     }

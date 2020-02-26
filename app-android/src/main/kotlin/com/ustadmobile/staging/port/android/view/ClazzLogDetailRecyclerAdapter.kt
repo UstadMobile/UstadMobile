@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzLogDetailPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 
 import java.util.HashMap
@@ -24,6 +25,7 @@ import java.util.HashMap
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_PARTIAL
+import com.ustadmobile.lib.db.entities.Person
 
 /**
  * The Log Detail (Attendance) Recycler Adapter
@@ -54,8 +56,13 @@ class ClazzLogDetailRecyclerAdapter internal constructor(
     override fun onBindViewHolder(holder: ClazzLogDetailViewHolder, position: Int) {
         val attendanceRecord = getItem(position)!!
 
-        val studentName = attendanceRecord.person!!.firstNames + " " +
-                attendanceRecord.person!!.lastName
+        if(attendanceRecord.person == null){
+            return
+        }
+
+        val studentName = attendanceRecord.person?.fullName(
+                UstadMobileSystemImpl.instance.getLocale(holder.itemView.context)
+        )
 
         holder.itemView.tag = attendanceRecord.clazzLogAttendanceRecordUid
 

@@ -17,6 +17,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonHandlerPresenter
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -91,7 +92,7 @@ class SimplePeopleListRecyclerAdapter : PagedListAdapter<Person,
         if (thisPerson == null) {
             studentName = "Student"
         } else {
-            studentName = thisPerson.firstNames + " " + thisPerson.lastName
+            studentName = thisPerson.fullName(UstadMobileSystemImpl.instance.getLocale(holder.itemView.context))
         }
 
         val studentEntry = holder.itemView

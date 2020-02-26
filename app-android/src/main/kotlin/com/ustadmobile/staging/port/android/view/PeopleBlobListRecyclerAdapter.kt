@@ -17,6 +17,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.CommonHandlerPresenter
 import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.PersonWithPersonPicture
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -121,13 +122,8 @@ class PeopleBlobListRecyclerAdapter : PagedListAdapter<PersonWithPersonPicture,
     override fun onBindViewHolder(holder: PeopleViewHolder, position: Int) {
 
         val thisPerson = getItem(position)
-
-        val studentName: String
-        if (thisPerson == null) {
-            studentName = "Student"
-        } else {
-            studentName = thisPerson.firstNames + " " +
-                    thisPerson.lastName
+        if(thisPerson == null){
+            return
         }
 
         val studentImage = holder.itemView
@@ -164,6 +160,8 @@ class PeopleBlobListRecyclerAdapter : PagedListAdapter<PersonWithPersonPicture,
         val studentEntry = holder.itemView
                 .findViewById<TextView>(R.id.item_peopleblob_name)
 
+        val studentName = thisPerson.fullName(UstadMobileSystemImpl.instance.getLocale(
+                holder.itemView.context))
         if (!hideNames) {
             studentEntry.text = studentName
         } else {

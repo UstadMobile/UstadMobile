@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzDetailEnrollStudentPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON_TYPE
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
@@ -130,8 +132,17 @@ class ClazzDetailEnrollStudentActivity : UstadBaseActivity(), ClazzDetailEnrollS
 
     override fun setStudentsProvider(factory: DataSource.Factory<Int, PersonWithEnrollment>) {
 
+        var enrollString = ""
+        if(groupEnrollment){
+           enrollString = UstadMobileSystemImpl.instance.getString(MessageID.enroll_group_member,
+                   viewContext)
+        }else{
+            enrollString = UstadMobileSystemImpl.instance.getString(MessageID.enroll_in_class,
+                    viewContext)
+        }
         val recyclerAdapter = PersonWithEnrollmentRecyclerAdapter(DIFF_CALLBACK, applicationContext,
-                this, mPresenter!!, false, true, groupEnrollment)
+                this, mPresenter!!, false, true, groupEnrollment,
+                enrollString)
 
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:

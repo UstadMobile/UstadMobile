@@ -83,7 +83,7 @@ class PersonWithSaleInfoListPresenter(context: Any,
         if(searchBit == null || searchBit.isEmpty()){
             factory = saleDao.getMyWomenEntrepreneurs(leUid)
         }else {
-            factory = saleDao.getMyWomenEntrepreneursSearch(leUid, searchBit)
+            factory = saleDao.getMyWomenEntrepreneursSearch(leUid, "%$searchBit%")
         }
         view.setWEListFactory(factory)
     }

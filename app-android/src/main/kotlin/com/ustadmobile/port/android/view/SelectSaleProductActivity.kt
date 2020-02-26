@@ -28,6 +28,10 @@ class SelectSaleProductActivity : UstadBaseActivity(), SelectSaleProductView {
 
     }
 
+    override fun setAddCategoryVisibility(show: Boolean) {
+        //Not needed here
+    }
+
     private var toolbar: Toolbar? = null
     private var mPresenter: SelectSaleProductPresenter? = null
     private var recentRV: RecyclerView? = null

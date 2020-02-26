@@ -175,22 +175,8 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
     private fun updateCustomerOnView(person:Person?){
         editMode = false
         currentPerson = person!!
-        var firstNames = ""
-        var lastName = ""
-        if(currentPerson!!.firstNames != null){
-            firstNames = currentPerson!!.firstNames!!
-        }
-        if(currentPerson!!.lastName != null){
-            lastName = currentPerson!!.lastName!!
-        }
-        if(firstNames != "" && lastName != "") {
-            view.updateCustomerName(firstNames + " " + lastName)
-        }else if(firstNames!= ""){
-            view.updateCustomerName(firstNames + " " + lastName)
-        }else{
-            view.updateCustomerName("")
-        }
 
+        view.updateCustomerName(currentPerson!!.fullName(UstadMobileSystemImpl.instance.getLocale(context)))
         if(currentPerson!!.personAddress != null){
             view.updateLocationName(currentPerson!!.personAddress!!)
         }else {
@@ -244,6 +230,9 @@ CustomerDetailView) : UstadBaseController<CustomerDetailView>(context, arguments
                 currentPerson!!.firstNames = newCustomerName;
                 currentPerson!!.lastName = "";
             }
+
+            currentPerson!!.personFirstNamesAlt = currentPerson!!.firstNames
+            currentPerson!!.personLastNameAlt = currentPerson!!.lastName
 
             currentPerson!!.personAddress = location
             currentPerson!!.active = true

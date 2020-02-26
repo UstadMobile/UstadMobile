@@ -586,7 +586,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
             }
 
             if (field.fieldUid == PERSON_FIELD_UID_FULL_NAME.toLong()) {
-                thisValue = thisPerson.firstNames + " " + thisPerson.lastName
+                thisValue = thisPerson.fullName(impl.getLocale(context))
                 thisView.setField(field.fieldIndex, field.fieldUid,
                         PersonDetailViewField(field.fieldType,
                                 labelMessageId, field.fieldIcon), thisValue)

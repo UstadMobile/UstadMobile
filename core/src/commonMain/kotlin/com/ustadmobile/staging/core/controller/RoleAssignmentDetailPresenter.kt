@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.RoleAssignmentDetailView
 import com.ustadmobile.core.view.RoleAssignmentDetailView.Companion.ENTITYROLE_UID
@@ -304,7 +305,7 @@ RoleAssignmentDetailView) : UstadBaseController<RoleAssignmentDetailView>(contex
         peopleIdToPosition = HashMap()
         var posIter = 0
         for (everyEntity in people!!) {
-            entityList.add(everyEntity.firstNames + " " + everyEntity.lastName)
+            entityList.add(everyEntity.fullName(UstadMobileSystemImpl.instance.getLocale(context)))
             peopleIdToPosition!![everyEntity.personUid] = posIter
             peoplePositionToId[posIter] = everyEntity.personUid
             posIter++

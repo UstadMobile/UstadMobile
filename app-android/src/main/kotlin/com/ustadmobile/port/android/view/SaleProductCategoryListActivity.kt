@@ -247,7 +247,7 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
     }
 
     override fun initFromSaleCategory(saleProductCategory: SaleProduct) {
-        runOnUiThread { updateToolbar(saleProductCategory.saleProductName) }
+        runOnUiThread { updateToolbar(saleProductCategory.getNameLocale(UstadMobileSystemImpl.instance.getLocale(viewContext))) }
     }
 
     override fun updateSortPresets(presets: Array<String?>) {

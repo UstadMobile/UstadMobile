@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SelectPeopleDialogView
 import com.ustadmobile.core.view.SelectPeopleDialogView.Companion.ARG_SELECTED_PEOPLE
 import com.ustadmobile.lib.db.entities.Person
@@ -33,18 +34,16 @@ class SelectPeopleDialogPresenter(context: Any, arguments: Map<String, String>?,
     }
 
     fun addToPeople(person: Person) {
-        val personName = person.firstNames + " " +
-                person.lastName
+        val personName = person.fullName(UstadMobileSystemImpl.instance.getLocale(context))
         if (!people.containsValue(person.personUid)) {
             people[personName] = person.personUid
         }
     }
 
     fun removePeople(person: Person) {
-        val personName = person.firstNames + " " +
-                person.lastName
-        if (people!!.containsKey(personName)) {
-            people!!.remove(personName)
+        val personName = person.fullName(UstadMobileSystemImpl.instance.getLocale(context))
+        if (people.containsKey(personName)) {
+            people.remove(personName)
         }
     }
 

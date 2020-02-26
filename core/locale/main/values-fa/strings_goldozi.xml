@@ -55,8 +55,6 @@
     <string name="sorT_by_name_desc">اسم (desc)</string>
     <string name="feature_coming_soon">این بخش به زودی فعال خواهد شد.</string>
     <!--Sprint 2-->
-    <string name="change_password">تغیر رمز</string>
-    <string name="current_password">رمز عبور فعلی</string>
     <string name="confirm_new_password">تأید رمز عبور ججدید</string>
     <string name="choose_language">انتخاب زبان</string>
     <string name="language_english">English</string>
@@ -182,22 +180,15 @@
     <string name="selected_les">متشبثین پیشتاز انتخاب شده</string>
     <string name="select_product_types">انتخاب انواع محصول</string>
     <!--Sprint 7-->
-    <string name="users">Users</string>
-    <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
     <string name="user">User</string>
     <string name="send_message">Send message</string>
     <string name="reset_password">Reset password</string>
     <string name="deactivate">غیر فعال نمودن</string>
-    <string name="groups">Groups</string>
     <string name="group">گروپ</string>
-    <string name="group_setting_desc">Add, remove, or modify groups</string>
-    <string name="group_name">Group name</string>
     <string name="members">Members</string>
     <string name="add_members">علاوه ساختن اعضأ</string>
     <string name="remove">حذف نمودن</string>
     <string name="subgroup">گروپ فرعی</string>
-    <string name="locations">Locations</string>
-    <string name="locations_setting_desc">Manage locations</string>
     <string name="account_last_synced">بار اخیر که حساب/اکاونت همگاه شد</string>
     <string name="minutes">minutes</string>
     <string name="hours">ساعات</string>
@@ -245,4 +236,8 @@
     <string name="sale_list_sort_by_total_descending">مجموع (بشکل نزولی)</string>
     <string name="over_selected_delivery">لطفاً کمتر از اجناس باقیمانده در ذخیره گاه را برای محصول انتخاب نمائید</string>
     <string name="create_new_product">ایجاد یک محصول جدید</string>
+
+    <string name="catalog">کتلاگ</string>
+    <string name="content">محتوای</string>
+
 </resources>

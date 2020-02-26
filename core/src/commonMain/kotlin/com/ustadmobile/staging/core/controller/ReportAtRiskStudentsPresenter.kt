@@ -97,7 +97,7 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
                     clazzDone.add(pwe.clazzName!!)
                     reportData.add(arrayOf(pwe.clazzName!!))
                 }
-                val name = pwe.firstNames + " " + pwe.lastName
+                val name = pwe.fullName(impl.getLocale(context))
                 val attendance = pwe.attendancePercentage.toString()
                 reportData.add(arrayOf("", name, attendance))
             }
@@ -199,7 +199,7 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
                         clazzDone.add(pwe.clazzName!!)
                         tableTextData.add(arrayOf(pwe.clazzName!!))
                     }
-                    val name = pwe.firstNames + " " + pwe.lastName
+                    val name = pwe.fullName(impl.getLocale(context))
                     val attendance = pwe.attendancePercentage.toString()
                     tableTextData.add(arrayOf("", name, attendance))
                 }

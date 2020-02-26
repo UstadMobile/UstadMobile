@@ -305,8 +305,9 @@ class ClazzLogDetailPresenter(context: Any,
                         val thisEntry = FeedEntry(
                                 feedEntryUid,
                                 "Attendance dropped",
-                                "Student " + thisPerson!!.firstNames + " " +
-                                        thisPerson.lastName + " of Class " +
+                                "Student " +
+                                        thisPerson!!.fullName(UstadMobileSystemImpl.instance.getLocale(context)) +
+                                        " of Class " +
                                         clazzName + " attendance dropped " +
                                         feedAlertPerentageHigh * 100 + "%",
                                 feedLinkViewPerson,
@@ -344,8 +345,9 @@ class ClazzLogDetailPresenter(context: Any,
                         val thisEntry = FeedEntry(
                                 feedEntryUid,
                                 "Attendance dropped",
-                                "Student " + thisPerson!!.firstNames + " " +
-                                        thisPerson.lastName + " of Class " +
+                                "Student " +
+                                        thisPerson!!.fullName(UstadMobileSystemImpl.instance.getLocale(context))
+                                        + " of Class " +
                                         clazzName + " attendance dropped " +
                                         feedAlertPerentageMed * 100 + "%",
                                 feedLinkViewPerson,

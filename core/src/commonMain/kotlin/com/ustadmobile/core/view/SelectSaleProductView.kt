@@ -34,6 +34,8 @@ interface SelectSaleProductView : UstadView {
 
     fun showAddButton(show: Boolean)
 
+    fun setAddCategoryVisibility(show: Boolean)
+
     companion object {
 
 

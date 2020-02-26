@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportAtRiskStudentsPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ReportAtRiskStudentsView
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.port.android.view.UstadBaseActivity
@@ -196,8 +197,8 @@ class ReportAtRiskStudentsActivity : UstadBaseActivity(), ReportAtRiskStudentsVi
             val studentNameTV = TextView(applicationContext)
             studentNameTV.textSize = 10f
             studentNameTV.setTextColor(Color.BLACK)
-            studentNameTV.text = (everyStudent.firstNames +
-                    " " + everyStudent.lastName +
+            studentNameTV.text = (
+                    everyStudent.fullName(UstadMobileSystemImpl.instance.getLocale(viewContext)) +
                     " (" + (everyStudent.attendancePercentage * 100).toString()
                     + "% " + getText(R.string.attendance).toString() + ")")
 

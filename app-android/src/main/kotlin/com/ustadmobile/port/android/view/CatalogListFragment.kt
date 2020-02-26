@@ -132,6 +132,10 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         return rootContainer
     }
 
+    override fun setAddCategoryVisibility(show: Boolean) {
+        addCollection.isVisible = show
+    }
+
     override fun onViewCreated(view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

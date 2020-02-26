@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SelectPeopleDialogPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import java.util.*
 
@@ -42,7 +43,7 @@ class PersonListReturnSelectedRecyclerAdapter internal constructor(
         val person = getItem(position)!!
 
         val title = holder.itemView.findViewById<TextView>(R.id.item_clazz_list_enroll_person_title)
-        title.text = person.firstNames + " " + person.lastName
+        title.text = person.fullName(UstadMobileSystemImpl.instance.getLocale(holder.itemView.context))
 
         val checkBox = holder.itemView.findViewById<CheckBox>(R.id.item_clazz_list_enroll_person_checkbox)
         checkBox.text = ""

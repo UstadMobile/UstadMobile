@@ -55,8 +55,6 @@
     <string name="sorT_by_name_desc">نوم(desc)</string>
     <string name="feature_coming_soon">دا بڼه، ډیر ژر... .</string>
     <!--Sprint 2-->
-    <string name="change_password">د پټ نوم بدلول</string>
-    <string name="current_password">اوسنی پټ نوم</string>
     <string name="confirm_new_password">د نوی پټ نوم تائیدول</string>
     <string name="choose_language">دژبې غوره کول</string>
     <string name="language_english">English</string>
@@ -182,22 +180,15 @@
     <string name="selected_les">غوره شوی مخکښ متشبثین</string>
     <string name="select_product_types">د محصول ډول غوره کړئ</string>
     <!--Sprint 7-->
-    <string name="users">Users</string>
-    <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
     <string name="user">User</string>
     <string name="send_message">Send message</string>
     <string name="reset_password">Reset password</string>
     <string name="deactivate">غیر فعال کول</string>
-    <string name="groups">Groups</string>
     <string name="group">ګروپ/ډله بندی</string>
-    <string name="group_setting_desc">Add, remove, or modify groups</string>
-    <string name="group_name">Group name</string>
     <string name="members">Members</string>
     <string name="add_members">غړي ورزیاتول</string>
     <string name="remove">لری کول/ له مینځه وړل</string>
     <string name="subgroup">فرعی ګروپ/ډله</string>
-    <string name="locations">Locations</string>
-    <string name="locations_setting_desc">Manage locations</string>
     <string name="account_last_synced">حساب/اکاونټ تیر ځلی هم مهال شوی</string>
     <string name="minutes">minutes</string>
     <string name="hours">ساعت</string>
@@ -246,4 +237,7 @@
     <string name="save_sale">مهربانی وکړئ د سپارلو د زیاتولو څخه وړاندې، خرڅلا ثبت/ذخیره کړئ</string>
     <string name="add_inventory">موجودی زیاتول</string>
     <string name="create_new_product">د نوی محصول جوړول</string>
+
+    <string name="catalog">کټلاګ</string>
+    <string name="content">محتویات</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Goldozi</string>
+    <string name="app_name">Ustad Mobile</string>
     <string name='login'>Login</string>
     <string name='error'>Error</string>
     <string name='err_registering_new_user'>Error registering new user:</string>
@@ -345,6 +345,7 @@
     <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
 
+
     <string name="syncing">Syncing..</string>
     <string name="node_title_list">Node List</string>
     <string name="feed">Feed</string>
@@ -394,7 +395,11 @@
     <string name="clazz">Class</string>
     <string name="student_image">Student image</string>
     <string name="enroll_new_student">Enroll new student</string>
-    <string name="sel">sel</string>
+
+    <!--Social Emotional Learning (SEL)-->
+    <string name="sel">SEL</string>
+
+    <!-- Allows the user to record Social Emotion Learning Nomination -->
     <string name="record_sel">Record SEL</string>
     <string name="current_sel">Current SEL answers by students</string>
     <string name="social_nomination">Social Nomination</string>
@@ -525,7 +530,8 @@
     <string name="age">Age</string>
     <string name="days">Days</string>
     <string name="onboarding_easily_record_student_attendance">Easily record student attendance</string>
-    <string name="get_started">Get started</string>
+    <!-- Get started - e.g. as used in the button when the app first runs-->
+    <string name="get_started2">Get started</string>
     <string name="select_file">Select file</string>
     <string name="bulk_upload_master">Bulk Upload Master</string>
     <string name="apply">Apply</string>
@@ -723,5 +729,64 @@
     <string name="created_user">Created user</string>
     <string name="add">Add</string>
     <string name="refresh">Refresh</string>
+
+    <string name="schools">Schools</string>
+    <string name="add_school">Add school</string>
+
+    <!-- Assignments e.g. homework for a class -->
+    <string name="assignments">Assignments</string>
+    <string name="new_assignment">Add assignment</string>
+
+    <!-- How an assignment is graded e.g. by letter, numerical, etc -->
+    <string name="grading">Grading</string>
+    <!-- Grading by letter e.g. A-F -->
+    <string name="grading_letter">Letter</string>
+    <string name="None">None</string>
+    <!-- e.g. Numerical assignment grading -->
+    <string name="numerical">Numerical</string>
+
+    <string name="instructions_for_students">Instructions for students</string>
+
+
+    <string name="not_started">Not started</string>
+
+    <!-- Used to show what percentage of an assignment a student has completed. The %1$s will be
+    replaced with the percentage the student completed e.g. "75% complete"-->
+    <string name="percentage_complete">%1$s% complete</string>
+
+    <!-- used to show when an assignment (or other work item) was started by the assignee. The
+    %1$s% will be replaced with the date that they started.-->
+    <string name="started_date">Started %1$s%</string>
+
+    <!-- Used to indicate that something (e.g. an assigment) has been started -->
+    <string name="started">Started</string>
+
+    <!-- E.g. for a mixed gender school which has both boys and girls-->
+    <string name="mixed">Mixed</string>
+
+    <!-- App store descriptions are placed here so that they appear in the translation system. They
+    will be automatically removed from the final app by resource shrinking -->
+
+
+    <!-- App store title - max 50 characters -->
+    <string name="store_title">Ustad Mobile - Offline Open Educational Resources</string>
+
+    <!-- Short description - max 80 characters -->
+    <string name="store_description_short">Access and share educational content offline</string>
+
+    <!-- Full app store description - max 4000 characters-->
+    <string name="store_description_full">Ustad Mobile is an open-source app that enables users to access a wide variety of open educational resources, online or offline. Both the app and content can be shared offline between devices.\n
+\n
+Ustad Mobile features openly licensed content from some of the Internet\'s leading Open Educational Resources (OER) sites:\n
+\n
+African Story Books\n
+ETakkatho\n
+Global Digital Library\n
+Khan Academy (including offline access to both videos and exercises)\n
+PHET\n
+Pratham Books\n
+Voice of America\n
+\n
+Content is provided under license by external content providers. Ustad Mobile, unless explicitly mentioned otherwise, is not endorsed by any such content provider.</string>
 
 </resources>

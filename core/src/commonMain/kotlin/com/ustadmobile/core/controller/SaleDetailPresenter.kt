@@ -310,17 +310,9 @@ class SaleDetailPresenter(context: Any,
     }
 
     private fun handleCustomerChanged(changedCustomer: Person?){
-        var firstNames = ""
-        var lastName = ""
-
         if(changedCustomer != null){
-            if(changedCustomer.firstNames != null){
-                firstNames = changedCustomer.firstNames!!
-            }
-            if(changedCustomer.lastName != null){
-                lastName = changedCustomer.lastName!!
-            }
-            if(changedCustomer!!.personLocationUid != 0L) {
+
+            if(changedCustomer.personLocationUid != 0L) {
                 if(updatedSale!!.saleLocationUid != changedCustomer.personLocationUid) {
                     updatedSale!!.saleLocationUid = changedCustomer.personLocationUid
                     //Update the sale
@@ -329,11 +321,10 @@ class SaleDetailPresenter(context: Any,
                     }
                 }
             }
-
-
         }
 
-        view.updateCustomerNameOnView(firstNames + " " + lastName)
+        view.updateCustomerNameOnView(changedCustomer!!.fullName(
+                UstadMobileSystemImpl.instance.getLocale(context)))
     }
 
     private fun handleLocationsChanged(changedLocations: List<Location>?) {
@@ -464,16 +455,11 @@ class SaleDetailPresenter(context: Any,
                 saleDao.updateAsync(updatedSale!!)
 
                 customer = personDao.findByUid(customerUid)
-                var firstNames = ""
-                var lastName = ""
-                if (customer != null && customer!!.firstNames != null) {
-                    firstNames = customer!!.firstNames!!
-                }
-                if (customer != null && customer!!.lastName != null) {
-                    lastName = customer!!.lastName!!
-                }
+
                 view.runOnUiThread(Runnable {
-                    view.updateCustomerNameOnView(firstNames + " " + lastName)
+                    view.updateCustomerNameOnView(customer!!.fullName(
+                            UstadMobileSystemImpl.instance.getLocale(context)
+                    ))
                 })
             }
         }

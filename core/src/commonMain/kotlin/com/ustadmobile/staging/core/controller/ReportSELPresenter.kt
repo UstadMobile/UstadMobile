@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ArgumentUtil
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLAZZ_LIST
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_FROM_DATE
@@ -180,8 +181,7 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
             //Top Nominee Row ( 0th Row) and every X
             for (everyStudent in students) {
 
-                val studentName = everyStudent.person!!.firstNames + " " +
-                        everyStudent.person!!.lastName
+                val studentName = everyStudent.person!!.fullName(UstadMobileSystemImpl.instance.getLocale(context))
 
                 clazzSheet.addValueToSheet(0, c, studentName)
                 nomineeToIdMap[everyStudent.clazzMemberUid] = c
@@ -194,8 +194,7 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
             r = 1
             for (es in students) {
                 nominatorToIdMap[es.clazzMemberUid] = r
-                val nominatorName = es.person!!.firstNames + " " +
-                        es.person!!.lastName
+                val nominatorName = es.person!!.fullName(UstadMobileSystemImpl.instance.getLocale(context))
 
                 clazzSheet.addValueToSheet(r, 0, nominatorName)
                 r++
