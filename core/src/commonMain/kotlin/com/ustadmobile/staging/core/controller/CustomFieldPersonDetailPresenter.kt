@@ -11,6 +11,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView.Companion.ARG_CUSTOM_FIELD_VALUE_OPTION_UID
+import com.ustadmobile.core.view.CustomFieldDetailView
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.CustomFieldValueOption
 import com.ustadmobile.lib.db.entities.Person
@@ -142,11 +143,13 @@ class CustomFieldPersonDetailPresenter(context: Any, arguments: Map<String, Stri
 
         val args = HashMap<String, String>()
         args.put(ARG_CUSTOM_FIELD_UID_FOR_PERSON, updatedField!!.customFieldUid.toString())
+        args.put(CustomFieldDetailView.ARG_CUSTOM_FIELD_UID, updatedField!!.customFieldUid.toString())
         impl.go(AddCustomFieldOptionDialogView.VIEW_NAME, args, context)
     }
 
     fun handleClickOptionEdit(customFieldOptionUid: Long) {
         val args = HashMap<String, String>()
+        args.put(CustomFieldDetailView.ARG_CUSTOM_FIELD_UID, updatedField!!.customFieldUid.toString())
         args.put(ARG_CUSTOM_FIELD_UID_FOR_PERSON, updatedField!!.customFieldUid.toString())
         args.put(ARG_CUSTOM_FIELD_VALUE_OPTION_UID, customFieldOptionUid.toString())
         impl.go(AddCustomFieldOptionDialogView.VIEW_NAME, args, context)
