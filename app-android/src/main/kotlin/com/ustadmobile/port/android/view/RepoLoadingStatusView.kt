@@ -76,11 +76,20 @@ class RepoLoadingStatusView: CoordinatorLayout, DoorObserver<RepositoryLoadHelpe
         View.inflate(context, R.layout.view_repo_loading_status, this)
     }
 
-    fun observerRepoStatus(liveData: DoorLiveData<*>, lifecycleOwner: LifecycleOwner){
+    fun observerRepoStatus(liveData: DoorLiveData<*>, lifecycleOwner: LifecycleOwner) = observeRepoStatusInternal(liveData, lifecycleOwner)
+
+    fun observeRepoStatusForever(liveData: DoorLiveData<*>) = observeRepoStatusInternal(liveData, null)
+
+    private fun observeRepoStatusInternal(liveData: DoorLiveData<*>, lifecycleOwner: LifecycleOwner?) {
         if(liveData.isRepositoryLiveData()) {
             statusLiveData?.removeObserver(this)
             val newStatusLiveData = (liveData as RepositoryLoadHelper<*>.LiveDataWrapper2<*>).loadingStatus
-            newStatusLiveData.observe(lifecycleOwner, this)
+            if(lifecycleOwner != null) {
+                newStatusLiveData.observe(lifecycleOwner, this)
+            }else {
+                newStatusLiveData.observeForever(this)
+            }
+
             statusLiveData = newStatusLiveData
         }
     }
