@@ -146,7 +146,7 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
 
             //Color the bar
             val barColor: String
-            if (barColors.size >= colorPos) {
+            if (barColors.size > colorPos) {
                 barColor = barColors[colorPos]
             } else {
                 barColor = barColors[1]
