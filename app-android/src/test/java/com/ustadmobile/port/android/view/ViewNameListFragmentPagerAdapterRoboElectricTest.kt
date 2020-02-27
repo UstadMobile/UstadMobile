@@ -6,7 +6,10 @@ import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class ViewNameListFragmentPagerAdapterRoboElectricTest {
 
     class DummyFragment: Fragment() {
@@ -27,6 +30,8 @@ class ViewNameListFragmentPagerAdapterRoboElectricTest {
         Assert.assertEquals("Page count is as per list", viewList.size, listPagerAdapter.count)
         Assert.assertEquals("Tab name is returned as expected", "TabTitle",
                 listPagerAdapter.getPageTitle(0))
+        Assert.assertEquals("Argument set as expected", "value",
+                fragCreated.arguments?.getString("arg"))
     }
 
     @Test(expected = IllegalArgumentException::class)
