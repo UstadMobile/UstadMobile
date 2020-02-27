@@ -7,8 +7,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeWithPresenter
+import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS_CONTROL_FLAG
@@ -53,10 +53,11 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 
     private fun onChanged(t: UmAccount?) {
         GlobalScope.launch {
-            val contentEntryListTabsArgs = mutableMapOf(
-                    "0" to "${MessageID.libraries};$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID" +
-                            "&$ARG_LIBRARIES_CONTENT&$ARG_EDIT_BUTTONS_CONTROL_FLAG=$EDIT_BUTTONS_NEWFOLDER",
-                    "1" to "${MessageID.downloaded};$ARG_DOWNLOADED_CONTENT")
+            val contentEntryListViews = mutableListOf(
+                    MessageID.libraries to "${ContentEntryListView.VIEW_NAME}?$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID&" +
+                            "$ARG_LIBRARIES_CONTENT&$ARG_EDIT_BUTTONS_CONTROL_FLAG=$EDIT_BUTTONS_NEWFOLDER",
+                    MessageID.downloaded to "${ContentEntryListView.VIEW_NAME}?$ARG_DOWNLOADED_CONTENT"
+            )
 
             val options = mutableListOf<Pair<Int, String>>()
 
@@ -74,7 +75,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                     options.add(Pair(MessageID.reports, ReportDashboardView.VIEW_NAME))
 
                     if(person.admin){
-                        contentEntryListTabsArgs["2"] =  "${MessageID.recycled};$ARG_RECYCLED_CONTENT"
+                        contentEntryListViews.add(Pair(MessageID.recycled, "${ContentEntryListView.VIEW_NAME}?$ARG_RECYCLED_CONTENT"))
                     }
 
                     homeView.runOnUiThread(Runnable {
@@ -93,9 +94,10 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 
             homeView.runOnUiThread(Runnable {
                 homeView.loadProfileIcon(if(account == null) "" else "")
-                options.add(0, Pair(MessageID.contents,
-                        HOME_CONTENTENTRYLIST_TABS_VIEWNAME + "?" +
-                                UMFileUtil.mapToQueryString(contentEntryListTabsArgs)))
+                val contentEntryListArgs = mapOf(
+                        ARG_HOME_CONTENTENTRYLIST_VIEWLIST to contentEntryListViews.map { it.second }.joinToString(separator = ","),
+                        ARG_HOME_CONTENTENTRYLIST_TITLELIST to contentEntryListViews.map { it.first.toString() }.joinToString(separator = ","))
+                options.add(0, Pair(MessageID.contents, "$HOME_CONTENTENTRYLIST_TABS_VIEWNAME?${contentEntryListArgs.toQueryString()}"))
                 homeView.setOptions(options)
             })
         }
@@ -142,6 +144,10 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
          * HomeContentEntryTabsFragment for information about arguments
          */
         const val HOME_CONTENTENTRYLIST_TABS_VIEWNAME = "ContentEntryListTabs"
+
+        const val ARG_HOME_CONTENTENTRYLIST_VIEWLIST = "viewList"
+
+        const val ARG_HOME_CONTENTENTRYLIST_TITLELIST = "titleList"
 
     }
 }
