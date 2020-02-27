@@ -11,6 +11,10 @@ import com.ustadmobile.core.view.ClazzAssignmentListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.Role
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 
 /**
  *  Presenter for ClazzAssignmentList view
@@ -24,6 +28,7 @@ class ClazzAssignmentListPresenter(context: Any,
     : UstadBaseController<ClazzAssignmentListView>(context, arguments, view) {
 
     private var clazzAssignmentDao = repository.clazzAssignmentDao
+    private var clazzDao = repository.clazzDao
     private var clazzUid : Long = 0L
 
     private lateinit var factory: DataSource.Factory<Int, ClazzAssignmentWithMetrics>
@@ -34,8 +39,15 @@ class ClazzAssignmentListPresenter(context: Any,
             clazzUid = arguments[ARG_CLAZZ_UID]?.toLong() ?: 0L
             getAndSetProvider()
 
-            //TODO: Figure out the visiblity of edit via permissions
-            view.setEditVisibility(true)
+            //Consider making this live data ?
+            val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+            GlobalScope.launch {
+                val assignmentEditPermission = clazzDao.personHasPermissionWithClazz(
+                        loggedInPersonUid, clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE)
+                view.runOnUiThread(Runnable {
+                    view.setEditVisibility(assignmentEditPermission)
+                })
+            }
         }
     }
 

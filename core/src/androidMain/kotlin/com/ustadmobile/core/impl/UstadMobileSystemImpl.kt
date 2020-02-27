@@ -338,7 +338,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     /**
      * Get a string for use in the UI
      */
-    actual fun getString(messageCode: Int, context: Any): String {
+    actual override fun getString(messageCode: Int, context: Any): String {
         val androidId = messageIdMap[messageCode]
         return if (androidId != null) {
             (context as Context).resources.getString(androidId)

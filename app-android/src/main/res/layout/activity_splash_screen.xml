@@ -9,10 +9,11 @@
     android:orientation="vertical"
     tools:context="com.ustadmobile.port.android.view.SplashScreenActivity">
 
+
    <androidx.appcompat.widget.AppCompatImageView
        android:id="@+id/organisation_icon"
-       android:layout_width="1dp"
-       android:layout_height="1dp"
+       android:layout_width="180dp"
+       android:layout_height="180dp"
        android:layout_centerHorizontal="true"
        android:layout_centerVertical="true"
        app:srcCompat="@drawable/ic_launcher_icon"

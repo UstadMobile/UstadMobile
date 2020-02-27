@@ -6,8 +6,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzAssignmentDetailAssignmentView
 import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -25,25 +27,38 @@ class ClazzAssignmentDetailPresenter(context: Any,
 
 
     private var clazzAssignmentDao = repository.clazzAssignmentDao
+    private var clazzDao = repository.clazzDao
     private lateinit var clazzAssignment: ClazzAssignmentWithMetrics
+    private var clazzUid = 0L
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
+        if(arguments.containsKey(UstadView.ARG_CLAZZ_UID)) {
+            clazzUid = arguments[UstadView.ARG_CLAZZ_UID]?.toLong() ?: 0L
+        }
+
         if(arguments.containsKey(ARG_CLAZZ_ASSIGNMENT_UID)){
             GlobalScope.launch {
+
+                //Consider making this live data ?
+                val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+                val assignmentEditPermission = clazzDao.personHasPermissionWithClazz(
+                        loggedInPersonUid, clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE)
+
                 val assignment = clazzAssignmentDao.findWithMetricsByUid(
                                 arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0)
                 if (assignment != null) {
                     clazzAssignment = assignment
                     view.runOnUiThread(Runnable {
                         view.setClazzAssignment(clazzAssignment)
-                        view.setupTabs(listOf(ClazzAssignmentDetailAssignmentView.VIEW_NAME,
-                                ClazzAssignmentDetailProgressView.VIEW_NAME))
+                        val tabs = mutableListOf<String>()
+                        tabs.add(ClazzAssignmentDetailAssignmentView.VIEW_NAME)
+                        if(assignmentEditPermission){
+                            tabs.add(ClazzAssignmentDetailProgressView.VIEW_NAME)
+                        }
+                        view.setupTabs(tabs)
                     })
-
-                    //TODO : Get permission and check if logged in person has progress access/ etc
-
                 }
             }
         }

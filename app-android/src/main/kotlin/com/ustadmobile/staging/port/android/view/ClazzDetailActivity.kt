@@ -1,26 +1,21 @@
 package com.ustadmobile.staging.port.android.view
 
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
-import java.util.*
 import com.ustadmobile.port.android.view.UstadBaseActivity
-import com.ustadmobile.port.android.view.UstadBaseFragment
+import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 
 /**
@@ -28,85 +23,55 @@ import com.ustadmobile.port.android.view.UstadBaseFragment
  *
  * This Activity extends UstadBaseActivity and implements ClazzDetailView
  */
-class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTabSelectedListener {
+class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView {
 
     private lateinit var mPager: ViewPager
-    private lateinit var mPagerAdapter: ClassDetailViewPagerAdapter
+    private lateinit var mPagerAdapter: ViewNameListFragmentPagerAdapter
     private lateinit var toolbar: Toolbar
     private lateinit var mTabLayout: TabLayout
     private lateinit var mPresenter: ClazzDetailPresenter
-    internal var currentClazzUid: Long = 0L
-    private var attendanceVisibility: Boolean = false
-    private var activityVisibility: Boolean = false
-    private var selVisibility: Boolean = false
+    private var currentClazzUid: Long = 0L
     private var settingsVisibility: Boolean = false
-    private var assignmentVisibility: Boolean = true
     internal lateinit var menu: Menu
 
-    var previousPosition = -1
+    private val bundleMakerFn: (viewUri: String, index: Int)-> Bundle = { _, _ ->
+        val bundle = Bundle()
+        bundle.putString(ARG_CLAZZ_UID, currentClazzUid.toString())
+        bundle.putString(UstadView.ARG_CLAZZ_UID, currentClazzUid.toString())
+        bundle
+    }
 
-    private val fragPosMap = HashMap<Int, Class<*>>()
 
     /**
      * Separated out view pager setup for clarity.
      */
-    private fun setupViewPager() {
+    private fun setupViewPager(tabs: List<String>) {
+
+        val viewNameToTitle = mapOf(
+                ClazzStudentListView.VIEW_NAME to getText(R.string.people).toString(),
+                ClassLogListView.VIEW_NAME to getText(R.string.attendance).toString(),
+                ClazzActivityListView.VIEW_NAME to getText(R.string.activity).toString(),
+                SELAnswerListView.VIEW_NAME to getText(R.string.sel_caps).toString(),
+                ClazzAssignmentListView.VIEW_NAME to getText(R.string.assignments).toString()
+        )
 
         runOnUiThread {
             mPager = findViewById(R.id.class_detail_view_pager_container)
-            mPagerAdapter = ClassDetailViewPagerAdapter(supportFragmentManager)
-            var fragCount = 0
-            val bundle = Bundle()
-            bundle.putString(ARG_CLAZZ_UID, currentClazzUid.toString())
-            bundle.putString(UstadView.ARG_CLAZZ_UID, currentClazzUid.toString())
-            mPagerAdapter.addFragments(fragCount, ClazzStudentListFragment.newInstance(bundle))
-            fragPosMap[fragCount++] = ClazzStudentListFragment::class.java
-
-            if (attendanceVisibility) {
-                mPagerAdapter.addFragments(fragCount, ClazzLogListFragment.newInstance(bundle))
-                fragPosMap[fragCount++] = ClazzLogListFragment::class.java
-            }
-
-            if (activityVisibility) {
-                mPagerAdapter.addFragments(fragCount, ClazzActivityListFragment.newInstance(bundle))
-                fragPosMap[fragCount++] = ClazzActivityListFragment::class.java
-            }
-
-            if (selVisibility) {
-                mPagerAdapter.addFragments(fragCount, SELAnswerListFragment.newInstance(bundle))
-                fragPosMap[fragCount++] = SELAnswerListFragment::class.java
-            }
-
-            if(assignmentVisibility){
-                mPagerAdapter.addFragments(fragCount, ClazzAssignmentListFragment.newInstance(bundle))
-                fragPosMap[fragCount++] = ClazzAssignmentListFragment::class.java
-            }
-
+            mPagerAdapter = ViewNameListFragmentPagerAdapter(supportFragmentManager,
+                    FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
+                    VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle,bundleMakerFn
+                    )
             mPager.adapter = mPagerAdapter
 
             mTabLayout = findViewById(R.id.activity_class_detail_tablayout)
             mTabLayout.tabGravity = TabLayout.GRAVITY_FILL
             mTabLayout.setupWithViewPager(mPager)
-
-            mTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-                override fun onTabSelected(tab: TabLayout.Tab) {
-                    if(previousPosition < 1) {
-                        previousPosition = tab.position
-                    }
-                }
-                override fun onTabUnselected(tab: TabLayout.Tab) {}
-                override fun onTabReselected(tab: TabLayout.Tab) {}
-            })
-
-            if(previousPosition != -1){
-                mTabLayout.getTabAt(previousPosition)
-            }
         }
     }
 
 
     override fun setupTabs(tabs: List<String>) {
-        setupViewPager()
+        setupViewPager(tabs)
     }
     /**
      * The ClazzDetailActivity's onCreate get the Clazz UID from arguments given to it
@@ -142,15 +107,8 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
         this.menu = menu
         val inflater = menuInflater
         inflater.inflate(R.menu.menu_clazzdetail, menu)
-
         val settingsGearMenuItem = menu.findItem(R.id.menu_clazzdetail_gear)
-        val gearIcon = AppCompatResources.getDrawable(applicationContext,
-                R.drawable.ic_settings_white_24dp)
-        gearIcon?.setColorFilter(resources.getColor(R.color.icons), PorterDuff.Mode.SRC_IN)
-        settingsGearMenuItem.icon = gearIcon
-
         settingsGearMenuItem.isVisible = settingsVisibility
-
         return true
     }
 
@@ -162,32 +120,25 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
-        val i = item.itemId
         //If this activity started from other activity
-        if (i == R.id.menu_clazzdetail_gear) {
-            mPresenter.handleClickClazzEdit()
-            return super.onOptionsItemSelected(item)
-        } else if (i == R.id.menu_clazzdetail_search) {
-            mPresenter.handleClickSearch()
-            return super.onOptionsItemSelected(item)
-        } else if (i == android.R.id.home) {
-            onBackPressed()
-            return true
-        } else {
-            return super.onOptionsItemSelected(item)
+        return when (item.itemId) {
+            R.id.menu_clazzdetail_gear -> {
+                mPresenter.handleClickClazzEdit()
+                super.onOptionsItemSelected(item)
+            }
+            R.id.menu_clazzdetail_search -> {
+                mPresenter.handleClickSearch()
+                super.onOptionsItemSelected(item)
+            }
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
         }
     }
-
-    //Tab layout's on Tab selected
-    override fun onTabSelected(tab: TabLayout.Tab) {
-        mPagerAdapter.getItem(tab.position) //Loads first fragment
-        mPagerAdapter.notifyDataSetChanged()
-        mPager.currentItem = tab.position
-    }
-
-    override fun onTabUnselected(tab: TabLayout.Tab) {}
-
-    override fun onTabReselected(tab: TabLayout.Tab) {}
 
     override fun setClazz(clazz: Clazz) {
         runOnUiThread {
@@ -195,94 +146,18 @@ class ClazzDetailActivity : UstadBaseActivity(), ClazzDetailView, TabLayout.OnTa
             setSupportActionBar(toolbar)
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
         }
-
-    }
-
-    override fun setAttendanceVisibility(visible: Boolean) {
-        attendanceVisibility = visible
-    }
-
-    override fun setActivityVisibility(visible: Boolean) {
-        activityVisibility = visible
-    }
-
-    override fun setSELVisibility(visible: Boolean) {
-        selVisibility = visible
     }
 
     override fun setSettingsVisibility(visible: Boolean) {
         settingsVisibility = visible
     }
 
-    /**
-     * ClazzDetailView's view pager adapter
-     */
-    private inner class ClassDetailViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
-        override fun getCount(): Int {
-            return positionMap.size
-        }
-
-        //Map of position and fragment
-        internal var positionMap: WeakHashMap<Int, UstadBaseFragment> = WeakHashMap()
-
-
-        fun addFragments(pos: Int, fragment: Fragment) {
-            positionMap[pos] = fragment as UstadBaseFragment
-        }
-
-        /**
-         * Generates fragment for that page/position
-         *
-         * @param position The position of the fragment to generate
-         * @return void
-         */
-        override fun getItem(position: Int): Fragment {
-            val thisFragment = positionMap[position]
-            if (thisFragment != null) {
-                return thisFragment
-            } else {
-                val fragClass = fragPosMap[position]
-                val bundle = Bundle()
-                bundle.putString(ARG_CLAZZ_UID, currentClazzUid.toString())
-                bundle.putString(UstadView.ARG_CLAZZ_UID, currentClazzUid.toString())
-                return if (fragClass == ClazzStudentListFragment::class.java) {
-                    ClazzStudentListFragment.newInstance(bundle)
-                } else if (fragClass == ClazzLogListFragment::class.java) {
-                    ClazzLogListFragment.newInstance(bundle)
-                } else if (fragClass == ClazzActivityListFragment::class.java) {
-                    ClazzActivityListFragment.newInstance(bundle)
-                } else if (fragClass == SELAnswerListFragment::class.java) {
-                    SELAnswerListFragment.newInstance(bundle)
-                } else if (fragClass == ClazzAssignmentListFragment::class.java){
-                    ClazzAssignmentListFragment.newInstance(bundle) as Fragment
-                } else {
-                    throw IllegalArgumentException("Not available")
-                }
-            }
-        }
-
-        /**
-         * Gets the title of the tab position
-         *
-         * @param position the position of the tab
-         * @return void
-         */
-        override fun getPageTitle(position: Int): CharSequence {
-            val fragClass = fragPosMap[position]
-            return if (fragClass == ClazzStudentListFragment::class.java) {
-                (getText(R.string.students_literal) as String).toUpperCase(Locale.getDefault())
-            } else if (fragClass == ClazzLogListFragment::class.java) {
-                (getText(R.string.attendance) as String).toUpperCase(Locale.getDefault())
-            } else if (fragClass == ClazzActivityListFragment::class.java) {
-                (getText(R.string.activity) as String).toUpperCase(Locale.getDefault())
-            } else if (fragClass == SELAnswerListFragment::class.java) {
-                (getText(R.string.sel) as String).toUpperCase(Locale.getDefault())
-            } else if (fragClass == ClazzAssignmentListFragment::class.java){
-                (getText(R.string.assignments) as String).toUpperCase(Locale.getDefault())
-            } else {
-                ""
-            }
-        }
+    companion object{
+        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
+                ClazzStudentListView.VIEW_NAME to ClazzStudentListFragment::class.java,
+                ClassLogListView.VIEW_NAME to ClazzLogListFragment::class.java,
+                ClazzActivityListView.VIEW_NAME to ClazzActivityListFragment::class.java,
+                SELAnswerListView.VIEW_NAME to SELAnswerListFragment::class.java,
+                ClazzAssignmentListView.VIEW_NAME to ClazzAssignmentListFragment::class.java)
     }
-
 }

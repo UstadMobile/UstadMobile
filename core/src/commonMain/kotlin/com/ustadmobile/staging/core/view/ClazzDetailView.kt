@@ -17,13 +17,6 @@ interface ClazzDetailView : UstadView {
 
     fun setupTabs(tabs: List<String>)
 
-    //TODO : Replace with tabs including assignment
-    fun setAttendanceVisibility(visible: Boolean)
-
-    fun setActivityVisibility(visible: Boolean)
-
-    fun setSELVisibility(visible: Boolean)
-
     fun setSettingsVisibility(visible: Boolean)
 
     companion object {

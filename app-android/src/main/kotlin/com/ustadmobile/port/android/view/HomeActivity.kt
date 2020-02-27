@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -167,15 +168,12 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     @SuppressLint("ObsoleteSdkInt") //We have build flavors that target lower than SDK 21
     private fun updateElevation(optionUri: String) {
-        if(Build.VERSION.SDK_INT < 21)
-            return //this is not applicable pre-Android 5
-
         val viewName = optionUri.substringBefore('?')
-        findViewById<AppBarLayout>(R.id.appBar).elevation = if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
+        ViewCompat.setElevation(findViewById(R.id.appBar), if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
             0f
         }else {
             10f
-        }
+        })
     }
 
     override fun onPageScrollStateChanged(state: Int) {}

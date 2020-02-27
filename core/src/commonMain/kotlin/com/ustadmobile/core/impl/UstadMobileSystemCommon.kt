@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.controller.AddScheduleDialogPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
@@ -222,14 +223,39 @@ open abstract class UstadMobileSystemCommon {
     }
 
     /**
+     * Get a string for use in the UI using a constant int from MessageID
+     */
+    @JsName("getString")
+    abstract fun getString(messageCode: Int, context: Any): String
+
+    /**
      * Get list of all UI supported languages
      */
     @JsName("getAllUiLanguage")
+    @Deprecated("Use getAllUiLanguagesList instead")
     open fun getAllUiLanguage(context: Any): Map<String,String>{
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
                 "",context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
         val languageList =languagesConfigVal.split(",")
         return languageList.map { it to (LANGUAGE_NAMES[it] ?: it) }.toMap()
+    }
+
+    /**
+     * Get a list of all languages available for the UI. This is a list of pairs in the form of
+     * langcode, language display name. The first entry will always be empty constant which
+     * tells the app to use the system default language.
+     *
+     * @param context
+     */
+    @JsName("getAllUiLanguagesList")
+    open fun getAllUiLanguagesList(context: Any): List<Pair<String, String>> {
+        val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
+                "",context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
+        val availableLangs = languagesConfigVal.split(",").sorted()
+
+
+        return listOf(LOCALE_USE_SYSTEM to getString(MessageID.use_device_language, context)) +
+                availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
 
