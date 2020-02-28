@@ -333,14 +333,14 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         }
 
         if (shakeDetector != null && sensorManager != null) {
-            shakeDetector!!.start(sensorManager)
+            shakeDetector?.start(sensorManager)
         }
     }
 
     override fun onPause() {
         super.onPause()
         if (shakeDetector != null) {
-            shakeDetector!!.stop()
+            shakeDetector?.stop()
         }
     }
 

@@ -4,7 +4,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.lifecycle.MutableLiveData
 import com.toughra.ustadmobile.R
+import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_CONNECTION_ERR
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
@@ -33,8 +35,7 @@ public class RepoLoadingStatusViewRoboElectricTest {
 
     @Test
     fun givenLaunchedApplication_whenLoadingFromEitherCloudOrMirror_thenShouldShowProgressBarAndRightIconAndMessage(){
-        repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADING_CLOUD,"")
-
+        repoLoadingStatusView.onChanged(RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADING_CLOUD))
         val iconView = repoLoadingStatusView.findViewById<ImageView>(R.id.statusViewImageInner)
         val messageView = repoLoadingStatusView.findViewById<TextView>(R.id.statusViewTextInner)
         val progressView = repoLoadingStatusView.findViewById<ProgressBar>(R.id.statusViewProgress)
@@ -52,7 +53,7 @@ public class RepoLoadingStatusViewRoboElectricTest {
 
     @Test
     fun givenApplicationLaunched_whenLoadingCompletedWithNoDataToShow_shouldHideProgressAndShowCorrectIconAndMessage(){
-        repoLoadingStatusView.onLoadStatusChanged(STATUS_FAILED_CONNECTION_ERR,"")
+        repoLoadingStatusView.onChanged(RepositoryLoadHelper.RepoLoadStatus(STATUS_FAILED_CONNECTION_ERR))
         val iconView = repoLoadingStatusView.findViewById<ImageView>(R.id.statusViewImageInner)
         val messageView = repoLoadingStatusView.findViewById<TextView>(R.id.statusViewText)
         val progressView = repoLoadingStatusView.findViewById<ProgressBar>(R.id.statusViewProgress)
@@ -70,7 +71,7 @@ public class RepoLoadingStatusViewRoboElectricTest {
     fun getApplicationLaunched_whenCustomMessageAndIconAreSetToBeDisplayedOnEmptyView_thenShouldDisplayThem(){
        repoLoadingStatusView.emptyStatusText = R.string.empty_state_libraries
         repoLoadingStatusView.emptyStatusImage = R.drawable.ic_folder_black_24dp
-        repoLoadingStatusView.onLoadStatusChanged(STATUS_LOADED_NODATA,"")
+        repoLoadingStatusView.onChanged(RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA))
 
         val messageView = repoLoadingStatusView.findViewById<TextView>(R.id.statusViewText)
         val iconView = repoLoadingStatusView.findViewById<ImageView>(R.id.statusViewImageInner)

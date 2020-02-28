@@ -35,18 +35,17 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
 
         if(arguments.containsKey(UstadView.ARG_CLAZZ_ASSIGNMENT_UID)){
             val clazzAssignmentUid = arguments[UstadView.ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0
+            getAndSetProvider(clazzAssignmentUid)
+
             GlobalScope.launch {
                 val assignment = clazzAssignmentDao.findWithMetricByUidAsync(clazzAssignmentUid)
+
+                //TODO: Find if edit permission and view/show
                 if(assignment != null){
                     clazzAssignment = assignment
-                    getAndSetProvider()
-                    view.runOnUiThread(Runnable {
-                        view.setClazzAssignment(clazzAssignment)
-                    })
-
-                    //TODO: Find if edit permission and view/show
                     view.runOnUiThread(Runnable {
                         view.setEditVisibility(true)
+                        view.setClazzAssignment(clazzAssignment)
                     })
                 }
             }
@@ -54,16 +53,17 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
     }
 
 
-    private fun getAndSetProvider() {
+    private fun getAndSetProvider(clazzAssignmentUid: Long) {
         factory = clazzAssignmentContentJoinDao.findContentByAssignmentUid(
-                clazzAssignment.clazzAssignmentUid)
+                clazzAssignmentUid)
         view.runOnUiThread(Runnable {
             view.setListProvider(factory)
         })
     }
 
     fun handleClickEdit(){
-        impl.go(ClazzAssignmentEditView.VIEW_NAME, arguments, context)
+        val args = mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to arguments[UstadView.ARG_CLAZZ_ASSIGNMENT_UID])
+        impl.go(ClazzAssignmentEditView.VIEW_NAME, args, context)
     }
 
 

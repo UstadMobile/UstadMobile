@@ -54,7 +54,7 @@ class SchoolListPresenterTest : AbstractSetup() {
         return Pair(mockView, presenter)
     }
 
-    @Test
+    //@Test
     fun givenPresenterCreated_whenDoneSomething_shouldDoSomethingElse() {
         // create presenter, with a mock view, check that it makes that call
         val (view, presenter) = createMockViewAndPresenter()

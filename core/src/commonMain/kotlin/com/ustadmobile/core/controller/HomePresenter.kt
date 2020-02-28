@@ -25,7 +25,7 @@ import kotlin.js.JsName
 class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeView,
                     val personDao: PersonDao, val impl: UstadMobileSystemImpl,
                     val repository : UmAppDatabase =
-                            UmAccountManager.getRepositoryForActiveAccount(this))
+                            UmAccountManager.getRepositoryForActiveAccount(context))
     : LanguageOptionPresenter(context, arguments, view, impl){
 
     private var account: UmAccount? = null

@@ -60,7 +60,7 @@
             android:id="@+id/item_clazz_assignment_with_metrics_progress"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dp"
-            android:visibility="visible"
+            android:visibility="invisible"
             tools:progress="77"
             android:progress="@{0+(int)contententrywithmetrics.contentEntryWithMetricsProgress}"
             android:layout_height="wrap_content"

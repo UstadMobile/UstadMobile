@@ -33,30 +33,22 @@ package com.ustadmobile.port.android.view
 
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.view.Window
 import android.view.WindowManager
-import android.widget.ImageView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
+import androidx.appcompat.app.AppCompatActivity
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SplashScreenPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SplashScreenView
-import java.util.concurrent.TimeUnit
 
 
-class SplashScreenActivity : SplashScreenView, UstadBaseActivity() {
+class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
 
-    private lateinit var organisationIcon : ImageView
-
-    private lateinit var constraintLayout: ConstraintLayout
+    override val viewContext: Any
+        get() = this
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
         //add translucent effect on toolbar - full screen
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
@@ -67,42 +59,14 @@ class SplashScreenActivity : SplashScreenView, UstadBaseActivity() {
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
 
+        super.onCreate(savedInstanceState)
+
         setTheme(R.style.ThemeSplash)
         setContentView(R.layout.activity_splash_screen)
-
-        organisationIcon = findViewById(R.id.organisation_icon)
-        constraintLayout = findViewById(R.id.constraint_layout)
 
         val presenter = SplashScreenPresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
                 this, UstadMobileSystemImpl.instance)
         presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
-
     }
-
-    override fun startUi(delay: Boolean, animate: Boolean) {
-        Handler().postDelayed({
-            UstadMobileSystemImpl.instance.startUI(this@SplashScreenActivity)
-        }, if(delay) TimeUnit.SECONDS.toMillis(if(animate) 3 else 2) else 0)
-    }
-
-    override fun animateOrganisationIcon(animate: Boolean, delay: Boolean) {
-
-        organisationIcon.setOnClickListener{
-            val constraint = ConstraintSet()
-            val transition = AutoTransition()
-            transition.duration = 1000
-            constraint.clone(this, R.layout.activity_splash_screen_zoom)
-            TransitionManager.beginDelayedTransition(constraintLayout, transition)
-            constraint.applyTo(constraintLayout)
-        }
-
-        if(delay){
-            Handler().postDelayed({
-                organisationIcon.performClick()
-            }, TimeUnit.MILLISECONDS.toMillis(if(animate) 200 else 0))
-        }
-
-    }
-
 
 }

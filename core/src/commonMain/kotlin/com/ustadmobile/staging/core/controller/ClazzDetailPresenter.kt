@@ -4,10 +4,8 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithPresenter
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
-import com.ustadmobile.core.view.PersonListSearchView
 import com.ustadmobile.core.view.PersonListSearchView.Companion.ARGUMENT_CURRNET_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
@@ -56,20 +54,35 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String?>, view: 
                 val attendancePermission =
                         clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazz.clazzUid,
                                 Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)
-                val selVisibility = clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                val selPermission  = clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
                         currentClazz.clazzUid, Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT)
                 val clazzActivityPermission =
                         clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazz.clazzUid,
                                 Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT)
+                val clazzAssignmentPermission =
+                        clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazz.clazzUid,
+                                Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW)
+
 
                 view.runOnUiThread(Runnable {
+
                     view.setSettingsVisibility(settingsVisibility)
-                    view.setAttendanceVisibility(
-                            if (currentClazz.isAttendanceFeature()) attendancePermission else false)
-                    view.setSELVisibility(if (currentClazz.isSelFeature()) selVisibility else false)
-                    view.setActivityVisibility(if (currentClazz.isActivityFeature())
-                        clazzActivityPermission else false)
-                    view.setupTabs(listOf())
+
+                    val tabs = mutableListOf<String>()
+                    tabs.add(ClazzStudentListView.VIEW_NAME)
+                    if(currentClazz.isAttendanceFeature() && attendancePermission){
+                        tabs.add(ClassLogListView.VIEW_NAME)
+                    }
+                    if(currentClazz.isActivityFeature() && clazzActivityPermission){
+                        tabs.add(ClazzActivityListView.VIEW_NAME)
+                    }
+                    if(currentClazz.isSelFeature() && selPermission){
+                        tabs.add(SELAnswerListView.VIEW_NAME)
+                    }
+                    if(currentClazz.isAssignmentFeature() && clazzAssignmentPermission){
+                        tabs.add(ClazzAssignmentListView.VIEW_NAME)
+                    }
+                    view.setupTabs(tabs)
                     view.setClazz(currentClazz)
                 })
             }
