@@ -8,8 +8,6 @@ import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
 import com.github.aakira.napier.Napier
-import com.ustadmobile.door.ext.isActive
-import com.ustadmobile.door.util.threadSafeListOf
 
 typealias LifeCycleHelperFactory = (DoorLifecycleOwner) -> RepositoryLoadHelperLifecycleHelper
 
@@ -305,7 +303,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         }
 
         var nonEmptyVal: T? = null
-        withContext(liveDataObserverDispatcher()) {
+        withContext(doorMainDispatcher()) {
             autoRetryOnEmptyLiveData?.observeForever(observer)
             nonEmptyVal = withTimeoutOrNull(500) { completableDeferred.await()}
             autoRetryOnEmptyLiveData?.removeObserver(observer)

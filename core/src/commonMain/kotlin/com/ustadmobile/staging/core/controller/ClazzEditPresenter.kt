@@ -200,7 +200,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         this.currentClazzUid = clazzUid
 
         GlobalScope.launch {
-            val clazzData = clazzDaoDB.findByUidAsync(currentClazzUid)
+            val clazzData = clazzDaoDB.findByUidAsync(currentClazzUid) ?: Clazz()
             handleClazzValueChanged(clazzData)
 
             mUpdatedClazz = clazzData

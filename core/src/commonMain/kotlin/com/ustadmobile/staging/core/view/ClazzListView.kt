@@ -49,6 +49,7 @@ interface ClazzListView : UstadView {
         @Deprecated("")
         val ARG_LOGDATE = "logdate"
 
+        @Deprecated("Use UstadView arg")
         val ARG_CLAZZ_UID = "ClazzUid"
 
         val SORT_ORDER_NAME_ASC = 1
