@@ -49,7 +49,7 @@ class SaleDeliveryRecyclerAdapter(
         //Options to Edit/Delete every schedule in the list
         dots.setOnClickListener { v: View ->
             //creating a popup menu
-            val popup = PopupMenu(theActivity.applicationContext, v)
+            val popup = PopupMenu(theActivity, v)
 
             popup.setOnMenuItemClickListener { item ->
                 val i = item.itemId
