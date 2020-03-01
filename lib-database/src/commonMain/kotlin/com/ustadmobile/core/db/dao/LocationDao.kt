@@ -97,8 +97,9 @@ abstract class LocationDao : BaseDao<Location> {
             "FROM Location AS LOC WHERE CAST(LOC.locationActive AS INTEGER) = 1 ORDER BY LOC.title ASC")
     abstract fun findAllLocationsWithCount(): DataSource.Factory<Int, LocationWithSubLocationCount>
 
-    //TODO: Replace by boolean argument
-    @Query("UPDATE Location SET locationActive = 0 WHERE locationUid = :uid")
+    @Query("UPDATE Location SET locationActive = 0" +
+            ", locationLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
+            " WHERE locationUid = :uid")
     abstract suspend fun inactivateLocationAsync(uid: Long):Int
 
     @Query("SELECT * FROM Location WHERE CAST(locationActive AS INTEGER) = 1 ")

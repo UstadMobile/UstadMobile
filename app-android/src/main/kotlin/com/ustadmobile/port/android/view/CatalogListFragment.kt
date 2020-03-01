@@ -25,9 +25,9 @@ import com.ustadmobile.core.view.SelectSaleProductView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.SaleProduct
 import com.ustadmobile.staging.core.view.SearchableListener
-import kotlinx.android.synthetic.main.xapi_header_report.*
 
-class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProductView, SearchableListener {
+class CatalogListFragment : UstadBaseFragment(), IOnBackPressed, SelectSaleProductView,
+        SearchableListener {
 
     override val viewContext: Any
         get() = context!!
@@ -45,7 +45,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
     private lateinit var addItem: FloatingActionButton
 
     override fun updateToolbar(title: String) {
-        //TODO
+        //Not applicable here. Toolbar is written by bottom navigation.
     }
 
     override fun onSearchButtonClick() {}
@@ -128,7 +128,6 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
 
         addCollection.isVisible = mPresenter.isLoggedInPersonAdmin()
 
-
         return rootContainer
     }
 
@@ -167,7 +166,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
                 )
 
         //set the adapter
-        recentRV.setAdapter(recyclerAdapter)
+        recentRV.adapter = recyclerAdapter
     }
 
     override fun setCategoryProvider(categoryProvider: DataSource.Factory<Int, SaleProduct>) {
@@ -190,7 +189,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         { recyclerAdapter.submitList(it) })
 
         //set the adapter
-        categoryRV.setAdapter(recyclerAdapter)
+        categoryRV.adapter = recyclerAdapter
     }
 
     fun searchCatalog(searchValue: String) {
@@ -235,7 +234,7 @@ class CatalogListFragment : UstadBaseFragment, IOnBackPressed, SelectSaleProduct
         })
     }
 
-    constructor()  {
+    init {
         val args = Bundle()
         arguments = args
         icon = R.drawable.ic_list_black_24dp

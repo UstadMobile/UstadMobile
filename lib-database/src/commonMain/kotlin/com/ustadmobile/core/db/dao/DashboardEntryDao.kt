@@ -16,6 +16,7 @@ abstract class DashboardEntryDao : BaseDao<DashboardEntry> {
 
 
     @Query("UPDATE DashboardEntry SET dashboardEntryTitle = :title " +
+            " , dashboardEntryLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
             " WHERE dashboardEntryUid = :uid")
     abstract suspend fun updateTitle(uid: Long, title: String):Int
 
@@ -25,16 +26,19 @@ abstract class DashboardEntryDao : BaseDao<DashboardEntry> {
 
 
     @Query("UPDATE DashboardEntry SET dashboardEntryIndex = -1 " +
+            " , dashboardEntryLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
             " WHERE  dashboardEntryUid = :uid")
     abstract suspend fun pinEntry(uid: Long):Int
 
     @Query("UPDATE DashboardEntry SET dashboardEntryIndex = " +
             "(SELECT (SELECT MAX(dashboardEntryIndex) FROM DashboardEntry) +1) " +
+            " , dashboardEntryLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
             "WHERE dashboardEntryUid = :uid")
     abstract suspend fun unpinEntry(uid: Long):Int
 
-    //TODO: Make it use a boolean argument
+
     @Query("UPDATE DashboardEntry SET dashboardEntryActive = 0 " +
+            " , dashboardEntryLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
             " WHERE dashboardEntryUid = :uid")
     abstract suspend fun deleteEntry(uid: Long):Int
 

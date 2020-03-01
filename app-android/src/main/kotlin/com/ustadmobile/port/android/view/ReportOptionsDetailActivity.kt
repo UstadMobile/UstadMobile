@@ -17,8 +17,11 @@ import com.crystal.crystalrangeseekbar.widgets.CrystalRangeSeekbar
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportOptionsDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ReportOptionsDetailView
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 class ReportOptionsDetailActivity : UstadBaseActivity(),
@@ -208,12 +211,21 @@ class ReportOptionsDetailActivity : UstadBaseActivity(),
         runOnUiThread { productTypesTV.text = productTypeSelected }
     }
 
-    override fun setDateRangeSelected(dateRangeSelected: String) {
-        runOnUiThread { dateRangeTV.text = dateRangeSelected }
+    override fun setDateRangeSelectedLongs(fromDate: Long, toDate: Long) {
+        val locale = Locale(UstadMobileSystemImpl.instance.getLocale(this))
+        val formatter = SimpleDateFormat("dd/MMM/yyyy", locale)
+        val dateRangeText = formatter.format(fromDate) + " - " + formatter.format(toDate)
+        runOnUiThread{ dateRangeTV.text = dateRangeText}
     }
 
     override fun setSalePriceRangeSelected(from: Int, to: Int, salePriceSelected: String) {
-        runOnUiThread { salesPriceTV.text = salePriceSelected }
+        val locale = Locale(UstadMobileSystemImpl.instance.getLocale(this))
+        val fromL = NumberFormat.getInstance(locale).format(from)
+        val toL = NumberFormat.getInstance(locale).format(to)
+        val currency = getText(R.string.currency_afs)
+        val rangeText = getText(R.string.from).toString() + " " +
+                fromL + " " + currency + "-" + toL + " " + currency
+        runOnUiThread { salesPriceTV.text = rangeText }
     }
 
     override fun setGroupByPresets(presets: Array<String?>, selectedPosition: Int) {

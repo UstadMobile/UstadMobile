@@ -44,7 +44,7 @@ class SelectSaleProductRecyclerAdapter
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaleProductViewHolder {
 
-        val list = LayoutInflater.from(theContext).inflate(
+        val list = LayoutInflater.from(parent.context).inflate(
                 R.layout.item_sale_product_blob, parent, false)
         return SelectSaleProductViewHolder(list)
 
@@ -56,7 +56,6 @@ class SelectSaleProductRecyclerAdapter
         Picasso
                 .get()
                 .load(imageUri)
-                //.resize(0, dpToPxImagePerson())
                 .fit()
                 .centerCrop()
                 .noFade()
@@ -70,12 +69,12 @@ class SelectSaleProductRecyclerAdapter
         val name = holder.itemView.findViewById<TextView>(R.id.item_sale_product_blob_title)
         val dots = holder.itemView.findViewById<ImageView>(R.id.item_sale_product_blob_dots)
 
+        productPictureDaoRepo  =
+                UmAccountManager.getRepositoryForActiveAccount(holder.itemView.context).saleProductPictureDao
+        productPictureDao = UmAccountManager.getActiveDatabase(holder.itemView.context).saleProductPictureDao
+
         var imagePathLocal = ""
         var imagePathServer = ""
-
-        productPictureDaoRepo  =
-                UmAccountManager.getRepositoryForActiveAccount(theContext).saleProductPictureDao
-        productPictureDao = UmAccountManager.getActiveDatabase(theContext).saleProductPictureDao
 
         holder.imageLoadJob?.cancel()
 
@@ -111,7 +110,6 @@ class SelectSaleProductRecyclerAdapter
         }
 
 
-
         val currentLocale = impl.getLocale(theContext)
         name.text = entity!!.getNameLocale(currentLocale)
 
@@ -134,7 +132,7 @@ class SelectSaleProductRecyclerAdapter
             dots.setOnClickListener { v: View ->
                 if (theActivity != null) {
                     //creating a popup menu
-                    val popup = PopupMenu(theActivity!!.applicationContext, v)
+                    val popup = PopupMenu(theActivity, v)
                     popup.setOnMenuItemClickListener { item ->
                         val i = item.itemId
                         if (i == R.id.edit) {

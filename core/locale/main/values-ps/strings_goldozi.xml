@@ -70,7 +70,6 @@
     <string name="passwords_dont_match">پټ نوم سره ورته نه دي بیا هڅه وکړئ</string>
     <string name="unable_to_update_password">د پټ نوم بیا جوړل ترسره نه شو.</string>
     <string name="syncing">هممهالی کیږی</string>
-    <string name="edit">سمون</string>
     <string name="camera">کامره</string>
     <string name="gallery">گالري</string>
     <string name="unable_open_image">د دې انځول خلاصول ترسره نه شو</string>

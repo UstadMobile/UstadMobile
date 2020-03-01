@@ -61,11 +61,13 @@ abstract class SaleProductPictureDao : BaseDao<SaleProductPicture> {
 
     @Query("""UPDATE SaleProductPicture 
         SET saleProductPictureIndex = saleProductPictureIndex + 1 
+        , saleProductPictureLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
         WHERE saleProductPictureIndex >= :index 
         AND saleProductPictureSaleProductUid = :productUid""")
     abstract suspend fun moveIndexAheadForSaleProductAndIndex(productUid: Long, index: Int): Int
 
     @Query("""UPDATE SaleProductPicture SET saleProductPictureIndex = :index 
+        , saleProductPictureLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
         WHERE SaleProductPictureUid = :productPictureUid """)
     abstract suspend fun updateSaleProductPictureIndex(productPictureUid: Long, index: Int): Int
 

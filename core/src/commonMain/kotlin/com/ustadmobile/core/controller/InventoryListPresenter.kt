@@ -60,7 +60,6 @@ class InventoryListPresenter(context: Any,
         idToOrderInteger = HashMap()
         //Update sort presets
         updateSortSpinnerPreset()
-        getAndSetProvider(currentSortOrder)
     }
 
 
@@ -75,7 +74,6 @@ class InventoryListPresenter(context: Any,
     }
 
     private fun getAndSetProvider(sortCode: Int) {
-
         factory = rvDao.findAllInventoryByProduct(loggedInPersonUid, searchQuery, sortCode)
         view.setListProvider(factory)
     }
@@ -126,9 +124,6 @@ class InventoryListPresenter(context: Any,
 
     fun handleClickAddItems(){
         val args = HashMap<String, String>()
-//        args.put(ARG_INVENTORY_MODE, "true")
-//        args.put(ARG_SELECT_PRODUCERS_INVENTORY_ADDITION, "true")
-//        impl.go(SelectSaleProductView.VIEW_NAME, args, context)
         impl.go(NewInventoryItemView.VIEW_NAME, args, context)
         view.finish()
     }

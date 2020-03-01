@@ -47,6 +47,25 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
     abstract fun findAllSelectedCategoriesForSaleProductProvider(saleProductUid: Long)
             : DataSource.Factory<Int,SaleProductSelected>
 
+    @Query("""
+        SELECT CASE 
+        WHEN 
+            (SELECT COUNT(*) FROM SaleProductParentJoin 
+                WHERE SaleProductParentJoin.saleProductParentJoinChildUid = :saleProductUid 
+                AND SaleProductParentJoin.saleProductParentJoinParentUid = SaleProduct.saleProductUid 
+                AND CAST(SaleProductParentJoin.saleProductParentJoinActive AS INTEGER) = 1 
+            ) > 0 
+         THEN 
+            1 ELSE 0 END AS isSelected, 
+         SaleProduct.* 
+        FROM SaleProduct WHERE 
+         CAST(SaleProduct.saleProductCategory AS INTEGER) = 1
+         AND CAST(SaleProduct.saleProductActive AS INTEGER) = 1 
+         AND SaleProduct.saleProductUid != :saleProductUid
+    """)
+    abstract fun findAllSelectedCategoriesForSaleProductProvider2(saleProductUid: Long)
+            : DataSource.Factory<Int,SaleProductSelected>
+
     @Query(QUERY_SELECT_ALL_SALE_PRODUCT + SEARCH_WHERE +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = :saleProductCategoryUid " +
             " AND CAST(child.saleProductCategory AS INTEGER) = 0 " + QUERY_SORT_BY_NAME_ASC )

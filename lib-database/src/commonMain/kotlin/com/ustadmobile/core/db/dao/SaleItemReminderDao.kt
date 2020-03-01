@@ -23,8 +23,8 @@ abstract class SaleItemReminderDao : BaseDao<SaleItemReminder> {
             "AND CAST(saleItemReminderActive AS INTEGER) = 1")
     abstract fun findBySaleItemUidList(uid: Long): List<SaleItemReminder>
 
-    //TODO: Replace with Boolean argument
     @Query("UPDATE SaleItemReminder SET SaleItemReminderActive = 0 " +
+            " , saleItemReminderLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
             "WHERE SaleItemReminderUid = :uid " + "AND saleItemReminderActive")
     abstract suspend fun invalidateReminder(uid: Long):Int
 

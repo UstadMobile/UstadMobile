@@ -22,7 +22,7 @@ interface ReportOptionsDetailView : UstadView {
 
     fun setProductTypeSelected(productTypeSelected: String)
 
-    fun setDateRangeSelected(dateRangeSelected: String)
+    fun setDateRangeSelectedLongs(fromDate: Long, toDate: Long)
 
     fun setSalePriceRangeSelected(from: Int, to: Int, salePriceSelected: String)
 

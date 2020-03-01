@@ -89,7 +89,7 @@ class SelectSaleProductPresenter(context: Any,
         personDao = repository.personDao
 
         if (arguments!!.containsKey(ARG_PRODUCER_UID)) {
-            producerUid = (arguments.get(ARG_PRODUCER_UID)!!.toLong())
+            producerUid = (arguments[ARG_PRODUCER_UID]!!.toLong())
         }
         if (arguments.containsKey(ARG_SELECT_PRODUCERS_SALE_UID)) {
             saleUid = (arguments.get(ARG_SELECT_PRODUCERS_SALE_UID)!!.toLong())
@@ -112,9 +112,13 @@ class SelectSaleProductPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-        GlobalScope.launch(Dispatchers.Main) {
+//        updateProviders()
+
+        GlobalScope.launch {
             loggedInPerson = personDao.findByUidAsync(loggedInPersonUid)
-            updateProviders()
+            view.runOnUiThread(Runnable {
+                updateProviders()
+            })
         }
 
         if(inventoryMode){

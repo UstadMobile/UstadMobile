@@ -147,8 +147,9 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
         const val FIND_BY_UID_QUERY = "SELECT * FROM SaleItem WHERE saleItemUid = :uid"
 
         //INACTIVATE:
-        //TODO: Replace with Boolean argument
-        const val INACTIVATE_QUERY = "UPDATE SaleItem SET saleItemActive = 0 WHERE saleItemUid = :uid"
+        const val INACTIVATE_QUERY = "UPDATE SaleItem SET saleItemActive = 0 " +
+                " , saleItemLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
+                " WHERE saleItemUid = :uid"
     }
 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">‫أستاد موبايل‬</string>
+    <string name="app_name">گلدوزی</string>
     <string name="login">وارد شدن</string>
     <string name="error">خطا</string>
     <string name="err_registering_new_user">خطا در ثبت نام کاربر جدید:</string>
@@ -348,4 +348,6 @@
     <string name="permission_person_insert">اضافه کردن مردم</string>
     <string name="enroll_new_group_member">ثبت نام کردن عضو جدید گروه</string>
     <string name="custom_fields">ساحات دلخواه</string>
+
+    <string name="edit">اصلاح کردن</string>
 </resources>

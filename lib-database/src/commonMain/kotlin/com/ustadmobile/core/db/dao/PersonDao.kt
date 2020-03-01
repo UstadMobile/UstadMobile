@@ -211,6 +211,12 @@ abstract class  PersonDao : BaseDao<Person> {
             Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) " )
     abstract fun findAllPeopleProvider(): DataSource.Factory<Int, Person>
 
+    @Query("SELECT * FROM Person WHERE CAST(active AS INTEGER) = 1 " +
+            " AND Person.mPersonGroupUid != 0 " +
+            "AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '"  +
+            Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) " )
+    abstract fun findAllPeopleWithWEGroupSetProvider(): DataSource.Factory<Int, Person>
+
     @Query("SELECT * FROM Person WHERE CAST(active AS INTEGER)=1 " +
             "AND Person.personRoleUid != (SELECT Role.roleUid FROM ROLE WHERE Role.roleName = '"  +
              Role.ROLE_NAME_CUSTOMER + "' LIMIT 1 ) " +

@@ -288,10 +288,10 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                 //Add for classes
                 val impl = UstadMobileSystemImpl.instance
-                if (label == impl.getString(MessageID.classes, applicationContext)) {
+                if (label == impl.getString(MessageID.classes, this)) {
                     //Nothing in Goldozi
 
-                }else if (label == impl.getString(MessageID.role_assignments, applicationContext)) {
+                }else if (label == impl.getString(MessageID.role_assignments, this)) {
 
                     //Nothing in Goldozi
 //                    thisLinearLayout!!.addView(divider)
@@ -368,7 +368,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     weGroupSpinner!!.setPadding(DEFAULT_PADDING*4, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
                     weGroupSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                            mPresenter!!.updateGroup(position)
+                            mPresenter.updateGroup(position)
                         }
 
                         override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -525,7 +525,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                         override fun afterTextChanged(s: Editable) {
                             if(s!=null) {
-                                mPresenter!!.handleFieldEdited(fieldUid, s.toString())
+                                mPresenter.handleFieldEdited(fieldUid, s.toString())
                             }
                         }
                     })
@@ -611,10 +611,10 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                 val s = field.getChildAt(1) as Spinner
                 valueObject = s.selectedItemPosition
             }
-            mPresenter!!.handleSaveCustomFieldValues(fieldId, type, valueObject!!)
+            mPresenter.handleSaveCustomFieldValues(fieldId, type, valueObject!!)
         }
 
-        mPresenter!!.handleClickDone()
+        mPresenter.handleClickDone()
     }
 
     /**
@@ -630,7 +630,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         var label: String? = null
         var labelId = 0
         if (field.messageLabel != 0) {
-            label = impl.getString(field.messageLabel, applicationContext)
+            label = impl.getString(field.messageLabel, this)
             labelId = MessageIDMap.ID_MAP[field.messageLabel]!!
         }
 
@@ -659,7 +659,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
         val recyclerAdapter =
                 RoleAssignmentListRecyclerAdapter(PersonDetailActivity.DIFF_CALLBACK_ENTITY_ROLE_WITH_GROUPNAME,
-                        null, mPresenter!!, this, applicationContext)
+                        null, mPresenter, this, applicationContext)
         // A warning is expected
         val data = LivePagedListBuilder(factory, 20).build()
         //Observe the data:
@@ -685,7 +685,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
     private fun startCameraIntent() {
         val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
         val dir = filesDir
-        val output = File(dir, mPresenter!!.personUid.toString() + "_image.png")
+        val output = File(dir, mPresenter.personUid.toString() + "_image.png")
         imagePathFromCamera = output.absolutePath
 
         val cameraImage = FileProvider.getUriForFile(this,
@@ -769,7 +769,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                     //set imagePathFromCamera to Person (persist)
                     updateImageOnView(imagePathFromCamera!!)
-                    mPresenter!!.updatePersonPic(imagePathFromCamera!!)
+                    mPresenter.updatePersonPic(imagePathFromCamera!!)
                 }
             }
         }
@@ -799,7 +799,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         //The field is an input type. So we are gonna add a TextInputLayout:
         val fieldTextInputLayout = TextInputLayout(this)
         val viewId = View.generateViewId()
-        mPresenter!!.addToMap(viewId, label.customFieldUid)
+        mPresenter.addToMap(viewId, label.customFieldUid)
         fieldTextInputLayout.setId(viewId)
         //Edit Text is inside a TextInputLayout
         val textInputLayoutParams = LinearLayout.LayoutParams(displayWidth,
@@ -853,7 +853,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
         labelTV.text = label.getNameByLocale(UstadMobileSystemImpl.instance.getLocale(this))
 
         val viewId = View.generateViewId()
-        mPresenter!!.addToMap(viewId, label.customFieldUid)
+        mPresenter.addToMap(viewId, label.customFieldUid)
 
         //VLL
         val vll = LinearLayout(this)

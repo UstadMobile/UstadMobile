@@ -47,8 +47,9 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     abstract suspend fun findMemberByGroupAndPersonAsync(groupUid: Long, personUid: Long)
             : PersonGroupMember?
 
-    //TODO: Update to boolean argument
-    @Query("UPDATE PersonGroupMember SET groupMemberActive = 0 " + " WHERE groupMemberPersonUid = :personUid AND groupMemberGroupUid = :groupUid")
+    @Query("UPDATE PersonGroupMember SET groupMemberActive = 0 " +
+            " , groupMemberLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
+            " WHERE groupMemberPersonUid = :personUid AND groupMemberGroupUid = :groupUid")
     abstract suspend fun inactivateMemberFromGroupAsync(personUid: Long, groupUid: Long) : Int
 
 }

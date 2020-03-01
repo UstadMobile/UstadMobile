@@ -124,8 +124,9 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
         const val FIND_BY_UID_QUERY = "SELECT * FROM SalePayment WHERE salePaymentUid = :uid"
 
         //INACTIVATE:
-        //TODO: Update with Boolean argument
-        const val INACTIVATE_QUERY = "UPDATE SalePayment SET salePaymentActive = 0 WHERE salePaymentUid = :uid"
+        const val INACTIVATE_QUERY = "UPDATE SalePayment SET salePaymentActive = 0 " +
+                " , salePaymentLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
+                "WHERE salePaymentUid = :uid"
     }
 
 }

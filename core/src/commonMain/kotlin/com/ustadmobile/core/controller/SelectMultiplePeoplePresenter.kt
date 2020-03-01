@@ -27,13 +27,12 @@ class SelectMultiplePeoplePresenter(context: Any, arguments: Map<String, String>
 
     init {
         if (arguments!!.containsKey(ARG_SELECTED_PEOPLE)) {
-            val selectedPeopleCSString = arguments!!.get(ARG_SELECTED_PEOPLE).toString()
+            val selectedPeopleCSString = arguments[ARG_SELECTED_PEOPLE].toString()
 
             //TODO: this
             //selectedPeopleList = convertCSVStringToLongList(selectedPeopleCSString)
 
         }
-
     }
 
     fun addToPeople(person: Person) {
@@ -56,7 +55,7 @@ class SelectMultiplePeoplePresenter(context: Any, arguments: Map<String, String>
         people = HashMap()
 
         //Find the provider
-        personWithEnrollmentUmProvider = repository.personDao.findAllPeopleProvider()
+        personWithEnrollmentUmProvider = repository.personDao.findAllPeopleWithWEGroupSetProvider()
         view.setListProvider(personWithEnrollmentUmProvider)
 
     }

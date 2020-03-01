@@ -40,36 +40,36 @@ class GroupListRecyclerAdapter(
         val menu = holder.itemView.findViewById<AppCompatImageView>(R.id
                 .item_title_with_desc_and_dots_dots)
 
-        holder.itemView.setOnClickListener({ v ->
+        holder.itemView.setOnClickListener { v ->
             assert(entity != null)
             mPresenter.handleEditGroup(entity!!.groupUid)
-        })
+        }
 
         assert(entity != null)
         if (entity == null) {
             return
         }
-        title.setText(entity!!.groupName)
+        title.text = entity.groupName
         var membersString = theActivity.getText(R.string.members).toString()
-        val count = entity!!.memberCount
+        val count = entity.memberCount
         if (count == 1) {
             membersString = theActivity.getText(R.string.member).toString()
 
         }
-        val descString = count.toString() + " " + membersString
-        desc.setText(descString)
+        val descString = "$count $membersString"
+        desc.text = descString
 
         //Options to Edit/Delete every schedule in the list
         menu.setOnClickListener{ v: View ->
             //creating a popup menu
-            val popup = PopupMenu(theActivity.applicationContext, v)
+            val popup = PopupMenu(theActivity, v)
             popup.setOnMenuItemClickListener { item ->
                 val i = item.itemId
                 if (i == R.id.edit) {
-                    mPresenter.handleEditGroup(entity!!.groupUid)
+                    mPresenter.handleEditGroup(entity.groupUid)
                     true
                 } else if (i == R.id.delete) {
-                    mPresenter.handleDeleteGroup(entity!!.groupUid)
+                    mPresenter.handleDeleteGroup(entity.groupUid)
                     true
                 } else {
                     false
@@ -81,7 +81,6 @@ class GroupListRecyclerAdapter(
             //displaying the popup
             popup.show()
         }
-
 
     }
 

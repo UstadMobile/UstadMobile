@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">‫أستاد موبايل‬</string>
+    <string name="app_name">ګلدوزی</string>
     <string name="login"> ننوتون</string>
     <string name="error"> تېروتنه</string>
     <string name="err_registering_new_user">د نوی کارونکی په ثبت کې تیروتنه:</string>
@@ -349,4 +349,6 @@
     <string name="confirm_password_unchanged">د پټ نوم تأیدول (ندی بدل شوی)</string>
     <string name="add">زیاتول</string>
     <string name="users">کارن (کار اخیستونکي)</string>
+
+    <string name="edit">سمون</string>
 </resources>

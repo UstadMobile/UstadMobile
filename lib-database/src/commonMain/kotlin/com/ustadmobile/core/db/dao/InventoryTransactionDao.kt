@@ -59,6 +59,7 @@ abstract class InventoryTransactionDao: BaseDao<InventoryTransaction> {
 
     @Query("""
         UPDATE InventoryTransaction SET inventoryTransactionActive = 1 
+        , inventoryTransactionItemLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
         WHERE InventoryTransaction.inventoryTransactionSaleUid = :saleUid AND 
         InventoryTransaction.inventoryTransactionFromLeUid = :leUid AND 
         CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 0 
@@ -67,6 +68,7 @@ abstract class InventoryTransactionDao: BaseDao<InventoryTransaction> {
 
     @Query("""
         UPDATE InventoryTransaction SET inventoryTransactionActive = 1 
+        , inventoryTransactionItemLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
         WHERE InventoryTransaction.inventoryTransactionSaleItemUid = :saleItemUid AND 
         InventoryTransaction.inventoryTransactionFromLeUid = :leUid AND 
         CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 0 
@@ -91,7 +93,8 @@ abstract class InventoryTransactionDao: BaseDao<InventoryTransaction> {
             :List<InventoryTransaction>
 
     @Query("""
-        UPDATE InventoryTransaction SET InventoryTransactionActive = 0 
+        UPDATE InventoryTransaction SET InventoryTransactionActive = 0
+         , inventoryTransactionItemLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
         WHERE InventoryTransaction.inventoryTransactionSaleUid = :saleUid
         AND InventoryTransaction.inventoryTransactionSaleDeliveryUid = :saleDeliveryUid 
         AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 0

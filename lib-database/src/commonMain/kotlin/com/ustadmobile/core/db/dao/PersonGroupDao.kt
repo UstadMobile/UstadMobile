@@ -54,7 +54,9 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
     @Query("SELECT * FROM PersonGroup WHERE groupPersonUid = :personUid ")
     abstract suspend fun findPersonIndividualGroup(personUid: Long): PersonGroup?
 
-    @Query("UPDATE PersonGroup SET groupActive = 0 WHERE groupUid = :uid")
+    @Query("UPDATE PersonGroup SET groupActive = 0" +
+            ", groupLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)" +
+            " WHERE groupUid = :uid")
     abstract suspend fun inactivateGroupAsync(uid: Long) : Int
 
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")

@@ -154,7 +154,7 @@ class SaleProductDetailPresenter(context: Any,
         }
 
         //Update provider:
-        categoriesProvider = productParentJoinDaoDb.findAllSelectedCategoriesForSaleProductProvider(
+        categoriesProvider = productParentJoinDaoDb.findAllSelectedCategoriesForSaleProductProvider2(
                 itemUid)
         GlobalScope.launch(Dispatchers.Main) {
             view.runOnUiThread(Runnable {

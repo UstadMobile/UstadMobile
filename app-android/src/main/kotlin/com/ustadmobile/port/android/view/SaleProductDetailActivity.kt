@@ -524,7 +524,7 @@ open class SaleProductDetailActivity : UstadBaseActivity(), SaleProductDetailVie
             : DiffUtil.ItemCallback<SaleProductSelected>() {
             override fun areItemsTheSame(oldItem: SaleProductSelected,
                                          newItem: SaleProductSelected): Boolean {
-                return oldItem == newItem
+                return oldItem.saleProductUid == newItem.saleProductUid
             }
 
             override fun areContentsTheSame(oldItem: SaleProductSelected,

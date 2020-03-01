@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.dao.SaleDao.Companion.SORT_ORDER_NAME_ASC
 import com.ustadmobile.core.db.dao.SaleDao.Companion.SORT_ORDER_NAME_DESC
 
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleProduct
@@ -202,8 +203,11 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
         const val FIND_BY_NAME_QUERY = "SELECT * FROM SaleProduct WHERE saleProductName = :name AND CAST(saleProductActive AS INTEGER) = 1"
 
         //INACTIVATE:
-        //TODO: Replace with Boolean argument
-        const val INACTIVATE_QUERY = "UPDATE SaleProduct SET saleProductActive = 0 WHERE saleProductUid = :uid"
+        const val INACTIVATE_QUERY = """
+            UPDATE SaleProduct SET saleProductActive = 0
+            , saleProductLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+            WHERE  saleProductUid = :uid 
+            """
     }
 
 

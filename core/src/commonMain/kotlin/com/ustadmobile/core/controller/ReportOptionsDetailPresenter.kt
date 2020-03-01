@@ -204,10 +204,8 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
 
     fun updateSalePriceRangeOnView() {
 
-        //TODO: Figure Number/Decimal formatting in Kotlin Common or let the view decide it.
         val toS = toPrice.toLong()
         val fromS = fromPrice.toLong()
-
 
         val rangeText = (impl.getString(MessageID.from, context) + " "
                 + fromS + " Afs - " + toS + " Afs")
@@ -218,19 +216,12 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
 
     fun updateDateRangeOnView() {
 
-        //TODO: KMP: Get current Locale
-        val currentLocale = null
-
         if (fromDate == 0L && toDate == 0L) {
             fromDate = UMCalendarUtil.getDateInMilliPlusDays(-31)
             toDate = UMCalendarUtil.getDateInMilliPlusDays(0)
         }
 
-        val dateRangeText = UMCalendarUtil.getPrettyDateSimpleFromLong(fromDate,
-                currentLocale) + " - " + UMCalendarUtil.getPrettyDateSimpleFromLong(toDate,
-                currentLocale)
-
-        view.setDateRangeSelected(dateRangeText)
+        view.setDateRangeSelectedLongs(fromDate, toDate)
 
     }
 

@@ -70,7 +70,6 @@
     <string name="passwords_dont_match">رمزهای عبور یکسان نیست. دوباره کوشش نمائید.</string>
     <string name="unable_to_update_password">تغییر رمز عبور اجرأ گردیده نتوانست.</string>
     <string name="syncing">همگاه کردن</string>
-    <string name="edit">اصلاح کردن</string>
     <string name="camera">کامره</string>
     <string name="gallery">گالری</string>
     <string name="unable_open_image">این تصویر باز شده نتوانست</string>
