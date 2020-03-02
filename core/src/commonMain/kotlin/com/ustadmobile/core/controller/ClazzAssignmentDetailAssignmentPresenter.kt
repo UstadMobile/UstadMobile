@@ -62,7 +62,8 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
     }
 
     fun handleClickEdit(){
-        val args = mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to arguments[UstadView.ARG_CLAZZ_ASSIGNMENT_UID])
+        val args = mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to arguments[UstadView.ARG_CLAZZ_ASSIGNMENT_UID],
+                UstadView.ARG_CLAZZ_UID to arguments[UstadView.ARG_CLAZZ_UID])
         impl.go(ClazzAssignmentEditView.VIEW_NAME, args, context)
     }
 

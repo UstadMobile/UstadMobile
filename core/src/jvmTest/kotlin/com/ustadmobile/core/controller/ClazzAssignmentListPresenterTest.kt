@@ -4,14 +4,15 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
+import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.core.view.ClazzAssignmentListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.util.test.AbstractSetup
 import com.ustadmobile.util.test.checkJndiSetup
-import org.junit.Before
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 
@@ -59,12 +60,31 @@ class ClazzAssignmentListPresenterTest : AbstractSetup() {
     fun givenPresenterCreated_whenClickAssignment_shouldCallGoToDetail() {
         // create presenter, with a mock view, check that it makes that call
         val (view, presenter) = createMockViewAndPresenter()
-        presenter.onCreate(mapOf())
+        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_UID to "21"))
 
-        presenter.handleClickAssignment(42L)
+        val ca = ClazzAssignmentWithMetrics()
+        ca.clazzAssignmentUid = 42
 
-        verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentDetailProgressView.VIEW_NAME,
-                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "42"))
+        presenter.handleClickAssignment(ca)
+
+        verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentDetailView.VIEW_NAME,
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "42",
+                        UstadView.ARG_CLAZZ_UID to "21"))
+
+    }
+
+    @Test
+    fun givenPresenterCreated_whenClickNewAssignment_shouldCallGoToDetail() {
+        // create presenter, with a mock view, check that it makes that call
+        val (view, presenter) = createMockViewAndPresenter()
+        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_UID to "21"))
+
+
+        presenter.handleClickNewAssignment()
+
+        verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentDetailView.VIEW_NAME,
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "0",
+                        UstadView.ARG_CLAZZ_UID to "21"))
 
     }
 

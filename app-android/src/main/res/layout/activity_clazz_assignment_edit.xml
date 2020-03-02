@@ -92,19 +92,10 @@
                     android:layout_width="97dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    app:selectDate="@{clazzassignment.clazzAssignmentStartDate}"
+                    android:focusable="false"
+                    app:realValue="@={clazzassignment.clazzAssignmentStartDate}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_start_date" />
-
-<!--                <EditText-->
-<!--                    android:id="@+id/activity_clazz_assignment_edit_start_date_edittext_val"-->
-<!--                    android:layout_width="97dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="16dp"-->
-<!--                    android:visibility="invisible"-->
-<!--                    app:selectDate="@{clazzassignment.clazzAssignmentStartDate}"-->
-<!--                    app:layout_constraintStart_toStartOf="parent"-->
-<!--                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_start_date" />-->
 
 
                 <ImageView
@@ -132,20 +123,11 @@
                 <EditText
                     android:id="@+id/activity_clazz_assignment_edit_end_date_edittext"
                     android:layout_width="97dp"
+                    android:focusable="false"
                     android:layout_height="wrap_content"
-                    app:selectDate="@{clazzassignment.clazzAssignmentDueDate}"
+                    app:realValue="@={clazzassignment.clazzAssignmentDueDate}"
                     app:layout_constraintStart_toStartOf="@+id/imageView9"
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_end_date" />
-
-<!--                <EditText-->
-<!--                    android:id="@+id/activity_clazz_assignment_edit_end_date_edittext_val"-->
-<!--                    android:layout_width="97dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    app:layout_constraintStart_toStartOf="@+id/imageView9"-->
-<!--                    app:selectDate="@{clazzassignment.clazzAssignmentStartDate}"-->
-<!--                    android:visibility="invisible"-->
-<!--                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_end_date" />-->
-
 
                 <EditText
                     android:id="@+id/activity_clazz_assignment_edit_instructions"
