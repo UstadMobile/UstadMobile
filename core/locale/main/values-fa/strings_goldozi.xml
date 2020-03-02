@@ -245,4 +245,16 @@
     <string name="sale_list_sort_by_total_descending">مجموع (بشکل نزولی)</string>
     <string name="over_selected_delivery">لطفاً کمتر از اجناس باقیمانده در ذخیره گاه را برای محصول انتخاب نمائید</string>
     <string name="create_new_product">ایجاد یک محصول جدید</string>
+    <string name="text_person">ارسال پیام به شخص</string>
+    <string name="call_person">تماس تلفونی با شخص</string>
+    <string name="last_name_alternative">تخلص (زبان بدیل)</string>
+    <string name="field_first_names_alternative">نامهای اولی/اصلی (به زبان بدیل)</string>
+    <string name="field_name_pashto">نام ساحه (پشتو)</string>
+    <string name="field_name_dari">نام ساحه (دری)</string>
+    <string name="receive">بدست آوردن</string>
+    <string name="content">محتوی</string>
+    <string name="catalog">کتلاگ</string>
+    <string name="add_image">علاوه کردن تصویر</string>
+    <string name="manage_images">مدیریت کردن تصاویر</string>
+    <string name="base_price">قیمت اصلی</string>
 </resources>
