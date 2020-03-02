@@ -349,4 +349,6 @@
     <string name="confirm_password_unchanged">د پټ نوم تأیدول (ندی بدل شوی)</string>
     <string name="add">زیاتول</string>
     <string name="users">کارن (کار اخیستونکي)</string>
+    <string name="new_person">نوی کس</string>
+    <string name="sub_locations">فرعی ځایونه/موقعیت</string>
 </resources>
