@@ -348,4 +348,6 @@
     <string name="permission_person_insert">اضافه کردن مردم</string>
     <string name="enroll_new_group_member">ثبت نام کردن عضو جدید گروه</string>
     <string name="custom_fields">ساحات دلخواه</string>
+    <string name="new_person">شخص جدید</string>
+    <string name="sub_locations">موقعیتهای فرعی</string>
 </resources>
