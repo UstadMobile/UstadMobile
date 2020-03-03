@@ -56,15 +56,13 @@ class ClazzAssignmentDetailProgressPresenterTest : AbstractSetup() {
     }
 
     @Test
-    fun givenPresenterCreated_whenEditClicked_shouldGoToEdit() {
+    fun givenPresenterCreated_whenLoaded_shouldUpdateView() {
         // create presenter, with a mock view, check that it makes that call
         val (view, presenter) = createMockViewAndPresenter()
-        presenter.onCreate(mapOf())
+        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "40"))
 
-        presenter.handleClickEdit()
-        verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentEditView.VIEW_NAME,
-                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "42"))
-
+        //TODO: fix
+        verify(view, timeout(1000)).setListProvider(any())
 
     }
 

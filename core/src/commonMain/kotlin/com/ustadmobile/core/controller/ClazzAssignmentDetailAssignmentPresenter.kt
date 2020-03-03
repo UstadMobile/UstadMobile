@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
+import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -26,12 +27,18 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
 
 
     private var clazzAssignmentDao = repository.clazzAssignmentDao
+    private var clazzDao = repository.clazzDao
     private var clazzAssignmentContentJoinDao = repository.clazzAssignmentContentJoinDao
     private lateinit var clazzAssignment : ClazzAssignment
     private lateinit var factory: DataSource.Factory<Int, ContentEntryWithMetrics>
+    private var clazzUid = 0L
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
+
+        if(arguments.containsKey(UstadView.ARG_CLAZZ_UID)) {
+            clazzUid = arguments[UstadView.ARG_CLAZZ_UID]?.toLong() ?: 0L
+        }
 
         if(arguments.containsKey(UstadView.ARG_CLAZZ_ASSIGNMENT_UID)){
             val clazzAssignmentUid = arguments[UstadView.ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0
@@ -40,11 +47,14 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
             GlobalScope.launch {
                 val assignment = clazzAssignmentDao.findWithMetricByUidAsync(clazzAssignmentUid)
 
-                //TODO: Find if edit permission and view/show
+                val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+                val assignmentEditPermission = clazzDao.personHasPermissionWithClazz(
+                        loggedInPersonUid, clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE)
+
                 if(assignment != null){
                     clazzAssignment = assignment
                     view.runOnUiThread(Runnable {
-                        view.setEditVisibility(true)
+                        view.setEditVisibility(assignmentEditPermission)
                         view.setClazzAssignment(clazzAssignment)
                     })
                 }

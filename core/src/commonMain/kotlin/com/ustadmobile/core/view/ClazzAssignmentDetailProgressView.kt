@@ -16,8 +16,6 @@ interface ClazzAssignmentDetailProgressView : UstadView {
      */
     fun setListProvider(factory: DataSource.Factory<Int, PersonWithAssignmentMetrics>)
 
-    fun setClazzAssignment(clazzAssignment: ClazzAssignmentWithMetrics)
-
     companion object {
         // This defines the view name that is an argument value in the go() in impl.
         const val VIEW_NAME = "ClazzAssignmentDetail"

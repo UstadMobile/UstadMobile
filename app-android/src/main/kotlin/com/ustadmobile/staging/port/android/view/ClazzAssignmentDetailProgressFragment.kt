@@ -81,9 +81,6 @@ class ClazzAssignmentDetailProgressFragment : UstadBaseFragment(), ClazzAssignme
         mRecyclerView?.adapter = recyclerAdapter
     }
 
-    override fun setClazzAssignment(clazzAssignment: ClazzAssignmentWithMetrics) {
-        //TODO: Remove if not useful
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()

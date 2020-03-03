@@ -9,6 +9,8 @@ import com.ustadmobile.core.view.ClazzAssignmentListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.AbstractSetup
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.After
@@ -70,7 +72,6 @@ class ClazzAssignmentListPresenterTest : AbstractSetup() {
         verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentDetailView.VIEW_NAME,
                 mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "42",
                         UstadView.ARG_CLAZZ_UID to "21"))
-
     }
 
     @Test
@@ -79,12 +80,34 @@ class ClazzAssignmentListPresenterTest : AbstractSetup() {
         val (view, presenter) = createMockViewAndPresenter()
         presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_UID to "21"))
 
-
         presenter.handleClickNewAssignment()
 
         verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentDetailView.VIEW_NAME,
                 mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "0",
                         UstadView.ARG_CLAZZ_UID to "21"))
+
+    }
+
+    @Test
+    fun givenPresenterCreated_whenOnCreated_setSetView() {
+        // create presenter, with a mock view, check that it makes that call
+        val (view, presenter) = createMockViewAndPresenter()
+        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_UID to "21"))
+
+        //Check against admin
+        verify(view, timeout(1000)).setEditVisibility(eq(true))
+        verify(view, timeout(1000)).setListProvider(eq(any()))
+
+        //Set another account
+        val randomPerson = Person("random", "Random", "Person",
+                true)
+        val randomAccount = UmAccount(randomPerson.personUid, "random",
+                "auth", "endpoint")
+        UmAccountManager.setActiveAccount(randomAccount, Any(), UstadMobileSystemImpl.instance)
+        verify(view, timeout(1000)).setEditVisibility(eq(false))
+
+        //TODO: Maybe check against  a person with permission given
+
 
     }
 

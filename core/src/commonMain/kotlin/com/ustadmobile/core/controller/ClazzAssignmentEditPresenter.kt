@@ -4,10 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.ContentEntryListView
-import com.ustadmobile.core.view.ContentEntryListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment

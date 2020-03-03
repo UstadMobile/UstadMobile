@@ -31,6 +31,13 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     abstract fun findJoinsByAssignmentUid(clazzAssignmentUid: Long)
             : DataSource.Factory<Int, ClazzAssignmentContentJoin>
 
+
+    @Query("""SELECT * FROM ClazzAssignmentContentJoin 
+        WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid 
+        AND CAST(clazzAssignmentContentJoinInactive AS INTEGER) = 0""")
+    abstract fun findJoinsByAssignmentUidList(clazzAssignmentUid: Long)
+            : List< ClazzAssignmentContentJoin>
+
     @Query("""SELECT ContentEntry.*, 0.0 as contentEntryWithMetricsProgress FROM ClazzAssignmentContentJoin 
         LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = clazzAssignmentContentJoinContentUid
         WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid 

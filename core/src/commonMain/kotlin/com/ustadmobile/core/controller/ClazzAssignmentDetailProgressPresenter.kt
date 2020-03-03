@@ -38,9 +38,6 @@ class ClazzAssignmentDetailProgressPresenter(context: Any,
                 if(assignment != null){
                     clazzAssignment = assignment
                     getAndSetProvider()
-                    view.runOnUiThread(Runnable {
-                        view.setClazzAssignment(clazzAssignment)
-                    })
                 }
             }
         }
@@ -52,19 +49,6 @@ class ClazzAssignmentDetailProgressPresenter(context: Any,
         view.runOnUiThread(Runnable {
             view.setListProvider(factory)
         })
-    }
-
-    /**
-     * Handle what happens when the edit button is clicked  - should go to assignment edit
-     */
-    fun handleClickEdit(){
-        val args = mapOf(ARG_CLAZZ_ASSIGNMENT_UID to
-                clazzAssignment.clazzAssignmentUid.toString())
-        impl.go(ClazzAssignmentEditView.VIEW_NAME, args, context)
-    }
-
-    fun handleClickStudent(student: PersonWithAssignmentMetrics){
-        //TODO:
     }
 
 }

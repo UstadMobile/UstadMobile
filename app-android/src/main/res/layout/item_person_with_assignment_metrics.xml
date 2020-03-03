@@ -19,7 +19,6 @@
         android:layout_height="wrap_content"
         android:background="?android:selectableItemBackground"
         android:tag="@{personwithassignmentmetrics.personUid}"
-        android:onClick="@{() -> presenter.handleClickStudent(personwithassignmentmetrics)}"
         android:padding="@dimen/dimen_4dp">
 
         <ImageView
