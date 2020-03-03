@@ -17,7 +17,6 @@ import java.util.*
  */
 
 var updatedDate = 0L
-var etToListener = mutableMapOf<Int, InverseBindingListener>()
 
 fun updateDateOnEditText(et: EditText, date: Long) {
     val dateFormatter: SimpleDateFormat by lazy { SimpleDateFormat("EEE, dd/MMM/yyyy",
@@ -29,26 +28,24 @@ fun updateDateOnEditText(et: EditText, date: Long) {
     }
 }
 
-fun openDatePicker(et: EditText, context: Context, date: Long) {
+fun openDatePicker2(et: EditText, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
-    if(date > 0) {
-        c.timeInMillis = date
+    if(updatedDate > 0) {
+        c.timeInMillis = updatedDate
     }
 
     //date listener - opens a new date picker.
-    val startDateListener = { _: DatePicker, year: Int, month:Int, dayOfMonth: Int ->
+    val dateListener = { _: DatePicker, year: Int, month:Int, dayOfMonth: Int ->
         c.set(Calendar.YEAR, year)
         c.set(Calendar.MONTH, month)
         c.set(Calendar.DAY_OF_MONTH, dayOfMonth)
         updatedDate = c.timeInMillis
-
-        etToListener[et.id]?.onChange()
-
-        val a=""
+        updateDateOnEditText(et, updatedDate)
+        inverseBindingListener.onChange()
     }
 
     val datePicker = DatePickerDialog(
-            context, startDateListener, c.get(Calendar.YEAR),
+            context, dateListener, c.get(Calendar.YEAR),
             c.get(Calendar.MONTH),
             c.get(Calendar.DAY_OF_MONTH))
     datePicker.show()
@@ -57,25 +54,23 @@ fun openDatePicker(et: EditText, context: Context, date: Long) {
 
 @BindingAdapter("realValueAttrChanged")
 fun getDate(et: EditText, inverseBindingListener: InverseBindingListener){
-    etToListener[et.id] = inverseBindingListener
-
+    et.setOnClickListener {
+        openDatePicker2(et, et.context,  inverseBindingListener)
+    }
 }
 
 @BindingAdapter("realValue")
 fun setDate(et: EditText, date: Long){
     updateDateOnEditText(et, date)
-    et.setOnClickListener {
-        openDatePicker(et, et.context, date)
-    }
+    updatedDate = date
+
 }
 
 @InverseBindingAdapter(attribute = "realValue")
 fun getRealValue(et: EditText): Long {
-    //etToListener.remove(et.id)
-    updateDateOnEditText(et, updatedDate)
     return updatedDate
 }
 
-class DatePickerBindingAdapter {
+interface DatePickerBindingAdapter {
 
 }
