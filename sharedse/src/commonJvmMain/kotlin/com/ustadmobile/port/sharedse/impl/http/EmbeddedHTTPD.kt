@@ -82,8 +82,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
                 ContainerEntryListResponder::class.java, appDatabase)
         addRoute("/$ENDPOINT_CONCATENATEDFILES/(.*)+", ConcatenatedContainerEntryFileResponder::class.java,
                 appDatabase)
-        addRoute("/xapi/statements(.*)+", XapiStatementResponder::class.java, repository)
-        addRoute("/xapi/activities/state(.*)+", XapiStateResponder::class.java, repository)
+        addRoute("/xapi/:contentEntryUid/statements(.*)+", XapiStatementResponder::class.java, repository)
+        addRoute("/xapi/:contentEntryUid/activities/state(.*)+", XapiStateResponder::class.java, repository)
     }
 
 

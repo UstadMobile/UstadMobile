@@ -2,19 +2,24 @@ package com.ustadmobile.core.controller
 
 //import org.mockito.ArgumentMatchers.any
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
+import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.Runnable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -98,14 +103,15 @@ class XapiPackageContentPresenterTest {
     }
 
     @Test
-    @Throws(InterruptedException::class)
     fun givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {
         val args = Hashtable<String, String>()
         Assert.assertNotNull(xapiContainer)
         args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
 
+        val account = UmAccount(42, "username", "fefe1010fe",
+                "http://localhost/xapi")
         val xapiPresenter = XapiPackageContentPresenter(
-                context, args, mockXapiPackageContentView!!) {
+                context, args, mockXapiPackageContentView!!, account) {
             val mountedPath = httpd!!.mountContainer(it, null)
             lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
                     mountedPath!!)
@@ -118,8 +124,23 @@ class XapiPackageContentPresenterTest {
 
         mountLatch.await(15000, TimeUnit.MILLISECONDS)
 
-        verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(5000)).loadUrl(
-                UMFileUtil.joinPaths(lastMountedUrl!!, "tetris.html"))
+        argumentCaptor<String> {
+            val pkgPath = UMFileUtil.joinPaths(lastMountedUrl!!, "tetris.html")
+            verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(5000)).loadUrl(
+                    capture())
+            Assert.assertTrue("Mounted path starts with url and html name",
+                    firstValue.startsWith(pkgPath))
+            val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
+            val umAccountActor = Json.parse(UmAccountActor.serializer(), paramsProvided["actor"]!!)
+            Assert.assertEquals("Account actor is as expected",
+                    umAccountActor.account.username, account.username)
+            val expectedEndpoint = UMFileUtil.resolveLink(lastMountedUrl!!, "/xapi")
+            Assert.assertEquals("Received expected Xapi endpoint: /xapi", expectedEndpoint,
+                    paramsProvided["endpoint"])
+            Assert.assertEquals("Received expected activity id",
+                    "http://id.tincanapi.com/activity/tincan-prototypes/tetris",
+                    paramsProvided["activity_id"])
+        }
 
         verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(15000)).setTitle("Tin Can Tetris Example")
     }
