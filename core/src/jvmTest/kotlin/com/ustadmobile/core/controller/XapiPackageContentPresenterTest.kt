@@ -10,6 +10,7 @@ import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -56,6 +57,8 @@ class XapiPackageContentPresenterTest {
 
     private val mountLatch = CountDownLatch(1)
 
+    private val contentEntryUid = 1234L
+
     @Before
     fun setup() {
         checkJndiSetup()
@@ -70,7 +73,9 @@ class XapiPackageContentPresenterTest {
         }
 
 
-        xapiContainer = Container()
+        xapiContainer = Container().also {
+            it.containerContentEntryUid = contentEntryUid
+        }
         xapiContainer.containerUid = repo.containerDao.insert(xapiContainer)
 
         xapiTmpFile = File.createTempFile("testxapipackagecontentpresenter",
@@ -107,9 +112,10 @@ class XapiPackageContentPresenterTest {
         val args = Hashtable<String, String>()
         Assert.assertNotNull(xapiContainer)
         args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
+        args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
 
         val account = UmAccount(42, "username", "fefe1010fe",
-                "http://localhost/xapi")
+                "http://localhost/")
         val xapiPresenter = XapiPackageContentPresenter(
                 context, args, mockXapiPackageContentView!!, account) {
             val mountedPath = httpd!!.mountContainer(it, null)
@@ -134,9 +140,9 @@ class XapiPackageContentPresenterTest {
             val umAccountActor = Json.parse(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
                     umAccountActor.account.username, account.username)
-            val expectedEndpoint = UMFileUtil.resolveLink(lastMountedUrl!!, "/xapi")
-            Assert.assertEquals("Received expected Xapi endpoint: /xapi", expectedEndpoint,
-                    paramsProvided["endpoint"])
+            val expectedEndpoint = UMFileUtil.resolveLink(lastMountedUrl!!, "/xapi/$contentEntryUid/")
+            Assert.assertEquals("Received expected Xapi endpoint: /xapi/contentEntryUid",
+                    expectedEndpoint, paramsProvided["endpoint"])
             Assert.assertEquals("Received expected activity id",
                     "http://id.tincanapi.com/activity/tincan-prototypes/tetris",
                     paramsProvided["activity_id"])

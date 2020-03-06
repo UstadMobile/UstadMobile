@@ -44,7 +44,9 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
         registrationUUID = UMUUID.randomUUID().toString()
-        val containerUid = (arguments[UstadView.ARG_CONTAINER_UID] ?: error("")).toLong()
+        val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLongOrNull() ?: 0L
+        val contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
+
         GlobalScope.launch {
             val mountedPath = containerMounter(containerUid)
 
@@ -59,7 +61,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     account.toXapiActorJsonObject(context))
             val launchMethodParams = mapOf(
                     "actor" to actorJsonStr,
-                    "endpoint" to UMFileUtil.resolveLink(mountedPath, "/xapi"),
+                    "endpoint" to UMFileUtil.resolveLink(mountedPath, "/xapi/$contentEntryUid/"),
                     "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
                     "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
 
