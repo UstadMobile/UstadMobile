@@ -32,8 +32,13 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     private val contentEntryDao = db.contentEntryDao
 
 
+    /**
+     * @param contentEntryUid - the contentEntryUid when it is already known. E.g. when the xapi
+     * endpoint is used by the XapiPackagePresenter then the contentEntryUid is known.
+     */
     @Throws(IllegalArgumentException::class)
-    fun storeStatements(statements: List<Statement>, statementId: String): List<String> {
+    fun storeStatements(statements: List<Statement>, statementId: String,
+                        contentEntryUid: Long = 0L): List<String> {
 
         hasStatementWithMatchingId(statements, statementId)
 
@@ -43,7 +48,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
 
         val statementUids = ArrayList<String>()
         for (statement in statements) {
-            val entity = storeStatement(statement)
+            val entity = storeStatement(statement, contentEntryUid = contentEntryUid)
             statementUids.add(entity.statementId!!)
         }
         return statementUids
@@ -220,7 +225,8 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     }
 
     @Throws(IllegalArgumentException::class)
-    fun storeStatement(statement: Statement): StatementEntity {
+    fun storeStatement(statement: Statement,
+                       contentEntryUid: Long = 0L): StatementEntity {
 
         checkValidStatement(statement, false)
 
@@ -304,7 +310,8 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                 xObjectEntity?.xObjectUid ?: 0,
                 contextStatementId, instructorUid,
                 agentUid, authorityUid, teamUid,
-                subActorUid, subVerbUid, subObjectUid)
+                subActorUid, subVerbUid, subObjectUid,
+                contentEntryUid = contentEntryUid)
 
         if (statement.context != null && statement.context!!.contextActivities != null) {
 

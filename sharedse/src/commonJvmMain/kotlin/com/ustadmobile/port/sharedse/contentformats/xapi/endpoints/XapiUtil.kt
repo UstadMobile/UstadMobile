@@ -90,14 +90,6 @@ object XapiUtil {
         return join
     }
 
-    fun getPerson(dao: PersonDao, actor: Actor): Person? {
-        var person: Person? = null
-        if (actor.account != null) {
-            person = dao.findByUsername(actor.account!!.name)
-        }
-        return person
-    }
-
     fun insertOrUpdateXObject(dao: XObjectDao, xobject: XObject, gson: Gson, contentEntryDao: ContentEntryDao): XObjectEntity {
 
         val entity = dao.findByObjectId(xobject.id)
@@ -118,6 +110,14 @@ object XapiUtil {
             }
         }
         return changedXObject
+    }
+
+    fun getPerson(dao: PersonDao, actor: Actor): Person? {
+        var person: Person? = null
+        if (actor.account != null) {
+            person = dao.findByUsername(actor.account!!.name)
+        }
+        return person
     }
 
     /**
@@ -254,11 +254,13 @@ object XapiUtil {
                                       personUid: Long, verbUid: Long, objectUid: Long,
                                       contextStatementUid: String,
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
-                                      subActorUid: Long, subVerbUid: Long, subObjectUid: Long): StatementEntity {
+                                      subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
+                                      contentEntryUid: Long = 0L): StatementEntity {
 
         var statementEntity: StatementEntity? = dao.findByStatementId(statement.id!!)
         if (statementEntity == null) {
             statementEntity = StatementEntity()
+            statementEntity.statementContentEntryUid = contentEntryUid
             statementEntity.personUid = personUid
             statementEntity.statementId = statement.id
             statementEntity.verbUid = verbUid
