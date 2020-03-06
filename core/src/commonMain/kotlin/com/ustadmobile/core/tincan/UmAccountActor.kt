@@ -12,6 +12,6 @@ import kotlinx.serialization.Serializable
 class UmAccountActor(val objectType: String = "Actor", val account: Account = Account()) {
 
     @Serializable
-    class Account(val homePage: String = "",  val username: String = "")
+    class Account(val homePage: String = "",  val name: String = "")
 
 }
