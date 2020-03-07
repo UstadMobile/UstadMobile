@@ -1,6 +1,7 @@
 package com.ustadmobile.core.util
 
 import com.soywiz.klock.*
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 /**
  * Basic calendar related utility methods. These are isolated in their own class as Calendar is not
@@ -47,6 +48,15 @@ object UMCalendarUtil {
                 0)
         return date.unixMillisLong
     }
+
+    fun parse8601TimestampOrDefault(timestamp: String?, defaultTime: Long = getSystemTimeInMillis()): Long {
+        return if(timestamp != null) {
+            parse8601Timestamp(timestamp)
+        }else {
+            defaultTime
+        }
+    }
+
 
     fun getPrettyDateWithTimeFromLongSimple(thisDate: Long): String{
         val format: DateFormat = DateFormat("HH:mm,  dd MMM yy")
