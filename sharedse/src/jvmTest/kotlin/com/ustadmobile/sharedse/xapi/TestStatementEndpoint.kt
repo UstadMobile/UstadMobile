@@ -120,6 +120,8 @@ class TestStatementEndpoint {
         val statementEntity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
         Assert.assertEquals("Statement entity has correctly assigned contententryuid",
                 1234L, statementEntity?.statementContentEntryUid)
+        Assert.assertEquals("Statement entity has progress set as per JSON",
+                17, statementEntity?.extensionProgress)
     }
 
     @Test

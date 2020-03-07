@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.contentformats.xapi.*
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.toInt
 import java.util.*
 
 object XapiUtil {
@@ -92,10 +93,10 @@ object XapiUtil {
     }
 
     fun insertOrUpdateXObject(dao: XObjectDao, xobject: XObject, gson: Gson, contentEntryDao: ContentEntryDao): XObjectEntity {
+        val xObjectId = xobject.id ?: throw IllegalArgumentException("XObject has no id")
+        val entity = dao.findByObjectId(xObjectId)
 
-        val entity = dao.findByObjectId(xobject.id)
-
-        var contentEntryUid = contentEntryDao.getContentEntryUidFromXapiObjectId(xobject.id!!)
+        val contentEntryUid = contentEntryDao.getContentEntryUidFromXapiObjectId(xObjectId)
 
         val definition = xobject.definition
         val changedXObject = XObjectEntity(xobject.id, xobject.objectType,
@@ -296,6 +297,12 @@ object XapiUtil {
                     statementEntity.resultScoreScaled = resultScore.scaled
                     statementEntity.resultScoreRaw = resultScore.raw
                 }
+
+                val progressExtension = statementResult.extensions?.get(StatementEndpoint.EXTENSION_PROGRESS)
+                if(progressExtension != null) {
+                    //As this is being parsed as JSON - any number is counted as Double type
+                    statementEntity.extensionProgress = progressExtension.anyToInt()
+                }
             } else {
                 statementEntity.resultSuccess = 0.toByte()
             }
@@ -312,6 +319,19 @@ object XapiUtil {
     }
 
     fun Boolean.toInt() = if (this) 1 else 0
+
+    /**
+     * Small utiltiy function to handle when we're not 100% sure about what we're getting in a Json
+     * block
+     */
+    private fun Any?.anyToInt() = when {
+        this is Double -> this.toInt()
+        this is Float -> this.toInt()
+        this is Int -> this
+        this is Long -> this.toInt()
+        this is String -> this.toInt()
+        else -> 0
+    }
 
 
 }

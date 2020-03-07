@@ -287,21 +287,22 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         var instructorUid: Long = 0
         var teamUid: Long = 0
 
-        if (statement.context != null) {
+        val statementContext = statement.context
+        if (statementContext != null) {
 
-            if (statement.context!!.instructor != null) {
-                val instructorAgent = getAgent(agentDao, personDao, statement.context!!.instructor!!)
+            val contextInstructor = statementContext.instructor
+            if (contextInstructor != null) {
+                val instructorAgent = getAgent(agentDao, personDao, contextInstructor)
                 instructorUid = instructorAgent.agentUid
             }
 
-            if (statement.context!!.team != null) {
-                val teamAgent = getAgent(agentDao, personDao, statement.context!!.team!!)
+            val contextTeam = statementContext.team
+            if (contextTeam != null) {
+                val teamAgent = getAgent(agentDao, personDao, contextTeam)
                 teamUid = teamAgent.agentUid
             }
 
-            if (statement.context!!.statement != null) {
-                contextStatementId = statement.context!!.statement!!.id!!
-            }
+            contextStatementId = statementContext.statement?.id ?: ""
         }
 
         val statementEntity = insertOrUpdateStatementEntity(statementDao, statement, gson,
@@ -395,6 +396,8 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     }
 
     companion object {
+
+        const val EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
         @Throws(StatementRequestException::class)
         fun checkValidActor(actor: Actor) {
