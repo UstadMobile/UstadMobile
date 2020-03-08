@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.AgentEntity
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
+import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.port.sharedse.contentformats.xapi.Statement
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
@@ -42,6 +43,8 @@ class TestStatementEndpoint {
         checkJndiSetup()
         val db = UmAppDatabase.Companion.getInstance(context)
         db.clearAllTables()
+        db.preload()
+
         repo = db
 
         val builder = GsonBuilder()
@@ -118,10 +121,15 @@ class TestStatementEndpoint {
                 contentEntryUid = 1234L)
 
         val statementEntity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
+        val xObject = repo.xObjectDao.findByXobjectUid(statementEntity!!.xObjectUid)
+
         Assert.assertEquals("Statement entity has correctly assigned contententryuid",
-                1234L, statementEntity?.statementContentEntryUid)
+                1234L, xObject?.objectContentEntryUid)
         Assert.assertEquals("Statement entity has progress set as per JSON",
                 17, statementEntity?.extensionProgress)
+        Assert.assertEquals("Statement has preset Verb UID as expected",
+                VerbEntity.FIXED_UIDS["http://adlnet.gov/expapi/verbs/progressed"],
+                statementEntity?.verbUid)
     }
 
     @Test

@@ -255,10 +255,12 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         }
 
         var xObjectEntity: XObjectEntity? = null
-        if (statement.`object` != null) {
-            xObjectEntity = insertOrUpdateXObject(xobjectDao, statement.`object`!!, gson, contentEntryDao)
+        val xObjectVal = statement.`object`
+        if (xObjectVal != null) {
+            xObjectEntity = insertOrUpdateXObject(xobjectDao, xObjectVal, gson,
+                    contentEntryDao, contentEntryUid)
 
-            insertOrUpdateXObjectLangMap(xLangMapEntryDao, statement.`object`!!, xObjectEntity, languageDao, langVariantDao)
+            insertOrUpdateXObjectLangMap(xLangMapEntryDao, xObjectVal, xObjectEntity, languageDao, langVariantDao)
         }
 
         var subActorUid: Long = 0
@@ -276,7 +278,9 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
 
             insertOrUpdateVerbLangMap(xLangMapEntryDao, subStatement.verb!!, subVerb, languageDao, langVariantDao)
 
-            val subObject = insertOrUpdateXObject(xobjectDao, subStatement.`object`!!, gson, contentEntryDao)
+            val subObject = insertOrUpdateXObject(xobjectDao, subStatement.`object`!!, gson,
+                    contentEntryDao, contentEntryUid)
+
             subObjectUid = subObject.xObjectUid
 
             insertOrUpdateXObjectLangMap(xLangMapEntryDao, subStatement.`object`!!, subObject, languageDao, langVariantDao)
@@ -311,8 +315,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                 xObjectEntity?.xObjectUid ?: 0,
                 contextStatementId, instructorUid,
                 agentUid, authorityUid, teamUid,
-                subActorUid, subVerbUid, subObjectUid,
-                contentEntryUid = contentEntryUid)
+                subActorUid, subVerbUid, subObjectUid)
 
         if (statement.context != null && statement.context!!.contextActivities != null) {
 

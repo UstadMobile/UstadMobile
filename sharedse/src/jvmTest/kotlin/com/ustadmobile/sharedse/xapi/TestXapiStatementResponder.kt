@@ -32,6 +32,7 @@ class TestXapiStatementResponder {
         checkJndiSetup()
         val appDatabase = UmAppDatabase.Companion.getInstance(context)
         appDatabase.clearAllTables()
+        appDatabase.preload()
         appRepo = appDatabase
 
         httpd = RouterNanoHTTPD(0)
@@ -63,8 +64,11 @@ class TestXapiStatementResponder {
         Assert.assertEquals(204, code.toLong())
         val statement = appRepo!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
         Assert.assertEquals("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", statement!!.statementId)
-        Assert.assertEquals("Statement is associated with expected contentEntryUid", contentEntryUid,
-                statement!!.statementContentEntryUid)
+
+        val xObject = appRepo!!.xObjectDao.findByXobjectUid(statement.xObjectUid)
+        Assert.assertNotNull("Joined XObject is not null", xObject)
+        Assert.assertEquals("Statement is associated with expected contentEntryUid",
+                contentEntryUid, xObject!!.objectContentEntryUid)
     }
 
     @Test
@@ -91,8 +95,10 @@ class TestXapiStatementResponder {
         Assert.assertEquals(200, code.toLong())
         val statement = appRepo!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
         Assert.assertEquals("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", statement!!.statementId)
-        Assert.assertEquals("Statement is associated with the expected contentEntryUid",
-                contentEntryUid, statement!!.statementContentEntryUid)
+        val xObject = appRepo!!.xObjectDao.findByXobjectUid(statement.xObjectUid)
+        Assert.assertNotNull("Joined XObject is not null", xObject)
+        Assert.assertEquals("Statement is associated with expected contentEntryUid",
+                contentEntryUid, xObject!!.objectContentEntryUid)
     }
 
 

@@ -92,24 +92,28 @@ object XapiUtil {
         return join
     }
 
-    fun insertOrUpdateXObject(dao: XObjectDao, xobject: XObject, gson: Gson, contentEntryDao: ContentEntryDao): XObjectEntity {
+    fun insertOrUpdateXObject(dao: XObjectDao, xobject: XObject, gson: Gson,
+                              contentEntryDao: ContentEntryDao,
+                              contentEntryUid: Long = 0L): XObjectEntity {
         val xObjectId = xobject.id ?: throw IllegalArgumentException("XObject has no id")
         val entity = dao.findByObjectId(xObjectId)
 
-        val contentEntryUid = contentEntryDao.getContentEntryUidFromXapiObjectId(xObjectId)
+        val contentEntryUidVal = if(contentEntryUid != 0L) {
+            contentEntryUid
+        }else {
+            contentEntryDao.getContentEntryUidFromXapiObjectId(xObjectId)
+        }
 
         val definition = xobject.definition
         val changedXObject = XObjectEntity(xobject.id, xobject.objectType,
                 if (definition != null) definition.type else "", if (definition != null) definition.interactionType else "",
-                if (definition != null) gson.toJson(definition.correctResponsePattern) else "", contentEntryUid)
+                if (definition != null) gson.toJson(definition.correctResponsePattern) else "", contentEntryUidVal)
 
         if (entity == null) {
             changedXObject.xObjectUid = dao.insert(changedXObject)
         } else {
             changedXObject.xObjectUid = entity.xObjectUid
-            if (changedXObject != entity) {
-                dao.update(changedXObject)
-            }
+            dao.takeIf { changedXObject != entity }?.update(changedXObject)
         }
         return changedXObject
     }
@@ -256,15 +260,13 @@ object XapiUtil {
                                       personUid: Long, verbUid: Long, objectUid: Long,
                                       contextStatementUid: String,
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
-                                      subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
-                                      contentEntryUid: Long = 0L): StatementEntity {
+                                      subActorUid: Long, subVerbUid: Long, subObjectUid: Long): StatementEntity {
 
         val statementId = statement.id ?: throw IllegalArgumentException("Statement ${statement} to be stored has no id!")
 
         var statementEntity: StatementEntity? = dao.findByStatementId(statementId)
         if (statementEntity == null) {
             statementEntity = StatementEntity().also {
-                it.statementContentEntryUid = contentEntryUid
                 it.personUid = personUid
                 it.statementId = statement.id
                 it.verbUid = verbUid

@@ -76,9 +76,6 @@ class StatementEntity {
     @LastChangedBy
     var statementLastChangedBy: Int = 0
 
-    var statementContentEntryUid: Long = 0L
-
-    //TODO: make it set this
     var extensionProgress: Int = 0
 
     companion object {
