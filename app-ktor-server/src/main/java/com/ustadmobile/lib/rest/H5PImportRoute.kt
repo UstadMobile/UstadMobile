@@ -7,6 +7,7 @@ import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.controller.checkIfH5PValidAndReturnItsContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
@@ -29,8 +30,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
+import org.apache.commons.io.Charsets
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.IOUtils
 import org.jsoup.Jsoup
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
@@ -42,6 +45,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.logging.Level
@@ -246,6 +250,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
 
                             driver.get(iframeUrl)
                             val logs = waitForNewFiles(driver)
+                            driver.get("https://h5p.org/sites/all/modules/h5p/library/js/h5p-resizer.js")
 
                             // open browser and download all links
                             logs.map { json.parse(LogResponse.serializer(), it.message) }
@@ -275,6 +280,14 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
 
                                     }
 
+
+                            var htmlPage = UMIOUtils.readStreamToString(javaClass.getResourceAsStream("/h5p/h5p.html"))
+                            htmlPage = htmlPage.replace("copy link here", iframeUrl)
+                            val htmlFile = File(parentDir, "h5pFile.html")
+                            FileUtils.writeStringToFile(htmlFile, htmlPage,  "utf-8")
+
+                            val htmlIndex = createIndexFromLog("h5p.html", "text/html", parentDir, htmlFile, null)
+                            indexList.add(0, htmlIndex)
 
                             // download h5P integration
                             val contentsJson = contentBody.jsonObject["jsonContent"]!!.content
