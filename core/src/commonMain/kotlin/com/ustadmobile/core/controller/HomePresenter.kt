@@ -71,23 +71,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                     }
 
                     //For ClassBook removing reports for the ClassBook's own report
-                    options.clear()
-                    options.add(0, Pair(MessageID.catalog,
-                            SelectSaleProductView.VIEW_NAME))
-                    options.add(1, Pair(MessageID.inventory,
-                            InventoryListView.VIEW_NAME))
-                    options.add(2, Pair(MessageID.sales,
-                            SaleListView.VIEW_NAME))
 
-
-                    options.add(3, Pair(MessageID.content,
-                            "${ContentEntryListView.VIEW_NAME}?$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID" +
-                                    "&$ARG_LIBRARIES_CONTENT&${ContentEntryListView.EDIT_BUTTONS_NEWFOLDER}=2" +
-                                    "&${ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG}=2"))
-
-
-                    options.add(4, Pair(MessageID.reports,
-                            DashboardEntryListView.VIEW_NAME))
 
                     homeView.runOnUiThread(Runnable {
                         homeView.setLoggedPerson(person)
@@ -103,6 +87,19 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                 }else{
                     println("debudebu: person null")
                 }
+                options.clear()
+                options.add(0, Pair(MessageID.catalog,
+                        SelectSaleProductView.VIEW_NAME))
+                options.add(1, Pair(MessageID.inventory,
+                        InventoryListView.VIEW_NAME))
+                options.add(2, Pair(MessageID.sales,
+                        SaleListView.VIEW_NAME))
+                options.add(3, Pair(MessageID.content,
+                        "${ContentEntryListView.VIEW_NAME}?$ARG_CONTENT_ENTRY_UID=$MASTER_SERVER_ROOT_ENTRY_UID" +
+                                "&$ARG_LIBRARIES_CONTENT&${ContentEntryListView.EDIT_BUTTONS_NEWFOLDER}=2" +
+                                "&${ContentEntryListView.ARG_EDIT_BUTTONS_CONTROL_FLAG}=2"))
+                options.add(4, Pair(MessageID.reports,
+                        DashboardEntryListView.VIEW_NAME))
             }
 
             homeView.runOnUiThread(Runnable {
