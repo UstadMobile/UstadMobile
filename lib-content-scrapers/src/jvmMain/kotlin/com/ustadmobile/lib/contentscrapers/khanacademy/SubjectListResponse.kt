@@ -110,6 +110,14 @@ class SubjectListResponse {
 
                 var downloadUrls: DownloadUrl? = null
 
+                var dateModified: String? = null
+
+                var creationDate: String? = null
+
+                var allAssessmentItems: List<Card.UserExercise.Model.AssessmentItem>? = null
+
+                var relatedContent: List<String>? = null
+
             }
         }
     }

@@ -103,6 +103,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             XapiReportOptionsView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiReportOptionsActivity"),
             XapiReportDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiReportDetailActivity"),
             WebChunkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}WebChunkActivity"),
+            HarView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HarActivity"),
             Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
             HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),
             SplashScreenView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SplashScreenActivity"),

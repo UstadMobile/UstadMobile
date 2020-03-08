@@ -76,10 +76,13 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         const val LAST_MODIFIED = "Last-Modified"
 
         const val ETAG = "ETag"
+        
+        const val FILE_SIZE_LIMIT = 440401920
 
         const val ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED = 100
         const val ERROR_TYPE_INVALID_LICENSE = 101
         const val ERROR_TYPE_NO_FILE_AVAILABLE = 102
+        const val ERROR_TYPE_FILE_SIZE_LIMIT_EXCEEDED = 103
 
 
         const val ERROR_TYPE_FILE_NOT_LOADED = 200

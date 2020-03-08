@@ -1,5 +1,6 @@
 package com.ustadmobile.core.contentformats.har
 
-import com.ustadmobile.core.contentformats.har.HarLog
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Har(var log: HarLog)

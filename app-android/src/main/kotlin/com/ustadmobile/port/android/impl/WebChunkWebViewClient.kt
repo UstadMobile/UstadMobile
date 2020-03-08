@@ -178,7 +178,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             }
             if (entry.containerEntryFile!!.compression == COMPRESSION_GZIP) {
                 mutMap["Content-Encoding"] = "gzip"
-                mutMap["Content-Length"] = entry.containerEntryFile!!.ceCompressedSize.toString()
+                mutMap["Content-Length"] = entry.containerEntryFile!!.ceTotalSize.toString()
             }
 
             if(!mutMap.containsKey("access-control-allow-origin")){
@@ -227,7 +227,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
                         "OK", mutMap, data)
             }
         } catch (e: Exception) {
-            System.err.println("did not find entry in zip for startingUrl " + log.url!!)
+            System.err.println("did not find entry in zip for startingUrl " + log.url)
             e.printStackTrace()
         }
 

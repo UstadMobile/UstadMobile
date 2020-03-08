@@ -65,6 +65,10 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />
         <activity
+            android:name="com.ustadmobile.port.android.view.HarActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="" />
+        <activity
             android:name="com.ustadmobile.port.android.view.VideoPlayerActivity"
             android:configChanges="keyboardHidden|keyboard|screenSize"
             android:label="" />

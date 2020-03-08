@@ -21,9 +21,12 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
 
         val lang = sourceUrl.substringBefore(".khan").substringAfter("://")
 
-        val khanLang = KhanConstants.khanLangMap[lang]
-                ?: throw ScraperException(0, "Do not have support for lite language: $lang")
+        val khanLang = KhanConstants.khanFullMap[lang]
+                ?: throw ScraperException(0, "Do not have support for language: $lang")
 
+        val parentLangEntry = createKangLangEntry(if (lang == "www") "en" else lang, khanLang.title, khanLang.url, db)
+
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, khanEntry, parentLangEntry, 0)
 
         val harEntryList = startHarIndexer(sourceUrl, listOf(Regex("learnMenuTopicsQuery"))) {
             true
@@ -39,14 +42,14 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
             val topicEntry = ContentScraperUtil.createOrUpdateContentEntry(
                     topic.slug!!, topic.translatedTitle,
                     topicUrl.toString(), ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
-                    parentcontentEntry!!.primaryLanguageUid, parentcontentEntry!!.languageVariantUid,
+                    parentLangEntry.primaryLanguageUid, parentLangEntry.languageVariantUid,
                     "", false, ScraperConstants.EMPTY_STRING,
                     ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
                     ScraperConstants.EMPTY_STRING,
                     0, contentEntryDao)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao,
-                    parentcontentEntry!!, topicEntry, topicCount)
+                    parentLangEntry, topicEntry, topicCount)
 
             createQueueItem(topicUrl.toString(), topicEntry, KHAN_TOPIC_INDEXER,
                     ScrapeQueueItem.ITEM_TYPE_INDEX)

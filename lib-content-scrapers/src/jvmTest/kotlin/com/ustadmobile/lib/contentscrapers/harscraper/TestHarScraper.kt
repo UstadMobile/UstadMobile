@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.harscraper
 
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
@@ -138,7 +139,7 @@ class TestHarScraper {
         var regex = "[?&]ts=[0-9]+".toRegex()
 
         var scraper = TestChildHarScraper(containerFolder, db, entry.contentEntryUid)
-        val(isContentUpdated, containerManager)  = scraper.startHarScrape(url.toString(), regexes = listOf(regex)){
+        val(isContentUpdated, containerManager)  = scraper.startHarScrape(url.toString(), regexes = listOf(HarRegexPair(regex.toString(),""))){
             true
         }
 

@@ -2,18 +2,23 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarContainer
-import com.ustadmobile.core.contentformats.har.HarRequest
-import com.ustadmobile.core.contentformats.har.HarResponse
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.NoAppFoundException
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.util.goToContentEntry
+import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.core.view.HarView
+import com.ustadmobile.core.view.HomeView
+import com.ustadmobile.core.view.UstadView
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import kotlin.js.JsName
 
 abstract class HarPresenterCommon(context: Any, arguments: Map<String, String?>, view: HarView, var isDownloadEnabled: Boolean, var appRepo: UmAppDatabase) :
         UstadBaseController<HarView>(context, arguments, view) {
@@ -50,48 +55,46 @@ abstract class HarPresenterCommon(context: Any, arguments: Map<String, String?>,
 
 
             val result = appRepo.containerDao.findByUidAsync(containerUid)!!
-            var containerManager = ContainerManager(result, UmAppDatabase.getInstance(context), appRepo)
-            harContainer = HarContainer(containerManager)
+            val containerManager = ContainerManager(result, UmAccountManager.getRepositoryForActiveAccount(context), appRepo)
+            harContainer = HarContainer(containerManager){
+                handleUrlLinkToContentEntry(it)
+            }
             containerDeferred.complete(harContainer)
             view.loadUrl(harContainer.startingUrl)
         }
     }
 
-    fun handleInterceptRequest(request: HarRequest): HarResponse {
+    @JsName("handleUrlLinkToContentEntry")
+    fun handleUrlLinkToContentEntry(sourceUrl: String) {
+        val impl = UstadMobileSystemImpl.instance
 
+        val dest = sourceUrl.replace("content-detail?",
+                ContentEntryDetailView.VIEW_NAME + "?")
+        val params = UMFileUtil.parseURLQueryString(dest)
 
-        return HarResponse()
+        if (params.containsKey("sourceUrl")) {
+
+            GlobalScope.launch {
+                try {
+                    val entry = appRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
+                            ?: throw IllegalArgumentException("No File found")
+                    goToContentEntry(entry.contentEntryUid, appRepo, context, impl, true,
+                            true,
+                            arguments[ContentEntryListPresenter.ARG_NO_IFRAMES]?.toBoolean()?: false)
+                } catch (e: Exception) {
+                    if (e is NoAppFoundException) {
+                        view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
+                                MessageID.get_app,
+                                e.mimeType!!)
+                    } else {
+                        view.showError(e.message!!)
+                    }
+                }
+
+            }
+
+        }
     }
-
-
-/* fun handleUrlLinkToContentEntry(sourceUrl: String) {
-     val impl = UstadMobileSystemImpl.instance
-
-     ContentEntryUtil.instance.goToContentEntryByViewDestination(
-             sourceUrl, arguments[ContentEntryListFragmentPresenter.ARG_NO_IFRAMES].toBoolean(),
-             appRepo, impl,
-             true,
-             context, isDownloadEnabled, object : UmCallback<Any> {
-         override fun onSuccess(result: Any?) {
-
-         }
-
-         override fun onFailure(exception: Throwable?) {
-             if (exception != null) {
-                 val message = exception.message
-                 if (exception is NoAppFoundException) {
-                     view.runOnUiThread(Runnable {
-                         view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
-                                 MessageID.get_app,
-                                 exception.mimeType!!)
-                     })
-                 } else {
-                     view.runOnUiThread(Runnable { view.showError(message!!) })
-                 }
-             }
-         }
-     })
- }*/
 
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance

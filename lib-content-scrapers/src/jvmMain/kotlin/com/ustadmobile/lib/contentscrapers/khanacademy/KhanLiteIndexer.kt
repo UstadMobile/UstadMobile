@@ -8,8 +8,6 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.contentscrapers.abztract.SeleniumIndexer
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.LanguageVariant
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.ExpectedConditions
@@ -25,10 +23,10 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
 
         val lang = sourceUrl.substringBefore(".khan").substringAfter("://")
 
-        val khanLang = KhanConstants.khanLangMap[lang]
+        val khanLang = KhanConstants.khanLiteMap[lang]
                 ?: throw ScraperException(0, "Do not have support for lite language: $lang")
 
-        val parentEntry = createEntry(if (lang == "www") "en" else lang, khanLang.title, khanLang.url)
+        val parentEntry = createKangLangEntry(if (lang == "www") "en" else lang, khanLang.title, khanLang.url, db)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, khanEntry, parentEntry, 0)
 
@@ -91,30 +89,6 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
             }
 
         }
-
-    }
-
-    private fun createEntry(langCode: String, langName: String, url: String): ContentEntry {
-
-        val langSplitArray = langCode.split("-")
-        val langEntity: Language
-        langEntity = if(langSplitArray[0].length == 2){
-            ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, langSplitArray[0])
-        }else{
-            ContentScraperUtil.insertOrUpdateLanguageByThreeCode(languageDao, langSplitArray[0])
-        }
-
-        var langVariantEntity: LanguageVariant? = null
-        if (langSplitArray.size > 1) {
-            langVariantEntity = ContentScraperUtil.insertOrUpdateLanguageVariant(db.languageVariantDao, langSplitArray[1], langEntity)
-        }
-
-        return ContentScraperUtil.createOrUpdateContentEntry(url, langName,
-                url, ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
-                langEntity.langUid, langVariantEntity?.langVariantUid ?: 0,
-                ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                0, contentEntryDao)
 
     }
 

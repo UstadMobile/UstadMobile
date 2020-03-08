@@ -6,7 +6,24 @@ div#footer {
 	display: none;
 }
 
-div[class*="responsiveNavMenuWrapper"] {
+nav[role*="navigation"], div[role*="navigation"] {
+	display: none;
+}
+
+nav[aria-label*="header"] {
+	display: none;
+}
+
+div[id*="discussiontabbedpanel"] {
+	display: none;
+}
+
+a[aria-label*="Share"]{
+    display: none;
+     opacity: 0;
+}
+
+div[role*="tablist"] {
 	display: none;
 }
 
@@ -24,10 +41,4 @@ div[class*="discussion"] {
 
 div[role*="dialog"] {
   	display: none;
- }
-
-/* Hide top navigation bar
- */
- #app-shell-root > div[class*="wrapper"]:first-child > div[class*="wrapper"]:first-child {
-     display: none;
- }
+}

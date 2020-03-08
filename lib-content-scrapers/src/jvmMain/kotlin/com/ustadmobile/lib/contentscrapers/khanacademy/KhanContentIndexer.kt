@@ -328,6 +328,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
         const val SUBJECT_PAGE_TOPIC_CARD = "SubjectPageTopicCard"
         const val SUBJECT_CHALLENGE = "SubjectChallenge"
         const val SUBJECT_PROGRESS = "SubjectProgress"
+        const val CONTENT_LIST= "ContentList"
         const val KHAN_PREFIX = "khan-id://"
         private lateinit var contentEntryDao: ContentEntryDao
         private lateinit var contentParentChildJoinDao: ContentEntryParentChildJoinDao

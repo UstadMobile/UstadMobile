@@ -63,7 +63,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
                     retryFlag = false
                 } catch (e: Exception) {
 
-                    if (numberOfFailures > 4) {
+                    if (numberOfFailures > 5) {
                         setScrapeDone(false, ERROR_TYPE_YOUTUBE_ERROR)
                         hideContentEntry()
                         close()

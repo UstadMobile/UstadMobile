@@ -205,7 +205,7 @@ class EdraakK12ContentScraper : Runnable {
         }
 
         try {
-            val index = UMIOUtils.readToString(javaClass.getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG), UTF_ENCODING)
+            val index = UMIOUtils.readToString(javaClass.getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG))
             val doc = Jsoup.parse(index, UTF_ENCODING)
             doc.head().selectFirst("title").text(response.title!!)
             FileUtils.writeStringToFile(File(destinationDirectory, INDEX_HTML), doc.toString(), UTF_ENCODING)

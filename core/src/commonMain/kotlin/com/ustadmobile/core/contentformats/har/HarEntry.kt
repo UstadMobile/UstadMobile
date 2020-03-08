@@ -1,9 +1,12 @@
 package com.ustadmobile.core.contentformats.har
 
+import kotlinx.serialization.Serializable
 
+
+@Serializable
 class HarEntry {
 
-    private val request: HarRequest? = null
-    private val response: HarResponse? = null
+    val request: HarRequest? = null
+    val response: HarResponse? = null
 
 }

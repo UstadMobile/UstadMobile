@@ -1,5 +1,8 @@
 package com.ustadmobile.core.contentformats.har
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class HarRequest {
 
     var method: String? = null

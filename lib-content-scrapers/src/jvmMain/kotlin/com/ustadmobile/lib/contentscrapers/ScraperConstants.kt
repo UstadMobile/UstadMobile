@@ -30,10 +30,10 @@ object ScraperConstants {
     const val CHECK_NAME = "check.svg"
     const val XML_NAMESPACE = "http://purl.org/dc/elements/1.1/"
 
-    const val KHAN_USERNAME = "samih@ustadmobile.com"
+    const val KHAN_USERNAME = "no-reply@ustadmobile.com"
     const val KHAN_PASS = "ustadscraper"
     const val CK12_PASS = "ustadscraper1"
-    const val KHAN_LOGIN_LINK = "https://www.khanacademy.org/login"
+    const val KHAN_LOGIN_LINK = "https://pl.khanacademy.org/login"
     const val ANDROID_USER_AGENT = "user-agent=Mozilla/5.0 (Linux; Android 4.4; Nexus 5 Build/_BuildID_) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36"
 
     const val GRAPHIE = "+graphie"
@@ -69,6 +69,12 @@ object ScraperConstants {
 
     const val KHAN_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/khan/khanscraper.css"
     const val KHAN_CSS_FILE = "khanscraper.css"
+
+    const val CC_LINK = "/com/ustadmobile/lib/contentscrapers/khan/cc.js"
+
+    const val GENWEB_C9E_LINK  = "/com/ustadmobile/lib/contentscrapers/khan/genwebc9e.js"
+
+    const val GENWEB_184_LINK  = "/com/ustadmobile/lib/contentscrapers/khan/genweb184.js"
 
     const val TRY_AGAIN_KHAN_LINK = "/com/ustadmobile/lib/contentscrapers/khan/exercise-try-again.svg"
     const val TRY_AGAIN_FILE = "exercise-try-again.svg"
@@ -177,6 +183,7 @@ object ScraperConstants {
     const val MIMETYPE_JPG = "image/jpg"
     const val MIMETYPE_WEBP = "image/webp"
     const val MIMETYPE_CSS = "text/css"
+    const val MIMETYPE_JS = "application/javascript"
     const val MIMETYPE_MP4 = "video/mp4"
     const val MIMETYPE_WEB_CHUNK = "application/webchunk+zip"
     const val MIMETYPE_HAR = "application/har+zip"

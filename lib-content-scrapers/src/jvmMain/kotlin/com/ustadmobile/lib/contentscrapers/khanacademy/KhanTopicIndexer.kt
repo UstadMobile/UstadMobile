@@ -10,30 +10,30 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarIndexer
+import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import java.net.URL
 
-class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : HarIndexer(parentContentEntry, runUid, db, sqiUid) {
+class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
 
 
     override fun indexUrl(sourceUrl: String) {
 
         val url = URL(sourceUrl)
 
-        val searchUrl = if (!sourceUrl.endsWith("/")) "$sourceUrl/" else sourceUrl
+        val jsonContent = getJsonContent(url)
+        //val searchUrl = if (!sourceUrl.endsWith("/")) "$sourceUrl/" else sourceUrl
 
-        val harEntryList = startHarIndexer(searchUrl, listOf(Regex("/content${url.path}"))) {
+        /*val harEntryList = startHarIndexer(searchUrl, listOf(Regex("/content${url.path}"))) {
             true
-        }
+        }*/
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
-        val subjectJson = harEntryList[0].response.content.text
 
-
-        var response: SubjectListResponse? = gson.fromJson(subjectJson, SubjectListResponse::class.java)
+        var response: SubjectListResponse? = gson.fromJson(jsonContent, SubjectListResponse::class.java)
         if (response!!.componentProps == null) {
-            response = gson.fromJson(subjectJson, PropsSubjectResponse::class.java).props
+            response = gson.fromJson(jsonContent, PropsSubjectResponse::class.java).props
         }
 
         response?.componentProps?.curation?.tabs?.forEachIndexed { i, tab ->
@@ -91,6 +91,14 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
 
                         tutorial.contentItems?.forEachIndexed { contentCount, contentItem ->
 
+
+                            val type = contentKindMap[contentItem.kind]
+
+                            if (type == null) {
+                                UMLogUtil.logFatal("Do not have support for kind ${contentItem.kind} for source Url $url")
+                                return@forEachIndexed
+                            }
+
                             val contentUrl = URL(url, contentItem.nodeUrl!!)
                             var lang = sourceUrl.substringBefore(".khan").substringAfter("://")
 
@@ -114,12 +122,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
                                     contentEntryParentChildJoinDao, tutorialEntry,
                                     entry, contentCount)
 
-                            val type = contentKindMap[contentItem.kind]
 
-                            if (type == null) {
-                                UMLogUtil.logFatal("Do not have support for kind ${contentItem.kind} for source Url $url")
-                                return@forEachIndexed
-                            }
 
                             createQueueItem(contentUrl.toString(), entry,
                                     type, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
@@ -131,6 +134,67 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
                     }
 
 
+                }else if(KhanContentIndexer.CONTENT_LIST == module.kind){
+
+                    val moduleItems = module.contentItems
+
+                    if (moduleItems == null || moduleItems.isEmpty()) {
+                        return@forEachIndexed
+                    }
+
+                    val tutorialEntry = ContentScraperUtil.createOrUpdateContentEntry(
+                            module.slug!!, module.title, module.topicId!!,
+                            ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
+                            parentcontentEntry!!.primaryLanguageUid,
+                            parentcontentEntry!!.languageVariantUid,
+                            module.description, false,
+                            ScraperConstants.EMPTY_STRING, module.imageUrl,
+                            ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                            0, contentEntryDao)
+
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(
+                            contentEntryParentChildJoinDao,
+                            parentcontentEntry!!, tutorialEntry, moduleCount)
+
+
+                    module.contentItems?.forEachIndexed { itemCount, contentItem ->
+
+                        val type = contentKindMap[contentItem.kind]
+
+                        if (type == null) {
+                            UMLogUtil.logFatal("Do not have support for kind ${contentItem.kind} for source Url $url")
+                            return@forEachIndexed
+                        }
+
+                        val contentUrl = URL(url, contentItem.nodeUrl!!)
+                        var lang = sourceUrl.substringBefore(".khan").substringAfter("://")
+
+                        if (lang == "www") {
+                            lang = ""
+                        }
+
+                        val entry = ContentScraperUtil.createOrUpdateContentEntry(
+                                contentItem.slug!!, contentItem.title,
+                                "${KhanContentIndexer.KHAN_PREFIX}${contentItem.contentId!!}${if (lang.isNotEmpty()) ".$lang" else ""}",
+                                ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
+                                parentcontentEntry!!.primaryLanguageUid,
+                                parentcontentEntry!!.languageVariantUid,
+                                contentItem.description,
+                                true, ScraperConstants.EMPTY_STRING,
+                                contentItem.thumbnailUrl,
+                                ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                                0, contentEntryDao)
+
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(
+                                contentEntryParentChildJoinDao, tutorialEntry,
+                                entry, itemCount)
+
+                        createQueueItem(contentUrl.toString(), entry,
+                                type, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+
+
+                    }
+
                 }
 
             }
@@ -138,6 +202,10 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
 
         }
 
+
+    }
+
+    override fun close() {
 
     }
 
@@ -168,6 +236,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
 
         val contentKindMap = mapOf(
                 "Video" to KHAN_FULL_VIDEO_SCRAPER,
+                "Talkthrough" to KHAN_FULL_VIDEO_SCRAPER,
                 "Article" to KHAN_FULL_ARTICLE_SCRAPER,
                 "Exercise" to KHAN_FULL_EXERCISE_SCRAPER)
 

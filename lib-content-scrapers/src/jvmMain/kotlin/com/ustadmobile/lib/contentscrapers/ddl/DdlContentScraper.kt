@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.ContainerETagDao
 import com.ustadmobile.core.db.dao.ContentCategoryDao
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
+import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -33,6 +34,7 @@ import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.io.File
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.file.Files
 import java.util.*
@@ -247,9 +249,13 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
                 if (isMediaFile && fileEntry.response.content.text.isNullOrEmpty()) {
 
+                    val conn = fileUrl?.openConnection() as HttpURLConnection
+                    val size = conn.contentLengthLong
+                    conn.disconnect()
+
                     val base64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(fileUrl))
                     fileEntry.response.content.encoding = "base64"
-                    fileEntry.response.content.size = base64.length.toLong()
+                    fileEntry.response.content.size = size
                     fileEntry.response.content.text = base64
                 }
 

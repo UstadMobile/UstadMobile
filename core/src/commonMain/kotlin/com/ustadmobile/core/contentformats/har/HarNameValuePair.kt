@@ -1,8 +1,6 @@
 package com.ustadmobile.core.contentformats.har
 
-class HarNameValuePair {
+import kotlinx.serialization.Serializable
 
-    var name: String? = null
-    var value: String? = null
-
-}
+@Serializable
+class HarNameValuePair(val name: String, val value: String)

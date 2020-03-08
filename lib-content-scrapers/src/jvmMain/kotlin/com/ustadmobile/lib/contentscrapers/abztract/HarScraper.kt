@@ -1,9 +1,13 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
 import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
@@ -13,6 +17,8 @@ import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.HarEntry
+import net.lightbody.bmp.core.har.HarRequest
+import net.lightbody.bmp.core.har.HarResponse
 import net.lightbody.bmp.proxy.CaptureType
 import org.apache.http.client.utils.DateUtils
 import org.openqa.selenium.InvalidArgumentException
@@ -25,7 +31,6 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import java.io.File
 import java.io.StringWriter
 import java.net.URL
-import java.net.URLDecoder
 
 
 typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
@@ -37,7 +42,8 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
     protected var chromeDriver: ChromeDriver
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
-    val regex = "[^a-zA-Z0-9\\.\\-]".toRegex()
+    private val cleanUpRegex = "[^a-zA-Z0-9\\.\\-]".toRegex()
+    val gson: Gson
 
     data class HarScraperResult(val updated: Boolean, val containerManager: ContainerManager?)
 
@@ -52,10 +58,18 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         val seleniumProxy = ClientUtil.createSeleniumProxy(proxy)
         seleniumProxy.noProxy = "<-loopback>"
+
+        //val mobileEmulation: MutableMap<String, String> = HashMap()
+
+       // mobileEmulation["deviceName"] = "Nexus 5"
+
         val options = ChromeOptions()
         options.setCapability(CapabilityType.PROXY, seleniumProxy)
         options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true)
+      //  options.setExperimentalOption("mobileEmulation", mobileEmulation)
         chromeDriver = ChromeDriver(options)
+
+        gson = GsonBuilder().disableHtmlEscaping().create()
     }
 
 
@@ -69,11 +83,10 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
      */
     fun startHarScrape(url: String, waitCondition: WaitConditionFn? = null,
                        filters: List<ScrapeFilterFn> = listOf(),
-                       regexes: List<Regex> = listOf(),
+                       regexes: List<HarRegexPair> = listOf(),
                        addHarContent: Boolean = true,
                        block: (proxy: BrowserMobProxyServer) -> Boolean): HarScraperResult {
 
-        ContentScraperUtil.clearChromeConsoleLog(chromeDriver)
         proxy.newHar("Scraper")
 
         try {
@@ -108,9 +121,9 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     }
 
 
-    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<Regex>, addHarContent: Boolean): ContainerManager {
+    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<HarRegexPair>, addHarContent: Boolean): ContainerManager {
 
-        var containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerDir.absolutePath)
+        val containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerDir.absolutePath)
 
         entries.forEach {
 
@@ -123,14 +136,13 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                     return@forEach
                 }
 
-                val decodedPath = URLDecoder.decode(request.url, ScraperConstants.UTF_ENCODING)
-                val decodedUrl = URL(decodedPath)
-                var containerPath = decodedUrl.toString().replace(regex, "_")
+                val decodedUrl = URL(request.url)
+                val containerPath = request.url
 
                 // to remove timestamps from queries
                 var regexedString = decodedUrl.toString()
                 regexes.forEach { itRegex ->
-                    regexedString = regexedString.replace(itRegex, "")
+                    regexedString = regexedString.replace(Regex(itRegex.regex), itRegex.replacement)
                 }
 
                 filters.forEach { filterFn ->
@@ -155,17 +167,33 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             }
         }
 
-        var writer = StringWriter()
+        val writer = StringWriter()
         proxy.har.writeTo(writer)
 
         if (addHarContent) {
             runBlocking {
                 containerManager.addEntries(StringEntrySource(writer.toString(), listOf("harcontent")))
-                containerManager.addEntries(StringEntrySource(regexes.joinToString(), listOf("regexList")))
+                containerManager.addEntries(StringEntrySource(gson.toJson(regexes), listOf("regexList")))
             }
         }
 
         return containerManager
+    }
+
+    fun addHarEntry(content: String, size: Int = content.length, encoding: String = UTF_ENCODING, mimeType: String, requestUrl: String): HarEntry {
+
+        val entry = HarEntry()
+        entry.response = HarResponse()
+        entry.response.content.text = content
+        entry.response.content.size = size.toLong()
+        entry.response.content.encoding = encoding
+        entry.response.content.mimeType = mimeType
+
+        entry.request = HarRequest()
+        entry.request.url = requestUrl
+
+        return entry
+
     }
 
     fun isContentUpdated(harEntry: HarEntry, container: Container): Boolean {

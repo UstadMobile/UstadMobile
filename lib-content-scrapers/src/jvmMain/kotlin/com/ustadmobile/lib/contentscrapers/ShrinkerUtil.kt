@@ -10,7 +10,6 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.CODEC2_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.FFMPEG_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.WEBP_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.fileHasContent
-import com.ustadmobile.lib.contentscrapers.buildconfig.ScraperBuildConfig
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 
 import org.apache.commons.io.FileUtils
@@ -29,7 +28,6 @@ import java.io.IOException
 import java.nio.file.InvalidPathException
 import java.nio.file.Paths
 import java.util.ArrayList
-import java.util.Arrays
 import java.util.HashMap
 import java.util.regex.Pattern
 
@@ -193,7 +191,7 @@ object ShrinkerUtil {
 
                     val htmlFile = File(opfDir, opfItem.href!!)
                     FileInputStream(htmlFile).use { htmlFileInputStream ->
-                        var html = UMIOUtils.readToString(htmlFileInputStream, UTF_ENCODING)
+                        var html = UMIOUtils.readToString(htmlFileInputStream)
                         /*
                          * Pratham uses an entity code to map &nbsp; to &#160; - this confuses jsoup
                          */

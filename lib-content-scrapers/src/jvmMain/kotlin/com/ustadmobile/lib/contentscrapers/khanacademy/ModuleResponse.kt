@@ -16,11 +16,15 @@ class ModuleResponse {
 
     var topicId: String? = null
 
+    var imageUrl: String? = null
+
     var url: String? = null
 
     var tutorials: List<Tutorial>? = null
 
     var modules: List<ModuleResponse>? = null
+
+    var contentItems: List<Tutorial.ContentItem>? = null
 
     var subjectChallenge: SubjectChallenge? = null
 

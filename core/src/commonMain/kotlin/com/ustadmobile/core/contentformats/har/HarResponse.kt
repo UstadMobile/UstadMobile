@@ -1,8 +1,11 @@
 package com.ustadmobile.core.contentformats.har
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class HarResponse {
 
-    var status: Int? = null
+    var status: Int = 101
 
     var statusText: String? = null
 

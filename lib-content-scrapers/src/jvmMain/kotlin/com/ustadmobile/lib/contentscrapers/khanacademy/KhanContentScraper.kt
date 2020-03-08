@@ -184,7 +184,7 @@ class KhanContentScraper : Runnable {
         } catch (e: Exception) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
             UMLogUtil.logError("Unable to scrape content from url $url")
-            ContentScraperUtil.deleteETagOrModified(destinationDirectory!!, destinationDirectory!!.name)
+            ContentScraperUtil.deleteETagOrModified(destinationDirectory, destinationDirectory.name)
         }
 
         factory.returnObject(driver)
@@ -274,7 +274,7 @@ class KhanContentScraper : Runnable {
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
 
-        val khanDirectory = File(destinationDirectory, destinationDirectory!!.name)
+        val khanDirectory = File(destinationDirectory, destinationDirectory.name)
         khanDirectory.mkdirs()
 
         val initialJson = KhanContentIndexer.getJsonStringFromScript(scrapUrl)
@@ -333,7 +333,7 @@ class KhanContentScraper : Runnable {
         }
 
         var isUpdated: Boolean
-        val modifiedFile = File(destinationDirectory, destinationDirectory!!.name + ScraperConstants.LAST_MODIFIED_TXT)
+        val modifiedFile = File(destinationDirectory, destinationDirectory.name + ScraperConstants.LAST_MODIFIED_TXT)
         isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, dateModified.toString())
 
         val indexJsonFile = File(khanDirectory, "index.json")
@@ -387,8 +387,8 @@ class KhanContentScraper : Runnable {
 
                         val khanContent = FileUtils.readFileToString(file, UTF_ENCODING)
                         val doc = Jsoup.parse(khanContent)
-                        doc.head().append(KHAN_CSS)
-                        doc.head().append(KHAN_COOKIE)
+                        //doc.head().append(KHAN_CSS)
+                        //doc.head().append(KHAN_COOKIE)
 
                         FileUtils.writeStringToFile(file, doc.html(), UTF_ENCODING)
 
@@ -573,7 +573,7 @@ class KhanContentScraper : Runnable {
         var foundRelative = false
         for (content in contentList) {
 
-            if (destinationDirectory!!.name.contains(content.id!!) || scrapUrl.contains(content.relativeUrl!!)) {
+            if (destinationDirectory.name.contains(content.id!!) || scrapUrl.contains(content.relativeUrl!!)) {
 
                 foundRelative = true
                 val articleId = content.id
@@ -583,7 +583,7 @@ class KhanContentScraper : Runnable {
                 val dateModified = ContentScraperUtil.parseServerDate(response.date_modified!!)
 
                 var isUpdated: Boolean
-                val modifiedFile = File(destinationDirectory, destinationDirectory!!.name + ScraperConstants.LAST_MODIFIED_TXT)
+                val modifiedFile = File(destinationDirectory, destinationDirectory.name + ScraperConstants.LAST_MODIFIED_TXT)
                 isUpdated = ContentScraperUtil.isFileContentsUpdated(modifiedFile, dateModified.toString())
 
                 if (ContentScraperUtil.fileHasContent(khanDirectory)) {
@@ -646,8 +646,6 @@ class KhanContentScraper : Runnable {
 
                         val khanContent = FileUtils.readFileToString(file, UTF_ENCODING)
                         val doc = Jsoup.parse(khanContent)
-                        doc.head().append(KHAN_CSS)
-                        doc.head().append(KHAN_COOKIE)
 
                         FileUtils.writeStringToFile(file, doc.html(), UTF_ENCODING)
 
@@ -699,8 +697,6 @@ class KhanContentScraper : Runnable {
 
     companion object {
 
-        private const val KHAN_CSS = "<link rel='stylesheet' href='/khanscraper.css' type='text/css'/>"
-        private const val KHAN_COOKIE = "<script> document.cookie = \"fkey=abcde;\" </script>"
         const val CONTENT_DETAIL_SOURCE_URL_KHAN_ID = "content-detail?sourceUrl=khan-id://"
     }
 

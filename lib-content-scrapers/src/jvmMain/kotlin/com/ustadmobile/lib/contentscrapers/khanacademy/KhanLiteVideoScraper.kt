@@ -68,6 +68,7 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
                 val isUpdated = isUrlContentUpdated(url, recentContainer)
                 if (!isUpdated) {
                     showContentEntry()
+                    setScrapeDone(true, 0)
                     return
                 }
             }
@@ -85,6 +86,8 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
                 val etagContainer = ContainerETag(container.containerUid, eTag)
                 db.containerETagDao.insert(etagContainer)
             }
+
+            setScrapeDone(true, 0)
 
             tempDir.deleteRecursively()
 

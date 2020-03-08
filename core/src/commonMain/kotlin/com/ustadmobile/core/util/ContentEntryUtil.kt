@@ -7,6 +7,7 @@ import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MimeType.EPUB
+import com.ustadmobile.core.util.MimeType.HAR
 import com.ustadmobile.core.util.MimeType.JPG
 import com.ustadmobile.core.util.MimeType.KHAN_VIDEO
 import com.ustadmobile.core.util.MimeType.MPEG
@@ -61,6 +62,7 @@ private val mimeTypeToViewNameMap = mapOf(
         TINCAN to XapiPackageContentView.VIEW_NAME,
         KHAN_VIDEO to VideoPlayerView.VIEW_NAME,
         WEB_CHUNK to WebChunkView.VIEW_NAME,
+        HAR to HarView.VIEW_NAME,
         EPUB to EpubContentView.VIEW_NAME
 ) + VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoPlayerView.VIEW_NAME }.toMap()
 

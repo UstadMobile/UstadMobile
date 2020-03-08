@@ -129,14 +129,14 @@ object UMIOUtils {
     /**
      * Read from the given input stream and return a string
      *
-     * @param in Input Stream to read from
+     * @param `in` Input Stream to read from
      * @param encoding Encoding to use
      * @return String from the given input stream in the given encoding
      * @throws IOException
      */
     @JvmOverloads
     @JvmStatic
-    fun readToString(`in`: InputStream, encoding: String): String {
+    fun readToString(`in`: InputStream): String {
         val bout = ByteArrayOutputStream()
         readFully(`in`, bout, 1024)
         `in`.close()
