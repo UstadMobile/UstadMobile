@@ -236,7 +236,16 @@
     <string name="save_sale">مهربانی وکړئ د سپارلو د زیاتولو څخه وړاندې، خرڅلا ثبت/ذخیره کړئ</string>
     <string name="add_inventory">موجودی زیاتول</string>
     <string name="create_new_product">د نوی محصول جوړول</string>
-
-    <string name="catalog">کټلاګ</string>
+    <string name="text_person">کس ته پیغام لیږل</string>
+    <string name="call_person">کس ته ټلفون کول</string>
+    <string name="last_name_alternative">تخلص (په بدیله ژبه)</string>
+    <string name="field_first_names_alternative">لومړي نومونه (په بدیله ژبه)</string>
+    <string name="field_name_pashto">ډګر نوم (پښتو)</string>
+    <string name="field_name_dari">ډګر نوم (دری)</string>
+    <string name="receive">ترلاسه کول</string>
     <string name="content">محتویات</string>
+    <string name="catalog">کټلاګ</string>
+    <string name="add_image">د انځور زیاتول</string>
+    <string name="manage_images">د انځورونو مدیریت کول</string>
+    <string name="base_price">اصلی بیه</string>
 </resources>
