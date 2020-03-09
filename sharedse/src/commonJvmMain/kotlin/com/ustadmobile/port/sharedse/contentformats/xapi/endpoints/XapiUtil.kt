@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.contentformats.xapi.*
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.toInt
 import java.util.*
 
 object XapiUtil {
@@ -48,17 +49,18 @@ object XapiUtil {
     }
 
     fun insertOrUpdateVerbLangMap(dao: XLangMapEntryDao, verb: Verb, verbEntity: VerbEntity, languageDao: LanguageDao, languageVariantDao: LanguageVariantDao) {
+        val verbDisplay = verb.display
+        if(verbDisplay != null) {
+            val listToInsert = verbDisplay.map {
+                val split = it.key.split("-")
+                val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
+                val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
 
-        val listToInsert = verb.display!!.map {
-
-            val split = it.key.split("-")
-            val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
-            val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
-
-            XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
-                    ?: 0, it.value)
+                XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
+                        ?: 0, it.value)
+            }
+            dao.insertList(listToInsert)
         }
-        dao.insertList(listToInsert)
     }
 
     fun insertOrUpdateXObjectLangMap(dao: XLangMapEntryDao, xobject: XObject, xObjectEntity: XObjectEntity, languageDao: LanguageDao, languageVariantDao: LanguageVariantDao) {
@@ -90,34 +92,38 @@ object XapiUtil {
         return join
     }
 
+    fun insertOrUpdateXObject(dao: XObjectDao, xobject: XObject, gson: Gson,
+                              contentEntryDao: ContentEntryDao,
+                              contentEntryUid: Long = 0L): XObjectEntity {
+        val xObjectId = xobject.id ?: throw IllegalArgumentException("XObject has no id")
+        val entity = dao.findByObjectId(xObjectId)
+
+        val contentEntryUidVal = if(contentEntryUid != 0L) {
+            contentEntryUid
+        }else {
+            contentEntryDao.getContentEntryUidFromXapiObjectId(xObjectId)
+        }
+
+        val definition = xobject.definition
+        val changedXObject = XObjectEntity(xobject.id, xobject.objectType,
+                if (definition != null) definition.type else "", if (definition != null) definition.interactionType else "",
+                if (definition != null) gson.toJson(definition.correctResponsePattern) else "", contentEntryUidVal)
+
+        if (entity == null) {
+            changedXObject.xObjectUid = dao.insert(changedXObject)
+        } else {
+            changedXObject.xObjectUid = entity.xObjectUid
+            dao.takeIf { changedXObject != entity }?.update(changedXObject)
+        }
+        return changedXObject
+    }
+
     fun getPerson(dao: PersonDao, actor: Actor): Person? {
         var person: Person? = null
         if (actor.account != null) {
             person = dao.findByUsername(actor.account!!.name)
         }
         return person
-    }
-
-    fun insertOrUpdateXObject(dao: XObjectDao, xobject: XObject, gson: Gson, contentEntryDao: ContentEntryDao): XObjectEntity {
-
-        val entity = dao.findByObjectId(xobject.id)
-
-        var contentEntryUid = contentEntryDao.getContentEntryUidFromXapiObjectId(xobject.id!!)
-
-        val definition = xobject.definition
-        val changedXObject = XObjectEntity(xobject.id, xobject.objectType,
-                if (definition != null) definition.type else "", if (definition != null) definition.interactionType else "",
-                if (definition != null) gson.toJson(definition.correctResponsePattern) else "", contentEntryUid)
-
-        if (entity == null) {
-            changedXObject.xObjectUid = dao.insert(changedXObject)
-        } else {
-            changedXObject.xObjectUid = entity.xObjectUid
-            if (changedXObject != entity) {
-                dao.update(changedXObject)
-            }
-        }
-        return changedXObject
     }
 
     /**
@@ -256,48 +262,78 @@ object XapiUtil {
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long): StatementEntity {
 
-        var statementEntity: StatementEntity? = dao.findByStatementId(statement.id!!)
+        val statementId = statement.id ?: throw IllegalArgumentException("Statement ${statement} to be stored has no id!")
+
+        var statementEntity: StatementEntity? = dao.findByStatementId(statementId)
         if (statementEntity == null) {
-            statementEntity = StatementEntity()
-            statementEntity.personUid = personUid
-            statementEntity.statementId = statement.id
-            statementEntity.verbUid = verbUid
-            statementEntity.xObjectUid = objectUid
-            statementEntity.agentUid = agentUid
-            statementEntity.authorityUid = authorityUid
-            statementEntity.instructorUid = instructorUid
-            statementEntity.teamUid = teamUid
-            statementEntity.contextStatementId = contextStatementUid
-            statementEntity.subStatementActorUid = subActorUid
-            statementEntity.substatementVerbUid = subVerbUid
-            statementEntity.subStatementObjectUid = subObjectUid
-            statementEntity.timestamp = UMCalendarUtil.parse8601Timestamp(statement.timestamp!!)
-            statementEntity.stored = UMCalendarUtil.parse8601Timestamp(statement.stored!!)
-            statementEntity.fullStatement = gson.toJson(statement)
-            if (statement.result != null) {
-                statementEntity.resultCompletion = statement.result!!.completion
-                statementEntity.resultDuration = UMTinCanUtil.parse8601Duration(statement.result!!.duration!!)
-                statementEntity.resultResponse = statement.result!!.response
-                statementEntity.resultSuccess = statement.result!!.success.toInt().toByte()
-                if (statement.result!!.score != null) {
-                    statementEntity.resultScoreMax = statement.result!!.score!!.max
-                    statementEntity.resultScoreMin = statement.result!!.score!!.min
-                    statementEntity.resultScoreScaled = statement.result!!.score!!.scaled
-                    statementEntity.resultScoreRaw = statement.result!!.score!!.raw
+            statementEntity = StatementEntity().also {
+                it.personUid = personUid
+                it.statementId = statement.id
+                it.verbUid = verbUid
+                it.xObjectUid = objectUid
+                it.agentUid = agentUid
+                it.authorityUid = authorityUid
+                it.instructorUid = instructorUid
+                it.teamUid = teamUid
+                it.contextStatementId = contextStatementUid
+                it.subStatementActorUid = subActorUid
+                it.substatementVerbUid = subVerbUid
+                it.subStatementObjectUid = subObjectUid
+                it.timestamp = UMCalendarUtil.parse8601TimestampOrDefault(statement.timestamp)
+                it.stored = UMCalendarUtil.parse8601TimestampOrDefault(statement.stored)
+                it.fullStatement = gson.toJson(statement)
+            }
+
+
+            val statementResult = statement.result
+            if (statementResult != null) {
+                statementEntity.resultCompletion = statementResult.completion
+                statementEntity.resultDuration = UMTinCanUtil.parse8601DurationOrDefault(statementResult.duration, 0L)
+                statementEntity.resultResponse = statementResult.response
+                statementEntity.resultSuccess = statementResult.success.toInt().toByte()
+
+                val resultScore = statementResult.score
+                if (resultScore != null) {
+                    statementEntity.resultScoreMax = resultScore.max
+                    statementEntity.resultScoreMin = resultScore.min
+                    statementEntity.resultScoreScaled = resultScore.scaled
+                    statementEntity.resultScoreRaw = resultScore.raw
+                }
+
+                val progressExtension = statementResult.extensions?.get(StatementEndpoint.EXTENSION_PROGRESS)
+                if(progressExtension != null) {
+                    //As this is being parsed as JSON - any number is counted as Double type
+                    statementEntity.extensionProgress = progressExtension.anyToInt()
                 }
             } else {
                 statementEntity.resultSuccess = 0.toByte()
             }
-            if (statement.context != null) {
-                statementEntity.contextPlatform = statement.context!!.platform
-                statementEntity.contextRegistration = statement.context!!.registration
+
+            val statementContext = statement.context
+            if (statementContext != null) {
+                statementEntity.contextPlatform = statementContext.platform
+                statementEntity.contextRegistration = statementContext.registration
             }
+
             statementEntity.statementUid = dao.insert(statementEntity)
         }
         return statementEntity
     }
 
     fun Boolean.toInt() = if (this) 1 else 0
+
+    /**
+     * Small utiltiy function to handle when we're not 100% sure about what we're getting in a Json
+     * block
+     */
+    private fun Any?.anyToInt() = when {
+        this is Double -> this.toInt()
+        this is Float -> this.toInt()
+        this is Int -> this
+        this is Long -> this.toInt()
+        this is String -> this.toInt()
+        else -> 0
+    }
 
 
 }

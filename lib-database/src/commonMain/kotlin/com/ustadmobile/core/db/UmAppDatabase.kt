@@ -53,6 +53,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     override val master: Boolean
         get() = false
 
+
+    /**
+     * Preload a few entities where we have fixed UIDs for fixed items (e.g. Xapi Verbs)
+     */
+    fun preload() {
+        verbDao.initPreloadedVerbs()
+    }
+
     @JsName("networkNodeDao")
     abstract val networkNodeDao: NetworkNodeDao
 
@@ -215,6 +223,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
 
+
     companion object {
 
         @Volatile
@@ -265,6 +274,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 db = builder.build()
                 namedInstances[dbName] = db
             }
+
             return db
         }
 

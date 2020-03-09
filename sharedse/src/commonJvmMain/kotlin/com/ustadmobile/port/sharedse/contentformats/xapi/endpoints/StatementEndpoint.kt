@@ -32,8 +32,13 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     private val contentEntryDao = db.contentEntryDao
 
 
+    /**
+     * @param contentEntryUid - the contentEntryUid when it is already known. E.g. when the xapi
+     * endpoint is used by the XapiPackagePresenter then the contentEntryUid is known.
+     */
     @Throws(IllegalArgumentException::class)
-    fun storeStatements(statements: List<Statement>, statementId: String): List<String> {
+    fun storeStatements(statements: List<Statement>, statementId: String,
+                        contentEntryUid: Long = 0L): List<String> {
 
         hasStatementWithMatchingId(statements, statementId)
 
@@ -43,7 +48,7 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
 
         val statementUids = ArrayList<String>()
         for (statement in statements) {
-            val entity = storeStatement(statement)
+            val entity = storeStatement(statement, contentEntryUid = contentEntryUid)
             statementUids.add(entity.statementId!!)
         }
         return statementUids
@@ -220,7 +225,8 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     }
 
     @Throws(IllegalArgumentException::class)
-    fun storeStatement(statement: Statement): StatementEntity {
+    fun storeStatement(statement: Statement,
+                       contentEntryUid: Long = 0L): StatementEntity {
 
         checkValidStatement(statement, false)
 
@@ -249,10 +255,12 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         }
 
         var xObjectEntity: XObjectEntity? = null
-        if (statement.`object` != null) {
-            xObjectEntity = insertOrUpdateXObject(xobjectDao, statement.`object`!!, gson, contentEntryDao)
+        val xObjectVal = statement.`object`
+        if (xObjectVal != null) {
+            xObjectEntity = insertOrUpdateXObject(xobjectDao, xObjectVal, gson,
+                    contentEntryDao, contentEntryUid)
 
-            insertOrUpdateXObjectLangMap(xLangMapEntryDao, statement.`object`!!, xObjectEntity, languageDao, langVariantDao)
+            insertOrUpdateXObjectLangMap(xLangMapEntryDao, xObjectVal, xObjectEntity, languageDao, langVariantDao)
         }
 
         var subActorUid: Long = 0
@@ -270,7 +278,9 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
 
             insertOrUpdateVerbLangMap(xLangMapEntryDao, subStatement.verb!!, subVerb, languageDao, langVariantDao)
 
-            val subObject = insertOrUpdateXObject(xobjectDao, subStatement.`object`!!, gson, contentEntryDao)
+            val subObject = insertOrUpdateXObject(xobjectDao, subStatement.`object`!!, gson,
+                    contentEntryDao, contentEntryUid)
+
             subObjectUid = subObject.xObjectUid
 
             insertOrUpdateXObjectLangMap(xLangMapEntryDao, subStatement.`object`!!, subObject, languageDao, langVariantDao)
@@ -281,21 +291,22 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
         var instructorUid: Long = 0
         var teamUid: Long = 0
 
-        if (statement.context != null) {
+        val statementContext = statement.context
+        if (statementContext != null) {
 
-            if (statement.context!!.instructor != null) {
-                val instructorAgent = getAgent(agentDao, personDao, statement.context!!.instructor!!)
+            val contextInstructor = statementContext.instructor
+            if (contextInstructor != null) {
+                val instructorAgent = getAgent(agentDao, personDao, contextInstructor)
                 instructorUid = instructorAgent.agentUid
             }
 
-            if (statement.context!!.team != null) {
-                val teamAgent = getAgent(agentDao, personDao, statement.context!!.team!!)
+            val contextTeam = statementContext.team
+            if (contextTeam != null) {
+                val teamAgent = getAgent(agentDao, personDao, contextTeam)
                 teamUid = teamAgent.agentUid
             }
 
-            if (statement.context!!.statement != null) {
-                contextStatementId = statement.context!!.statement!!.id!!
-            }
+            contextStatementId = statementContext.statement?.id ?: ""
         }
 
         val statementEntity = insertOrUpdateStatementEntity(statementDao, statement, gson,
@@ -388,6 +399,8 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     }
 
     companion object {
+
+        const val EXTENSION_PROGRESS = "https://w3id.org/xapi/cmi5/result/extensions/progress"
 
         @Throws(StatementRequestException::class)
         fun checkValidActor(actor: Actor) {

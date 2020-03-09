@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.AgentEntity
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
+import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.port.sharedse.contentformats.xapi.Statement
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
@@ -28,8 +29,13 @@ class TestStatementEndpoint {
     val fullstatement = "/com/ustadmobile/port/sharedse/xapi/fullstatement"
     val simpleStatement = "/com/ustadmobile/port/sharedse/xapi/simpleStatement"
     val subStatement = "/com/ustadmobile/port/sharedse/xapi/substatement"
-    private var repo: UmAppDatabase? = null
-    private var gson: Gson? = null
+
+    val statementWithProgress = "/com/ustadmobile/port/sharedse/xapi/statementWithProgress.json"
+
+    private lateinit var repo: UmAppDatabase
+
+    private lateinit var gson: Gson
+
     val context = Any()
 
     @Before
@@ -37,13 +43,14 @@ class TestStatementEndpoint {
         checkJndiSetup()
         val db = UmAppDatabase.Companion.getInstance(context)
         db.clearAllTables()
+        db.preload()
+
         repo = db
 
         val builder = GsonBuilder()
         builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
         builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
         gson = builder.create()
-
     }
 
     @Test
@@ -54,14 +61,14 @@ class TestStatementEndpoint {
         extractTestResourceToFile(simpleStatement, tmpFile)
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
-        val statement = gson!!.fromJson(content, Statement::class.java)
-        val endpoint = StatementEndpoint(repo!!, gson!!)
+        val statement = gson.fromJson(content, Statement::class.java)
+        val endpoint = StatementEndpoint(repo, gson)
         endpoint.storeStatements(listOf(statement), "")
 
-        val entity = repo!!.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
-        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:user@example.com", "", "", "")
-        val verb = repo!!.verbDao.findByUrl("http://example.com/xapi/verbs#sent-a-statement")
-        val xobject = repo!!.xObjectDao.findByObjectId("http://example.com/xapi/activity/simplestatement")
+        val entity = repo.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
+        val agent = repo.agentDao.getAgentByAnyId("", "mailto:user@example.com", "", "", "")
+        val verb = repo.verbDao.findByUrl("http://example.com/xapi/verbs#sent-a-statement")
+        val xobject = repo.xObjectDao.findByObjectId("http://example.com/xapi/activity/simplestatement")
 
         Assert.assertEquals("joined to agent", entity!!.agentUid, agent!!.agentUid)
         Assert.assertEquals("mailto:user@example.com", agent.agentMbox)
@@ -79,16 +86,16 @@ class TestStatementEndpoint {
         extractTestResourceToFile(contextWithObject, tmpFile)
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
-        val statement = gson!!.fromJson(content, Statement::class.java)
-        val endpoint = StatementEndpoint(repo!!, gson!!)
+        val statement = gson.fromJson(content, Statement::class.java)
+        val endpoint = StatementEndpoint(repo, gson)
         endpoint.storeStatements(listOf(statement), "")
 
-        val entity = repo!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
-        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:sally@example.com", "", "", "")
-        val verb = repo!!.verbDao.findByUrl("http://adlnet.gov/expapi/verbs/experienced")
-        val xobject = repo!!.xObjectDao.findByObjectId("http://example.com/activities/solo-hang-gliding")
-        val parent = repo!!.xObjectDao.findByObjectId("http://example.com/activities/hang-gliding-class-a")
-        val contextJoin = repo!!.contextXObjectStatementJoinDao
+        val entity = repo.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
+        val agent = repo.agentDao.getAgentByAnyId("", "mailto:sally@example.com", "", "", "")
+        val verb = repo.verbDao.findByUrl("http://adlnet.gov/expapi/verbs/experienced")
+        val xobject = repo.xObjectDao.findByObjectId("http://example.com/activities/solo-hang-gliding")
+        val parent = repo.xObjectDao.findByObjectId("http://example.com/activities/hang-gliding-class-a")
+        val contextJoin = repo.contextXObjectStatementJoinDao
                 .findByStatementAndObjectUid(entity!!.statementUid, parent!!.xObjectUid)
 
         Assert.assertEquals("joined to agent", entity.agentUid, agent!!.agentUid)
@@ -100,8 +107,29 @@ class TestStatementEndpoint {
         Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin!!.contextActivityFlag.toLong())
         Assert.assertEquals("context statement joined matches with objectuid", parent.xObjectUid, contextJoin.contextXObjectUid)
         Assert.assertEquals("context statement joined matches with statement", entity.statementUid, contextJoin.contextStatementUid)
+    }
 
 
+    @Test
+    fun givenStatementWithProgress_whenStored_thenDbAndStatementShouldMatch() {
+        val statementStr = this::class.java.getResourceAsStream(statementWithProgress).bufferedReader().use {
+            it.readText()
+        }
+
+        val statementEndpoint = StatementEndpoint(repo, gson)
+        statementEndpoint.storeStatement(gson.fromJson(statementStr, Statement::class.java),
+                contentEntryUid = 1234L)
+
+        val statementEntity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
+        val xObject = repo.xObjectDao.findByXobjectUid(statementEntity!!.xObjectUid)
+
+        Assert.assertEquals("Statement entity has correctly assigned contententryuid",
+                1234L, xObject?.objectContentEntryUid)
+        Assert.assertEquals("Statement entity has progress set as per JSON",
+                17, statementEntity?.extensionProgress)
+        Assert.assertEquals("Statement has preset Verb UID as expected",
+                VerbEntity.FIXED_UIDS["http://adlnet.gov/expapi/verbs/progressed"],
+                statementEntity?.verbUid)
     }
 
     @Test
@@ -113,19 +141,19 @@ class TestStatementEndpoint {
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
         println(content)
 
-        val statement = gson!!.fromJson(content, Statement::class.java)
-        val endpoint = StatementEndpoint(repo!!, gson!!)
+        val statement = gson.fromJson(content, Statement::class.java)
+        val endpoint = StatementEndpoint(repo, gson)
         endpoint.storeStatements(listOf(statement), "")
 
-        val entity = repo!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
-        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "", "")
-        val verb = repo!!.verbDao.findByUrl("http://adlnet.gov/expapi/verbs/attended")
-        val xobject = repo!!.xObjectDao.findByObjectId("http://www.example.com/meetings/occurances/34534")
-        val instructor = repo!!.agentDao.getAgentByAnyId("", "", "13936749", "http://www.example.com", "")
-        val authority = repo!!.agentDao.getAgentByAnyId("", "", "anonymous", "http://cloud.scorm.com/", "")
-        val team = repo!!.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "", "")
-        val parent = repo!!.xObjectDao.findByObjectId("http://www.example.com/meetings/series/267")
-        val contextJoin = repo!!.contextXObjectStatementJoinDao
+        val entity = repo.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
+        val agent = repo.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "", "")
+        val verb = repo.verbDao.findByUrl("http://adlnet.gov/expapi/verbs/attended")
+        val xobject = repo.xObjectDao.findByObjectId("http://www.example.com/meetings/occurances/34534")
+        val instructor = repo.agentDao.getAgentByAnyId("", "", "13936749", "http://www.example.com", "")
+        val authority = repo.agentDao.getAgentByAnyId("", "", "anonymous", "http://cloud.scorm.com/", "")
+        val team = repo.agentDao.getAgentByAnyId("", "mailto:teampb@example.com", "", "", "")
+        val parent = repo.xObjectDao.findByObjectId("http://www.example.com/meetings/series/267")
+        val contextJoin = repo.contextXObjectStatementJoinDao
                 .findByStatementAndObjectUid(entity!!.statementUid, parent!!.xObjectUid)
 
         Assert.assertEquals("joined to agent", agent?.agentUid, entity?.agentUid)
@@ -160,16 +188,16 @@ class TestStatementEndpoint {
     @Throws(IOException::class)
     fun givenValidStatementWithSubStatement_whenParsed_thenDbAndStatementShouldMatch() {
 
-        val statement = gson!!.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(subStatement)), Statement::class.java)
-        val endpoint = StatementEndpoint(repo!!, gson!!)
+        val statement = gson.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(subStatement)), Statement::class.java)
+        val endpoint = StatementEndpoint(repo, gson)
         endpoint.storeStatements(listOf(statement), "")
 
-        val entity = repo!!.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
-        val agent = repo!!.agentDao.getAgentByAnyId("", "mailto:test@example.com", "", "", "")
-        val verb = repo!!.verbDao.findByUrl("http://example.com/planned")
-        val subActor = repo!!.agentDao.getAgentByAnyId("", "mailto:test@example.com", "", "", "")
-        val subVerb = repo!!.verbDao.findByUrl("http://example.com/visited")
-        val subobject = repo!!.xObjectDao.findByObjectId("http://example.com/website")
+        val entity = repo.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
+        val agent = repo.agentDao.getAgentByAnyId("", "mailto:test@example.com", "", "", "")
+        val verb = repo.verbDao.findByUrl("http://example.com/planned")
+        val subActor = repo.agentDao.getAgentByAnyId("", "mailto:test@example.com", "", "", "")
+        val subVerb = repo.verbDao.findByUrl("http://example.com/visited")
+        val subobject = repo.xObjectDao.findByObjectId("http://example.com/website")
 
         Assert.assertEquals("joined to agent", agent?.agentUid, entity?.agentUid)
         Assert.assertEquals("mailto:test@example.com", agent?.agentMbox)
@@ -189,7 +217,7 @@ class TestStatementEndpoint {
 
     @Test
     fun givenAgentEntity_daoReturnsTheCorrectAgent() {
-        val agentDao = repo!!.agentDao
+        val agentDao = repo.agentDao
         val agentEntity = AgentEntity()
         agentEntity.agentMbox = "samih@ustadmobile.com"
         agentEntity.agentOpenid = null

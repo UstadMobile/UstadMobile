@@ -76,6 +76,8 @@ class StatementEntity {
     @LastChangedBy
     var statementLastChangedBy: Int = 0
 
+    var extensionProgress: Int = 0
+
     companion object {
 
         const val TABLE_ID = 60

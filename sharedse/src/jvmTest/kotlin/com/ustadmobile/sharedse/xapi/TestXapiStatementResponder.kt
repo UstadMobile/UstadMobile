@@ -32,18 +32,19 @@ class TestXapiStatementResponder {
         checkJndiSetup()
         val appDatabase = UmAppDatabase.Companion.getInstance(context)
         appDatabase.clearAllTables()
+        appDatabase.preload()
         appRepo = appDatabase
 
         httpd = RouterNanoHTTPD(0)
-        httpd.addRoute("/xapi/statements(.*)+", XapiStatementResponder::class.java, appRepo)
+        httpd.addRoute("/xapi/:contentEntryUid/statements", XapiStatementResponder::class.java, appRepo)
         httpd.start()
     }
 
     @Test
     @Throws(IOException::class)
     fun testput() {
-
-        val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/statements"
+        val contentEntryUid = 1234L
+        val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/$contentEntryUid/statements"
 
         val tmpFile = File.createTempFile("testStatement", "statement")
         extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
@@ -63,13 +64,18 @@ class TestXapiStatementResponder {
         Assert.assertEquals(204, code.toLong())
         val statement = appRepo!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
         Assert.assertEquals("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", statement!!.statementId)
+
+        val xObject = appRepo!!.xObjectDao.findByXobjectUid(statement.xObjectUid)
+        Assert.assertNotNull("Joined XObject is not null", xObject)
+        Assert.assertEquals("Statement is associated with expected contentEntryUid",
+                contentEntryUid, xObject!!.objectContentEntryUid)
     }
 
     @Test
     @Throws(IOException::class)
     fun testPost() {
-
-        val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/statements"
+        val contentEntryUid = 1234L
+        val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/$contentEntryUid/statements"
 
         val tmpFile = File.createTempFile("testStatement", "statement")
         extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
@@ -89,6 +95,10 @@ class TestXapiStatementResponder {
         Assert.assertEquals(200, code.toLong())
         val statement = appRepo!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
         Assert.assertEquals("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", statement!!.statementId)
+        val xObject = appRepo!!.xObjectDao.findByXobjectUid(statement.xObjectUid)
+        Assert.assertNotNull("Joined XObject is not null", xObject)
+        Assert.assertEquals("Statement is associated with expected contentEntryUid",
+                contentEntryUid, xObject!!.objectContentEntryUid)
     }
 
 
@@ -96,7 +106,7 @@ class TestXapiStatementResponder {
     @Throws(IOException::class)
     fun givenAValidStatement_whenPostRequestHasQueryParamsWithMethodisPut_thenShouldReturn204() {
 
-        val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/statements?method=PUT"
+        val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/1234/statements?method=PUT"
 
         val tmpFile = File.createTempFile("testStatement", "statement")
         extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
@@ -123,7 +133,7 @@ class TestXapiStatementResponder {
     @Throws(IOException::class)
     fun givenAValidStatement_whenPutRequestHasStatementIdParam_thenShouldReturn() {
 
-        val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/statements?statementId=" +
+        val urlString = "http://localhost:" + httpd.listeningPort + "/xapi/1234/statements?statementId=" +
                 URLEncoder.encode("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", StandardCharsets.UTF_8.toString())
 
         val tmpFile = File.createTempFile("testStatement", "statement")

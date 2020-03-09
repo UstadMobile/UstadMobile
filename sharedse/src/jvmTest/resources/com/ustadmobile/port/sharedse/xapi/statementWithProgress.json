@@ -1,0 +1,21 @@
+{
+  "id": "442f1133-bcd0-42b5-957e-4ad36f9414e0",
+  "timestamp": "2020-03-07T11:13:56.039Z",
+  "actor": {
+    "objectType": "Agent",
+    "mbox": "mailto:tincan@scorm.com",
+    "name": "Project Tin Can"
+  },
+  "verb": {
+    "id": "http://adlnet.gov/expapi/verbs/progressed"
+  },
+  "result": {
+    "extensions": {
+      "https://w3id.org/xapi/cmi5/result/extensions/progress": 17
+    }
+  },
+  "object": {
+    "id": "http://demo.com/",
+    "objectType": "Activity"
+  }
+}
