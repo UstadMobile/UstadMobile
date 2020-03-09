@@ -84,7 +84,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
                         contentEntry.contentEntryUid = entryDao.insert(contentEntry)
                         parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
-                        parentChildJoin.cepcjUid  = parentChildJoinDao.insert(parentChildJoin)
+                        parentChildJoin.cepcjUid = parentChildJoinDao.insert(parentChildJoin)
 
                     } else {
 
@@ -165,11 +165,11 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
                 val parentDir = Files.createTempDirectory("video").toFile()
 
                 var fileName = FilenameUtils.getName(urlString)
-                if(!fileName.contains(".")){
-                    fileName =  headers["Content-Disposition"]?.substringAfter("filename=\"")?.substringBefore("\";")?.toLowerCase()
+                if (!fileName.contains(".")) {
+                    fileName = headers["Content-Disposition"]?.substringAfter("filename=\"")?.substringBefore("\";")?.toLowerCase()
                 }
 
-                if(FilenameUtils.getExtension(fileName).isNullOrEmpty()){
+                if (FilenameUtils.getExtension(fileName).isNullOrEmpty()) {
                     fileName += VideoPlayerPresenterCommon.VIDEO_MIME_MAP[mimetype]
                 }
 
@@ -250,6 +250,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
 
                             driver.get(iframeUrl)
                             val logs = waitForNewFiles(driver)
+                            // to capture the link opening in the logs so it downloads 
                             driver.get("https://h5p.org/sites/all/modules/h5p/library/js/h5p-resizer.js")
 
                             // open browser and download all links
@@ -281,12 +282,15 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
                                     }
 
 
+                            // use our custom page to put the embed in
                             var htmlPage = UMIOUtils.readStreamToString(javaClass.getResourceAsStream("/h5p/h5p.html"))
                             htmlPage = htmlPage.replace("copy link here", iframeUrl)
-                            val htmlFile = File(parentDir, "h5pFile.html")
-                            FileUtils.writeStringToFile(htmlFile, htmlPage,  "utf-8")
-
-                            val htmlIndex = createIndexFromLog("h5p.html", "text/html", parentDir, htmlFile, null)
+                            val htmlDir = File(parentDir, "h5p")
+                            htmlDir.mkdirs()
+                            val htmlFile = File(htmlDir, "h5p.html")
+                            FileUtils.writeStringToFile(htmlFile, htmlPage, "utf-8")
+                            // add it to the start of the list so it would be the first url to open
+                            val htmlIndex = createIndexFromLog("http://www.h5p.com/h5p", "text/html", htmlDir, htmlFile, null)
                             indexList.add(0, htmlIndex)
 
                             // download h5P integration
