@@ -90,6 +90,8 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
         LoginRoute(db)
         ContainerMountRoute(db)
         UmAppDatabase_KtorRoute(db, Gson(), File("attachments/UmAppDatabase").absolutePath)
+        db.preload()
+
         if(devMode) {
 
             get("UmAppDatabase/clearAllTables") {
