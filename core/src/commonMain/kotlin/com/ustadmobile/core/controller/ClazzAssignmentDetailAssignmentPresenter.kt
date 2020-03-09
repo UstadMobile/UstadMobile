@@ -42,10 +42,11 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
 
         if(arguments.containsKey(UstadView.ARG_CLAZZ_ASSIGNMENT_UID)){
             val clazzAssignmentUid = arguments[UstadView.ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0
-            getAndSetProvider(clazzAssignmentUid)
 
             GlobalScope.launch {
                 val assignment = clazzAssignmentDao.findWithMetricByUidAsync(clazzAssignmentUid)
+
+                getAndSetProvider(assignment)
 
                 val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
                 val assignmentEditPermission = clazzDao.personHasPermissionWithClazz(
@@ -62,10 +63,10 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
         }
     }
 
-
-    private fun getAndSetProvider(clazzAssignmentUid: Long) {
+    private fun getAndSetProvider(assignment: ClazzAssignment?) {
         factory = clazzAssignmentContentJoinDao.findContentByAssignmentUid(
-                clazzAssignmentUid)
+                assignment?.clazzAssignmentUid?:0, assignment?.clazzAssignmentStartDate?:0,
+                assignment?.clazzAssignmentDueDate?:0)
         view.runOnUiThread(Runnable {
             view.setListProvider(factory)
         })

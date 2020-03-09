@@ -38,11 +38,18 @@ abstract class ClazzAssignmentContentJoinDao : BaseDao<ClazzAssignmentContentJoi
     abstract fun findJoinsByAssignmentUidList(clazzAssignmentUid: Long)
             : List< ClazzAssignmentContentJoin>
 
-    @Query("""SELECT ContentEntry.*, 0.0 as contentEntryWithMetricsProgress FROM ClazzAssignmentContentJoin 
+    @Query("""SELECT ContentEntry.* ,
+         (
+            SELECT MAX(extensionProgress) FROM StatementEntity
+            LEFT JOIN XObjectEntity ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid
+            WHERE XObjectEntity.objectContentEntryUid = clazzAssignmentContentJoinContentUid
+            AND timestamp BETWEEN :fromDate AND :endDate
+        ) as contentEntryWithMetricsProgress
+        FROM ClazzAssignmentContentJoin
         LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = clazzAssignmentContentJoinContentUid
-        WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid 
+        WHERE clazzAssignmentContentJoinClazzAssignmentUid = :clazzAssignmentUid
         AND CAST(clazzAssignmentContentJoinInactive AS INTEGER) = 0""")
-    abstract fun findContentByAssignmentUid(clazzAssignmentUid: Long)
+    abstract fun findContentByAssignmentUid(clazzAssignmentUid: Long, fromDate: Long, endDate: Long)
             : DataSource.Factory<Int, ContentEntryWithMetrics>
 
     @Query("""
