@@ -315,7 +315,8 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                 xObjectEntity?.xObjectUid ?: 0,
                 contextStatementId, instructorUid,
                 agentUid, authorityUid, teamUid,
-                subActorUid, subVerbUid, subObjectUid)
+                subActorUid, subVerbUid, subObjectUid,
+                contentEntryUid = contentEntryUid)
 
         if (statement.context != null && statement.context!!.contextActivities != null) {
 
