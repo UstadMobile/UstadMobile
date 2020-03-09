@@ -99,6 +99,8 @@ class TestXapiStatementResponder {
         Assert.assertNotNull("Joined XObject is not null", xObject)
         Assert.assertEquals("Statement is associated with expected contentEntryUid",
                 contentEntryUid, xObject!!.objectContentEntryUid)
+        Assert.assertEquals("ContentEntry itself has contentEntryUid set", contentEntryUid,
+                statement?.statementContentEntryUid)
     }
 
 
