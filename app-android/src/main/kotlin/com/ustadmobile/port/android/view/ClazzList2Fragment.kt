@@ -9,7 +9,9 @@ import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzList2Binding
 import com.toughra.ustadmobile.databinding.ItemClazzlist2ClazzBinding
 import com.ustadmobile.core.controller.ClazzList2Presenter
@@ -31,6 +33,8 @@ class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, SortOptionSelecte
 
     private var dbRepo: UmAppDatabase? = null
 
+    private var mRecyclerView: RecyclerView? = null
+
     class ClazzList2RecyclerAdapter(var presenter: ClazzList2Presenter?): PagedListAdapter<ClazzWithNumStudents, ClazzList2RecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
 
         class ClazzList2ViewHolder(val itemBinding: ItemClazzlist2ClazzBinding): RecyclerView.ViewHolder(itemBinding.root)
@@ -46,6 +50,10 @@ class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, SortOptionSelecte
             holder.itemBinding.presenter = presenter
         }
 
+        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+            super.onAttachedToRecyclerView(recyclerView)
+        }
+
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             super.onDetachedFromRecyclerView(recyclerView)
             presenter = null
@@ -53,7 +61,10 @@ class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, SortOptionSelecte
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         rootViewBinding = FragmentClazzList2Binding.inflate(inflater, container, false)
+        mRecyclerView = rootViewBinding?.root?.findViewById(R.id.fragment_class_list_recyclerview)
+        mRecyclerView?.layoutManager = LinearLayoutManager(context)
         mPresenter = ClazzList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
@@ -68,6 +79,7 @@ class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, SortOptionSelecte
         super.onDestroyView()
         rootViewBinding = null
         mPresenter = null
+        dbRepo = null
     }
 
     override var addButtonVisible: Boolean = false
@@ -89,10 +101,11 @@ class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, SortOptionSelecte
         set(value) {
             val dbRepoVal = dbRepo ?: return
             val adapter = ClazzList2RecyclerAdapter(mPresenter)
-            val liveData = value?.asRepositoryLiveData(dbRepoVal)
+            val liveData = value?.asRepositoryLiveData(dbRepoVal.clazzDao)
             liveData?.observe(this, Observer {
                 adapter.submitList(it)
             })
+            mRecyclerView?.adapter = adapter
         }
 
     override val viewContext: Any

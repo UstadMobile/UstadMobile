@@ -69,7 +69,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
                     options.add(0, Pair(MessageID.bottomnav_feed_title,
                             FeedListView.VIEW_NAME))
                     options.add(1, Pair(MessageID.bottomnav_classes_title,
-                            ClazzListView.VIEW_NAME))
+                            ClazzList2View.VIEW_NAME))
                     options.add(2, Pair(MessageID.bottomnav_people_title,
                             PeopleListView.VIEW_NAME))
                     options.add(Pair(MessageID.reports, ReportDashboardView.VIEW_NAME))

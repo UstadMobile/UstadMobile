@@ -21,6 +21,8 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
 
     var loggedInPersonUid = 0L
 
+    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
+
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
         ORDER_NAME_DSC(MessageID.sort_by_name_desc),
@@ -65,11 +67,15 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
     }
 
     fun handleClickAddClazz() {
-        systemImpl.go(ClazzEditView.VIEW_NAME, mapOf(), context)
+        systemImpl.go(ClazzEdit2View.VIEW_NAME, mapOf(), context)
     }
 
     fun handleClickSortOrder(sortOrder: SortOrder) {
-        getAndSetList(sortOrder)
+        if(sortOrder != currentSortOrder) {
+            getAndSetList(sortOrder)
+            currentSortOrder = sortOrder
+        }
+
     }
 
 }

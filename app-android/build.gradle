@@ -290,6 +290,8 @@ dependencies {
 
     implementation "com.github.aakira:napier-android:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
@@ -421,7 +423,7 @@ dependencies {
 
     //bottom navigation
     implementation "com.aurelhubert:ahbottomnavigation:$version_android_bottom_nav"
-    
+
     //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
     androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 

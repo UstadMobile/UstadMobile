@@ -262,6 +262,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                 FeedListView.VIEW_NAME to FeedListFragment::class.java,
                 ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
                 ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
+                ClazzList2View.VIEW_NAME to ClazzList2Fragment::class.java,
                 PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
                 HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java)
 
