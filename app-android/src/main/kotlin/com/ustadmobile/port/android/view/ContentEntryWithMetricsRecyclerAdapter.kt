@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -25,6 +26,7 @@ class ContentEntryWithMetricsRecyclerAdapter(
 
         val entity = getItem(position)
         holder.binding.contententrywithmetrics = entity
+        holder.binding.itemClazzAssignmentWithMetricsProgress.visibility = View.INVISIBLE
     }
 
     inner class ClazzAssignmentListViewHolder

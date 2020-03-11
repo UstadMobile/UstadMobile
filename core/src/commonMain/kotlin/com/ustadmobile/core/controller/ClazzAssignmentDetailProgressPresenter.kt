@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
-import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.PersonWithAssignmentMetrics
@@ -45,7 +44,8 @@ class ClazzAssignmentDetailProgressPresenter(context: Any,
 
     private fun getAndSetProvider() {
         factory = clazzAssignmentDao.findAllStudentsInAssignmentWithMetrics(
-                clazzAssignment.clazzAssignmentUid)
+                clazzAssignment.clazzAssignmentUid, clazzAssignment.clazzAssignmentStartDate,
+                clazzAssignment.clazzAssignmentDueDate)
         view.runOnUiThread(Runnable {
             view.setListProvider(factory)
         })

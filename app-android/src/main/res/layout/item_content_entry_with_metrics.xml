@@ -23,6 +23,7 @@
             android:id="@+id/item_clazz_assignment_with_metrics_thumbnail"
             android:layout_width="60dp"
             android:layout_height="60dp"
+            app:contentPicture="@{contententrywithmetrics.contentEntryUid}"
             android:src="@drawable/ic_collections_bookmark_black_24dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

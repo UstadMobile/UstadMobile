@@ -27,6 +27,7 @@
             android:id="@+id/item_clazz_assignment_with_metrics_thumbnail"
             android:layout_width="60dp"
             android:layout_height="60dp"
+            app:contentPicture="@{clazzassignmentwithmetrics.firstContentEntryUid}"
             android:src="@drawable/ic_collections_bookmark_black_24dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -89,12 +90,14 @@
             android:id="@+id/item_clazz_assignment_with_metrics_progress"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dp"
-            android:visibility="visible"
-            tools:progress="77"
             android:layout_height="wrap_content"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="@+id/item_clazz_assignment_with_metrics_thumbnail"
             app:layout_constraintEnd_toEndOf="@+id/item_clazz_assignment_with_metrics_thumbnail"
-            app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_with_metrics_thumbnail" />
+            app:layout_constraintStart_toStartOf="@+id/item_clazz_assignment_with_metrics_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazz_assignment_with_metrics_thumbnail"
+            tools:progress="77"
+            android:progress="@{0+(int)clazzassignmentwithmetrics.clazzAssignmentProgress}"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

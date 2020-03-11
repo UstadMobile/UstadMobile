@@ -64,9 +64,10 @@ class ClazzAssignmentDetailAssignmentPresenter(context: Any,
     }
 
     private fun getAndSetProvider(assignment: ClazzAssignment?) {
+        val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
         factory = clazzAssignmentContentJoinDao.findContentByAssignmentUid(
                 assignment?.clazzAssignmentUid?:0, assignment?.clazzAssignmentStartDate?:0,
-                assignment?.clazzAssignmentDueDate?:0)
+                assignment?.clazzAssignmentDueDate?:0, loggedInPersonUid)
         view.runOnUiThread(Runnable {
             view.setListProvider(factory)
         })

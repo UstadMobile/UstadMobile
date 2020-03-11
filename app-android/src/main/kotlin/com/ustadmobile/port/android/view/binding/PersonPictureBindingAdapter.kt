@@ -32,16 +32,20 @@ fun setPersonPicture(personPicture: ImageView, personUid: Long){
                 personPicture.context).personPictureDao
 
 
-        val personPictureLocal = personPictureDao.findByPersonUidAsync(personUid)?: PersonPicture()
-        imgPath = personPictureDaoRepo.getAttachmentPath(personPictureLocal)?:""
+        val personPictureLocal = personPictureDao.findByPersonUidAsync(personUid)
+        if(personPictureLocal != null) {
+            imgPath = personPictureDaoRepo.getAttachmentPath(personPictureLocal) ?: ""
+        }
 
         if (imgPath.isNotEmpty())
             setPictureOnView(imgPath, personPicture)
         else
             personPicture.setImageResource(R.drawable.ic_person_black_new_24dp)
 
-        val personPictureEntity = personPictureDaoRepo.findByPersonUidAsync(personUid)?: PersonPicture()
-        imgPath = personPictureDaoRepo.getAttachmentPath(personPictureEntity)?:""
+        val personPictureEntity = personPictureDaoRepo.findByPersonUidAsync(personUid)
+        if(personPictureEntity != null) {
+            imgPath = personPictureDaoRepo.getAttachmentPath(personPictureEntity) ?: ""
+        }
 
         if(personPictureLocal != personPictureEntity) {
             if (!imgPath.isEmpty())

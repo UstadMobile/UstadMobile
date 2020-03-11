@@ -19,6 +19,8 @@ class ClazzAssignmentWithMetrics() : ClazzAssignment() {
 
     var firstContentEntryUid : Long = 0
 
+    var clazzAssignmentProgress: Double = 0.0
+
     //Title of the story. eg: "Story 1, Story 1C"
     var storiesTitle : String = ""
 
