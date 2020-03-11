@@ -93,7 +93,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:focusable="false"
-                    app:realValue="@={clazzassignment.clazzAssignmentStartDate}"
+                    app:dateLong="@={clazzassignment.clazzAssignmentStartDate}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_start_date" />
 
@@ -125,7 +125,7 @@
                     android:layout_width="97dp"
                     android:focusable="false"
                     android:layout_height="wrap_content"
-                    app:realValue="@={clazzassignment.clazzAssignmentDueDate}"
+                    app:dateLong="@={clazzassignment.clazzAssignmentDueDate}"
                     app:layout_constraintStart_toStartOf="@+id/imageView9"
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_assignment_edit_end_date" />
 
