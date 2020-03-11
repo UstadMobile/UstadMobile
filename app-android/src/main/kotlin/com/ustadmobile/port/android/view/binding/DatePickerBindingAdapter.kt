@@ -7,6 +7,7 @@ import android.widget.EditText
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import java.text.SimpleDateFormat
 import java.util.*
@@ -15,8 +16,6 @@ import java.util.*
  * Data binding Adapter for Date picker types.
  * Contains the logic for linking editText dates with Datepicker
  */
-
-val TAG_DATELONG = 420
 
 fun updateDateOnEditText(et: EditText, date: Long) {
     val dateFormatter: SimpleDateFormat by lazy { SimpleDateFormat("EEE, dd/MMM/yyyy",
@@ -30,7 +29,7 @@ fun updateDateOnEditText(et: EditText, date: Long) {
 
 fun openDatePicker2(et: EditText, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
-    val currentDate = et.getTag(TAG_DATELONG) as? Long ?: 0L
+    val currentDate = et.getTag(R.id.tag_datelong) as? Long ?: 0L
     if(currentDate > 0) {
         c.timeInMillis = currentDate
     }
@@ -40,7 +39,7 @@ fun openDatePicker2(et: EditText, context: Context, inverseBindingListener: Inve
         c.set(Calendar.YEAR, year)
         c.set(Calendar.MONTH, month)
         c.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-        et.setTag(TAG_DATELONG, c.timeInMillis)
+        et.setTag(R.id.tag_datelong, c.timeInMillis)
         updateDateOnEditText(et, c.timeInMillis)
         inverseBindingListener.onChange()
     }
@@ -63,10 +62,10 @@ fun getDate(et: EditText, inverseBindingListener: InverseBindingListener){
 @BindingAdapter("dateLong")
 fun setDate(et: EditText, date: Long){
     updateDateOnEditText(et, date)
-    et.setTag(TAG_DATELONG, date)
+    et.setTag(R.id.tag_datelong, date)
 }
 
 @InverseBindingAdapter(attribute = "dateLong")
 fun getRealValue(et: EditText): Long {
-    return et.getTag(TAG_DATELONG) as? Long ?: 0L
+    return et.getTag(R.id.tag_datelong) as? Long ?: 0L
 }
