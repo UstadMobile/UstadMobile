@@ -18,6 +18,10 @@
             name="fieldsEnabled"
             type="boolean" />
 
+        <variable
+            name="activityEventHandler"
+            type="com.ustadmobile.port.android.view.ClazzEdit2ActivityEventHandler" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -267,46 +271,6 @@
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_hline"></LinearLayout>
 
                 <TextView
-                    android:id="@+id/activity_clazz_edit_location_title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="8dp"
-                    android:text="@string/location"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_recyclerview" />
-
-                <Spinner
-                    android:id="@+id/activity_clazz_edit_location_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:paddingTop="20dp"
-                    android:spinnerMode="dialog"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_location_title"
-                    android:visibility="gone">
-
-                </Spinner>
-
-                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                    android:id="@+id/locationAutoCompleteTextView"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:hint="@string/enter_name"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_location_title" />
-
-                <TextView
                     android:id="@+id/activity_clazz_edit_timezone_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -316,7 +280,7 @@
                     android:text="@string/select_a_timezone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/locationAutoCompleteTextView" />
+                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_recyclerview" />
 
                 <Spinner
                     android:id="@+id/activity_clazz_edit_timezone_spinner"
