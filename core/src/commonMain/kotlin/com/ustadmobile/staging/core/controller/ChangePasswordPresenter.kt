@@ -1,13 +1,10 @@
 package com.ustadmobile.core.controller
 
-
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ChangePasswordView
 import com.ustadmobile.lib.db.entities.Person
@@ -30,7 +27,7 @@ class ChangePasswordPresenter(context: Any,
                               view: ChangePasswordView)
     : UstadBaseController<ChangePasswordView>(context, arguments!!, view) {
 
-    internal var repository: UmAppDatabase
+    internal var repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
     private val personDao: PersonDao
     private val personAuthDao: PersonAuthDao
     private var currentPerson: Person? = null
@@ -41,7 +38,6 @@ class ChangePasswordPresenter(context: Any,
     var updatePasswordConfirm: String? = null
 
     init {
-        repository = UmAccountManager.getRepositoryForActiveAccount(context)
         personDao = repository.personDao
         personAuthDao = repository.personAuthDao
         val cp = UmAccountManager.getActiveAccount(context)
@@ -55,10 +51,10 @@ class ChangePasswordPresenter(context: Any,
 
         if (loggedInPersonUid != 0L) {
             GlobalScope.launch {
-                var result = personDao.findByUidAsync(loggedInPersonUid)
+                val result = personDao.findByUidAsync(loggedInPersonUid)
                 currentPerson = result
                 if (currentPerson != null) {
-                    var personAuth = personAuthDao.findByUidAsync(loggedInPersonUid)
+                    val personAuth = personAuthDao.findByUidAsync(loggedInPersonUid)
                     if (personAuth == null) {
                         currentPersonAuth = PersonAuth()
                         currentPersonAuth!!.personAuthUid = loggedInPersonUid
@@ -72,8 +68,8 @@ class ChangePasswordPresenter(context: Any,
 
     fun handleClickSave() {
 
-        if (updatePassword != null && !updatePassword!!.isEmpty() && updatePasswordConfirm != null &&
-                !updatePasswordConfirm!!.isEmpty() && currentPersonAuth != null && currentPerson != null) {
+        if (updatePassword != null && updatePassword!!.isNotEmpty() && updatePasswordConfirm != null &&
+                updatePasswordConfirm!!.isNotEmpty() && currentPersonAuth != null && currentPerson != null) {
             if (updatePassword != updatePasswordConfirm) {
                 view.sendMessage(MessageID.passwords_dont_match)
                 return
@@ -90,15 +86,12 @@ class ChangePasswordPresenter(context: Any,
 
             val serverUrl = UmAccountManager.getActiveEndpoint(context)
 
-
             GlobalScope.launch {
-
-
                 //Authenticate with current password first to see if current password matches.
                 try {
                     val loginResponse = defaultHttpClient().get<HttpResponse>() {
                         url {
-                            takeFrom(serverUrl!!)
+                            takeFrom(serverUrl)
                             encodedPath = "${encodedPath}Login/login"
                         }
                         parameter("username", currentPerson!!.username)
@@ -111,8 +104,8 @@ class ChangePasswordPresenter(context: Any,
                             val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
                             {
                                 url {
-                                    takeFrom(serverUrl!!)
-                                    encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
+                                    takeFrom(serverUrl)
+                                    encodedPath = "UmAppDatabase/PersonAuthDao/resetPassword"
                                 }
                                 parameter("p0", currentPerson!!.personUid)
                                 parameter("p1", updatePassword!!)
@@ -125,7 +118,7 @@ class ChangePasswordPresenter(context: Any,
                                     personAuthDao.updateAsync(currentPersonAuth!!)
                                     view.finish()
                                 } catch (e: Exception) {
-                                    println(e!!.message)
+                                    println(e.message)
                                     view.sendMessage(MessageID.unable_to_update_password)
                                 }
                             }else {
