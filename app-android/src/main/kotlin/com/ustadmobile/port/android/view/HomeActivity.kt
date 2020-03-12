@@ -199,6 +199,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
             R.id.action_send_feedback -> hearShake()
             R.id.action_share_app -> presenter.handleClickShareApp()
+            R.id.menu_home_activity_settings -> presenter.handleClickSettings()
         }
 
         return super.onOptionsItemSelected(item)

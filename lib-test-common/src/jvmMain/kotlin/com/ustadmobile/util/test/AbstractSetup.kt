@@ -16,6 +16,8 @@ abstract class AbstractSetup {
 
     var umAccount: UmAccount? = null
 
+    var randomAccount : UmAccount? = null
+
 
     fun insert(db: UmAppDatabase, clear:Boolean = false){
 
@@ -25,6 +27,10 @@ abstract class AbstractSetup {
         val personDao = db.personDao
         val personGroupDao = db.personGroupDao
         val personGroupMemberDao = db.personGroupMemberDao
+        val clazzDao = db.clazzDao
+        val contentEntryDao = db.contentEntryDao
+        val clazzAssignmentDao = db.clazzAssignmentDao
+        val clazzAssignmentContentJoinDao = db.clazzAssignmentContentJoinDao
 
 
         //Create two LEs
@@ -76,12 +82,49 @@ abstract class AbstractSetup {
         personGroupMemberDao.insert(we5GM)
         personGroupMemberDao.insert(we6GM)
         //Update
+
+        //set person as admin
+        le1.admin = true
+
         personDao.update(le1)
         personDao.update(le2)
+
+
 
         //Set active account to le1
         umAccount = UmAccount(le1Uid, "le1",
                 "auth", "endpoint")
+
+
+        val clazz = Clazz()
+        clazz.clazzName = "Class A"
+        clazz.clazzDesc = "Desc Class"
+        clazz.clazzUid = 42L
+        clazzDao.insert(clazz)
+
+        val newAssignment = ClazzAssignment()
+        newAssignment.clazzAssignmentUid = 40L
+        newAssignment.clazzAssignmentClazzUid = clazz.clazzUid
+
+        val ce = ContentEntry()
+        ce.entryId = "424242"
+        ce.title = "testing"
+        ce.leaf = true
+        ce.contentEntryUid = contentEntryDao.insert(ce)
+
+        newAssignment.clazzAssignmentUid =clazzAssignmentDao.insert(newAssignment)
+
+        val cej = ClazzAssignmentContentJoin()
+        cej.clazzAssignmentContentJoinContentUid = ce.contentEntryUid
+        cej.clazzAssignmentContentJoinClazzAssignmentUid = newAssignment.clazzAssignmentUid
+
+        cej.clazzAssignmentContentJoinUid = clazzAssignmentContentJoinDao.insert(cej)
+
+        val randomPerson = Person("random", "Random", "Person", true)
+        randomPerson.personUid = personDao.insert(randomPerson)
+
+        randomAccount = UmAccount(randomPerson.personUid, randomPerson.username, "auth",
+                "endpoint")
 
     }
 }

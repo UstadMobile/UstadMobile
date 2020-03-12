@@ -300,6 +300,16 @@
             android:label="@string/add_school"
             android:theme="@style/Theme.UstadTheme"/>
 
+        <activity android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/assignment"
+            android:theme="@style/Theme.UstadTheme"/>
+
+        <activity android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/assignment"
+            android:theme="@style/Theme.UstadTheme"/>
+
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"

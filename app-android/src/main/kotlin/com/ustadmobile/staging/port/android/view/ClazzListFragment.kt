@@ -14,7 +14,6 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil

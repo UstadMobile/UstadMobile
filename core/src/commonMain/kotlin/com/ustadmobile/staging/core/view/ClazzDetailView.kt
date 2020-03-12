@@ -1,5 +1,7 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.lib.db.entities.Clazz
+
 /**
  * ClassDetail Core View extends Core UstadView. Will be implemented
  * on various implementations.
@@ -11,17 +13,11 @@ interface ClazzDetailView : UstadView {
      *
      * @param toolbarTitle The toolbar title
      */
-    fun setToolbarTitle(toolbarTitle: String)
+    fun setClazz(clazz: Clazz)
 
-    fun setAttendanceVisibility(visible: Boolean)
-
-    fun setActivityVisibility(visible: Boolean)
-
-    fun setSELVisibility(visible: Boolean)
+    fun setupTabs(tabs: List<String>)
 
     fun setSettingsVisibility(visible: Boolean)
-
-    fun setupViewPager()
 
     companion object {
 

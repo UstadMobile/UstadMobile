@@ -161,9 +161,11 @@ class ContentEntryListActivity : UstadBaseWithContentOptionsActivity(),
     }
 
     override fun onBackPressed() {
+        val fragment = supportFragmentManager.findFragmentById(R.id.entry_content) as ContentEntryListFragment?
+
         if (contentCreationOptionBehaviour.state == BottomSheetBehavior.STATE_EXPANDED) {
             contentCreationOptionBehaviour.state = BottomSheetBehavior.STATE_COLLAPSED
-        } else {
+        }else if(fragment?.handleBackPressed() != true) {
             super.onBackPressed()
         }
     }

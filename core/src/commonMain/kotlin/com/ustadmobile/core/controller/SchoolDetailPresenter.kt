@@ -36,7 +36,7 @@ class SchoolDetailPresenter(context: Any,
         if(arguments.containsKey(ARG_SCHOOL_DETAIL_SCHOOL_UID)){
             GlobalScope.launch {
                 val school =
-                        schoolDao.findByUidAsync(arguments[ARG_SCHOOL_DETAIL_SCHOOL_UID]!!.toLong())
+                        schoolDao.findByUidAsync(arguments[ARG_SCHOOL_DETAIL_SCHOOL_UID]?.toLong() ?: 0)
                 if (school != null) {
                     currentSchool = school
                     view.runOnUiThread(Runnable {
@@ -53,8 +53,7 @@ class SchoolDetailPresenter(context: Any,
      * Handle what happens when the gear edit button is clicked - should go to schooledit page
      */
     fun handleClickSchoolEdit(){
-        val args = HashMap<String, String>()
-        args[ARG_SCHOOL_DETAIL_SCHOOL_UID] = currentSchool.schoolUid.toString()
+        val args = mapOf(ARG_SCHOOL_DETAIL_SCHOOL_UID to currentSchool.schoolUid.toString())
         impl.go(SchoolEditView.VIEW_NAME, args, context)
     }
 

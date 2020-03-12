@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 /**
  * Presenter for RoleDetail view
  */
-class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: RoleDetailView) :
-        UstadBaseController<RoleDetailView>(context, arguments!!, view) {
+class RoleDetailPresenter(context: Any, arguments: Map<String, String>, view: RoleDetailView) :
+        UstadBaseController<RoleDetailView>(context, arguments, view) {
 
     internal var repository: UmAppDatabase
     private var currentRoleUid: Long = 0
@@ -32,8 +32,8 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
         roleDao = repository.roleDao
 
-        if (arguments!!.containsKey(ROLE_UID)) {
-            currentRoleUid = arguments!!.get(ROLE_UID)!!.toLong()
+        if (arguments.containsKey(ROLE_UID)) {
+            currentRoleUid = arguments.get(ROLE_UID)!!.toLong()
         }
 
     }
@@ -54,7 +54,7 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
         }
     }
 
-    fun handleRoleChanged(changedRole: Role?) {
+    private fun handleRoleChanged(changedRole: Role?) {
 
         //set the og person value
         if (currentRole == null)
@@ -68,7 +68,7 @@ class RoleDetailPresenter(context: Any, arguments: Map<String, String>?, view: R
         }
     }
 
-    fun initFromRole(roleUid: Long) {
+    private fun initFromRole(roleUid: Long) {
         this.currentRoleUid = roleUid
 
         val roleUmLiveData = roleDao.findByUidLive(currentRoleUid)

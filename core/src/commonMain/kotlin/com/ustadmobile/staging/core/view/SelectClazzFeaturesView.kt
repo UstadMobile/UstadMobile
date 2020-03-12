@@ -26,6 +26,7 @@ interface SelectClazzFeaturesView : UstadView {
         val CLAZZ_FEATURE_ATTENDANCE_ENABLED = "ClazzFeatureAttendanceEnabled"
         val CLAZZ_FEATURE_ACTIVITY_ENABLED = "ClazzFeatureActivityEnabled"
         val CLAZZ_FEATURE_SEL_ENABLED = "ClazzFeatureSELEnabled"
+        val CLAZZ_FEATURE_ASSIGNMENT_ENABLED = "ClazzFeatureSELEnabled"
     }
 
 

@@ -32,14 +32,21 @@ import kotlin.jvm.Volatile
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class, School::class
+    SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 33)
+], version = 34)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
+
+    /*
+        Changes in 34:
+        Added School and Assignment based entities
+        Updated Clazz : added clazzFeatures and removed individual feature bits
+     */
+
 
     var attachmentsDir: String? = null
 
@@ -205,6 +212,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
     abstract val umCalendarDao : UMCalendarDao
     abstract val schoolDao : SchoolDao
+    abstract val clazzAssignmentDao : ClazzAssignmentDao
+    abstract val clazzAssignmentContentJoinDao : ClazzAssignmentContentJoinDao
 
     @JsName("xLangMapEntryDao")
     abstract val xLangMapEntryDao: XLangMapEntryDao
