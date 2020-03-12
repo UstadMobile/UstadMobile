@@ -55,7 +55,7 @@ class ClazzAssignmentDetailProgressFragment : UstadBaseFragment(), ClazzAssignme
         val mRecyclerLayoutManager = LinearLayoutManager(context)
         mRecyclerView?.layoutManager = mRecyclerLayoutManager
         //set up Presenter
-        mPresenter = ClazzAssignmentDetailProgressPresenter(context!!,
+        mPresenter = ClazzAssignmentDetailProgressPresenter(requireContext(),
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter?.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 

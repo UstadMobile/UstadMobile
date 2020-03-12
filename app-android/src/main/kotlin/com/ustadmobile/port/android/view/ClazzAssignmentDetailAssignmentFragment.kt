@@ -72,7 +72,7 @@ class ClazzAssignmentDetailAssignmentFragment : UstadBaseFragment(), ClazzAssign
         val mRecyclerLayoutManager = LinearLayoutManager(context)
         mRecyclerView?.layoutManager = mRecyclerLayoutManager
         //set up Presenter
-        mPresenter = ClazzAssignmentDetailAssignmentPresenter(context!!,
+        mPresenter = ClazzAssignmentDetailAssignmentPresenter(requireContext(),
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter?.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 

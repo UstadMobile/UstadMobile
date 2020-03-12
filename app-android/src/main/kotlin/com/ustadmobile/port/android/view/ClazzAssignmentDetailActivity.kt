@@ -99,7 +99,7 @@ class ClazzAssignmentDetailActivity : UstadBaseActivity(), ClazzAssignmentDetail
 
         toolbar = rootView?.clazzAssignmentDetailToolbar
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         //Presenter
         mPresenter = ClazzAssignmentDetailPresenter(this,
