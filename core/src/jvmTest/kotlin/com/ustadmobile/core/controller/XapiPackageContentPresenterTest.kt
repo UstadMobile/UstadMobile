@@ -139,7 +139,7 @@ class XapiPackageContentPresenterTest {
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
             val umAccountActor = Json.parse(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
-                    umAccountActor.account.username, account.username)
+                    umAccountActor.account.name, account.username)
             val expectedEndpoint = UMFileUtil.resolveLink(lastMountedUrl!!, "/xapi/$contentEntryUid/")
             Assert.assertEquals("Received expected Xapi endpoint: /xapi/contentEntryUid",
                     expectedEndpoint, paramsProvided["endpoint"])

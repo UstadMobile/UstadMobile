@@ -20,16 +20,18 @@ class ClazzAssignmentDetailAssignmentPresenterTest : AbstractSetup() {
 
     lateinit var systemImplSpy: UstadMobileSystemImpl
 
+    lateinit var db: UmAppDatabase
+
+    lateinit var repo: UmAppDatabase
 
     @Before
     fun setUp() {
         checkJndiSetup()
         val impl = UstadMobileSystemImpl.instance
 
-        val db = UmAppDatabase.getInstance(Any())
-
-        //do inserts
-        insert(db, true)
+        db = UmAppDatabase.getInstance(Any())
+        db.clearAllTables()
+        repo = db
 
         //Set active logged in account
         UmAccountManager.setActiveAccount(umAccount!!, Any(), impl)
@@ -52,7 +54,7 @@ class ClazzAssignmentDetailAssignmentPresenterTest : AbstractSetup() {
         }
         val mockContext = mock<DoorLifecycleOwner> {}
         val presenter = ClazzAssignmentDetailAssignmentPresenter(mockContext,
-                presenterArgs, mockView, systemImplSpy)
+                presenterArgs, mockView, systemImplSpy, repository = repo)
         return Pair(mockView, presenter)
     }
 
