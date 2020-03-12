@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.SortOption
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Clazz
@@ -30,7 +30,7 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
         ORDER_ATTENDANCE_DESC(MessageID.attendance_high_to_low)
     }
 
-    class ClazzListSortOption(val sortOrder: SortOrder, context: Any) : SortOption(sortOrder.messageId, context)
+    class ClazzListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)

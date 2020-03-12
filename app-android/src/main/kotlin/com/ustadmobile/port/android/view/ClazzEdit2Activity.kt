@@ -30,7 +30,7 @@ interface ClazzEdit2ActivityEventHandler {
 }
 
 class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Schedule?>>,
-        ClazzEdit2ActivityEventHandler {
+        ClazzEdit2ActivityEventHandler, ScheduleEditDialogFragment.ScheduleEditDialogFragmentListener {
 
     private var rootView: ActivityClazzEdit2Binding? = null
 
@@ -78,10 +78,15 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
     }
 
     override fun handleClickAddSchedule() {
-
+        val scheduleEditDialog = ScheduleEditDialogFragment()
+        scheduleEditDialog.show(supportFragmentManager, TAG_SCHEDULE_EDIT_DIALOG)
     }
 
     override fun handleClickEditSchedule(schedule: Schedule) {
+
+    }
+
+    override fun onScheduleDone(schedule: Schedule?) {
 
     }
 
@@ -132,6 +137,8 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
     }
 
     companion object {
+        const val TAG_SCHEDULE_EDIT_DIALOG = "scheduleEdit"
+
         val DIFF_CALLBACK_SCHEDULE: DiffUtil.ItemCallback<Schedule> = object: DiffUtil.ItemCallback<Schedule>() {
             override fun areItemsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {
                 return oldItem.scheduleUid == newItem.scheduleUid

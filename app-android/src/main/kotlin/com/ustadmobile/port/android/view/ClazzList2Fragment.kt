@@ -19,13 +19,13 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.SortOption
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
-import com.ustadmobile.port.android.view.binding.SortOptionSelectedListener
+import com.ustadmobile.port.android.view.binding.MessageIdOptionSelectedListener
 
-class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, SortOptionSelectedListener{
+class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, MessageIdOptionSelectedListener{
 
     private var mPresenter: ClazzList2Presenter? = null
 
@@ -111,12 +111,12 @@ class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, SortOptionSelecte
     override val viewContext: Any
         get() = requireContext()
 
-    override fun onSortOptionSelected(view: AdapterView<*>?, sortOption: SortOption) {
-        if(sortOption !is ClazzList2Presenter.ClazzListSortOption) return
-        mPresenter?.handleClickSortOrder(sortOption.sortOrder)
+    override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
+        if(messageIdOption !is ClazzList2Presenter.ClazzListSortOption) return
+        mPresenter?.handleClickSortOrder(messageIdOption.sortOrder)
     }
 
-    override fun onNoSortItemSelected(view: AdapterView<*>?) {
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
         //do nothing
     }
 

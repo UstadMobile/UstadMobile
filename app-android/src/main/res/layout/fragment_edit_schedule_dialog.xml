@@ -7,6 +7,10 @@
         <variable
             name="schedule"
             type="com.ustadmobile.lib.db.entities.Schedule" />
+
+        <variable
+            name="frequencyOptions"
+            type="java.util.List&lt;com.ustadmobile.core.util.MessageIdOption&gt;"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -24,7 +28,8 @@
             android:spinnerMode="dialog"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_heading" />
+            app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_heading"
+            app:messageIdOptions="@{frequencyOptions}"/>
 
         <TextView
             android:id="@+id/fragment_add_schedule_dialog_schedule_heading"

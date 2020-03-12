@@ -20,11 +20,11 @@ was here before: android:paddingBottom="@dimen/bottom_navigation_height"
 
         <variable
             name="sortOptions"
-            type="java.util.List&lt;com.ustadmobile.core.util.SortOption&gt;"/>
+            type="java.util.List&lt;com.ustadmobile.core.util.MessageIdOption&gt;"/>
 
         <variable
             name="onSortSelected"
-            type="com.ustadmobile.port.android.view.binding.SortOptionSelectedListener" />
+            type="com.ustadmobile.port.android.view.binding.MessageIdOptionSelectedListener" />
 
     </data>
 
@@ -49,8 +49,8 @@ was here before: android:paddingBottom="@dimen/bottom_navigation_height"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:sortOptions="@{sortOptions}"
-            app:onSortItemSelected="@{onSortSelected}"
+            app:messageIdOptions="@{sortOptions}"
+            app:onMessageIdOptionSelected="@{onSortSelected}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

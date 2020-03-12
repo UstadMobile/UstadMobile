@@ -2,7 +2,7 @@ package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 
-open class SortOption(val messageId: Int, context: Any, val code: Int = messageId) {
+open class MessageIdOption(val messageId: Int, context: Any, val code: Int = messageId) {
 
     val messageStr = UstadMobileSystemImpl.instance.getString(messageId, context)
 

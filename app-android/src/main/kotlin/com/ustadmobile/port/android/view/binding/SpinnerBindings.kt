@@ -6,38 +6,38 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.databinding.BindingAdapter
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.util.SortOption
+import com.ustadmobile.core.util.MessageIdOption
 
-interface SortOptionSelectedListener {
+interface MessageIdOptionSelectedListener {
 
-    fun onSortOptionSelected(view: AdapterView<*>?, sortOption: SortOption)
+    fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption)
     
-    fun onNoSortItemSelected(view: AdapterView<*>?)
+    fun onNoMessageIdOptionSelected(view: AdapterView<*>?)
 
 }
 
-@BindingAdapter("sortOptions")
-fun Spinner.setSortOptions(sortOptions: MutableList<SortOption>?) {
-    val sortOptionsToUse = sortOptions ?: mutableListOf()
-    adapter = ArrayAdapter<SortOption>(context, R.layout.item_simple_spinner_gray, sortOptionsToUse).also {
+@BindingAdapter("messageIdOptions")
+fun Spinner.setSortOptions(messageIdOptions: MutableList<MessageIdOption>?) {
+    val sortOptionsToUse = messageIdOptions ?: mutableListOf()
+    adapter = ArrayAdapter<MessageIdOption>(context, R.layout.item_simple_spinner_gray, sortOptionsToUse).also {
         it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     }
 
 }
 
-@BindingAdapter("onSortItemSelected")
-fun Spinner.setOnSortItemSelected(itemSelectedListener: SortOptionSelectedListener?) {
+@BindingAdapter("onMessageIdOptionSelected")
+fun Spinner.setOnSortItemSelected(itemSelectedListener: MessageIdOptionSelectedListener?) {
     if(itemSelectedListener == null) {
         onItemSelectedListener = null
     }else {
         onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                itemSelectedListener.onNoSortItemSelected(parent)
+                itemSelectedListener.onNoMessageIdOptionSelected(parent)
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val sortOption = this@setOnSortItemSelected.adapter.getItem(position) as SortOption
-                itemSelectedListener.onSortOptionSelected(parent, sortOption)
+                val sortOption = this@setOnSortItemSelected.adapter.getItem(position) as MessageIdOption
+                itemSelectedListener.onMessageIdOptionSelected(parent, sortOption)
             }
         }
     }
