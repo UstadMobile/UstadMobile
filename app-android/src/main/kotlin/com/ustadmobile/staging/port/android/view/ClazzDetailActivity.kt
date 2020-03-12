@@ -14,6 +14,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.port.android.view.ClazzAssignmentListFragment
 import com.ustadmobile.port.android.view.UstadBaseActivity
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
