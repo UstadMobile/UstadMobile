@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentEditScheduleDialogBinding
 import com.ustadmobile.core.controller.ScheduleEditPresenter
@@ -28,6 +29,8 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
 
     private var mPresenter: ScheduleEditPresenter? = null
 
+    private var mToolbar: Toolbar? = null
+
     override var schedule: Schedule? = null
         get() = field
         set(value) {
@@ -39,17 +42,33 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
         get() = field
         set(value) {
             viewBinding?.frequencyOptions = value
+            field  = value
+        }
+
+    override var dayOptions: List<ScheduleEditPresenter.DayMessageIdOption>? = null
+        get() = field
+        set(value) {
+            viewBinding?.dayOptions = value
+            field = value
         }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inflater = requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val viewBindingVal = FragmentEditScheduleDialogBinding.inflate(inflater, null)
         viewBinding = viewBindingVal
+        mToolbar = viewBinding?.root?.findViewById(R.id.fragment_edit_schedule_dialog_toolbar)
+        mToolbar?.setNavigationOnClickListener { v -> dismiss() }
+        mToolbar?.inflateMenu(R.menu.menu_done)
+        mToolbar?.setOnMenuItemClickListener {
+            val currentSchedule = viewBinding?.schedule
+            if(currentSchedule != null) {
+                mPresenter?.handleClickDone(currentSchedule)
+            }
+            true
+        }
 
-        return AlertDialog.Builder(requireContext())
+        return AlertDialog.Builder(requireContext(), R.style.FullScreenDialogStyle)
                 .setView(viewBindingVal.root)
-                .setPositiveButton(R.string.add, this)
-                .setNegativeButton(R.string.cancel, this)
                 .create().also {
                     it.setOnShowListener(this)
                 }
@@ -75,10 +94,13 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
     override fun onDestroyView() {
         super.onDestroyView()
         viewBinding = null
+        mToolbar = null
+        mPresenter = null
     }
 
     override fun finishWithResult(schedule: Schedule?) {
         fragmentListener?.onScheduleDone(schedule)
+        dismiss()
     }
 
     override fun onClick(dialog: DialogInterface?, which: Int) {

@@ -9,6 +9,8 @@ interface ScheduleEditView: UstadView {
 
     var frequencyOptions: List<ScheduleEditPresenter.FrequencyMessageIdOption>?
 
+    var dayOptions: List<ScheduleEditPresenter.DayMessageIdOption>?
+
     fun finishWithResult(schedule: Schedule?)
 
     companion object {

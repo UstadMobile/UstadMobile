@@ -8,6 +8,7 @@ import android.widget.TimePicker
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import java.text.SimpleDateFormat
 import java.util.*
@@ -16,8 +17,6 @@ import java.util.*
  * Time binding Adapter for Date picker types.
  * Contains the logic for linking editText dates with Timepicker
  */
-
-var updatedTime = 0L
 
 fun updateTimeOnEditText(et: EditText, date: Long) {
     val dateFormatter: SimpleDateFormat by lazy { SimpleDateFormat("HH:mm",
@@ -31,16 +30,17 @@ fun updateTimeOnEditText(et: EditText, date: Long) {
 
 fun openTimePicker(et: EditText, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
-    if(updatedTime > 0) {
-        c.timeInMillis = updatedTime
+    val timeSet = et.getTag(R.id.tag_timelong) as? Long ?: 0L
+    if(timeSet > 0) {
+        c.timeInMillis = timeSet
     }
 
     //date listener - opens a new date picker.
     val timeListener = { _: TimePicker, hourOfDay:Int, minute:Int ->
         c.set(Calendar.HOUR_OF_DAY, hourOfDay)
         c.set(Calendar.MINUTE, minute)
-        updatedTime = c.timeInMillis
-        updateTimeOnEditText(et, updatedTime)
+        et.setTag(R.id.tag_timelong, c.timeInMillis)
+        updateTimeOnEditText(et, c.timeInMillis)
         inverseBindingListener.onChange()
     }
 
@@ -60,17 +60,11 @@ fun getTime(et: EditText, inverseBindingListener: InverseBindingListener){
 
 @BindingAdapter("timeValue")
 fun setTime(et: EditText, time: Long){
+    et.setTag(R.id.tag_timelong, time)
     updateTimeOnEditText(et, time)
-    updatedTime = time
 }
 
 @InverseBindingAdapter(attribute = "timeValue")
 fun getTimeValue(et: EditText): Long {
-    return updatedTime
-}
-
-
-
-interface TimePickerBindingAdapter {
-
+    return et.getTag(R.id.tag_timelong) as? Long ?: 0L
 }

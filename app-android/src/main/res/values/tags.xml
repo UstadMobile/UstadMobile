@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="tag_datelong" type="id"/>
+    <item name="tag_timelong" type="id"/>
+    <item name="tag_messageidoptions" type="id"/>
 </resources>

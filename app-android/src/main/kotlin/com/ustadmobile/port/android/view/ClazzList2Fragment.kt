@@ -23,9 +23,8 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
-import com.ustadmobile.port.android.view.binding.MessageIdOptionSelectedListener
 
-class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, MessageIdOptionSelectedListener{
+class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener{
 
     private var mPresenter: ClazzList2Presenter? = null
 

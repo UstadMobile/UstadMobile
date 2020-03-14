@@ -15,6 +15,18 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
 
     class FrequencyMessageIdOption(frequency: FrequencyOption, context: Any) : MessageIdOption(frequency.messageId, context, frequency.optionVal)
 
+    enum class DayOptions(val optionVal: Int, val messageId: Int) {
+        SUNDAY(Schedule.DAY_SUNDAY, MessageID.sunday),
+        MONDAY(Schedule.DAY_MONDAY, MessageID.monday),
+        TUESDAY(Schedule.DAY_TUESDAY, MessageID.tuesday),
+        WEDNESDAY(Schedule.DAY_WEDNESDAY, MessageID.wednesday),
+        THURSDAY(Schedule.DAY_THURSDAY, MessageID.thursday),
+        FRIDAY(Schedule.DAY_FRIDAY, MessageID.friday),
+        SATURDAY(Schedule.DAY_SATURDAY, MessageID.saturday)
+    }
+
+    class DayMessageIdOption(day: DayOptions, context: Any) : MessageIdOption(day.messageId, context, day.optionVal)
+
     var schedule: Schedule? = null
 
     override fun onCreate(savedState: Map<String, String?>?) {
@@ -28,6 +40,7 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
 
         view.frequencyOptions = FrequencyOption.values().map { FrequencyMessageIdOption(it, context) }
         view.schedule = schedule
+        view.dayOptions = DayOptions.values().map { DayMessageIdOption(it, context) }
     }
 
     fun handleClickDone(schedule: Schedule) {

@@ -24,7 +24,7 @@ was here before: android:paddingBottom="@dimen/bottom_navigation_height"
 
         <variable
             name="onSortSelected"
-            type="com.ustadmobile.port.android.view.binding.MessageIdOptionSelectedListener" />
+            type="com.ustadmobile.port.android.view.MessageIdSpinner.OnMessageIdOptionSelectedListener" />
 
     </data>
 
@@ -44,7 +44,7 @@ was here before: android:paddingBottom="@dimen/bottom_navigation_height"
             app:layout_constraintEnd_toStartOf="@+id/fragment_clazz_list_sort_spinner"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Spinner
+        <com.ustadmobile.port.android.view.MessageIdSpinner
             android:id="@+id/fragment_clazz_list_sort_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
