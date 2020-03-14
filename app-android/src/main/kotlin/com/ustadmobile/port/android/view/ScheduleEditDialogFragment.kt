@@ -13,13 +13,14 @@ import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.lib.db.entities.Schedule
+import kotlinx.serialization.json.Json
 
 class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
         DialogInterface.OnClickListener, DialogInterface.OnShowListener{
 
     interface ScheduleEditDialogFragmentListener {
 
-        fun onScheduleDone(schedule: Schedule?)
+        fun onScheduleDone(schedule: Schedule)
 
     }
 
@@ -98,7 +99,7 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
         mPresenter = null
     }
 
-    override fun finishWithResult(schedule: Schedule?) {
+    override fun finishWithResult(schedule: Schedule) {
         fragmentListener?.onScheduleDone(schedule)
         dismiss()
     }
@@ -109,4 +110,15 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
 
     override val viewContext: Any
         get() = requireContext()
+
+    companion object {
+        fun newInstance(schedule: Schedule): ScheduleEditDialogFragment {
+            return ScheduleEditDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ScheduleEditView.ARG_SCHEDULE,
+                            Json.stringify(Schedule.serializer(), schedule))
+                }
+            }
+        }
+    }
 }

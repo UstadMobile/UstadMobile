@@ -7,6 +7,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Schedule
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlin.jvm.Volatile
 
@@ -19,6 +20,12 @@ class ClazzEdit2Presenter(context: Any, arguments: Map<String, String>,
     private var clazz: Clazz? = null
 
     private val clazzSchedulesList = DoorMutableLiveData<List<Schedule>>()
+
+    private val scheduleIdsToInsert = mutableListOf<Long>()
+
+    private val scheduleIdsToDeactivate = mutableListOf<Long>()
+
+    private val idsToInsertAtomic = atomic(-100)
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
@@ -64,12 +71,31 @@ class ClazzEdit2Presenter(context: Any, arguments: Map<String, String>,
         }
     }
 
-    fun handleAddSchedule(schedule: Schedule) {
-
+    fun handleAddOrEditSchedule(schedule: Schedule) {
+        if (schedule.scheduleUid == 0L) {
+            schedule.scheduleUid = idsToInsertAtomic.getAndIncrement().toLong()
+            scheduleIdsToInsert += schedule.scheduleUid
+            val newList = (clazzSchedulesList.getValue() ?: listOf()) + schedule
+            clazzSchedulesList.sendValue(newList)
+        }else {
+            val mutableList = clazzSchedulesList.getValue()?.toMutableList() ?: mutableListOf()
+            val indexChanged = mutableList.indexOfFirst { it.scheduleUid == schedule.scheduleUid }
+            if(indexChanged == -1)
+                return
+            mutableList[indexChanged] = schedule
+            clazzSchedulesList.sendValue(mutableList)
+        }
     }
 
     fun handleRemoveSchedule(schedule: Schedule) {
-
+        val mutableList = clazzSchedulesList.getValue()?.toMutableList() ?: mutableListOf()
+        mutableList.remove(schedule)
+        clazzSchedulesList.sendValue(mutableList)
+        if(schedule.scheduleUid in scheduleIdsToInsert) {
+            scheduleIdsToInsert.remove(schedule.scheduleUid)
+        }else {
+            scheduleIdsToDeactivate.add(schedule.scheduleUid)
+        }
     }
 
 }

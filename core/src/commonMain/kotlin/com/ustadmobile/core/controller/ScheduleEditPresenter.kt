@@ -10,7 +10,7 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
 
     enum class FrequencyOption(val optionVal: Int, val messageId: Int) {
         DAILY(Schedule.SCHEDULE_FREQUENCY_DAILY, MessageID.daily),
-        WEEKLY(Schedule.SCHEDULE_FREQUENCY_DAILY, MessageID.weekly)
+        WEEKLY(Schedule.SCHEDULE_FREQUENCY_WEEKLY, MessageID.weekly)
     }
 
     class FrequencyMessageIdOption(frequency: FrequencyOption, context: Any) : MessageIdOption(frequency.messageId, context, frequency.optionVal)

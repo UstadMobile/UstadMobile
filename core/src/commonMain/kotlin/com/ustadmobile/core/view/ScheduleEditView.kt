@@ -11,7 +11,7 @@ interface ScheduleEditView: UstadView {
 
     var dayOptions: List<ScheduleEditPresenter.DayMessageIdOption>?
 
-    fun finishWithResult(schedule: Schedule?)
+    fun finishWithResult(schedule: Schedule)
 
     companion object {
         const val ARG_SCHEDULE = "schedule"
