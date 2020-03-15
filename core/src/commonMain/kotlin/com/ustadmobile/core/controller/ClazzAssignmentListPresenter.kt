@@ -58,13 +58,13 @@ class ClazzAssignmentListPresenter(context: Any,
     fun handleClickAssignment(clazzAssignment: ClazzAssignmentWithMetrics){
         val args = mapOf(ARG_CLAZZ_ASSIGNMENT_UID to clazzAssignment.clazzAssignmentUid.toString(),
                 ARG_CLAZZ_UID to clazzUid.toString())
-        impl.go(ClazzAssignmentDetailView.VIEW_NAME, args, view.viewContext)
+        impl.go(ClazzAssignmentDetailView.VIEW_NAME, args, context)
     }
 
     fun handleClickNewAssignment(){
         val args = mapOf(ARG_CLAZZ_ASSIGNMENT_UID to "0",
                 ARG_CLAZZ_UID to clazzUid.toString())
-        impl.go(ClazzAssignmentEditView.VIEW_NAME, args , view.viewContext)
+        impl.go(ClazzAssignmentEditView.VIEW_NAME, args , context)
     }
 
 }

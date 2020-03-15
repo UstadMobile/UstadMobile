@@ -25,6 +25,11 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
             " AND CAST(groupMemberActive AS INTEGER) = 1 ")
     abstract fun finAllMembersWithGroupId(groupUid: Long): DataSource.Factory<Int, PersonGroupMember>
 
+
+    @Query("SELECT * FROM PersonGroupMember WHERE groupMemberGroupUid = :groupUid " +
+            " AND CAST(groupMemberActive AS INTEGER) = 1 ")
+    abstract fun finAllMembersWithGroupIdSync(groupUid: Long): List<PersonGroupMember>
+
     @Query("SELECT Person.*, (0) AS clazzUid, " +
             "   '' AS clazzName, " +
             "  (0) AS attendancePercentage, " +

@@ -50,6 +50,12 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
     abstract fun findGroupByRoleAndEntityTypeAndUidSync(tableId: Int, entityUid: Long,
                                                         roleUid: Long): List<EntityRole>
 
+    @Query(""" SELECT * FROM EntityRole WHERE erTableId = :tableId 
+        AND erEntityUid = :entityUid AND erRoleUid = :roleUid AND erGroupUid = :groupUid 
+        AND CAST(erActive AS INTEGER) = 1 """)
+    abstract fun findGroupByRoleAndEntityTypeAndUidAndPersonGroupUid(roleUid: Long, tableId: Int,
+                                                                     entityUid: Long, groupUid: Long): List<EntityRole>
+
     @Query(SELECT_ROLE_ASSIGNMENT_QUERY)
     abstract fun findAllActiveRoleAssignments(): DataSource.Factory<Int, EntityRoleWithGroupName>
 

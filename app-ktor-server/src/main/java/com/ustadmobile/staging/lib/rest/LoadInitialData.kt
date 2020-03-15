@@ -282,7 +282,9 @@ class LoadInitialData {
 
                         Role.PERMISSION_PERSON_PICTURE_SELECT or         //See Person Picture
 
-                        Role.PERMISSION_PERSON_PICTURE_UPDATE           //Update Person picture
+                        Role.PERMISSION_PERSON_PICTURE_UPDATE or          //Update Person picture
+                        Role.PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE         //Assignments
+
                 newRole.rolePermissions = teacherPermissions
                 newRole.roleUid = roleDao.insert(newRole)
             }
