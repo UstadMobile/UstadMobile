@@ -44,6 +44,12 @@ abstract class ClazzAssignmentDao : BaseDao<ClazzAssignment> {
     """)
     abstract fun findByClazzUidFactory(clazzUid: Long): DataSource.Factory<Int, ClazzAssignment>
 
+    @Query("""SELECT * FROM ClazzAssignment WHERE 
+        clazzAssignmentClazzUid = :clazzUid 
+        AND CAST(clazzAssignmentInactive AS INTEGER) = 0
+    """)
+    abstract fun findByClazzUidFactorySync(clazzUid: Long): List<ClazzAssignment>
+
     @Query("""
         SELECT ClazzAssignment.*, 
         

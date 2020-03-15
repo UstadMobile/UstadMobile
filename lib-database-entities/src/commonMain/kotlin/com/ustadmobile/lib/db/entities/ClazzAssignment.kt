@@ -55,4 +55,42 @@ open class ClazzAssignment() {
         const val CLAZZ_ASSIGNMENT_GRADING_NUMERICAL = 1
         const val CLAZZ_ASSIGNMENT_GRADING_LETTERS = 2
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ClazzAssignment
+
+        if (clazzAssignmentUid != other.clazzAssignmentUid) return false
+        if (clazzAssignmentTitle != other.clazzAssignmentTitle) return false
+        if (clazzAssignmentClazzUid != other.clazzAssignmentClazzUid) return false
+        if (clazzAssignmentInactive != other.clazzAssignmentInactive) return false
+        if (clazzAssignmentStartDate != other.clazzAssignmentStartDate) return false
+        if (clazzAssignmentDueDate != other.clazzAssignmentDueDate) return false
+        if (clazzAssignmentCreationDate != other.clazzAssignmentCreationDate) return false
+        if (clazzAssignmentUpdateDate != other.clazzAssignmentUpdateDate) return false
+        if (clazzAssignmentInstructions != other.clazzAssignmentInstructions) return false
+        if (clazzAssignmentGrading != other.clazzAssignmentGrading) return false
+        if (clazzAssignmentRequireAttachment != other.clazzAssignmentRequireAttachment) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = clazzAssignmentUid.hashCode()
+        result = 31 * result + (clazzAssignmentTitle?.hashCode() ?: 0)
+        result = 31 * result + clazzAssignmentClazzUid.hashCode()
+        result = 31 * result + clazzAssignmentInactive.hashCode()
+        result = 31 * result + clazzAssignmentStartDate.hashCode()
+        result = 31 * result + clazzAssignmentDueDate.hashCode()
+        result = 31 * result + clazzAssignmentCreationDate.hashCode()
+        result = 31 * result + clazzAssignmentUpdateDate.hashCode()
+        result = 31 * result + (clazzAssignmentInstructions?.hashCode() ?: 0)
+        result = 31 * result + clazzAssignmentGrading
+        result = 31 * result + clazzAssignmentRequireAttachment.hashCode()
+        return result
+    }
+
+
 }

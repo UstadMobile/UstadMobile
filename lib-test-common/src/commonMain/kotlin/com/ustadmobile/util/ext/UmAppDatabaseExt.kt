@@ -61,6 +61,23 @@ fun UmAppDatabase.grantClazzRoleToPerson(person: Person, clazz: Clazz, role: Rol
 
 }
 
+fun UmAppDatabase.createAssignmentWithClazz(clazzAssignment: ClazzAssignment, clazz: Clazz)
+        : ClazzAssignment{
+
+    if(clazz.clazzUid == 0L){
+        //Create class
+        clazz.clazzUid = clazzDao.insert(clazz)
+    }
+    if(clazzAssignment.clazzAssignmentUid == 0L){
+        //Create assignment
+        clazzAssignment.clazzAssignmentClazzUid = clazz.clazzUid
+        clazzAssignment.clazzAssignmentUid = clazzAssignmentDao.insert(clazzAssignment)
+
+    }
+
+    return clazzAssignment
+}
+
 fun UmAppDatabase.createTeacherRole(): Role{
     val teacherPermissions = Role.PERMISSION_CLAZZ_ADD_STUDENT or
             Role.PERMISSION_CLAZZ_SELECT or                  //See Clazzes

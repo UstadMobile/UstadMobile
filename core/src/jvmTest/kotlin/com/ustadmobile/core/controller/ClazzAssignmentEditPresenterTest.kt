@@ -7,9 +7,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzAssignment
-import com.ustadmobile.lib.db.entities.ClazzAssignmentContentJoin
-import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.util.ext.PersonWithClazzandRole
+import com.ustadmobile.util.ext.createTeacherRole
+import com.ustadmobile.util.ext.grantClazzRoleToPerson
 import com.ustadmobile.util.test.AbstractSetup
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
@@ -18,24 +19,34 @@ import org.junit.Test
 import org.junit.Assert
 
 
-class ClazzAssignmentEditPresenterTest : AbstractSetup() {
+class ClazzAssignmentEditPresenterTest {
 
     lateinit var systemImplSpy: UstadMobileSystemImpl
-    private val context = Any()
-
+    lateinit var mockContext: Any
+    lateinit var db : UmAppDatabase
+    lateinit var data: PersonWithClazzandRole
 
     @Before
     fun setUp() {
         checkJndiSetup()
         val impl = UstadMobileSystemImpl.instance
 
-        val db = UmAppDatabase.getInstance(Any())
+        db = UmAppDatabase.getInstance(Any())
+        db.clearAllTables()
 
         //do inserts
-        insert(db, true)
+        val teacher = Person("teacher", "Teacher" ,  "One")
+        teacher.active = true
+        val clazz = Clazz("Class A")
+        clazz.isClazzActive = true
+        val teacherRole = db.createTeacherRole()
+        data = db.grantClazzRoleToPerson(teacher, clazz, teacherRole)
 
         //Set active logged in account
-        UmAccountManager.setActiveAccount(umAccount!!, Any(), impl)
+        val teacherAccount=  UmAccount(data.person.personUid, data.person.username,
+                "auth", "endpoint")
+        UmAccountManager.setActiveAccount(teacherAccount, Any(), impl)
+
         systemImplSpy = spy(impl)
 
     }
@@ -53,24 +64,30 @@ class ClazzAssignmentEditPresenterTest : AbstractSetup() {
                 Unit
             }
         }
-        val mockContext = mock<DoorLifecycleOwner> {}
+        mockContext = mock<DoorLifecycleOwner> {}
         val presenter = ClazzAssignmentEditPresenter(mockContext,
-                presenterArgs, mockView, systemImplSpy)
+                presenterArgs, mockView, systemImplSpy, db)
         return Pair(mockView, presenter)
     }
 
     @Test
     fun givenPresenterCreated_whenHandleSaveClicked_shouldPresist() {
         // create presenter, with a mock view, check that it makes that call
-        val (view, presenter) = createMockViewAndPresenter()
-        presenter.onCreate(mapOf())
+        val (view, presenter) = createMockViewAndPresenter(
+                mapOf(UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString())
+        )
+        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString()))
 
         val newAssignment = ClazzAssignment()
-        newAssignment.clazzAssignmentUid = 40L
-        newAssignment.clazzAssignmentClazzUid = 42L
         presenter.handleSaveAssignment(newAssignment)
 
-        val newCA = UmAppDatabase.getInstance(context).clazzAssignmentDao.findByUidAsync(40)
+        timeout(2000)
+        val assignments : List<ClazzAssignment> =
+                db.clazzAssignmentDao.findByClazzUidFactorySync(data.clazz.clazzUid)
+        var newCA: ClazzAssignment  ? = null
+        if(assignments.isNotEmpty()){
+            newCA = assignments[0]
+        }
         assert(newCA != null)
 
         verify(view, timeout(1000)).finish()
@@ -79,26 +96,37 @@ class ClazzAssignmentEditPresenterTest : AbstractSetup() {
     @Test
     fun givenPresenterCreated_whenContentAddedAndHandleSaveClicked_shouldPersistJoins(){
         // create presenter, with a mock view, check that it makes that call
-        val (view, presenter) = createMockViewAndPresenter()
-        presenter.onCreate(mapOf())
+        val (view, presenter) = createMockViewAndPresenter(
+                mapOf(UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString())
+        )
+        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString()))
 
-        val newAssignment = ClazzAssignment()
-        newAssignment.clazzAssignmentUid = 40L
-        newAssignment.clazzAssignmentClazzUid = 42L
-
+        //Add the content
         val ce = ContentEntry()
         ce.entryId = "424242"
         ce.title = "testing"
         ce.leaf = true
-        ce.contentEntryUid = UmAppDatabase.getInstance(context).contentEntryDao.insert(ce)
+        ce.contentEntryUid = db.contentEntryDao.insert(ce)
+
+        //Create a new blank assignment for editing
+        val newAssignment = ClazzAssignment()
+
         presenter.handleContentEntryAdded(ce)
 
         presenter.handleSaveAssignment(newAssignment)
 
-        val newCA = UmAppDatabase.getInstance(context).clazzAssignmentDao.findByUidAsync(40)
+        timeout(2000)
+        val assignments : List<ClazzAssignment> =
+                db.clazzAssignmentDao.findByClazzUidFactorySync(data.clazz.clazzUid)
+        var newCA: ClazzAssignment  ? = null
+        if(assignments.isNotEmpty()) {
+            newCA = assignments[0]
+        }
         assert(newCA != null)
 
-        val caCEJ : List<ClazzAssignmentContentJoin> = UmAppDatabase.getInstance(context).clazzAssignmentContentJoinDao.findJoinsByAssignmentUidList(40)
+        val caCEJ : List<ClazzAssignmentContentJoin> =
+                db.clazzAssignmentContentJoinDao.findJoinsByAssignmentUidList(
+                        newCA!!.clazzAssignmentUid)
         assert(caCEJ.isNotEmpty())
 
         verify(view, timeout(1000)).finish()
@@ -107,51 +135,53 @@ class ClazzAssignmentEditPresenterTest : AbstractSetup() {
     @Test
     fun givenClazzAssignmentWithExistingContentLoaded_whenHandleClickAddContentAndSave_shouldPersist(){
         // create presenter, with a mock view, check that it makes that call
-        val (view, presenter) = createMockViewAndPresenter()
+        val (view, presenter) = createMockViewAndPresenter(
+                mapOf(UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString(),
+                        UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "40"
+                )
+        )
 
         val newAssignment = ClazzAssignment()
-        newAssignment.clazzAssignmentUid = 40L
-        newAssignment.clazzAssignmentClazzUid = 42L
+        newAssignment.clazzAssignmentClazzUid = data.clazz.clazzUid
 
         val ce = ContentEntry()
         ce.entryId = "424242"
         ce.title = "testing"
         ce.leaf = true
-        ce.contentEntryUid = UmAppDatabase.getInstance(context).contentEntryDao.insert(ce)
+        ce.contentEntryUid = db.contentEntryDao.insert(ce)
 
         val ce2 = ContentEntry()
         ce2.entryId = "42424221212121"
         ce2.title = "testing2"
         ce2.leaf = true
-        ce2.contentEntryUid = UmAppDatabase.getInstance(context).contentEntryDao.insert(ce2)
+        ce2.contentEntryUid = db.contentEntryDao.insert(ce2)
 
         newAssignment.clazzAssignmentUid =
-                UmAppDatabase.getInstance(context).clazzAssignmentDao.insert(newAssignment)
+                db.clazzAssignmentDao.insert(newAssignment)
 
         val cej = ClazzAssignmentContentJoin()
         cej.clazzAssignmentContentJoinContentUid = ce.contentEntryUid
         cej.clazzAssignmentContentJoinClazzAssignmentUid = newAssignment.clazzAssignmentUid
 
         cej.clazzAssignmentContentJoinUid =
-                UmAppDatabase.getInstance(context).clazzAssignmentContentJoinDao.insert(cej)
+                db.clazzAssignmentContentJoinDao.insert(cej)
 
-        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "40",
-                UstadView.ARG_CLAZZ_UID to "42"))
+        presenter.onCreate(
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to newAssignment.clazzAssignmentUid.toString(),
+                UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString()))
 
         //Verify TODO
-        verify(view, timeout(1000)).setClazzAssignment(newAssignment)
-
+        verify(view, timeout(1000)).setClazzAssignment(any())
 
         presenter.handleContentEntryAdded(ce2)
 
         presenter.handleSaveAssignment(newAssignment)
 
-        val newCA =
-                UmAppDatabase.getInstance(context).clazzAssignmentDao.findByUidAsync(40)
+        val newCA = db.clazzAssignmentDao.findByUidAsync(newAssignment.clazzAssignmentUid)
         assert(newCA != null)
 
         val caCEJ : List<ClazzAssignmentContentJoin> =
-                UmAppDatabase.getInstance(context).clazzAssignmentContentJoinDao.findJoinsByAssignmentUidList(40)
+                db.clazzAssignmentContentJoinDao.findJoinsByAssignmentUidList(newAssignment.clazzAssignmentUid)
         assert(caCEJ.isNotEmpty())
 
         verify(view, timeout(1000)).finish()

@@ -6,8 +6,16 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzAssignmentDetailAssignmentView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
+import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.util.ext.PersonWithClazzandRole
+import com.ustadmobile.util.ext.createTeacherRole
+import com.ustadmobile.util.ext.grantClazzRoleToPerson
 import com.ustadmobile.util.test.AbstractSetup
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
@@ -16,13 +24,12 @@ import org.junit.Test
 import org.junit.Assert
 
 
-class ClazzAssignmentDetailAssignmentPresenterTest : AbstractSetup() {
+class ClazzAssignmentDetailAssignmentPresenterTest {
 
     lateinit var systemImplSpy: UstadMobileSystemImpl
-
-    lateinit var db: UmAppDatabase
-
-    lateinit var repo: UmAppDatabase
+    lateinit var mockContext: Any
+    lateinit var db : UmAppDatabase
+    lateinit var data: PersonWithClazzandRole
 
     @Before
     fun setUp() {
@@ -31,10 +38,21 @@ class ClazzAssignmentDetailAssignmentPresenterTest : AbstractSetup() {
 
         db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
-        repo = db
+
+        //do inserts
+        val teacher = Person("teacher", "Teacher" ,  "One")
+        teacher.active = true
+        val clazz = Clazz("Class A")
+        clazz.isClazzActive = true
+        val teacherRole = db.createTeacherRole()
+        data = db.grantClazzRoleToPerson(teacher, clazz, teacherRole)
 
         //Set active logged in account
-        UmAccountManager.setActiveAccount(umAccount!!, Any(), impl)
+        val teacherAccount=  UmAccount(data.person.personUid, data.person.username,
+                "auth", "endpoint")
+        UmAccountManager.setActiveAccount(teacherAccount, Any(), impl)
+
+
         systemImplSpy = spy(impl)
 
     }
@@ -52,22 +70,29 @@ class ClazzAssignmentDetailAssignmentPresenterTest : AbstractSetup() {
                 Unit
             }
         }
-        val mockContext = mock<DoorLifecycleOwner> {}
+        mockContext = mock<DoorLifecycleOwner> {}
         val presenter = ClazzAssignmentDetailAssignmentPresenter(mockContext,
-                presenterArgs, mockView, systemImplSpy, repository = repo)
+                presenterArgs, mockView, systemImplSpy, db)
         return Pair(mockView, presenter)
     }
 
     @Test
     fun givenPresenterCreated_whenLoadedWithEditPermission_shouldUpdateView() {
 
-        //Set active logged in account
-        UmAccountManager.setActiveAccount(umAccount!!, Any(), UstadMobileSystemImpl.instance)
+        //Create assignment
+        val assignment : ClazzAssignment = ClazzAssignment()
+        assignment.clazzAssignmentClazzUid = data.clazz.clazzUid
+        assignment.clazzAssignmentUid = db.clazzAssignmentDao.insert(assignment)
 
         // create presenter, with a mock view, check that it makes that call
-        val (view, presenter) = createMockViewAndPresenter()
-        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "40",
-                UstadView.ARG_CLAZZ_UID to "42"))
+        val (view, presenter) = createMockViewAndPresenter(
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignment.clazzAssignmentUid.toString(),
+                        UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString())
+        )
+        presenter.onCreate(
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignment.clazzAssignmentUid.toString(),
+                UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString())
+        )
 
         verify(view, timeout(1000)).setEditVisibility(true)
         //TODO: Test setClazzAssignment
@@ -78,12 +103,23 @@ class ClazzAssignmentDetailAssignmentPresenterTest : AbstractSetup() {
     fun givenPresenterCreated_whenLoadedWithoutEditPermission_shouldUpdateView() {
 
         //Set active logged in account
-        UmAccountManager.setActiveAccount(randomAccount!!, Any(), UstadMobileSystemImpl.instance)
+        val randomAccount=  UmAccount(420420420, "random",
+                "auth", "endpoint")
+        UmAccountManager.setActiveAccount(randomAccount, Any(), UstadMobileSystemImpl.instance)
+
+        //Create assignment
+        val assignment : ClazzAssignment = ClazzAssignment()
+        assignment.clazzAssignmentClazzUid = data.clazz.clazzUid
+        assignment.clazzAssignmentUid = db.clazzAssignmentDao.insert(assignment)
+
 
         // create presenter, with a mock view, check that it makes that call
-        val (view, presenter) = createMockViewAndPresenter()
-        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "40",
-                UstadView.ARG_CLAZZ_UID to "42"))
+        val (view, presenter) = createMockViewAndPresenter(
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignment.clazzAssignmentUid.toString(),
+                        UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString())
+        )
+        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignment.clazzAssignmentUid.toString(),
+                UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString()))
 
         verify(view, timeout(1000)).setEditVisibility(false)
         //TODO: Test setClazzAssignment
@@ -92,16 +128,29 @@ class ClazzAssignmentDetailAssignmentPresenterTest : AbstractSetup() {
 
     @Test
     fun givenPresenterCreated_whenEditClicked_shouldOpenEdit(){
+
+        //Create assignment
+        val assignment : ClazzAssignment = ClazzAssignment()
+        assignment.clazzAssignmentClazzUid = data.clazz.clazzUid
+        assignment.clazzAssignmentUid = db.clazzAssignmentDao.insert(assignment)
+
+
         // create presenter, with a mock view, check that it makes that call
-        val (view, presenter) = createMockViewAndPresenter()
-        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "40",
-                UstadView.ARG_CLAZZ_UID to "42"))
+        val (_, presenter) = createMockViewAndPresenter(
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignment.clazzAssignmentUid.toString(),
+                        UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString())
+        )
+        presenter.onCreate(
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignment.clazzAssignmentUid.toString(),
+                        UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString())
+        )
 
         presenter.handleClickEdit()
 
-        verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentDetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "40",
-                        UstadView.ARG_CLAZZ_UID to "42"))
+        verify(systemImplSpy, timeout(1000)).go(ClazzAssignmentEditView.VIEW_NAME,
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignment.clazzAssignmentUid.toString(),
+                        UstadView.ARG_CLAZZ_UID to data.clazz.clazzUid.toString()), mockContext)
+
 
     }
 

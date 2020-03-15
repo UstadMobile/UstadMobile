@@ -8,6 +8,13 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
 import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzAssignment
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.util.ext.PersonWithClazzandRole
+import com.ustadmobile.util.ext.createTeacherRole
+import com.ustadmobile.util.ext.grantClazzRoleToPerson
 import com.ustadmobile.util.test.AbstractSetup
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
@@ -15,9 +22,13 @@ import org.junit.After
 import org.junit.Test
 
 
-class ClazzAssignmentDetailProgressPresenterTest : AbstractSetup() {
+class ClazzAssignmentDetailProgressPresenterTest {
 
     lateinit var systemImplSpy: UstadMobileSystemImpl
+    lateinit var mockContext: Any
+    lateinit var db : UmAppDatabase
+    lateinit var data: PersonWithClazzandRole
+
 
 
     @Before
@@ -25,13 +36,22 @@ class ClazzAssignmentDetailProgressPresenterTest : AbstractSetup() {
         checkJndiSetup()
         val impl = UstadMobileSystemImpl.instance
 
-        val db = UmAppDatabase.getInstance(Any())
+        db = UmAppDatabase.getInstance(Any())
+        db.clearAllTables()
 
         //do inserts
-        insert(db, true)
+        val teacher = Person("teacher", "Teacher" ,  "One")
+        teacher.active = true
+        val clazz = Clazz("Class A")
+        clazz.isClazzActive = true
+        val teacherRole = db.createTeacherRole()
+        data = db.grantClazzRoleToPerson(teacher, clazz, teacherRole)
 
         //Set active logged in account
-        UmAccountManager.setActiveAccount(umAccount!!, Any(), impl)
+        val teacherAccount=  UmAccount(data.person.personUid, data.person.username,
+                "auth", "endpoint")
+        UmAccountManager.setActiveAccount(teacherAccount, Any(), impl)
+
         systemImplSpy = spy(impl)
 
     }
@@ -51,15 +71,25 @@ class ClazzAssignmentDetailProgressPresenterTest : AbstractSetup() {
         }
         val mockContext = mock<DoorLifecycleOwner> {}
         val presenter = ClazzAssignmentDetailProgressPresenter(mockContext,
-                presenterArgs, mockView, systemImplSpy)
+                presenterArgs, mockView, systemImplSpy, db)
         return Pair(mockView, presenter)
     }
 
     @Test
     fun givenPresenterCreated_whenLoaded_shouldUpdateView() {
+
+        //Create assignment
+        val assignment : ClazzAssignment = ClazzAssignment()
+        assignment.clazzAssignmentClazzUid = data.clazz.clazzUid
+        assignment.clazzAssignmentUid = db.clazzAssignmentDao.insert(assignment)
+
         // create presenter, with a mock view, check that it makes that call
-        val (view, presenter) = createMockViewAndPresenter()
-        presenter.onCreate(mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to "40"))
+        val (view, presenter) = createMockViewAndPresenter(
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignment.clazzAssignmentUid.toString())
+        )
+        presenter.onCreate(
+                mapOf(UstadView.ARG_CLAZZ_ASSIGNMENT_UID to assignment.clazzAssignmentUid.toString())
+        )
 
         //TODO: fix
         verify(view, timeout(1000)).setListProvider(any())
