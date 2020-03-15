@@ -87,10 +87,6 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
         }
     }
 
-    runBlocking {
-        initLamsustadContent(db, containerDirPath)
-    }
-
     install(Routing) {
         ContainerDownload(db)
         H5PImportRoute(db) { url: String, entryUid: Long, urlContent: String, containerUid: Long ->
@@ -134,47 +130,6 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
                 call.respond(containerUid)
             }
         }
-    }
-}
-
-suspend fun Application.initLamsustadContent(db: UmAppDatabase, containerPath: String) {
-    val folderSrcUrl = "http://www.ustadmobile.com/lamsustad/stories"
-    val storiesEntry = db.contentEntryDao.findBySourceUrl(folderSrcUrl)
-    if(storiesEntry == null) {
-        val storiesContentEntry = ContentEntry("قصص", "", false, false).apply {
-            sourceUrl = folderSrcUrl
-            publik = true
-            thumbnailUrl = "https://www.ustadmobile.com/files/lamsustad/stories.webp"
-        }
-
-        storiesContentEntry.contentEntryUid = db.contentEntryDao.insert(storiesContentEntry)
-        db.contentEntryParentChildJoinDao.insert(ContentEntryParentChildJoin().apply {
-            cepcjChildContentEntryUid = storiesContentEntry.contentEntryUid
-            cepcjParentContentEntryUid = HomePresenter.MASTER_SERVER_ROOT_ENTRY_UID
-            childIndex = 0
-        })
-
-        for(i in 1..5) {
-            val file = File("build/lamsustad/Book${i}_xapi.zip")
-            if(!file.exists()) {
-                println("Lamsustad file $file does not exist")
-                continue
-            }
-            val importedEntry = importContentEntryFromFile(file, db, db, containerPath)
-            if(importedEntry != null) {
-                importedEntry.first.thumbnailUrl = "https://www.ustadmobile.com/files/lamsustad/story${i}.webp"
-                db.contentEntryDao.update(importedEntry.first)
-                db.contentEntryParentChildJoinDao.insert(
-                        ContentEntryParentChildJoin(storiesContentEntry, importedEntry.first, i))
-                println("Imported and joined \"${importedEntry.first.title}\"")
-            }else {
-                println("Error importing content")
-            }
-        }
-
-        val loadData = LoadInitialData(_restApplicationDb)
-        loadData.loadData()
-
     }
 }
 

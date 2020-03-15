@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view.binding
 
 import android.app.DatePickerDialog
 import android.content.Context
+import android.text.format.DateFormat
 import android.widget.DatePicker
 import android.widget.EditText
 import androidx.databinding.BindingAdapter
@@ -18,8 +19,7 @@ import java.util.*
  */
 
 fun updateDateOnEditText(et: EditText, date: Long) {
-    val dateFormatter: SimpleDateFormat by lazy { SimpleDateFormat("EEE, dd/MMM/yyyy",
-            Locale(UstadMobileSystemImpl.instance.getLocale(et.context)?:"")) }
+    val dateFormatter = DateFormat.getDateFormat(et.context)
     if (date == 0L) {
         et.setText("-")
     }else{

@@ -258,7 +258,7 @@ class ClazzEditActivity : UstadBaseActivity(), ClazzEditView,
         }
 
 
-        timezoneSpinner = findViewById(R.id.activity_clazz_edit_timezone_spinner)
+        timezoneSpinner = findViewById(R.id.activity_clazz_edit_timezone_text)
         timezoneSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 setTimezoneSelected(position)

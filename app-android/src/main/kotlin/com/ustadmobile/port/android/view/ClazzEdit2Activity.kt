@@ -3,14 +3,15 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.PopupMenu
-import androidx.databinding.DataBindingUtil
-import com.toughra.ustadmobile.R
 import androidx.appcompat.widget.Toolbar
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.BR
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityClazzEdit2Binding
 import com.toughra.ustadmobile.databinding.ItemSchedule2Binding
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
@@ -20,6 +21,7 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Schedule
+import java.util.*
 
 interface ClazzEdit2ActivityEventHandler {
 
@@ -27,10 +29,13 @@ interface ClazzEdit2ActivityEventHandler {
 
     fun handleClickEditSchedule(schedule: Schedule)
 
+    fun handleClickTimeZone()
+
 }
 
 class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Schedule?>>,
-        ClazzEdit2ActivityEventHandler, ScheduleEditDialogFragment.ScheduleEditDialogFragmentListener {
+        ClazzEdit2ActivityEventHandler, ScheduleEditDialogFragment.ScheduleEditDialogFragmentListener,
+        OnTimeZoneSelectedListener {
 
     private var rootView: ActivityClazzEdit2Binding? = null
 
@@ -109,8 +114,19 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
         scheduleEditDialog.show(supportFragmentManager, TAG_SCHEDULE_EDIT_DIALOG)
     }
 
+    override fun handleClickTimeZone() {
+        val timezoneDialog = TimeZoneListDialogFragment.newInstance(
+                rootView?.clazz?.clazzTimeZone ?: "")
+        timezoneDialog.show(supportFragmentManager, TAG_TIMEZONE_DIALOG)
+    }
+
     override fun onScheduleDone(schedule: Schedule) {
         mPresenter.handleAddOrEditSchedule(schedule)
+    }
+
+    override fun onTimeZoneSelected(timeZone: TimeZone) {
+        rootView?.clazz?.clazzTimeZone = timeZone.id
+        rootView?.clazz = rootView?.clazz
     }
 
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
@@ -161,6 +177,8 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
 
     companion object {
         const val TAG_SCHEDULE_EDIT_DIALOG = "scheduleEdit"
+
+        const val TAG_TIMEZONE_DIALOG = "timezoneDialog"
 
         val DIFF_CALLBACK_SCHEDULE: DiffUtil.ItemCallback<Schedule> = object: DiffUtil.ItemCallback<Schedule>() {
             override fun areItemsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {

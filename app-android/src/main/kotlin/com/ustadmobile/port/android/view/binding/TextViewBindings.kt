@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view.binding
 
+import android.annotation.SuppressLint
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.ustadmobile.core.controller.ScheduleEditPresenter
@@ -35,4 +36,13 @@ fun TextView.setScheduleText(schedule: Schedule) {
             scheduleTimeToDate(schedule.sceduleStartTime.toInt()),
             scheduleTimeToDate(schedule.scheduleEndTime.toInt())
     ))
+}
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter("timeZoneText")
+fun TextView.setTimeZoneText(timeZone: TimeZone) {
+    val gmtOffset =  "${(timeZone.rawOffset / MS_PER_HOUR)}:" +
+            (timeZone.rawOffset.rem(MS_PER_HOUR) / MS_PER_MIN).toString().padStart(2, '0')
+    val plusMinSymbol = if(timeZone.rawOffset >= 0) "+" else ""
+    text = "(GMT$plusMinSymbol$gmtOffset) ${timeZone.id}"
 }

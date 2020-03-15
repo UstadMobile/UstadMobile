@@ -51,6 +51,12 @@ open class Clazz() {
     @LastChangedBy
     var clazzLastChangedBy: Int = 0
 
+    /**
+     * The timezone ID as per https://www.iana.org/time-zones. If null, this means use the School
+     * timezone
+     */
+    var clazzTimeZone: String? = null
+
     fun isAttendanceFeature() : Boolean{
         return clazzFeatures and CLAZZ_FEATURE_ATTENDANCE > 0
     }
