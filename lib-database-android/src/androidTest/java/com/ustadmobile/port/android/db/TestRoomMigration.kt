@@ -34,8 +34,8 @@ class TestRoomMigration {
             close()
         }
 
-//        helper.runMigrationsAndValidate(TEST_DB, 29, true,
-//                UmAppDatabase.MIGRATION_28_29)
+        helper.runMigrationsAndValidate(TEST_DB, 29, true,
+                UmAppDatabase.MIGRATION_28_29)
     }
 
     @Test
