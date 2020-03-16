@@ -89,6 +89,7 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         const val ERROR_TYPE_NO_SOURCE_URL_FOUND = 201
         const val ERROR_TYPE_LINK_NOT_FOUND = 203
         const val ERROR_TYPE_YOUTUBE_ERROR = 210
+        const val ERROR_TYPE_UNKNOWN_YOUTUBE = 220
         const val ERROR_TYPE_MISSING_EXE = 230
 
     }

@@ -57,10 +57,19 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
                     process.waitFor()
                     val exitValue = process.exitValue()
                     if (exitValue != 0) {
-                        UMLogUtil.logError("Error Stream for src $sourceUrl with error code  ${UMIOUtils.readStreamToString(process.errorStream)}")
+                        val error = UMIOUtils.readStreamToString(process.errorStream)
+                        UMLogUtil.logError("Error Stream for src $sourceUrl with error code  $error")
+                        if (!error.contains("429")) {
+                            throw ScraperException(ERROR_TYPE_UNKNOWN_YOUTUBE, "unknown error: $error")
+                        }
                         throw IOException("Failed $numberOfFailures for  $sourceUrl")
                     }
                     retryFlag = false
+                } catch (s: ScraperException) {
+                    setScrapeDone(false, ERROR_TYPE_UNKNOWN_YOUTUBE)
+                    hideContentEntry()
+                    close()
+                    throw s
                 } catch (e: Exception) {
 
                     if (numberOfFailures > 5) {

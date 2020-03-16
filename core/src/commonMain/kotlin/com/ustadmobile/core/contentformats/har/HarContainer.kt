@@ -124,12 +124,6 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
 
         var data = containerManager.getInputStream(containerEntry)
 
-        if(url.contains("practice/")){
-            var string = UMIOUtils.readStreamToString(data)
-            println(string)
-            data = containerManager.getInputStream(containerEntry)
-        }
-
         harEntry.response.content!!.data = data
 
         val rangeHeader: String? = mutMap["Range"] ?: return harEntry.response

@@ -22,6 +22,8 @@ class ItemData {
 
             var height: Int = 0
 
+            var url: String? = null
+
         }
 
         inner class Widget {
@@ -32,10 +34,17 @@ class ItemData {
 
                 var options: ArrayList<Option>? = null
 
+                var choices: ArrayList<Option>? = null
+
+                var backgroundImage: Image? = null
+
                 inner class Option {
 
                     internal var content: String? = null
 
+                    var correct: Boolean = false
+
+                    var isNoneOfTheAbove: Boolean = false
                 }
 
             }

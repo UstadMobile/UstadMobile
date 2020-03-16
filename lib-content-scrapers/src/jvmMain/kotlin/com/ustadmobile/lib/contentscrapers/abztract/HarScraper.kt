@@ -31,6 +31,7 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import java.io.File
 import java.io.StringWriter
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 
 typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
@@ -59,14 +60,9 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         val seleniumProxy = ClientUtil.createSeleniumProxy(proxy)
         seleniumProxy.noProxy = "<-loopback>"
 
-        //val mobileEmulation: MutableMap<String, String> = HashMap()
-
-       // mobileEmulation["deviceName"] = "Nexus 5"
-
         val options = ChromeOptions()
         options.setCapability(CapabilityType.PROXY, seleniumProxy)
         options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true)
-      //  options.setExperimentalOption("mobileEmulation", mobileEmulation)
         chromeDriver = ChromeDriver(options)
 
         gson = GsonBuilder().disableHtmlEscaping().create()
@@ -98,6 +94,8 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         val waitDriver = WebDriverWait(chromeDriver, ScraperConstants.TIME_OUT_SELENIUM.toLong())
         waitForJSandJQueryToLoad(waitDriver)
         waitCondition?.invoke(waitDriver)
+        proxy.waitForQuiescence(30, 3, TimeUnit.SECONDS)
+
 
         checkStartingUrlNot404(proxy.har.log.entries, url)
 

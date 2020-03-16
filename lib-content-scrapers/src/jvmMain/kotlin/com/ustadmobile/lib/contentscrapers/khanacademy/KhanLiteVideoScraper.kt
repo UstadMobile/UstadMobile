@@ -37,9 +37,6 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
 
         if (url == null) {
 
-           /* hideContentEntry()
-            throw ScraperException(ERROR_TYPE_YOUTUBE_ERROR, "stopped youtube $sourceUrl")*/
-
             val ytUrl = getYoutubeUrl(khanId)
             try {
                 scrapeYoutubeLink(ytUrl)

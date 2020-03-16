@@ -79,7 +79,6 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.FORWARD_SLASH
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.GRAPHIE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_GRAPHIE_PREFIX
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_LOGIN_LINK
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PASS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_USERNAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.OPUS_EXT
@@ -1253,7 +1252,6 @@ object ContentScraperUtil {
 
         val driver = setupLogIndexChromeDriver()
 
-        driver.get(KHAN_LOGIN_LINK)
         val waitDriver = WebDriverWait(driver, TIME_OUT_SELENIUM.toLong())
         waitForJSandJQueryToLoad(waitDriver)
         waitDriver.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#login-signup-root")))
