@@ -14,7 +14,7 @@ import com.github.aakira.napier.Napier
  * This implements common repository functions such as addMirror, removeMirror, setMirrorPriority
  * setConnectivityStatus and val connectivityStatus
  */
-class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = liveDataObserverDispatcher()) {
+class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = doorMainDispatcher()) {
 
     private val mirrors: MutableMap<Int, MirrorEndpoint> = ConcurrentHashMap()
 

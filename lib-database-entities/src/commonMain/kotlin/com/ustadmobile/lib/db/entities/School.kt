@@ -53,7 +53,7 @@ open class School() {
 
     companion object {
 
-        const val TABLE_ID = 174
+        const val TABLE_ID = 164
 
         const val SCHOOL_FEATURE_ATTENDANCE: Long  = 1
 

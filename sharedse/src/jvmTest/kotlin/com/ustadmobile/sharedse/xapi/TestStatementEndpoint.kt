@@ -130,6 +130,8 @@ class TestStatementEndpoint {
         Assert.assertEquals("Statement has preset Verb UID as expected",
                 VerbEntity.FIXED_UIDS["http://adlnet.gov/expapi/verbs/progressed"],
                 statementEntity?.verbUid)
+        Assert.assertEquals("Statement has contentEntryUid set", 1234L,
+                statementEntity?.statementContentEntryUid)
     }
 
     @Test

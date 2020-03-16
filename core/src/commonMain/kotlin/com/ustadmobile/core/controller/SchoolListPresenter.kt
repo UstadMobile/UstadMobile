@@ -24,7 +24,6 @@ class SchoolListPresenter(context: Any,
                                   UmAccountManager.getRepositoryForActiveAccount(context))
     : UstadBaseController<SchoolListView>(context, arguments!!, view) {
 
-
     private var idToOrderInteger: MutableMap<Long, Int>? = null
 
     private var currentSortOrder = 0
@@ -80,8 +79,6 @@ class SchoolListPresenter(context: Any,
                 .map { impl.getString(it, context) }
         view.setSortOptions(sortOptions.toTypedArray())
     }
-
-
 
     fun handleClickAddSchool(){
         val args = mapOf(ARG_SCHOOL_NEW to "true")

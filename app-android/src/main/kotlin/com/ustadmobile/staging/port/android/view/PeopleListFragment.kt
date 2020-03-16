@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
@@ -77,7 +78,7 @@ class PeopleListFragment : UstadBaseFragment, PeopleListView, SearchableListener
         fab!!.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
 
         if(activityMode){
-            val layout = rootContainer!!.findViewById<SwipeRefreshLayout>(
+            val layout = rootContainer!!.findViewById<ConstraintLayout>(
                     R.id.fragment_people_list_root)
             layout.setPadding(0,0,0,24)
         }

@@ -3,14 +3,14 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzEditView
+import com.ustadmobile.core.util.ext.observeWithPresenter
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
-import com.ustadmobile.core.view.PersonListSearchView
 import com.ustadmobile.core.view.PersonListSearchView.Companion.ARGUMENT_CURRNET_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
@@ -19,81 +19,72 @@ import kotlinx.coroutines.launch
  * want to see.
  * This is usually called first when we click on a Class from a list of Classes to get into it.
  */
-class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: ClazzDetailView,
+class ClazzDetailPresenter(context: Any, arguments: Map<String, String?>, view: ClazzDetailView,
                            val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
-    : UstadBaseController<ClazzDetailView>(context, arguments!!, view) {
+    : UstadBaseController<ClazzDetailView>(context, arguments, view) {
 
     //Any arguments stored as variables here
-    private var currentClazzUid: Long = -1
+    private var currentClazzUid: Long = 0
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
     private val clazzDao = repository.clazzDao
-    private var currentClazz: Clazz? = null
-    private var previousPermissionClazz: Clazz? = null
-    private val loggedInPersonUid: Long?
+    private lateinit var currentClazz: Clazz
+    private val loggedInPersonUid: Long
 
     init {
-
         //Get Clazz Uid and set them.
-        if (arguments!!.containsKey(ARG_CLAZZ_UID)) {
-            currentClazzUid = arguments.get(ARG_CLAZZ_UID)!!.toLong()
+        if (arguments.containsKey(ARG_CLAZZ_UID)) {
+            currentClazzUid = arguments[ARG_CLAZZ_UID]?.toLong() ?:0
         }
-
-        loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid
-    }
-
-    /**
-     * In Order:
-     * 1. Just set the title of the toolbar.
-     *
-     * @param savedState    The savedState
-     */
-    override fun onCreate(savedState: Map<String, String?>?) {
-        super.onCreate(savedState)
-
-        //Update view and Permission check
-        //checkPermissions()
-
+        loggedInPersonUid = UmAccountManager.getActiveAccount(context)?.personUid?:0
     }
 
     fun checkPermissions() {
 
-        GlobalScope.launch {
-            val result = clazzDao.findByUidAsync(currentClazzUid)
-            view.setToolbarTitle(result!!.clazzName!!)
+        val clazzLive = clazzDao.findByUidLive(currentClazzUid)
+        clazzLive.observeWithPresenter(this, this::handleClazzChanged)
+    }
 
-            var new = false
-            currentClazz = result
-            if(previousPermissionClazz == null){
-                new = true
-                previousPermissionClazz = Clazz()
-                val af = currentClazz!!.isAttendanceFeature
-                previousPermissionClazz!!.isAttendanceFeature =af
-                val aaf = currentClazz!!.isActivityFeature
-                previousPermissionClazz!!.isActivityFeature = aaf
-                val sf = currentClazz!!.isSelFeature
-                previousPermissionClazz!!.isSelFeature = sf
-            }
+    private fun handleClazzChanged(clazz: Clazz?){
+        if(clazz != null) {
+            currentClazz = clazz
+            GlobalScope.launch {
+                val settingsVisibility =
+                        clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazz.clazzUid,
+                                Role.PERMISSION_CLAZZ_UPDATE)
+                val attendancePermission =
+                        clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazz.clazzUid,
+                                Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)
+                val selPermission  = clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                        currentClazz.clazzUid, Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT)
+                val clazzActivityPermission =
+                        clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazz.clazzUid,
+                                Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT)
+                val clazzAssignmentPermission =
+                        clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazz.clazzUid,
+                                Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW)
 
-            val result2 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid!!, currentClazzUid,
-                    Role.PERMISSION_CLAZZ_UPDATE)
-            view.setSettingsVisibility(result2!!)
-            val result3 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
-                    Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)
-            view.setAttendanceVisibility(if (currentClazz!!.isAttendanceFeature) result3 else false)
 
-            val result4 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT)
-            view.setSELVisibility(if (currentClazz!!.isSelFeature) result4 else false)
-            val result5 = clazzDao.personHasPermissionWithClazz(loggedInPersonUid, currentClazzUid,
-                    Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT)
-            view.setActivityVisibility(if (currentClazz!!.isActivityFeature) result5 else false)
+                view.runOnUiThread(Runnable {
 
-            if(new){
-                view.setupViewPager()
-            }else if(currentClazz != null && previousPermissionClazz!=null &&
-                    currentClazz!!.hasPermissionsChanged(previousPermissionClazz!!)) {
-                previousPermissionClazz = currentClazz
-                //Setup view pager after all permissions
-                view.setupViewPager()
+                    view.setSettingsVisibility(settingsVisibility)
+
+                    val tabs = mutableListOf<String>()
+                    tabs.add(ClazzStudentListView.VIEW_NAME)
+                    if(currentClazz.isAttendanceFeature() && attendancePermission){
+                        tabs.add(ClassLogListView.VIEW_NAME)
+                    }
+                    if(currentClazz.isActivityFeature() && clazzActivityPermission){
+                        tabs.add(ClazzActivityListView.VIEW_NAME)
+                    }
+                    if(currentClazz.isSelFeature() && selPermission){
+                        tabs.add(SELAnswerListView.VIEW_NAME)
+                    }
+                    if(currentClazz.isAssignmentFeature() && clazzAssignmentPermission){
+                        tabs.add(ClazzAssignmentListView.VIEW_NAME)
+                    }
+                    view.setupTabs(tabs)
+                    view.setClazz(currentClazz)
+                })
             }
         }
     }
@@ -103,7 +94,7 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
      */
     fun handleClickClazzEdit() {
         val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
+        args[ARG_CLAZZ_UID] = currentClazzUid.toString()
         impl.go(ClazzEditView.VIEW_NAME, args, view.viewContext)
     }
 

@@ -93,6 +93,10 @@ class Role() {
 
         const val PERMISSION_PERSON_PICTURE_UPDATE: Long = 4194304
 
+        const val PERMISSION_CLAZZ_ASSIGNMENT_VIEW : Long = 8388608
+
+        const val PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE : Long = 16777216
+
         /**
          * Permission to view reports. In reality, this is really just a UI permission, and does not
          * affect access to the underlying data.
