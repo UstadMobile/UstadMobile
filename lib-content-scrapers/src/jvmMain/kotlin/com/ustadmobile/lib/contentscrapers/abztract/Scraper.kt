@@ -83,14 +83,17 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         const val ERROR_TYPE_INVALID_LICENSE = 101
         const val ERROR_TYPE_NO_FILE_AVAILABLE = 102
         const val ERROR_TYPE_FILE_SIZE_LIMIT_EXCEEDED = 103
+        const val ERROR_TYPE_ENTRY_NOT_CREATED = 104
 
 
-        const val ERROR_TYPE_FILE_NOT_LOADED = 200
+        const val ERROR_TYPE_CONTENT_NOT_FOUND = 200
         const val ERROR_TYPE_NO_SOURCE_URL_FOUND = 201
         const val ERROR_TYPE_LINK_NOT_FOUND = 203
         const val ERROR_TYPE_YOUTUBE_ERROR = 210
         const val ERROR_TYPE_UNKNOWN_YOUTUBE = 220
-        const val ERROR_TYPE_MISSING_EXE = 230
+        const val ERROR_TYPE_MISSING_EXECUTABLE = 230
+        const val ERROR_TYPE_MISSING_QUESTIONS = 240
+        const val ERROR_TYPE_ILLEGAL_STATE = 250
 
     }
 

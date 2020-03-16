@@ -47,8 +47,8 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         if (entry == null) {
             hideContentEntry()
-            setScrapeDone(false, ERROR_TYPE_NO_SOURCE_URL_FOUND)
-            throw ScraperException(ERROR_TYPE_NO_SOURCE_URL_FOUND, "Content Entry was not found for url $sourceUrl")
+            setScrapeDone(false, ERROR_TYPE_ENTRY_NOT_CREATED)
+            throw ScraperException(ERROR_TYPE_ENTRY_NOT_CREATED, "Content Entry was not found for url $sourceUrl")
         }
 
         var lang = sourceUrl.substringBefore(".khan").substringAfter("://")
@@ -77,28 +77,29 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             contentList.add(navData.contentModel!!)
         }
 
-        for (content in contentList) {
+        val content = contentList.find { sourceUrl.contains(it.nodeSlug!!) }
 
-            if (sourceUrl.contains(content.nodeSlug!!)) {
-
-                val dateModified = ContentScraperUtil.parseServerDate(content.dateModified
-                        ?: content.creationDate!!)
-
-                val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
-
-                val isContentUpdated = if (recentContainer == null) true else {
-                    dateModified > recentContainer.cntLastModified
-                }
-
-                if (!isContentUpdated) {
-                    showContentEntry()
-                    setScrapeDone(true, 0)
-                    return
-                }
-
-            }
-
+        if (content == null) {
+            hideContentEntry()
+            setScrapeDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
+            throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "no content was found in url : $sourceUrl")
         }
+
+        val dateModified = ContentScraperUtil.parseServerDate(content.dateModified
+                ?: content.creationDate!!)
+
+        val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+
+        val isContentUpdated = if (recentContainer == null) true else {
+            dateModified > recentContainer.cntLastModified
+        }
+
+        if (!isContentUpdated) {
+            showContentEntry()
+            setScrapeDone(true, 0)
+            return
+        }
+
 
         val realPractice = loginKhanAcademy(sourceUrl, lang)
         val scraperResult = startHarScrape(sourceUrl, {
@@ -144,8 +145,9 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 val reservedList = practiceJson.taskJson?.reservedItems
 
                 if (reservedList.isNullOrEmpty()) {
-                    // TODO set scraperdone
-                    throw ScraperException(0, "")
+                    hideContentEntry()
+                    setScrapeDone(false, ERROR_TYPE_MISSING_QUESTIONS)
+                    throw ScraperException(ERROR_TYPE_MISSING_QUESTIONS, "no questions found for exercise")
                 }
 
                 reservedList.forEachIndexed { index, item ->

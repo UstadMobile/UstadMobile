@@ -38,7 +38,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
         if (!ytExeFile.exists()) {
             hideContentEntry()
             close()
-            throw ScraperException(ERROR_TYPE_MISSING_EXE, "Webp executable does not exist: $ytPath")
+            throw ScraperException(ERROR_TYPE_MISSING_EXECUTABLE, "Webp executable does not exist: $ytPath")
         }
 
         tempDir = Files.createTempDirectory(sourceUrl.substringAfter("=")).toFile()

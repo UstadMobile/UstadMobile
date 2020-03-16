@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.LanguageVariant
 import org.apache.commons.io.IOUtils
+import java.net.HttpURLConnection
 import java.net.URL
 
 data class KhanLang(val url: String, val title: String)
@@ -75,6 +76,19 @@ fun createKangLangEntry(langCode: String, langName: String, url: String, db: UmA
             ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
             0, db.contentEntryDao)
 
+}
+
+fun isUrlValid(url: URL): Boolean {
+    val huc: HttpURLConnection = url.openConnection() as HttpURLConnection
+    huc.requestMethod = "HEAD"
+
+    val responseCode: Int = huc.responseCode
+
+    return responseCode == 200
+}
+
+fun getYoutubeUrl(videoId: String): String {
+    return "https://www.youtube.com/watch?v=$videoId"
 }
 
 object KhanConstants {

@@ -79,7 +79,7 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDataba
             }
 
             if (fileEntry.response.content.text.isNullOrEmpty()) {
-                throw ScraperException(Scraper.ERROR_TYPE_FILE_NOT_LOADED, "file didnt load for ${fileEntry.request.url} for source url $sourceUrl")
+                throw ScraperException(Scraper.ERROR_TYPE_CONTENT_NOT_FOUND, "file didnt load for ${fileEntry.request.url} for source url $sourceUrl")
             }
 
             fileList.add(fileEntry)

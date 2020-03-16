@@ -10,6 +10,10 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper
+import com.ustadmobile.lib.contentscrapers.khanacademy.KhanArticleScraper
+import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants
+import com.ustadmobile.lib.contentscrapers.khanacademy.KhanExerciseScraper
+import com.ustadmobile.lib.contentscrapers.khanacademy.KhanVideoScraper
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper
 import com.ustadmobile.lib.contentscrapers.ytindexer.ChildYoutubeScraper
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -29,6 +33,7 @@ import org.mockito.Mockito
 import java.io.File
 import java.io.IOException
 import java.net.URISyntaxException
+import java.net.URL
 import java.nio.file.Files
 
 class TestPrathamContentScraper {
@@ -168,15 +173,21 @@ class TestPrathamContentScraper {
 
     @Test
     fun test() {
-        val containerDir = Files.createTempDirectory("container").toFile()
+
+        val parentUrl = URL("https://tr.khanacademy.org/math")
+
+        val jsonUrl = URL(parentUrl, "/api/internal/static/content${parentUrl.path}?lang=tr")
+
+
+       val containerDir = Files.createTempDirectory("container").toFile()
 
         val entry = ContentEntry()
-        entry.sourceUrl = "https://www.youtube.com/watch?v=wWFFK9EE6tQ"
+        entry.sourceUrl = "https://bg.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-out-1-20-objects"
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
        /* val scraper = DdlContentScraper(
                 containerDir, "en", db, entry.contentEntryUid)
-        scraper.scrapeUrl(entry.sourceUrl!!)*/
+        scraper.scrapeUrl(entry.sourceUrl!!)*//*
 
         val child = ChildYoutubeScraper(containerDir, db,  entry.contentEntryUid, 0)
         child.scrapeYoutubeLink(entry.sourceUrl!!)
@@ -184,7 +195,25 @@ class TestPrathamContentScraper {
         val document = Jsoup.connect("https://ddl.af/fa/resource/9398/")
                 .header("X-Requested-With", "XMLHttpRequest").get()
 
-        var sourceUrl = "https://ddl.af/fa/resource/9398/"
+        var sourceUrl = "https://ddl.af/fa/resource/9398/"*/
+
+       // val khan = KhanArticleScraper(containerDir, db, entry.contentEntryUid, 0)
+        val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0)
+        khan.scrapeUrl(entry.sourceUrl!!)
+
+    }
+
+    @Test
+    fun testVideo(){
+
+        val containerDir = Files.createTempDirectory("container").toFile()
+
+        val entry = ContentEntry()
+        entry.sourceUrl = "https://bg.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/v/counting-with-small-numbers/"
+        entry.contentEntryUid = db.contentEntryDao.insert(entry)
+
+        val khan = KhanVideoScraper(containerDir, db, entry.contentEntryUid, 0)
+        khan.scrapeUrl(entry.sourceUrl!!)
 
     }
 

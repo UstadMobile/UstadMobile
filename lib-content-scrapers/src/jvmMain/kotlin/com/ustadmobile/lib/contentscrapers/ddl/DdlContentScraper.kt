@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.ContainerETagDao
 import com.ustadmobile.core.db.dao.ContentCategoryDao
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -242,7 +241,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                 }
 
                 if (fileEntry == null) {
-                    throw ScraperException(ERROR_TYPE_FILE_NOT_LOADED, "No File found for content in har entry")
+                    throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "No File found for content in har entry")
                 }
 
                 val isMediaFile = isMediaUrl(fileUrl.toString())
@@ -290,7 +289,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
             UMLogUtil.logError("$DDL Debug - Did not find any content to download at url $sourceUrl")
             close()
-            throw ScraperException(ERROR_TYPE_FILE_NOT_LOADED, "Container Manager did not have the file")
+            throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "Container Manager did not have the file")
         }
 
         runBlocking {

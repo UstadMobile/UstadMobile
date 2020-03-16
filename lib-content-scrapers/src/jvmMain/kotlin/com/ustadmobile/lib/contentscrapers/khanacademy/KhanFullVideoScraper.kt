@@ -34,8 +34,8 @@ class KhanFullVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
 
         if (entry == null) {
             hideContentEntry()
-            setScrapeDone(false, ERROR_TYPE_NO_SOURCE_URL_FOUND)
-            throw ScraperException(ERROR_TYPE_NO_SOURCE_URL_FOUND, "Content Entry was not found for url $sourceUrl")
+            setScrapeDone(false, ERROR_TYPE_ENTRY_NOT_CREATED)
+            throw ScraperException(ERROR_TYPE_ENTRY_NOT_CREATED, "Content Entry was not found for url $sourceUrl")
         }
 
         val khanId = entry!!.sourceUrl!!.substringAfter(KhanContentIndexer.KHAN_PREFIX)

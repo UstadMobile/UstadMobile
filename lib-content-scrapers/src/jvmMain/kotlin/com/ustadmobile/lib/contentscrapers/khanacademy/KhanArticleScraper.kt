@@ -37,8 +37,8 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
 
         if (entry == null) {
             hideContentEntry()
-            setScrapeDone(false, ERROR_TYPE_NO_SOURCE_URL_FOUND)
-            throw ScraperException(ERROR_TYPE_NO_SOURCE_URL_FOUND, "Content Entry was not found for url $sourceUrl")
+            setScrapeDone(false, ERROR_TYPE_ENTRY_NOT_CREATED)
+            throw ScraperException(ERROR_TYPE_ENTRY_NOT_CREATED, "Does not have the article data id which we need to scrape the page for url $sourceUrl")
         }
 
         val url = URL(sourceUrl)
@@ -62,47 +62,36 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
         }
 
         if (contentList.isEmpty()) {
-            throw IllegalArgumentException("Does not have the article data id which we need to scrape the page for url $sourceUrl")
+            hideContentEntry()
+            setScrapeDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
+            throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "Does not have the article data id which we need to scrape the page for url $sourceUrl")
         }
 
-        var foundRelative = false
-        var nodeSlug: String? = null
-        for (content in contentList) {
+        val content = contentList.find { sourceUrl.contains(it.relativeUrl!!) }
 
-            if (sourceUrl.contains(content.relativeUrl!!)) {
-
-
-                foundRelative = true
-                val articleId = content.id
-                nodeSlug = content.nodeSlug
-                val articleUrl = generateArtcleUrl(articleId)
-                val response = gson.fromJson(IOUtils.toString(URL(articleUrl), UTF_ENCODING), ArticleResponse::class.java)
-                val dateModified = ContentScraperUtil.parseServerDate(response.date_modified!!)
-
-                val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
-
-                val isContentUpdated = if (recentContainer == null) true else {
-                    dateModified > recentContainer.cntLastModified
-                }
-
-                if (!isContentUpdated) {
-                    showContentEntry()
-                    setScrapeDone(true, 0)
-                    return
-                }
-
-                break
-
-            }
+        if (content == null) {
+            hideContentEntry()
+            setScrapeDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
+            throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "No content found in contentModel for url: $sourceUrl")
         }
 
-        if (foundRelative) {
-            UMLogUtil.logDebug("found the id at url $sourceUrl")
-        } else {
-            // TODO error and scraper done
-            setScrapeDone(false, 0)
-            close()
-            throw IllegalArgumentException("did not find id at url $sourceUrl")
+
+        val articleId = content.id
+        val nodeSlug = content.nodeSlug
+        val articleUrl = generateArtcleUrl(articleId)
+        val response = gson.fromJson(IOUtils.toString(URL(articleUrl), UTF_ENCODING), ArticleResponse::class.java)
+        val dateModified = ContentScraperUtil.parseServerDate(response.date_modified!!)
+
+        val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+
+        val isContentUpdated = if (recentContainer == null) true else {
+            dateModified > recentContainer.cntLastModified
+        }
+
+        if (!isContentUpdated) {
+            showContentEntry()
+            setScrapeDone(true, 0)
+            return
         }
 
         val scraperResult = startHarScrape(sourceUrl, {

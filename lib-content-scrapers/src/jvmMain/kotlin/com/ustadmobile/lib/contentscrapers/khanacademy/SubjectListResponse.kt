@@ -98,6 +98,8 @@ class SubjectListResponse {
 
                 var relativeUrl: String? = null
 
+                var youtubeId: String? = null
+
                 var slug: String? = null
 
                 var title: String? = null

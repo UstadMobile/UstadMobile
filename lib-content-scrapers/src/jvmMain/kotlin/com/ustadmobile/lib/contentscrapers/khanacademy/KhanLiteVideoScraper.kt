@@ -27,7 +27,8 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
         }
 
         if (entry == null) {
-            throw ScraperException(ERROR_TYPE_NO_SOURCE_URL_FOUND, "Content Entry was not found for url $sourceUrl")
+            hideContentEntry()
+            throw ScraperException(ERROR_TYPE_ENTRY_NOT_CREATED, "Content Entry was not found for url $sourceUrl")
         }
 
         val khanId = entry!!.sourceUrl!!.substringAfter(KHAN_PREFIX)
@@ -108,15 +109,6 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
         }
     }
 
-    private fun isUrlValid(url: URL): Boolean {
-        val huc: HttpURLConnection = url.openConnection() as HttpURLConnection
-        huc.requestMethod = "HEAD"
-
-        val responseCode: Int = huc.responseCode
-
-        return responseCode == 200
-    }
-
 
     fun getMp4LowUrl(videoId: String): String {
         return "https://cdn.kastatic.org/ka-youtube-converted/$videoId.mp4-low/$videoId-low.mp4"
@@ -124,10 +116,6 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
 
     fun getMp4Url(videoId: String): String {
         return "https://cdn.kastatic.org/ka-youtube-converted/$videoId.mp4/$videoId.mp4"
-    }
-
-    fun getYoutubeUrl(videoId: String): String {
-        return "https://www.youtube.com/watch?v=$videoId"
     }
 
 }
