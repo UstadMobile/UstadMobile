@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.SplashScreenView
 import org.junit.Before
 import org.junit.Test
@@ -23,64 +24,21 @@ class SplashScreenPresenterTest {
         view = mock()
         impl = mock()
 
-        screenPresenter = SplashScreenPresenter(context, mapOf(),view,impl)
+        screenPresenter = SplashScreenPresenter(context, mapOf(),view,impl, delay = 100)
     }
 
     @Test
-    fun givenAppPrefAnimateOrganisationIconSetToTrue_whenAppStarted_shouldAnimateTheIcon() {
-        doAnswer {
-            "false"
-        }.`when`(impl).getAppPref(any(), any(), any())
-
-        doAnswer {
-            "true"
-        }.`when`(impl).getAppConfigString(any(), any(), any())
-
-        screenPresenter.onCreate(mapOf())
-
-        verify(view).animateOrganisationIcon(eq(true), eq(true))
+    fun givenOnboardingShown_whenOnCreateCalled_thenShouldCallStartUi() {
+        whenever(impl.getAppPref(eq(OnBoardingView.PREF_TAG), any(), any())).thenReturn("true")
+        screenPresenter.onCreate(null)
+        verify(impl, timeout(5000)).startUI(any())
     }
 
     @Test
-    fun givenAppPrefAnimateOrganisationIconSetToFalse_whenAppStarted_shouldNotAnimateTheIcon() {
-        doAnswer {
-            "false"
-        }.`when`(impl).getAppPref(any(), any(), any())
-
-        doAnswer {
-            "false"
-        }.`when`(impl).getAppConfigString(any(), any(), any())
-
-        screenPresenter.onCreate(mapOf())
-
-        verify(view).animateOrganisationIcon(eq(false), eq(true))
-    }
-
-
-    @Test
-    fun givenAppIsLaunchedForTheFirstTime_whenLibPreloadIsSetToTrue_shouldPreloadLibs() {
-        doAnswer {
-            "false"
-        }.`when`(impl).getAppPref(any(), any(), any())
-
-        doAnswer {
-            "true"
-        }.`when`(impl).getAppConfigString(any(), any(), any())
-
-        screenPresenter.onCreate(mapOf())
-    }
-
-    @Test
-    fun givenAppWasLaunchedPreviously_whenLibPreloadIsSetToTrue_shouldNoPreloadLibs() {
-        doAnswer {
-            "true"
-        }.`when`(impl).getAppPref(any(), any(), any())
-
-        doAnswer {
-            "true"
-        }.`when`(impl).getAppConfigString(any(), any(), any())
-
-        screenPresenter.onCreate(mapOf())
+    fun givenOnboardingNotShown_whenOnCreateCalled_thenShouldGoToOnboarding() {
+        whenever(impl.getAppPref(eq(OnBoardingView.PREF_TAG), any(), any())).thenReturn("false")
+        screenPresenter.onCreate(null)
+        verify(impl, timeout(5000)).go(eq(OnBoardingView.VIEW_NAME), any(), any())
     }
 
 }

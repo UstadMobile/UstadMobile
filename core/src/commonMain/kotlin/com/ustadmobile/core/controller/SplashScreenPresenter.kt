@@ -1,27 +1,35 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.SplashScreenView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class SplashScreenPresenter(context: Any, arguments: Map<String, String?>, view: SplashScreenView, val impl: UstadMobileSystemImpl)
+class SplashScreenPresenter(context: Any, arguments: Map<String, String?>, view: SplashScreenView,
+                            val impl: UstadMobileSystemImpl, val delay: Long = DEFAULT_DELAY)
     : UstadBaseController<SplashScreenView>(context, arguments, view) {
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
-        val launched = impl.getAppPref(OnBoardingView.PREF_TAG, "false",context).toBoolean()
+        val onboardingShown = impl.getAppPref(OnBoardingView.PREF_TAG, "false",context).toBoolean()
 
-        val showSplash = impl.getAppConfigString(AppConfig.KEY_SHOW_SPASH_SCREEN,
-                "false", context)!!.toBoolean()
+        GlobalScope.launch {
+            delay(delay)
 
-        val animateIcon = impl.getAppConfigString(AppConfig.KEY_ANIMATE_ORGANISATION_ICON,
-                "false", context)!!.toBoolean()
+            if(!onboardingShown) {
+                impl.go(OnBoardingView.VIEW_NAME, mapOf(), context)
+            }else {
+                impl.startUI(context)
+            }
+        }
+    }
 
-        val delay = showSplash || !launched
-        view.animateOrganisationIcon(animateIcon, delay)
+    companion object {
 
-        view.startUi(delay, animateIcon)
+        const val DEFAULT_DELAY = 2000L
+
     }
 }

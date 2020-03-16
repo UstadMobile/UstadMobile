@@ -76,6 +76,14 @@ class StatementEntity {
     @LastChangedBy
     var statementLastChangedBy: Int = 0
 
+    var extensionProgress: Int = 0
+
+    /**
+     * Though technically the XObject is what really links to ContentEntry, the ContentEntryUid is
+     * here to simplify queries used to check on student progress and avoid an extra join
+     */
+    var statementContentEntryUid: Long = 0
+
     companion object {
 
         const val TABLE_ID = 60

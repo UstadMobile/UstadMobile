@@ -28,6 +28,7 @@ interface LoginView : UstadViewWithSnackBar {
     companion object {
 
         const val VIEW_NAME = "Login"
+
     }
 
 }

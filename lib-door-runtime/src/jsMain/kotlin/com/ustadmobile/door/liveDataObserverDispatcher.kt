@@ -6,4 +6,4 @@ import kotlinx.coroutines.Dispatchers
 /**
  * Utility expect/actual function so we can easily get a dispatcher to run observe calls on
  */
-actual fun liveDataObserverDispatcher() = Dispatchers.Default
+actual fun doorMainDispatcher() = Dispatchers.Default

@@ -65,6 +65,9 @@ interface UstadView {
         const val ARG_CONTAINER_UID = "containerUid"
 
         const val ARG_CONTENT_ENTRY_UID = "entryid"
+
+        const val ARG_CLAZZ_UID = "clazzUid"
+        const val ARG_CLAZZ_ASSIGNMENT_UID = "clazzAssignmentUid"
     }
 
 }

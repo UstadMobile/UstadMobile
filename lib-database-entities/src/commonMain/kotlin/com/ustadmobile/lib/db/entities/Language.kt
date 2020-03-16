@@ -9,7 +9,6 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.db.entities.Language.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
-
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable

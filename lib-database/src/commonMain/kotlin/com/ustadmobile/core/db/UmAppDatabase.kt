@@ -11,8 +11,16 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
-    DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
-    Clazz::class, ClazzMember::class, PersonCustomField::class, PersonCustomFieldValue::class,
+    ClazzLog::class,ClazzLogAttendanceRecord::class, FeedEntry::class,PersonField::class,
+    PersonDetailPresenterField::class,SelQuestion::class,
+    SelQuestionResponse::class, SelQuestionResponseNomination::class, SelQuestionSet::class,
+    SelQuestionSetRecognition::class, SelQuestionSetResponse::class,
+    Schedule::class, DateRange::class, UMCalendar::class,
+    ClazzActivity::class, ClazzActivityChange::class,
+    SelQuestionOption::class, ScheduledCheck::class,
+    AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
+    Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
+    Clazz::class, ClazzMember::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
@@ -24,18 +32,34 @@ import kotlin.jvm.Volatile
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class
+    SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class
 
+    //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
 ], version = 34)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
+    /*
+        Changes in 34:
+        Added School and Assignment based entities
+        Updated Clazz : added clazzFeatures and removed individual feature bits
+     */
+
+
     var attachmentsDir: String? = null
 
     override val master: Boolean
         get() = false
+
+
+    /**
+     * Preload a few entities where we have fixed UIDs for fixed items (e.g. Xapi Verbs)
+     */
+    fun preload() {
+        verbDao.initPreloadedVerbs()
+    }
 
     @JsName("networkNodeDao")
     abstract val networkNodeDao: NetworkNodeDao
@@ -165,12 +189,40 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("agentDao")
     abstract val agentDao: AgentDao
 
+    abstract val syncresultDao : SyncResultDao
+
+    abstract val auditLogDao : AuditLogDao
+    abstract val clazzActivityChangeDao : ClazzActivityChangeDao
+    abstract val clazzActivityDao : ClazzActivityDao
+    abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
+    abstract val clazzLogDao : ClazzLogDao
+    abstract val customFieldDao: CustomFieldDao
+    abstract val customFieldValueDao : CustomFieldValueDao
+    abstract val customFieldValueOptionDao : CustomFieldValueOptionDao
+    abstract val dateRangeDao : DateRangeDao
+    abstract val feedEntryDao : FeedEntryDao
+    abstract val personDetailPresenterFieldDao : PersonDetailPresenterFieldDao
+    abstract val scheduleDao : ScheduleDao
+    abstract val scheduledCheckDao : ScheduledCheckDao
+    abstract val selQuestionDao : SelQuestionDao
+    abstract val selQuestionOptionDao : SelQuestionOptionDao
+    abstract val selQuestionResponseDao : SelQuestionResponseDao
+    abstract val selQuestionResponseNominationDao : SelQuestionResponseNominationDao
+    abstract val selQuestionSetDao : SelQuestionSetDao
+    abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
+    abstract val umCalendarDao : UMCalendarDao
+    abstract val schoolDao : SchoolDao
+    abstract val clazzAssignmentDao : ClazzAssignmentDao
+    abstract val clazzAssignmentContentJoinDao : ClazzAssignmentContentJoinDao
+
     @JsName("xLangMapEntryDao")
     abstract val xLangMapEntryDao: XLangMapEntryDao
 
     abstract val locallyAvailableContainerDao: LocallyAvailableContainerDao
 
+    //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
+
 
     companion object {
 
@@ -206,19 +258,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             namedInstances[dbName] = instance
         }
 
-//        @Synchronized
-//        fun getInstance(context: Any): UmAppDatabase {
-//            if (instance == null) {
-//                var builder = DatabaseBuilder.databaseBuilder(
-//                        context, UmAppDatabase::class, "UmAppDatabase")
-//               // builder = addMigrations(builder)
-//               //instance = addCallbacks(builder).build()
-//                instance = builder.build()
-//            }
-//
-//            return instance!!
-//        }
-
         @JsName("getInstance")
         fun getInstance(context: Any) = lazy { getInstance(context, "UmAppDatabase") }.value
 
@@ -235,6 +274,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 db = builder.build()
                 namedInstances[dbName] = db
             }
+
             return db
         }
 
@@ -282,12 +322,1030 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         /**
-         * Fix SQLite update triggers
+         * Fix SQLite update triggers, add locallyavailablecontainer and move to 30
          */
-        val MIGRATION_28_29 = object : DoorMigration(28, 29) {
+        val MIGRATION_29_30_TRIGGERS = object: DoorMigration(29, 30) {
             override fun migrate(database: DoorSqlDatabase) {
-                if (database.dbType() == DoorDbType.SQLITE) {
+
+                if(database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer ( " +
+                            " laContainerUid  INTEGER PRIMARY KEY  NOT NULL )")
+
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_14")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_14")
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_14
+                    |AFTER UPDATE ON ClazzLog FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzLogMSQN = 0 
+                    |OR OLD.clazzLogMSQN = NEW.clazzLogMSQN
+                    |)
+                    |ELSE
+                    |(NEW.clazzLogLCSN = 0  
+                    |OR OLD.clazzLogLCSN = NEW.clazzLogLCSN
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzLog SET clazzLogLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+                    |ELSE (SELECT MAX(MAX(clazzLogLCSN), OLD.clazzLogLCSN) + 1 FROM ClazzLog) END),
+                    |clazzLogMSQN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(clazzLogMSQN), OLD.clazzLogMSQN) + 1 FROM ClazzLog)
+                    |ELSE NEW.clazzLogMSQN END)
+                    |WHERE clazzLogUid = NEW.clazzLogUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_14
+        |AFTER INSERT ON ClazzLog FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzLogMSQN = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.clazzLogLCSN = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ClazzLog SET clazzLogLCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+        |ELSE (SELECT MAX(clazzLogLCSN) + 1 FROM ClazzLog) END),
+        |clazzLogMSQN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(clazzLogMSQN) + 1 FROM ClazzLog)
+        |ELSE NEW.clazzLogMSQN END)
+        |WHERE clazzLogUid = NEW.clazzLogUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_15")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_15")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_15
+        |AFTER UPDATE ON ClazzLogAttendanceRecord FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzLogAttendanceRecordMasterChangeSeqNum = 0 
+        |OR OLD.clazzLogAttendanceRecordMasterChangeSeqNum = NEW.clazzLogAttendanceRecordMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.clazzLogAttendanceRecordLocalChangeSeqNum = 0  
+        |OR OLD.clazzLogAttendanceRecordLocalChangeSeqNum = NEW.clazzLogAttendanceRecordLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(clazzLogAttendanceRecordLocalChangeSeqNum), OLD.clazzLogAttendanceRecordLocalChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord) END),
+        |clazzLogAttendanceRecordMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(clazzLogAttendanceRecordMasterChangeSeqNum), OLD.clazzLogAttendanceRecordMasterChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord)
+        |ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END)
+        |WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_15
+        |AFTER INSERT ON ClazzLogAttendanceRecord FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzLogAttendanceRecordMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.clazzLogAttendanceRecordLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum 
+        |ELSE (SELECT MAX(clazzLogAttendanceRecordLocalChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord) END),
+        |clazzLogAttendanceRecordMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(clazzLogAttendanceRecordMasterChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord)
+        |ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END)
+        |WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_121")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_121")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_121
+        |AFTER UPDATE ON FeedEntry FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.feedEntryMasterChangeSeqNum = 0 
+        |OR OLD.feedEntryMasterChangeSeqNum = NEW.feedEntryMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.feedEntryLocalChangeSeqNum = 0  
+        |OR OLD.feedEntryLocalChangeSeqNum = NEW.feedEntryLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE FeedEntry SET feedEntryLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.feedEntryLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(feedEntryLocalChangeSeqNum), OLD.feedEntryLocalChangeSeqNum) + 1 FROM FeedEntry) END),
+        |feedEntryMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(feedEntryMasterChangeSeqNum), OLD.feedEntryMasterChangeSeqNum) + 1 FROM FeedEntry)
+        |ELSE NEW.feedEntryMasterChangeSeqNum END)
+        |WHERE feedEntryUid = NEW.feedEntryUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_121
+        |AFTER INSERT ON FeedEntry FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.feedEntryMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.feedEntryLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE FeedEntry SET feedEntryLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.feedEntryLocalChangeSeqNum 
+        |ELSE (SELECT MAX(feedEntryLocalChangeSeqNum) + 1 FROM FeedEntry) END),
+        |feedEntryMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(feedEntryMasterChangeSeqNum) + 1 FROM FeedEntry)
+        |ELSE NEW.feedEntryMasterChangeSeqNum END)
+        |WHERE feedEntryUid = NEW.feedEntryUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_20")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_20")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_20
+        |AFTER UPDATE ON PersonField FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.personFieldMasterChangeSeqNum = 0 
+        |OR OLD.personFieldMasterChangeSeqNum = NEW.personFieldMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.personFieldLocalChangeSeqNum = 0  
+        |OR OLD.personFieldLocalChangeSeqNum = NEW.personFieldLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE PersonField SET personFieldLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personFieldLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(personFieldLocalChangeSeqNum), OLD.personFieldLocalChangeSeqNum) + 1 FROM PersonField) END),
+        |personFieldMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(personFieldMasterChangeSeqNum), OLD.personFieldMasterChangeSeqNum) + 1 FROM PersonField)
+        |ELSE NEW.personFieldMasterChangeSeqNum END)
+        |WHERE personCustomFieldUid = NEW.personCustomFieldUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_20
+        |AFTER INSERT ON PersonField FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.personFieldMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.personFieldLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE PersonField SET personFieldLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personFieldLocalChangeSeqNum 
+        |ELSE (SELECT MAX(personFieldLocalChangeSeqNum) + 1 FROM PersonField) END),
+        |personFieldMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(personFieldMasterChangeSeqNum) + 1 FROM PersonField)
+        |ELSE NEW.personFieldMasterChangeSeqNum END)
+        |WHERE personCustomFieldUid = NEW.personCustomFieldUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_19")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_19")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_19
+        |AFTER UPDATE ON PersonDetailPresenterField FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.personDetailPresenterFieldMasterChangeSeqNum = 0 
+        |OR OLD.personDetailPresenterFieldMasterChangeSeqNum = NEW.personDetailPresenterFieldMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.personDetailPresenterFieldLocalChangeSeqNum = 0  
+        |OR OLD.personDetailPresenterFieldLocalChangeSeqNum = NEW.personDetailPresenterFieldLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE PersonDetailPresenterField SET personDetailPresenterFieldLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personDetailPresenterFieldLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(personDetailPresenterFieldLocalChangeSeqNum), OLD.personDetailPresenterFieldLocalChangeSeqNum) + 1 FROM PersonDetailPresenterField) END),
+        |personDetailPresenterFieldMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(personDetailPresenterFieldMasterChangeSeqNum), OLD.personDetailPresenterFieldMasterChangeSeqNum) + 1 FROM PersonDetailPresenterField)
+        |ELSE NEW.personDetailPresenterFieldMasterChangeSeqNum END)
+        |WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_19
+        |AFTER INSERT ON PersonDetailPresenterField FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.personDetailPresenterFieldMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.personDetailPresenterFieldLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE PersonDetailPresenterField SET personDetailPresenterFieldLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personDetailPresenterFieldLocalChangeSeqNum 
+        |ELSE (SELECT MAX(personDetailPresenterFieldLocalChangeSeqNum) + 1 FROM PersonDetailPresenterField) END),
+        |personDetailPresenterFieldMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(personDetailPresenterFieldMasterChangeSeqNum) + 1 FROM PersonDetailPresenterField)
+        |ELSE NEW.personDetailPresenterFieldMasterChangeSeqNum END)
+        |WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_22")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_22")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_22
+        |AFTER UPDATE ON SelQuestion FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionMasterChangeSeqNum = 0 
+        |OR OLD.selQuestionMasterChangeSeqNum = NEW.selQuestionMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.selQuestionLocalChangeSeqNum = 0  
+        |OR OLD.selQuestionLocalChangeSeqNum = NEW.selQuestionLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestion SET selQuestionLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(selQuestionLocalChangeSeqNum), OLD.selQuestionLocalChangeSeqNum) + 1 FROM SelQuestion) END),
+        |selQuestionMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(selQuestionMasterChangeSeqNum), OLD.selQuestionMasterChangeSeqNum) + 1 FROM SelQuestion)
+        |ELSE NEW.selQuestionMasterChangeSeqNum END)
+        |WHERE selQuestionUid = NEW.selQuestionUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_22
+        |AFTER INSERT ON SelQuestion FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.selQuestionLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestion SET selQuestionLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionLocalChangeSeqNum 
+        |ELSE (SELECT MAX(selQuestionLocalChangeSeqNum) + 1 FROM SelQuestion) END),
+        |selQuestionMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(selQuestionMasterChangeSeqNum) + 1 FROM SelQuestion)
+        |ELSE NEW.selQuestionMasterChangeSeqNum END)
+        |WHERE selQuestionUid = NEW.selQuestionUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_23")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_23")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_23
+        |AFTER UPDATE ON SelQuestionResponse FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionResponseMasterChangeSeqNum = 0 
+        |OR OLD.selQuestionResponseMasterChangeSeqNum = NEW.selQuestionResponseMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.selQuestionResponseLocalChangeSeqNum = 0  
+        |OR OLD.selQuestionResponseLocalChangeSeqNum = NEW.selQuestionResponseLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionResponse SET selQuestionResponseLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionResponseLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(selQuestionResponseLocalChangeSeqNum), OLD.selQuestionResponseLocalChangeSeqNum) + 1 FROM SelQuestionResponse) END),
+        |selQuestionResponseMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(selQuestionResponseMasterChangeSeqNum), OLD.selQuestionResponseMasterChangeSeqNum) + 1 FROM SelQuestionResponse)
+        |ELSE NEW.selQuestionResponseMasterChangeSeqNum END)
+        |WHERE selQuestionResponseUid = NEW.selQuestionResponseUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_23
+        |AFTER INSERT ON SelQuestionResponse FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionResponseMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.selQuestionResponseLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionResponse SET selQuestionResponseLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionResponseLocalChangeSeqNum 
+        |ELSE (SELECT MAX(selQuestionResponseLocalChangeSeqNum) + 1 FROM SelQuestionResponse) END),
+        |selQuestionResponseMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(selQuestionResponseMasterChangeSeqNum) + 1 FROM SelQuestionResponse)
+        |ELSE NEW.selQuestionResponseMasterChangeSeqNum END)
+        |WHERE selQuestionResponseUid = NEW.selQuestionResponseUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_24")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_24")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_24
+        |AFTER UPDATE ON SelQuestionResponseNomination FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selqrnMCSN = 0 
+        |OR OLD.selqrnMCSN = NEW.selqrnMCSN
+        |)
+        |ELSE
+        |(NEW.selqrnMCSNLCSN = 0  
+        |OR OLD.selqrnMCSNLCSN = NEW.selqrnMCSNLCSN
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionResponseNomination SET selqrnMCSNLCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selqrnMCSNLCSN 
+        |ELSE (SELECT MAX(MAX(selqrnMCSNLCSN), OLD.selqrnMCSNLCSN) + 1 FROM SelQuestionResponseNomination) END),
+        |selqrnMCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(selqrnMCSN), OLD.selqrnMCSN) + 1 FROM SelQuestionResponseNomination)
+        |ELSE NEW.selqrnMCSN END)
+        |WHERE selqrnUid = NEW.selqrnUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_24
+        |AFTER INSERT ON SelQuestionResponseNomination FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selqrnMCSN = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.selqrnMCSNLCSN = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionResponseNomination SET selqrnMCSNLCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selqrnMCSNLCSN 
+        |ELSE (SELECT MAX(selqrnMCSNLCSN) + 1 FROM SelQuestionResponseNomination) END),
+        |selqrnMCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(selqrnMCSN) + 1 FROM SelQuestionResponseNomination)
+        |ELSE NEW.selqrnMCSN END)
+        |WHERE selqrnUid = NEW.selqrnUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_25")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_25")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_25
+        |AFTER UPDATE ON SelQuestionSet FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionSetMasterChangeSeqNum = 0 
+        |OR OLD.selQuestionSetMasterChangeSeqNum = NEW.selQuestionSetMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.selQuestionSetLocalChangeSeqNum = 0  
+        |OR OLD.selQuestionSetLocalChangeSeqNum = NEW.selQuestionSetLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionSet SET selQuestionSetLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(selQuestionSetLocalChangeSeqNum), OLD.selQuestionSetLocalChangeSeqNum) + 1 FROM SelQuestionSet) END),
+        |selQuestionSetMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(selQuestionSetMasterChangeSeqNum), OLD.selQuestionSetMasterChangeSeqNum) + 1 FROM SelQuestionSet)
+        |ELSE NEW.selQuestionSetMasterChangeSeqNum END)
+        |WHERE selQuestionSetUid = NEW.selQuestionSetUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_25
+        |AFTER INSERT ON SelQuestionSet FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionSetMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.selQuestionSetLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionSet SET selQuestionSetLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetLocalChangeSeqNum 
+        |ELSE (SELECT MAX(selQuestionSetLocalChangeSeqNum) + 1 FROM SelQuestionSet) END),
+        |selQuestionSetMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(selQuestionSetMasterChangeSeqNum) + 1 FROM SelQuestionSet)
+        |ELSE NEW.selQuestionSetMasterChangeSeqNum END)
+        |WHERE selQuestionSetUid = NEW.selQuestionSetUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_26")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_26")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_26
+        |AFTER UPDATE ON SelQuestionSetRecognition FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionSetRecognitionMasterChangeSeqNum = 0 
+        |OR OLD.selQuestionSetRecognitionMasterChangeSeqNum = NEW.selQuestionSetRecognitionMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.selQuestionSetRecognitionLocalChangeSeqNum = 0  
+        |OR OLD.selQuestionSetRecognitionLocalChangeSeqNum = NEW.selQuestionSetRecognitionLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionSetRecognition SET selQuestionSetRecognitionLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetRecognitionLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(selQuestionSetRecognitionLocalChangeSeqNum), OLD.selQuestionSetRecognitionLocalChangeSeqNum) + 1 FROM SelQuestionSetRecognition) END),
+        |selQuestionSetRecognitionMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(selQuestionSetRecognitionMasterChangeSeqNum), OLD.selQuestionSetRecognitionMasterChangeSeqNum) + 1 FROM SelQuestionSetRecognition)
+        |ELSE NEW.selQuestionSetRecognitionMasterChangeSeqNum END)
+        |WHERE selQuestionSetRecognitionUid = NEW.selQuestionSetRecognitionUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_26
+        |AFTER INSERT ON SelQuestionSetRecognition FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionSetRecognitionMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.selQuestionSetRecognitionLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionSetRecognition SET selQuestionSetRecognitionLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetRecognitionLocalChangeSeqNum 
+        |ELSE (SELECT MAX(selQuestionSetRecognitionLocalChangeSeqNum) + 1 FROM SelQuestionSetRecognition) END),
+        |selQuestionSetRecognitionMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(selQuestionSetRecognitionMasterChangeSeqNum) + 1 FROM SelQuestionSetRecognition)
+        |ELSE NEW.selQuestionSetRecognitionMasterChangeSeqNum END)
+        |WHERE selQuestionSetRecognitionUid = NEW.selQuestionSetRecognitionUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_27")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_27")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_27
+        |AFTER UPDATE ON SelQuestionSetResponse FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionSetResponseMasterChangeSeqNum = 0 
+        |OR OLD.selQuestionSetResponseMasterChangeSeqNum = NEW.selQuestionSetResponseMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.selQuestionSetResponseLocalChangeSeqNum = 0  
+        |OR OLD.selQuestionSetResponseLocalChangeSeqNum = NEW.selQuestionSetResponseLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionSetResponse SET selQuestionSetResponseLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetResponseLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(selQuestionSetResponseLocalChangeSeqNum), OLD.selQuestionSetResponseLocalChangeSeqNum) + 1 FROM SelQuestionSetResponse) END),
+        |selQuestionSetResponseMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(selQuestionSetResponseMasterChangeSeqNum), OLD.selQuestionSetResponseMasterChangeSeqNum) + 1 FROM SelQuestionSetResponse)
+        |ELSE NEW.selQuestionSetResponseMasterChangeSeqNum END)
+        |WHERE selQuestionSetResposeUid = NEW.selQuestionSetResposeUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_27
+        |AFTER INSERT ON SelQuestionSetResponse FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionSetResponseMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.selQuestionSetResponseLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionSetResponse SET selQuestionSetResponseLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetResponseLocalChangeSeqNum 
+        |ELSE (SELECT MAX(selQuestionSetResponseLocalChangeSeqNum) + 1 FROM SelQuestionSetResponse) END),
+        |selQuestionSetResponseMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(selQuestionSetResponseMasterChangeSeqNum) + 1 FROM SelQuestionSetResponse)
+        |ELSE NEW.selQuestionSetResponseMasterChangeSeqNum END)
+        |WHERE selQuestionSetResposeUid = NEW.selQuestionSetResposeUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_21")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_21")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_21
+        |AFTER UPDATE ON Schedule FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.scheduleMasterChangeSeqNum = 0 
+        |OR OLD.scheduleMasterChangeSeqNum = NEW.scheduleMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.scheduleLocalChangeSeqNum = 0  
+        |OR OLD.scheduleLocalChangeSeqNum = NEW.scheduleLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE Schedule SET scheduleLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduleLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(scheduleLocalChangeSeqNum), OLD.scheduleLocalChangeSeqNum) + 1 FROM Schedule) END),
+        |scheduleMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(scheduleMasterChangeSeqNum), OLD.scheduleMasterChangeSeqNum) + 1 FROM Schedule)
+        |ELSE NEW.scheduleMasterChangeSeqNum END)
+        |WHERE scheduleUid = NEW.scheduleUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_21
+        |AFTER INSERT ON Schedule FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.scheduleMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.scheduleLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE Schedule SET scheduleLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduleLocalChangeSeqNum 
+        |ELSE (SELECT MAX(scheduleLocalChangeSeqNum) + 1 FROM Schedule) END),
+        |scheduleMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(scheduleMasterChangeSeqNum) + 1 FROM Schedule)
+        |ELSE NEW.scheduleMasterChangeSeqNum END)
+        |WHERE scheduleUid = NEW.scheduleUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_17")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_17")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_17
+        |AFTER UPDATE ON DateRange FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.dateRangeMasterChangeSeqNum = 0 
+        |OR OLD.dateRangeMasterChangeSeqNum = NEW.dateRangeMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.dateRangeLocalChangeSeqNum = 0  
+        |OR OLD.dateRangeLocalChangeSeqNum = NEW.dateRangeLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE DateRange SET dateRangeLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.dateRangeLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(dateRangeLocalChangeSeqNum), OLD.dateRangeLocalChangeSeqNum) + 1 FROM DateRange) END),
+        |dateRangeMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(dateRangeMasterChangeSeqNum), OLD.dateRangeMasterChangeSeqNum) + 1 FROM DateRange)
+        |ELSE NEW.dateRangeMasterChangeSeqNum END)
+        |WHERE dateRangeUid = NEW.dateRangeUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_17
+        |AFTER INSERT ON DateRange FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.dateRangeMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.dateRangeLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE DateRange SET dateRangeLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.dateRangeLocalChangeSeqNum 
+        |ELSE (SELECT MAX(dateRangeLocalChangeSeqNum) + 1 FROM DateRange) END),
+        |dateRangeMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(dateRangeMasterChangeSeqNum) + 1 FROM DateRange)
+        |ELSE NEW.dateRangeMasterChangeSeqNum END)
+        |WHERE dateRangeUid = NEW.dateRangeUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_28")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_28")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_28
+        |AFTER UPDATE ON UMCalendar FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.umCalendarMasterChangeSeqNum = 0 
+        |OR OLD.umCalendarMasterChangeSeqNum = NEW.umCalendarMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.umCalendarLocalChangeSeqNum = 0  
+        |OR OLD.umCalendarLocalChangeSeqNum = NEW.umCalendarLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE UMCalendar SET umCalendarLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.umCalendarLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(umCalendarLocalChangeSeqNum), OLD.umCalendarLocalChangeSeqNum) + 1 FROM UMCalendar) END),
+        |umCalendarMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(umCalendarMasterChangeSeqNum), OLD.umCalendarMasterChangeSeqNum) + 1 FROM UMCalendar)
+        |ELSE NEW.umCalendarMasterChangeSeqNum END)
+        |WHERE umCalendarUid = NEW.umCalendarUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_28
+        |AFTER INSERT ON UMCalendar FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.umCalendarMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.umCalendarLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE UMCalendar SET umCalendarLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.umCalendarLocalChangeSeqNum 
+        |ELSE (SELECT MAX(umCalendarLocalChangeSeqNum) + 1 FROM UMCalendar) END),
+        |umCalendarMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(umCalendarMasterChangeSeqNum) + 1 FROM UMCalendar)
+        |ELSE NEW.umCalendarMasterChangeSeqNum END)
+        |WHERE umCalendarUid = NEW.umCalendarUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_11")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_11")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_11
+        |AFTER UPDATE ON ClazzActivity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzActivityMasterChangeSeqNum = 0 
+        |OR OLD.clazzActivityMasterChangeSeqNum = NEW.clazzActivityMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.clazzActivityLocalChangeSeqNum = 0  
+        |OR OLD.clazzActivityLocalChangeSeqNum = NEW.clazzActivityLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ClazzActivity SET clazzActivityLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(clazzActivityLocalChangeSeqNum), OLD.clazzActivityLocalChangeSeqNum) + 1 FROM ClazzActivity) END),
+        |clazzActivityMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(clazzActivityMasterChangeSeqNum), OLD.clazzActivityMasterChangeSeqNum) + 1 FROM ClazzActivity)
+        |ELSE NEW.clazzActivityMasterChangeSeqNum END)
+        |WHERE clazzActivityUid = NEW.clazzActivityUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_11
+        |AFTER INSERT ON ClazzActivity FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzActivityMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.clazzActivityLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ClazzActivity SET clazzActivityLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityLocalChangeSeqNum 
+        |ELSE (SELECT MAX(clazzActivityLocalChangeSeqNum) + 1 FROM ClazzActivity) END),
+        |clazzActivityMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(clazzActivityMasterChangeSeqNum) + 1 FROM ClazzActivity)
+        |ELSE NEW.clazzActivityMasterChangeSeqNum END)
+        |WHERE clazzActivityUid = NEW.clazzActivityUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_32")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_32")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_32
+        |AFTER UPDATE ON ClazzActivityChange FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzActivityChangeMasterChangeSeqNum = 0 
+        |OR OLD.clazzActivityChangeMasterChangeSeqNum = NEW.clazzActivityChangeMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.clazzActivityChangeLocalChangeSeqNum = 0  
+        |OR OLD.clazzActivityChangeLocalChangeSeqNum = NEW.clazzActivityChangeLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE ClazzActivityChange SET clazzActivityChangeLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityChangeLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(clazzActivityChangeLocalChangeSeqNum), OLD.clazzActivityChangeLocalChangeSeqNum) + 1 FROM ClazzActivityChange) END),
+        |clazzActivityChangeMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(clazzActivityChangeMasterChangeSeqNum), OLD.clazzActivityChangeMasterChangeSeqNum) + 1 FROM ClazzActivityChange)
+        |ELSE NEW.clazzActivityChangeMasterChangeSeqNum END)
+        |WHERE clazzActivityChangeUid = NEW.clazzActivityChangeUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_32
+        |AFTER INSERT ON ClazzActivityChange FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.clazzActivityChangeMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.clazzActivityChangeLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ClazzActivityChange SET clazzActivityChangeLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityChangeLocalChangeSeqNum 
+        |ELSE (SELECT MAX(clazzActivityChangeLocalChangeSeqNum) + 1 FROM ClazzActivityChange) END),
+        |clazzActivityChangeMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(clazzActivityChangeMasterChangeSeqNum) + 1 FROM ClazzActivityChange)
+        |ELSE NEW.clazzActivityChangeMasterChangeSeqNum END)
+        |WHERE clazzActivityChangeUid = NEW.clazzActivityChangeUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_52")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_52")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_52
+        |AFTER UPDATE ON SelQuestionOption FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionOptionMasterChangeSeqNum = 0 
+        |OR OLD.selQuestionOptionMasterChangeSeqNum = NEW.selQuestionOptionMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.selQuestionOptionLocalChangeSeqNum = 0  
+        |OR OLD.selQuestionOptionLocalChangeSeqNum = NEW.selQuestionOptionLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionOption SET selQuestionOptionLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionOptionLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(selQuestionOptionLocalChangeSeqNum), OLD.selQuestionOptionLocalChangeSeqNum) + 1 FROM SelQuestionOption) END),
+        |selQuestionOptionMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(selQuestionOptionMasterChangeSeqNum), OLD.selQuestionOptionMasterChangeSeqNum) + 1 FROM SelQuestionOption)
+        |ELSE NEW.selQuestionOptionMasterChangeSeqNum END)
+        |WHERE selQuestionOptionUid = NEW.selQuestionOptionUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_52
+        |AFTER INSERT ON SelQuestionOption FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.selQuestionOptionMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.selQuestionOptionLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE SelQuestionOption SET selQuestionOptionLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionOptionLocalChangeSeqNum 
+        |ELSE (SELECT MAX(selQuestionOptionLocalChangeSeqNum) + 1 FROM SelQuestionOption) END),
+        |selQuestionOptionMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(selQuestionOptionMasterChangeSeqNum) + 1 FROM SelQuestionOption)
+        |ELSE NEW.selQuestionOptionMasterChangeSeqNum END)
+        |WHERE selQuestionOptionUid = NEW.selQuestionOptionUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_173")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_173")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_173
+        |AFTER UPDATE ON ScheduledCheck FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.scheduledCheckMasterCsn = 0 
+        |OR OLD.scheduledCheckMasterCsn = NEW.scheduledCheckMasterCsn
+        |)
+        |ELSE
+        |(NEW.scheduledCheckLocalCsn = 0  
+        |OR OLD.scheduledCheckLocalCsn = NEW.scheduledCheckLocalCsn
+        |) END)
+        |BEGIN 
+        |UPDATE ScheduledCheck SET scheduledCheckLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduledCheckLocalCsn 
+        |ELSE (SELECT MAX(MAX(scheduledCheckLocalCsn), OLD.scheduledCheckLocalCsn) + 1 FROM ScheduledCheck) END),
+        |scheduledCheckMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(scheduledCheckMasterCsn), OLD.scheduledCheckMasterCsn) + 1 FROM ScheduledCheck)
+        |ELSE NEW.scheduledCheckMasterCsn END)
+        |WHERE scheduledCheckUid = NEW.scheduledCheckUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_173
+        |AFTER INSERT ON ScheduledCheck FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.scheduledCheckMasterCsn = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.scheduledCheckLocalCsn = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE ScheduledCheck SET scheduledCheckLocalCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduledCheckLocalCsn 
+        |ELSE (SELECT MAX(scheduledCheckLocalCsn) + 1 FROM ScheduledCheck) END),
+        |scheduledCheckMasterCsn = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(scheduledCheckMasterCsn) + 1 FROM ScheduledCheck)
+        |ELSE NEW.scheduledCheckMasterCsn END)
+        |WHERE scheduledCheckUid = NEW.scheduledCheckUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_53")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_53")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_53
+        |AFTER UPDATE ON AuditLog FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.auditLogMasterChangeSeqNum = 0 
+        |OR OLD.auditLogMasterChangeSeqNum = NEW.auditLogMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.auditLogLocalChangeSeqNum = 0  
+        |OR OLD.auditLogLocalChangeSeqNum = NEW.auditLogLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE AuditLog SET auditLogLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.auditLogLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(auditLogLocalChangeSeqNum), OLD.auditLogLocalChangeSeqNum) + 1 FROM AuditLog) END),
+        |auditLogMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(auditLogMasterChangeSeqNum), OLD.auditLogMasterChangeSeqNum) + 1 FROM AuditLog)
+        |ELSE NEW.auditLogMasterChangeSeqNum END)
+        |WHERE auditLogUid = NEW.auditLogUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_53
+        |AFTER INSERT ON AuditLog FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.auditLogMasterChangeSeqNum = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.auditLogLocalChangeSeqNum = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE AuditLog SET auditLogLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.auditLogLocalChangeSeqNum 
+        |ELSE (SELECT MAX(auditLogLocalChangeSeqNum) + 1 FROM AuditLog) END),
+        |auditLogMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(auditLogMasterChangeSeqNum) + 1 FROM AuditLog)
+        |ELSE NEW.auditLogMasterChangeSeqNum END)
+        |WHERE auditLogUid = NEW.auditLogUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_56")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_56")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_56
+        |AFTER UPDATE ON CustomField FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.customFieldMCSN = 0 
+        |OR OLD.customFieldMCSN = NEW.customFieldMCSN
+        |)
+        |ELSE
+        |(NEW.customFieldLCSN = 0  
+        |OR OLD.customFieldLCSN = NEW.customFieldLCSN
+        |) END)
+        |BEGIN 
+        |UPDATE CustomField SET customFieldLCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldLCSN 
+        |ELSE (SELECT MAX(MAX(customFieldLCSN), OLD.customFieldLCSN) + 1 FROM CustomField) END),
+        |customFieldMCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(customFieldMCSN), OLD.customFieldMCSN) + 1 FROM CustomField)
+        |ELSE NEW.customFieldMCSN END)
+        |WHERE customFieldUid = NEW.customFieldUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_56
+        |AFTER INSERT ON CustomField FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.customFieldMCSN = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.customFieldLCSN = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE CustomField SET customFieldLCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldLCSN 
+        |ELSE (SELECT MAX(customFieldLCSN) + 1 FROM CustomField) END),
+        |customFieldMCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(customFieldMCSN) + 1 FROM CustomField)
+        |ELSE NEW.customFieldMCSN END)
+        |WHERE customFieldUid = NEW.customFieldUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_57")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_57")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_57
+        |AFTER UPDATE ON CustomFieldValue FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.customFieldValueMCSN = 0 
+        |OR OLD.customFieldValueMCSN = NEW.customFieldValueMCSN
+        |)
+        |ELSE
+        |(NEW.customFieldValueLCSN = 0  
+        |OR OLD.customFieldValueLCSN = NEW.customFieldValueLCSN
+        |) END)
+        |BEGIN 
+        |UPDATE CustomFieldValue SET customFieldValueLCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueLCSN 
+        |ELSE (SELECT MAX(MAX(customFieldValueLCSN), OLD.customFieldValueLCSN) + 1 FROM CustomFieldValue) END),
+        |customFieldValueMCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(customFieldValueMCSN), OLD.customFieldValueMCSN) + 1 FROM CustomFieldValue)
+        |ELSE NEW.customFieldValueMCSN END)
+        |WHERE customFieldValueUid = NEW.customFieldValueUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_57
+        |AFTER INSERT ON CustomFieldValue FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.customFieldValueMCSN = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.customFieldValueLCSN = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE CustomFieldValue SET customFieldValueLCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueLCSN 
+        |ELSE (SELECT MAX(customFieldValueLCSN) + 1 FROM CustomFieldValue) END),
+        |customFieldValueMCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(customFieldValueMCSN) + 1 FROM CustomFieldValue)
+        |ELSE NEW.customFieldValueMCSN END)
+        |WHERE customFieldValueUid = NEW.customFieldValueUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_55")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_55")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_55
+        |AFTER UPDATE ON CustomFieldValueOption FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.customFieldValueOptionMCSN = 0 
+        |OR OLD.customFieldValueOptionMCSN = NEW.customFieldValueOptionMCSN
+        |)
+        |ELSE
+        |(NEW.customFieldValueOptionLCSN = 0  
+        |OR OLD.customFieldValueOptionLCSN = NEW.customFieldValueOptionLCSN
+        |) END)
+        |BEGIN 
+        |UPDATE CustomFieldValueOption SET customFieldValueOptionLCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueOptionLCSN 
+        |ELSE (SELECT MAX(MAX(customFieldValueOptionLCSN), OLD.customFieldValueOptionLCSN) + 1 FROM CustomFieldValueOption) END),
+        |customFieldValueOptionMCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(customFieldValueOptionMCSN), OLD.customFieldValueOptionMCSN) + 1 FROM CustomFieldValueOption)
+        |ELSE NEW.customFieldValueOptionMCSN END)
+        |WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+        |CREATE TRIGGER INS_55
+        |AFTER INSERT ON CustomFieldValueOption FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.customFieldValueOptionMCSN = 0 
+        |
+        |)
+        |ELSE
+        |(NEW.customFieldValueOptionLCSN = 0  
+        |
+        |) END)
+        |BEGIN 
+        |UPDATE CustomFieldValueOption SET customFieldValueOptionLCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueOptionLCSN 
+        |ELSE (SELECT MAX(customFieldValueOptionLCSN) + 1 FROM CustomFieldValueOption) END),
+        |customFieldValueOptionMCSN = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(customFieldValueOptionMCSN) + 1 FROM CustomFieldValueOption)
+        |ELSE NEW.customFieldValueOptionMCSN END)
+        |WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid
+        |; END
+        """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_9")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_9")
                     database.execSQL("""
         |CREATE TRIGGER UPD_9
         |AFTER UPDATE ON Person FOR EACH ROW WHEN
@@ -333,6 +1391,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_6")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_6")
                     database.execSQL("""
         |CREATE TRIGGER UPD_6
         |AFTER UPDATE ON Clazz FOR EACH ROW WHEN
@@ -377,9 +1436,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |WHERE clazzUid = NEW.clazzUid
         |; END
         """.trimMargin())
-                    database.execSQL("DROP TRIGGER IF EXISTS UPD_11")
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_65")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_65")
                     database.execSQL("""
-        |CREATE TRIGGER UPD_11
+        |CREATE TRIGGER UPD_65
         |AFTER UPDATE ON ClazzMember FOR EACH ROW WHEN
         |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
         |(NEW.clazzMemberMasterChangeSeqNum = 0 
@@ -401,7 +1461,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("""
-        |CREATE TRIGGER INS_11
+        |CREATE TRIGGER INS_65
         |AFTER INSERT ON ClazzMember FOR EACH ROW WHEN
         |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
         |(NEW.clazzMemberMasterChangeSeqNum = 0 
@@ -422,7 +1482,54 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |WHERE clazzMemberUid = NEW.clazzMemberUid
         |; END
         """.trimMargin())
+                    database.execSQL("DROP TRIGGER IF EXISTS UPD_178")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_178")
+                    database.execSQL("""
+        |CREATE TRIGGER UPD_178
+        |AFTER UPDATE ON PersonCustomFieldValue FOR EACH ROW WHEN
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(NEW.personCustomFieldValueMasterChangeSeqNum = 0 
+        |OR OLD.personCustomFieldValueMasterChangeSeqNum = NEW.personCustomFieldValueMasterChangeSeqNum
+        |)
+        |ELSE
+        |(NEW.personCustomFieldValueLocalChangeSeqNum = 0  
+        |OR OLD.personCustomFieldValueLocalChangeSeqNum = NEW.personCustomFieldValueLocalChangeSeqNum
+        |) END)
+        |BEGIN 
+        |UPDATE PersonCustomFieldValue SET personCustomFieldValueLocalChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personCustomFieldValueLocalChangeSeqNum 
+        |ELSE (SELECT MAX(MAX(personCustomFieldValueLocalChangeSeqNum), OLD.personCustomFieldValueLocalChangeSeqNum) + 1 FROM PersonCustomFieldValue) END),
+        |personCustomFieldValueMasterChangeSeqNum = 
+        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+        |(SELECT MAX(MAX(personCustomFieldValueMasterChangeSeqNum), OLD.personCustomFieldValueMasterChangeSeqNum) + 1 FROM PersonCustomFieldValue)
+        |ELSE NEW.personCustomFieldValueMasterChangeSeqNum END)
+        |WHERE personCustomFieldValueUid = NEW.personCustomFieldValueUid
+        |; END
+        """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_178
+                    |AFTER INSERT ON PersonCustomFieldValue FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.personCustomFieldValueMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.personCustomFieldValueLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE PersonCustomFieldValue SET personCustomFieldValueLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personCustomFieldValueLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(personCustomFieldValueLocalChangeSeqNum) + 1 FROM PersonCustomFieldValue) END),
+                    |personCustomFieldValueMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(personCustomFieldValueMasterChangeSeqNum) + 1 FROM PersonCustomFieldValue)
+                    |ELSE NEW.personCustomFieldValueMasterChangeSeqNum END)
+                    |WHERE personCustomFieldValueUid = NEW.personCustomFieldValueUid
+                    |; END
+                    """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_42")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_42")
                     database.execSQL("""
         |CREATE TRIGGER UPD_42
         |AFTER UPDATE ON ContentEntry FOR EACH ROW WHEN
@@ -468,6 +1575,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_3")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_3")
                     database.execSQL("""
         |CREATE TRIGGER UPD_3
         |AFTER UPDATE ON ContentEntryContentCategoryJoin FOR EACH ROW WHEN
@@ -513,6 +1621,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_7")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_7")
                     database.execSQL("""
         |CREATE TRIGGER UPD_7
         |AFTER UPDATE ON ContentEntryParentChildJoin FOR EACH ROW WHEN
@@ -558,6 +1667,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_8")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_8")
                     database.execSQL("""
         |CREATE TRIGGER UPD_8
         |AFTER UPDATE ON ContentEntryRelatedEntryJoin FOR EACH ROW WHEN
@@ -603,6 +1713,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_2")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_2")
                     database.execSQL("""
         |CREATE TRIGGER UPD_2
         |AFTER UPDATE ON ContentCategorySchema FOR EACH ROW WHEN
@@ -648,6 +1759,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_1")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_1")
                     database.execSQL("""
         |CREATE TRIGGER UPD_1
         |AFTER UPDATE ON ContentCategory FOR EACH ROW WHEN
@@ -693,6 +1805,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_13")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_13")
                     database.execSQL("""
         |CREATE TRIGGER UPD_13
         |AFTER UPDATE ON Language FOR EACH ROW WHEN
@@ -738,6 +1851,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_10")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_10")
                     database.execSQL("""
         |CREATE TRIGGER UPD_10
         |AFTER UPDATE ON LanguageVariant FOR EACH ROW WHEN
@@ -783,6 +1897,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_45")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_45")
                     database.execSQL("""
         |CREATE TRIGGER UPD_45
         |AFTER UPDATE ON Role FOR EACH ROW WHEN
@@ -828,6 +1943,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_47")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_47")
                     database.execSQL("""
         |CREATE TRIGGER UPD_47
         |AFTER UPDATE ON EntityRole FOR EACH ROW WHEN
@@ -873,6 +1989,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_43")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_43")
                     database.execSQL("""
         |CREATE TRIGGER UPD_43
         |AFTER UPDATE ON PersonGroup FOR EACH ROW WHEN
@@ -918,6 +2035,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_44")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_44")
                     database.execSQL("""
         |CREATE TRIGGER UPD_44
         |AFTER UPDATE ON PersonGroupMember FOR EACH ROW WHEN
@@ -963,6 +2081,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_29")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_29")
                     database.execSQL("""
         |CREATE TRIGGER UPD_29
         |AFTER UPDATE ON Location FOR EACH ROW WHEN
@@ -1008,6 +2127,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_48")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_48")
                     database.execSQL("""
         |CREATE TRIGGER UPD_48
         |AFTER UPDATE ON PersonLocationJoin FOR EACH ROW WHEN
@@ -1053,6 +2173,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_50")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_50")
                     database.execSQL("""
         |CREATE TRIGGER UPD_50
         |AFTER UPDATE ON PersonPicture FOR EACH ROW WHEN
@@ -1098,6 +2219,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_51")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_51")
                     database.execSQL("""
         |CREATE TRIGGER UPD_51
         |AFTER UPDATE ON Container FOR EACH ROW WHEN
@@ -1143,6 +2265,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_62")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_62")
                     database.execSQL("""
         |CREATE TRIGGER UPD_62
         |AFTER UPDATE ON VerbEntity FOR EACH ROW WHEN
@@ -1188,6 +2311,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_64")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_64")
                     database.execSQL("""
         |CREATE TRIGGER UPD_64
         |AFTER UPDATE ON XObjectEntity FOR EACH ROW WHEN
@@ -1233,6 +2357,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_60")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_60")
                     database.execSQL("""
         |CREATE TRIGGER UPD_60
         |AFTER UPDATE ON StatementEntity FOR EACH ROW WHEN
@@ -1278,6 +2403,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_66")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_66")
                     database.execSQL("""
         |CREATE TRIGGER UPD_66
         |AFTER UPDATE ON ContextXObjectStatementJoin FOR EACH ROW WHEN
@@ -1323,6 +2449,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_68")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_68")
                     database.execSQL("""
         |CREATE TRIGGER UPD_68
         |AFTER UPDATE ON AgentEntity FOR EACH ROW WHEN
@@ -1368,6 +2495,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_70")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_70")
                     database.execSQL("""
         |CREATE TRIGGER UPD_70
         |AFTER UPDATE ON StateEntity FOR EACH ROW WHEN
@@ -1413,6 +2541,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_72")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_72")
                     database.execSQL("""
         |CREATE TRIGGER UPD_72
         |AFTER UPDATE ON StateContentEntity FOR EACH ROW WHEN
@@ -1458,6 +2587,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("DROP TRIGGER IF EXISTS UPD_74")
+                    database.execSQL("DROP TRIGGER IF EXISTS INS_74")
                     database.execSQL("""
         |CREATE TRIGGER UPD_74
         |AFTER UPDATE ON XLangMapEntry FOR EACH ROW WHEN
@@ -1481,27 +2611,27 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         |; END
         """.trimMargin())
                     database.execSQL("""
-        |CREATE TRIGGER INS_74
-        |AFTER INSERT ON XLangMapEntry FOR EACH ROW WHEN
-        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-        |(NEW.statementLangMapMasterCsn = 0 
-        |
-        |)
-        |ELSE
-        |(NEW.statementLangMapLocalCsn = 0  
-        |
-        |) END)
-        |BEGIN 
-        |UPDATE XLangMapEntry SET statementLangMapLocalCsn = 
-        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLangMapLocalCsn 
-        |ELSE (SELECT MAX(statementLangMapLocalCsn) + 1 FROM XLangMapEntry) END),
-        |statementLangMapMasterCsn = 
-        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-        |(SELECT MAX(statementLangMapMasterCsn) + 1 FROM XLangMapEntry)
-        |ELSE NEW.statementLangMapMasterCsn END)
-        |WHERE statementLangMapUid = NEW.statementLangMapUid
-        |; END
-        """.trimMargin())
+                    |CREATE TRIGGER INS_74
+                    |AFTER INSERT ON XLangMapEntry FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.statementLangMapMasterCsn = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.statementLangMapLocalCsn = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE XLangMapEntry SET statementLangMapLocalCsn = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLangMapLocalCsn 
+                    |ELSE (SELECT MAX(statementLangMapLocalCsn) + 1 FROM XLangMapEntry) END),
+                    |statementLangMapMasterCsn = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(statementLangMapMasterCsn) + 1 FROM XLangMapEntry)
+                    |ELSE NEW.statementLangMapMasterCsn END)
+                    |WHERE statementLangMapUid = NEW.statementLangMapUid
+                    |; END
+                    """.trimMargin())
                 }
             }
         }
@@ -1599,19 +2729,41 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
                     """.trimMargin())
 
-
                 }
-
-
             }
-
         }
 
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
-            builder.addMigrations(object : DoorMigration(26, 27) {
+            builder.addMigrations(object : DoorMigration(27,28){
+
                 override fun migrate(database: DoorSqlDatabase) {
+                    try {
+                        println("Migrating from 27 to 28")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationUid TO selqrnUid")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationClazzMemberUid TO selqrnClazzMemberUid")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationSelQuestionResponseUId TO selqrnSelQuestionResponseUId")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationMasterChangeSeqNum TO selqrnMCSN")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationLocalChangeSeqNum TO selqrnMCSNLCSN")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationLastChangedBy TO selqrnMCSNLCB")
+
+                        database.execSQL("ALTER TABLE selQuestionSetRecognition RENAME COLUMN selQuestionSetRecognitionSelQuestionSetResponseUid TO selqsrSelQuestionSetResponseUid")
+                    } catch (e:Exception) {
+                        print("Migration exception: " + e.message)
+                    }
+                }
+            })
+
+            builder.addMigrations(object : DoorMigration(26,27){
+                override fun migrate(database: DoorSqlDatabase) {
+
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN status, ADD COLUMN contentFlags INTEGER NOT NULL DEFAULT 0, ADD COLUMN ceInactive BOOL")
                 }
 
@@ -1627,7 +2779,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             builder.addMigrations(object : DoorMigration(24, 25) {
                 override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
+                    try{
+                        database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
+                    } catch (e:Exception) {
+                        print(e.message)
+                    }
                 }
 
             })

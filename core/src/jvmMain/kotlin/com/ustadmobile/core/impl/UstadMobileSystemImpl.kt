@@ -74,7 +74,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
     /**
      * Get a string for use in the UI
      */
-    actual fun getString(messageCode: Int, context: Any): String{
+    actual override fun getString(messageCode: Int, context: Any): String{
         return ""
     }
 

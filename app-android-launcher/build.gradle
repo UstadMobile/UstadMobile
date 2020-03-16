@@ -22,8 +22,17 @@ kotlin {
 
 
 android {
+
+    dataBinding {
+        enabled = true
+    }
+
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
+
+    dataBinding {
+        enabled = true
+    }
 
     lintOptions {
         abortOnError false
@@ -45,13 +54,13 @@ android {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode 1
-        versionName "1.0"
+        versionName "6.4.29.7"
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + rootProject.ext.buildConfigProperties["android.acra.url"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
+        missingDimensionStrategy 'api', 'api18'
     }
 
     signingConfigs {
@@ -109,8 +118,7 @@ android {
         }
 
         release {
-            testCoverageEnabled = false
-            debuggable false
+            testCoverageEnabled = true
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

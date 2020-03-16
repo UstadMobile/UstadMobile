@@ -8,27 +8,27 @@ import javax.lang.model.element.TypeElement
 
 class SyncableEntityInfo {
 
-    lateinit var syncableEntity: ClassName
+    var syncableEntity: ClassName
 
-    lateinit var entityPkField: PropertySpec
+    var entityPkField: PropertySpec
 
-    lateinit var entityMasterCsnField: PropertySpec
+    var entityMasterCsnField: PropertySpec
 
-    lateinit var entityLocalCsnField: PropertySpec
+    var entityLocalCsnField: PropertySpec
 
-    lateinit var entityLastChangedByField: PropertySpec
+    var entityLastChangedByField: PropertySpec
 
-    lateinit var tracker: ClassName
+    var tracker: ClassName
 
-    lateinit var trackerCsnField: PropertySpec
+    var trackerCsnField: PropertySpec
 
-    lateinit var trackerPkField: PropertySpec
+    var trackerPkField: PropertySpec
 
-    lateinit var trackerDestField: PropertySpec
+    var trackerDestField: PropertySpec
 
-    lateinit var trackerReceivedField: PropertySpec
+    var trackerReceivedField: PropertySpec
 
-    lateinit var trackerReqIdField: PropertySpec
+    var trackerReqIdField: PropertySpec
 
     var tableId: Int = 0
 
@@ -40,6 +40,9 @@ class SyncableEntityInfo {
                 .first { it.getAnnotation(PrimaryKey::class.java) != null }
         entityPkField = PropertySpec.builder("${entityPkFieldEl.simpleName}",
                 entityPkFieldEl.asType().asTypeName()).build()
+
+        println("hello")
+        println("Class name: " + syncableEntityParam.canonicalName)
 
         val entityMasterCsnFieldEl = syncableEntityEl.enclosedElements
                 .first { it.getAnnotation(MasterChangeSeqNum::class.java) != null}

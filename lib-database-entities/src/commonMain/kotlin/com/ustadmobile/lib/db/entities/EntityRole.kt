@@ -9,10 +9,11 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
+
 @Entity
 @SyncableEntity(tableId = 47)
 @Serializable
-class EntityRole() {
+open class EntityRole() {
 
     @PrimaryKey(autoGenerate = true)
     var erUid: Long = 0
@@ -38,11 +39,14 @@ class EntityRole() {
     @ColumnInfo(index = true)
     var erRoleUid: Long = 0
 
+    var erActive: Boolean = false
+
     constructor(erTableId: Int, erEntityUid: Long, erGroupUid: Long, erRoleUid: Long) : this() {
         this.erTableId = erTableId
         this.erEntityUid = erEntityUid
         this.erGroupUid = erGroupUid
         this.erRoleUid = erRoleUid
+        this.erActive = true
     }
 
 }

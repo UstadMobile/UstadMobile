@@ -21,7 +21,7 @@ import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.liveDataObserverDispatcher
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_CONTENT_EDITOR
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.FLAG_IMPORTED
@@ -83,7 +83,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
         }
 
         if (containerDownloadManager != null) {
-            GlobalScope.launch(liveDataObserverDispatcher()) {
+            GlobalScope.launch(doorMainDispatcher()) {
                 downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).apply {
                     Napier.i("ContentEntryDetailPresenter: DLUFIX: Observing $this")
                     observeWithPresenter(this@ContentEntryDetailPresenter, this@ContentEntryDetailPresenter::onDownloadJobItemChanged)

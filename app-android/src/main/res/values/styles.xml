@@ -186,4 +186,23 @@
         <item name="android:windowBackground">@color/icons</item>
     </style>
 
+    <style name="CustomDatePickerDialogTheme" parent="android:Theme.Material.Light.Dialog">
+        <item name="android:datePickerStyle">@style/MyDatePickerStyle</item>
+    </style>
+
+    <style name="MyDatePickerStyle" parent="@android:style/Widget.Material.DatePicker">
+        <item name="android:datePickerMode">spinner</item>
+    </style>
+
+    <!-- TODO: Is this really needed? Used in activity_clazz_detail -->
+    <!-- This is for the Tabs in TabLayout-->
+    <style name="TabLayoutStyle" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/primary_light</item>
+        <item name="tabSelectedTextColor">@color/primary_text</item>
+    </style>
+
+    <style name="MyButton" parent="Theme.AppCompat.Light">
+        <item name="colorControlHighlight">@color/text_secondary</item>
+    </style>
+
 </resources>

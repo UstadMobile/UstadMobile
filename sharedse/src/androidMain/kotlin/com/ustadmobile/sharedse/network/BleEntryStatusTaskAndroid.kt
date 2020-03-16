@@ -121,7 +121,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
 
         } catch (e: IllegalArgumentException) {
             UMLog.l(UMLog.ERROR, 698,
-                    "Wrong address format provided", e)
+                    "Wrong personAddress format provided", e)
         }
 
     }
