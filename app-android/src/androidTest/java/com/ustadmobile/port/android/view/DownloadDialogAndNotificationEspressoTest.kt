@@ -59,8 +59,8 @@ import java.util.concurrent.TimeUnit
  * otherwise matcher will match match multiple view with the same Id and test will fail.
  *
  * **How to run this test**
- * 1. Get your local machine IP address
- * 2. buildconfig.local.properties and change test.um_http_testserver value to your acquired IP address
+ * 1. Get your local machine IP personAddress
+ * 2. buildconfig.local.properties and change test.um_http_testserver value to your acquired IP personAddress
  * 3. Start local test server by running this task = lib-http-testserver:runHttpTestServer
  */
 

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/item_clazz_list_enroll_person_cl"
+    android:background="?android:selectableItemBackground"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/item_clazz_list_enroll_person_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textSize="20sp"
+        android:textColor="@color/text_primary"
+        android:text="TextView"
+        android:textAppearance="@android:style/TextAppearance.Material.Headline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="8dp" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/item_clazz_list_enroll_person_icon"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/item_clazz_list_enroll_person_title"
+        app:srcCompat="@drawable/ic_people_black_24dp"
+        android:layout_marginLeft="8dp" />
+
+    <TextView
+        android:id="@+id/item_clazz_list_enroll_person_numstudents_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/text_primary"
+        android:layout_marginTop="8dp"
+        android:text=""
+        app:layout_constraintStart_toEndOf="@+id/item_clazz_list_enroll_person_icon"
+        app:layout_constraintTop_toBottomOf="@+id/item_clazz_list_enroll_person_title"
+        android:layout_marginLeft="8dp" />
+
+    <CheckBox
+        android:id="@+id/item_clazz_list_enroll_person_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/enroll_in_class"
+        android:buttonTint="@color/primary"
+        android:textColor="@color/text_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,10 +1,15 @@
 package com.ustadmobile.core.impl
 
+import com.ustadmobile.core.controller.AddScheduleDialogPresenter
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.impl.http.UmHttpCall
 import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.AddScheduleDialogView
 import com.ustadmobile.core.view.LoginView
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
@@ -209,7 +214,7 @@ open abstract class UstadMobileSystemCommon {
      *
      * @return The locale as the user sees it.
      */
-    open fun getDisplayedLocale(context: Any): String? {
+    open fun getDisplayedLocale(context: Any): String {
         var locale = getLocale(context)
         if (locale == LOCALE_USE_SYSTEM)
             locale = getSystemLocale(context)
@@ -218,18 +223,39 @@ open abstract class UstadMobileSystemCommon {
     }
 
     /**
+     * Get a string for use in the UI using a constant int from MessageID
+     */
+    @JsName("getString")
+    abstract fun getString(messageCode: Int, context: Any): String
+
+    /**
      * Get list of all UI supported languages
      */
     @JsName("getAllUiLanguage")
+    @Deprecated("Use getAllUiLanguagesList instead")
     open fun getAllUiLanguage(context: Any): Map<String,String>{
-        val languageList = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
-                "",context)!!.split(",")
-        val languageMap = HashMap<String,String>()
-        for(language in languageList){
-            languageMap[language] = UstadMobileConstants.LANGUAGE_NAMES[language] ?:
-                    UstadMobileConstants.LANGUAGE_NAMES["en"]!!
-        }
-        return languageMap
+        val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
+                "",context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
+        val languageList =languagesConfigVal.split(",")
+        return languageList.map { it to (LANGUAGE_NAMES[it] ?: it) }.toMap()
+    }
+
+    /**
+     * Get a list of all languages available for the UI. This is a list of pairs in the form of
+     * langcode, language display name. The first entry will always be empty constant which
+     * tells the app to use the system default language.
+     *
+     * @param context
+     */
+    @JsName("getAllUiLanguagesList")
+    open fun getAllUiLanguagesList(context: Any): List<Pair<String, String>> {
+        val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
+                "",context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
+        val availableLangs = languagesConfigVal.split(",").sorted()
+
+
+        return listOf(LOCALE_USE_SYSTEM to getString(MessageID.use_device_language, context)) +
+                availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
 
@@ -424,6 +450,11 @@ open abstract class UstadMobileSystemCommon {
 
     protected fun getContentDirName(context: Any): String? {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
+    }
+
+    fun scheduleChecks(context: Any) {
+        AddScheduleDialogPresenter.createPendingScheduledChecks(
+                UmAccountManager.getActiveDatabase(context).scheduledCheckDao)
     }
 
 

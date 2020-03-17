@@ -1,5 +1,7 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
@@ -21,7 +23,8 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView, val impl: UstadMobileSystemImpl)
+class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView,
+                     val impl: UstadMobileSystemImpl, private val personRepo: PersonDao)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
     private val mNextDest: String
@@ -68,6 +71,9 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                 if (loginResponse.status == HttpStatusCode.OK) {
                     val account = loginResponse.receive<UmAccount>()
                     account.endpointUrl = serverUrl
+
+                    //make sure that the person is loaded into the database
+                    personRepo.findByUid(account.personUid)
                     view.runOnUiThread(Runnable { view.setInProgress(false) })
                     UmAccountManager.setActiveAccount(account, context)
 

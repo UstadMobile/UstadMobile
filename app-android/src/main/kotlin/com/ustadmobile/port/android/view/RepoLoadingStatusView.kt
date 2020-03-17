@@ -29,8 +29,7 @@ import kotlinx.coroutines.launch
  * call. This LiveData also has a LiveData object with the loading status.
  *
  */
-class RepoLoadingStatusView: CoordinatorLayout, FistItemLoadedListener,
-        DoorObserver<RepositoryLoadHelper.RepoLoadStatus> {
+class RepoLoadingStatusView: CoordinatorLayout, DoorObserver<RepositoryLoadHelper.RepoLoadStatus>, FistItemLoadedListener {
 
     data class RepoLoadingStatusInfo(val progressVisible: Boolean,
                                      var imageResourceToShow: Int,
@@ -77,11 +76,20 @@ class RepoLoadingStatusView: CoordinatorLayout, FistItemLoadedListener,
         View.inflate(context, R.layout.view_repo_loading_status, this)
     }
 
-    fun observerRepoStatus(liveData: DoorLiveData<*>, lifecycleOwner: LifecycleOwner){
+    fun observerRepoStatus(liveData: DoorLiveData<*>, lifecycleOwner: LifecycleOwner) = observeRepoStatusInternal(liveData, lifecycleOwner)
+
+    fun observeRepoStatusForever(liveData: DoorLiveData<*>) = observeRepoStatusInternal(liveData, null)
+
+    private fun observeRepoStatusInternal(liveData: DoorLiveData<*>, lifecycleOwner: LifecycleOwner?) {
         if(liveData.isRepositoryLiveData()) {
             statusLiveData?.removeObserver(this)
             val newStatusLiveData = (liveData as RepositoryLoadHelper<*>.LiveDataWrapper2<*>).loadingStatus
-            newStatusLiveData.observe(lifecycleOwner, this)
+            if(lifecycleOwner != null) {
+                newStatusLiveData.observe(lifecycleOwner, this)
+            }else {
+                newStatusLiveData.observeForever(this)
+            }
+
             statusLiveData = newStatusLiveData
         }
     }
@@ -105,6 +113,13 @@ class RepoLoadingStatusView: CoordinatorLayout, FistItemLoadedListener,
                 }
             }
         }
+    }
+
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        statusLiveData?.removeObserver(this)
+        statusLiveData = null
     }
 
     override fun onFirstItemLoaded() {

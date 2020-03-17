@@ -31,6 +31,9 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
 
     internal var coordinatorLayout: CoordinatorLayout? = null
 
+    /**
+     * TODO: the below is a leak
+     */
     private var entryFragment: ContentEntryEditFragment? = null
 
     private var impl: UstadMobileSystemImpl? = null

@@ -59,7 +59,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
     /**
      * Get a string for use in the UI
      */
-    fun getString(messageCode: Int, context: Any): String
+    override fun getString(messageCode: Int, context: Any): String
 
 
     /**

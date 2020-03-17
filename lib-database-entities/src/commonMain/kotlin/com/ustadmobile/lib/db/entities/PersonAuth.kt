@@ -7,7 +7,6 @@ import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
-
 /**
  * This is a 1:1 relationship with Person. It avoids synchronizing login credentials with any other
  * devices in cases where another user has permission to view someone else's profile.
@@ -23,13 +22,29 @@ import kotlinx.serialization.Serializable
 @Serializable
 class PersonAuth() {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     var personAuthUid: Long = 0
 
     var passwordHash: String? = null
 
+    var personAuthStatus: Int = 0
+
+    @LocalChangeSeqNum
+    var personAuthLocalChangeSeqNum: Long = 0
+
+    @MasterChangeSeqNum
+    var personAuthMasterChangeSeqNum: Long = 0
+
+    @LastChangedBy
+    var lastChangedBy: Int = 0
+
     constructor(personAuthUid: Long, passwordHash: String) : this() {
         this.personAuthUid = personAuthUid
         this.passwordHash = passwordHash
+    }
+
+    companion object {
+        val STATUS_SENT = 1
+        val STATUS_NOT_SENT = 0
     }
 }

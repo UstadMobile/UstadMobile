@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = TABLE_ID )
 @Serializable
-class Location() {
+open class Location() {
 
     @PrimaryKey(autoGenerate = true)
     var locationUid: Long = 0
@@ -27,7 +27,6 @@ class Location() {
 
     var parentLocationUid: Long = 0
 
-    var locationActive: Boolean = true
 
     @LocalChangeSeqNum
     var locationLocalChangeSeqNum: Long = 0
@@ -38,9 +37,21 @@ class Location() {
     @LastChangedBy
     var locationLastChangedBy: Int = 0
 
+    var timeZone: String? = null
+
+    var locationActive: Boolean = true
+
     constructor(title: String, description: String) : this() {
         this.title = title
         this.description = description
+        this.locationActive = true
+    }
+
+    constructor(title: String, description: String, timeZone: String) : this() {
+        this.title = title
+        this.description = description
+        this.locationActive = true
+        this.timeZone = timeZone
     }
 
     constructor(title: String, description: String, active: Boolean) : this() {
@@ -61,4 +72,14 @@ class Location() {
 
         const val TABLE_ID = 29
     }
+
+    override fun toString(): String {
+        if (this.title != null) {
+            return this.title!!
+        }else{
+            return "Location"
+        }
+    }
+
+
 }

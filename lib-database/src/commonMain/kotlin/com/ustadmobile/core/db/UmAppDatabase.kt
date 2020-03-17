@@ -11,8 +11,16 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
-    DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
-    Clazz::class, ClazzMember::class, PersonCustomField::class, PersonCustomFieldValue::class,
+    ClazzLog::class,ClazzLogAttendanceRecord::class, FeedEntry::class,PersonField::class,
+    PersonDetailPresenterField::class,SelQuestion::class,
+    SelQuestionResponse::class, SelQuestionResponseNomination::class, SelQuestionSet::class,
+    SelQuestionSetRecognition::class, SelQuestionSetResponse::class,
+    Schedule::class, DateRange::class, UMCalendar::class,
+    ClazzActivity::class, ClazzActivityChange::class,
+    SelQuestionOption::class, ScheduledCheck::class,
+    AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
+    Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
+    Clazz::class, ClazzMember::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
@@ -24,18 +32,34 @@ import kotlin.jvm.Volatile
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class
+    SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class
 
+    //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 32)
+], version = 34)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
+
+    /*
+        Changes in 34:
+        Added School and Assignment based entities
+        Updated Clazz : added clazzFeatures and removed individual feature bits
+     */
+
 
     var attachmentsDir: String? = null
 
     override val master: Boolean
         get() = false
+
+
+    /**
+     * Preload a few entities where we have fixed UIDs for fixed items (e.g. Xapi Verbs)
+     */
+    fun preload() {
+        verbDao.initPreloadedVerbs()
+    }
 
     @JsName("networkNodeDao")
     abstract val networkNodeDao: NetworkNodeDao
@@ -165,12 +189,40 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("agentDao")
     abstract val agentDao: AgentDao
 
+    abstract val syncresultDao : SyncResultDao
+
+    abstract val auditLogDao : AuditLogDao
+    abstract val clazzActivityChangeDao : ClazzActivityChangeDao
+    abstract val clazzActivityDao : ClazzActivityDao
+    abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
+    abstract val clazzLogDao : ClazzLogDao
+    abstract val customFieldDao: CustomFieldDao
+    abstract val customFieldValueDao : CustomFieldValueDao
+    abstract val customFieldValueOptionDao : CustomFieldValueOptionDao
+    abstract val dateRangeDao : DateRangeDao
+    abstract val feedEntryDao : FeedEntryDao
+    abstract val personDetailPresenterFieldDao : PersonDetailPresenterFieldDao
+    abstract val scheduleDao : ScheduleDao
+    abstract val scheduledCheckDao : ScheduledCheckDao
+    abstract val selQuestionDao : SelQuestionDao
+    abstract val selQuestionOptionDao : SelQuestionOptionDao
+    abstract val selQuestionResponseDao : SelQuestionResponseDao
+    abstract val selQuestionResponseNominationDao : SelQuestionResponseNominationDao
+    abstract val selQuestionSetDao : SelQuestionSetDao
+    abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
+    abstract val umCalendarDao : UMCalendarDao
+    abstract val schoolDao : SchoolDao
+    abstract val clazzAssignmentDao : ClazzAssignmentDao
+    abstract val clazzAssignmentContentJoinDao : ClazzAssignmentContentJoinDao
+
     @JsName("xLangMapEntryDao")
     abstract val xLangMapEntryDao: XLangMapEntryDao
 
     abstract val locallyAvailableContainerDao: LocallyAvailableContainerDao
 
+    //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
+
 
     companion object {
 
@@ -206,19 +258,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             namedInstances[dbName] = instance
         }
 
-//        @Synchronized
-//        fun getInstance(context: Any): UmAppDatabase {
-//            if (instance == null) {
-//                var builder = DatabaseBuilder.databaseBuilder(
-//                        context, UmAppDatabase::class, "UmAppDatabase")
-//               // builder = addMigrations(builder)
-//               //instance = addCallbacks(builder).build()
-//                instance = builder.build()
-//            }
-//
-//            return instance!!
-//        }
-
         @JsName("getInstance")
         fun getInstance(context: Any) = lazy { getInstance(context, "UmAppDatabase") }.value
 
@@ -235,6 +274,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 db = builder.build()
                 namedInstances[dbName] = db
             }
+
             return db
         }
 
@@ -247,11 +287,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         val MIGRATION_30_31 = object : DoorMigration(30, 31) {
             override fun migrate(database: DoorSqlDatabase) {
-                if (database.dbType() == DoorDbType.SQLITE) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
-                } else if (database.dbType() == DoorDbType.POSTGRES){
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
-                }
+                database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
             }
         }
 
@@ -263,7 +299,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         |remoteCsn  INTEGER NOT NULL, syncType  INTEGER NOT NULL, timestamp  INTEGER NOT NULL, 
                         |sent  INTEGER NOT NULL, received  INTEGER NOT NULL, 
                         |srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
-                } else if (database.dbType() == DoorDbType.POSTGRES){
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (
                         |  tableId  INTEGER , status  INTEGER , localCsn  INTEGER , 
                         |  remoteCsn  INTEGER , syncType  INTEGER , 
@@ -273,9 +309,19 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        /**
-         * Fix SQLite update triggers
-         */
+        val MIGRATION_32_33 = object : DoorMigration(32, 33) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("""ALTER TABLE ScrapeQueueItem ADD COLUMN errorCode INTEGER NOT NULL DEFAULT 0""".trimMargin())
+            }
+        }
+
+        val MIGRATION_33_34 = object : DoorMigration(33, 34) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("""ALTER TABLE ScrapeQueueItem ADD COLUMN priority INTEGER NOT NULL DEFAULT 1""".trimMargin())
+            }
+        }
+
+
         val MIGRATION_28_29 = object : DoorMigration(28, 29) {
             override fun migrate(database: DoorSqlDatabase) {
                 if (database.dbType() == DoorDbType.SQLITE) {
@@ -1498,6 +1544,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+
         val MIGRATION_29_30 = object : DoorMigration(29, 30) {
             override fun migrate(database: DoorSqlDatabase) {
 
@@ -1591,19 +1638,41 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
                     """.trimMargin())
 
-
                 }
-
-
             }
-
         }
 
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
-            builder.addMigrations(object : DoorMigration(26, 27) {
+            builder.addMigrations(object : DoorMigration(27,28){
+
                 override fun migrate(database: DoorSqlDatabase) {
+                    try {
+                        println("Migrating from 27 to 28")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationUid TO selqrnUid")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationClazzMemberUid TO selqrnClazzMemberUid")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationSelQuestionResponseUId TO selqrnSelQuestionResponseUId")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationMasterChangeSeqNum TO selqrnMCSN")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationLocalChangeSeqNum TO selqrnMCSNLCSN")
+                        database.execSQL("ALTER TABLE SelQuestionResponseNomination " +
+                                " RENAME COLUMN selQuestionResponseNominationLastChangedBy TO selqrnMCSNLCB")
+
+                        database.execSQL("ALTER TABLE selQuestionSetRecognition RENAME COLUMN selQuestionSetRecognitionSelQuestionSetResponseUid TO selqsrSelQuestionSetResponseUid")
+                    } catch (e:Exception) {
+                        print("Migration exception: " + e.message)
+                    }
+                }
+            })
+
+            builder.addMigrations(object : DoorMigration(26,27){
+                override fun migrate(database: DoorSqlDatabase) {
+
                     database.execSQL("ALTER TABLE ContentEntry DROP COLUMN status, ADD COLUMN contentFlags INTEGER NOT NULL DEFAULT 0, ADD COLUMN ceInactive BOOL")
                 }
 
@@ -1619,7 +1688,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             builder.addMigrations(object : DoorMigration(24, 25) {
                 override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
+                    try{
+                        database.execSQL("ALTER TABLE Container RENAME COLUMN lastModified TO cntLastModified")
+                    } catch (e:Exception) {
+                        print(e.message)
+                    }
                 }
 
             })
@@ -2662,7 +2735,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32)
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34)
 
             return builder
         }

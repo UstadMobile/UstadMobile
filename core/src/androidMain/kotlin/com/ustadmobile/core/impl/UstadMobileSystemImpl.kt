@@ -115,8 +115,77 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             UserProfileView.VIEW_NAME to Class.forName("${PACKAGE_NAME}UserProfileActivity"),
             ContentEntryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
             ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"),
+
+            ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
+
+            ClazzDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzDetailActivity"),
+            ClassLogDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzLogDetailActivity"),
+            PersonDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonDetailActivity"),
+            PersonEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonEditActivity"),
+            PersonDetailEnrollClazzView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonDetailEnrollClazzActivity"),
+            ClazzDetailEnrollStudentView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzDetailEnrollStudentActivity"),
+            SELSelectStudentView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELSelectStudentActivity"),
+            SELSelectConsentView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELSelectConsentActivity"),
+            SELEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELEditActivity"),
+            SELQuestionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionActivity"),
+            SELQuestionEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionEditActivity"),
+            SELRecognitionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELRecognitionActivity"),
+            ClazzEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzEditActivity"),
+            AddScheduleDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddScheduleDialogFragment"),
+            ClazzActivityEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzActivityEditActivity"),
+            AddActivityChangeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddActivityChangeDialogFragment"),
+            ReportEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportEditActivity"),
+            SelectMultipleTreeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectMultipleTreeDialogFragment"),
+            ReportSelectionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSelectionActivity"),
+            SelectClazzesDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectClazzesDialogFragment"),
+            SelectAttendanceThresholdsDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectAttendanceThresholdsDialogFragment"),
+            SelectTwoDatesDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectTwoDatesDialogFragment"),
+            ReportOverallAttendanceView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportOverallAttendanceActivity"),
+            ReportNumberOfDaysClassesOpenView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportNumberOfDaysClassesOpenActivity"),
+            ReportAttendanceGroupedByThresholdsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportAttendanceGroupedByThresholdsActivity"),
+            BulkUploadMasterView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}BulkUploadMasterActivity"),
+            SettingsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SettingsActivity"),
+            SELQuestionSetsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetsActivity"),
+            AddQuestionSetDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddQuestionSetDialogFragment"),
+            SELQuestionSetDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetDetailActivity"),
+            PersonPictureDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonPictureDialogFragment"),
+            SELQuestionDetail2View.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionDetail2Activity"),
+            AddQuestionOptionDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddQuestionOptionDialogFragment"),
+            ReportAtRiskStudentsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportAtRiskStudentsActivity"),
+            CallPersonRelatedDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CallPersonRelatedDialogFragment"),
+            ReportMasterView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportMasterActivity"),
+            ReportSELView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSELActivity"),
+            PersonListSearchView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonListSearchActivity"),
+            BaseReportView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSelectionFragment"),
+            HolidayCalendarListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}HolidayCalendarListActivity"),
+            HolidayCalendarDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}HolidayCalendarDetailActivity"),
+            RoleListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleListActivity"),
+            RoleDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleDetailActivity"),
+            GroupListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupListActivity"),
+            GroupDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupDetailActivity"),
+            RoleAssignmentDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleAssignmentDetailActivity"),
+            RoleAssignmentListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleAssignmentListActivity"),
+            LocationListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}LocationListActivity"),
+            LocationDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}LocationDetailActivity"),
+            AuditLogSelectionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogSelectionActivity"),
+            AuditLogListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogListActivity"),
+            AddDateRangeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddDateRangeDialogFragment"),
+            SelectClazzFeaturesView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectClazzFeaturesDialogFragment"),
+            PersonAuthDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonAuthDetailActivity"),
+            SelectPeopleDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectPeopleDialogFragment"),
+            CustomFieldListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CustomFieldListActivity"),
+            CustomFieldDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CustomFieldDetailActivity"),
+            AddCustomFieldOptionDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddCustomFieldOptionDialogFragment"),
+            RecordDropoutDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RecordDropoutDialogFragment"),
+            ChangePasswordView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ChangePasswordActivity"),
+            PeopleListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PeopleListActivity"),
+
             ContentEntryExportView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryExportFragmentDialog"),
-            ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"))
+            ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
+            ClazzAssignmentEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentEditActivity"),
+            ClazzAssignmentDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentDetailActivity"),
+            SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"))
+
 
 
     private abstract class UmCallbackAsyncTask<A, P, R>
@@ -269,7 +338,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     /**
      * Get a string for use in the UI
      */
-    actual fun getString(messageCode: Int, context: Any): String {
+    actual override fun getString(messageCode: Int, context: Any): String {
         val androidId = messageIdMap[messageCode]
         return if (androidId != null) {
             (context as Context).resources.getString(androidId)
@@ -606,6 +675,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         const val TAG = "UstadMobileImplAndroid"
 
         private const val PACKAGE_NAME = "com.ustadmobile.port.android.view."
+        private const val STAGING_PACKAGE_NAME = "com.ustadmobile.staging.port.android.view."
 
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 

@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_EDIT_BUTTONS
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_FILTER_BUTTONS
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_VIEWMODE
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_ADD_CONTENT
 import com.ustadmobile.core.view.ContentEntryListView.Companion.EDIT_BUTTONS_EDITOPTION
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -41,17 +42,26 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     private var noIframe: Boolean = false
 
+    var activeFilterIndex: Int = 0
+        private set
+
     /*
      List of Strings - possible values are: ARG_DOWNLOADED_CONTENT, ARG_LIBRARIES_CONTENT,
      ARG_RECYCLED_CONTENT
      */
     private var filterButtons = listOf<String>()
 
+    private var viewMode: ContentEntryListViewMode = ContentEntryListViewMode.NORMAL
+
+    private val parentEntryUidStack = mutableListOf<Long>()
+
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
 
         filterButtons = arguments[ARG_FILTER_BUTTONS]?.split(",") ?: listOf()
         parentUid = arguments[ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
+        viewMode = ContentEntryListViewMode.valueOf(arguments[ARG_VIEWMODE] ?: ContentEntryListViewMode.NORMAL.toString())
+        parentEntryUidStack += parentUid
 
         view.setFilterButtons(filterButtons.map { systemImpl.getString(
             FILTERBUTTON_TO_MESSAGEIDMAP[it] ?: MessageID.error, context) }, 0)
@@ -109,7 +119,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
             val entryLiveData: DoorLiveData<ContentEntry?> = contentEntryDaoRepo.findLiveContentEntry(parentUid)
             entryLiveData.observeWithPresenter(this, this::onContentEntryChanged)
         } catch (e: Exception) {
-            viewContract.runOnUiThread(Runnable { viewContract.showError() })
+            viewContract.showError()
         }
 
 
@@ -192,6 +202,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
     @JsName("handleClickFilterButton")
     fun handleClickFilterButton(buttonPos: Int){
         val filterButton = filterButtons[buttonPos]
+        activeFilterIndex = buttonPos
         view.setEmptyView(filterButton)
         when(filterButton){
             ARG_LIBRARIES_CONTENT -> showContentByParent()
@@ -202,17 +213,42 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     @JsName("handleContentEntryClicked")
     fun handleContentEntryClicked(entry: ContentEntry) {
-        val args = hashMapOf<String, String?>()
-        args.putAll(arguments)
-        val entryUid = entry.contentEntryUid
-        args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
-        args.remove(ARG_FILTER_BUTTONS)
-        args[ARG_NO_IFRAMES] = noIframe.toString()
-        args[ARG_EDIT_BUTTONS_CONTROL_FLAG] = (EDIT_BUTTONS_ADD_CONTENT or EDIT_BUTTONS_EDITOPTION).toString()
-        val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
-        systemImpl.go(destView, args, context)
+        when {
+            viewMode == ContentEntryListViewMode.NORMAL -> {
+                val args = hashMapOf<String, String?>()
+                args.putAll(arguments)
+                val entryUid = entry.contentEntryUid
+                args[ARG_CONTENT_ENTRY_UID] = entryUid.toString()
+                args.remove(ARG_FILTER_BUTTONS)
+                args[ARG_NO_IFRAMES] = noIframe.toString()
+                args[ARG_EDIT_BUTTONS_CONTROL_FLAG] = (EDIT_BUTTONS_ADD_CONTENT or EDIT_BUTTONS_EDITOPTION).toString()
+                val destView = if (entry.leaf) ContentEntryDetailView.VIEW_NAME else ContentEntryListView.VIEW_NAME
+                systemImpl.go(destView, args, context)
+            }
 
+            viewMode == ContentEntryListViewMode.PICKER && !entry.leaf -> {
+                this.parentEntryUidStack += entry.contentEntryUid
+                parentUid = entry.contentEntryUid
+                showContentByParent()
+            }
+
+            viewMode == ContentEntryListViewMode.PICKER && entry.leaf -> {
+                view.finishWithPickResult(entry)
+            }
+        }
     }
+
+    fun handleClickBack(): Boolean {
+        if(viewMode == ContentEntryListViewMode.PICKER && parentEntryUidStack.size > 1) {
+            parentEntryUidStack.removeAt(parentEntryUidStack.size - 1)
+            parentUid = parentEntryUidStack[parentEntryUidStack.size - 1]
+            showContentByParent()
+            return true
+        }else {
+            return false
+        }
+    }
+
 
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {

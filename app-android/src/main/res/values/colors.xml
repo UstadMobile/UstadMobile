@@ -65,5 +65,14 @@
     <color name="colorTextSecondaryTransparent">#21757575</color>
 
 
+    <color name="just_black">#000000</color>
+    <color name="color_gray">#FF888888</color>
+    <color name="traffic_green">#009900</color>
+    <color name="traffic_orange">#FFCC00</color>
+    <color name="traffic_red">#FF0000</color>
+
+    <color name="fab_text">#FFFF</color>
+    <color name="toolbar">#000</color>
+
 
 </resources>

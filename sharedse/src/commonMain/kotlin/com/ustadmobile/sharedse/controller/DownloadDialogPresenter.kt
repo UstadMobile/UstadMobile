@@ -6,11 +6,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.isStatusCompleted
 import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
 import com.ustadmobile.core.util.ext.isStatusPaused
 import com.ustadmobile.core.util.ext.isStatusPausedOrQueuedOrDownloading
@@ -18,7 +16,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
-import com.ustadmobile.door.liveDataObserverDispatcher
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
@@ -78,7 +76,7 @@ class DownloadDialogPresenter(context: Any,
             val newDownloadJobIdVal = t?.djiDjUid ?: 0
             if(newDownloadJobIdVal != currentJobId) {
                 currentJobId = newDownloadJobIdVal
-                GlobalScope.launch(liveDataObserverDispatcher()) {
+                GlobalScope.launch(doorMainDispatcher()) {
                     val downloadJobLiveDataVal = containerDownloadManager.getDownloadJob(newDownloadJobIdVal)
                     downloadJobLiveData = downloadJobLiveDataVal
                     downloadJobLiveDataVal.observe(lifecycleOwner,
@@ -95,7 +93,7 @@ class DownloadDialogPresenter(context: Any,
         UMLog.l(UMLog.INFO, 420, "Starting download presenter for " +
                 "content entry uid: " + contentEntryUid)
         view.setWifiOnlyOptionVisible(false)
-        GlobalScope.launch(liveDataObserverDispatcher()) {
+        GlobalScope.launch(doorMainDispatcher()) {
             downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(
                     contentEntryUid)
             val isWifiOnly = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)

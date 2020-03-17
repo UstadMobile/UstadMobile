@@ -10,7 +10,8 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent", value = ["containerContentEntryUid", "cntLastModified"])))
+@Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent",
+        value = ["containerContentEntryUid", "cntLastModified"])))
 @SyncableEntity(tableId = 51)
 @Serializable
 open class Container() {
