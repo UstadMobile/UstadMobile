@@ -58,6 +58,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         School, ClazzAssignment, ClazzAssignmentContentJoin
 
         Updated Clazz : added clazzFeatures and removed individual feature bits
+        Updated Role : added roleActive
      */
 
 
@@ -330,11 +331,312 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             override fun migrate(database: DoorSqlDatabase) {
                 if(database.dbType() == DoorDbType.SQLITE){
 
+                    //Drop PersonCustomField ( cause its not PersonField)
+                    database.execSQL("DROP TABLE PersonCustomField")
+
+                    //PersonGroupMember migration:
+                    //Begin: Create table PersonGroupMember for SQLite
+                    database.execSQL("ALTER TABLE PersonGroupMember RENAME to PersonGroupMember_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS PersonGroupMember (  
+                        |groupMemberActive  INTEGER NOT NULL , 
+                        |groupMemberPersonUid  INTEGER NOT NULL , 
+                        |groupMemberGroupUid  INTEGER NOT NULL , 
+                        |groupMemberMasterCsn  INTEGER NOT NULL , 
+                        |groupMemberLocalCsn  INTEGER NOT NULL , 
+                        |groupMemberLastChangedBy  INTEGER NOT NULL , 
+                        |groupMemberUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                    database.execSQL("""INSERT INTO PersonGroupMember (
+                        |groupMemberUid, groupMemberActive, groupMemberPersonUid, 
+                        |groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, 
+                        |groupMemberLastChangedBy) 
+                        |SELECT groupMemberUid, 1, 
+                        |groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, 
+                        |groupMemberLocalCsn, groupMemberLastChangedBy 
+                        |FROM PersonGroupMember_OLD""".trimMargin())
+                    database.execSQL("DROP TABLE PersonGroupMember_OLD")
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonGroupMember_groupMemberGroupUid 
+                    |ON PersonGroupMember (groupMemberGroupUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonGroupMember_groupMemberPersonUid 
+                    |ON PersonGroupMember (groupMemberPersonUid)
+                    """.trimMargin())
+
+                    //Statement migration
+                    //Begin: Create table StatementEntity for SQLite
+                    database.execSQL("ALTER TABLE StatementEntity RENAME to StatementEntity_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS StatementEntity (  
+                        |statementId  TEXT , 
+                        |personUid  INTEGER NOT NULL , 
+                        |verbUid  INTEGER NOT NULL , 
+                        |xObjectUid  INTEGER NOT NULL , 
+                        |subStatementActorUid  INTEGER NOT NULL , 
+                        |substatementVerbUid  INTEGER NOT NULL , 
+                        |subStatementObjectUid  INTEGER NOT NULL , 
+                        |agentUid  INTEGER NOT NULL , instructorUid  INTEGER NOT NULL , 
+                        |authorityUid  INTEGER NOT NULL , teamUid  INTEGER NOT NULL , 
+                        |resultCompletion  INTEGER NOT NULL , resultSuccess  INTEGER NOT NULL , 
+                        |resultScoreScaled  INTEGER NOT NULL , resultScoreRaw  INTEGER NOT NULL , 
+                        |resultScoreMin  INTEGER NOT NULL , resultScoreMax  INTEGER NOT NULL , 
+                        |resultDuration  INTEGER NOT NULL , resultResponse  TEXT , 
+                        |timestamp  INTEGER NOT NULL , stored  INTEGER NOT NULL , 
+                        |contextRegistration  TEXT , contextPlatform  TEXT , 
+                        |contextStatementId  TEXT , fullStatement  TEXT , 
+                        |statementMasterChangeSeqNum  INTEGER NOT NULL , 
+                        |statementLocalChangeSeqNum  INTEGER NOT NULL , 
+                        |statementLastChangedBy  INTEGER NOT NULL , 
+                        |extensionProgress  INTEGER NOT NULL , 
+                        |statementContentEntryUid  INTEGER NOT NULL , 
+                        |statementUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                    database.execSQL("""INSERT INTO StatementEntity (
+                        |statementUid, statementId, personUid, verbUid, xObjectUid, 
+                        |subStatementActorUid, substatementVerbUid, subStatementObjectUid, 
+                        |agentUid, instructorUid, authorityUid, teamUid, resultCompletion, 
+                        |resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, 
+                        |resultScoreMax, resultDuration, resultResponse, timestamp, stored, 
+                        |contextRegistration, contextPlatform, contextStatementId, 
+                        |fullStatement, statementMasterChangeSeqNum, 
+                        |statementLocalChangeSeqNum, statementLastChangedBy, 
+                        |extensionProgress, statementContentEntryUid) 
+                        |SELECT statementUid, statementId, personUid, verbUid, xObjectUid, 
+                        |subStatementActorUid, substatementVerbUid, subStatementObjectUid, 
+                        |agentUid, instructorUid, authorityUid, teamUid, resultCompletion, 
+                        |resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, 
+                        |resultScoreMax, resultDuration, resultResponse, timestamp, stored, 
+                        |contextRegistration, contextPlatform, contextStatementId, 
+                        |fullStatement, statementMasterChangeSeqNum, 
+                        |statementLocalChangeSeqNum, statementLastChangedBy, 
+                        |0, 0 FROM StatementEntity_OLD""".trimMargin())
+                    database.execSQL("DROP TABLE StatementEntity_OLD")
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonCustomFieldValue_trk (" +
+                            "  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL , csn  INTEGER NOT NULL , rx  INTEGER NOT NULL ," +
+                            " reqId  INTEGER NOT NULL , ts  INTEGER NOT NULL , " +
+                            " pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonCustomFieldValue_trk_clientId_epk_rx_csn 
+                    |ON PersonCustomFieldValue_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
+                    database.execSQL("ALTER TABLE Location RENAME to Location_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Location (  
+                         title  TEXT , description  TEXT , lng  TEXT , lat  TEXT , 
+                         parentLocationUid  INTEGER NOT NULL , locationLocalChangeSeqNum  INTEGER NOT NULL , 
+                         locationMasterChangeSeqNum  INTEGER NOT NULL , locationLastChangedBy  INTEGER NOT NULL , 
+                         timeZone  TEXT , locationActive  INTEGER NOT NULL , 
+                         locationUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("INSERT INTO Location (" +
+                            "locationUid, title, description, lng, lat, " +
+                            "parentLocationUid, locationLocalChangeSeqNum, " +
+                            "locationMasterChangeSeqNum, locationLastChangedBy, timeZone, " +
+                            "locationActive) SELECT locationUid, title, description, lng, " +
+                            "lat, parentLocationUid, locationLocalChangeSeqNum, " +
+                            "locationMasterChangeSeqNum, locationLastChangedBy, " +
+                            "'', locationActive FROM Location_OLD")
+                    database.execSQL("DROP TABLE Location_OLD")
+
+                    //Begin: Create table EntityRole for SQLite
+                    database.execSQL("ALTER TABLE EntityRole RENAME to EntityRole_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS EntityRole (  
+                        erMasterCsn  INTEGER NOT NULL , erLocalCsn  INTEGER NOT NULL , erLastChangedBy  INTEGER NOT NULL , 
+                        erTableId  INTEGER NOT NULL , erEntityUid  INTEGER NOT NULL , erGroupUid  INTEGER NOT NULL , 
+                        erRoleUid  INTEGER NOT NULL , erActive  INTEGER NOT NULL , 
+                        erUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("""INSERT INTO EntityRole (
+                         erUid, erMasterCsn, erLocalCsn, erLastChangedBy, erTableId, 
+                         erEntityUid, erGroupUid, erRoleUid, erActive) 
+                         SELECT erUid, erMasterCsn, erLocalCsn, erLastChangedBy, 
+                         erTableId, erEntityUid, erGroupUid, erRoleUid, 1 
+                         FROM EntityRole_OLD""")
+                    database.execSQL("DROP TABLE EntityRole_OLD")
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_EntityRole_erEntityUid 
+                    |ON EntityRole (erEntityUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_EntityRole_erGroupUid 
+                    |ON EntityRole (erGroupUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_EntityRole_erRoleUid 
+                    |ON EntityRole (erRoleUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_EntityRole_erTableId 
+                    |ON EntityRole (erTableId)
+                    """.trimMargin())
+
+                    //Begin: Create table PersonGroup for SQLite
+                    database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS PersonGroup (  
+                    groupMasterCsn  INTEGER NOT NULL , groupLocalCsn  INTEGER NOT NULL , 
+                    groupLastChangedBy  INTEGER NOT NULL , groupName  TEXT , 
+                    groupActive  INTEGER NOT NULL , groupPersonUid  INTEGER NOT NULL , 
+                    groupUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("""INSERT INTO PersonGroup (
+                        groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy,
+                         groupName, groupActive, groupPersonUid) SELECT groupUid, 
+                         groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupName, 
+                         1, groupPersonUid FROM PersonGroup_OLD""")
+                    database.execSQL("DROP TABLE PersonGroup_OLD")
+
+                    //Begin: Person for SQLite
+                    database.execSQL("ALTER TABLE Person RENAME to Person_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Person (  
+                        username  TEXT , firstNames  TEXT , lastName  TEXT , emailAddr  TEXT ,  
+                        phoneNum  TEXT , gender  INTEGER NOT NULL , active  INTEGER NOT NULL ,  
+                        admin  INTEGER NOT NULL , personNotes  TEXT , fatherName  TEXT ,  
+                        fatherNumber  TEXT , motherName  TEXT , motherNum  TEXT ,  
+                        dateOfBirth  INTEGER NOT NULL , personAddress  TEXT ,  
+                        personMasterChangeSeqNum  INTEGER NOT NULL ,  
+                        personLocalChangeSeqNum  INTEGER NOT NULL ,  
+                        personLastChangedBy  INTEGER NOT NULL ,  
+                        personUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("""INSERT INTO Person ( 
+                        personUid, username, firstNames, lastName, emailAddr, phoneNum,  
+                        gender, active, admin, personNotes, fatherName, fatherNumber,  
+                        motherName, motherNum, dateOfBirth, personAddress,  
+                        personMasterChangeSeqNum, personLocalChangeSeqNum,  
+                        personLastChangedBy)  
+                        SELECT personUid, username, firstNames, lastName, emailAddr,  
+                        phoneNum, gender, active, admin,
+                        '', '', '', '', '', 0, '', 
+                        personMasterChangeSeqNum, personLocalChangeSeqNum,  
+                        personLastChangedBy FROM Person_OLD""")
+                    database.execSQL("DROP TABLE Person_OLD")
+
+                    //Begin: Migrate PersonCustomFieldValue for SQLite
+                    database.execSQL("ALTER TABLE PersonCustomFieldValue RENAME to PersonCustomFieldValue_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS PersonCustomFieldValue (  
+                        personCustomFieldValuePersonCustomFieldUid  INTEGER NOT NULL , 
+                        personCustomFieldValuePersonUid  INTEGER NOT NULL , 
+                        fieldValue  TEXT , 
+                        personCustomFieldValueMasterChangeSeqNum  INTEGER NOT NULL , 
+                        personCustomFieldValueLocalChangeSeqNum  INTEGER NOT NULL , 
+                        personCustomFieldValueLastChangedBy  INTEGER NOT NULL , 
+                        personCustomFieldValueUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("""INSERT INTO PersonCustomFieldValue (
+                        personCustomFieldValueUid, personCustomFieldValuePersonCustomFieldUid,  
+                        personCustomFieldValuePersonUid, fieldValue, 
+                        personCustomFieldValueMasterChangeSeqNum, 
+                        personCustomFieldValueLocalChangeSeqNum, 
+                        personCustomFieldValueLastChangedBy) 
+                        SELECT personCustomFieldValueUid, 
+                        personCustomFieldValuePersonCustomFieldUid, 
+                        personCustomFieldValuePersonUid, fieldValue,  
+                        0, 0, 0 
+                        FROM PersonCustomFieldValue_OLD""")
+                    database.execSQL("DROP TABLE PersonCustomFieldValue_OLD")
+
+                    //Begin: migrate clazz for sqlite
+                    //Begin: Create table Clazz for SQLite
+                    database.execSQL("ALTER TABLE Clazz RENAME to Clazz_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Clazz (  " +
+                            "clazzName  TEXT , clazzDesc  TEXT , " +
+                            "attendanceAverage  REAL NOT NULL , " +
+                            "clazzHolidayUMCalendarUid  INTEGER NOT NULL , " +
+                            "clazzScheuleUMCalendarUid  INTEGER NOT NULL , " +
+                            "isClazzActive  INTEGER NOT NULL , " +
+                            "clazzLocationUid  INTEGER NOT NULL , clazzStartTime  INTEGER NOT NULL , " +
+                            "clazzEndTime  INTEGER NOT NULL , clazzFeatures  INTEGER NOT NULL , " +
+                            "clazzMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzLastChangedBy  INTEGER NOT NULL , " +
+                            "clazzUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("DROP TABLE Clazz_OLD")
+
+                    //Begin: migrate personauth for sqlite
+                    //Begin: Create table PersonAuth for SQLite
+                    database.execSQL("ALTER TABLE PersonAuth RENAME to PersonAuth_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth (  " +
+                            "passwordHash  TEXT , " +
+                            "personAuthStatus  INTEGER NOT NULL, " +
+                            "personAuthLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "personAuthMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "lastChangedBy  INTEGER NOT NULL , " +
+                            "personAuthUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonAuth (personAuthUid, passwordHash, " +
+                            "personAuthStatus, personAuthLocalChangeSeqNum, " +
+                            "personAuthMasterChangeSeqNum, lastChangedBy) " +
+                            "SELECT personAuthUid, passwordHash, 0, " +
+                            "0, " +
+                            "0, 0 FROM PersonAuth_OLD")
+                    database.execSQL("DROP TABLE PersonAuth_OLD")
+                    //End: Create table PersonAuth for SQLite
+
+
+                    //Begin: migrate role for SQLite
+                    database.execSQL("ALTER TABLE Role RENAME to Role_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Role (  
+                        roleName  TEXT , 
+                        roleActive  INTEGER NOT NULL , 
+                        roleMasterCsn  INTEGER NOT NULL , 
+                        roleLocalCsn  INTEGER NOT NULL , 
+                        roleLastChangedBy  INTEGER NOT NULL , 
+                        rolePermissions  INTEGER NOT NULL , 
+                        roleUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
+                    database.execSQL("""INSERT INTO Role (
+                        roleUid, roleName, roleActive, roleMasterCsn, 
+                        roleLocalCsn, roleLastChangedBy, rolePermissions
+                        ) 
+                        SELECT roleUid, roleName, 1, roleMasterCsn, 
+                        roleLocalCsn, roleLastChangedBy, rolePermissions 
+                        FROM Role_OLD""")
+                    database.execSQL("DROP TABLE Role_OLD")
+
+
+                    //Begin: Create table ClazzMember for SQLite
+                    database.execSQL("ALTER TABLE ClazzMember RENAME to ClazzMember_OLD")
+                    database.execSQL("DROP TABLE ClazzMember_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember (  " +
+                            "clazzMemberPersonUid  INTEGER NOT NULL , " +
+                            "clazzMemberClazzUid  INTEGER NOT NULL , " +
+                            "clazzMemberDateJoined  INTEGER NOT NULL , " +
+                            "clazzMemberDateLeft  INTEGER NOT NULL , " +
+                            "clazzMemberRole  INTEGER NOT NULL , " +
+                            "clazzMemberAttendancePercentage  REAL NOT NULL , " +
+                            "clazzMemberActive  INTEGER NOT NULL , " +
+                            "clazzMemberLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzMemberMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzMemberLastChangedBy  INTEGER NOT NULL , " +
+                            "clazzMemberUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL " +
+                            ")")
+
+                    database.execSQL("""
+                    |CREATE
+                    | INDEX index_ClazzMember_clazzMemberPersonUid
+                    |ON ClazzMember (clazzMemberPersonUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE
+                    | INDEX index_ClazzMember_clazzMemberClazzUid
+                    |ON ClazzMember (clazzMemberClazzUid)
+                    """.trimMargin())
+                    //End: Create table ClazzMember for SQLite
+
+
                     //Begin: Create table ClazzLog for SQLite
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE ClazzLog RENAME to ClazzLog_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog (  clazzLogClazzUid  BIGINT , logDate  BIGINT , timeRecorded  BIGINT , clazzLogDone  BOOL , clazzLogCancelled  BOOL , clazzLogNumPresent  INTEGER , clazzLogNumAbsent  INTEGER , clazzLogNumPartial  INTEGER , clazzLogScheduleUid  BIGINT , clazzLogMSQN  BIGINT , clazzLogLCSN  BIGINT , clazzLogLCB  INTEGER , clazzLogUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog (  clazzLogClazzUid  INTEGER NOT NULL , logDate  INTEGER NOT NULL , timeRecorded  INTEGER NOT NULL , clazzLogDone  INTEGER NOT NULL , clazzLogCancelled  INTEGER NOT NULL , clazzLogNumPresent  INTEGER NOT NULL, clazzLogNumAbsent  INTEGER NOT NULL, clazzLogNumPartial  INTEGER NOT NULL, clazzLogScheduleUid  INTEGER NOT NULL , clazzLogMSQN  INTEGER NOT NULL , clazzLogLCSN  INTEGER NOT NULL , clazzLogLCB  INTEGER NOT NULL, clazzLogUid  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO ClazzLog (clazzLogUid, clazzLogClazzUid, logDate, timeRecorded, clazzLogDone, clazzLogCancelled, clazzLogNumPresent, clazzLogNumAbsent, clazzLogNumPartial, clazzLogScheduleUid, clazzLogMSQN, clazzLogLCSN, clazzLogLCB) SELECT clazzLogUid, clazzLogClazzUid, logDate, timeRecorded, clazzLogDone, clazzLogCancelled, clazzLogNumPresent, clazzLogNumAbsent, clazzLogNumPartial, clazzLogScheduleUid, clazzLogMSQN, clazzLogLCSN, clazzLogLCB FROM ClazzLog_OLD")
                     database.execSQL("DROP TABLE ClazzLog_OLD")
@@ -383,7 +685,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzLogUid = NEW.clazzLogUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  " +
+                            "INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER NOT NULL " +
+                            " PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_ClazzLog_trk_clientId_epk_rx_csn 
@@ -395,7 +699,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE ClazzLogAttendanceRecord RENAME to ClazzLogAttendanceRecord_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord (  clazzLogAttendanceRecordClazzLogUid  BIGINT , clazzLogAttendanceRecordClazzMemberUid  BIGINT , attendanceStatus  INTEGER , clazzLogAttendanceRecordMasterChangeSeqNum  BIGINT , clazzLogAttendanceRecordLocalChangeSeqNum  BIGINT , clazzLogAttendanceRecordLastChangedBy  INTEGER , clazzLogAttendanceRecordUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord (  " +
+                            "clazzLogAttendanceRecordClazzLogUid  INTEGER NOT NULL , " +
+                            "clazzLogAttendanceRecordClazzMemberUid  INTEGER NOT NULL , " +
+                            "attendanceStatus  INTEGER NOT NULL, " +
+                            "clazzLogAttendanceRecordMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzLogAttendanceRecordLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzLogAttendanceRecordLastChangedBy  INTEGER NOT NULL, " +
+                            "clazzLogAttendanceRecordUid  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO ClazzLogAttendanceRecord (clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordClazzMemberUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy) SELECT clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordClazzMemberUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy FROM ClazzLogAttendanceRecord_OLD")
                     database.execSQL("DROP TABLE ClazzLogAttendanceRecord_OLD")
@@ -444,7 +755,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord_trk (  " +
+                            "epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, " +
+                            "csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, " +
+                            "ts  INTEGER NOT NULL , pk  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn 
@@ -456,7 +770,15 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE FeedEntry RENAME to FeedEntry_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  feedEntryPersonUid  BIGINT , title  TEXT , description  TEXT , link  TEXT , feedEntryClazzName  TEXT , deadline  BIGINT , feedEntryHash  BIGINT , feedEntryDone  BOOL , feedEntryClazzLogUid  BIGINT , dateCreated  BIGINT , feedEntryCheckType  INTEGER , feedEntryLocalChangeSeqNum  BIGINT , feedEntryMasterChangeSeqNum  BIGINT , feedEntryLastChangedBy  INTEGER , feedEntryUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  " +
+                            "feedEntryPersonUid  INTEGER NOT NULL , title  TEXT , " +
+                            "description  TEXT , link  TEXT , feedEntryClazzName  TEXT ," +
+                            " deadline  INTEGER NOT NULL , feedEntryHash  INTEGER NOT NULL ," +
+                            " feedEntryDone  INTEGER NOT NULL , feedEntryClazzLogUid  INTEGER NOT NULL , " +
+                            "dateCreated  INTEGER NOT NULL , feedEntryCheckType  INTEGER NOT NULL, " +
+                            "feedEntryLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "feedEntryMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "feedEntryLastChangedBy  INTEGER NOT NULL, feedEntryUid  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO FeedEntry (feedEntryUid, feedEntryPersonUid, title, description, link, feedEntryClazzName, deadline, feedEntryHash, feedEntryDone, feedEntryClazzLogUid, dateCreated, feedEntryCheckType, feedEntryLocalChangeSeqNum, feedEntryMasterChangeSeqNum, feedEntryLastChangedBy) SELECT feedEntryUid, feedEntryPersonUid, title, description, link, feedEntryClazzName, deadline, feedEntryHash, feedEntryDone, feedEntryClazzLogUid, dateCreated, feedEntryCheckType, feedEntryLocalChangeSeqNum, feedEntryMasterChangeSeqNum, feedEntryLastChangedBy FROM FeedEntry_OLD")
                     database.execSQL("DROP TABLE FeedEntry_OLD")
@@ -505,7 +827,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE feedEntryUid = NEW.feedEntryUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_FeedEntry_trk_clientId_epk_rx_csn 
@@ -517,7 +839,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE PersonField RENAME to PersonField_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField (  fieldName  TEXT , labelMessageId  INTEGER , fieldIcon  TEXT , personFieldMasterChangeSeqNum  BIGINT , personFieldLocalChangeSeqNum  BIGINT , personFieldLastChangedBy  INTEGER , personCustomFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField (  fieldName  TEXT , labelMessageId  INTEGER NOT NULL, fieldIcon  TEXT , personFieldMasterChangeSeqNum  INTEGER NOT NULL , personFieldLocalChangeSeqNum  INTEGER NOT NULL , personFieldLastChangedBy  INTEGER NOT NULL, personCustomFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO PersonField (personCustomFieldUid, fieldName, labelMessageId, fieldIcon, personFieldMasterChangeSeqNum, personFieldLocalChangeSeqNum, personFieldLastChangedBy) SELECT personCustomFieldUid, fieldName, labelMessageId, fieldIcon, personFieldMasterChangeSeqNum, personFieldLocalChangeSeqNum, personFieldLastChangedBy FROM PersonField_OLD")
                     database.execSQL("DROP TABLE PersonField_OLD")
@@ -566,7 +888,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personCustomFieldUid = NEW.personCustomFieldUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_PersonField_trk_clientId_epk_rx_csn 
@@ -578,7 +900,21 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE PersonDetailPresenterField RENAME to PersonDetailPresenterField_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonDetailPresenterField (  fieldUid  BIGINT , fieldType  INTEGER , fieldIndex  INTEGER , labelMessageId  INTEGER , fieldIcon  TEXT , headerMessageId  INTEGER , viewModeVisible  BOOL , editModeVisible  BOOL , isReadyOnly  BOOL , personDetailPresenterFieldMasterChangeSeqNum  BIGINT , personDetailPresenterFieldLocalChangeSeqNum  BIGINT , personDetailPresenterFieldLastChangedBy  INTEGER , personDetailPresenterFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS PersonDetailPresenterField (  
+                        fieldUid  INTEGER NOT NULL , 
+                        fieldType  INTEGER NOT NULL, 
+                        fieldIndex  INTEGER NOT NULL, 
+                        labelMessageId  INTEGER NOT NULL, 
+                        fieldIcon  TEXT , 
+                        headerMessageId  INTEGER NOT NULL, 
+                        viewModeVisible  INTEGER NOT NULL , 
+                        editModeVisible  INTEGER NOT NULL , 
+                        isReadyOnly  INTEGER NOT NULL , 
+                        personDetailPresenterFieldMasterChangeSeqNum  INTEGER NOT NULL , 
+                        personDetailPresenterFieldLocalChangeSeqNum  INTEGER NOT NULL , 
+                        personDetailPresenterFieldLastChangedBy  INTEGER NOT NULL, 
+                        personDetailPresenterFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO PersonDetailPresenterField (personDetailPresenterFieldUid, fieldUid, fieldType, fieldIndex, labelMessageId, fieldIcon, headerMessageId, viewModeVisible, editModeVisible, isReadyOnly, personDetailPresenterFieldMasterChangeSeqNum, personDetailPresenterFieldLocalChangeSeqNum, personDetailPresenterFieldLastChangedBy) SELECT personDetailPresenterFieldUid, fieldUid, fieldType, fieldIndex, labelMessageId, fieldIcon, headerMessageId, viewModeVisible, editModeVisible, isReadyOnly, personDetailPresenterFieldMasterChangeSeqNum, personDetailPresenterFieldLocalChangeSeqNum, personDetailPresenterFieldLastChangedBy FROM PersonDetailPresenterField_OLD")
                     database.execSQL("DROP TABLE PersonDetailPresenterField_OLD")
@@ -627,7 +963,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonDetailPresenterField_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonDetailPresenterField_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_PersonDetailPresenterField_trk_clientId_epk_rx_csn 
@@ -639,7 +975,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE SelQuestion RENAME to SelQuestion_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion (  questionText  TEXT , selQuestionSelQuestionSetUid  BIGINT , questionIndex  INTEGER , assignToAllClasses  BOOL , multiNominations  BOOL , questionType  INTEGER , questionActive  BOOL , selQuestionMasterChangeSeqNum  BIGINT , selQuestionLocalChangeSeqNum  BIGINT , selQuestionLastChangedBy  INTEGER , selQuestionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion (  questionText  TEXT , selQuestionSelQuestionSetUid  INTEGER NOT NULL , questionIndex  INTEGER NOT NULL, assignToAllClasses  INTEGER NOT NULL , multiNominations  INTEGER NOT NULL , questionType  INTEGER NOT NULL, questionActive  INTEGER NOT NULL , selQuestionMasterChangeSeqNum  INTEGER NOT NULL , selQuestionLocalChangeSeqNum  INTEGER NOT NULL , selQuestionLastChangedBy  INTEGER NOT NULL, selQuestionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO SelQuestion (selQuestionUid, questionText, selQuestionSelQuestionSetUid, questionIndex, assignToAllClasses, multiNominations, questionType, questionActive, selQuestionMasterChangeSeqNum, selQuestionLocalChangeSeqNum, selQuestionLastChangedBy) SELECT selQuestionUid, questionText, selQuestionSelQuestionSetUid, questionIndex, assignToAllClasses, multiNominations, questionType, questionActive, selQuestionMasterChangeSeqNum, selQuestionLocalChangeSeqNum, selQuestionLastChangedBy FROM SelQuestion_OLD")
                     database.execSQL("DROP TABLE SelQuestion_OLD")
@@ -688,7 +1024,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionUid = NEW.selQuestionUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_SelQuestion_trk_clientId_epk_rx_csn 
@@ -700,7 +1036,13 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE SelQuestionResponse RENAME to SelQuestionResponse_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponse (  selQuestionResponseSelQuestionSetResponseUid  BIGINT , selQuestionResponseSelQuestionUid  BIGINT , selQuestionResponseMasterChangeSeqNum  BIGINT , selQuestionResponseLocalChangeSeqNum  BIGINT , selQuestionResponseLastChangedBy  INTEGER , selQuestionResponseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SelQuestionResponse (  
+                        selQuestionResponseSelQuestionSetResponseUid  INTEGER NOT NULL , 
+                        selQuestionResponseSelQuestionUid  INTEGER NOT NULL , 
+                        selQuestionResponseMasterChangeSeqNum  INTEGER NOT NULL , 
+                        selQuestionResponseLocalChangeSeqNum  INTEGER NOT NULL , 
+                        selQuestionResponseLastChangedBy  INTEGER NOT NULL, 
+                        selQuestionResponseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO SelQuestionResponse (selQuestionResponseUid, selQuestionResponseSelQuestionSetResponseUid, selQuestionResponseSelQuestionUid, selQuestionResponseMasterChangeSeqNum, selQuestionResponseLocalChangeSeqNum, selQuestionResponseLastChangedBy) SELECT selQuestionResponseUid, selQuestionResponseSelQuestionSetResponseUid, selQuestionResponseSelQuestionUid, selQuestionResponseMasterChangeSeqNum, selQuestionResponseLocalChangeSeqNum, selQuestionResponseLastChangedBy FROM SelQuestionResponse_OLD")
                     database.execSQL("DROP TABLE SelQuestionResponse_OLD")
@@ -749,7 +1091,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionResponseUid = NEW.selQuestionResponseUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponse_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SelQuestionResponse_trk (  
+                        epk  INTEGER NOT NULL , 
+                        clientId  INTEGER NOT NULL, 
+                        csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, 
+                        ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_SelQuestionResponse_trk_clientId_epk_rx_csn 
@@ -761,7 +1108,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME to SelQuestionResponseNomination_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination (  selqrnClazzMemberUid  BIGINT , selqrnSelQuestionResponseUId  BIGINT , nominationActive  BOOL , selqrnMCSN  BIGINT , selqrnMCSNLCSN  BIGINT , selqrnMCSNLCB  INTEGER , selqrnUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination (  selqrnClazzMemberUid  INTEGER NOT NULL , selqrnSelQuestionResponseUId  INTEGER NOT NULL , nominationActive  INTEGER NOT NULL , selqrnMCSN  INTEGER NOT NULL , selqrnMCSNLCSN  INTEGER NOT NULL , selqrnMCSNLCB  INTEGER NOT NULL, selqrnUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO SelQuestionResponseNomination (selqrnUid, selqrnClazzMemberUid, selqrnSelQuestionResponseUId, nominationActive, selqrnMCSN, selqrnMCSNLCSN, selqrnMCSNLCB) SELECT selqrnUid, selqrnClazzMemberUid, selqrnSelQuestionResponseUId, nominationActive, selqrnMCSN, selqrnMCSNLCSN, selqrnMCSNLCB FROM SelQuestionResponseNomination_OLD")
                     database.execSQL("DROP TABLE SelQuestionResponseNomination_OLD")
@@ -810,7 +1157,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selqrnUid = NEW.selqrnUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_SelQuestionResponseNomination_trk_clientId_epk_rx_csn 
@@ -822,7 +1169,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE SelQuestionSet RENAME to SelQuestionSet_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSet (  title  TEXT , selQuestionSetMasterChangeSeqNum  BIGINT , selQuestionSetLocalChangeSeqNum  BIGINT , selQuestionSetLastChangedBy  INTEGER , selQuestionSetUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSet (  title  TEXT , selQuestionSetMasterChangeSeqNum  INTEGER NOT NULL , selQuestionSetLocalChangeSeqNum  INTEGER NOT NULL , selQuestionSetLastChangedBy  INTEGER NOT NULL, selQuestionSetUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO SelQuestionSet (selQuestionSetUid, title, selQuestionSetMasterChangeSeqNum, selQuestionSetLocalChangeSeqNum, selQuestionSetLastChangedBy) SELECT selQuestionSetUid, title, selQuestionSetMasterChangeSeqNum, selQuestionSetLocalChangeSeqNum, selQuestionSetLastChangedBy FROM SelQuestionSet_OLD")
                     database.execSQL("DROP TABLE SelQuestionSet_OLD")
@@ -871,7 +1218,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionSetUid = NEW.selQuestionSetUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSet_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSet_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_SelQuestionSet_trk_clientId_epk_rx_csn 
@@ -883,7 +1230,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE SelQuestionSetRecognition RENAME to SelQuestionSetRecognition_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition (  selqsrSelQuestionSetResponseUid  BIGINT , selQuestionSetRecognitionClazzMemberUid  BIGINT , isSelQuestionSetRecognitionRecognized  BOOL , selQuestionSetRecognitionMasterChangeSeqNum  BIGINT , selQuestionSetRecognitionLocalChangeSeqNum  BIGINT , selQuestionSetRecognitionLastChangedBy  INTEGER , selQuestionSetRecognitionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition (  selqsrSelQuestionSetResponseUid  INTEGER NOT NULL , selQuestionSetRecognitionClazzMemberUid  INTEGER NOT NULL , isSelQuestionSetRecognitionRecognized  INTEGER NOT NULL , selQuestionSetRecognitionMasterChangeSeqNum  INTEGER NOT NULL , selQuestionSetRecognitionLocalChangeSeqNum  INTEGER NOT NULL , selQuestionSetRecognitionLastChangedBy  INTEGER NOT NULL, selQuestionSetRecognitionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO SelQuestionSetRecognition (selQuestionSetRecognitionUid, selqsrSelQuestionSetResponseUid, selQuestionSetRecognitionClazzMemberUid, isSelQuestionSetRecognitionRecognized, selQuestionSetRecognitionMasterChangeSeqNum, selQuestionSetRecognitionLocalChangeSeqNum, selQuestionSetRecognitionLastChangedBy) SELECT selQuestionSetRecognitionUid, selqsrSelQuestionSetResponseUid, selQuestionSetRecognitionClazzMemberUid, isSelQuestionSetRecognitionRecognized, selQuestionSetRecognitionMasterChangeSeqNum, selQuestionSetRecognitionLocalChangeSeqNum, selQuestionSetRecognitionLastChangedBy FROM SelQuestionSetRecognition_OLD")
                     database.execSQL("DROP TABLE SelQuestionSetRecognition_OLD")
@@ -932,7 +1279,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionSetRecognitionUid = NEW.selQuestionSetRecognitionUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_SelQuestionSetRecognition_trk_clientId_epk_rx_csn 
@@ -944,7 +1291,16 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE SelQuestionSetResponse RENAME to SelQuestionSetResponse_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetResponse (  selQuestionSetResponseSelQuestionSetUid  BIGINT , selQuestionSetResponseClazzMemberUid  BIGINT , selQuestionSetResponseStartTime  BIGINT , selQuestionSetResponseFinishTime  BIGINT , selQuestionSetResponseRecognitionPercentage  FLOAT , selQuestionSetResponseMasterChangeSeqNum  BIGINT , selQuestionSetResponseLocalChangeSeqNum  BIGINT , selQuestionSetResponseLastChangedBy  INTEGER , selQuestionSetResposeUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetResponse (  " +
+                            "selQuestionSetResponseSelQuestionSetUid  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseClazzMemberUid  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseStartTime  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseFinishTime  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseRecognitionPercentage  REAL NOT NULL, " +
+                            "selQuestionSetResponseMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseLastChangedBy  INTEGER NOT NULL, " +
+                            "selQuestionSetResposeUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO SelQuestionSetResponse (selQuestionSetResposeUid, selQuestionSetResponseSelQuestionSetUid, selQuestionSetResponseClazzMemberUid, selQuestionSetResponseStartTime, selQuestionSetResponseFinishTime, selQuestionSetResponseRecognitionPercentage, selQuestionSetResponseMasterChangeSeqNum, selQuestionSetResponseLocalChangeSeqNum, selQuestionSetResponseLastChangedBy) SELECT selQuestionSetResposeUid, selQuestionSetResponseSelQuestionSetUid, selQuestionSetResponseClazzMemberUid, selQuestionSetResponseStartTime, selQuestionSetResponseFinishTime, selQuestionSetResponseRecognitionPercentage, selQuestionSetResponseMasterChangeSeqNum, selQuestionSetResponseLocalChangeSeqNum, selQuestionSetResponseLastChangedBy FROM SelQuestionSetResponse_OLD")
                     database.execSQL("DROP TABLE SelQuestionSetResponse_OLD")
@@ -993,7 +1349,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionSetResposeUid = NEW.selQuestionSetResposeUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetResponse_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetResponse_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_SelQuestionSetResponse_trk_clientId_epk_rx_csn 
@@ -1005,7 +1361,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE Schedule RENAME to Schedule_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule (  sceduleStartTime  BIGINT , scheduleEndTime  BIGINT , scheduleDay  INTEGER , scheduleMonth  INTEGER , scheduleFrequency  INTEGER , umCalendarUid  BIGINT , scheduleClazzUid  BIGINT , scheduleMasterChangeSeqNum  BIGINT , scheduleLocalChangeSeqNum  BIGINT , scheduleLastChangedBy  INTEGER , scheduleActive  BOOL , scheduleUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule (  sceduleStartTime  INTEGER NOT NULL , scheduleEndTime  INTEGER NOT NULL , scheduleDay  INTEGER NOT NULL, scheduleMonth  INTEGER NOT NULL, scheduleFrequency  INTEGER NOT NULL, umCalendarUid  INTEGER NOT NULL , scheduleClazzUid  INTEGER NOT NULL , scheduleMasterChangeSeqNum  INTEGER NOT NULL , scheduleLocalChangeSeqNum  INTEGER NOT NULL , scheduleLastChangedBy  INTEGER NOT NULL, scheduleActive  INTEGER NOT NULL , scheduleUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO Schedule (scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleActive) SELECT scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleActive FROM Schedule_OLD")
                     database.execSQL("DROP TABLE Schedule_OLD")
@@ -1054,7 +1410,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE scheduleUid = NEW.scheduleUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_Schedule_trk_clientId_epk_rx_csn 
@@ -1066,7 +1422,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE DateRange RENAME to DateRange_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange (  dateRangeLocalChangeSeqNum  BIGINT , dateRangeMasterChangeSeqNum  BIGINT , dateRangLastChangedBy  INTEGER , dateRangeFromDate  BIGINT , dateRangeToDate  BIGINT , dateRangeUMCalendarUid  BIGINT , dateRangeName  TEXT , dateRangeDesc  TEXT , dateRangeActive  BOOL , dateRangeUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange (  dateRangeLocalChangeSeqNum  INTEGER NOT NULL , dateRangeMasterChangeSeqNum  INTEGER NOT NULL , dateRangLastChangedBy  INTEGER NOT NULL, dateRangeFromDate  INTEGER NOT NULL , dateRangeToDate  INTEGER NOT NULL , dateRangeUMCalendarUid  INTEGER NOT NULL , dateRangeName  TEXT , dateRangeDesc  TEXT , dateRangeActive  INTEGER NOT NULL , dateRangeUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO DateRange (dateRangeUid, dateRangeLocalChangeSeqNum, dateRangeMasterChangeSeqNum, dateRangLastChangedBy, dateRangeFromDate, dateRangeToDate, dateRangeUMCalendarUid, dateRangeName, dateRangeDesc, dateRangeActive) SELECT dateRangeUid, dateRangeLocalChangeSeqNum, dateRangeMasterChangeSeqNum, dateRangLastChangedBy, dateRangeFromDate, dateRangeToDate, dateRangeUMCalendarUid, dateRangeName, dateRangeDesc, dateRangeActive FROM DateRange_OLD")
                     database.execSQL("DROP TABLE DateRange_OLD")
@@ -1115,7 +1471,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE dateRangeUid = NEW.dateRangeUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_DateRange_trk_clientId_epk_rx_csn 
@@ -1127,7 +1483,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE UMCalendar RENAME to UMCalendar_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS UMCalendar (  umCalendarName  TEXT , umCalendarCategory  INTEGER , umCalendarActive  BOOL , isUmCalendarFlag  BOOL , umCalendarMasterChangeSeqNum  BIGINT , umCalendarLocalChangeSeqNum  BIGINT , umCalendarLastChangedBy  INTEGER , umCalendarUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UMCalendar (  umCalendarName  TEXT , umCalendarCategory  INTEGER NOT NULL, umCalendarActive  INTEGER NOT NULL , isUmCalendarFlag  INTEGER NOT NULL , umCalendarMasterChangeSeqNum  INTEGER NOT NULL , umCalendarLocalChangeSeqNum  INTEGER NOT NULL , umCalendarLastChangedBy  INTEGER NOT NULL, umCalendarUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO UMCalendar (umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, isUmCalendarFlag, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy) SELECT umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, isUmCalendarFlag, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy FROM UMCalendar_OLD")
                     database.execSQL("DROP TABLE UMCalendar_OLD")
@@ -1176,7 +1532,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE umCalendarUid = NEW.umCalendarUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS UMCalendar_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UMCalendar_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_UMCalendar_trk_clientId_epk_rx_csn 
@@ -1188,7 +1544,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE ClazzActivity RENAME to ClazzActivity_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity (  clazzActivityClazzActivityChangeUid  BIGINT , isClazzActivityGoodFeedback  BOOL , clazzActivityNotes  TEXT , clazzActivityLogDate  BIGINT , clazzActivityClazzUid  BIGINT , clazzActivityDone  BOOL , clazzActivityQuantity  BIGINT , clazzActivityMasterChangeSeqNum  BIGINT , clazzActivityLocalChangeSeqNum  BIGINT , clazzActivityLastChangedBy  INTEGER , clazzActivityUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity (  clazzActivityClazzActivityChangeUid  INTEGER NOT NULL , isClazzActivityGoodFeedback  INTEGER NOT NULL , clazzActivityNotes  TEXT , clazzActivityLogDate  INTEGER NOT NULL , clazzActivityClazzUid  INTEGER NOT NULL , clazzActivityDone  INTEGER NOT NULL , clazzActivityQuantity  INTEGER NOT NULL , clazzActivityMasterChangeSeqNum  INTEGER NOT NULL , clazzActivityLocalChangeSeqNum  INTEGER NOT NULL , clazzActivityLastChangedBy  INTEGER NOT NULL, clazzActivityUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO ClazzActivity (clazzActivityUid, clazzActivityClazzActivityChangeUid, isClazzActivityGoodFeedback, clazzActivityNotes, clazzActivityLogDate, clazzActivityClazzUid, clazzActivityDone, clazzActivityQuantity, clazzActivityMasterChangeSeqNum, clazzActivityLocalChangeSeqNum, clazzActivityLastChangedBy) SELECT clazzActivityUid, clazzActivityClazzActivityChangeUid, isClazzActivityGoodFeedback, clazzActivityNotes, clazzActivityLogDate, clazzActivityClazzUid, clazzActivityDone, clazzActivityQuantity, clazzActivityMasterChangeSeqNum, clazzActivityLocalChangeSeqNum, clazzActivityLastChangedBy FROM ClazzActivity_OLD")
                     database.execSQL("DROP TABLE ClazzActivity_OLD")
@@ -1237,7 +1593,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzActivityUid = NEW.clazzActivityUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_ClazzActivity_trk_clientId_epk_rx_csn 
@@ -1249,7 +1605,17 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE ClazzActivityChange RENAME to ClazzActivityChange_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivityChange (  clazzActivityChangeTitle  TEXT , clazzActivityDesc  TEXT , clazzActivityUnitOfMeasure  INTEGER , isClazzActivityChangeActive  BOOL , clazzActivityChangeLastChangedBy  INTEGER , clazzActivityChangeMasterChangeSeqNum  BIGINT , clazzActivityChangeLocalChangeSeqNum  BIGINT , clazzActivityLastChangedBy  INTEGER , clazzActivityChangeUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS ClazzActivityChange( 
+                        clazzActivityChangeTitle  TEXT , 
+                        clazzActivityDesc  TEXT , 
+                        clazzActivityUnitOfMeasure  INTEGER NOT NULL, 
+                        isClazzActivityChangeActive  INTEGER NOT NULL, 
+                        clazzActivityChangeLastChangedBy  INTEGER NOT NULL, 
+                        clazzActivityChangeMasterChangeSeqNum  INTEGER NOT NULL, 
+                        clazzActivityChangeLocalChangeSeqNum  INTEGER NOT NULL,
+                        clazzActivityLastChangedBy  INTEGER NOT NULL, 
+                        clazzActivityChangeUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO ClazzActivityChange (clazzActivityChangeUid, clazzActivityChangeTitle, clazzActivityDesc, clazzActivityUnitOfMeasure, isClazzActivityChangeActive, clazzActivityChangeLastChangedBy, clazzActivityChangeMasterChangeSeqNum, clazzActivityChangeLocalChangeSeqNum, clazzActivityLastChangedBy) SELECT clazzActivityChangeUid, clazzActivityChangeTitle, clazzActivityDesc, clazzActivityUnitOfMeasure, isClazzActivityChangeActive, clazzActivityChangeLastChangedBy, clazzActivityChangeMasterChangeSeqNum, clazzActivityChangeLocalChangeSeqNum, clazzActivityLastChangedBy FROM ClazzActivityChange_OLD")
                     database.execSQL("DROP TABLE ClazzActivityChange_OLD")
@@ -1298,7 +1664,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzActivityChangeUid = NEW.clazzActivityChangeUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivityChange_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivityChange_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_ClazzActivityChange_trk_clientId_epk_rx_csn 
@@ -1310,7 +1676,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE SelQuestionOption RENAME to SelQuestionOption_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionOption (  optionText  TEXT , selQuestionOptionQuestionUid  BIGINT , selQuestionOptionMasterChangeSeqNum  BIGINT , selQuestionOptionLocalChangeSeqNum  BIGINT , selQuestionOptionLastChangedBy  INTEGER , optionActive  BOOL , selQuestionOptionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionOption (  optionText  TEXT , selQuestionOptionQuestionUid  INTEGER NOT NULL , selQuestionOptionMasterChangeSeqNum  INTEGER NOT NULL , selQuestionOptionLocalChangeSeqNum  INTEGER NOT NULL , selQuestionOptionLastChangedBy  INTEGER NOT NULL, optionActive  INTEGER NOT NULL , selQuestionOptionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO SelQuestionOption (selQuestionOptionUid, optionText, selQuestionOptionQuestionUid, selQuestionOptionMasterChangeSeqNum, selQuestionOptionLocalChangeSeqNum, selQuestionOptionLastChangedBy, optionActive) SELECT selQuestionOptionUid, optionText, selQuestionOptionQuestionUid, selQuestionOptionMasterChangeSeqNum, selQuestionOptionLocalChangeSeqNum, selQuestionOptionLastChangedBy, optionActive FROM SelQuestionOption_OLD")
                     database.execSQL("DROP TABLE SelQuestionOption_OLD")
@@ -1359,7 +1725,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE selQuestionOptionUid = NEW.selQuestionOptionUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionOption_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SelQuestionOption_trk (  
+                        epk  INTEGER NOT NULL , 
+                        clientId  INTEGER NOT NULL, 
+                        csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , 
+                        reqId  INTEGER NOT NULL, 
+                        ts  INTEGER NOT NULL , 
+                        pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_SelQuestionOption_trk_clientId_epk_rx_csn 
@@ -1371,7 +1744,17 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE ScheduledCheck RENAME to ScheduledCheck_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ScheduledCheck (  checkTime  BIGINT , checkType  INTEGER , checkUuid  TEXT , checkParameters  TEXT , scClazzLogUid  BIGINT , scheduledCheckMasterCsn  BIGINT , scheduledCheckLocalCsn  BIGINT , scheduledCheckLastChangedBy  INTEGER , scheduledCheckUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS ScheduledCheck (  
+                        checkTime  INTEGER NOT NULL , 
+                        checkType  INTEGER NOT NULL, 
+                        checkUuid  TEXT , 
+                        checkParameters  TEXT , 
+                        scClazzLogUid  INTEGER NOT NULL , 
+                        scheduledCheckMasterCsn  INTEGER NOT NULL , 
+                        scheduledCheckLocalCsn  INTEGER NOT NULL , 
+                        scheduledCheckLastChangedBy  INTEGER NOT NULL, 
+                        scheduledCheckUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO ScheduledCheck (scheduledCheckUid, checkTime, checkType, checkUuid, checkParameters, scClazzLogUid, scheduledCheckMasterCsn, scheduledCheckLocalCsn, scheduledCheckLastChangedBy) SELECT scheduledCheckUid, checkTime, checkType, checkUuid, checkParameters, scClazzLogUid, scheduledCheckMasterCsn, scheduledCheckLocalCsn, scheduledCheckLastChangedBy FROM ScheduledCheck_OLD")
                     database.execSQL("DROP TABLE ScheduledCheck_OLD")
@@ -1420,7 +1803,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE scheduledCheckUid = NEW.scheduledCheckUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ScheduledCheck_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ScheduledCheck_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_ScheduledCheck_trk_clientId_epk_rx_csn 
@@ -1432,7 +1815,17 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE AuditLog RENAME to AuditLog_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS AuditLog (  auditLogMasterChangeSeqNum  BIGINT , auditLogLocalChangeSeqNum  BIGINT , auditLogLastChangedBy  INTEGER , auditLogActorPersonUid  BIGINT , auditLogTableUid  INTEGER , auditLogEntityUid  BIGINT , auditLogDate  BIGINT , notes  TEXT , auditLogUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS AuditLog (  
+                        auditLogMasterChangeSeqNum  INTEGER NOT NULL , 
+                        auditLogLocalChangeSeqNum  INTEGER NOT NULL , 
+                        auditLogLastChangedBy  INTEGER NOT NULL,
+                        auditLogActorPersonUid  INTEGER NOT NULL , 
+                        auditLogTableUid  INTEGER NOT NULL, 
+                        auditLogEntityUid  INTEGER NOT NULL , 
+                        auditLogDate  INTEGER NOT NULL , 
+                        notes  TEXT , 
+                        auditLogUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO AuditLog (auditLogUid, auditLogMasterChangeSeqNum, auditLogLocalChangeSeqNum, auditLogLastChangedBy, auditLogActorPersonUid, auditLogTableUid, auditLogEntityUid, auditLogDate, notes) SELECT auditLogUid, auditLogMasterChangeSeqNum, auditLogLocalChangeSeqNum, auditLogLastChangedBy, auditLogActorPersonUid, auditLogTableUid, auditLogEntityUid, auditLogDate, notes FROM AuditLog_OLD")
                     database.execSQL("DROP TABLE AuditLog_OLD")
@@ -1481,7 +1874,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE auditLogUid = NEW.auditLogUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS AuditLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS AuditLog_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_AuditLog_trk_clientId_epk_rx_csn 
@@ -1493,7 +1886,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE CustomField RENAME to CustomField_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField (  customFieldName  TEXT , customFieldNameAlt  TEXT , customFieldLabelMessageID  INTEGER , customFieldIcon  TEXT , customFieldType  INTEGER , customFieldEntityType  INTEGER , customFieldActive  BOOL , customFieldDefaultValue  TEXT , customFieldMCSN  BIGINT , customFieldLCSN  BIGINT , customFieldLCB  INTEGER , customFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField (  customFieldName  TEXT , customFieldNameAlt  TEXT , customFieldLabelMessageID  INTEGER NOT NULL, customFieldIcon  TEXT , customFieldType  INTEGER NOT NULL, customFieldEntityType  INTEGER NOT NULL, customFieldActive  INTEGER NOT NULL , customFieldDefaultValue  TEXT , customFieldMCSN  INTEGER NOT NULL , customFieldLCSN  INTEGER NOT NULL , customFieldLCB  INTEGER NOT NULL, customFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO CustomField (customFieldUid, customFieldName, customFieldNameAlt, customFieldLabelMessageID, customFieldIcon, customFieldType, customFieldEntityType, customFieldActive, customFieldDefaultValue, customFieldMCSN, customFieldLCSN, customFieldLCB) SELECT customFieldUid, customFieldName, customFieldNameAlt, customFieldLabelMessageID, customFieldIcon, customFieldType, customFieldEntityType, customFieldActive, customFieldDefaultValue, customFieldMCSN, customFieldLCSN, customFieldLCB FROM CustomField_OLD")
                     database.execSQL("DROP TABLE CustomField_OLD")
@@ -1542,7 +1935,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE customFieldUid = NEW.customFieldUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_CustomField_trk_clientId_epk_rx_csn 
@@ -1554,7 +1947,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE CustomFieldValue RENAME to CustomFieldValue_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue (  customFieldValueFieldUid  BIGINT , customFieldValueEntityUid  BIGINT , customFieldValueValue  TEXT , customFieldValueMCSN  BIGINT , customFieldValueLCSN  BIGINT , customFieldValueLCB  INTEGER , customFieldValueUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue (  customFieldValueFieldUid  INTEGER NOT NULL , customFieldValueEntityUid  INTEGER NOT NULL , customFieldValueValue  TEXT , customFieldValueMCSN  INTEGER NOT NULL , customFieldValueLCSN  INTEGER NOT NULL , customFieldValueLCB  INTEGER NOT NULL, customFieldValueUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO CustomFieldValue (customFieldValueUid, customFieldValueFieldUid, customFieldValueEntityUid, customFieldValueValue, customFieldValueMCSN, customFieldValueLCSN, customFieldValueLCB) SELECT customFieldValueUid, customFieldValueFieldUid, customFieldValueEntityUid, customFieldValueValue, customFieldValueMCSN, customFieldValueLCSN, customFieldValueLCB FROM CustomFieldValue_OLD")
                     database.execSQL("DROP TABLE CustomFieldValue_OLD")
@@ -1603,7 +1996,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE customFieldValueUid = NEW.customFieldValueUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_CustomFieldValue_trk_clientId_epk_rx_csn 
@@ -1615,7 +2008,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE CustomFieldValueOption RENAME to CustomFieldValueOption_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption (  customFieldValueOptionName  TEXT , customFieldValueOptionFieldUid  BIGINT , customFieldValueOptionIcon  TEXT , customFieldValueOptionMessageId  INTEGER , customFieldValueOptionActive  BOOL , customFieldValueOptionMCSN  BIGINT , customFieldValueOptionLCSN  BIGINT , customFieldValueOptionLCB  INTEGER , customFieldValueOptionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption (  customFieldValueOptionName  TEXT , customFieldValueOptionFieldUid  INTEGER NOT NULL , customFieldValueOptionIcon  TEXT , customFieldValueOptionMessageId  INTEGER NOT NULL, customFieldValueOptionActive  INTEGER NOT NULL , customFieldValueOptionMCSN  INTEGER NOT NULL , customFieldValueOptionLCSN  INTEGER NOT NULL , customFieldValueOptionLCB  INTEGER NOT NULL, customFieldValueOptionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO CustomFieldValueOption (customFieldValueOptionUid, customFieldValueOptionName, customFieldValueOptionFieldUid, customFieldValueOptionIcon, customFieldValueOptionMessageId, customFieldValueOptionActive, customFieldValueOptionMCSN, customFieldValueOptionLCSN, customFieldValueOptionLCB) SELECT customFieldValueOptionUid, customFieldValueOptionName, customFieldValueOptionFieldUid, customFieldValueOptionIcon, customFieldValueOptionMessageId, customFieldValueOptionActive, customFieldValueOptionMCSN, customFieldValueOptionLCSN, customFieldValueOptionLCB FROM CustomFieldValueOption_OLD")
                     database.execSQL("DROP TABLE CustomFieldValueOption_OLD")
@@ -1664,7 +2057,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_CustomFieldValueOption_trk_clientId_epk_rx_csn 
@@ -1677,7 +2070,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE School RENAME to School_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS School (  schoolName  TEXT , schoolDesc  TEXT , schoolAddress  TEXT , schoolActive  BOOL , schoolFeatures  BIGINT , schoolLocationLong  DOUBLE , schoolLocationLatt  DOUBLE , schoolMasterChangeSeqNum  BIGINT , schoolLocalChangeSeqNum  BIGINT , schoolLastChangedBy  INTEGER , schoolUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS School (  " +
+                            "schoolName  TEXT , schoolDesc  TEXT , schoolAddress  TEXT , " +
+                            "schoolActive  INTEGER NOT NULL , schoolFeatures  INTEGER NOT NULL , " +
+                            "schoolLocationLong  REAL NOT NULL , schoolLocationLatt  REAL NOT NULL , " +
+                            "schoolMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "schoolLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "schoolLastChangedBy  INTEGER NOT NULL, " +
+                            "schoolUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO School (schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy) SELECT schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy FROM School_OLD")
                     database.execSQL("DROP TABLE School_OLD")
@@ -1726,7 +2126,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE schoolUid = NEW.schoolUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS School_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS School_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_School_trk_clientId_epk_rx_csn 
@@ -1738,7 +2138,21 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE ClazzAssignment RENAME to ClazzAssignment_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment (  clazzAssignmentTitle  TEXT , clazzAssignmentClazzUid  BIGINT , clazzAssignmentInactive  BOOL , clazzAssignmentStartDate  BIGINT , clazzAssignmentDueDate  BIGINT , clazzAssignmentCreationDate  BIGINT , clazzAssignmentUpdateDate  BIGINT , clazzAssignmentInstructions  TEXT , clazzAssignmentGrading  INTEGER , clazzAssignmentRequireAttachment  BOOL , clazzAssignmentMCSN  BIGINT , clazzAssignmentLCSN  BIGINT , clazzAssignmentLCB  INTEGER , clazzAssignmentUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS ClazzAssignment (  
+                        clazzAssignmentTitle  TEXT , 
+                        clazzAssignmentClazzUid  INTEGER NOT NULL , 
+                        clazzAssignmentInactive  INTEGER NOT NULL , 
+                        clazzAssignmentStartDate  INTEGER NOT NULL , 
+                        clazzAssignmentDueDate  INTEGER NOT NULL , 
+                        clazzAssignmentCreationDate  INTEGER NOT NULL ,
+                         clazzAssignmentUpdateDate  INTEGER NOT NULL , 
+                         clazzAssignmentInstructions  TEXT , 
+                         clazzAssignmentGrading  INTEGER NOT NULL,
+                          clazzAssignmentRequireAttachment  INTEGER NOT NULL , 
+                          clazzAssignmentMCSN  INTEGER NOT NULL , 
+                          clazzAssignmentLCSN  INTEGER NOT NULL , 
+                          clazzAssignmentLCB  INTEGER NOT NULL, 
+                          clazzAssignmentUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO ClazzAssignment (clazzAssignmentUid, clazzAssignmentTitle, clazzAssignmentClazzUid, clazzAssignmentInactive, clazzAssignmentStartDate, clazzAssignmentDueDate, clazzAssignmentCreationDate, clazzAssignmentUpdateDate, clazzAssignmentInstructions, clazzAssignmentGrading, clazzAssignmentRequireAttachment, clazzAssignmentMCSN, clazzAssignmentLCSN, clazzAssignmentLCB) SELECT clazzAssignmentUid, clazzAssignmentTitle, clazzAssignmentClazzUid, clazzAssignmentInactive, clazzAssignmentStartDate, clazzAssignmentDueDate, clazzAssignmentCreationDate, clazzAssignmentUpdateDate, clazzAssignmentInstructions, clazzAssignmentGrading, clazzAssignmentRequireAttachment, clazzAssignmentMCSN, clazzAssignmentLCSN, clazzAssignmentLCB FROM ClazzAssignment_OLD")
                     database.execSQL("DROP TABLE ClazzAssignment_OLD")
@@ -1787,7 +2201,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzAssignmentUid = NEW.clazzAssignmentUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_ClazzAssignment_trk_clientId_epk_rx_csn 
@@ -1799,7 +2213,15 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE ClazzAssignmentContentJoin RENAME to ClazzAssignmentContentJoin_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin (  clazzAssignmentContentJoinContentUid  BIGINT , clazzAssignmentContentJoinClazzAssignmentUid  BIGINT , clazzAssignmentContentJoinInactive  BOOL , clazzAssignmentContentJoinDateAdded  BIGINT , clazzAssignmentContentJoinMCSN  BIGINT , clazzAssignmentContentJoinLCSN  BIGINT , clazzAssignmentContentJoinLCB  INTEGER , clazzAssignmentContentJoinUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin (  " +
+                            "clazzAssignmentContentJoinContentUid  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinClazzAssignmentUid  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinInactive  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinDateAdded  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinMCSN  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinLCSN  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinLCB  INTEGER NOT NULL, " +
+                            "clazzAssignmentContentJoinUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     /* START MIGRATION: 
                     database.execSQL("INSERT INTO ClazzAssignmentContentJoin (clazzAssignmentContentJoinUid, clazzAssignmentContentJoinContentUid, clazzAssignmentContentJoinClazzAssignmentUid, clazzAssignmentContentJoinInactive, clazzAssignmentContentJoinDateAdded, clazzAssignmentContentJoinMCSN, clazzAssignmentContentJoinLCSN, clazzAssignmentContentJoinLCB) SELECT clazzAssignmentContentJoinUid, clazzAssignmentContentJoinContentUid, clazzAssignmentContentJoinClazzAssignmentUid, clazzAssignmentContentJoinInactive, clazzAssignmentContentJoinDateAdded, clazzAssignmentContentJoinMCSN, clazzAssignmentContentJoinLCSN, clazzAssignmentContentJoinLCB FROM ClazzAssignmentContentJoin_OLD")
                     database.execSQL("DROP TABLE ClazzAssignmentContentJoin_OLD")
@@ -1848,7 +2270,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     |WHERE clazzAssignmentContentJoinUid = NEW.clazzAssignmentContentJoinUid
                     |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin_trk (" +
+                            "  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, " +
+                            " rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , " +
+                            " pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_ClazzAssignmentContentJoin_trk_clientId_epk_rx_csn 
@@ -1861,6 +2286,165 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 }
                 else if(database.dbType() == DoorDbType.POSTGRES){
+
+                    //Drop PersonCustomField ( cause its not PersonField)
+                    database.execSQL("DROP TABLE PersonCustomField")
+
+                    //PersonGroupMember migration
+                    //Begin: Create table PersonGroupMember for PostgreSQL
+                    database.execSQL("ALTER TABLE PersonGroupMember RENAME to PersonGroupMember_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroupMember (  groupMemberActive  BOOL , groupMemberPersonUid  BIGINT , groupMemberGroupUid  BIGINT , groupMemberMasterCsn  BIGINT , groupMemberLocalCsn  BIGINT , groupMemberLastChangedBy  INTEGER , groupMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonGroupMember (" +
+                            "groupMemberUid, groupMemberActive, groupMemberPersonUid, " +
+                            "groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, " +
+                            "groupMemberLastChangedBy) SELECT groupMemberUid, 1, groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, groupMemberLastChangedBy FROM PersonGroupMember_OLD")
+                    database.execSQL("DROP TABLE PersonGroupMember_OLD")
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonGroupMember_groupMemberGroupUid 
+                    |ON PersonGroupMember (groupMemberGroupUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonGroupMember_groupMemberPersonUid 
+                    |ON PersonGroupMember (groupMemberPersonUid)
+                    """.trimMargin())
+
+                    //StatementEntity
+                    //Begin: Create table StatementEntity for PostgreSQL
+                    database.execSQL("ALTER TABLE StatementEntity RENAME to StatementEntity_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS StatementEntity (  statementId  TEXT , personUid  BIGINT , verbUid  BIGINT , xObjectUid  BIGINT , subStatementActorUid  BIGINT , substatementVerbUid  BIGINT , subStatementObjectUid  BIGINT , agentUid  BIGINT , instructorUid  BIGINT , authorityUid  BIGINT , teamUid  BIGINT , resultCompletion  BOOL , resultSuccess  SMALLINT , resultScoreScaled  BIGINT , resultScoreRaw  BIGINT , resultScoreMin  BIGINT , resultScoreMax  BIGINT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT , stored  BIGINT , contextRegistration  TEXT , contextPlatform  TEXT , contextStatementId  TEXT , fullStatement  TEXT , statementMasterChangeSeqNum  BIGINT , statementLocalChangeSeqNum  BIGINT , statementLastChangedBy  INTEGER , extensionProgress  INTEGER , statementContentEntryUid  BIGINT , statementUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO StatementEntity (
+                        |statementUid, statementId, personUid, verbUid, xObjectUid, 
+                        |subStatementActorUid, substatementVerbUid, subStatementObjectUid, 
+                        |agentUid, instructorUid, authorityUid, teamUid, resultCompletion, 
+                        |resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, 
+                        |resultScoreMax, resultDuration, resultResponse, timestamp, stored, 
+                        |contextRegistration, contextPlatform, contextStatementId, 
+                        |fullStatement, statementMasterChangeSeqNum, 
+                        |statementLocalChangeSeqNum, statementLastChangedBy, 
+                        |extensionProgress, statementContentEntryUid) 
+                        |SELECT statementUid, statementId, personUid, verbUid, xObjectUid, 
+                        |subStatementActorUid, substatementVerbUid, subStatementObjectUid, 
+                        |agentUid, instructorUid, authorityUid, teamUid, resultCompletion, 
+                        |resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, 
+                        |resultScoreMax, resultDuration, resultResponse, timestamp, stored, 
+                        |contextRegistration, contextPlatform, contextStatementId, 
+                        |fullStatement, statementMasterChangeSeqNum, 
+                        |statementLocalChangeSeqNum, statementLastChangedBy, 
+                        |0, 0 FROM StatementEntity_OLD""".trimMargin())
+                    database.execSQL("DROP TABLE StatementEntity_OLD")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonCustomFieldValue_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonCustomFieldValue_trk_clientId_epk_rx_csn 
+                    |ON PersonCustomFieldValue_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
+                    //Begin: Create table Location for PostgreSQL
+                    database.execSQL("ALTER TABLE Location RENAME to Location_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Location (  title  TEXT , description  TEXT , lng  TEXT , lat  TEXT , parentLocationUid  BIGINT , locationLocalChangeSeqNum  BIGINT , locationMasterChangeSeqNum  BIGINT , locationLastChangedBy  INTEGER , timeZone  TEXT , locationActive  BOOL , locationUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("INSERT INTO Location (locationUid, title, description, " +
+                            "lng, lat, parentLocationUid, locationLocalChangeSeqNum, locationMasterChangeSeqNum, " +
+                            "locationLastChangedBy, timeZone, locationActive) " +
+                            "SELECT locationUid, title, description, lng, lat, parentLocationUid, " +
+                            "locationLocalChangeSeqNum, locationMasterChangeSeqNum, " +
+                            "locationLastChangedBy, '', locationActive FROM Location_OLD")
+                    database.execSQL("DROP TABLE Location_OLD")
+
+                    //EntityRole migration
+                    database.execSQL("ALTER TABLE EntityRole RENAME to EntityRole_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS EntityRole (  erMasterCsn  BIGINT , erLocalCsn  BIGINT , erLastChangedBy  INTEGER , erTableId  INTEGER , erEntityUid  BIGINT , erGroupUid  BIGINT , erRoleUid  BIGINT , erActive  BOOL , erUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO EntityRole (erUid, erMasterCsn, 
+                        erLocalCsn, erLastChangedBy, erTableId, erEntityUid, erGroupUid, 
+                        erRoleUid, erActive) 
+                        SELECT erUid, erMasterCsn, erLocalCsn, erLastChangedBy, erTableId, 
+                        erEntityUid, erGroupUid, erRoleUid, 1 FROM EntityRole_OLD""")
+                    database.execSQL("DROP TABLE EntityRole_OLD")
+
+                    //Begin: Create table PersonGroup for PostgreSQL
+                    database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup (  groupMasterCsn  BIGINT , groupLocalCsn  BIGINT , groupLastChangedBy  INTEGER , groupName  TEXT , groupActive  BOOL , groupPersonUid  BIGINT , groupUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO PersonGroup (
+                         groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy, 
+                         groupName, groupActive, groupPersonUid) SELECT groupUid, 
+                         groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupName, 
+                         1, groupPersonUid FROM PersonGroup_OLD""")
+                    database.execSQL("DROP TABLE PersonGroup_OLD")
+
+                    //Begin: Create table Person for PostgreSQL
+                    database.execSQL("ALTER TABLE Person RENAME to Person_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Person (  username  TEXT , firstNames  TEXT , lastName  TEXT , emailAddr  TEXT , phoneNum  TEXT , gender  INTEGER , active  BOOL , admin  BOOL , personNotes  TEXT , fatherName  TEXT , fatherNumber  TEXT , motherName  TEXT , motherNum  TEXT , dateOfBirth  BIGINT , personAddress  TEXT , personMasterChangeSeqNum  BIGINT , personLocalChangeSeqNum  BIGINT , personLastChangedBy  INTEGER , personUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO Person (personUid, username, firstNames, 
+                        lastName, emailAddr, phoneNum, gender, active, admin, personNotes, 
+                        fatherName, fatherNumber, motherName, motherNum, dateOfBirth, 
+                        personAddress, personMasterChangeSeqNum, personLocalChangeSeqNum, 
+                        personLastChangedBy)
+                         SELECT personUid, username, firstNames, lastName, emailAddr, 
+                         phoneNum, gender, active, admin, '', '', 
+                         '', '', '', 0, '', 
+                         personMasterChangeSeqNum, personLocalChangeSeqNum, 
+                         personLastChangedBy FROM Person_OLD""")
+                    database.execSQL("DROP TABLE Person_OLD")
+
+                    //Begin: Create table PersonCustomFieldValue for PostgreSQL
+                    database.execSQL("ALTER TABLE PersonCustomFieldValue RENAME to PersonCustomFieldValue_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonCustomFieldValue (  personCustomFieldValuePersonCustomFieldUid  BIGINT , personCustomFieldValuePersonUid  BIGINT , fieldValue  TEXT , personCustomFieldValueMasterChangeSeqNum  BIGINT , personCustomFieldValueLocalChangeSeqNum  BIGINT , personCustomFieldValueLastChangedBy  INTEGER , personCustomFieldValueUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO PersonCustomFieldValue (
+                        personCustomFieldValueUid, personCustomFieldValuePersonCustomFieldUid,
+                         personCustomFieldValuePersonUid, fieldValue,
+                          personCustomFieldValueMasterChangeSeqNum, 
+                          personCustomFieldValueLocalChangeSeqNum, 
+                          personCustomFieldValueLastChangedBy) 
+                          SELECT personCustomFieldValueUid, 
+                          personCustomFieldValuePersonCustomFieldUid,
+                           personCustomFieldValuePersonUid, fieldValue, 
+                           0, 
+                           0, 
+                           0 FROM PersonCustomFieldValue_OLD""")
+                    database.execSQL("DROP TABLE PersonCustomFieldValue_OLD")
+
+                    //Begin: clazz
+                    //Begin: Create table Clazz for PostgreSQL
+                    database.execSQL("ALTER TABLE Clazz RENAME to Clazz_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Clazz (  clazzName  TEXT , clazzDesc  TEXT , attendanceAverage  FLOAT , clazzHolidayUMCalendarUid  BIGINT , clazzScheuleUMCalendarUid  BIGINT , isClazzActive  BOOL , clazzLocationUid  BIGINT , clazzStartTime  BIGINT , clazzEndTime  BIGINT , clazzFeatures  BIGINT , clazzMasterChangeSeqNum  BIGINT , clazzLocalChangeSeqNum  BIGINT , clazzLastChangedBy  INTEGER , clazzUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("DROP TABLE Clazz_OLD")
+
+                    //Begin : PersonAuth stuff
+                    //Begin: Create table PersonAuth for PostgreSQL
+                    database.execSQL("ALTER TABLE PersonAuth RENAME to PersonAuth_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth (  passwordHash  TEXT , personAuthStatus  INTEGER , personAuthLocalChangeSeqNum  BIGINT , personAuthMasterChangeSeqNum  BIGINT , lastChangedBy  INTEGER , personAuthUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonAuth (personAuthUid, passwordHash, " +
+                            "personAuthStatus, personAuthLocalChangeSeqNum, " +
+                            "personAuthMasterChangeSeqNum, lastChangedBy)" +
+                            " SELECT personAuthUid, passwordHash, 0, " +
+                            "0, 0," +
+                            " 0 FROM PersonAuth_OLD")
+                    database.execSQL("DROP TABLE PersonAuth_OLD")
+                    //End: Create table PersonAuth for PostgreSQL
+
+                    //Begin: Create table ClazzMember for PostgreSQL
+                    database.execSQL("ALTER TABLE ClazzMember RENAME to ClazzMember_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember (  clazzMemberPersonUid  BIGINT , clazzMemberClazzUid  BIGINT , clazzMemberDateJoined  BIGINT , clazzMemberDateLeft  BIGINT , clazzMemberRole  INTEGER , clazzMemberAttendancePercentage  FLOAT , clazzMemberActive  BOOL , clazzMemberLocalChangeSeqNum  BIGINT , clazzMemberMasterChangeSeqNum  BIGINT , clazzMemberLastChangedBy  INTEGER , clazzMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("DROP TABLE ClazzMember_OLD")
+
+
+                    database.execSQL("ALTER TABLE Role RENAME to Role_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Role (
+                        roleName  TEXT , roleActive  BOOL , roleMasterCsn  BIGINT , 
+                        roleLocalCsn  BIGINT , roleLastChangedBy  INTEGER , 
+                        rolePermissions  BIGINT , roleUid  BIGSERIAL  PRIMARY KEY  NOT NULL )""")
+                    database.execSQL("""INSERT INTO Role (
+                        roleUid, roleName, roleActive, roleMasterCsn, 
+                        roleLocalCsn, roleLastChangedBy, rolePermissions
+                        ) 
+                        SELECT roleUid, roleName, true, roleMasterCsn, 
+                        roleLocalCsn, roleLastChangedBy, rolePermissions 
+                        FROM Role_OLD""")
+                    database.execSQL("DROP TABLE Role_OLD")
 
                     //Begin: Create table ClazzLog for PostgreSQL
                     /* START MIGRATION: 
@@ -1899,7 +2483,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("DROP FUNCTION IF EXISTS inc_csn_14_fn")
                     database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_14")
                     END MIGRATION*/
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER NOT NULL, rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""
                     |CREATE 
                     | INDEX index_ClazzLog_trk_clientId_epk_rx_csn 
@@ -2853,7 +3437,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     //End: Create table CustomFieldValueOption for PostgreSQL
 
 
-//Begin: Create table School for PostgreSQL
+                    //Begin: Create table School for PostgreSQL
                     /* START MIGRATION: 
                     database.execSQL("ALTER TABLE School RENAME to School_OLD")
                     END MIGRATION */
