@@ -15,7 +15,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.HolidayCalendarListView
-import com.ustadmobile.lib.db.entities.UMCalendarWithNumEntries
+import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.port.android.view.UstadBaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -76,7 +76,7 @@ class HolidayCalendarListActivity : UstadBaseActivity(), HolidayCalendarListView
 
     }
 
-    override fun setListProvider(factory: DataSource.Factory<Int, UMCalendarWithNumEntries>) {
+    override fun setListProvider(factory: DataSource.Factory<Int, HolidayCalendarWithNumEntries>) {
         val recyclerAdapter = HolidayCalendarListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 applicationContext)
 
@@ -86,7 +86,7 @@ class HolidayCalendarListActivity : UstadBaseActivity(), HolidayCalendarListView
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
             data.observe(thisP,
-                    Observer<PagedList<UMCalendarWithNumEntries>> { recyclerAdapter.submitList(it) })
+                    Observer<PagedList<HolidayCalendarWithNumEntries>> { recyclerAdapter.submitList(it) })
         }
 
         //set the adapter
@@ -98,14 +98,14 @@ class HolidayCalendarListActivity : UstadBaseActivity(), HolidayCalendarListView
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<UMCalendarWithNumEntries> = object : DiffUtil.ItemCallback<UMCalendarWithNumEntries>() {
-            override fun areItemsTheSame(oldItem: UMCalendarWithNumEntries,
-                                         newItem: UMCalendarWithNumEntries): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<HolidayCalendarWithNumEntries> = object : DiffUtil.ItemCallback<HolidayCalendarWithNumEntries>() {
+            override fun areItemsTheSame(oldItem: HolidayCalendarWithNumEntries,
+                                         newItem: HolidayCalendarWithNumEntries): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: UMCalendarWithNumEntries,
-                                            newItem: UMCalendarWithNumEntries): Boolean {
+            override fun areContentsTheSame(oldItem: HolidayCalendarWithNumEntries,
+                                            newItem: HolidayCalendarWithNumEntries): Boolean {
                 return oldItem.umCalendarUid == newItem.umCalendarUid
             }
         }

@@ -1,8 +1,7 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.lib.db.entities.UMCalendarWithNumEntries
+import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 
 
 /**
@@ -23,7 +22,7 @@ interface HolidayCalendarListView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: DataSource.Factory<Int, UMCalendarWithNumEntries>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, HolidayCalendarWithNumEntries>)
 
     companion object {
 

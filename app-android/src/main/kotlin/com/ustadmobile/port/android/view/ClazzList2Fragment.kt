@@ -5,14 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.lifecycle.Observer
-import androidx.paging.DataSource
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentClazzList2Binding
 import com.toughra.ustadmobile.databinding.ItemClazzlist2ClazzBinding
 import com.ustadmobile.core.controller.ClazzList2Presenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -21,18 +16,15 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ClazzList2View
-import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 
-class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener{
+class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents, ClazzList2Fragment.ClazzList2RecyclerAdapter.ClazzList2ViewHolder>(),
+        ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener{
 
     private var mPresenter: ClazzList2Presenter? = null
 
-    private var rootViewBinding: FragmentClazzList2Binding? = null
-
     private var dbRepo: UmAppDatabase? = null
-
-    private var mRecyclerView: RecyclerView? = null
 
     class ClazzList2RecyclerAdapter(var presenter: ClazzList2Presenter?): PagedListAdapter<ClazzWithNumStudents, ClazzList2RecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
 
@@ -49,10 +41,6 @@ class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, MessageIdSpinner.
             holder.itemBinding.presenter = presenter
         }
 
-        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-            super.onAttachedToRecyclerView(recyclerView)
-        }
-
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             super.onDetachedFromRecyclerView(recyclerView)
             presenter = null
@@ -60,55 +48,26 @@ class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, MessageIdSpinner.
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = super.onCreateView(inflater, container, savedInstanceState)
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
-        rootViewBinding = FragmentClazzList2Binding.inflate(inflater, container, false)
-        mRecyclerView = rootViewBinding?.root?.findViewById(R.id.fragment_class_list_recyclerview)
-        mRecyclerView?.layoutManager = LinearLayoutManager(context)
         mPresenter = ClazzList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UstadMobileSystemImpl.instance)
+        mDataBinding?.presenter = mPresenter
+        mDataBinding?.onSortSelected = this
+        mRecyclerViewAdapter = ClazzList2RecyclerAdapter(mPresenter)
         mPresenter?.onCreate(null)
-        rootViewBinding?.presenter = mPresenter
-        rootViewBinding?.onSortSelected = this
-        return rootViewBinding?.root
+        return view
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        rootViewBinding = null
         mPresenter = null
         dbRepo = null
     }
 
-    override var addButtonVisible: Boolean = false
-        get() = field
-        set(value) {
-            rootViewBinding?.addVisible = value
-            field = value
-        }
 
-    override var sortOptions: List<ClazzList2Presenter.SortOrder>? = null
-        get() = field
-        set(value) {
-            rootViewBinding?.sortOptions = value?.map { ClazzList2Presenter.ClazzListSortOption(it, requireContext()) }
-            field = value
-        }
-
-    override var clazzList: DataSource.Factory<Int, ClazzWithNumStudents>? = null
-        get() = field
-        set(value) {
-            val dbRepoVal = dbRepo ?: return
-            val adapter = ClazzList2RecyclerAdapter(mPresenter)
-            val liveData = value?.asRepositoryLiveData(dbRepoVal.clazzDao)
-            liveData?.observe(this, Observer {
-                adapter.submitList(it)
-            })
-            mRecyclerView?.adapter = adapter
-        }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
         if(messageIdOption !is ClazzList2Presenter.ClazzListSortOption) return
@@ -118,6 +77,9 @@ class ClazzList2Fragment: UstadBaseFragment(), ClazzList2View, MessageIdSpinner.
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
         //do nothing
     }
+
+    override val displayTypeRepo: Any?
+        get() = dbRepo?.clazzDao
 
     companion object {
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzWithNumStudents> = object

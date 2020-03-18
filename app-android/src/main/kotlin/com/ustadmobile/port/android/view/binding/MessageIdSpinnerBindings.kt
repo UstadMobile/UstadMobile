@@ -43,6 +43,6 @@ fun MessageIdSpinner.setSelectedMessageIdListener(inverseBindingListener: Invers
 
 
 @BindingAdapter("onMessageIdOptionSelected")
-fun MessageIdSpinner.setOnMessageIdOptionSelected(itemSelectedListener: MessageIdSpinner.OnMessageIdOptionSelectedListener) {
+fun MessageIdSpinner.setOnMessageIdOptionSelected(itemSelectedListener: MessageIdSpinner.OnMessageIdOptionSelectedListener?) {
     this.messageIdOptionSelectedListener = itemSelectedListener
 }

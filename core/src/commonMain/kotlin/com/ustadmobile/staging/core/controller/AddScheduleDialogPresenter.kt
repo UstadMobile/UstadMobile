@@ -16,7 +16,6 @@ import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.ScheduledCheck
-import com.ustadmobile.lib.db.entities.UMCalendar
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch

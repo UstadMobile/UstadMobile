@@ -3,13 +3,13 @@ package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.UMCalendarDao
+import com.ustadmobile.core.db.dao.HolidayCalendarDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HolidayCalendarDetailView
 import com.ustadmobile.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDAR_UID
 import com.ustadmobile.core.view.HolidayCalendarListView
-import com.ustadmobile.lib.db.entities.UMCalendarWithNumEntries
+import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -21,9 +21,9 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>?
                                    val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<HolidayCalendarListView>(context, arguments!!, view) {
 
-    private var umProvider: DataSource.Factory<Int, UMCalendarWithNumEntries>? = null
+    private var umProvider: DataSource.Factory<Int, HolidayCalendarWithNumEntries>? = null
     internal var repository: UmAppDatabase
-    private val providerDao: UMCalendarDao
+    private val providerDao: HolidayCalendarDao
 
 
     init {
@@ -31,7 +31,7 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>?
         repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
         //Get provider Dao
-        providerDao = repository.umCalendarDao
+        providerDao = repository.holidayCalendarDao
 
 
     }
@@ -58,7 +58,7 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>?
 
     fun handleDeleteCalendar(calendarUid: Long) {
         GlobalScope.launch {
-            repository.umCalendarDao.inactivateCalendarAsync(calendarUid)
+            repository.holidayCalendarDao.inactivateCalendarAsync(calendarUid)
         }
     }
 

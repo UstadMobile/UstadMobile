@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.CustomFieldDao
 import com.ustadmobile.core.db.dao.CustomFieldValueDao
 import com.ustadmobile.core.db.dao.CustomFieldValueOptionDao
@@ -45,7 +44,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
     private var tempClazzLocationUid: Long = 0
 
     private var clazzScheduleLiveData: DataSource.Factory<Int, Schedule>? = null
-    private var holidaysLiveData: DoorLiveData<List<UMCalendar>>? = null
+    private var holidaysLiveData: DoorLiveData<List<HolidayCalendar>>? = null
     private var locationsLiveData: DoorLiveData<List<Location>>? = null
 
     private var loggedInPersonUid = 0L
@@ -207,7 +206,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
             currentClazzUid = mUpdatedClazz!!.clazzUid
 
             //Holidays
-            holidaysLiveData = repository.umCalendarDao.findAllHolidaysLiveData()
+            holidaysLiveData = repository.holidayCalendarDao.findAllHolidaysLiveData()
             view.runOnUiThread(Runnable {
                 holidaysLiveData!!.observeWithPresenter(thisP, thisP::handleAllHolidaysChanged)
             })
@@ -406,7 +405,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      *
      * @param umCalendar The list of UMCalendar holidays
      */
-    private fun handleAllHolidaysChanged(umCalendar: List<UMCalendar>?) {
+    private fun handleAllHolidaysChanged(umCalendar: List<HolidayCalendar>?) {
         var selectedPosition = 0
 
         holidayCalendarUidToPosition = HashMap()

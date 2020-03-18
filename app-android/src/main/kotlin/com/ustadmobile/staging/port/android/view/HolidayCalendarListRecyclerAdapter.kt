@@ -15,13 +15,13 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
-import com.ustadmobile.lib.db.entities.UMCalendarWithNumEntries
+import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 
 class HolidayCalendarListRecyclerAdapter(
-        diffCallback: DiffUtil.ItemCallback<UMCalendarWithNumEntries>,
+        diffCallback: DiffUtil.ItemCallback<HolidayCalendarWithNumEntries>,
         internal var mPresenter: HolidayCalendarListPresenter, internal var theActivity: Activity,
         internal var theContext: Context)
-    : PagedListAdapter<UMCalendarWithNumEntries, HolidayCalendarListRecyclerAdapter.HolidayCalendarListViewHolder>(diffCallback) {
+    : PagedListAdapter<HolidayCalendarWithNumEntries, HolidayCalendarListRecyclerAdapter.HolidayCalendarListViewHolder>(diffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HolidayCalendarListViewHolder {
 

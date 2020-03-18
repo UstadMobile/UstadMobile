@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = 28)
 @Entity
 @Serializable
-open class UMCalendar() {
+open class HolidayCalendar() {
 
     @PrimaryKey(autoGenerate = true)
     var umCalendarUid: Long = 0
@@ -28,10 +28,7 @@ open class UMCalendar() {
 
     //active
     var umCalendarActive: Boolean = false
-
-    //Tester method- Please remove me later
-    var isUmCalendarFlag: Boolean = false
-
+    
     @MasterChangeSeqNum
     var umCalendarMasterChangeSeqNum: Long = 0
 

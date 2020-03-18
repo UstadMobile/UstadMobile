@@ -4,7 +4,7 @@ package com.ustadmobile.core.controller
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.DateRangeDao
-import com.ustadmobile.core.db.dao.UMCalendarDao
+import com.ustadmobile.core.db.dao.HolidayCalendarDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithPresenter
@@ -13,7 +13,7 @@ import com.ustadmobile.core.view.AddDateRangeDialogView.Companion.DATERANGE_UID
 import com.ustadmobile.core.view.HolidayCalendarDetailView
 import com.ustadmobile.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDAR_UID
 import com.ustadmobile.lib.db.entities.DateRange
-import com.ustadmobile.lib.db.entities.UMCalendar
+import com.ustadmobile.lib.db.entities.HolidayCalendar
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -30,9 +30,9 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
     internal var repository: UmAppDatabase
     private val providerDao: DateRangeDao
     private var currentCalendarUid: Long = 0
-    private var currentCalendar: UMCalendar? = null
-    private var updatedCalendar: UMCalendar? = null
-    internal var umCalendarDao: UMCalendarDao
+    private var currentCalendar: HolidayCalendar? = null
+    private var updatedCalendar: HolidayCalendar? = null
+    internal var umCalendarDao: HolidayCalendarDao
 
     init {
 
@@ -40,7 +40,7 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
 
         //Get provider Dao
         providerDao = repository.dateRangeDao
-        umCalendarDao = repository.umCalendarDao
+        umCalendarDao = repository.holidayCalendarDao
 
         if (arguments!!.containsKey(HolidayCalendarDetailView.ARG_CALENDAR_UID)) {
             currentCalendarUid = arguments!!.get(ARG_CALENDAR_UID)!!.toLong()
@@ -52,7 +52,7 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
         super.onCreate(savedState)
 
         if (currentCalendarUid == 0L) {
-            currentCalendar = UMCalendar()
+            currentCalendar = HolidayCalendar()
             currentCalendar!!.umCalendarActive = false
             GlobalScope.launch {
                 val result = umCalendarDao.insertAsync(currentCalendar!!)
@@ -92,7 +92,7 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
 
     }
 
-    private fun handleCalendarValueChanged(calendar: UMCalendar?) {
+    private fun handleCalendarValueChanged(calendar: HolidayCalendar?) {
         //set the og person value
         if (currentCalendar == null)
             currentCalendar = calendar
@@ -135,9 +135,9 @@ HolidayCalendarDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemI
 
     fun handleClickDone() {
         updatedCalendar!!.umCalendarActive = true
-        updatedCalendar!!.umCalendarCategory = UMCalendar.CATEGORY_HOLIDAY
+        updatedCalendar!!.umCalendarCategory = HolidayCalendar.CATEGORY_HOLIDAY
         GlobalScope.launch {
-            repository.umCalendarDao.updateAsync(updatedCalendar!!)
+            repository.holidayCalendarDao.updateAsync(updatedCalendar!!)
             view.finish()
         }
     }

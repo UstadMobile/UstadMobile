@@ -20,7 +20,7 @@ import com.ustadmobile.core.controller.HolidayCalendarDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.HolidayCalendarDetailView
 import com.ustadmobile.lib.db.entities.DateRange
-import com.ustadmobile.lib.db.entities.UMCalendar
+import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.port.android.view.UstadBaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -121,7 +121,7 @@ class HolidayCalendarDetailActivity : UstadBaseActivity(), HolidayCalendarDetail
         mRecyclerView!!.adapter = recyclerAdapter
     }
 
-    override fun updateCalendarOnView(updatedCalendar: UMCalendar) {
+    override fun updateCalendarOnView(updatedCalendar: HolidayCalendar) {
 
         var calendarName: String? = ""
 

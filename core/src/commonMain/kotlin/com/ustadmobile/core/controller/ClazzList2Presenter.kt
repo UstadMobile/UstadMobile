@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
                           val db: UmAppDatabase, val dbRepo: UmAppDatabase,
                           val systemImpl: UstadMobileSystemImpl)
-    : UstadBaseController<ClazzList2View>(context, arguments, view) {
+    : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view) {
 
     var searchQuery: String = "%"
 
@@ -37,19 +37,23 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
 
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
         getAndSetList(SortOrder.ORDER_NAME_ASC)
-        view.sortOptions = SortOrder.values().toList()
+        view.sortOptions = SortOrder.values().toList().map { ClazzListSortOption(it, context) }
         checkPermissions()
     }
 
     fun checkPermissions() {
         GlobalScope.launch(doorMainDispatcher()) {
-            view.addButtonVisible = dbRepo.clazzDao.personHasPermission(loggedInPersonUid,
-                    PERMISSION_CLAZZ_INSERT)
+            view.addMode = if(dbRepo.clazzDao.personHasPermission(loggedInPersonUid,
+                    PERMISSION_CLAZZ_INSERT)) {
+                ListViewAddMode.FAB
+            }else {
+                ListViewAddMode.NONE
+            }
         }
     }
 
     private fun getAndSetList(sortOrder: SortOrder) {
-        view.clazzList = when(sortOrder) {
+        view.list = when(sortOrder) {
             SortOrder.ORDER_ATTENDANCE_ASC -> dbRepo.clazzDao.findAllActiveClazzesSortByNameAsc(
                     searchQuery, loggedInPersonUid)
             SortOrder.ORDER_ATTENDANCE_DESC -> dbRepo.clazzDao.findAllActiveClazzesSortByNameDesc(
@@ -61,12 +65,12 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
         }
     }
 
-    fun handleClickClazz(clazz: Clazz) {
-        val args = mapOf(UstadView.ARG_CLAZZ_UID to clazz.clazzUid.toString())
+    override fun handleClickEntry(entry: Clazz) {
+        val args = mapOf(UstadView.ARG_CLAZZ_UID to entry.clazzUid.toString())
         systemImpl.go(ClazzDetailView.VIEW_NAME, args, context)
     }
 
-    fun handleClickAddClazz() {
+    override fun handleClickCreateNew() {
         systemImpl.go(ClazzEdit2View.VIEW_NAME, mapOf(), context)
     }
 

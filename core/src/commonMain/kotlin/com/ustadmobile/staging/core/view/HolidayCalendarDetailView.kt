@@ -2,9 +2,8 @@ package com.ustadmobile.core.view
 
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.DateRange
-import com.ustadmobile.lib.db.entities.UMCalendar
+import com.ustadmobile.lib.db.entities.HolidayCalendar
 
 /**
  * Core View. Screen is for HolidayCalendarDetail's View
@@ -13,7 +12,7 @@ interface HolidayCalendarDetailView : UstadView {
 
     fun setListProvider(umProvider: DataSource.Factory<Int, DateRange>)
 
-    fun updateCalendarOnView(calendar: UMCalendar)
+    fun updateCalendarOnView(calendar: HolidayCalendar)
 
     /**
      * Method to finish the screen / view.
