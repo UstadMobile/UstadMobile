@@ -86,8 +86,8 @@ abstract class UstadListViewFragment<RT, DT, VH: RecyclerView.ViewHolder>: Ustad
             field = value
         }
 
-    override fun finishWithResult(result: RT) {
-        mListViewResultListener?.onListItemsSelected(listOf(result))
+    override fun finishWithResult(result: List<RT>) {
+        mListViewResultListener?.onListItemsSelected(result)
     }
 
     override val viewContext: Any

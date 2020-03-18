@@ -8,37 +8,37 @@ import android.widget.AdapterView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemClazzlist2ClazzBinding
-import com.ustadmobile.core.controller.ClazzList2Presenter
+import com.toughra.ustadmobile.databinding.Item@Entity_ViewBinding_VariableName@ListItemBinding
+import com.ustadmobile.core.controller.@Entity@ListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ClazzList2View
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
+import com.ustadmobile.core.view.@Entity@ListView
+import com.ustadmobile.lib.db.entities.@Entity@
+import com.ustadmobile.lib.db.entities.@DisplayEntity@
 
-class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents, ClazzList2Fragment.ClazzList2RecyclerAdapter.ClazzList2ViewHolder>(),
-        ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener{
+class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@, @Entity@ListFragment.@Entity@ListRecyclerAdapter.@Entity@ListViewHolder>(),
+        @Entity@ListView, MessageIdSpinner.OnMessageIdOptionSelectedListener{
 
-    private var mPresenter: ClazzList2Presenter? = null
+    private var mPresenter: @Entity@ListPresenter? = null
 
     private var dbRepo: UmAppDatabase? = null
 
-    class ClazzList2RecyclerAdapter(var presenter: ClazzList2Presenter?): PagedListAdapter<ClazzWithNumStudents, ClazzList2RecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
+    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?): PagedListAdapter<@DisplayEntity@, @Entity@ListRecyclerAdapter.@Entity@ListViewHolder>(DIFF_CALLBACK) {
 
-        class ClazzList2ViewHolder(val itemBinding: ItemClazzlist2ClazzBinding): RecyclerView.ViewHolder(itemBinding.root)
+        class @Entity@ListViewHolder(val itemBinding: Item@Entity_ViewBinding_VariableName@ListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzList2ViewHolder {
-            val itemBinding = ItemClazzlist2ClazzBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): @Entity@ListViewHolder {
+            val itemBinding = Item@Entity_ViewBinding_VariableName@ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
 
-            return ClazzList2ViewHolder(itemBinding)
+            return @Entity@ListViewHolder(itemBinding)
         }
 
-        override fun onBindViewHolder(holder: ClazzList2ViewHolder, position: Int) {
-            holder.itemBinding.clazz = getItem(position)
+        override fun onBindViewHolder(holder: @Entity@ListViewHolder, position: Int) {
+            holder.itemBinding.@Entity_VariableName@ = getItem(position)
             holder.itemBinding.presenter = presenter
         }
 
@@ -51,14 +51,14 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents, C
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
-        mPresenter = ClazzList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
+        mPresenter = @Entity@ListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = ClazzList2RecyclerAdapter(mPresenter)
+        mRecyclerViewAdapter = @Entity@ListRecyclerAdapter(mPresenter)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }
@@ -79,18 +79,18 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents, C
     }
 
     override val displayTypeRepo: Any?
-        get() = dbRepo?.clazzDao
+        get() = TODO("Provide repo e.g. dbRepo.@Entity@Dao")
 
     companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzWithNumStudents> = object
-            : DiffUtil.ItemCallback<ClazzWithNumStudents>() {
-            override fun areItemsTheSame(oldItem: ClazzWithNumStudents,
-                                         newItem: ClazzWithNumStudents): Boolean {
-                return oldItem.clazzUid == newItem.clazzUid
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<@DisplayEntity@> = object
+            : DiffUtil.ItemCallback<@DisplayEntity@>() {
+            override fun areItemsTheSame(oldItem: @DisplayEntity@,
+                                         newItem: @DisplayEntity@): Boolean {
+                TODO("e.g. insert primary keys here return oldItem.@Entity_VariableName@ == newItem.@Entity_VariableName@")
             }
 
-            override fun areContentsTheSame(oldItem: ClazzWithNumStudents,
-                                            newItem: ClazzWithNumStudents): Boolean {
+            override fun areContentsTheSame(oldItem: @DisplayEntity@,
+                                            newItem: @DisplayEntity@): Boolean {
                 return oldItem == newItem
             }
         }

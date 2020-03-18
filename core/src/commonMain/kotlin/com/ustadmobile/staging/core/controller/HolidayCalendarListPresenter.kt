@@ -1,14 +1,15 @@
-package com.ustadmobile.core.controller
+package com.ustadmobile.staging.core.controller
 
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.HolidayCalendarDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.HolidayCalendarDetailView
 import com.ustadmobile.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDAR_UID
-import com.ustadmobile.core.view.HolidayCalendarListView
+import com.ustadmobile.staging.core.view.HolidayCalendarListView
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -41,7 +42,7 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>?
 
         //Get provider
         umProvider = providerDao.findAllHolidaysWithEntriesCount()
-        view.setListProvider(umProvider!!)
+        //view.setListProvider(umProvider!!)
 
     }
 

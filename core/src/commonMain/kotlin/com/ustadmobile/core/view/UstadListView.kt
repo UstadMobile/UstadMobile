@@ -25,6 +25,6 @@ interface UstadListView<RT, DT>: UstadView {
 
     var sortOptions: List<MessageIdOption>?
 
-    fun finishWithResult(result: RT)
+    fun finishWithResult(result: List<RT>)
 
 }

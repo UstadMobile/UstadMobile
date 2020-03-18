@@ -6,16 +6,18 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
-import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.ustadmobile.lib.db.entities.UmAccount
 
 class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
-                          val db: UmAppDatabase, val dbRepo: UmAppDatabase,
-                          val systemImpl: UstadMobileSystemImpl)
-    : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view) {
+                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
+                          db: UmAppDatabase, repo: UmAppDatabase,
+                          activeAccount: DoorLiveData<UmAccount?>)
+    : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view, lifecycleOwner, systemImpl,
+        db, repo, activeAccount) {
 
     var searchQuery: String = "%"
 
@@ -38,29 +40,21 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
         getAndSetList(SortOrder.ORDER_NAME_ASC)
         view.sortOptions = SortOrder.values().toList().map { ClazzListSortOption(it, context) }
-        checkPermissions()
     }
 
-    fun checkPermissions() {
-        GlobalScope.launch(doorMainDispatcher()) {
-            view.addMode = if(dbRepo.clazzDao.personHasPermission(loggedInPersonUid,
-                    PERMISSION_CLAZZ_INSERT)) {
-                ListViewAddMode.FAB
-            }else {
-                ListViewAddMode.NONE
-            }
-        }
+    override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
+        return repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
     }
 
     private fun getAndSetList(sortOrder: SortOrder) {
         view.list = when(sortOrder) {
-            SortOrder.ORDER_ATTENDANCE_ASC -> dbRepo.clazzDao.findAllActiveClazzesSortByNameAsc(
+            SortOrder.ORDER_ATTENDANCE_ASC -> repo.clazzDao.findAllActiveClazzesSortByNameAsc(
                     searchQuery, loggedInPersonUid)
-            SortOrder.ORDER_ATTENDANCE_DESC -> dbRepo.clazzDao.findAllActiveClazzesSortByNameDesc(
+            SortOrder.ORDER_ATTENDANCE_DESC -> repo.clazzDao.findAllActiveClazzesSortByNameDesc(
                     searchQuery, loggedInPersonUid)
-            SortOrder.ORDER_NAME_ASC -> dbRepo.clazzDao.findAllActiveClazzesSortByNameAsc(
+            SortOrder.ORDER_NAME_ASC -> repo.clazzDao.findAllActiveClazzesSortByNameAsc(
                     searchQuery, loggedInPersonUid)
-            SortOrder.ORDER_NAME_DSC -> dbRepo.clazzDao.findAllActiveClazzesSortByNameDesc(
+            SortOrder.ORDER_NAME_DSC -> repo.clazzDao.findAllActiveClazzesSortByNameDesc(
                     searchQuery, loggedInPersonUid)
         }
     }
@@ -74,12 +68,11 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
         systemImpl.go(ClazzEdit2View.VIEW_NAME, mapOf(), context)
     }
 
-    fun handleClickSortOrder(sortOrder: SortOrder) {
+    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+        val sortOrder = (sortOption as? ClazzListSortOption)?.sortOrder ?: return
         if(sortOrder != currentSortOrder) {
-            getAndSetList(sortOrder)
             currentSortOrder = sortOrder
+            getAndSetList(sortOrder)
         }
-
     }
-
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="holidayCalendar"
+            type="com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries" />
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.HolidayCalendarListPresenter" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="@{() -> presenter.handleClickEntry(holidayCalendar)}"
+        >
+
+        <!-- TODO: Insert layout here and use ViewBinding to show the entity itself-->
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

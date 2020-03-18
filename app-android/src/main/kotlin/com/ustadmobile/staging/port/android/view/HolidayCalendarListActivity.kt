@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.HolidayCalendarListView
+import com.ustadmobile.staging.core.view.HolidayCalendarListView
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.port.android.view.UstadBaseActivity
 import kotlinx.coroutines.Dispatchers
@@ -66,13 +66,13 @@ class HolidayCalendarListActivity : UstadBaseActivity(), HolidayCalendarListView
         mRecyclerView!!.layoutManager = mRecyclerLayoutManager
 
         //Call the Presenter
-        mPresenter = HolidayCalendarListPresenter(this,
-                UMAndroidUtil.bundleToMap(intent.extras), this)
-        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+//        mPresenter = HolidayCalendarListPresenter(this,
+//                UMAndroidUtil.bundleToMap(intent.extras), this)
+//        mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //FAB and its listener
         val fab = findViewById<FloatingTextButton>(R.id.activity_holiday_calendar_list_fab)
-        fab.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
+        //fab.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
 
     }
 
