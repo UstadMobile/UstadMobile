@@ -1,70 +1,65 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Schedule
-import kotlinx.atomicfu.atomic
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
 import kotlin.jvm.Volatile
 
-class ClazzEdit2Presenter(context: Any, arguments: Map<String, String>,
-                          view: ClazzEdit2View, val db: UmAppDatabase,
-                          val repo: UmAppDatabase): UstadBaseController<ClazzEdit2View>(context, arguments, view) {
-
+class ClazzEdit2Presenter(context: Any,
+                          arguments: Map<String, String>, view: ClazzEdit2View,
+                          lifecycleOwner: DoorLifecycleOwner,
+                          systemImpl: UstadMobileSystemImpl,
+                          db: UmAppDatabase, repo: UmAppDatabase,
+                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
+    : UstadEditPresenter<ClazzEdit2View, Clazz>(context, arguments, view, lifecycleOwner, systemImpl,
+        db, repo, activeAccount) {
 
     @Volatile
     private var clazz: Clazz? = null
 
-    private val clazzSchedulesList = DoorMutableLiveData<List<Schedule>>()
+    private val scheduleOneToManyJoinEditHelper
+            = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid) {scheduleUid = it}
 
-    private val scheduleIdsToInsert = mutableListOf<Long>()
-
-    private val scheduleIdsToDeactivate = mutableListOf<Long>()
-
-    private val idsToInsertAtomic = atomic(-100)
+    override val persistenceMode: PERSISTENCE_MODE
+        get() = PERSISTENCE_MODE.DB
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-
-
-        GlobalScope.launch(doorMainDispatcher()) {
-            val clazzUid = arguments[UstadView.ARG_CLAZZ_UID]?.toLong() ?: 0L
-
-            view.clazzSchedules = clazzSchedulesList
-            view.loading = true
-            view.fieldsEnabled = false
-            listOf(db, repo).forEach {
-                val clazz = withTimeoutOrNull(2000) {
-                    it.clazzDao.takeIf {clazzUid != 0L }?.findByUidAsync(clazzUid) ?: Clazz("Test Clazz").also {
-                        it.isClazzActive = true
-                    }
-                }  ?: return@forEach
-
-                val schedules = withTimeoutOrNull(2000) {
-                    it.scheduleDao.findAllSchedulesByClazzUidAsync(clazzUid)
-                } ?: listOf()
-
-                clazzSchedulesList.sendValue(schedules)
-
-                this@ClazzEdit2Presenter.clazz = clazz
-                view.clazz = clazz
-            }
-
-            view.loading = false
-            view.fieldsEnabled = true
-        }
+        view.clazzSchedules = scheduleOneToManyJoinEditHelper.liveList
     }
 
-    fun handleClickDone(clazz: Clazz) {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Clazz? {
+        val clazzUid = arguments[UstadView.ARG_CLAZZ_UID]?.toLong() ?: 0L
+        val clazz = withTimeoutOrNull(2000) {
+            db.clazzDao.takeIf {clazzUid != 0L }?.findByUidAsync(clazzUid) ?: Clazz("Test Clazz").also {
+                it.isClazzActive = true
+            }
+        }  ?: return null
+
+        val schedules = withTimeoutOrNull(2000) {
+            db.scheduleDao.findAllSchedulesByClazzUidAsync(clazzUid)
+        } ?: listOf()
+
+        scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)
+        return clazz
+    }
+
+    override fun handleClickSave(entity: Clazz) {
         GlobalScope.launch(doorMainDispatcher()) {
-            if(clazz.clazzUid == 0L) {
-                clazz.clazzUid = repo.clazzDao.insertAsync(clazz)
+            if(entity.clazzUid == 0L) {
+                entity.clazzUid = repo.clazzDao.insertAsync(entity)
             }else {
-                repo.clazzDao.updateAsync(clazz)
+                repo.clazzDao.updateAsync(entity)
             }
 
             view.finish()
@@ -72,30 +67,11 @@ class ClazzEdit2Presenter(context: Any, arguments: Map<String, String>,
     }
 
     fun handleAddOrEditSchedule(schedule: Schedule) {
-        if (schedule.scheduleUid == 0L) {
-            schedule.scheduleUid = idsToInsertAtomic.getAndIncrement().toLong()
-            scheduleIdsToInsert += schedule.scheduleUid
-            val newList = (clazzSchedulesList.getValue() ?: listOf()) + schedule
-            clazzSchedulesList.sendValue(newList)
-        }else {
-            val mutableList = clazzSchedulesList.getValue()?.toMutableList() ?: mutableListOf()
-            val indexChanged = mutableList.indexOfFirst { it.scheduleUid == schedule.scheduleUid }
-            if(indexChanged == -1)
-                return
-            mutableList[indexChanged] = schedule
-            clazzSchedulesList.sendValue(mutableList)
-        }
+        scheduleOneToManyJoinEditHelper.onEditResult(schedule)
     }
 
     fun handleRemoveSchedule(schedule: Schedule) {
-        val mutableList = clazzSchedulesList.getValue()?.toMutableList() ?: mutableListOf()
-        mutableList.remove(schedule)
-        clazzSchedulesList.sendValue(mutableList)
-        if(schedule.scheduleUid in scheduleIdsToInsert) {
-            scheduleIdsToInsert.remove(schedule.scheduleUid)
-        }else {
-            scheduleIdsToDeactivate.add(schedule.scheduleUid)
-        }
+        scheduleOneToManyJoinEditHelper.onDeactivateEntity(schedule)
     }
 
 }

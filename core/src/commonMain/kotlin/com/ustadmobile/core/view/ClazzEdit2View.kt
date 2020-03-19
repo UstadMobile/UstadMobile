@@ -4,17 +4,9 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Schedule
 
-interface ClazzEdit2View: UstadViewWithProgress {
+interface ClazzEdit2View: UstadEditView<Clazz> {
 
     var clazzSchedules: DoorMutableLiveData<List<Schedule>>?
-
-    var clazz: Clazz?
-
-    var fieldsEnabled: Boolean
-
-    var loading: Boolean
-
-    fun finish()
 
     companion object {
 
