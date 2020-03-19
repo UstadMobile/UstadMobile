@@ -13,6 +13,8 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ReportBarChartComponentView
 import com.ustadmobile.lib.db.entities.ReportSalesPerformance
@@ -62,11 +64,11 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
 
         //TODO: Have unlimited variations
         val barColorsList = ArrayList<String>()
-        barColorsList.add("#FF9800")
-        barColorsList.add("#FF6D00")
-        barColorsList.add("#FF5722")
-        barColorsList.add("#918F8F")
-        barColorsList.add("#666666")
+        barColorsList.add("#ffa600")
+        barColorsList.add("#488f31")
+        barColorsList.add("#bc5090")
+        barColorsList.add("#58508d")
+        barColorsList.add("#003f5c")
         val barColors = barColorsList.toTypedArray()
 
 
@@ -136,10 +138,14 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
         var colorPos = 0
         for (barEntry in locationToBarEntriesMap.keys) {
             //Get location name
-            val locationName = locationUidToName[barEntry]
+            var locationName = locationUidToName[barEntry]
+            if(locationName.isNullOrBlank()){
+                locationName = UstadMobileSystemImpl.instance.getString(MessageID.not_set, context)
+            }
 
             //Get entries (values plotted)
             val locationEntry = locationToBarEntriesMap[barEntry]!!
+
 
             //Create BarDataSet
             val barDataSet = BarDataSet(locationEntry, locationName)

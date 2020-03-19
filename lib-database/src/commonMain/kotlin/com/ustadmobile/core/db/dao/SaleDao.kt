@@ -294,16 +294,11 @@ abstract class SaleDao : BaseDao<Sale> {
     //REPORTING:
 
     @Query(SALE_PERFORMANCE_REPORT_1)
-    abstract suspend fun getSalesPerformanceReportSumGroupedByLocation(leUids: List<Long> ,
-                                   producerUids:List<Long>, locationUids:List<Long> ,
-                                   productTypeUids:List<Long> , fromDate:Long, toDate:Long,
-                                   fromPrice:Int, toPrice:Int): List<ReportSalesPerformance>
-
-    @Query(SALE_PERFORMANCE_REPORT_1)
     abstract fun getSalesPerformanceReportSumGroupedByLocationLive(leUids: List<Long> ,
                        producerUids:List<Long>, locationUids:List<Long> ,
                        productTypeUids:List<Long> , fromDate:Long, toDate:Long,
-                       fromPrice:Int, toPrice:Int): DoorLiveData<List<ReportSalesPerformance>>
+                       fromPrice:Int, toPrice:Int, ptFlag: Int, leFlag: Int, lFlag: Int,
+                                       pdFlag:Int): DoorLiveData<List<ReportSalesPerformance>>
 
     @Query("SELECT    " +
             " SUM(SaleItem.saleItemQuantity*SaleItem.saleItemPricePerPiece) as totalSalesValue,  " +
@@ -678,10 +673,20 @@ abstract class SaleDao : BaseDao<Sale> {
         " WHERE " +
         "   CAST(SALE.saleActive AS INTEGER) = 1  " +
         "   AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
-        "   OR locationUid in (:locationUids) " +
-        "   OR leUid in (:leUids) " +
-        "   OR producerUid in (:producerUids) " +
-        "   OR productTypeUid in (:productTypeUids) " +
+
+        "   AND (" +
+            " 0=:lFlag or  locationUid in (:locationUids) " +
+        ") " +
+        "   AND (" +
+            " 0=:leFlag or  leUid in (:leUids) " +
+        ") " +
+        "   AND (" +
+            " 0=:pdFlag or  producerUid in (:producerUids) " +
+        ") " +
+        "   AND (" +
+            " 0=:ptFlag or  productTypeUid in (:productTypeUids) " +
+        ") " +
+
         "   AND Sale.saleCreationDate > :fromDate " +
         "   AND Sale.saleCreationDate < :toDate " ;
 
