@@ -16,6 +16,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import kotlinx.serialization.json.JsonObject
 
 
 /**
@@ -52,6 +53,15 @@ class ReportChartViewComponentPresenter(context: Any,
             reportOptionsString = arguments[ARG_REPORT_OPTIONS].toString()
             val json = Json(JsonConfiguration.Stable)
             reportOptions = json.parse(ReportOptions.serializer(), reportOptionsString)
+            val jal = (json.parseJson(reportOptionsString) as JsonObject).get("locations")?.jsonArray
+            val l = mutableListOf<Long>()
+            if(jal!= null) {
+                for (i in 0 until jal.size) {
+                    val item = jal[i].toString().toLong()
+                    l.add(i,item)
+                }
+            }
+            reportOptions.locations = l
 
             val startOfWeek = 6 //Sunday //TODO: GET THIS FROM SETTINGS, etc/
             val producerUids = ArrayList<Long>()
@@ -60,7 +70,7 @@ class ReportChartViewComponentPresenter(context: Any,
             GlobalScope.launch {
 
                 val resultLive = saleDao.getSalesPerformanceReportSumGroupedByLocationLive(reportOptions.les!!,
-                        producerUids, reportOptions.locations!!, reportOptions.productTypes!!,
+                        producerUids, reportOptions.locations, reportOptions.productTypes!!,
                         reportOptions.fromDate, reportOptions.toDate,
                         reportOptions.fromPrice, reportOptions.toPrice)
                 //view.runOnUiThread(Runnable {

@@ -111,7 +111,7 @@
                     android:padding="@dimen/dimen_16dp"
                     android:layout_height="wrap_content"
                     app:backgroundTint="@color/primary"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@color/primary_text" />
 
                 <com.ustadmobile.port.android.view.DownloadProgressView
                     android:id="@+id/entry_detail_progress"

@@ -15,7 +15,8 @@ class ReportOptions {
     var groupBy: Int = 0
     var isShowAverage: Boolean = false
     var les: List<Long>? = null
-    var locations: List<Long>? = null
+
+    var locations: MutableList<Long> = mutableListOf()
     var fromDate: Long = 0
     var toDate: Long = 0
     var fromPrice: Int = 0
@@ -27,7 +28,7 @@ class ReportOptions {
         groupBy = GROUP_BY_LOCATION
         isShowAverage = true
         les = ArrayList()
-        locations = ArrayList()
+        locations = mutableListOf()
         fromDate = UMCalendarUtil.getDateInMilliPlusDays(-31)
         toDate = UMCalendarUtil.getDateInMilliPlusDays(0)
         fromPrice = 0

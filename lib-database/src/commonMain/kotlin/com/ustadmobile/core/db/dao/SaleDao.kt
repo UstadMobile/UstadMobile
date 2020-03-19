@@ -678,12 +678,14 @@ abstract class SaleDao : BaseDao<Sale> {
         " WHERE " +
         "   CAST(SALE.saleActive AS INTEGER) = 1  " +
         "   AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  " +
-        "   OR leUid in (:leUids) " +
+        "   AND locationUid in (:locationUids) " +
+        "   AND( leUid in (:leUids) " +
         "   OR producerUid in (:producerUids) " +
-        "   OR locationUid in (:locationUids) " +
         "   OR productTypeUid in (:productTypeUids) " +
         "   AND Sale.saleCreationDate > :fromDate " +
-        "   AND Sale.saleCreationDate < :toDate " ;
+        "   AND Sale.saleCreationDate < :toDate )" ;
+
+
         const val SALE_PERFORMANCE_REPORT_GROUP_BY_LOCATION =
         " GROUP BY locationName, firstDateOccurence " ;
         const val SALE_PERFORMANCE_REPORT_GROUP_BY_PRODUCT_TYPE =

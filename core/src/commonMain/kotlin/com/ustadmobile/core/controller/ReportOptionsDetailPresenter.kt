@@ -107,7 +107,9 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
             GlobalScope.launch {
                 val result = dashboardEntryDao.findByUidAsync(dashboardEntryUid)
                 if (result != null) {
-                    view.setTitle(result.dashboardEntryTitle!!)
+                    view.runOnUiThread(Runnable {
+                        view.setTitle(result.dashboardEntryTitle!!)
+                    })
                     currentDashboardEntry = result
                     initFromDashboardEntry()
                 }
@@ -141,7 +143,10 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
             setReportOptionFromString(reportOptionString!!)
         }
 
-        view.setEditMode(currentDashboardEntry != null)
+        view.runOnUiThread(Runnable {
+            view.setEditMode(currentDashboardEntry != null)
+        })
+
 
         //Build report options on view:
 
@@ -163,37 +168,51 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
         updateSalePriceRangeOnView()
 
         //Show Average
-        view.setShowAverage(reportOptions!!.isShowAverage)
+        view.runOnUiThread(Runnable {
+            view.setShowAverage(reportOptions!!.isShowAverage)
+        })
 
 
         if (selectedLocations!!.isEmpty()) {
-            view.setLocationSelected(impl.getString(MessageID.all, context))
+            view.runOnUiThread(Runnable {
+                view.setLocationSelected(impl.getString(MessageID.all, context))
+            })
         } else {
             val locationDao = repository.locationDao
             GlobalScope.launch {
                 val result = locationDao.findAllLocationNamesInUidList(selectedLocations!!)
-                view.setLocationSelected(result!!)
+                view.runOnUiThread(Runnable {
+                    view.setLocationSelected(result!!)
+                })
             }
 
         }
 
         if (selectedProducts!!.isEmpty()) {
-            view.setProductTypeSelected(impl.getString(MessageID.all, context))
+            view.runOnUiThread(Runnable {
+                view.setProductTypeSelected(impl.getString(MessageID.all, context))
+            })
         } else {
             val saleProductDao = repository.saleProductDao
             GlobalScope.launch {
                 val result = saleProductDao.findAllProductNamesInUidList(selectedProducts!!)
-                view.setProductTypeSelected(result!!)
+                view.runOnUiThread(Runnable {
+                    view.setProductTypeSelected(result!!)
+                })
             }
         }
 
         if (selectedLEs!!.isEmpty()) {
-            view.setLESelected(impl.getString(MessageID.all, context))
+            view.runOnUiThread(Runnable {
+                view.setLESelected(impl.getString(MessageID.all, context))
+            })
         } else {
             val personDao = repository.personDao
             GlobalScope.launch {
                 val result = personDao.findAllPeopleNamesInUidList(selectedLEs!!)
-                view.setLESelected(result!!)
+                view.runOnUiThread(Runnable {
+                    view.setLESelected(result!!)
+                })
             }
         }
 
@@ -209,7 +228,9 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
 
         val rangeText = (impl.getString(MessageID.from, context) + " "
                 + fromS + " Afs - " + toS + " Afs")
-        view.setSalePriceRangeSelected(fromPrice, toPrice, rangeText)
+        view.runOnUiThread(Runnable {
+            view.setSalePriceRangeSelected(fromPrice, toPrice, rangeText)
+        })
 
 
     }
@@ -221,7 +242,9 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
             toDate = UMCalendarUtil.getDateInMilliPlusDays(0)
         }
 
-        view.setDateRangeSelectedLongs(fromDate, toDate)
+        view.runOnUiThread(Runnable {
+            view.setDateRangeSelectedLongs(fromDate, toDate)
+        })
 
     }
 
@@ -235,7 +258,9 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
             }
         }
 
-        view.setTitle(reportTitle)
+        view.runOnUiThread(Runnable {
+            view.setTitle(reportTitle)
+        })
     }
 
     private fun populateGroupBy() {
@@ -251,7 +276,9 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
 
         val sortPresets = arrayListToStringArray(presetAL)
 
-        view.setGroupByPresets(sortPresets, currentGroupBy - 1)
+        view.runOnUiThread(Runnable {
+            view.setGroupByPresets(sortPresets, currentGroupBy - 1)
+        })
     }
 
     fun handleChangeGroupBy(order: Long) {
@@ -285,7 +312,12 @@ class ReportOptionsDetailPresenter(context: Any, arguments: Map<String, String>?
         reportOptions!!.toPrice = toPrice
         reportOptions!!.fromDate = fromDate
         reportOptions!!.toDate = toDate
-        reportOptions!!.locations = selectedLocations
+
+        val s = selectedLocations
+        if (s != null) {
+            reportOptions!!.locations = s.toMutableList()
+        }
+
         reportOptions!!.productTypes = selectedProducts
         reportOptions!!.les = selectedLEs
 
