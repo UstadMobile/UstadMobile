@@ -31,7 +31,7 @@ class ClazzAssignmentDetailPresenter(context: Any,
     private lateinit var clazzAssignment: ClazzAssignmentWithMetrics
     private var clazzUid = 0L
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         if(arguments.containsKey(UstadView.ARG_CLAZZ_UID)) {

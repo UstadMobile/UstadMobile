@@ -55,7 +55,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
 
     private var activeJobCount = 0
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         impl = UstadMobileSystemImpl.instance
 

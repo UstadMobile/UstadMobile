@@ -12,7 +12,7 @@ class BaseReportPresenter(context: Any, arguments: Map<String, String>?, view: B
                           val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
         UstadBaseController<BaseReportView>(context, arguments!!, view) {
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
     }
 

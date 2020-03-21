@@ -30,7 +30,7 @@ class AddActivityChangeDialogPresenter(context: Any, arguments: Map<String, Stri
     //The Database repo
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
 

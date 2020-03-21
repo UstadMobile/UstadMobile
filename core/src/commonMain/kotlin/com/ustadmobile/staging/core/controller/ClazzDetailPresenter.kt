@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
  * want to see.
  * This is usually called first when we click on a Class from a list of Classes to get into it.
  */
-class ClazzDetailPresenter(context: Any, arguments: Map<String, String?>, view: ClazzDetailView,
+class ClazzDetailPresenter(context: Any, arguments: Map<String, String>, view: ClazzDetailView,
                            val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<ClazzDetailView>(context, arguments, view) {
 

@@ -21,7 +21,7 @@ class AddQuestionSetDialogPresenter(context: Any, arguments:Map<String, String>?
         selQuestionSetDao = repository.selQuestionSetDao
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
     }
 

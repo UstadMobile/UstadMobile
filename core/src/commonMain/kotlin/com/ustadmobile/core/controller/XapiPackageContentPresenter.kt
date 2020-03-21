@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
@@ -18,7 +17,6 @@ import kotlinx.io.StringReader
 import org.kmp.io.KMPXmlParser
 import com.ustadmobile.core.util.ext.toQueryString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 
 /**
  * Created by mike on 9/13/17.
@@ -41,7 +39,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     private var registrationUUID: String? = null
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         registrationUUID = UMUUID.randomUUID().toString()
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLongOrNull() ?: 0L

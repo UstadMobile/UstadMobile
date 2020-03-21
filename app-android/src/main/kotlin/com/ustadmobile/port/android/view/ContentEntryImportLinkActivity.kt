@@ -14,7 +14,6 @@ import android.widget.TextView
 import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.ContentEntryImportLinkView

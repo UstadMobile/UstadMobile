@@ -9,7 +9,7 @@ import com.ustadmobile.core.view.ScormPackageView
  *
  * Created by mike on 1/6/18.
  */
-class ScormPackagePresenter(context: Any, arguments: Map<String, String?>, view: ScormPackageView)
+class ScormPackagePresenter(context: Any, arguments: Map<String, String>, view: ScormPackageView)
     : UstadBaseController<ScormPackageView>(context, arguments, view) {
 /*
 

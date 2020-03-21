@@ -27,7 +27,7 @@ SELQuestionSetsView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.in
         selQuestionSetDao = repository.selQuestionSetDao
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         questionSetWithNumQuestionsUmProvider = selQuestionSetDao.findAllQuestionSetsWithNumQuestions()

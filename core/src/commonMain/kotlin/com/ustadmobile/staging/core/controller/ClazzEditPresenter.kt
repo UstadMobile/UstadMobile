@@ -150,7 +150,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      *
      * @param savedState The saved state
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid

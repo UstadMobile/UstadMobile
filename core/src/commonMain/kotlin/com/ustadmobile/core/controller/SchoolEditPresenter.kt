@@ -29,7 +29,7 @@ class SchoolEditPresenter(context: Any,
 
     private lateinit var currentSchool : School
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         GlobalScope.launch {

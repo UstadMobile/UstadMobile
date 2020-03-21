@@ -71,7 +71,7 @@ ext {
     ustadVersionCode = 179
 
     version_gradle_buildconfig_plugin = "1.1.7"
-    version_jacoco_tool = "0.8.4"
+    version_jacoco_tool = "0.8.5"
     version_kotlin_jvmTarget = "1.8"
     version_kotlinx_serialization = "0.14.0"
     version_klock = "1.4.0"

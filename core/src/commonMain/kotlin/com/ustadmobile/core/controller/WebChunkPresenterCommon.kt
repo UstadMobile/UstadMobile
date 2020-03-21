@@ -58,7 +58,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
     @JsName("handleMountChunk")
     abstract suspend fun handleMountChunk()
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         var entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID)!!.toLong()

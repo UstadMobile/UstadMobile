@@ -45,7 +45,7 @@ import kotlin.js.JsName
  * @author mike
  */
 abstract class UstadBaseController<V : UstadView>(override val context: Any,
-                                                  val arguments: Map<String, String?>, val view: V)
+                                                  protected val arguments: Map<String, String>, val view: V)
     : UmLifecycleOwner {
 
     private val lifecycleListeners = mutableListOf<UmLifecycleListener>()
@@ -58,7 +58,7 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      * @param savedState savedState if any
      */
     @JsName("onCreate")
-    open fun onCreate(savedState: Map<String, String?>?) {
+    open fun onCreate(savedState: Map<String, String>?) {
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {
                 listener.onLifecycleCreate(this)
@@ -141,6 +141,10 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
 
     override fun removeLifecycleListener(listener: UmLifecycleListener) {
         lifecycleListeners.remove(listener)
+    }
+
+    open fun onSaveInstanceState(savedState: MutableMap<String, String>) {
+
     }
 
     companion object {

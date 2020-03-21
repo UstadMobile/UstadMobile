@@ -23,7 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String?>,
+class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String>,
                                       view: ContentEntryImportLinkView,
                                       var endpointUrl: String,
                                       val db: UmAppDatabase,
@@ -45,7 +45,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     var jobCount = 0
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         parentContentEntryUid = arguments.getValue(CONTENT_ENTRY_PARENT_UID)?.toLong() ?: 0L

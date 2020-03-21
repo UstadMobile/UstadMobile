@@ -9,7 +9,6 @@ import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_CLAZZUID
 import com.ustadmobile.core.view.SelectClazzFeaturesView.Companion.CLAZZ_FEATURE_SEL_ENABLED
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Clazz.Companion.CLAZZ_FEATURE_ATTENDANCE
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -59,7 +58,7 @@ SelectClazzFeaturesView) : UstadBaseController<SelectClazzFeaturesView>(context,
         }
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         if (currentClazzUid != 0L) {

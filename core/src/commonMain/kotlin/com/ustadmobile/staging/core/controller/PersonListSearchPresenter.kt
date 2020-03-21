@@ -31,7 +31,7 @@ PersonListSearchView) : CommonHandlerPresenter<PersonListSearchView>(context, ar
      *
      * @param savedState The saved state.
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         personWithEnrollmentUmProvider = repository.clazzMemberDao

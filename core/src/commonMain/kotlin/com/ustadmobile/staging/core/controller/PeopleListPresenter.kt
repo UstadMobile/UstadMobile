@@ -1,12 +1,10 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
 import com.ustadmobile.core.view.PeopleListView
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_ATTENDANCE_ASC
@@ -19,7 +17,6 @@ import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonCustomFieldValue
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_PERSON_INSERT
 import kotlinx.coroutines.GlobalScope
@@ -54,7 +51,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
      *
      * @param savedState The saved state.
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         personWithEnrollmentUmProvider = repository.personDao.findAllPeopleWithEnrollment()

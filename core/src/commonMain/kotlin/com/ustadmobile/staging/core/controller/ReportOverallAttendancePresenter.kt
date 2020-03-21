@@ -152,7 +152,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
         view.generateCSVReport()
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         getAttendanceDataAndUpdateCharts()

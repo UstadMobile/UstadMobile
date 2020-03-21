@@ -6,12 +6,10 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.FeedListView
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_REPORT_NAME
 import com.ustadmobile.core.view.ReportSelectionView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.ClazzAverage
 import com.ustadmobile.lib.db.entities.FeedEntry
 import com.ustadmobile.lib.db.entities.Role
@@ -44,7 +42,7 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>, view: Feed
      *
      * @param savedState    THE SAVED STATE
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)?.personUid ?: 0L

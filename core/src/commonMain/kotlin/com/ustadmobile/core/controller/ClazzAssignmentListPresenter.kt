@@ -32,7 +32,7 @@ class ClazzAssignmentListPresenter(context: Any,
 
     private lateinit var factory: DataSource.Factory<Int, ClazzAssignmentWithMetrics>
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         if(arguments.containsKey(ARG_CLAZZ_UID)){
             clazzUid = arguments[ARG_CLAZZ_UID]?.toLong() ?: 0L

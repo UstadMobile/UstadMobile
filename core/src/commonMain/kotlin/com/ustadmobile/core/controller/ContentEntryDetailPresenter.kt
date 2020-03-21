@@ -34,7 +34,7 @@ import kotlin.js.JsName
 
 
 // the view should handle this being empty
-class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
+class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
                                   viewContract: ContentEntryDetailView,
                                   private val isDownloadEnabled: Boolean,
                                   private val appRepo: UmAppDatabase,
@@ -65,7 +65,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     private var downloadJobItemLiveData: DoorLiveData<DownloadJobItem?>? = null
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         entryUuid = arguments.getValue(ARG_CONTENT_ENTRY_UID)!!.toLong()

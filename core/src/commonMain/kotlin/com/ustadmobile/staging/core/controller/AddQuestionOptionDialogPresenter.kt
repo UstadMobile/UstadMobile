@@ -36,7 +36,7 @@ class AddQuestionOptionDialogPresenter (context: Any, arguments: Map<String, Str
         questionOptionDao = repository.selQuestionOptionDao
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         GlobalScope.launch {

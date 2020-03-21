@@ -69,7 +69,7 @@ SELQuestionSetDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemIm
         impl.go(SELQuestionDetail2View.VIEW_NAME, args, context)
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         GlobalScope.launch {

@@ -13,7 +13,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Register2View,
+class Register2Presenter(context: Any, arguments: Map<String, String>, view: Register2View,
                          private val personDao: PersonDao, private val personRepo: PersonDao)
     : UstadBaseController<Register2View>(context, arguments, view) {
 
@@ -24,7 +24,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String?>, view: Re
                 AppConfig.KEY_FIRST_DEST, HomeView.VIEW_NAME, context) ?: HomeView.VIEW_NAME
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         if (arguments.containsKey(ARG_SERVER_URL)) {

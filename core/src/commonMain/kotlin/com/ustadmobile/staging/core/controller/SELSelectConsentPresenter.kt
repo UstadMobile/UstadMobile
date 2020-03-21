@@ -69,7 +69,7 @@ SELSelectConsentView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.i
 
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
     }
 

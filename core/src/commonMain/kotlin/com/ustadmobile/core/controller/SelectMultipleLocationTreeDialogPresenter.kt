@@ -8,7 +8,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
-class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<String, String?>,
+class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<String, String>,
                                                 view: SelectMultipleLocationTreeDialogView,
                                                 private val locationDao: LocationDao)
     : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(context, arguments, view) {

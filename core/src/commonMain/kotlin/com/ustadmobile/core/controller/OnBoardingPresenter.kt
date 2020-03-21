@@ -11,7 +11,7 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: On
 
     private val languageOptions = impl.getAllUiLanguagesList(context)
 
-    override fun onCreate(savedState: Map<String, String?> ?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         view.setLanguageOptions(languageOptions.map { it.second })

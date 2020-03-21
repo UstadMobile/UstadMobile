@@ -195,7 +195,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_heading"
                     android:drawableLeft="@drawable/ic_add_circle"
                     android:gravity="start"
-                    android:onClick="@{() -> activityEventHandler.handleClickAddSchedule()}" />
+                    android:onClick="@{() -> activityEventHandler.showNewScheduleDialog()}" />
 
 
                 <androidx.recyclerview.widget.RecyclerView

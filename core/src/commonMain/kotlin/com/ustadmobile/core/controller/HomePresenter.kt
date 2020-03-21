@@ -22,7 +22,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeView,
+class HomePresenter(context: Any, arguments: Map<String, String>,  view: HomeView,
                     val personDao: PersonDao, val impl: UstadMobileSystemImpl,
                     val repository : UmAppDatabase =
                             UmAccountManager.getRepositoryForActiveAccount(context))
@@ -38,7 +38,7 @@ class HomePresenter(context: Any, arguments: Map<String, String?>,  view: HomeVi
 
     private var personPictureDao: PersonPictureDao = repository.personPictureDao
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         showDownloadAll = impl.getAppConfigString(

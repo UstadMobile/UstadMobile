@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -23,7 +22,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginView,
+class LoginPresenter(context: Any, arguments: Map<String, String>, view: LoginView,
                      val impl: UstadMobileSystemImpl, private val personRepo: PersonDao)
     : UstadBaseController<LoginView>(context, arguments, view) {
 
@@ -38,7 +37,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String?>, view: LoginV
                 .trim()
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         if (arguments.containsKey(ARG_SERVER_URL)) {
             view.setServerUrl(arguments.getValue(ARG_SERVER_URL)!!)

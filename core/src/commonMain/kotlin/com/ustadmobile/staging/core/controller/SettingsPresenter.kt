@@ -7,7 +7,7 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: Set
                         val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
         UstadBaseController<SettingsView>(context, arguments!!, view) {
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
     }
 

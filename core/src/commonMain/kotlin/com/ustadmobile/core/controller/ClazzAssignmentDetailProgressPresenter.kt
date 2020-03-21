@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
-import com.ustadmobile.core.view.ClazzAssignmentEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_ASSIGNMENT_UID
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.PersonWithAssignmentMetrics
@@ -29,7 +28,7 @@ class ClazzAssignmentDetailProgressPresenter(context: Any,
     private lateinit var clazzAssignment : ClazzAssignmentWithMetrics
     private lateinit var factory: DataSource.Factory<Int, PersonWithAssignmentMetrics>
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         if(arguments.containsKey(ARG_CLAZZ_ASSIGNMENT_UID)){
             val clazzAssignmentUid = arguments[ARG_CLAZZ_ASSIGNMENT_UID]?.toLong() ?: 0

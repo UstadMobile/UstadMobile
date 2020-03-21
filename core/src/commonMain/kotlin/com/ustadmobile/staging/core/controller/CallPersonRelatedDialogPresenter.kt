@@ -68,7 +68,7 @@ class CallPersonRelatedDialogPresenter(context: Any, arguments: Map<String, Stri
         view.setOnDisplay(putThisMap)
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         val personDao = repository.personDao

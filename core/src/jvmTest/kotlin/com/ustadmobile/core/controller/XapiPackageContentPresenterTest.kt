@@ -20,7 +20,6 @@ import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.Runnable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before

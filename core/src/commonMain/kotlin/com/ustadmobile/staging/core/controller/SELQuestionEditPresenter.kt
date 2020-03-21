@@ -28,7 +28,7 @@ SELQuestionEditView) : UstadBaseController<SELQuestionEditView>(context, argumen
 
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
     }
 

@@ -6,7 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<String, String?>,
+class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<String, String>,
                                                view: SelectMultipleEntriesTreeDialogView,
                                                private val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao) :
         CommonEntityHandlerPresenter<SelectMultipleEntriesTreeDialogView>(context, arguments, view) {

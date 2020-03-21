@@ -1,12 +1,27 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ScheduleEditView
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.serialization.json.Json
 
-class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: ScheduleEditView) : UstadBaseController<ScheduleEditView>(context, args, view) {
+class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: ScheduleEditView,
+lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl, db: UmAppDatabase,
+    repo: UmAppDatabase, activeAccount: DoorLiveData<UmAccount?>)
+    : UstadEditPresenter<ScheduleEditView, Schedule>(context, args, view, lifecycleOwner, systemImpl, db, repo, activeAccount) {
+
+    override val persistenceMode: PERSISTENCE_MODE
+        get() = PERSISTENCE_MODE.JSON
+
+    interface ScheduleEditDoneListener {
+        fun onScheduleEditDone(schedule: Schedule, requestCode: Int)
+    }
 
     enum class FrequencyOption(val optionVal: Int, val messageId: Int) {
         DAILY(Schedule.SCHEDULE_FREQUENCY_DAILY, MessageID.daily),
@@ -29,23 +44,25 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
 
     var schedule: Schedule? = null
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        val scheduleData = arguments[ScheduleEditView.ARG_SCHEDULE]
-        schedule = if(scheduleData != null) {
-            Json.parse(Schedule.serializer(), scheduleData)
-        }else {
-            Schedule()
-        }
 
         view.frequencyOptions = FrequencyOption.values().map { FrequencyMessageIdOption(it, context) }
-        view.schedule = schedule
         view.dayOptions = DayOptions.values().map { DayMessageIdOption(it, context) }
     }
 
-    fun handleClickDone(schedule: Schedule) {
-        view.finishWithResult(schedule)
+    override fun onLoadFromJson(bundle: Map<String, String>): Schedule? {
+        val scheduleData = arguments[ScheduleEditView.ARG_SCHEDULE]
+        return if(scheduleData != null) {
+            Json.parse(Schedule.serializer(), scheduleData)
+        }else {
+            Schedule().apply {
+                scheduleActive = true
+            }
+        }
     }
 
-
+    override fun handleClickSave(entity: Schedule) {
+        view.finishWithResult(entity)
+    }
 }

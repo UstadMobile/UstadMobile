@@ -14,7 +14,6 @@ import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Before
 import org.junit.After
 import org.junit.Test
-import org.junit.Assert
 
 
 class ClazzAssignmentDetailPresenterTest : AbstractSetup() {

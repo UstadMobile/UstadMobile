@@ -40,7 +40,7 @@ class CustomFieldListPresenter(context: Any, arguments: Map<String, String>?,
 
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         entityTypePresets = arrayOf(impl.getString(MessageID.clazz, context), impl.getString(MessageID.person, context))

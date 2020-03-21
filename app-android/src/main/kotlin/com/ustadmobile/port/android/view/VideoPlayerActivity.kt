@@ -27,7 +27,6 @@ import com.google.android.exoplayer2.util.Util
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoPlayerPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager

@@ -61,7 +61,7 @@ ReportMasterView) : UstadBaseController<ReportMasterView>(context, arguments!!, 
 
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         getDataAndUpdateTable()

@@ -110,7 +110,7 @@ class SELEditPresenter (context: Any, arguments: Map<String, String>?, view: SEL
      *
      * @param savedState    The saved state
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         //Populate the provider

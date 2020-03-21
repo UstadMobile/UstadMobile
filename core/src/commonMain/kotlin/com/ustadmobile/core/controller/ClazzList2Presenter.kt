@@ -34,7 +34,7 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
 
     class ClazzListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
@@ -61,7 +61,8 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
 
     override fun handleClickEntry(entry: Clazz) {
         val args = mapOf(UstadView.ARG_CLAZZ_UID to entry.clazzUid.toString())
-        systemImpl.go(ClazzDetailView.VIEW_NAME, args, context)
+        //systemImpl.go(ClazzDetailView.VIEW_NAME, args, context)
+        systemImpl.go(ClazzEdit2View.VIEW_NAME, args, context)
     }
 
     override fun handleClickCreateNew() {

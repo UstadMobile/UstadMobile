@@ -38,7 +38,7 @@ class ClazzAssignmentEditPresenter(context: Any,
             ClazzAssignmentContentEntryJoinWithContentEntry>>(mutableListOf())
 
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         if(arguments.containsKey(UstadView.ARG_CLAZZ_ASSIGNMENT_UID)){

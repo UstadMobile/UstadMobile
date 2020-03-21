@@ -33,7 +33,7 @@ class PersonDetailEnrollClazzPresenter(context: Any,
         }
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         //Populate classes

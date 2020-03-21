@@ -33,16 +33,35 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT>(context: Any,
         return null
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    open fun onLoadFromJson(bundle: Map<String, String>): RT? {
+        return null
+    }
+
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        if(persistenceMode == PERSISTENCE_MODE.DB) {
+        if(savedState != null) {
+            entity = onLoadFromJson(savedState)
+            view.entity = entity
+        }else if(persistenceMode == PERSISTENCE_MODE.DB) {
+            view.loading = true
+            view.fieldsEnabled = false
             GlobalScope.launch(doorMainDispatcher()) {
                 listOf(db, repo).forEach {
                     entity = onLoadEntityFromDb(it)
                     view.entity = entity
                 }
+
+                view.loading = false
+                view.fieldsEnabled = true
             }
+        }else if(persistenceMode == PERSISTENCE_MODE.JSON){
+            entity = onLoadFromJson(arguments)
+            view.entity = entity
         }
+    }
+
+    companion object {
+        const val ARG_SAVEDSTATE_ENTITY = "entity"
     }
 }

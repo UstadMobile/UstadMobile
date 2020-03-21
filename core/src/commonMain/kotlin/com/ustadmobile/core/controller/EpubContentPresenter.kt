@@ -189,7 +189,7 @@ class EpubContentPresenter(context: Any,
         }
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val containerUid = (arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 0)
         view.setProgressBarProgress(-1)

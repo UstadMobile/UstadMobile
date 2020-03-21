@@ -15,7 +15,11 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityClazzEdit2Binding
 import com.toughra.ustadmobile.databinding.ItemSchedule2Binding
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
+import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.toBundle
+import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorMutableLiveData
@@ -25,16 +29,16 @@ import java.util.*
 
 interface ClazzEdit2ActivityEventHandler {
 
-    fun handleClickAddSchedule()
+    fun showNewScheduleDialog()
 
-    fun handleClickEditSchedule(schedule: Schedule)
+    fun showEditScheduleDialog(schedule: Schedule)
 
     fun handleClickTimeZone()
 
 }
 
 class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Schedule?>>,
-        ClazzEdit2ActivityEventHandler, ScheduleEditDialogFragment.ScheduleEditDialogFragmentListener,
+        ClazzEdit2ActivityEventHandler, ScheduleEditPresenter.ScheduleEditDoneListener,
         OnTimeZoneSelectedListener {
 
     private var rootView: ActivityClazzEdit2Binding? = null
@@ -53,23 +57,8 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
             val viewHolder = ScheduleViewHolder(ItemSchedule2Binding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
-            val moreOptionsButton = viewHolder.itemView.findViewById<View>(R.id.item_schedule_secondary_menu_imageview)
             viewHolder.binding.mPresenter = presenter
-            moreOptionsButton.setOnClickListener {
-                val popupMenu = PopupMenu(moreOptionsButton.context, moreOptionsButton)
-                popupMenu.setOnMenuItemClickListener {item ->
-                    val binding = viewHolder.binding
-                    val scheduleClicked = binding.schedule ?: return@setOnMenuItemClickListener false
-                    when(item.itemId) {
-                        R.id.edit -> activityEventHandler.handleClickEditSchedule(scheduleClicked)
-                        R.id.delete -> presenter?.handleRemoveSchedule(scheduleClicked)
-                    }
-                    true
-                }
-                popupMenu.inflate(R.menu.menu_edit_delete)
-                popupMenu.show()
-            }
-
+            viewHolder.binding.mActivity = activityEventHandler
             return viewHolder
         }
 
@@ -94,22 +83,22 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
         scheduleRecyclerView?.layoutManager = LinearLayoutManager(this)
 
         mPresenter = ClazzEdit2Presenter(this, intent.extras.toStringMap(), this,
+                this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(this),
                 UmAccountManager.getRepositoryForActiveAccount(this))
         scheduleRecyclerAdapter?.presenter = mPresenter
-        mPresenter.onCreate(savedInstanceState.toStringMap())
+        mPresenter.onCreate(savedInstanceState.toNullableStringMap())
     }
 
     override fun onChanged(t: List<Schedule?>?) {
         scheduleRecyclerAdapter?.submitList(t)
     }
 
-    override fun handleClickAddSchedule() {
-        val scheduleEditDialog = ScheduleEditDialogFragment()
-        scheduleEditDialog.show(supportFragmentManager, TAG_SCHEDULE_EDIT_DIALOG)
+    override fun showNewScheduleDialog() {
+        ScheduleEditDialogFragment().show(supportFragmentManager, TAG_SCHEDULE_EDIT_DIALOG)
     }
 
-    override fun handleClickEditSchedule(schedule: Schedule) {
+    override fun showEditScheduleDialog(schedule: Schedule) {
         val scheduleEditDialog = ScheduleEditDialogFragment.newInstance(schedule)
         scheduleEditDialog.show(supportFragmentManager, TAG_SCHEDULE_EDIT_DIALOG)
     }
@@ -120,13 +109,18 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
         timezoneDialog.show(supportFragmentManager, TAG_TIMEZONE_DIALOG)
     }
 
-    override fun onScheduleDone(schedule: Schedule) {
+    override fun onScheduleEditDone(schedule: Schedule, requestCode: Int) {
         mPresenter.handleAddOrEditSchedule(schedule)
     }
 
     override fun onTimeZoneSelected(timeZone: TimeZone) {
         rootView?.clazz?.clazzTimeZone = timeZone.id
         rootView?.clazz = rootView?.clazz
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putAll(mutableMapOf<String, String>().apply { mPresenter.onSaveInstanceState(this) }.toBundle())
     }
 
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
@@ -137,11 +131,11 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
             value?.observe(this, this)
         }
 
-    override var clazz: Clazz? = null
+    override var entity: Clazz? = null
         get() = field
         set(value) {
             field = value
-            rootView?.clazz = clazz
+            rootView?.clazz = value
         }
 
     override var fieldsEnabled: Boolean = false
@@ -150,6 +144,10 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
             field = value
             rootView?.fieldsEnabled = value
         }
+
+    override fun finishWithResult(result: Clazz) {
+        TODO("Not yet implemented")
+    }
 
     override var loading: Boolean = false
         get() = field
@@ -162,7 +160,7 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
         when(item.itemId) {
             R.id.menu_done -> {
                 val selectedClazz = rootView?.clazz ?: return false
-                mPresenter.handleClickDone(selectedClazz)
+                mPresenter.handleClickSave(selectedClazz)
                 return true
             }
         }

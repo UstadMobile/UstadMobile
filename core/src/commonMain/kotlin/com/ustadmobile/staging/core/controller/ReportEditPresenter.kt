@@ -108,7 +108,7 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
     }
 
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         //Update report name on top

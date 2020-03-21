@@ -94,7 +94,7 @@ class ClazzActivityListPresenter(context: Any, arguments: Map<String, String>?,
      *
      * @param savedState    The savedState
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         //Populate the provider

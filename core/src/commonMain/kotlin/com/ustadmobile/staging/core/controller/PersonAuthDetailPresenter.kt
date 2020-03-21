@@ -49,7 +49,7 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
 
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         loggedInPersonUid = UmAccountManager.getActiveAccount(context)!!.personUid

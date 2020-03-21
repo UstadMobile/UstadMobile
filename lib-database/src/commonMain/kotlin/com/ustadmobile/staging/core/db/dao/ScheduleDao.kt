@@ -1,10 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -18,13 +15,21 @@ import com.ustadmobile.lib.db.entities.ScheduledCheck
         inheritPermissionJoinedPrimaryKey = "clazzUid")
 @UmRepository
 @Dao
-abstract class ScheduleDao : BaseDao<Schedule> {
+abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
 
     @Insert
     abstract override fun insert(entity: Schedule): Long
 
     @Update
     abstract suspend fun updateAsync(entity: Schedule) : Int
+
+    @Transaction
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach { updateScheduleActivated(it, false) }
+    }
+
+    @Query("UPDATE Schedule SET scheduleActive = :active WHERE scheduleUid = :scheduleUid")
+    abstract fun updateScheduleActivated(scheduleUid: Long, active: Boolean)
 
     @Query("SELECT * FROM Schedule WHERE scheduleUid = :uid")
     abstract fun findByUid(uid: Long): Schedule?

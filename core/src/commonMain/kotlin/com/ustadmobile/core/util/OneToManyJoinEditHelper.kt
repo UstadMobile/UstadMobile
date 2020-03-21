@@ -1,6 +1,10 @@
 package com.ustadmobile.core.util
 
+import com.ustadmobile.core.db.dao.OneToManyJoinDao
 import com.ustadmobile.door.DoorMutableLiveData
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.json.Json
 
 /**
  * This class is designed to help manager a one to many join in edit mode. E.g. Clazz has a 1:n
@@ -12,6 +16,10 @@ import com.ustadmobile.door.DoorMutableLiveData
  * false).
  */
 open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
+                                         val serializationKey: String,
+                                         val serializationStrategy: SerializationStrategy<List<T>>? = null,
+                                         val deserializationStrategy: DeserializationStrategy<List<T>>? = null,
+                                         val newPk: K,
                                     val pkSetter: T.(K) -> Unit,
     open protected val fakePkGenerator: () -> K) {
 
@@ -53,4 +61,29 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
 
     val entitiesToDeactivate: List<T>
         get() = liveList.getValue()?.filter { pkGetter(it) in pksToDeactivate } ?: listOf()
+
+    fun onSaveState(savedState: MutableMap<String, String>) {
+        val listVal = liveList.getValue() ?: return
+        val serializer = serializationStrategy ?: return
+        savedState[serializationKey] = Json.stringify(serializationStrategy, listVal)
+    }
+
+    fun onLoadFromJsonSavedState(savedState: Map<String, String>?) {
+        val listJsonStr = savedState?.get(serializationKey) ?: return
+        val deserializer = deserializationStrategy ?: return
+        val listVal = Json.parse(deserializer, listJsonStr)
+        liveList.sendValue(listVal)
+    }
+
+    /**
+     * Commits the results of the editing to the database
+     */
+    open suspend fun commitToDatabase(dao: OneToManyJoinDao<T>, fkSetter: (T) -> Unit) {
+        dao.insertListAsync(entitiesToInsert.also { it.forEach {
+            fkSetter(it)
+            pkSetter(it, newPk)
+        }  })
+        dao.updateListAsync(entitiesToUpdate.also { it.forEach(fkSetter) })
+    }
+
 }

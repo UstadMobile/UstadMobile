@@ -1,15 +1,12 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.AboutView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlinx.io.IOException
 import kotlinx.io.InputStream
 
 /**
@@ -20,7 +17,7 @@ class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
                      val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<AboutView>(context, args!!, view) {
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         GlobalScope.launch {

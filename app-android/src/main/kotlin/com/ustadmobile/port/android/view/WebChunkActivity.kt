@@ -7,7 +7,6 @@ import android.view.MenuItem
 import android.webkit.WebView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.WebChunkPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback

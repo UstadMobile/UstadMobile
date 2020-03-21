@@ -26,7 +26,7 @@ import java.util.*
 import kotlin.text.Charsets.UTF_8
 
 
-actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
+actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String>,
                                                        view: ContentEditorView, private val storage: String?,
                                                        private val database : UmAppDatabase,
                                                        private val repository : UmAppDatabase ,

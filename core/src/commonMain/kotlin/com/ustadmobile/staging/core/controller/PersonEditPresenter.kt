@@ -242,7 +242,7 @@ class PersonEditPresenter
      * Presenter's Overridden onCreate that: Gets the mPerson LiveData and observe it.
      * @param savedState    The saved state
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val personDetailPresenterFieldDao = repository.personDetailPresenterFieldDao
 

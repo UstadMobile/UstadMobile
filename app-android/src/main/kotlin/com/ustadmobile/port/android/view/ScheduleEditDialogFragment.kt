@@ -10,6 +10,8 @@ import androidx.appcompat.widget.Toolbar
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentEditScheduleDialogBinding
 import com.ustadmobile.core.controller.ScheduleEditPresenter
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.lib.db.entities.Schedule
@@ -18,13 +20,8 @@ import kotlinx.serialization.json.Json
 class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
         DialogInterface.OnClickListener, DialogInterface.OnShowListener{
 
-    interface ScheduleEditDialogFragmentListener {
 
-        fun onScheduleDone(schedule: Schedule)
-
-    }
-
-    private var fragmentListener: ScheduleEditDialogFragmentListener? = null
+    private var fragmentListener: ScheduleEditPresenter.ScheduleEditDoneListener? = null
 
     private var viewBinding: FragmentEditScheduleDialogBinding? = null
 
@@ -32,10 +29,23 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
 
     private var mToolbar: Toolbar? = null
 
-    override var schedule: Schedule? = null
+    override var entity: Schedule? = null
         get() = field
         set(value) {
             viewBinding?.schedule = value
+            field = value
+        }
+
+
+    override var loading: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+        }
+
+    override var fieldsEnabled: Boolean = false
+        get() = field
+        set(value) {
             field = value
         }
 
@@ -63,7 +73,7 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
         mToolbar?.setOnMenuItemClickListener {
             val currentSchedule = viewBinding?.schedule
             if(currentSchedule != null) {
-                mPresenter?.handleClickDone(currentSchedule)
+                mPresenter?.handleClickSave(currentSchedule)
             }
             true
         }
@@ -76,13 +86,18 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
     }
 
     override fun onShow(dialog: DialogInterface?) {
-        mPresenter = ScheduleEditPresenter(requireContext(), arguments.toStringMap(), this)
+        mPresenter = ScheduleEditPresenter(requireContext(), arguments.toStringMap(), this,
+            this, UstadMobileSystemImpl.instance,
+                UmAccountManager.getActiveDatabase(requireContext()),
+                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
+                UmAccountManager.activeAccountLiveData)
+
         mPresenter?.onCreate(null)
     }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        fragmentListener = context as? ScheduleEditDialogFragmentListener
+        fragmentListener = context as? ScheduleEditPresenter.ScheduleEditDoneListener
     }
 
 
@@ -99,8 +114,12 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
         mPresenter = null
     }
 
-    override fun finishWithResult(schedule: Schedule) {
-        fragmentListener?.onScheduleDone(schedule)
+    override fun finishWithResult(result: Schedule) {
+        fragmentListener?.onScheduleEditDone(result, 0)
+        dismiss()
+    }
+
+    override fun finish() {
         dismiss()
     }
 

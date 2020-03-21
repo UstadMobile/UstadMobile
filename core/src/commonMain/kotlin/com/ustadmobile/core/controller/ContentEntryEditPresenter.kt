@@ -28,7 +28,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryEditView,
+class ContentEntryEditPresenter(context: Any, arguments: Map<String, String>, view: ContentEntryEditView,
                                 private val contentEntryDao: ContentEntryDao,
                                 private val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao,
                                 private val contentEntryStatusDao: ContentEntryStatusDao,
@@ -66,7 +66,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String?>, v
 
     private var isImportedContent: Boolean = contentType == CONTENT_IMPORT_FILE
 
-    override fun onCreate(savedState: Map<String, String?> ?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         GlobalScope.launch {

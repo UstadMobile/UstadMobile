@@ -55,7 +55,7 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
 
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         getNumberOfDaysOpenDataAndUpdateCharts()

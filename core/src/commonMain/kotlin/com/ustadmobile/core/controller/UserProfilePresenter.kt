@@ -1,14 +1,9 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.PersonPictureDao
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_IMAGE_PATH
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_UID
@@ -20,7 +15,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view: UserProfileView,
+class UserProfilePresenter (context: Any, arguments: Map<String, String>, view: UserProfileView,
                             val repository: UmAppDatabase, val impl: UstadMobileSystemImpl)
     : UstadBaseController<UserProfileView>(context, arguments, view){
 
@@ -34,7 +29,7 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
 
     var loggedInPersonUid = 0L
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val account = UmAccountManager.getActiveAccount(context)
         if(account != null) {

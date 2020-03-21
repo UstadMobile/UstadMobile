@@ -37,7 +37,7 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>?
 
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         //Get provider

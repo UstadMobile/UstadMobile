@@ -36,7 +36,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
 
     private lateinit var reportOptions: XapiReportOptions
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         val json = Json(JsonConfiguration.Stable)

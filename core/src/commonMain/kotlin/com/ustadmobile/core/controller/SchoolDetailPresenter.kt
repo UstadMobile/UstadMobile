@@ -30,7 +30,7 @@ class SchoolDetailPresenter(context: Any,
     private lateinit var currentSchool : School
     private lateinit var factory: DataSource.Factory<Int, School>
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         if(arguments.containsKey(ARG_SCHOOL_DETAIL_SCHOOL_UID)){

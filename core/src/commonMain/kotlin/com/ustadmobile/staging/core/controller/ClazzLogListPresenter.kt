@@ -75,7 +75,7 @@ class ClazzLogListPresenter(context: Any, arguments: Map<String, String>?, view:
      *
      * @param savedState    The savedState
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         GlobalScope.launch {
             clazzLogListProvider =

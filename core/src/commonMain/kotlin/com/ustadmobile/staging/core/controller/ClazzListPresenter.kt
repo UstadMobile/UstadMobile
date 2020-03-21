@@ -64,7 +64,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      *
      * @param savedState The state
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         val activeAccount = UmAccountManager.getActiveAccount(context)

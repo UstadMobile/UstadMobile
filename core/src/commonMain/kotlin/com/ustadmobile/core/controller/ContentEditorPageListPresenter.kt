@@ -24,7 +24,7 @@ class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String
 
     private var selectedPage: String? = null
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         entryLiveData  = contentEntryDao.findLiveContentEntry(entryUuid)

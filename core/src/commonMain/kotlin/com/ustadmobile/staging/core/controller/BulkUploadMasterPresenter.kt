@@ -52,7 +52,7 @@ class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
         personCustomFieldValueDao = repository.personCustomFieldValueDao
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         //TODO: KMP Fix when TimeZone is working

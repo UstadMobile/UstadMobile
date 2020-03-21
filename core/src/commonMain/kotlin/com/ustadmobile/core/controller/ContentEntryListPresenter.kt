@@ -25,7 +25,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
+class ContentEntryListPresenter(context: Any, arguments: Map<String, String>,
                                 private val viewContract: ContentEntryListView,
                                 private val contentEntryDao: ContentEntryDao,
                                 private val contentEntryDaoRepo: ContentEntryDao,
@@ -55,7 +55,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String?>,
 
     private val parentEntryUidStack = mutableListOf<Long>()
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         filterButtons = arguments[ARG_FILTER_BUTTONS]?.split(",") ?: listOf()

@@ -17,7 +17,6 @@ import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailProgress
 import com.ustadmobile.core.controller.ClazzAssignmentDetailProgressPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.lib.db.entities.PersonWithAssignmentMetrics
 import com.ustadmobile.port.android.view.PersonWithAssignmentMetricsRecyclerAdapter
 import com.ustadmobile.port.android.view.UstadBaseFragment

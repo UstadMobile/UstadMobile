@@ -23,9 +23,6 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.port.android.view.UstadBaseFragment
 import com.ustadmobile.staging.core.view.SearchableListener
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 /**

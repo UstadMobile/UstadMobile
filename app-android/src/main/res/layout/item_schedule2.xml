@@ -11,6 +11,10 @@
             name="mPresenter"
             type="com.ustadmobile.core.controller.ClazzEdit2Presenter" />
 
+        <variable
+            name="mActivity"
+            type="com.ustadmobile.port.android.view.ClazzEdit2ActivityEventHandler" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -40,7 +44,10 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_more_vert_black_24dp"
             android:contentDescription="@string/edit"
-            android:layout_marginRight="8dp" />
+            android:layout_marginRight="8dp"
+            app:onClickEditPopupMenu="@{() -> mActivity.showEditScheduleDialog(schedule)}"
+            app:onClickDeletePopupMenu="@{() -> mPresenter.handleRemoveSchedule(schedule)}"
+            />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -49,7 +49,7 @@ class GroupDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
 
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         if (currentGroupUid == 0L) {

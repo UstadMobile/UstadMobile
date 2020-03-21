@@ -31,7 +31,7 @@ class RoleAssignmentListPresenter(context: Any, arguments: Map<String, String>?,
         providerDao = repository.entityRoleDao
     }
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         //Get provider

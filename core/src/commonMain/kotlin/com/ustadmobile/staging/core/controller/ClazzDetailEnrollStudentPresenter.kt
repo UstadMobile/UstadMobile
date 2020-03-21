@@ -12,7 +12,6 @@ import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
 import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.CUSTOM_FIELD_MIN_UID
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -68,7 +67,7 @@ class ClazzDetailEnrollStudentPresenter(context: Any, arguments: Map<String, Str
      *
      * @param savedState The savedState
      */
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         if (currentRole == ClazzMember.ROLE_TEACHER) {
