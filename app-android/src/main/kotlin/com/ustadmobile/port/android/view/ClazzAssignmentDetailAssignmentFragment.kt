@@ -1,4 +1,4 @@
-package com.ustadmobile.staging.port.android.view
+package com.ustadmobile.port.android.view
 
 
 import android.os.Bundle
@@ -20,8 +20,6 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClazzAssignmentDetailAssignmentView
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
-import com.ustadmobile.port.android.view.ContentEntryWithMetricsRecyclerAdapter
-import com.ustadmobile.port.android.view.UstadBaseFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -74,7 +72,7 @@ class ClazzAssignmentDetailAssignmentFragment : UstadBaseFragment(), ClazzAssign
         val mRecyclerLayoutManager = LinearLayoutManager(context)
         mRecyclerView?.layoutManager = mRecyclerLayoutManager
         //set up Presenter
-        mPresenter = ClazzAssignmentDetailAssignmentPresenter(context!!,
+        mPresenter = ClazzAssignmentDetailAssignmentPresenter(requireContext(),
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter?.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 

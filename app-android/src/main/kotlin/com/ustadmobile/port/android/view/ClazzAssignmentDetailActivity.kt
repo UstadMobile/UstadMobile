@@ -18,8 +18,6 @@ import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
 import com.ustadmobile.core.view.ClazzAssignmentDetailView
 import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import com.ustadmobile.staging.port.android.view.ClazzAssignmentDetailAssignmentFragment
-import com.ustadmobile.staging.port.android.view.ClazzAssignmentDetailProgressFragment
 
 
 /**
@@ -101,7 +99,7 @@ class ClazzAssignmentDetailActivity : UstadBaseActivity(), ClazzAssignmentDetail
 
         toolbar = rootView?.clazzAssignmentDetailToolbar
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         //Presenter
         mPresenter = ClazzAssignmentDetailPresenter(this,

@@ -1,4 +1,4 @@
-package com.ustadmobile.staging.port.android.view
+package com.ustadmobile.port.android.view
 
 
 import android.os.Bundle
@@ -13,29 +13,27 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentListBinding
-import com.ustadmobile.core.controller.ClazzAssignmentListPresenter
+import com.toughra.ustadmobile.databinding.FragmentClazzAssignmentDetailProgressBinding
+import com.ustadmobile.core.controller.ClazzAssignmentDetailProgressPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.ClazzAssignmentListView
-import com.ustadmobile.lib.db.entities.ClazzAssignmentWithMetrics
-import com.ustadmobile.port.android.view.ClazzAssignmentListRecyclerAdapter
-import com.ustadmobile.port.android.view.UstadBaseFragment
+import com.ustadmobile.core.view.ClazzAssignmentDetailProgressView
+import com.ustadmobile.lib.db.entities.PersonWithAssignmentMetrics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import ru.dimorinny.floatingtextbutton.FloatingTextButton
 
 /**
  * ClazzListFragment Android fragment extends UstadBaseFragment
  */
-class ClazzAssignmentListFragment : UstadBaseFragment(), ClazzAssignmentListView {
+class ClazzAssignmentDetailProgressFragment : UstadBaseFragment(), ClazzAssignmentDetailProgressView {
+
+
     override val viewContext: Any
         get() = requireContext()
 
-    private var rootContainer: FragmentClazzAssignmentListBinding? = null
+    private var rootContainer: FragmentClazzAssignmentDetailProgressBinding? = null
     private var mRecyclerView: RecyclerView? = null
-    private var mPresenter: ClazzAssignmentListPresenter? = null
-    internal var fab: FloatingTextButton? = null
+    private var mPresenter: ClazzAssignmentDetailProgressPresenter? = null
 
     /**
      * On Create of the fragment.
@@ -50,14 +48,14 @@ class ClazzAssignmentListFragment : UstadBaseFragment(), ClazzAssignmentListView
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
-        rootContainer = FragmentClazzAssignmentListBinding.inflate(
+        rootContainer = FragmentClazzAssignmentDetailProgressBinding.inflate(
                 LayoutInflater.from(context), container, false)
 
-        mRecyclerView = rootContainer?.fragmentClazzAssignmentListRecyclerview
+        mRecyclerView = rootContainer?.fragmentClazzAssignmentDetailProgressRecyclerview
         val mRecyclerLayoutManager = LinearLayoutManager(context)
         mRecyclerView?.layoutManager = mRecyclerLayoutManager
         //set up Presenter
-        mPresenter = ClazzAssignmentListPresenter(context!!,
+        mPresenter = ClazzAssignmentDetailProgressPresenter(requireContext(),
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter?.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
@@ -66,13 +64,8 @@ class ClazzAssignmentListFragment : UstadBaseFragment(), ClazzAssignmentListView
         return rootContainer?.root
     }
 
-    /**
-     * Sets the provider to the view.
-     *
-     * @param setListProvider The UMProvider provider of ClazzWithNumStudents Type.
-     */
-    override fun setListProvider(factory : DataSource.Factory<Int, ClazzAssignmentWithMetrics>) {
-        val recyclerAdapter = ClazzAssignmentListRecyclerAdapter(DIFF_CALLBACK, mPresenter)
+    override fun setListProvider(factory: DataSource.Factory<Int, PersonWithAssignmentMetrics>) {
+        val recyclerAdapter = PersonWithAssignmentMetricsRecyclerAdapter(DIFF_CALLBACK_PERSON_WITH_METRICS, mPresenter)
 
         // a warning is expected.
         val data = LivePagedListBuilder(factory, 20).build()
@@ -80,19 +73,11 @@ class ClazzAssignmentListFragment : UstadBaseFragment(), ClazzAssignmentListView
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
             data.observe(thisP,
-                    Observer<PagedList<ClazzAssignmentWithMetrics>> { recyclerAdapter.submitList(it) })
+                    Observer<PagedList<PersonWithAssignmentMetrics>> { recyclerAdapter.submitList(it) })
         }
-
         mRecyclerView?.adapter = recyclerAdapter
     }
 
-    override fun setEditVisibility(visible: Boolean) {
-        if(visible) {
-            rootContainer?.fragmentClazzAssignmentListFab?.visibility = View.VISIBLE
-        }else{
-            rootContainer?.fragmentClazzAssignmentListFab?.visibility = View.INVISIBLE
-        }
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -103,15 +88,15 @@ class ClazzAssignmentListFragment : UstadBaseFragment(), ClazzAssignmentListView
     }
 
     companion object {
-        val title = R.string.assignments
+        val title = R.string.student_progress
 
         /**
          * Generates a new Fragment for a page fragment
          *
          * @return A new instance of fragment ClazzListFragment.
          */
-        fun newInstance(): ClazzAssignmentListFragment {
-            val fragment = ClazzAssignmentListFragment()
+        fun newInstance(): ClazzAssignmentDetailProgressFragment {
+            val fragment = ClazzAssignmentDetailProgressFragment()
             val args = Bundle()
             fragment.arguments = args
             return fragment
@@ -122,8 +107,8 @@ class ClazzAssignmentListFragment : UstadBaseFragment(), ClazzAssignmentListView
          *
          * @return A new instance of fragment ClazzListFragment.
          */
-        fun newInstance(args: Bundle): ClazzAssignmentListFragment {
-            val fragment = ClazzAssignmentListFragment()
+        fun newInstance(args: Bundle?): ClazzAssignmentDetailProgressFragment {
+            val fragment = ClazzAssignmentDetailProgressFragment()
             fragment.arguments = args
             return fragment
         }
@@ -131,15 +116,15 @@ class ClazzAssignmentListFragment : UstadBaseFragment(), ClazzAssignmentListView
         /**
          * The DIFF Callback.
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzAssignmentWithMetrics> = object
-            : DiffUtil.ItemCallback<ClazzAssignmentWithMetrics>() {
-            override fun areItemsTheSame(oldItem: ClazzAssignmentWithMetrics,
-                                         newItem: ClazzAssignmentWithMetrics): Boolean {
+        val DIFF_CALLBACK_PERSON_WITH_METRICS: DiffUtil.ItemCallback<PersonWithAssignmentMetrics> = object
+            : DiffUtil.ItemCallback<PersonWithAssignmentMetrics>() {
+            override fun areItemsTheSame(oldItem: PersonWithAssignmentMetrics,
+                                         newItem: PersonWithAssignmentMetrics): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: ClazzAssignmentWithMetrics,
-                                            newItem: ClazzAssignmentWithMetrics): Boolean {
+            override fun areContentsTheSame(oldItem: PersonWithAssignmentMetrics,
+                                            newItem: PersonWithAssignmentMetrics): Boolean {
                 return oldItem == newItem
             }
         }
