@@ -74,9 +74,14 @@ task prepareUmEditorDirectories {
 /* Task to minify UmEditor javascript file*/
 new File(rootPath + "src/js").eachFile { def file ->
     def dynamicTaskName = "taskMinifyJs${umJsTaskIndex}"
+
+    println("HELLO")
+    println(findCommand("uglifyjs", "editor.uglifyjs"))
+
     def jsDistDir =  "${rootPath}dist/js/"
     File jsDistFile = new File(jsDistDir)
     File commandDir = new File(findCommand("uglifyjs", "editor.uglifyjs"))
+
 
     if(commandDir.exists()){
         task "${dynamicTaskName}"(type: Exec) {

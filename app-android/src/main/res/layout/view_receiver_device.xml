@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/dimen_4dp"
+    android:background="?attr/selectableItemBackground"
+    android:paddingTop="@dimen/dimen_4dp">
+
+    <ImageView
+        android:id="@+id/item_send_course_receiver_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_smartphone_black_24dp"/>
+
+    <TextView
+        android:id="@+id/item_send_course_receiver_name"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/view_receiver_device_cancel_button"
+        android:layout_gravity="center_vertical"
+        android:text="@string/cancel_invite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"/>
+
+
+</LinearLayout>

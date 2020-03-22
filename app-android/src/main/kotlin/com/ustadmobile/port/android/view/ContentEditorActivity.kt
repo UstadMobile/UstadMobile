@@ -82,7 +82,9 @@ import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
 open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
-        ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback, UmEditorActionView.OnQuickActionMenuItemClicked, UmEditorAnimatedViewSwitcher.OnAnimatedViewsClosedListener {
+        ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback,
+        UmEditorActionView.OnQuickActionMenuItemClicked,
+        UmEditorAnimatedViewSwitcher.OnAnimatedViewsClosedListener {
 
     private lateinit var presenter: ContentEditorPresenter
 

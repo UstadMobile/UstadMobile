@@ -55,6 +55,10 @@ tasks.whenTaskAdded { task ->
 }
 
 android {
+    dataBinding {
+        enabled = true
+    }
+
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
         main.res.srcDirs += "../core/locale/main/"
@@ -94,6 +98,10 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
+    dataBinding {
+        enabled = true
+    }
+
     defaultConfig {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
@@ -112,6 +120,7 @@ android {
             excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module"]
         }
 
+        missingDimensionStrategy 'api', 'api18'
     }
 
     flavorDimensions "config"
@@ -181,7 +190,7 @@ gradle.taskGraph.useFilter { task ->
 }
 
 task generateCoreStringToAndroidResMap {
-    inputs.files("../core/locale/main/**/*.xml")
+    inputs.files("../core/locale/main/values/*.xml")
     onlyIf {
         /*
          Only run this task if the input files have been updated since the task was last run.
@@ -189,7 +198,7 @@ task generateCoreStringToAndroidResMap {
          */
         long inputLastModified = 0L
 
-        rootProject.fileTree(dir: "core/locale/main", include: "**/*.xml").each() { File file ->
+        rootProject.fileTree(dir: "core/locale/main", include: "values/*.xml").each() { File file ->
             if (file.lastModified() > inputLastModified)
                 inputLastModified = file.lastModified()
         }
@@ -213,7 +222,7 @@ task generateCoreStringToAndroidResMap {
         genSrcHeader += "\tinit {\n"
 
         System.out.println("Looking in: core/locale/main")
-        rootProject.fileTree(dir: "core/locale/main", include: "**/*.xml").each() { File file ->
+        rootProject.fileTree(dir: "core/locale/main", include: "values/*.xml").each() { File file ->
             System.out.println("Found: " + file.getAbsolutePath())
             def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
             xmlDoc.string.each() { str ->
@@ -415,6 +424,16 @@ dependencies {
     
     //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
     androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+
+    //Range seekbar by Crystal
+    implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
+
+    //Bottom Navigation
+    implementation "com.aurelhubert:ahbottomnavigation:$version_android_ahbottomnavigation"
+
+    //Android play core for update support within the application
+    implementation "com.google.android.play:core:$version_play_core"
+
 }
 
 task sourceJar(type: Jar) {

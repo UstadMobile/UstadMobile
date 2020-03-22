@@ -14,6 +14,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.XapiPackageContentView
 import java.util.concurrent.atomic.AtomicReference
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -76,7 +77,8 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
 
     override fun onHttpdConnected(httpd: EmbeddedHTTPD) {
         mPresenter = XapiPackageContentPresenter(this,
-                bundleToMap(intent.extras), this, httpd.containerMounter)
+                bundleToMap(intent.extras), this,
+                UmAccountManager.getActiveAccount(this), httpd.containerMounter)
 
         mPresenter.onCreate(bundleToMap(savedState))
     }
@@ -110,7 +112,7 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
     }
 
     override fun showSnackBarNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
-        mProgressBar!!.progress = 0
-        mProgressBar!!.visibility = View.GONE
+        mProgressBar?.progress = 0
+        mProgressBar?.visibility = View.GONE
     }
 }

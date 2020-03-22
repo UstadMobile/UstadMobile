@@ -12,3 +12,11 @@ actual fun <T> DoorLiveData<T>.observeWithPresenter(presenter: UstadBaseControll
         }
     })
 }
+
+actual fun <T: Any?> DoorLiveData<T>.observeWithLifecycleOwner(lifecycleOwner: DoorLifecycleOwner, observer: (T?) -> Unit) {
+    this.observe(lifecycleOwner, object : DoorObserver<T?> {
+        override fun onChanged(t: T?) {
+            observer.invoke(t)
+        }
+    })
+}

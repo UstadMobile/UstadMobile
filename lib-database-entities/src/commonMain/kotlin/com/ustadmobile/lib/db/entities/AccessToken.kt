@@ -20,4 +20,11 @@ class AccessToken() {
         this.accessTokenPersonUid = personUid
         this.expires = expires
     }
+
+    constructor(personUid: Long, expires: Long, fToken:String) : this() {
+        token = ""
+        this.accessTokenPersonUid = personUid
+        this.expires = expires
+        this.token = fToken
+    }
 }

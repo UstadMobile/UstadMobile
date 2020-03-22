@@ -1,14 +1,16 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileConstants
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.LoginView
+
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileConstants
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.SplashScreenView
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.junit.Before
@@ -42,7 +44,7 @@ class UserProfileTest {
             }
         }
 
-        presenter = UserProfilePresenter(context, mapOf(),view,UmAppDatabase.getInstance(context).personDao,impl)
+        presenter = UserProfilePresenter(context, mapOf(),view,UmAppDatabase.getInstance(context),impl)
 
         UmAccountManager.setActiveAccount(UmAccount(11,"username",
                 null,null), context)
@@ -56,7 +58,11 @@ class UserProfileTest {
 
         presenter.handleUserLogout()
 
-        verify(impl).go(eq(SplashScreenView.VIEW_NAME), any())
+        val firstDest = impl.getAppConfigString(
+                AppConfig.KEY_FIRST_DEST, "BasePoint", context)
+
+        verify(impl).go(eq(LoginView.VIEW_NAME), any(), any())
+
     }
 
 
@@ -65,7 +71,7 @@ class UserProfileTest {
 
         presenter.onCreate(mapOf())
 
-        presenter.handleShowLanguageOptions()
+        presenter.handleClickLanguage()
 
         verify(view).setLanguageOption(any())
     }

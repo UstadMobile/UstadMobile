@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = 43)
 @Serializable
-class PersonGroup() {
+open class PersonGroup() {
 
     @PrimaryKey(autoGenerate = true)
     var groupUid: Long = 0
@@ -27,7 +27,7 @@ class PersonGroup() {
 
     var groupName: String? = null
 
-
+    var groupActive : Boolean = true
     /**
      * If this was created as a group for one person, this is the uid for that Person object.
      * Single member groups are used to avoid queries having to look things up from another table.
@@ -35,4 +35,8 @@ class PersonGroup() {
      * @return person UID if this group is created for one user only, otherwise 0
      */
     var groupPersonUid: Long = 0
+
+    constructor(name: String) : this() {
+        this.groupName = name
+    }
 }

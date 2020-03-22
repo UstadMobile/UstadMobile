@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/activity_holiday_calendar_detail_appbar"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:elevation="4dp" android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/activity_holiday_calendar_detail_toolbar"
+            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways"
+            app:title="@string/new_holiday" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <EditText android:id="@+id/activity_holiday_calendar_detail_name" android:layout_width="0dp"
+        android:layout_height="wrap_content" android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp" android:layout_marginEnd="8dp" android:ems="10"
+        android:hint="@string/holiday_calendar_name"
+        android:inputType="text|textPersonName|textCapSentences"
+        android:textColor="@color/text_primary" app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0" app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_holiday_calendar_detail_appbar"
+        android:autofillHints="@string/holiday_calendar_name" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activity_holiday_calendar_detail_add_cl" android:layout_width="0dp"
+        android:layout_height="48dp" android:layout_marginStart="8dp" android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_holiday_calendar_detail_name">
+
+
+        <ImageView android:id="@+id/activity_holiday_calendar_detail_add_image"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginStart="16dp" android:layout_marginLeft="16dp"
+            android:layout_marginTop="8dp" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_date_range_black_24dp" />
+
+        <TextView android:id="@+id/activity_holiday_calendar_detail_add_text"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginStart="8dp" android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp" android:text="@string/add_calendar_range"
+            android:textColor="@color/text_primary"
+            app:layout_constraintStart_toEndOf="@+id/activity_holiday_calendar_detail_add_image"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/activity_holiday_calendar_detail_recyclerview"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_alignParentBottom="true" android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" android:scrollbars="vertical" android:visibility="visible"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintBottom_toTopOf="@+id/activity_holiday_calendar_detail_fab"
+        app:layout_constraintTop_toBottomOf="@+id/activity_holiday_calendar_detail_add_cl"
+        tools:layout_editor_absoluteX="16dp" />
+
+    <ru.dimorinny.floatingtextbutton.FloatingTextButton
+        android:id="@+id/activity_holiday_calendar_detail_fab" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_gravity="bottom|center"
+        android:layout_marginBottom="16dp" android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp" app:floating_background_color="@color/accent"
+        app:floating_left_icon="@drawable/ic_check_white_24dp" app:floating_title="@string/done"
+        app:floating_title_color="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

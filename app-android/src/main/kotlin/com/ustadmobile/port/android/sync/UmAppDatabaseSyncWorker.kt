@@ -19,8 +19,7 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
             val clientRepo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
             runBlocking {
                 val syncRepo =(clientRepo as DoorDatabaseSyncRepository)
-                // TODO disabled until response is chunked up 
-                //syncRepo.sync(null)
+                syncRepo.sync(null)
             }
 
             UMLog.l(UMLog.INFO, 100, "database syncWith repo ran")
@@ -29,7 +28,9 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
         }
 
         if (!isStopped) {
-            val appRecentlyActive = UmAppDatabaseSyncService.isInForeground || System.currentTimeMillis() - UmAppDatabaseSyncService.lastForegroundTime < UmAppDatabaseSyncService.SYNC_AFTER_BACKGROUND_LAG
+            val appRecentlyActive = UmAppDatabaseSyncService.isInForeground ||
+                    System.currentTimeMillis() - UmAppDatabaseSyncService.lastForegroundTime <
+                    UmAppDatabaseSyncService.SYNC_AFTER_BACKGROUND_LAG
             if (appRecentlyActive) {
                 queueSyncWorker((if (appRecentlyActive) 1 else 15).toLong(), TimeUnit.MINUTES)
             }
@@ -38,6 +39,7 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
 
         return Result.success()
     }
+
 
     companion object {
 
@@ -53,6 +55,23 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
                     .setConstraints(workConstraint)
                     .build()
             WorkManager.getInstance().enqueue(request)
+        }
+
+        /**
+         * It will run the new OneTimeWorkRequests only if
+         *             there is no pending work labelled with the TAG
+         */
+        fun queueSyncWorkerWithPolicy(delay: Long, timeUnit: TimeUnit,
+                                      policy: ExistingWorkPolicy) {
+            val workConstraint = Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            val request = OneTimeWorkRequest.Builder(UmAppDatabaseSyncWorker::class.java)
+                    .setInitialDelay(delay, timeUnit)
+                    .addTag(TAG)
+                    .setConstraints(workConstraint)
+                    .build()
+            WorkManager.getInstance().enqueueUniqueWork(TAG, policy, request)
         }
     }
 }
