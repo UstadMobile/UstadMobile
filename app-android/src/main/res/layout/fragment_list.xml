@@ -1,7 +1,6 @@
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:paddingBottom="@dimen/bottom_navigation_height"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
@@ -54,13 +53,16 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/fragment_list_recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="32dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:scrollbars="vertical"
+            android:clipToPadding="false"
+            android:paddingBottom="54dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_list_sort_spinner" />
+
 
         <ru.dimorinny.floatingtextbutton.FloatingTextButton
             android:id="@+id/fragment_clazz_list_fab"
