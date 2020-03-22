@@ -90,6 +90,8 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
 
         }
 
+        setIndexerDone(true, 0)
+
     }
 
 

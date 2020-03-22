@@ -55,5 +55,7 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
                     ScrapeQueueItem.ITEM_TYPE_INDEX)
         }
 
+        setIndexerDone(true, 0)
+
     }
 }

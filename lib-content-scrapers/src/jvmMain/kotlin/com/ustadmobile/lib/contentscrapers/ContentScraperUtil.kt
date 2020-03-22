@@ -122,12 +122,12 @@ object ContentScraperUtil {
     val SEARCH_LOCATIONS = mapOf(
             CHROME_PATH_KEY to listOf("/usr/bin/chromedriver"),
             FFMPEG_PATH_KEY to listOf("/usr/bin/ffmpeg"),
-            CODEC2_PATH_KEY to listOf("/usr/local/bin/c2enc"),
+            CODEC2_PATH_KEY to listOf("/usr/bin/c2enc"),
             WEBP_PATH_KEY to listOf("/usr/bin/cwebp"),
             MOGRIFY_PATH_KEY to listOf("/usr/bin/mogrify"),
             YOUTUBE_DL_PATH_KEY to listOf("/usr/local/bin/youtube-dl"))
 
-    val driversList = listOf(CHROME_PATH_KEY, FFMPEG_PATH_KEY, /*CODEC2_PATH_KEY,*/ WEBP_PATH_KEY, YOUTUBE_DL_PATH_KEY)
+    val driversList = listOf(CHROME_PATH_KEY, FFMPEG_PATH_KEY, CODEC2_PATH_KEY, WEBP_PATH_KEY, YOUTUBE_DL_PATH_KEY)
 
     fun checkIfPathsToDriversExist() {
         driversList.forEach { driver ->
@@ -1341,10 +1341,10 @@ object ContentScraperUtil {
     }
 
     @Throws(IOException::class)
-    fun createSrtFile(srtFormatList: List<SrtFormat>?, srtFile: File) {
+    fun createSrtFile(srtFormatList: List<SrtFormat>?, srtFile: File): String {
 
         if (srtFormatList == null || srtFormatList.isEmpty()) {
-            return
+            return ""
         }
 
         val buffer = StringBuilder()
@@ -1364,6 +1364,7 @@ object ContentScraperUtil {
         }
 
         FileUtils.writeStringToFile(srtFile, buffer.toString(), UTF_ENCODING)
+        return buffer.toString()
     }
 
     fun formatTimeInMs(timeMs: Long): String {

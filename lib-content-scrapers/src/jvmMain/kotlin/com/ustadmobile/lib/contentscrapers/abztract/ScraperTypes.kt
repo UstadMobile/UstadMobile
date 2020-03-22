@@ -56,7 +56,7 @@ object ScraperTypes {
     val scraperTypeMap = mapOf(
             DDL_ARTICLE_SCRAPER to DdlContentScraper::class.java,
             HAB_YOUTUBE_SCRAPER to HabVideoScraper::class.java,
-            KHAN_FULL_VIDEO_SCRAPER to KhanFullVideoScraper::class.java,
+            KHAN_FULL_VIDEO_SCRAPER to KhanVideoScraper::class.java,
             KHAN_FULL_ARTICLE_SCRAPER to KhanArticleScraper::class.java,
             KHAN_FULL_EXERCISE_SCRAPER to KhanExerciseScraper::class.java,
             KHAN_LITE_VIDEO_SCRAPER to KhanLiteVideoScraper::class.java)

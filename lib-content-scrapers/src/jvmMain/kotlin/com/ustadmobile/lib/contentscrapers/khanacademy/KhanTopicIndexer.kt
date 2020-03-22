@@ -23,11 +23,6 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
         val url = URL(sourceUrl)
 
         val jsonContent = getJsonContent(url)
-        //val searchUrl = if (!sourceUrl.endsWith("/")) "$sourceUrl/" else sourceUrl
-
-        /*val harEntryList = startHarIndexer(searchUrl, listOf(Regex("/content${url.path}"))) {
-            true
-        }*/
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
 
@@ -201,6 +196,8 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
 
 
         }
+
+        setIndexerDone(true, 0)
 
 
     }

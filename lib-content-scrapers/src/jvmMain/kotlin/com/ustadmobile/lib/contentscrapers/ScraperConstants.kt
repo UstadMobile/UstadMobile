@@ -224,6 +224,7 @@ object ScraperConstants {
     const val MP3_EXT = ".mp3"
     const val WEBM_EXT = ".webm"
     const val OPUS_EXT = ".opus"
+    const val SRT_EXT = ".srt"
 
     const val CK12_VIDEO = "video"
     const val CK12_PLIX = "plix"
@@ -251,7 +252,7 @@ object ScraperConstants {
     const val VIDEO_FILENAME_MP4 = "video.mp4"
     const val VIDEO_FILENAME_WEBM = "video.webm"
     const val TINCAN_FILENAME = "tincan.xml"
-    const val SUBTITLE_FILENAME = "subtitle.srt"
+    const val SUBTITLE_FILENAME = "subtitle"
 
     const val ARABIC_LANG_CODE = "ar"
     const val ENGLISH_LANG_CODE = "en"

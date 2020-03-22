@@ -61,7 +61,6 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDataba
 
                 fileEntry = proxy.har.log.entries.find { harEntry ->
                     harEntry.request.url.contains(regex)
-
                 }
                 Thread.sleep(1000)
                 counterRequest++
@@ -87,6 +86,7 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDataba
         }
 
         block.invoke(proxy)
+        close()
 
         return fileList
 

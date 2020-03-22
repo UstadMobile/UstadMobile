@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils
 import java.net.HttpURLConnection
 import java.net.URL
 
+
 data class KhanLang(val url: String, val title: String)
 
 data class KhanFile(val url: String, val fileLocation: String, val mimeType: String)
@@ -98,6 +99,10 @@ object KhanConstants {
     const val regexUrlPrefix = "https://((.*).khanacademy.org|cdn.kastatic.org)/(.*)"
     const val KHAN_CSS = "<link rel='stylesheet' href='https://www.khanacademy.org/khanscraper.css' type='text/css'/>"
     const val KHAN_COOKIE = "<script> document.cookie = \"fkey=abcde;\" </script>"
+
+    const val subTitleUrl = "http://www.khanacademy.org/api/internal/videos/"
+
+    const val subTitlePostUrl = "/transcript?lang="
 
     const val secondExerciseUrl = "/api/internal/user/exercises/"
 
@@ -240,7 +245,7 @@ object KhanConstants {
             "fa-af" to KhanLang(getLangUrl("fa-af"), "داري"),
             "el" to KhanLang(getLangUrl("el"), "Ελληνικά"),
             "he" to KhanLang(getLangUrl("he"), "עברית"),
-            "zlm" to KhanLang(getLangUrl("zlm"), "BahasaMalaysian"),
+            "zlm" to KhanLang(getLangUrl("zlm"), "Bahasa Malaysian"),
             "fa" to KhanLang(getLangUrl("fa"), "فارسی"),
             "sw" to KhanLang(getLangUrl("sw"), "Kiswahili"),
             "te" to KhanLang(getLangUrl("te"), "తెలుగు"),
@@ -251,6 +256,7 @@ object KhanConstants {
             "zu" to KhanLang(getLangUrl("zu"), "Zulu"))
 
     val khanFullMap = mapOf(
+            "en" to KhanLang(getLangUrl("en"), "English"),
             "www" to KhanLang(getLangUrl("en"), "English"),
             "hy" to KhanLang(getLangUrl("hy"), "հայերեն"),
             "bn" to KhanLang(getLangUrl("zlm"), "বাংলা"),
@@ -263,7 +269,7 @@ object KhanConstants {
             "nb" to KhanLang(getLangUrl("nb"), "norsk bokmål"),
             "pl" to KhanLang(getLangUrl("pl"), "Polski"),
             "pt" to KhanLang(getLangUrl("pt"), "Português"),
-            "pt-pt" to KhanLang(getLangUrl("pt-pt"), "Português europeu"),
+            "pt-pt" to KhanLang(getLangUrl("pt-pt"), "Português Europeu"),
             "sr" to KhanLang(getLangUrl("sr"), "Српски"),
             "es" to KhanLang(getLangUrl("es"), "Español"),
             "tr" to KhanLang(getLangUrl("tr"), "Türkçe"),
@@ -281,6 +287,6 @@ object KhanConstants {
             "ru" to KhanLang(getLangUrl("ru"), "русский"),
             "sv" to KhanLang(getLangUrl("sv"), "Svenska"),
             "ta" to KhanLang(getLangUrl("ta"), "தமிழ்"),
-            "uz" to KhanLang(getLangUrl("uz"), "O'zbek"))
+            "uz" to KhanLang(getLangUrl("uz"), "Ozbek"))
 
 }

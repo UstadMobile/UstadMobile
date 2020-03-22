@@ -32,6 +32,8 @@ class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatab
             createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_FULL_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX)
         }
 
+        setIndexerDone(true, 0)
+
 
     }
 
