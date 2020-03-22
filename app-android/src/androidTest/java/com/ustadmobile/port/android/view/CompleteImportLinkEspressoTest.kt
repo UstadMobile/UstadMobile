@@ -11,10 +11,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ServiceTestRule
 import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ContentEntryListPresenter.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.AbstractImportLinkTest
 import org.junit.Before
