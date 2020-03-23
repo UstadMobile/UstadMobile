@@ -5,6 +5,7 @@ import com.ustadmobile.core.io.RangeInputStream
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.util.parseRangeRequestHeader
+import io.ktor.client.request.request
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.internal.HashMapSerializer
 import kotlinx.serialization.internal.StringSerializer
@@ -17,7 +18,7 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
     var startingUrl: String
     private val linkPatterns = mutableMapOf<Regex, String>()
     var regexList: List<HarRegexPair>? = null
-    var requestMap = mutableMapOf<String, HarEntry>()
+    var requestMap = mutableMapOf<Pair<String, String>, MutableList<HarEntry>>()
 
     init {
 
@@ -52,8 +53,18 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
 
         val entries = harContent.log.entries
 
+
+        val found = entries.find { it.request!!.url!!.contains("3/ass") }
+
         entries.forEach {
-            requestMap[it.request!!.url!!] = it
+
+            val pair = Pair(it.request!!.method!!, it.request.url!!)
+            if(requestMap.containsKey(pair)){
+                val list = requestMap[pair]
+                list!!.add(it)
+            }else{
+                requestMap[pair] = mutableListOf(it)
+            }
         }
 
         startingUrl = entries[0].request?.url ?: ""
@@ -71,12 +82,12 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
 
         checkWithPattern(regexedUrl)
 
-        val harEntry = requestMap[regexedUrl]
+        val harList = requestMap[(Pair(request.method!!, regexedUrl))]
 
         val harResponse = HarResponse()
         val harContent = HarContent()
 
-        if (harEntry == null) {
+        if (harList == null) {
             harResponse.status = 401
             harResponse.statusText = "OK"
             harContent.mimeType = ""
@@ -84,6 +95,12 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
 
             return harResponse
         }
+
+        if(harList.size > 1){
+            println(regexedUrl)
+        }
+
+        val harEntry = harList[0]
 
         val containerEntry = containerManager.getEntry(harEntry.response!!.content!!.text!!)
 

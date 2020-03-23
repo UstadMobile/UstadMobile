@@ -29,6 +29,7 @@ object ScraperConstants {
     const val CHECK_PATH = "/com/ustadmobile/lib/contentscrapers/ck12/check.svg"
     const val CHECK_NAME = "check.svg"
     const val XML_NAMESPACE = "http://purl.org/dc/elements/1.1/"
+    const val POST_METHOD = "POST"
 
     const val KHAN_USERNAME = "no-reply@ustadmobile.com"
     const val KHAN_PASS = "ustadscraper"

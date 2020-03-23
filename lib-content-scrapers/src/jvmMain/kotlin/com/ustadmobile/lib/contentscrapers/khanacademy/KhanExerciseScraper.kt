@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.POST_METHOD
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
@@ -86,6 +87,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         }
 
         val nodeSlug = content.nodeSlug
+        val slug = content.slug
 
         val dateModified = ContentScraperUtil.parseServerDate(content.dateModified
                 ?: content.creationDate!!)
@@ -164,7 +166,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
                     val practiceUrl = URL(url, "$secondExerciseUrl$exercise$exerciseMidleUrl$assessmentItem$exercisePostUrl$lang")
 
-                    val problemUrl = URL(url, "$secondExerciseUrl$nodeSlug/problems/${index + 1}$exercisePostUrl$lang")
+                    val problemUrl = URL(url, "$secondExerciseUrl$slug/problems/${index + 1}$exercisePostUrl$lang")
 
                     val itemData = IOUtils.toString(practiceUrl, ScraperConstants.UTF_ENCODING)
 
@@ -235,17 +237,20 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             entries.add(addHarEntry(
                     IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.KHAN_TAKE_HINT_LINK), ScraperConstants.UTF_ENCODING),
                     mimeType = ScraperConstants.MIMETYPE_TEXT,
-                    requestUrl = "https://www.khanacademy.org/take-a-hint"))
+                    requestUrl = "https://www.khanacademy.org/take-a-hint",
+                    requestMethod = POST_METHOD))
 
             entries.add(addHarEntry(
                     IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_JSON_LINK), ScraperConstants.UTF_ENCODING),
                     mimeType = ScraperConstants.MIMETYPE_JSON,
-                    requestUrl = "https://www.khanacademy.org/attempt"))
+                    requestUrl = "https://www.khanacademy.org/attempt",
+                    requestMethod = POST_METHOD))
 
             entries.add(addHarEntry(
                     IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.HINT_JSON_LINK), ScraperConstants.UTF_ENCODING),
                     mimeType = ScraperConstants.MIMETYPE_JSON,
-                    requestUrl = "https://www.khanacademy.org/hint"))
+                    requestUrl = "https://www.khanacademy.org/hint",
+                    requestMethod = POST_METHOD))
 
             val fileList = KhanConstants.fileMap[lang]
 

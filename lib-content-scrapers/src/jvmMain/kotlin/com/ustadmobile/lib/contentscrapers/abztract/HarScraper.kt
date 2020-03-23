@@ -13,6 +13,7 @@ import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
 import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.Container
 import io.github.bonigarcia.wdm.WebDriverManager
+import io.ktor.client.request.request
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
@@ -177,7 +178,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         return containerManager
     }
 
-    fun addHarEntry(content: String, size: Int = content.length, encoding: String = UTF_ENCODING, mimeType: String, requestUrl: String): HarEntry {
+    fun addHarEntry(content: String, size: Int = content.length, encoding: String = UTF_ENCODING, mimeType: String, requestUrl: String, requestMethod: String = "GET"): HarEntry {
 
         val entry = HarEntry()
         entry.response = HarResponse()
@@ -187,6 +188,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         entry.response.content.mimeType = mimeType
 
         entry.request = HarRequest()
+        entry.request.method = requestMethod
         entry.request.url = requestUrl
 
         return entry
