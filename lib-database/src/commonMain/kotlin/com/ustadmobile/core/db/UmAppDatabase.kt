@@ -2271,12 +2271,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     //PersonGroupMember migration
                     //Begin: Create table PersonGroupMember for PostgreSQL
                     database.execSQL("ALTER TABLE PersonGroupMember RENAME to PersonGroupMember_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS persongroupmember_groupmemberuid_seq RENAME to persongroupmember_groupmemberuid_seq_old;")
                     database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroupMember (  groupMemberActive  BOOL , groupMemberPersonUid  BIGINT , groupMemberGroupUid  BIGINT , groupMemberMasterCsn  BIGINT , groupMemberLocalCsn  BIGINT , groupMemberLastChangedBy  INTEGER , groupMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("INSERT INTO PersonGroupMember (" +
                             "groupMemberUid, groupMemberActive, groupMemberPersonUid, " +
                             "groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, " +
-                            "groupMemberLastChangedBy) SELECT groupMemberUid, 1, groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, groupMemberLastChangedBy FROM PersonGroupMember_OLD")
+                            "groupMemberLastChangedBy) SELECT groupMemberUid, true, groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, groupMemberLastChangedBy FROM PersonGroupMember_OLD")
                     database.execSQL("DROP TABLE PersonGroupMember_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS persongroupmember_groupmemberuid_seq_old""")
 
                     database.execSQL("""
                     |CREATE 
@@ -2293,6 +2295,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     //StatementEntity
                     //Begin: Create table StatementEntity for PostgreSQL
                     database.execSQL("ALTER TABLE StatementEntity RENAME to StatementEntity_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS statemententity_statementuid_seq RENAME to statemententity_statementuid_seq_old;")
                     database.execSQL("CREATE TABLE IF NOT EXISTS StatementEntity (  statementId  TEXT , personUid  BIGINT , verbUid  BIGINT , xObjectUid  BIGINT , subStatementActorUid  BIGINT , substatementVerbUid  BIGINT , subStatementObjectUid  BIGINT , agentUid  BIGINT , instructorUid  BIGINT , authorityUid  BIGINT , teamUid  BIGINT , resultCompletion  BOOL , resultSuccess  SMALLINT , resultScoreScaled  BIGINT , resultScoreRaw  BIGINT , resultScoreMin  BIGINT , resultScoreMax  BIGINT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT , stored  BIGINT , contextRegistration  TEXT , contextPlatform  TEXT , contextStatementId  TEXT , fullStatement  TEXT , statementMasterChangeSeqNum  BIGINT , statementLocalChangeSeqNum  BIGINT , statementLastChangedBy  INTEGER , extensionProgress  INTEGER , statementContentEntryUid  BIGINT , statementUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""INSERT INTO StatementEntity (
                         |statementUid, statementId, personUid, verbUid, xObjectUid, 
@@ -2314,6 +2317,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         |statementLocalChangeSeqNum, statementLastChangedBy, 
                         |0, 0 FROM StatementEntity_OLD""".trimMargin())
                     database.execSQL("DROP TABLE StatementEntity_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS persongroupmember_groupmemberuid_seq_old""")
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS PersonCustomFieldValue_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""
@@ -2324,6 +2328,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     //Begin: Create table Location for PostgreSQL
                     database.execSQL("ALTER TABLE Location RENAME to Location_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS location_locationuid_seq RENAME to location_locationuid_seq_old;")
                     database.execSQL("CREATE TABLE IF NOT EXISTS Location (  title  TEXT , description  TEXT , lng  TEXT , lat  TEXT , parentLocationUid  BIGINT , locationLocalChangeSeqNum  BIGINT , locationMasterChangeSeqNum  BIGINT , locationLastChangedBy  INTEGER , timeZone  TEXT , locationActive  BOOL , locationUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("INSERT INTO Location (locationUid, title, description, " +
                             "lng, lat, parentLocationUid, locationLocalChangeSeqNum, locationMasterChangeSeqNum, " +
@@ -2332,29 +2337,36 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                             "locationLocalChangeSeqNum, locationMasterChangeSeqNum, " +
                             "locationLastChangedBy, '', locationActive FROM Location_OLD")
                     database.execSQL("DROP TABLE Location_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS location_locationuid_seq_old""")
 
                     //EntityRole migration
                     database.execSQL("ALTER TABLE EntityRole RENAME to EntityRole_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS entityrole_eruid_seq RENAME to entityrole_eruid_seq_old;")
                     database.execSQL("CREATE TABLE IF NOT EXISTS EntityRole (  erMasterCsn  BIGINT , erLocalCsn  BIGINT , erLastChangedBy  INTEGER , erTableId  INTEGER , erEntityUid  BIGINT , erGroupUid  BIGINT , erRoleUid  BIGINT , erActive  BOOL , erUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""INSERT INTO EntityRole (erUid, erMasterCsn, 
                         erLocalCsn, erLastChangedBy, erTableId, erEntityUid, erGroupUid, 
                         erRoleUid, erActive) 
                         SELECT erUid, erMasterCsn, erLocalCsn, erLastChangedBy, erTableId, 
-                        erEntityUid, erGroupUid, erRoleUid, 1 FROM EntityRole_OLD""")
+                        erEntityUid, erGroupUid, erRoleUid, true FROM EntityRole_OLD""")
                     database.execSQL("DROP TABLE EntityRole_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS entityrole_eruid_seq_old""")
+
 
                     //Begin: Create table PersonGroup for PostgreSQL
                     database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS persongroup_groupuid_seq RENAME to persongroup_groupuid_seq_old;")
                     database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup (  groupMasterCsn  BIGINT , groupLocalCsn  BIGINT , groupLastChangedBy  INTEGER , groupName  TEXT , groupActive  BOOL , groupPersonUid  BIGINT , groupUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""INSERT INTO PersonGroup (
                          groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy, 
                          groupName, groupActive, groupPersonUid) SELECT groupUid, 
                          groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupName, 
-                         1, groupPersonUid FROM PersonGroup_OLD""")
+                         true, groupPersonUid FROM PersonGroup_OLD""")
                     database.execSQL("DROP TABLE PersonGroup_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS persongroup_groupuid_seq_old""")
 
                     //Begin: Create table Person for PostgreSQL
                     database.execSQL("ALTER TABLE Person RENAME to Person_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS person_personuid_seq RENAME to person_personuid_seq_old;")
                     database.execSQL("CREATE TABLE IF NOT EXISTS Person (  username  TEXT , firstNames  TEXT , lastName  TEXT , emailAddr  TEXT , phoneNum  TEXT , gender  INTEGER , active  BOOL , admin  BOOL , personNotes  TEXT , fatherName  TEXT , fatherNumber  TEXT , motherName  TEXT , motherNum  TEXT , dateOfBirth  BIGINT , personAddress  TEXT , personMasterChangeSeqNum  BIGINT , personLocalChangeSeqNum  BIGINT , personLastChangedBy  INTEGER , personUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""INSERT INTO Person (personUid, username, firstNames, 
                         lastName, emailAddr, phoneNum, gender, active, admin, personNotes, 
@@ -2367,6 +2379,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                          personMasterChangeSeqNum, personLocalChangeSeqNum, 
                          personLastChangedBy FROM Person_OLD""")
                     database.execSQL("DROP TABLE Person_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS person_personuid_seq_old""")
+
 
                     //Begin: Create table PersonCustomFieldValue for PostgreSQL
                     database.execSQL("ALTER TABLE PersonCustomFieldValue RENAME to PersonCustomFieldValue_OLD")
@@ -2388,8 +2402,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     //Begin: clazz
                     //Begin: Create table Clazz for PostgreSQL
                     database.execSQL("ALTER TABLE Clazz RENAME to Clazz_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS clazz_clazzuid_seq RENAME to clazz_clazzuid_seq_old;")
                     database.execSQL("CREATE TABLE IF NOT EXISTS Clazz (  clazzName  TEXT , clazzDesc  TEXT , attendanceAverage  FLOAT , clazzHolidayUMCalendarUid  BIGINT , clazzScheuleUMCalendarUid  BIGINT , isClazzActive  BOOL , clazzLocationUid  BIGINT , clazzStartTime  BIGINT , clazzEndTime  BIGINT , clazzFeatures  BIGINT , clazzMasterChangeSeqNum  BIGINT , clazzLocalChangeSeqNum  BIGINT , clazzLastChangedBy  INTEGER , clazzUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("DROP TABLE Clazz_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS clazz_clazzuid_seq_old""")
 
                     //Begin : PersonAuth stuff
                     //Begin: Create table PersonAuth for PostgreSQL
@@ -2406,11 +2422,15 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     //Begin: Create table ClazzMember for PostgreSQL
                     database.execSQL("ALTER TABLE ClazzMember RENAME to ClazzMember_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS clazzmember_clazzmemberuid_seq RENAME to clazzmember_clazzmemberuid_seq_old;")
                     database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember (  clazzMemberPersonUid  BIGINT , clazzMemberClazzUid  BIGINT , clazzMemberDateJoined  BIGINT , clazzMemberDateLeft  BIGINT , clazzMemberRole  INTEGER , clazzMemberAttendancePercentage  FLOAT , clazzMemberActive  BOOL , clazzMemberLocalChangeSeqNum  BIGINT , clazzMemberMasterChangeSeqNum  BIGINT , clazzMemberLastChangedBy  INTEGER , clazzMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("DROP TABLE ClazzMember_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS clazzmember_clazzmemberuid_seq_old""")
+
 
 
                     database.execSQL("ALTER TABLE Role RENAME to Role_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS role_roleuid_seq RENAME to role_roleuid_seq_old;")
                     database.execSQL("""CREATE TABLE IF NOT EXISTS Role (
                         roleName  TEXT , roleActive  BOOL , roleMasterCsn  BIGINT , 
                         roleLocalCsn  BIGINT , roleLastChangedBy  INTEGER , 
@@ -2423,6 +2443,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         roleLocalCsn, roleLastChangedBy, rolePermissions 
                         FROM Role_OLD""")
                     database.execSQL("DROP TABLE Role_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS role_roleuid_seq_old""")
 
                     //Begin: Create table ClazzLog for PostgreSQL
                     /* START MIGRATION:
@@ -3419,7 +3440,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     /* START MIGRATION:
                     database.execSQL("ALTER TABLE School RENAME to School_OLD")
                     END MIGRATION */
-                    database.execSQL("CREATE TABLE IF NOT EXISTS School (  schoolName  TEXT , schoolDesc  TEXT , schoolAddress  TEXT , schoolActive  BOOL , schoolFeatures  BIGINT , schoolLocationLong  DOUBLE , schoolLocationLatt  DOUBLE , schoolMasterChangeSeqNum  BIGINT , schoolLocalChangeSeqNum  BIGINT , schoolLastChangedBy  INTEGER , schoolUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS School (  schoolName  TEXT , schoolDesc  TEXT , schoolAddress  TEXT , schoolActive  BOOL , schoolFeatures  BIGINT , schoolLocationLong  DOUBLE precision , schoolLocationLatt  DOUBLE precision, schoolMasterChangeSeqNum  BIGINT , schoolLocalChangeSeqNum  BIGINT , schoolLastChangedBy  INTEGER , schoolUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     /* START MIGRATION:
                     database.execSQL("INSERT INTO School (schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy) SELECT schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy FROM School_OLD")
                     database.execSQL("DROP TABLE School_OLD")

@@ -163,7 +163,7 @@ class LoadInitialData {
 
     private fun createOfficer() {
 
-        var officerPerson = personDao!!.findByUsername("officer")
+        var officerPerson = personDao.findByUsername("officer")
         if (officerPerson == null) {
             officerPerson = Person()
             officerPerson.active = true
@@ -173,13 +173,13 @@ class LoadInitialData {
 
             GlobalScope.launch {
                 val personWithGroup = personDao.createPersonWithGroupAsync(officerPerson)
-                val officerPersonUid = personWithGroup!!.personUid
+                val officerPersonUid = personWithGroup.personUid
 
                 //Create password
                 val officerPersonAuth = PersonAuth(officerPersonUid,
                         PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword("irZahle3"))
 
-                val result = personAuthDao!!.insertAsync(officerPersonAuth)
+                val result = personAuthDao.insertAsync(officerPersonAuth)
 
                 if (result != null) {
 
