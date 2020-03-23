@@ -35,6 +35,7 @@ class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDataba
         createEntryAndQueue("https://www.youtube.com/playlist?list=PLFhWybf5Uzoz_FEWSHLXv5lNIpYib2UH3", "زينات أبو شنب")
         createEntryAndQueue("https://www.youtube.com/playlist?list=PLFhWybf5UzowVPdatEhRjPcUfcJ2kE80C", "هالة إبراهيم - إستشارية في الشؤون التربوية الخاصة")
 
+        setIndexerDone(true, 0)
     }
 
     fun createEntryAndQueue(sourceUrl: String, title: String){

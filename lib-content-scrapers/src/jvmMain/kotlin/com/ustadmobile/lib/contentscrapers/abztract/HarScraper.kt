@@ -171,7 +171,6 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         if (addHarContent) {
             runBlocking {
                 containerManager.addEntries(StringEntrySource(writer.toString(), listOf("harcontent")))
-                containerManager.addEntries(StringEntrySource(gson.toJson(regexes), listOf("regexList")))
             }
         }
 

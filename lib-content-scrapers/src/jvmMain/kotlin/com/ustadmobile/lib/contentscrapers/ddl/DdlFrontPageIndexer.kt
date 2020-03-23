@@ -28,6 +28,8 @@ class DdlFrontPageIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase,
         createLangEntry("English", englishLang, parentDdl)
         createLangEntry("فارسی", farsiLang, parentDdl)
         createLangEntry("پښتو", pashtoLang, parentDdl)
+
+        setIndexerDone(true, 0)
     }
 
     private fun createLangEntry(langName: String, langEntity: Language, parentDdl: ContentEntry) {

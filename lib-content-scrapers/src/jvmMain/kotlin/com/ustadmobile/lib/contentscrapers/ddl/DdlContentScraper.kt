@@ -105,6 +105,8 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                     }
 
                     if (fileEntry == null) {
+                        hideContentEntry()
+                        setScrapeDone(false, ERROR_TYPE_LINK_NOT_FOUND)
                         throw ScraperException(ERROR_TYPE_LINK_NOT_FOUND, "no request found for link")
                     }
 
@@ -137,6 +139,8 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                 }
 
                 if (entry == null) {
+                    hideContentEntry()
+                    setScrapeDone(false, ERROR_TYPE_NO_SOURCE_URL_FOUND)
                     throw ScraperException(ERROR_TYPE_NO_SOURCE_URL_FOUND, "no source url found in har entry")
                 }
 
@@ -176,6 +180,8 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                         thumbnail, EMPTY_STRING, EMPTY_STRING, ContentEntry.ARTICLE_TYPE, contentEntryDao)
 
                 if (licenseType == 0) {
+                    hideContentEntry()
+                    setScrapeDone(false, ERROR_TYPE_INVALID_LICENSE)
                     throw ScraperException(ERROR_TYPE_INVALID_LICENSE, "License type not supported")
                 }
 
@@ -241,6 +247,8 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                 }
 
                 if (fileEntry == null) {
+                    hideContentEntry()
+                    setScrapeDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
                     throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "No File found for content in har entry")
                 }
 
@@ -268,17 +276,19 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
             }
         } catch (e: Exception) {
-            contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
             UMLogUtil.logError("$DDL Exception - Error downloading resource from url $sourceUrl")
             close()
             if (e is TimeoutException || e is NoSuchElementException) {
+                hideContentEntry()
+                setScrapeDone(false, ERROR_TYPE_NO_FILE_AVAILABLE)
                 throw ScraperException(ERROR_TYPE_NO_FILE_AVAILABLE, "no file found in the website")
             }
             throw e
         }
 
         if (!scraperResult.updated) {
-            contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
+            showContentEntry()
+            setScrapeDone(true, 0)
             close()
             return
         }
@@ -286,7 +296,8 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
         val containerManager = scraperResult.containerManager
 
         if (containerManager?.allEntries?.isEmpty() != false) {
-            contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
+            hideContentEntry()
+            setScrapeDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
             UMLogUtil.logError("$DDL Debug - Did not find any content to download at url $sourceUrl")
             close()
             throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "Container Manager did not have the file")
@@ -306,6 +317,8 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
         }
 
+        showContentEntry()
+        setScrapeDone(true, 0)
         close()
     }
 

@@ -38,6 +38,8 @@ class DdlPageIndexer(contentEntryUid: Long, runId: Int, db: UmAppDatabase, sqiUi
             val url = "https://www.ddl.af/$twoCodeLang/resources/list?subject_area=${subjectId}&page=$i"
             createQueueItem(url, parentcontentEntry!!, ScraperTypes.DDL_LIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
         }
+
+        setIndexerDone(true, 0)
     }
 
     override fun close() {

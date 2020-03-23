@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.contentformats.har.HarExtra
+import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -94,6 +96,9 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
             return
         }
 
+        val harExtra = HarExtra()
+
+
         val scraperResult = startHarScrape(sourceUrl, {
 
             it.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(
@@ -122,21 +127,22 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
         }
 
 
-        val linkMap = HashMap<String, String>()
+        val linksList = mutableListOf<HarRegexPair>()
         val navList = navData.navItems
         if (navList != null) {
             for (navItem in navList) {
                 if (navItem.nodeSlug == nodeSlug) {
                     continue
                 }
-                linkMap[regexUrlPrefix + navItem.nodeSlug!!] = KhanContentScraper.CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id!!
+                linksList.add(HarRegexPair(regexUrlPrefix + navItem.nodeSlug!!, KhanContentScraper.CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id!!))
             }
         } else {
             UMLogUtil.logError("Your related items are in another json for url $sourceUrl")
         }
+        harExtra.links = linksList
 
         runBlocking {
-            scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(linkMap).toString(), listOf("linksMap")))
+            scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
         }
 
 

@@ -55,6 +55,7 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
 
             if (!VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.contains(mimetype)) {
                 hideContentEntry()
+                setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
                 throw ScraperException(ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED, "Video type not supported for $mimetype for url $url")
             }
 
@@ -85,6 +86,7 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
                 db.containerETagDao.insert(etagContainer)
             }
 
+            showContentEntry()
             setScrapeDone(true, 0)
 
             tempDir.deleteRecursively()

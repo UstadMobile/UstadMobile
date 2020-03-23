@@ -2,9 +2,11 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LOCALE_USE_SYSTEM
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.OnBoardingView.Companion.PREF_TAG
+import com.ustadmobile.core.view.UstadView
 
 class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: OnBoardingView, val impl: UstadMobileSystemImpl) :
         UstadBaseController<OnBoardingView>(context, arguments, view) {
@@ -17,9 +19,13 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: On
         view.setLanguageOptions(languageOptions.map { it.second })
     }
 
-    fun handleClickGetStarted() {
-        val args: Map<String,String?> = arguments
+    }
+
+    fun handleGetStarted() {
+        val args: MutableMap<String,String?> = arguments.toMutableMap()
+       // args[UstadView.ARG_CONTENT_ENTRY_UID] = 1777919737.toString()
         impl.setAppPref(PREF_TAG, true.toString(), view.viewContext)
+       // impl.go(ContentEntryDetailView.VIEW_NAME, args, context)
         impl.go(HomeView.VIEW_NAME, args, context)
     }
 

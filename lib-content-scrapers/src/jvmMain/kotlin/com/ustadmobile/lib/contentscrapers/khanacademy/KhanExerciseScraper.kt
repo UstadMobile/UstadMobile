@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.contentformats.har.HarExtra
 import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
@@ -55,7 +56,6 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         if (lang == "www") {
             lang = "en"
         }
-        val nodeSlug = sourceUrl.substringAfterLast("/")
 
         val url = URL(sourceUrl)
 
@@ -85,6 +85,8 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "no content was found in url : $sourceUrl")
         }
 
+        val nodeSlug = content.nodeSlug
+
         val dateModified = ContentScraperUtil.parseServerDate(content.dateModified
                 ?: content.creationDate!!)
 
@@ -99,6 +101,18 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             setScrapeDone(true, 0)
             return
         }
+
+
+        val harExtra = HarExtra()
+        harExtra.regexes = listOf(
+                HarRegexPair("&_=([^&]*)", ""),
+                HarRegexPair("last_seen_problem_sha=(.*)&", ""),
+                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attempt\\?)(.*)",
+                        "https://www.khanacademy.org/attempt"),
+                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/Take-a-hint\\?)(.*)",
+                        "https://www.khanacademy.org/take-a-hint"),
+                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/hint\\?)(.*)",
+                        "https://www.khanacademy.org/hint"))
 
 
         val realPractice = loginKhanAcademy(sourceUrl, lang)
@@ -119,15 +133,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
             }
             entry
-        }, regexes = listOf(
-                HarRegexPair("&_=([^&]*)", ""),
-                HarRegexPair("last_seen_problem_sha=(.*)&", ""),
-                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attempt\\?)(.*)",
-                        "https://www.khanacademy.org/attempt"),
-                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/Take-a-hint\\?)(.*)",
-                        "https://www.khanacademy.org/take-a-hint"),
-                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/hint\\?)(.*)",
-                        "https://www.khanacademy.org/hint"))) {
+        }, regexes = harExtra.regexes!!) {
 
             val entries = it.har.log.entries
 
@@ -315,7 +321,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             true
         }
 
-        val linksMap = HashMap<String, String>()
+        val linksList = mutableListOf<HarRegexPair>()
         val navList = navData.navItems
         if (navList != null) {
 
@@ -323,16 +329,16 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 if (navItem.nodeSlug == nodeSlug) {
                     continue
                 }
-                linksMap[regexUrlPrefix + navItem.nodeSlug!!] = KhanContentScraper.CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id!!
+                linksList.add(HarRegexPair(regexUrlPrefix + navItem.nodeSlug!!, KhanContentScraper.CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id!!))
             }
-
         }
+        harExtra.links = linksList
 
         runBlocking {
-            scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(linksMap).toString(), listOf("linksMap")))
+            scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
         }
 
-
+        showContentEntry()
         setScrapeDone(true, 0)
         close()
     }

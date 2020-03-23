@@ -27,7 +27,7 @@ class HabPlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabas
 
             it
         }
-
+        setIndexerDone(true, 0)
 
     }
 

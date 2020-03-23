@@ -93,6 +93,7 @@ class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, s
 
         }
 
+        setIndexerDone(true, 0)
     }
 
     override fun close() {

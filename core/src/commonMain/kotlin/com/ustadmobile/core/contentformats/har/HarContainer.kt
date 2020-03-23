@@ -12,9 +12,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.list
 
-@Serializable
-data class HarRegexPair(val regex: String, val replacement: String)
-
 class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl: String) -> Unit) {
 
     var startingUrl: String
@@ -25,8 +22,7 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
     init {
 
         val indexEntry = containerManager.getEntry("harcontent")
-        val regexListEntry = containerManager.getEntry("regexList")
-        val linksMapEntry = containerManager.getEntry("linksMap")
+        val harExtraEntry = containerManager.getEntry("harextras.json")
 
         if (indexEntry == null) {
             throw Exception()
@@ -41,17 +37,14 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
                 useArrayPolymorphism = false
         ))
 
-        if (regexListEntry != null) {
-            val list = json.parse(HarRegexPair.serializer().list, UMIOUtils.readToString(containerManager.getInputStream(regexListEntry)))
-            regexList = list
+        var harExtra = HarExtra()
+        if (harExtraEntry != null) {
+            harExtra = json.parse(HarExtra.serializer(), UMIOUtils.readToString(containerManager.getInputStream(harExtraEntry)))
         }
 
-        if (linksMapEntry != null) {
-
-            val linksMap = json.parse(HashMapSerializer(StringSerializer, StringSerializer), UMIOUtils.readToString(containerManager.getInputStream(linksMapEntry)))
-            linksMap.keys.forEach {
-                linkPatterns[Regex(it)] = linksMap.getValue(it)
-            }
+        regexList = harExtra.regexes
+        harExtra.links?.forEach {
+            linkPatterns[Regex(it.regex)] = it.replacement
         }
 
 
@@ -88,7 +81,6 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
             harResponse.statusText = "OK"
             harContent.mimeType = ""
             harResponse.content = harContent
-
 
             return harResponse
         }

@@ -44,6 +44,7 @@ class DdlListIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiU
 
         }
 
+        setIndexerDone(true, 0)
 
     }
 
