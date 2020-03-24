@@ -11,15 +11,7 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
-    ClazzLog::class,ClazzLogAttendanceRecord::class, FeedEntry::class,PersonField::class,
-    PersonDetailPresenterField::class,SelQuestion::class,
-    SelQuestionResponse::class, SelQuestionResponseNomination::class, SelQuestionSet::class,
-    SelQuestionSetRecognition::class, SelQuestionSetResponse::class,
-    Schedule::class, DateRange::class, UMCalendar::class,
-    ClazzActivity::class, ClazzActivityChange::class,
-    SelQuestionOption::class, ScheduledCheck::class,
-    AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
-    Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
+    DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class, Person::class,
     Clazz::class, ClazzMember::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
@@ -32,20 +24,24 @@ import kotlin.jvm.Volatile
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class
+    SyncResult::class,
+
+    ClazzLog::class,ClazzLogAttendanceRecord::class, FeedEntry::class, PersonField::class,
+    PersonDetailPresenterField::class,SelQuestion::class,
+    SelQuestionResponse::class, SelQuestionResponseNomination::class, SelQuestionSet::class,
+    SelQuestionSetRecognition::class, SelQuestionSetResponse::class,
+    Schedule::class, DateRange::class, UMCalendar::class,
+    ClazzActivity::class, ClazzActivityChange::class,
+    SelQuestionOption::class, ScheduledCheck::class,
+    AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
+    School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 34)
-@MinSyncVersion(28)
+], version = 35)
+@MinSyncVersion(35)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
-
-    /*
-        Changes in 34:
-        Added School and Assignment based entities
-        Updated Clazz : added clazzFeatures and removed individual feature bits
-     */
 
 
     var attachmentsDir: String? = null
@@ -305,6 +301,3275 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         |  remoteCsn  INTEGER , syncType  INTEGER , 
                         |  timestamp  BIGINT , sent  INTEGER , received  INTEGER , 
                         |  srUid  SERIAL  PRIMARY KEY  NOT NULL )""".trimMargin())
+                }
+            }
+        }
+
+        val MIGRATION_34_35 = object : DoorMigration(34, 35){
+            override fun migrate(database: DoorSqlDatabase) {
+                if(database.dbType() == DoorDbType.SQLITE){
+
+                    //Drop PersonCustomField ( cause its not PersonField)
+                    database.execSQL("DROP TABLE PersonCustomField")
+
+                    //PersonGroupMember migration:
+                    //Begin: Create table PersonGroupMember for SQLite
+                    database.execSQL("ALTER TABLE PersonGroupMember RENAME to PersonGroupMember_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS PersonGroupMember (  
+                        |groupMemberActive  INTEGER NOT NULL , 
+                        |groupMemberPersonUid  INTEGER NOT NULL , 
+                        |groupMemberGroupUid  INTEGER NOT NULL , 
+                        |groupMemberMasterCsn  INTEGER NOT NULL , 
+                        |groupMemberLocalCsn  INTEGER NOT NULL , 
+                        |groupMemberLastChangedBy  INTEGER NOT NULL , 
+                        |groupMemberUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                    database.execSQL("""INSERT INTO PersonGroupMember (
+                        |groupMemberUid, groupMemberActive, groupMemberPersonUid, 
+                        |groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, 
+                        |groupMemberLastChangedBy) 
+                        |SELECT groupMemberUid, 1, 
+                        |groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, 
+                        |groupMemberLocalCsn, groupMemberLastChangedBy 
+                        |FROM PersonGroupMember_OLD""".trimMargin())
+                    database.execSQL("DROP TABLE PersonGroupMember_OLD")
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonGroupMember_groupMemberGroupUid 
+                    |ON PersonGroupMember (groupMemberGroupUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonGroupMember_groupMemberPersonUid 
+                    |ON PersonGroupMember (groupMemberPersonUid)
+                    """.trimMargin())
+
+                    //Statement migration
+                    //Begin: Create table StatementEntity for SQLite
+                    database.execSQL("ALTER TABLE StatementEntity RENAME to StatementEntity_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS StatementEntity (  
+                        |statementId  TEXT , 
+                        |personUid  INTEGER NOT NULL , 
+                        |verbUid  INTEGER NOT NULL , 
+                        |xObjectUid  INTEGER NOT NULL , 
+                        |subStatementActorUid  INTEGER NOT NULL , 
+                        |substatementVerbUid  INTEGER NOT NULL , 
+                        |subStatementObjectUid  INTEGER NOT NULL , 
+                        |agentUid  INTEGER NOT NULL , instructorUid  INTEGER NOT NULL , 
+                        |authorityUid  INTEGER NOT NULL , teamUid  INTEGER NOT NULL , 
+                        |resultCompletion  INTEGER NOT NULL , resultSuccess  INTEGER NOT NULL , 
+                        |resultScoreScaled  INTEGER NOT NULL , resultScoreRaw  INTEGER NOT NULL , 
+                        |resultScoreMin  INTEGER NOT NULL , resultScoreMax  INTEGER NOT NULL , 
+                        |resultDuration  INTEGER NOT NULL , resultResponse  TEXT , 
+                        |timestamp  INTEGER NOT NULL , stored  INTEGER NOT NULL , 
+                        |contextRegistration  TEXT , contextPlatform  TEXT , 
+                        |contextStatementId  TEXT , fullStatement  TEXT , 
+                        |statementMasterChangeSeqNum  INTEGER NOT NULL , 
+                        |statementLocalChangeSeqNum  INTEGER NOT NULL , 
+                        |statementLastChangedBy  INTEGER NOT NULL , 
+                        |extensionProgress  INTEGER NOT NULL , 
+                        |statementContentEntryUid  INTEGER NOT NULL , 
+                        |statementUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                    database.execSQL("""INSERT INTO StatementEntity (
+                        |statementUid, statementId, personUid, verbUid, xObjectUid, 
+                        |subStatementActorUid, substatementVerbUid, subStatementObjectUid, 
+                        |agentUid, instructorUid, authorityUid, teamUid, resultCompletion, 
+                        |resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, 
+                        |resultScoreMax, resultDuration, resultResponse, timestamp, stored, 
+                        |contextRegistration, contextPlatform, contextStatementId, 
+                        |fullStatement, statementMasterChangeSeqNum, 
+                        |statementLocalChangeSeqNum, statementLastChangedBy, 
+                        |extensionProgress, statementContentEntryUid) 
+                        |SELECT statementUid, statementId, personUid, verbUid, xObjectUid, 
+                        |subStatementActorUid, substatementVerbUid, subStatementObjectUid, 
+                        |agentUid, instructorUid, authorityUid, teamUid, resultCompletion, 
+                        |resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, 
+                        |resultScoreMax, resultDuration, resultResponse, timestamp, stored, 
+                        |contextRegistration, contextPlatform, contextStatementId, 
+                        |fullStatement, statementMasterChangeSeqNum, 
+                        |statementLocalChangeSeqNum, statementLastChangedBy, 
+                        |0, 0 FROM StatementEntity_OLD""".trimMargin())
+                    database.execSQL("DROP TABLE StatementEntity_OLD")
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonCustomFieldValue_trk (" +
+                            "  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL , csn  INTEGER NOT NULL , rx  INTEGER NOT NULL ," +
+                            " reqId  INTEGER NOT NULL , ts  INTEGER NOT NULL , " +
+                            " pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonCustomFieldValue_trk_clientId_epk_rx_csn 
+                    |ON PersonCustomFieldValue_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
+                    database.execSQL("ALTER TABLE Location RENAME to Location_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Location (  
+                         title  TEXT , description  TEXT , lng  TEXT , lat  TEXT , 
+                         parentLocationUid  INTEGER NOT NULL , locationLocalChangeSeqNum  INTEGER NOT NULL , 
+                         locationMasterChangeSeqNum  INTEGER NOT NULL , locationLastChangedBy  INTEGER NOT NULL , 
+                         timeZone  TEXT , locationActive  INTEGER NOT NULL , 
+                         locationUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("INSERT INTO Location (" +
+                            "locationUid, title, description, lng, lat, " +
+                            "parentLocationUid, locationLocalChangeSeqNum, " +
+                            "locationMasterChangeSeqNum, locationLastChangedBy, timeZone, " +
+                            "locationActive) SELECT locationUid, title, description, lng, " +
+                            "lat, parentLocationUid, locationLocalChangeSeqNum, " +
+                            "locationMasterChangeSeqNum, locationLastChangedBy, " +
+                            "'', locationActive FROM Location_OLD")
+                    database.execSQL("DROP TABLE Location_OLD")
+
+                    //Begin: Create table EntityRole for SQLite
+                    database.execSQL("ALTER TABLE EntityRole RENAME to EntityRole_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS EntityRole (  
+                        erMasterCsn  INTEGER NOT NULL , erLocalCsn  INTEGER NOT NULL , erLastChangedBy  INTEGER NOT NULL , 
+                        erTableId  INTEGER NOT NULL , erEntityUid  INTEGER NOT NULL , erGroupUid  INTEGER NOT NULL , 
+                        erRoleUid  INTEGER NOT NULL , erActive  INTEGER NOT NULL , 
+                        erUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("""INSERT INTO EntityRole (
+                         erUid, erMasterCsn, erLocalCsn, erLastChangedBy, erTableId, 
+                         erEntityUid, erGroupUid, erRoleUid, erActive) 
+                         SELECT erUid, erMasterCsn, erLocalCsn, erLastChangedBy, 
+                         erTableId, erEntityUid, erGroupUid, erRoleUid, 1 
+                         FROM EntityRole_OLD""")
+                    database.execSQL("DROP TABLE EntityRole_OLD")
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_EntityRole_erEntityUid 
+                    |ON EntityRole (erEntityUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_EntityRole_erGroupUid 
+                    |ON EntityRole (erGroupUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_EntityRole_erRoleUid 
+                    |ON EntityRole (erRoleUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_EntityRole_erTableId 
+                    |ON EntityRole (erTableId)
+                    """.trimMargin())
+
+                    //Begin: Create table PersonGroup for SQLite
+                    database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS PersonGroup (  
+                    groupMasterCsn  INTEGER NOT NULL , groupLocalCsn  INTEGER NOT NULL , 
+                    groupLastChangedBy  INTEGER NOT NULL , groupName  TEXT , 
+                    groupActive  INTEGER NOT NULL , groupPersonUid  INTEGER NOT NULL , 
+                    groupUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("""INSERT INTO PersonGroup (
+                        groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy,
+                         groupName, groupActive, groupPersonUid) SELECT groupUid, 
+                         groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupName, 
+                         1, groupPersonUid FROM PersonGroup_OLD""")
+                    database.execSQL("DROP TABLE PersonGroup_OLD")
+
+                    //Begin: Person for SQLite
+                    database.execSQL("ALTER TABLE Person RENAME to Person_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Person (  
+                        username  TEXT , firstNames  TEXT , lastName  TEXT , emailAddr  TEXT ,  
+                        phoneNum  TEXT , gender  INTEGER NOT NULL , active  INTEGER NOT NULL ,  
+                        admin  INTEGER NOT NULL , personNotes  TEXT , fatherName  TEXT ,  
+                        fatherNumber  TEXT , motherName  TEXT , motherNum  TEXT ,  
+                        dateOfBirth  INTEGER NOT NULL , personAddress  TEXT ,  
+                        personMasterChangeSeqNum  INTEGER NOT NULL ,  
+                        personLocalChangeSeqNum  INTEGER NOT NULL ,  
+                        personLastChangedBy  INTEGER NOT NULL ,  
+                        personUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("""INSERT INTO Person ( 
+                        personUid, username, firstNames, lastName, emailAddr, phoneNum,  
+                        gender, active, admin, personNotes, fatherName, fatherNumber,  
+                        motherName, motherNum, dateOfBirth, personAddress,  
+                        personMasterChangeSeqNum, personLocalChangeSeqNum,  
+                        personLastChangedBy)  
+                        SELECT personUid, username, firstNames, lastName, emailAddr,  
+                        phoneNum, gender, active, admin,
+                        '', '', '', '', '', 0, '', 
+                        personMasterChangeSeqNum, personLocalChangeSeqNum,  
+                        personLastChangedBy FROM Person_OLD""")
+                    database.execSQL("DROP TABLE Person_OLD")
+
+                    //Begin: Migrate PersonCustomFieldValue for SQLite
+                    database.execSQL("ALTER TABLE PersonCustomFieldValue RENAME to PersonCustomFieldValue_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS PersonCustomFieldValue (  
+                        personCustomFieldValuePersonCustomFieldUid  INTEGER NOT NULL , 
+                        personCustomFieldValuePersonUid  INTEGER NOT NULL , 
+                        fieldValue  TEXT , 
+                        personCustomFieldValueMasterChangeSeqNum  INTEGER NOT NULL , 
+                        personCustomFieldValueLocalChangeSeqNum  INTEGER NOT NULL , 
+                        personCustomFieldValueLastChangedBy  INTEGER NOT NULL , 
+                        personCustomFieldValueUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    database.execSQL("""INSERT INTO PersonCustomFieldValue (
+                        personCustomFieldValueUid, personCustomFieldValuePersonCustomFieldUid,  
+                        personCustomFieldValuePersonUid, fieldValue, 
+                        personCustomFieldValueMasterChangeSeqNum, 
+                        personCustomFieldValueLocalChangeSeqNum, 
+                        personCustomFieldValueLastChangedBy) 
+                        SELECT personCustomFieldValueUid, 
+                        personCustomFieldValuePersonCustomFieldUid, 
+                        personCustomFieldValuePersonUid, fieldValue,  
+                        0, 0, 0 
+                        FROM PersonCustomFieldValue_OLD""")
+                    database.execSQL("DROP TABLE PersonCustomFieldValue_OLD")
+
+                    //Begin: migrate clazz for sqlite
+                    //Begin: Create table Clazz for SQLite
+                    database.execSQL("ALTER TABLE Clazz RENAME to Clazz_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Clazz (  " +
+                            "clazzName  TEXT , clazzDesc  TEXT , " +
+                            "attendanceAverage  REAL NOT NULL , " +
+                            "clazzHolidayUMCalendarUid  INTEGER NOT NULL , " +
+                            "clazzScheuleUMCalendarUid  INTEGER NOT NULL , " +
+                            "isClazzActive  INTEGER NOT NULL , " +
+                            "clazzLocationUid  INTEGER NOT NULL , clazzStartTime  INTEGER NOT NULL , " +
+                            "clazzEndTime  INTEGER NOT NULL , clazzFeatures  INTEGER NOT NULL , " +
+                            "clazzMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzLastChangedBy  INTEGER NOT NULL , " +
+                            "clazzUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("DROP TABLE Clazz_OLD")
+
+                    //Begin: migrate personauth for sqlite
+                    //Begin: Create table PersonAuth for SQLite
+                    database.execSQL("ALTER TABLE PersonAuth RENAME to PersonAuth_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth (  " +
+                            "passwordHash  TEXT , " +
+                            "personAuthStatus  INTEGER NOT NULL, " +
+                            "personAuthLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "personAuthMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "lastChangedBy  INTEGER NOT NULL , " +
+                            "personAuthUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonAuth (personAuthUid, passwordHash, " +
+                            "personAuthStatus, personAuthLocalChangeSeqNum, " +
+                            "personAuthMasterChangeSeqNum, lastChangedBy) " +
+                            "SELECT personAuthUid, passwordHash, 0, " +
+                            "0, " +
+                            "0, 0 FROM PersonAuth_OLD")
+                    database.execSQL("DROP TABLE PersonAuth_OLD")
+                    //End: Create table PersonAuth for SQLite
+
+
+                    //Begin: migrate role for SQLite
+                    database.execSQL("ALTER TABLE Role RENAME to Role_OLD")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Role (  
+                        roleName  TEXT , 
+                        roleActive  INTEGER NOT NULL , 
+                        roleMasterCsn  INTEGER NOT NULL , 
+                        roleLocalCsn  INTEGER NOT NULL , 
+                        roleLastChangedBy  INTEGER NOT NULL , 
+                        rolePermissions  INTEGER NOT NULL , 
+                        roleUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
+                    database.execSQL("""INSERT INTO Role (
+                        roleUid, roleName, roleActive, roleMasterCsn, 
+                        roleLocalCsn, roleLastChangedBy, rolePermissions
+                        ) 
+                        SELECT roleUid, roleName, 1, roleMasterCsn, 
+                        roleLocalCsn, roleLastChangedBy, rolePermissions 
+                        FROM Role_OLD""")
+                    database.execSQL("DROP TABLE Role_OLD")
+
+
+                    //Begin: Create table ClazzMember for SQLite
+                    database.execSQL("ALTER TABLE ClazzMember RENAME to ClazzMember_OLD")
+                    database.execSQL("DROP TABLE ClazzMember_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember (  " +
+                            "clazzMemberPersonUid  INTEGER NOT NULL , " +
+                            "clazzMemberClazzUid  INTEGER NOT NULL , " +
+                            "clazzMemberDateJoined  INTEGER NOT NULL , " +
+                            "clazzMemberDateLeft  INTEGER NOT NULL , " +
+                            "clazzMemberRole  INTEGER NOT NULL , " +
+                            "clazzMemberAttendancePercentage  REAL NOT NULL , " +
+                            "clazzMemberActive  INTEGER NOT NULL , " +
+                            "clazzMemberLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzMemberMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzMemberLastChangedBy  INTEGER NOT NULL , " +
+                            "clazzMemberUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL " +
+                            ")")
+
+                    database.execSQL("""
+                    |CREATE
+                    | INDEX index_ClazzMember_clazzMemberPersonUid
+                    |ON ClazzMember (clazzMemberPersonUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE
+                    | INDEX index_ClazzMember_clazzMemberClazzUid
+                    |ON ClazzMember (clazzMemberClazzUid)
+                    """.trimMargin())
+                    //End: Create table ClazzMember for SQLite
+
+
+                    //Begin: Create table ClazzLog for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzLog RENAME to ClazzLog_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog (  clazzLogClazzUid  INTEGER NOT NULL , logDate  INTEGER NOT NULL , timeRecorded  INTEGER NOT NULL , clazzLogDone  INTEGER NOT NULL , clazzLogCancelled  INTEGER NOT NULL , clazzLogNumPresent  INTEGER NOT NULL, clazzLogNumAbsent  INTEGER NOT NULL, clazzLogNumPartial  INTEGER NOT NULL, clazzLogScheduleUid  INTEGER NOT NULL , clazzLogMSQN  INTEGER NOT NULL , clazzLogLCSN  INTEGER NOT NULL , clazzLogLCB  INTEGER NOT NULL, clazzLogUid  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzLog (clazzLogUid, clazzLogClazzUid, logDate, timeRecorded, clazzLogDone, clazzLogCancelled, clazzLogNumPresent, clazzLogNumAbsent, clazzLogNumPartial, clazzLogScheduleUid, clazzLogMSQN, clazzLogLCSN, clazzLogLCB) SELECT clazzLogUid, clazzLogClazzUid, logDate, timeRecorded, clazzLogDone, clazzLogCancelled, clazzLogNumPresent, clazzLogNumAbsent, clazzLogNumPartial, clazzLogScheduleUid, clazzLogMSQN, clazzLogLCSN, clazzLogLCB FROM ClazzLog_OLD")
+                    database.execSQL("DROP TABLE ClazzLog_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_14
+                    |AFTER UPDATE ON ClazzLog FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzLogMSQN = 0 
+                    |OR OLD.clazzLogMSQN = NEW.clazzLogMSQN
+                    |)
+                    |ELSE
+                    |(NEW.clazzLogLCSN = 0  
+                    |OR OLD.clazzLogLCSN = NEW.clazzLogLCSN
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzLog SET clazzLogLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+                    |ELSE (SELECT MAX(MAX(clazzLogLCSN), OLD.clazzLogLCSN) + 1 FROM ClazzLog) END),
+                    |clazzLogMSQN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(clazzLogMSQN), OLD.clazzLogMSQN) + 1 FROM ClazzLog)
+                    |ELSE NEW.clazzLogMSQN END)
+                    |WHERE clazzLogUid = NEW.clazzLogUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_14
+                    |AFTER INSERT ON ClazzLog FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzLogMSQN = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.clazzLogLCSN = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzLog SET clazzLogLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+                    |ELSE (SELECT MAX(clazzLogLCSN) + 1 FROM ClazzLog) END),
+                    |clazzLogMSQN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(clazzLogMSQN) + 1 FROM ClazzLog)
+                    |ELSE NEW.clazzLogMSQN END)
+                    |WHERE clazzLogUid = NEW.clazzLogUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  " +
+                            "INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER NOT NULL " +
+                            " PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzLog_trk_clientId_epk_rx_csn 
+                    |ON ClazzLog_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzLog for SQLite
+
+                    //Begin: Create table ClazzLogAttendanceRecord for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzLogAttendanceRecord RENAME to ClazzLogAttendanceRecord_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord (  " +
+                            "clazzLogAttendanceRecordClazzLogUid  INTEGER NOT NULL , " +
+                            "clazzLogAttendanceRecordClazzMemberUid  INTEGER NOT NULL , " +
+                            "attendanceStatus  INTEGER NOT NULL, " +
+                            "clazzLogAttendanceRecordMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzLogAttendanceRecordLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "clazzLogAttendanceRecordLastChangedBy  INTEGER NOT NULL, " +
+                            "clazzLogAttendanceRecordUid  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzLogAttendanceRecord (clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordClazzMemberUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy) SELECT clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordClazzMemberUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy FROM ClazzLogAttendanceRecord_OLD")
+                    database.execSQL("DROP TABLE ClazzLogAttendanceRecord_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_15
+                    |AFTER UPDATE ON ClazzLogAttendanceRecord FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzLogAttendanceRecordMasterChangeSeqNum = 0 
+                    |OR OLD.clazzLogAttendanceRecordMasterChangeSeqNum = NEW.clazzLogAttendanceRecordMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.clazzLogAttendanceRecordLocalChangeSeqNum = 0  
+                    |OR OLD.clazzLogAttendanceRecordLocalChangeSeqNum = NEW.clazzLogAttendanceRecordLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(clazzLogAttendanceRecordLocalChangeSeqNum), OLD.clazzLogAttendanceRecordLocalChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord) END),
+                    |clazzLogAttendanceRecordMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(clazzLogAttendanceRecordMasterChangeSeqNum), OLD.clazzLogAttendanceRecordMasterChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord)
+                    |ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END)
+                    |WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_15
+                    |AFTER INSERT ON ClazzLogAttendanceRecord FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzLogAttendanceRecordMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.clazzLogAttendanceRecordLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(clazzLogAttendanceRecordLocalChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord) END),
+                    |clazzLogAttendanceRecordMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(clazzLogAttendanceRecordMasterChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord)
+                    |ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END)
+                    |WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord_trk (  " +
+                            "epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, " +
+                            "csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, " +
+                            "ts  INTEGER NOT NULL , pk  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn 
+                    |ON ClazzLogAttendanceRecord_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzLogAttendanceRecord for SQLite
+
+                    //Begin: Create table FeedEntry for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE FeedEntry RENAME to FeedEntry_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  " +
+                            "feedEntryPersonUid  INTEGER NOT NULL , title  TEXT , " +
+                            "description  TEXT , link  TEXT , feedEntryClazzName  TEXT ," +
+                            " deadline  INTEGER NOT NULL , feedEntryHash  INTEGER NOT NULL ," +
+                            " feedEntryDone  INTEGER NOT NULL , feedEntryClazzLogUid  INTEGER NOT NULL , " +
+                            "dateCreated  INTEGER NOT NULL , feedEntryCheckType  INTEGER NOT NULL, " +
+                            "feedEntryLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "feedEntryMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "feedEntryLastChangedBy  INTEGER NOT NULL, feedEntryUid  INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO FeedEntry (feedEntryUid, feedEntryPersonUid, title, description, link, feedEntryClazzName, deadline, feedEntryHash, feedEntryDone, feedEntryClazzLogUid, dateCreated, feedEntryCheckType, feedEntryLocalChangeSeqNum, feedEntryMasterChangeSeqNum, feedEntryLastChangedBy) SELECT feedEntryUid, feedEntryPersonUid, title, description, link, feedEntryClazzName, deadline, feedEntryHash, feedEntryDone, feedEntryClazzLogUid, dateCreated, feedEntryCheckType, feedEntryLocalChangeSeqNum, feedEntryMasterChangeSeqNum, feedEntryLastChangedBy FROM FeedEntry_OLD")
+                    database.execSQL("DROP TABLE FeedEntry_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_121
+                    |AFTER UPDATE ON FeedEntry FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.feedEntryMasterChangeSeqNum = 0 
+                    |OR OLD.feedEntryMasterChangeSeqNum = NEW.feedEntryMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.feedEntryLocalChangeSeqNum = 0  
+                    |OR OLD.feedEntryLocalChangeSeqNum = NEW.feedEntryLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE FeedEntry SET feedEntryLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.feedEntryLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(feedEntryLocalChangeSeqNum), OLD.feedEntryLocalChangeSeqNum) + 1 FROM FeedEntry) END),
+                    |feedEntryMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(feedEntryMasterChangeSeqNum), OLD.feedEntryMasterChangeSeqNum) + 1 FROM FeedEntry)
+                    |ELSE NEW.feedEntryMasterChangeSeqNum END)
+                    |WHERE feedEntryUid = NEW.feedEntryUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_121
+                    |AFTER INSERT ON FeedEntry FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.feedEntryMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.feedEntryLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE FeedEntry SET feedEntryLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.feedEntryLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(feedEntryLocalChangeSeqNum) + 1 FROM FeedEntry) END),
+                    |feedEntryMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(feedEntryMasterChangeSeqNum) + 1 FROM FeedEntry)
+                    |ELSE NEW.feedEntryMasterChangeSeqNum END)
+                    |WHERE feedEntryUid = NEW.feedEntryUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_FeedEntry_trk_clientId_epk_rx_csn 
+                    |ON FeedEntry_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table FeedEntry for SQLite
+
+                    //Begin: Create table PersonField for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE PersonField RENAME to PersonField_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField (  fieldName  TEXT , labelMessageId  INTEGER NOT NULL, fieldIcon  TEXT , personFieldMasterChangeSeqNum  INTEGER NOT NULL , personFieldLocalChangeSeqNum  INTEGER NOT NULL , personFieldLastChangedBy  INTEGER NOT NULL, personCustomFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO PersonField (personCustomFieldUid, fieldName, labelMessageId, fieldIcon, personFieldMasterChangeSeqNum, personFieldLocalChangeSeqNum, personFieldLastChangedBy) SELECT personCustomFieldUid, fieldName, labelMessageId, fieldIcon, personFieldMasterChangeSeqNum, personFieldLocalChangeSeqNum, personFieldLastChangedBy FROM PersonField_OLD")
+                    database.execSQL("DROP TABLE PersonField_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_20
+                    |AFTER UPDATE ON PersonField FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.personFieldMasterChangeSeqNum = 0 
+                    |OR OLD.personFieldMasterChangeSeqNum = NEW.personFieldMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.personFieldLocalChangeSeqNum = 0  
+                    |OR OLD.personFieldLocalChangeSeqNum = NEW.personFieldLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE PersonField SET personFieldLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personFieldLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(personFieldLocalChangeSeqNum), OLD.personFieldLocalChangeSeqNum) + 1 FROM PersonField) END),
+                    |personFieldMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(personFieldMasterChangeSeqNum), OLD.personFieldMasterChangeSeqNum) + 1 FROM PersonField)
+                    |ELSE NEW.personFieldMasterChangeSeqNum END)
+                    |WHERE personCustomFieldUid = NEW.personCustomFieldUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_20
+                    |AFTER INSERT ON PersonField FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.personFieldMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.personFieldLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE PersonField SET personFieldLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personFieldLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(personFieldLocalChangeSeqNum) + 1 FROM PersonField) END),
+                    |personFieldMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(personFieldMasterChangeSeqNum) + 1 FROM PersonField)
+                    |ELSE NEW.personFieldMasterChangeSeqNum END)
+                    |WHERE personCustomFieldUid = NEW.personCustomFieldUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonField_trk_clientId_epk_rx_csn 
+                    |ON PersonField_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table PersonField for SQLite
+
+                    //Begin: Create table PersonDetailPresenterField for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE PersonDetailPresenterField RENAME to PersonDetailPresenterField_OLD")
+                    END MIGRATION */
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS PersonDetailPresenterField (  
+                        fieldUid  INTEGER NOT NULL , 
+                        fieldType  INTEGER NOT NULL, 
+                        fieldIndex  INTEGER NOT NULL, 
+                        labelMessageId  INTEGER NOT NULL, 
+                        fieldIcon  TEXT , 
+                        headerMessageId  INTEGER NOT NULL, 
+                        viewModeVisible  INTEGER NOT NULL , 
+                        editModeVisible  INTEGER NOT NULL , 
+                        isReadyOnly  INTEGER NOT NULL , 
+                        personDetailPresenterFieldMasterChangeSeqNum  INTEGER NOT NULL , 
+                        personDetailPresenterFieldLocalChangeSeqNum  INTEGER NOT NULL , 
+                        personDetailPresenterFieldLastChangedBy  INTEGER NOT NULL, 
+                        personDetailPresenterFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO PersonDetailPresenterField (personDetailPresenterFieldUid, fieldUid, fieldType, fieldIndex, labelMessageId, fieldIcon, headerMessageId, viewModeVisible, editModeVisible, isReadyOnly, personDetailPresenterFieldMasterChangeSeqNum, personDetailPresenterFieldLocalChangeSeqNum, personDetailPresenterFieldLastChangedBy) SELECT personDetailPresenterFieldUid, fieldUid, fieldType, fieldIndex, labelMessageId, fieldIcon, headerMessageId, viewModeVisible, editModeVisible, isReadyOnly, personDetailPresenterFieldMasterChangeSeqNum, personDetailPresenterFieldLocalChangeSeqNum, personDetailPresenterFieldLastChangedBy FROM PersonDetailPresenterField_OLD")
+                    database.execSQL("DROP TABLE PersonDetailPresenterField_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_19
+                    |AFTER UPDATE ON PersonDetailPresenterField FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.personDetailPresenterFieldMasterChangeSeqNum = 0 
+                    |OR OLD.personDetailPresenterFieldMasterChangeSeqNum = NEW.personDetailPresenterFieldMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.personDetailPresenterFieldLocalChangeSeqNum = 0  
+                    |OR OLD.personDetailPresenterFieldLocalChangeSeqNum = NEW.personDetailPresenterFieldLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE PersonDetailPresenterField SET personDetailPresenterFieldLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personDetailPresenterFieldLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(personDetailPresenterFieldLocalChangeSeqNum), OLD.personDetailPresenterFieldLocalChangeSeqNum) + 1 FROM PersonDetailPresenterField) END),
+                    |personDetailPresenterFieldMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(personDetailPresenterFieldMasterChangeSeqNum), OLD.personDetailPresenterFieldMasterChangeSeqNum) + 1 FROM PersonDetailPresenterField)
+                    |ELSE NEW.personDetailPresenterFieldMasterChangeSeqNum END)
+                    |WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_19
+                    |AFTER INSERT ON PersonDetailPresenterField FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.personDetailPresenterFieldMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.personDetailPresenterFieldLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE PersonDetailPresenterField SET personDetailPresenterFieldLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personDetailPresenterFieldLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(personDetailPresenterFieldLocalChangeSeqNum) + 1 FROM PersonDetailPresenterField) END),
+                    |personDetailPresenterFieldMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(personDetailPresenterFieldMasterChangeSeqNum) + 1 FROM PersonDetailPresenterField)
+                    |ELSE NEW.personDetailPresenterFieldMasterChangeSeqNum END)
+                    |WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonDetailPresenterField_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonDetailPresenterField_trk_clientId_epk_rx_csn 
+                    |ON PersonDetailPresenterField_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table PersonDetailPresenterField for SQLite
+
+                    //Begin: Create table SelQuestion for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestion RENAME to SelQuestion_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion (  questionText  TEXT , selQuestionSelQuestionSetUid  INTEGER NOT NULL , questionIndex  INTEGER NOT NULL, assignToAllClasses  INTEGER NOT NULL , multiNominations  INTEGER NOT NULL , questionType  INTEGER NOT NULL, questionActive  INTEGER NOT NULL , selQuestionMasterChangeSeqNum  INTEGER NOT NULL , selQuestionLocalChangeSeqNum  INTEGER NOT NULL , selQuestionLastChangedBy  INTEGER NOT NULL, selQuestionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestion (selQuestionUid, questionText, selQuestionSelQuestionSetUid, questionIndex, assignToAllClasses, multiNominations, questionType, questionActive, selQuestionMasterChangeSeqNum, selQuestionLocalChangeSeqNum, selQuestionLastChangedBy) SELECT selQuestionUid, questionText, selQuestionSelQuestionSetUid, questionIndex, assignToAllClasses, multiNominations, questionType, questionActive, selQuestionMasterChangeSeqNum, selQuestionLocalChangeSeqNum, selQuestionLastChangedBy FROM SelQuestion_OLD")
+                    database.execSQL("DROP TABLE SelQuestion_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_22
+                    |AFTER UPDATE ON SelQuestion FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionMasterChangeSeqNum = 0 
+                    |OR OLD.selQuestionMasterChangeSeqNum = NEW.selQuestionMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionLocalChangeSeqNum = 0  
+                    |OR OLD.selQuestionLocalChangeSeqNum = NEW.selQuestionLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestion SET selQuestionLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(selQuestionLocalChangeSeqNum), OLD.selQuestionLocalChangeSeqNum) + 1 FROM SelQuestion) END),
+                    |selQuestionMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(selQuestionMasterChangeSeqNum), OLD.selQuestionMasterChangeSeqNum) + 1 FROM SelQuestion)
+                    |ELSE NEW.selQuestionMasterChangeSeqNum END)
+                    |WHERE selQuestionUid = NEW.selQuestionUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_22
+                    |AFTER INSERT ON SelQuestion FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestion SET selQuestionLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(selQuestionLocalChangeSeqNum) + 1 FROM SelQuestion) END),
+                    |selQuestionMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(selQuestionMasterChangeSeqNum) + 1 FROM SelQuestion)
+                    |ELSE NEW.selQuestionMasterChangeSeqNum END)
+                    |WHERE selQuestionUid = NEW.selQuestionUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestion_trk_clientId_epk_rx_csn 
+                    |ON SelQuestion_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestion for SQLite
+
+                    //Begin: Create table SelQuestionResponse for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionResponse RENAME to SelQuestionResponse_OLD")
+                    END MIGRATION */
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SelQuestionResponse (  
+                        selQuestionResponseSelQuestionSetResponseUid  INTEGER NOT NULL , 
+                        selQuestionResponseSelQuestionUid  INTEGER NOT NULL , 
+                        selQuestionResponseMasterChangeSeqNum  INTEGER NOT NULL , 
+                        selQuestionResponseLocalChangeSeqNum  INTEGER NOT NULL , 
+                        selQuestionResponseLastChangedBy  INTEGER NOT NULL, 
+                        selQuestionResponseUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionResponse (selQuestionResponseUid, selQuestionResponseSelQuestionSetResponseUid, selQuestionResponseSelQuestionUid, selQuestionResponseMasterChangeSeqNum, selQuestionResponseLocalChangeSeqNum, selQuestionResponseLastChangedBy) SELECT selQuestionResponseUid, selQuestionResponseSelQuestionSetResponseUid, selQuestionResponseSelQuestionUid, selQuestionResponseMasterChangeSeqNum, selQuestionResponseLocalChangeSeqNum, selQuestionResponseLastChangedBy FROM SelQuestionResponse_OLD")
+                    database.execSQL("DROP TABLE SelQuestionResponse_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_23
+                    |AFTER UPDATE ON SelQuestionResponse FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionResponseMasterChangeSeqNum = 0 
+                    |OR OLD.selQuestionResponseMasterChangeSeqNum = NEW.selQuestionResponseMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionResponseLocalChangeSeqNum = 0  
+                    |OR OLD.selQuestionResponseLocalChangeSeqNum = NEW.selQuestionResponseLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionResponse SET selQuestionResponseLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionResponseLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(selQuestionResponseLocalChangeSeqNum), OLD.selQuestionResponseLocalChangeSeqNum) + 1 FROM SelQuestionResponse) END),
+                    |selQuestionResponseMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(selQuestionResponseMasterChangeSeqNum), OLD.selQuestionResponseMasterChangeSeqNum) + 1 FROM SelQuestionResponse)
+                    |ELSE NEW.selQuestionResponseMasterChangeSeqNum END)
+                    |WHERE selQuestionResponseUid = NEW.selQuestionResponseUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_23
+                    |AFTER INSERT ON SelQuestionResponse FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionResponseMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionResponseLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionResponse SET selQuestionResponseLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionResponseLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(selQuestionResponseLocalChangeSeqNum) + 1 FROM SelQuestionResponse) END),
+                    |selQuestionResponseMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(selQuestionResponseMasterChangeSeqNum) + 1 FROM SelQuestionResponse)
+                    |ELSE NEW.selQuestionResponseMasterChangeSeqNum END)
+                    |WHERE selQuestionResponseUid = NEW.selQuestionResponseUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SelQuestionResponse_trk (  
+                        epk  INTEGER NOT NULL , 
+                        clientId  INTEGER NOT NULL, 
+                        csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, 
+                        ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionResponse_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionResponse_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionResponse for SQLite
+
+                    //Begin: Create table SelQuestionResponseNomination for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME to SelQuestionResponseNomination_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination (  selqrnClazzMemberUid  INTEGER NOT NULL , selqrnSelQuestionResponseUId  INTEGER NOT NULL , nominationActive  INTEGER NOT NULL , selqrnMCSN  INTEGER NOT NULL , selqrnMCSNLCSN  INTEGER NOT NULL , selqrnMCSNLCB  INTEGER NOT NULL, selqrnUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionResponseNomination (selqrnUid, selqrnClazzMemberUid, selqrnSelQuestionResponseUId, nominationActive, selqrnMCSN, selqrnMCSNLCSN, selqrnMCSNLCB) SELECT selqrnUid, selqrnClazzMemberUid, selqrnSelQuestionResponseUId, nominationActive, selqrnMCSN, selqrnMCSNLCSN, selqrnMCSNLCB FROM SelQuestionResponseNomination_OLD")
+                    database.execSQL("DROP TABLE SelQuestionResponseNomination_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_24
+                    |AFTER UPDATE ON SelQuestionResponseNomination FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selqrnMCSN = 0 
+                    |OR OLD.selqrnMCSN = NEW.selqrnMCSN
+                    |)
+                    |ELSE
+                    |(NEW.selqrnMCSNLCSN = 0  
+                    |OR OLD.selqrnMCSNLCSN = NEW.selqrnMCSNLCSN
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionResponseNomination SET selqrnMCSNLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selqrnMCSNLCSN 
+                    |ELSE (SELECT MAX(MAX(selqrnMCSNLCSN), OLD.selqrnMCSNLCSN) + 1 FROM SelQuestionResponseNomination) END),
+                    |selqrnMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(selqrnMCSN), OLD.selqrnMCSN) + 1 FROM SelQuestionResponseNomination)
+                    |ELSE NEW.selqrnMCSN END)
+                    |WHERE selqrnUid = NEW.selqrnUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_24
+                    |AFTER INSERT ON SelQuestionResponseNomination FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selqrnMCSN = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.selqrnMCSNLCSN = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionResponseNomination SET selqrnMCSNLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selqrnMCSNLCSN 
+                    |ELSE (SELECT MAX(selqrnMCSNLCSN) + 1 FROM SelQuestionResponseNomination) END),
+                    |selqrnMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(selqrnMCSN) + 1 FROM SelQuestionResponseNomination)
+                    |ELSE NEW.selqrnMCSN END)
+                    |WHERE selqrnUid = NEW.selqrnUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionResponseNomination_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionResponseNomination_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionResponseNomination for SQLite
+
+                    //Begin: Create table SelQuestionSet for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionSet RENAME to SelQuestionSet_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSet (  title  TEXT , selQuestionSetMasterChangeSeqNum  INTEGER NOT NULL , selQuestionSetLocalChangeSeqNum  INTEGER NOT NULL , selQuestionSetLastChangedBy  INTEGER NOT NULL, selQuestionSetUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionSet (selQuestionSetUid, title, selQuestionSetMasterChangeSeqNum, selQuestionSetLocalChangeSeqNum, selQuestionSetLastChangedBy) SELECT selQuestionSetUid, title, selQuestionSetMasterChangeSeqNum, selQuestionSetLocalChangeSeqNum, selQuestionSetLastChangedBy FROM SelQuestionSet_OLD")
+                    database.execSQL("DROP TABLE SelQuestionSet_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_25
+                    |AFTER UPDATE ON SelQuestionSet FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionSetMasterChangeSeqNum = 0 
+                    |OR OLD.selQuestionSetMasterChangeSeqNum = NEW.selQuestionSetMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionSetLocalChangeSeqNum = 0  
+                    |OR OLD.selQuestionSetLocalChangeSeqNum = NEW.selQuestionSetLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionSet SET selQuestionSetLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(selQuestionSetLocalChangeSeqNum), OLD.selQuestionSetLocalChangeSeqNum) + 1 FROM SelQuestionSet) END),
+                    |selQuestionSetMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(selQuestionSetMasterChangeSeqNum), OLD.selQuestionSetMasterChangeSeqNum) + 1 FROM SelQuestionSet)
+                    |ELSE NEW.selQuestionSetMasterChangeSeqNum END)
+                    |WHERE selQuestionSetUid = NEW.selQuestionSetUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_25
+                    |AFTER INSERT ON SelQuestionSet FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionSetMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionSetLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionSet SET selQuestionSetLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(selQuestionSetLocalChangeSeqNum) + 1 FROM SelQuestionSet) END),
+                    |selQuestionSetMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(selQuestionSetMasterChangeSeqNum) + 1 FROM SelQuestionSet)
+                    |ELSE NEW.selQuestionSetMasterChangeSeqNum END)
+                    |WHERE selQuestionSetUid = NEW.selQuestionSetUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSet_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionSet_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionSet_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionSet for SQLite
+
+                    //Begin: Create table SelQuestionSetRecognition for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionSetRecognition RENAME to SelQuestionSetRecognition_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition (  selqsrSelQuestionSetResponseUid  INTEGER NOT NULL , selQuestionSetRecognitionClazzMemberUid  INTEGER NOT NULL , isSelQuestionSetRecognitionRecognized  INTEGER NOT NULL , selQuestionSetRecognitionMasterChangeSeqNum  INTEGER NOT NULL , selQuestionSetRecognitionLocalChangeSeqNum  INTEGER NOT NULL , selQuestionSetRecognitionLastChangedBy  INTEGER NOT NULL, selQuestionSetRecognitionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionSetRecognition (selQuestionSetRecognitionUid, selqsrSelQuestionSetResponseUid, selQuestionSetRecognitionClazzMemberUid, isSelQuestionSetRecognitionRecognized, selQuestionSetRecognitionMasterChangeSeqNum, selQuestionSetRecognitionLocalChangeSeqNum, selQuestionSetRecognitionLastChangedBy) SELECT selQuestionSetRecognitionUid, selqsrSelQuestionSetResponseUid, selQuestionSetRecognitionClazzMemberUid, isSelQuestionSetRecognitionRecognized, selQuestionSetRecognitionMasterChangeSeqNum, selQuestionSetRecognitionLocalChangeSeqNum, selQuestionSetRecognitionLastChangedBy FROM SelQuestionSetRecognition_OLD")
+                    database.execSQL("DROP TABLE SelQuestionSetRecognition_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_26
+                    |AFTER UPDATE ON SelQuestionSetRecognition FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionSetRecognitionMasterChangeSeqNum = 0 
+                    |OR OLD.selQuestionSetRecognitionMasterChangeSeqNum = NEW.selQuestionSetRecognitionMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionSetRecognitionLocalChangeSeqNum = 0  
+                    |OR OLD.selQuestionSetRecognitionLocalChangeSeqNum = NEW.selQuestionSetRecognitionLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionSetRecognition SET selQuestionSetRecognitionLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetRecognitionLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(selQuestionSetRecognitionLocalChangeSeqNum), OLD.selQuestionSetRecognitionLocalChangeSeqNum) + 1 FROM SelQuestionSetRecognition) END),
+                    |selQuestionSetRecognitionMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(selQuestionSetRecognitionMasterChangeSeqNum), OLD.selQuestionSetRecognitionMasterChangeSeqNum) + 1 FROM SelQuestionSetRecognition)
+                    |ELSE NEW.selQuestionSetRecognitionMasterChangeSeqNum END)
+                    |WHERE selQuestionSetRecognitionUid = NEW.selQuestionSetRecognitionUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_26
+                    |AFTER INSERT ON SelQuestionSetRecognition FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionSetRecognitionMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionSetRecognitionLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionSetRecognition SET selQuestionSetRecognitionLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetRecognitionLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(selQuestionSetRecognitionLocalChangeSeqNum) + 1 FROM SelQuestionSetRecognition) END),
+                    |selQuestionSetRecognitionMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(selQuestionSetRecognitionMasterChangeSeqNum) + 1 FROM SelQuestionSetRecognition)
+                    |ELSE NEW.selQuestionSetRecognitionMasterChangeSeqNum END)
+                    |WHERE selQuestionSetRecognitionUid = NEW.selQuestionSetRecognitionUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionSetRecognition_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionSetRecognition_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionSetRecognition for SQLite
+
+                    //Begin: Create table SelQuestionSetResponse for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionSetResponse RENAME to SelQuestionSetResponse_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetResponse (  " +
+                            "selQuestionSetResponseSelQuestionSetUid  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseClazzMemberUid  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseStartTime  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseFinishTime  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseRecognitionPercentage  REAL NOT NULL, " +
+                            "selQuestionSetResponseMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "selQuestionSetResponseLastChangedBy  INTEGER NOT NULL, " +
+                            "selQuestionSetResposeUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionSetResponse (selQuestionSetResposeUid, selQuestionSetResponseSelQuestionSetUid, selQuestionSetResponseClazzMemberUid, selQuestionSetResponseStartTime, selQuestionSetResponseFinishTime, selQuestionSetResponseRecognitionPercentage, selQuestionSetResponseMasterChangeSeqNum, selQuestionSetResponseLocalChangeSeqNum, selQuestionSetResponseLastChangedBy) SELECT selQuestionSetResposeUid, selQuestionSetResponseSelQuestionSetUid, selQuestionSetResponseClazzMemberUid, selQuestionSetResponseStartTime, selQuestionSetResponseFinishTime, selQuestionSetResponseRecognitionPercentage, selQuestionSetResponseMasterChangeSeqNum, selQuestionSetResponseLocalChangeSeqNum, selQuestionSetResponseLastChangedBy FROM SelQuestionSetResponse_OLD")
+                    database.execSQL("DROP TABLE SelQuestionSetResponse_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_27
+                    |AFTER UPDATE ON SelQuestionSetResponse FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionSetResponseMasterChangeSeqNum = 0 
+                    |OR OLD.selQuestionSetResponseMasterChangeSeqNum = NEW.selQuestionSetResponseMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionSetResponseLocalChangeSeqNum = 0  
+                    |OR OLD.selQuestionSetResponseLocalChangeSeqNum = NEW.selQuestionSetResponseLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionSetResponse SET selQuestionSetResponseLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetResponseLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(selQuestionSetResponseLocalChangeSeqNum), OLD.selQuestionSetResponseLocalChangeSeqNum) + 1 FROM SelQuestionSetResponse) END),
+                    |selQuestionSetResponseMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(selQuestionSetResponseMasterChangeSeqNum), OLD.selQuestionSetResponseMasterChangeSeqNum) + 1 FROM SelQuestionSetResponse)
+                    |ELSE NEW.selQuestionSetResponseMasterChangeSeqNum END)
+                    |WHERE selQuestionSetResposeUid = NEW.selQuestionSetResposeUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_27
+                    |AFTER INSERT ON SelQuestionSetResponse FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionSetResponseMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionSetResponseLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionSetResponse SET selQuestionSetResponseLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetResponseLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(selQuestionSetResponseLocalChangeSeqNum) + 1 FROM SelQuestionSetResponse) END),
+                    |selQuestionSetResponseMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(selQuestionSetResponseMasterChangeSeqNum) + 1 FROM SelQuestionSetResponse)
+                    |ELSE NEW.selQuestionSetResponseMasterChangeSeqNum END)
+                    |WHERE selQuestionSetResposeUid = NEW.selQuestionSetResposeUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetResponse_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionSetResponse_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionSetResponse_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionSetResponse for SQLite
+
+                    //Begin: Create table Schedule for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE Schedule RENAME to Schedule_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule (  sceduleStartTime  INTEGER NOT NULL , scheduleEndTime  INTEGER NOT NULL , scheduleDay  INTEGER NOT NULL, scheduleMonth  INTEGER NOT NULL, scheduleFrequency  INTEGER NOT NULL, umCalendarUid  INTEGER NOT NULL , scheduleClazzUid  INTEGER NOT NULL , scheduleMasterChangeSeqNum  INTEGER NOT NULL , scheduleLocalChangeSeqNum  INTEGER NOT NULL , scheduleLastChangedBy  INTEGER NOT NULL, scheduleActive  INTEGER NOT NULL , scheduleUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO Schedule (scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleActive) SELECT scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleActive FROM Schedule_OLD")
+                    database.execSQL("DROP TABLE Schedule_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_21
+                    |AFTER UPDATE ON Schedule FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.scheduleMasterChangeSeqNum = 0 
+                    |OR OLD.scheduleMasterChangeSeqNum = NEW.scheduleMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.scheduleLocalChangeSeqNum = 0  
+                    |OR OLD.scheduleLocalChangeSeqNum = NEW.scheduleLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE Schedule SET scheduleLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduleLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(scheduleLocalChangeSeqNum), OLD.scheduleLocalChangeSeqNum) + 1 FROM Schedule) END),
+                    |scheduleMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(scheduleMasterChangeSeqNum), OLD.scheduleMasterChangeSeqNum) + 1 FROM Schedule)
+                    |ELSE NEW.scheduleMasterChangeSeqNum END)
+                    |WHERE scheduleUid = NEW.scheduleUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_21
+                    |AFTER INSERT ON Schedule FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.scheduleMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.scheduleLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE Schedule SET scheduleLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduleLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(scheduleLocalChangeSeqNum) + 1 FROM Schedule) END),
+                    |scheduleMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(scheduleMasterChangeSeqNum) + 1 FROM Schedule)
+                    |ELSE NEW.scheduleMasterChangeSeqNum END)
+                    |WHERE scheduleUid = NEW.scheduleUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_Schedule_trk_clientId_epk_rx_csn 
+                    |ON Schedule_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table Schedule for SQLite
+
+                    //Begin: Create table DateRange for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE DateRange RENAME to DateRange_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange (  dateRangeLocalChangeSeqNum  INTEGER NOT NULL , dateRangeMasterChangeSeqNum  INTEGER NOT NULL , dateRangLastChangedBy  INTEGER NOT NULL, dateRangeFromDate  INTEGER NOT NULL , dateRangeToDate  INTEGER NOT NULL , dateRangeUMCalendarUid  INTEGER NOT NULL , dateRangeName  TEXT , dateRangeDesc  TEXT , dateRangeActive  INTEGER NOT NULL , dateRangeUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO DateRange (dateRangeUid, dateRangeLocalChangeSeqNum, dateRangeMasterChangeSeqNum, dateRangLastChangedBy, dateRangeFromDate, dateRangeToDate, dateRangeUMCalendarUid, dateRangeName, dateRangeDesc, dateRangeActive) SELECT dateRangeUid, dateRangeLocalChangeSeqNum, dateRangeMasterChangeSeqNum, dateRangLastChangedBy, dateRangeFromDate, dateRangeToDate, dateRangeUMCalendarUid, dateRangeName, dateRangeDesc, dateRangeActive FROM DateRange_OLD")
+                    database.execSQL("DROP TABLE DateRange_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_17
+                    |AFTER UPDATE ON DateRange FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.dateRangeMasterChangeSeqNum = 0 
+                    |OR OLD.dateRangeMasterChangeSeqNum = NEW.dateRangeMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.dateRangeLocalChangeSeqNum = 0  
+                    |OR OLD.dateRangeLocalChangeSeqNum = NEW.dateRangeLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE DateRange SET dateRangeLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.dateRangeLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(dateRangeLocalChangeSeqNum), OLD.dateRangeLocalChangeSeqNum) + 1 FROM DateRange) END),
+                    |dateRangeMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(dateRangeMasterChangeSeqNum), OLD.dateRangeMasterChangeSeqNum) + 1 FROM DateRange)
+                    |ELSE NEW.dateRangeMasterChangeSeqNum END)
+                    |WHERE dateRangeUid = NEW.dateRangeUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_17
+                    |AFTER INSERT ON DateRange FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.dateRangeMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.dateRangeLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE DateRange SET dateRangeLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.dateRangeLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(dateRangeLocalChangeSeqNum) + 1 FROM DateRange) END),
+                    |dateRangeMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(dateRangeMasterChangeSeqNum) + 1 FROM DateRange)
+                    |ELSE NEW.dateRangeMasterChangeSeqNum END)
+                    |WHERE dateRangeUid = NEW.dateRangeUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_DateRange_trk_clientId_epk_rx_csn 
+                    |ON DateRange_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table DateRange for SQLite
+
+                    //Begin: Create table UMCalendar for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE UMCalendar RENAME to UMCalendar_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UMCalendar (  umCalendarName  TEXT , umCalendarCategory  INTEGER NOT NULL, umCalendarActive  INTEGER NOT NULL , isUmCalendarFlag  INTEGER NOT NULL , umCalendarMasterChangeSeqNum  INTEGER NOT NULL , umCalendarLocalChangeSeqNum  INTEGER NOT NULL , umCalendarLastChangedBy  INTEGER NOT NULL, umCalendarUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO UMCalendar (umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, isUmCalendarFlag, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy) SELECT umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, isUmCalendarFlag, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy FROM UMCalendar_OLD")
+                    database.execSQL("DROP TABLE UMCalendar_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_28
+                    |AFTER UPDATE ON UMCalendar FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.umCalendarMasterChangeSeqNum = 0 
+                    |OR OLD.umCalendarMasterChangeSeqNum = NEW.umCalendarMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.umCalendarLocalChangeSeqNum = 0  
+                    |OR OLD.umCalendarLocalChangeSeqNum = NEW.umCalendarLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE UMCalendar SET umCalendarLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.umCalendarLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(umCalendarLocalChangeSeqNum), OLD.umCalendarLocalChangeSeqNum) + 1 FROM UMCalendar) END),
+                    |umCalendarMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(umCalendarMasterChangeSeqNum), OLD.umCalendarMasterChangeSeqNum) + 1 FROM UMCalendar)
+                    |ELSE NEW.umCalendarMasterChangeSeqNum END)
+                    |WHERE umCalendarUid = NEW.umCalendarUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_28
+                    |AFTER INSERT ON UMCalendar FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.umCalendarMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.umCalendarLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE UMCalendar SET umCalendarLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.umCalendarLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(umCalendarLocalChangeSeqNum) + 1 FROM UMCalendar) END),
+                    |umCalendarMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(umCalendarMasterChangeSeqNum) + 1 FROM UMCalendar)
+                    |ELSE NEW.umCalendarMasterChangeSeqNum END)
+                    |WHERE umCalendarUid = NEW.umCalendarUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UMCalendar_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_UMCalendar_trk_clientId_epk_rx_csn 
+                    |ON UMCalendar_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table UMCalendar for SQLite
+
+                    //Begin: Create table ClazzActivity for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzActivity RENAME to ClazzActivity_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity (  clazzActivityClazzActivityChangeUid  INTEGER NOT NULL , isClazzActivityGoodFeedback  INTEGER NOT NULL , clazzActivityNotes  TEXT , clazzActivityLogDate  INTEGER NOT NULL , clazzActivityClazzUid  INTEGER NOT NULL , clazzActivityDone  INTEGER NOT NULL , clazzActivityQuantity  INTEGER NOT NULL , clazzActivityMasterChangeSeqNum  INTEGER NOT NULL , clazzActivityLocalChangeSeqNum  INTEGER NOT NULL , clazzActivityLastChangedBy  INTEGER NOT NULL, clazzActivityUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzActivity (clazzActivityUid, clazzActivityClazzActivityChangeUid, isClazzActivityGoodFeedback, clazzActivityNotes, clazzActivityLogDate, clazzActivityClazzUid, clazzActivityDone, clazzActivityQuantity, clazzActivityMasterChangeSeqNum, clazzActivityLocalChangeSeqNum, clazzActivityLastChangedBy) SELECT clazzActivityUid, clazzActivityClazzActivityChangeUid, isClazzActivityGoodFeedback, clazzActivityNotes, clazzActivityLogDate, clazzActivityClazzUid, clazzActivityDone, clazzActivityQuantity, clazzActivityMasterChangeSeqNum, clazzActivityLocalChangeSeqNum, clazzActivityLastChangedBy FROM ClazzActivity_OLD")
+                    database.execSQL("DROP TABLE ClazzActivity_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_11
+                    |AFTER UPDATE ON ClazzActivity FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzActivityMasterChangeSeqNum = 0 
+                    |OR OLD.clazzActivityMasterChangeSeqNum = NEW.clazzActivityMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.clazzActivityLocalChangeSeqNum = 0  
+                    |OR OLD.clazzActivityLocalChangeSeqNum = NEW.clazzActivityLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzActivity SET clazzActivityLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(clazzActivityLocalChangeSeqNum), OLD.clazzActivityLocalChangeSeqNum) + 1 FROM ClazzActivity) END),
+                    |clazzActivityMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(clazzActivityMasterChangeSeqNum), OLD.clazzActivityMasterChangeSeqNum) + 1 FROM ClazzActivity)
+                    |ELSE NEW.clazzActivityMasterChangeSeqNum END)
+                    |WHERE clazzActivityUid = NEW.clazzActivityUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_11
+                    |AFTER INSERT ON ClazzActivity FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzActivityMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.clazzActivityLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzActivity SET clazzActivityLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(clazzActivityLocalChangeSeqNum) + 1 FROM ClazzActivity) END),
+                    |clazzActivityMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(clazzActivityMasterChangeSeqNum) + 1 FROM ClazzActivity)
+                    |ELSE NEW.clazzActivityMasterChangeSeqNum END)
+                    |WHERE clazzActivityUid = NEW.clazzActivityUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzActivity_trk_clientId_epk_rx_csn 
+                    |ON ClazzActivity_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzActivity for SQLite
+
+                    //Begin: Create table ClazzActivityChange for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzActivityChange RENAME to ClazzActivityChange_OLD")
+                    END MIGRATION */
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS ClazzActivityChange( 
+                        clazzActivityChangeTitle  TEXT , 
+                        clazzActivityDesc  TEXT , 
+                        clazzActivityUnitOfMeasure  INTEGER NOT NULL, 
+                        isClazzActivityChangeActive  INTEGER NOT NULL, 
+                        clazzActivityChangeLastChangedBy  INTEGER NOT NULL, 
+                        clazzActivityChangeMasterChangeSeqNum  INTEGER NOT NULL, 
+                        clazzActivityChangeLocalChangeSeqNum  INTEGER NOT NULL,
+                        clazzActivityLastChangedBy  INTEGER NOT NULL, 
+                        clazzActivityChangeUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzActivityChange (clazzActivityChangeUid, clazzActivityChangeTitle, clazzActivityDesc, clazzActivityUnitOfMeasure, isClazzActivityChangeActive, clazzActivityChangeLastChangedBy, clazzActivityChangeMasterChangeSeqNum, clazzActivityChangeLocalChangeSeqNum, clazzActivityLastChangedBy) SELECT clazzActivityChangeUid, clazzActivityChangeTitle, clazzActivityDesc, clazzActivityUnitOfMeasure, isClazzActivityChangeActive, clazzActivityChangeLastChangedBy, clazzActivityChangeMasterChangeSeqNum, clazzActivityChangeLocalChangeSeqNum, clazzActivityLastChangedBy FROM ClazzActivityChange_OLD")
+                    database.execSQL("DROP TABLE ClazzActivityChange_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_32
+                    |AFTER UPDATE ON ClazzActivityChange FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzActivityChangeMasterChangeSeqNum = 0 
+                    |OR OLD.clazzActivityChangeMasterChangeSeqNum = NEW.clazzActivityChangeMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.clazzActivityChangeLocalChangeSeqNum = 0  
+                    |OR OLD.clazzActivityChangeLocalChangeSeqNum = NEW.clazzActivityChangeLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzActivityChange SET clazzActivityChangeLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityChangeLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(clazzActivityChangeLocalChangeSeqNum), OLD.clazzActivityChangeLocalChangeSeqNum) + 1 FROM ClazzActivityChange) END),
+                    |clazzActivityChangeMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(clazzActivityChangeMasterChangeSeqNum), OLD.clazzActivityChangeMasterChangeSeqNum) + 1 FROM ClazzActivityChange)
+                    |ELSE NEW.clazzActivityChangeMasterChangeSeqNum END)
+                    |WHERE clazzActivityChangeUid = NEW.clazzActivityChangeUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_32
+                    |AFTER INSERT ON ClazzActivityChange FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzActivityChangeMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.clazzActivityChangeLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzActivityChange SET clazzActivityChangeLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityChangeLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(clazzActivityChangeLocalChangeSeqNum) + 1 FROM ClazzActivityChange) END),
+                    |clazzActivityChangeMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(clazzActivityChangeMasterChangeSeqNum) + 1 FROM ClazzActivityChange)
+                    |ELSE NEW.clazzActivityChangeMasterChangeSeqNum END)
+                    |WHERE clazzActivityChangeUid = NEW.clazzActivityChangeUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivityChange_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzActivityChange_trk_clientId_epk_rx_csn 
+                    |ON ClazzActivityChange_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzActivityChange for SQLite
+
+                    //Begin: Create table SelQuestionOption for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionOption RENAME to SelQuestionOption_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionOption (  optionText  TEXT , selQuestionOptionQuestionUid  INTEGER NOT NULL , selQuestionOptionMasterChangeSeqNum  INTEGER NOT NULL , selQuestionOptionLocalChangeSeqNum  INTEGER NOT NULL , selQuestionOptionLastChangedBy  INTEGER NOT NULL, optionActive  INTEGER NOT NULL , selQuestionOptionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionOption (selQuestionOptionUid, optionText, selQuestionOptionQuestionUid, selQuestionOptionMasterChangeSeqNum, selQuestionOptionLocalChangeSeqNum, selQuestionOptionLastChangedBy, optionActive) SELECT selQuestionOptionUid, optionText, selQuestionOptionQuestionUid, selQuestionOptionMasterChangeSeqNum, selQuestionOptionLocalChangeSeqNum, selQuestionOptionLastChangedBy, optionActive FROM SelQuestionOption_OLD")
+                    database.execSQL("DROP TABLE SelQuestionOption_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_52
+                    |AFTER UPDATE ON SelQuestionOption FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionOptionMasterChangeSeqNum = 0 
+                    |OR OLD.selQuestionOptionMasterChangeSeqNum = NEW.selQuestionOptionMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionOptionLocalChangeSeqNum = 0  
+                    |OR OLD.selQuestionOptionLocalChangeSeqNum = NEW.selQuestionOptionLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionOption SET selQuestionOptionLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionOptionLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(selQuestionOptionLocalChangeSeqNum), OLD.selQuestionOptionLocalChangeSeqNum) + 1 FROM SelQuestionOption) END),
+                    |selQuestionOptionMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(selQuestionOptionMasterChangeSeqNum), OLD.selQuestionOptionMasterChangeSeqNum) + 1 FROM SelQuestionOption)
+                    |ELSE NEW.selQuestionOptionMasterChangeSeqNum END)
+                    |WHERE selQuestionOptionUid = NEW.selQuestionOptionUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_52
+                    |AFTER INSERT ON SelQuestionOption FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.selQuestionOptionMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.selQuestionOptionLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE SelQuestionOption SET selQuestionOptionLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionOptionLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(selQuestionOptionLocalChangeSeqNum) + 1 FROM SelQuestionOption) END),
+                    |selQuestionOptionMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(selQuestionOptionMasterChangeSeqNum) + 1 FROM SelQuestionOption)
+                    |ELSE NEW.selQuestionOptionMasterChangeSeqNum END)
+                    |WHERE selQuestionOptionUid = NEW.selQuestionOptionUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SelQuestionOption_trk (  
+                        epk  INTEGER NOT NULL , 
+                        clientId  INTEGER NOT NULL, 
+                        csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , 
+                        reqId  INTEGER NOT NULL, 
+                        ts  INTEGER NOT NULL , 
+                        pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionOption_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionOption_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionOption for SQLite
+
+                    //Begin: Create table ScheduledCheck for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ScheduledCheck RENAME to ScheduledCheck_OLD")
+                    END MIGRATION */
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS ScheduledCheck (  
+                        checkTime  INTEGER NOT NULL , 
+                        checkType  INTEGER NOT NULL, 
+                        checkUuid  TEXT , 
+                        checkParameters  TEXT , 
+                        scClazzLogUid  INTEGER NOT NULL , 
+                        scheduledCheckMasterCsn  INTEGER NOT NULL , 
+                        scheduledCheckLocalCsn  INTEGER NOT NULL , 
+                        scheduledCheckLastChangedBy  INTEGER NOT NULL, 
+                        scheduledCheckUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ScheduledCheck (scheduledCheckUid, checkTime, checkType, checkUuid, checkParameters, scClazzLogUid, scheduledCheckMasterCsn, scheduledCheckLocalCsn, scheduledCheckLastChangedBy) SELECT scheduledCheckUid, checkTime, checkType, checkUuid, checkParameters, scClazzLogUid, scheduledCheckMasterCsn, scheduledCheckLocalCsn, scheduledCheckLastChangedBy FROM ScheduledCheck_OLD")
+                    database.execSQL("DROP TABLE ScheduledCheck_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_173
+                    |AFTER UPDATE ON ScheduledCheck FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.scheduledCheckMasterCsn = 0 
+                    |OR OLD.scheduledCheckMasterCsn = NEW.scheduledCheckMasterCsn
+                    |)
+                    |ELSE
+                    |(NEW.scheduledCheckLocalCsn = 0  
+                    |OR OLD.scheduledCheckLocalCsn = NEW.scheduledCheckLocalCsn
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ScheduledCheck SET scheduledCheckLocalCsn = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduledCheckLocalCsn 
+                    |ELSE (SELECT MAX(MAX(scheduledCheckLocalCsn), OLD.scheduledCheckLocalCsn) + 1 FROM ScheduledCheck) END),
+                    |scheduledCheckMasterCsn = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(scheduledCheckMasterCsn), OLD.scheduledCheckMasterCsn) + 1 FROM ScheduledCheck)
+                    |ELSE NEW.scheduledCheckMasterCsn END)
+                    |WHERE scheduledCheckUid = NEW.scheduledCheckUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_173
+                    |AFTER INSERT ON ScheduledCheck FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.scheduledCheckMasterCsn = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.scheduledCheckLocalCsn = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ScheduledCheck SET scheduledCheckLocalCsn = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduledCheckLocalCsn 
+                    |ELSE (SELECT MAX(scheduledCheckLocalCsn) + 1 FROM ScheduledCheck) END),
+                    |scheduledCheckMasterCsn = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(scheduledCheckMasterCsn) + 1 FROM ScheduledCheck)
+                    |ELSE NEW.scheduledCheckMasterCsn END)
+                    |WHERE scheduledCheckUid = NEW.scheduledCheckUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ScheduledCheck_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ScheduledCheck_trk_clientId_epk_rx_csn 
+                    |ON ScheduledCheck_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ScheduledCheck for SQLite
+
+                    //Begin: Create table AuditLog for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE AuditLog RENAME to AuditLog_OLD")
+                    END MIGRATION */
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS AuditLog (  
+                        auditLogMasterChangeSeqNum  INTEGER NOT NULL , 
+                        auditLogLocalChangeSeqNum  INTEGER NOT NULL , 
+                        auditLogLastChangedBy  INTEGER NOT NULL,
+                        auditLogActorPersonUid  INTEGER NOT NULL , 
+                        auditLogTableUid  INTEGER NOT NULL, 
+                        auditLogEntityUid  INTEGER NOT NULL , 
+                        auditLogDate  INTEGER NOT NULL , 
+                        notes  TEXT , 
+                        auditLogUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL 
+                        )""")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO AuditLog (auditLogUid, auditLogMasterChangeSeqNum, auditLogLocalChangeSeqNum, auditLogLastChangedBy, auditLogActorPersonUid, auditLogTableUid, auditLogEntityUid, auditLogDate, notes) SELECT auditLogUid, auditLogMasterChangeSeqNum, auditLogLocalChangeSeqNum, auditLogLastChangedBy, auditLogActorPersonUid, auditLogTableUid, auditLogEntityUid, auditLogDate, notes FROM AuditLog_OLD")
+                    database.execSQL("DROP TABLE AuditLog_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_53
+                    |AFTER UPDATE ON AuditLog FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.auditLogMasterChangeSeqNum = 0 
+                    |OR OLD.auditLogMasterChangeSeqNum = NEW.auditLogMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.auditLogLocalChangeSeqNum = 0  
+                    |OR OLD.auditLogLocalChangeSeqNum = NEW.auditLogLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE AuditLog SET auditLogLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.auditLogLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(auditLogLocalChangeSeqNum), OLD.auditLogLocalChangeSeqNum) + 1 FROM AuditLog) END),
+                    |auditLogMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(auditLogMasterChangeSeqNum), OLD.auditLogMasterChangeSeqNum) + 1 FROM AuditLog)
+                    |ELSE NEW.auditLogMasterChangeSeqNum END)
+                    |WHERE auditLogUid = NEW.auditLogUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_53
+                    |AFTER INSERT ON AuditLog FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.auditLogMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.auditLogLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE AuditLog SET auditLogLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.auditLogLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(auditLogLocalChangeSeqNum) + 1 FROM AuditLog) END),
+                    |auditLogMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(auditLogMasterChangeSeqNum) + 1 FROM AuditLog)
+                    |ELSE NEW.auditLogMasterChangeSeqNum END)
+                    |WHERE auditLogUid = NEW.auditLogUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS AuditLog_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_AuditLog_trk_clientId_epk_rx_csn 
+                    |ON AuditLog_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table AuditLog for SQLite
+
+                    //Begin: Create table CustomField for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE CustomField RENAME to CustomField_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField (  customFieldName  TEXT , customFieldNameAlt  TEXT , customFieldLabelMessageID  INTEGER NOT NULL, customFieldIcon  TEXT , customFieldType  INTEGER NOT NULL, customFieldEntityType  INTEGER NOT NULL, customFieldActive  INTEGER NOT NULL , customFieldDefaultValue  TEXT , customFieldMCSN  INTEGER NOT NULL , customFieldLCSN  INTEGER NOT NULL , customFieldLCB  INTEGER NOT NULL, customFieldUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO CustomField (customFieldUid, customFieldName, customFieldNameAlt, customFieldLabelMessageID, customFieldIcon, customFieldType, customFieldEntityType, customFieldActive, customFieldDefaultValue, customFieldMCSN, customFieldLCSN, customFieldLCB) SELECT customFieldUid, customFieldName, customFieldNameAlt, customFieldLabelMessageID, customFieldIcon, customFieldType, customFieldEntityType, customFieldActive, customFieldDefaultValue, customFieldMCSN, customFieldLCSN, customFieldLCB FROM CustomField_OLD")
+                    database.execSQL("DROP TABLE CustomField_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_56
+                    |AFTER UPDATE ON CustomField FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.customFieldMCSN = 0 
+                    |OR OLD.customFieldMCSN = NEW.customFieldMCSN
+                    |)
+                    |ELSE
+                    |(NEW.customFieldLCSN = 0  
+                    |OR OLD.customFieldLCSN = NEW.customFieldLCSN
+                    |) END)
+                    |BEGIN 
+                    |UPDATE CustomField SET customFieldLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldLCSN 
+                    |ELSE (SELECT MAX(MAX(customFieldLCSN), OLD.customFieldLCSN) + 1 FROM CustomField) END),
+                    |customFieldMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(customFieldMCSN), OLD.customFieldMCSN) + 1 FROM CustomField)
+                    |ELSE NEW.customFieldMCSN END)
+                    |WHERE customFieldUid = NEW.customFieldUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_56
+                    |AFTER INSERT ON CustomField FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.customFieldMCSN = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.customFieldLCSN = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE CustomField SET customFieldLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldLCSN 
+                    |ELSE (SELECT MAX(customFieldLCSN) + 1 FROM CustomField) END),
+                    |customFieldMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(customFieldMCSN) + 1 FROM CustomField)
+                    |ELSE NEW.customFieldMCSN END)
+                    |WHERE customFieldUid = NEW.customFieldUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_CustomField_trk_clientId_epk_rx_csn 
+                    |ON CustomField_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table CustomField for SQLite
+
+                    //Begin: Create table CustomFieldValue for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE CustomFieldValue RENAME to CustomFieldValue_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue (  customFieldValueFieldUid  INTEGER NOT NULL , customFieldValueEntityUid  INTEGER NOT NULL , customFieldValueValue  TEXT , customFieldValueMCSN  INTEGER NOT NULL , customFieldValueLCSN  INTEGER NOT NULL , customFieldValueLCB  INTEGER NOT NULL, customFieldValueUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO CustomFieldValue (customFieldValueUid, customFieldValueFieldUid, customFieldValueEntityUid, customFieldValueValue, customFieldValueMCSN, customFieldValueLCSN, customFieldValueLCB) SELECT customFieldValueUid, customFieldValueFieldUid, customFieldValueEntityUid, customFieldValueValue, customFieldValueMCSN, customFieldValueLCSN, customFieldValueLCB FROM CustomFieldValue_OLD")
+                    database.execSQL("DROP TABLE CustomFieldValue_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_57
+                    |AFTER UPDATE ON CustomFieldValue FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.customFieldValueMCSN = 0 
+                    |OR OLD.customFieldValueMCSN = NEW.customFieldValueMCSN
+                    |)
+                    |ELSE
+                    |(NEW.customFieldValueLCSN = 0  
+                    |OR OLD.customFieldValueLCSN = NEW.customFieldValueLCSN
+                    |) END)
+                    |BEGIN 
+                    |UPDATE CustomFieldValue SET customFieldValueLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueLCSN 
+                    |ELSE (SELECT MAX(MAX(customFieldValueLCSN), OLD.customFieldValueLCSN) + 1 FROM CustomFieldValue) END),
+                    |customFieldValueMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(customFieldValueMCSN), OLD.customFieldValueMCSN) + 1 FROM CustomFieldValue)
+                    |ELSE NEW.customFieldValueMCSN END)
+                    |WHERE customFieldValueUid = NEW.customFieldValueUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_57
+                    |AFTER INSERT ON CustomFieldValue FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.customFieldValueMCSN = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.customFieldValueLCSN = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE CustomFieldValue SET customFieldValueLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueLCSN 
+                    |ELSE (SELECT MAX(customFieldValueLCSN) + 1 FROM CustomFieldValue) END),
+                    |customFieldValueMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(customFieldValueMCSN) + 1 FROM CustomFieldValue)
+                    |ELSE NEW.customFieldValueMCSN END)
+                    |WHERE customFieldValueUid = NEW.customFieldValueUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_CustomFieldValue_trk_clientId_epk_rx_csn 
+                    |ON CustomFieldValue_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table CustomFieldValue for SQLite
+
+                    //Begin: Create table CustomFieldValueOption for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE CustomFieldValueOption RENAME to CustomFieldValueOption_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption (  customFieldValueOptionName  TEXT , customFieldValueOptionFieldUid  INTEGER NOT NULL , customFieldValueOptionIcon  TEXT , customFieldValueOptionMessageId  INTEGER NOT NULL, customFieldValueOptionActive  INTEGER NOT NULL , customFieldValueOptionMCSN  INTEGER NOT NULL , customFieldValueOptionLCSN  INTEGER NOT NULL , customFieldValueOptionLCB  INTEGER NOT NULL, customFieldValueOptionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO CustomFieldValueOption (customFieldValueOptionUid, customFieldValueOptionName, customFieldValueOptionFieldUid, customFieldValueOptionIcon, customFieldValueOptionMessageId, customFieldValueOptionActive, customFieldValueOptionMCSN, customFieldValueOptionLCSN, customFieldValueOptionLCB) SELECT customFieldValueOptionUid, customFieldValueOptionName, customFieldValueOptionFieldUid, customFieldValueOptionIcon, customFieldValueOptionMessageId, customFieldValueOptionActive, customFieldValueOptionMCSN, customFieldValueOptionLCSN, customFieldValueOptionLCB FROM CustomFieldValueOption_OLD")
+                    database.execSQL("DROP TABLE CustomFieldValueOption_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_55
+                    |AFTER UPDATE ON CustomFieldValueOption FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.customFieldValueOptionMCSN = 0 
+                    |OR OLD.customFieldValueOptionMCSN = NEW.customFieldValueOptionMCSN
+                    |)
+                    |ELSE
+                    |(NEW.customFieldValueOptionLCSN = 0  
+                    |OR OLD.customFieldValueOptionLCSN = NEW.customFieldValueOptionLCSN
+                    |) END)
+                    |BEGIN 
+                    |UPDATE CustomFieldValueOption SET customFieldValueOptionLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueOptionLCSN 
+                    |ELSE (SELECT MAX(MAX(customFieldValueOptionLCSN), OLD.customFieldValueOptionLCSN) + 1 FROM CustomFieldValueOption) END),
+                    |customFieldValueOptionMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(customFieldValueOptionMCSN), OLD.customFieldValueOptionMCSN) + 1 FROM CustomFieldValueOption)
+                    |ELSE NEW.customFieldValueOptionMCSN END)
+                    |WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_55
+                    |AFTER INSERT ON CustomFieldValueOption FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.customFieldValueOptionMCSN = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.customFieldValueOptionLCSN = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE CustomFieldValueOption SET customFieldValueOptionLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueOptionLCSN 
+                    |ELSE (SELECT MAX(customFieldValueOptionLCSN) + 1 FROM CustomFieldValueOption) END),
+                    |customFieldValueOptionMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(customFieldValueOptionMCSN) + 1 FROM CustomFieldValueOption)
+                    |ELSE NEW.customFieldValueOptionMCSN END)
+                    |WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_CustomFieldValueOption_trk_clientId_epk_rx_csn 
+                    |ON CustomFieldValueOption_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table CustomFieldValueOption for SQLite
+
+
+                    //Begin: Create table School for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE School RENAME to School_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS School (  " +
+                            "schoolName  TEXT , schoolDesc  TEXT , schoolAddress  TEXT , " +
+                            "schoolActive  INTEGER NOT NULL , schoolFeatures  INTEGER NOT NULL , " +
+                            "schoolLocationLong  REAL NOT NULL , schoolLocationLatt  REAL NOT NULL , " +
+                            "schoolMasterChangeSeqNum  INTEGER NOT NULL , " +
+                            "schoolLocalChangeSeqNum  INTEGER NOT NULL , " +
+                            "schoolLastChangedBy  INTEGER NOT NULL, " +
+                            "schoolUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO School (schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy) SELECT schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy FROM School_OLD")
+                    database.execSQL("DROP TABLE School_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_164
+                    |AFTER UPDATE ON School FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.schoolMasterChangeSeqNum = 0 
+                    |OR OLD.schoolMasterChangeSeqNum = NEW.schoolMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.schoolLocalChangeSeqNum = 0  
+                    |OR OLD.schoolLocalChangeSeqNum = NEW.schoolLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE School SET schoolLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(schoolLocalChangeSeqNum), OLD.schoolLocalChangeSeqNum) + 1 FROM School) END),
+                    |schoolMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(schoolMasterChangeSeqNum), OLD.schoolMasterChangeSeqNum) + 1 FROM School)
+                    |ELSE NEW.schoolMasterChangeSeqNum END)
+                    |WHERE schoolUid = NEW.schoolUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_164
+                    |AFTER INSERT ON School FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.schoolMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.schoolLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE School SET schoolLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(schoolLocalChangeSeqNum) + 1 FROM School) END),
+                    |schoolMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(schoolMasterChangeSeqNum) + 1 FROM School)
+                    |ELSE NEW.schoolMasterChangeSeqNum END)
+                    |WHERE schoolUid = NEW.schoolUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS School_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_School_trk_clientId_epk_rx_csn 
+                    |ON School_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table School for SQLite
+
+                    //Begin: Create table ClazzAssignment for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzAssignment RENAME to ClazzAssignment_OLD")
+                    END MIGRATION */
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS ClazzAssignment (  
+                        clazzAssignmentTitle  TEXT , 
+                        clazzAssignmentClazzUid  INTEGER NOT NULL , 
+                        clazzAssignmentInactive  INTEGER NOT NULL , 
+                        clazzAssignmentStartDate  INTEGER NOT NULL , 
+                        clazzAssignmentDueDate  INTEGER NOT NULL , 
+                        clazzAssignmentCreationDate  INTEGER NOT NULL ,
+                         clazzAssignmentUpdateDate  INTEGER NOT NULL , 
+                         clazzAssignmentInstructions  TEXT , 
+                         clazzAssignmentGrading  INTEGER NOT NULL,
+                          clazzAssignmentRequireAttachment  INTEGER NOT NULL , 
+                          clazzAssignmentMCSN  INTEGER NOT NULL , 
+                          clazzAssignmentLCSN  INTEGER NOT NULL , 
+                          clazzAssignmentLCB  INTEGER NOT NULL, 
+                          clazzAssignmentUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzAssignment (clazzAssignmentUid, clazzAssignmentTitle, clazzAssignmentClazzUid, clazzAssignmentInactive, clazzAssignmentStartDate, clazzAssignmentDueDate, clazzAssignmentCreationDate, clazzAssignmentUpdateDate, clazzAssignmentInstructions, clazzAssignmentGrading, clazzAssignmentRequireAttachment, clazzAssignmentMCSN, clazzAssignmentLCSN, clazzAssignmentLCB) SELECT clazzAssignmentUid, clazzAssignmentTitle, clazzAssignmentClazzUid, clazzAssignmentInactive, clazzAssignmentStartDate, clazzAssignmentDueDate, clazzAssignmentCreationDate, clazzAssignmentUpdateDate, clazzAssignmentInstructions, clazzAssignmentGrading, clazzAssignmentRequireAttachment, clazzAssignmentMCSN, clazzAssignmentLCSN, clazzAssignmentLCB FROM ClazzAssignment_OLD")
+                    database.execSQL("DROP TABLE ClazzAssignment_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_176
+                    |AFTER UPDATE ON ClazzAssignment FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzAssignmentMCSN = 0 
+                    |OR OLD.clazzAssignmentMCSN = NEW.clazzAssignmentMCSN
+                    |)
+                    |ELSE
+                    |(NEW.clazzAssignmentLCSN = 0  
+                    |OR OLD.clazzAssignmentLCSN = NEW.clazzAssignmentLCSN
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzAssignment SET clazzAssignmentLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzAssignmentLCSN 
+                    |ELSE (SELECT MAX(MAX(clazzAssignmentLCSN), OLD.clazzAssignmentLCSN) + 1 FROM ClazzAssignment) END),
+                    |clazzAssignmentMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(clazzAssignmentMCSN), OLD.clazzAssignmentMCSN) + 1 FROM ClazzAssignment)
+                    |ELSE NEW.clazzAssignmentMCSN END)
+                    |WHERE clazzAssignmentUid = NEW.clazzAssignmentUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_176
+                    |AFTER INSERT ON ClazzAssignment FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzAssignmentMCSN = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.clazzAssignmentLCSN = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzAssignment SET clazzAssignmentLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzAssignmentLCSN 
+                    |ELSE (SELECT MAX(clazzAssignmentLCSN) + 1 FROM ClazzAssignment) END),
+                    |clazzAssignmentMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(clazzAssignmentMCSN) + 1 FROM ClazzAssignment)
+                    |ELSE NEW.clazzAssignmentMCSN END)
+                    |WHERE clazzAssignmentUid = NEW.clazzAssignmentUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzAssignment_trk_clientId_epk_rx_csn 
+                    |ON ClazzAssignment_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzAssignment for SQLite
+
+                    //Begin: Create table ClazzAssignmentContentJoin for SQLite
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzAssignmentContentJoin RENAME to ClazzAssignmentContentJoin_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin (  " +
+                            "clazzAssignmentContentJoinContentUid  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinClazzAssignmentUid  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinInactive  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinDateAdded  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinMCSN  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinLCSN  INTEGER NOT NULL , " +
+                            "clazzAssignmentContentJoinLCB  INTEGER NOT NULL, " +
+                            "clazzAssignmentContentJoinUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzAssignmentContentJoin (clazzAssignmentContentJoinUid, clazzAssignmentContentJoinContentUid, clazzAssignmentContentJoinClazzAssignmentUid, clazzAssignmentContentJoinInactive, clazzAssignmentContentJoinDateAdded, clazzAssignmentContentJoinMCSN, clazzAssignmentContentJoinLCSN, clazzAssignmentContentJoinLCB) SELECT clazzAssignmentContentJoinUid, clazzAssignmentContentJoinContentUid, clazzAssignmentContentJoinClazzAssignmentUid, clazzAssignmentContentJoinInactive, clazzAssignmentContentJoinDateAdded, clazzAssignmentContentJoinMCSN, clazzAssignmentContentJoinLCSN, clazzAssignmentContentJoinLCB FROM ClazzAssignmentContentJoin_OLD")
+                    database.execSQL("DROP TABLE ClazzAssignmentContentJoin_OLD")
+                    END MIGRATION*/
+                    database.execSQL("""
+                    |CREATE TRIGGER UPD_177
+                    |AFTER UPDATE ON ClazzAssignmentContentJoin FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzAssignmentContentJoinMCSN = 0 
+                    |OR OLD.clazzAssignmentContentJoinMCSN = NEW.clazzAssignmentContentJoinMCSN
+                    |)
+                    |ELSE
+                    |(NEW.clazzAssignmentContentJoinLCSN = 0  
+                    |OR OLD.clazzAssignmentContentJoinLCSN = NEW.clazzAssignmentContentJoinLCSN
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzAssignmentContentJoin SET clazzAssignmentContentJoinLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzAssignmentContentJoinLCSN 
+                    |ELSE (SELECT MAX(MAX(clazzAssignmentContentJoinLCSN), OLD.clazzAssignmentContentJoinLCSN) + 1 FROM ClazzAssignmentContentJoin) END),
+                    |clazzAssignmentContentJoinMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(clazzAssignmentContentJoinMCSN), OLD.clazzAssignmentContentJoinMCSN) + 1 FROM ClazzAssignmentContentJoin)
+                    |ELSE NEW.clazzAssignmentContentJoinMCSN END)
+                    |WHERE clazzAssignmentContentJoinUid = NEW.clazzAssignmentContentJoinUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER INS_177
+                    |AFTER INSERT ON ClazzAssignmentContentJoin FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.clazzAssignmentContentJoinMCSN = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.clazzAssignmentContentJoinLCSN = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ClazzAssignmentContentJoin SET clazzAssignmentContentJoinLCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzAssignmentContentJoinLCSN 
+                    |ELSE (SELECT MAX(clazzAssignmentContentJoinLCSN) + 1 FROM ClazzAssignmentContentJoin) END),
+                    |clazzAssignmentContentJoinMCSN = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(clazzAssignmentContentJoinMCSN) + 1 FROM ClazzAssignmentContentJoin)
+                    |ELSE NEW.clazzAssignmentContentJoinMCSN END)
+                    |WHERE clazzAssignmentContentJoinUid = NEW.clazzAssignmentContentJoinUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin_trk (" +
+                            "  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, " +
+                            " rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL , " +
+                            " pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzAssignmentContentJoin_trk_clientId_epk_rx_csn 
+                    |ON ClazzAssignmentContentJoin_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzAssignmentContentJoin for SQLite
+
+
+
+
+                }
+                else if(database.dbType() == DoorDbType.POSTGRES){
+
+                    //Drop PersonCustomField ( cause its not PersonField)
+                    database.execSQL("DROP TABLE PersonCustomField")
+
+                    //PersonGroupMember migration
+                    //Begin: Create table PersonGroupMember for PostgreSQL
+                    database.execSQL("ALTER TABLE PersonGroupMember RENAME to PersonGroupMember_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS persongroupmember_groupmemberuid_seq RENAME to persongroupmember_groupmemberuid_seq_old;")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroupMember (  groupMemberActive  BOOL , groupMemberPersonUid  BIGINT , groupMemberGroupUid  BIGINT , groupMemberMasterCsn  BIGINT , groupMemberLocalCsn  BIGINT , groupMemberLastChangedBy  INTEGER , groupMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonGroupMember (" +
+                            "groupMemberUid, groupMemberActive, groupMemberPersonUid, " +
+                            "groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, " +
+                            "groupMemberLastChangedBy) SELECT groupMemberUid, true, groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, groupMemberLastChangedBy FROM PersonGroupMember_OLD")
+                    database.execSQL("DROP TABLE PersonGroupMember_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS persongroupmember_groupmemberuid_seq_old""")
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonGroupMember_groupMemberGroupUid 
+                    |ON PersonGroupMember (groupMemberGroupUid)
+                    """.trimMargin())
+
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonGroupMember_groupMemberPersonUid 
+                    |ON PersonGroupMember (groupMemberPersonUid)
+                    """.trimMargin())
+
+                    //StatementEntity
+                    //Begin: Create table StatementEntity for PostgreSQL
+                    database.execSQL("ALTER TABLE StatementEntity RENAME to StatementEntity_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS statemententity_statementuid_seq RENAME to statemententity_statementuid_seq_old;")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS StatementEntity (  statementId  TEXT , personUid  BIGINT , verbUid  BIGINT , xObjectUid  BIGINT , subStatementActorUid  BIGINT , substatementVerbUid  BIGINT , subStatementObjectUid  BIGINT , agentUid  BIGINT , instructorUid  BIGINT , authorityUid  BIGINT , teamUid  BIGINT , resultCompletion  BOOL , resultSuccess  SMALLINT , resultScoreScaled  BIGINT , resultScoreRaw  BIGINT , resultScoreMin  BIGINT , resultScoreMax  BIGINT , resultDuration  BIGINT , resultResponse  TEXT , timestamp  BIGINT , stored  BIGINT , contextRegistration  TEXT , contextPlatform  TEXT , contextStatementId  TEXT , fullStatement  TEXT , statementMasterChangeSeqNum  BIGINT , statementLocalChangeSeqNum  BIGINT , statementLastChangedBy  INTEGER , extensionProgress  INTEGER , statementContentEntryUid  BIGINT , statementUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO StatementEntity (
+                        |statementUid, statementId, personUid, verbUid, xObjectUid, 
+                        |subStatementActorUid, substatementVerbUid, subStatementObjectUid, 
+                        |agentUid, instructorUid, authorityUid, teamUid, resultCompletion, 
+                        |resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, 
+                        |resultScoreMax, resultDuration, resultResponse, timestamp, stored, 
+                        |contextRegistration, contextPlatform, contextStatementId, 
+                        |fullStatement, statementMasterChangeSeqNum, 
+                        |statementLocalChangeSeqNum, statementLastChangedBy, 
+                        |extensionProgress, statementContentEntryUid) 
+                        |SELECT statementUid, statementId, personUid, verbUid, xObjectUid, 
+                        |subStatementActorUid, substatementVerbUid, subStatementObjectUid, 
+                        |agentUid, instructorUid, authorityUid, teamUid, resultCompletion, 
+                        |resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, 
+                        |resultScoreMax, resultDuration, resultResponse, timestamp, stored, 
+                        |contextRegistration, contextPlatform, contextStatementId, 
+                        |fullStatement, statementMasterChangeSeqNum, 
+                        |statementLocalChangeSeqNum, statementLastChangedBy, 
+                        |0, 0 FROM StatementEntity_OLD""".trimMargin())
+                    database.execSQL("DROP TABLE StatementEntity_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS persongroupmember_groupmemberuid_seq_old""")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonCustomFieldValue_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonCustomFieldValue_trk_clientId_epk_rx_csn 
+                    |ON PersonCustomFieldValue_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
+                    //Begin: Create table Location for PostgreSQL
+                    database.execSQL("ALTER TABLE Location RENAME to Location_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS location_locationuid_seq RENAME to location_locationuid_seq_old;")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Location (  title  TEXT , description  TEXT , lng  TEXT , lat  TEXT , parentLocationUid  BIGINT , locationLocalChangeSeqNum  BIGINT , locationMasterChangeSeqNum  BIGINT , locationLastChangedBy  INTEGER , timeZone  TEXT , locationActive  BOOL , locationUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("INSERT INTO Location (locationUid, title, description, " +
+                            "lng, lat, parentLocationUid, locationLocalChangeSeqNum, locationMasterChangeSeqNum, " +
+                            "locationLastChangedBy, timeZone, locationActive) " +
+                            "SELECT locationUid, title, description, lng, lat, parentLocationUid, " +
+                            "locationLocalChangeSeqNum, locationMasterChangeSeqNum, " +
+                            "locationLastChangedBy, '', locationActive FROM Location_OLD")
+                    database.execSQL("DROP TABLE Location_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS location_locationuid_seq_old""")
+
+                    //EntityRole migration
+                    database.execSQL("ALTER TABLE EntityRole RENAME to EntityRole_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS entityrole_eruid_seq RENAME to entityrole_eruid_seq_old;")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS EntityRole (  erMasterCsn  BIGINT , erLocalCsn  BIGINT , erLastChangedBy  INTEGER , erTableId  INTEGER , erEntityUid  BIGINT , erGroupUid  BIGINT , erRoleUid  BIGINT , erActive  BOOL , erUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO EntityRole (erUid, erMasterCsn, 
+                        erLocalCsn, erLastChangedBy, erTableId, erEntityUid, erGroupUid, 
+                        erRoleUid, erActive) 
+                        SELECT erUid, erMasterCsn, erLocalCsn, erLastChangedBy, erTableId, 
+                        erEntityUid, erGroupUid, erRoleUid, true FROM EntityRole_OLD""")
+                    database.execSQL("DROP TABLE EntityRole_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS entityrole_eruid_seq_old""")
+
+
+                    //Begin: Create table PersonGroup for PostgreSQL
+                    database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS persongroup_groupuid_seq RENAME to persongroup_groupuid_seq_old;")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup (  groupMasterCsn  BIGINT , groupLocalCsn  BIGINT , groupLastChangedBy  INTEGER , groupName  TEXT , groupActive  BOOL , groupPersonUid  BIGINT , groupUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO PersonGroup (
+                         groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy, 
+                         groupName, groupActive, groupPersonUid) SELECT groupUid, 
+                         groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupName, 
+                         true, groupPersonUid FROM PersonGroup_OLD""")
+                    database.execSQL("DROP TABLE PersonGroup_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS persongroup_groupuid_seq_old""")
+
+                    //Begin: Create table Person for PostgreSQL
+                    database.execSQL("ALTER TABLE Person RENAME to Person_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS person_personuid_seq RENAME to person_personuid_seq_old;")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Person (  username  TEXT , firstNames  TEXT , lastName  TEXT , emailAddr  TEXT , phoneNum  TEXT , gender  INTEGER , active  BOOL , admin  BOOL , personNotes  TEXT , fatherName  TEXT , fatherNumber  TEXT , motherName  TEXT , motherNum  TEXT , dateOfBirth  BIGINT , personAddress  TEXT , personMasterChangeSeqNum  BIGINT , personLocalChangeSeqNum  BIGINT , personLastChangedBy  INTEGER , personUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO Person (personUid, username, firstNames, 
+                        lastName, emailAddr, phoneNum, gender, active, admin, personNotes, 
+                        fatherName, fatherNumber, motherName, motherNum, dateOfBirth, 
+                        personAddress, personMasterChangeSeqNum, personLocalChangeSeqNum, 
+                        personLastChangedBy)
+                         SELECT personUid, username, firstNames, lastName, emailAddr, 
+                         phoneNum, gender, active, admin, '', '', 
+                         '', '', '', 0, '', 
+                         personMasterChangeSeqNum, personLocalChangeSeqNum, 
+                         personLastChangedBy FROM Person_OLD""")
+                    database.execSQL("DROP TABLE Person_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS person_personuid_seq_old""")
+
+
+                    //Begin: Create table PersonCustomFieldValue for PostgreSQL
+                    database.execSQL("ALTER TABLE PersonCustomFieldValue RENAME to PersonCustomFieldValue_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonCustomFieldValue (  personCustomFieldValuePersonCustomFieldUid  BIGINT , personCustomFieldValuePersonUid  BIGINT , fieldValue  TEXT , personCustomFieldValueMasterChangeSeqNum  BIGINT , personCustomFieldValueLocalChangeSeqNum  BIGINT , personCustomFieldValueLastChangedBy  INTEGER , personCustomFieldValueUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""INSERT INTO PersonCustomFieldValue (
+                        personCustomFieldValueUid, personCustomFieldValuePersonCustomFieldUid,
+                         personCustomFieldValuePersonUid, fieldValue,
+                          personCustomFieldValueMasterChangeSeqNum, 
+                          personCustomFieldValueLocalChangeSeqNum, 
+                          personCustomFieldValueLastChangedBy) 
+                          SELECT personCustomFieldValueUid, 
+                          personCustomFieldValuePersonCustomFieldUid,
+                           personCustomFieldValuePersonUid, fieldValue, 
+                           0, 
+                           0, 
+                           0 FROM PersonCustomFieldValue_OLD""")
+                    database.execSQL("DROP TABLE PersonCustomFieldValue_OLD")
+
+                    //Begin: clazz
+                    //Begin: Create table Clazz for PostgreSQL
+                    database.execSQL("ALTER TABLE Clazz RENAME to Clazz_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS clazz_clazzuid_seq RENAME to clazz_clazzuid_seq_old;")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Clazz (  clazzName  TEXT , clazzDesc  TEXT , attendanceAverage  FLOAT , clazzHolidayUMCalendarUid  BIGINT , clazzScheuleUMCalendarUid  BIGINT , isClazzActive  BOOL , clazzLocationUid  BIGINT , clazzStartTime  BIGINT , clazzEndTime  BIGINT , clazzFeatures  BIGINT , clazzMasterChangeSeqNum  BIGINT , clazzLocalChangeSeqNum  BIGINT , clazzLastChangedBy  INTEGER , clazzUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("DROP TABLE Clazz_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS clazz_clazzuid_seq_old""")
+
+                    //Begin : PersonAuth stuff
+                    //Begin: Create table PersonAuth for PostgreSQL
+                    database.execSQL("ALTER TABLE PersonAuth RENAME to PersonAuth_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonAuth (  passwordHash  TEXT , personAuthStatus  INTEGER , personAuthLocalChangeSeqNum  BIGINT , personAuthMasterChangeSeqNum  BIGINT , lastChangedBy  INTEGER , personAuthUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonAuth (personAuthUid, passwordHash, " +
+                            "personAuthStatus, personAuthLocalChangeSeqNum, " +
+                            "personAuthMasterChangeSeqNum, lastChangedBy)" +
+                            " SELECT personAuthUid, passwordHash, 0, " +
+                            "0, 0," +
+                            " 0 FROM PersonAuth_OLD")
+                    database.execSQL("DROP TABLE PersonAuth_OLD")
+                    //End: Create table PersonAuth for PostgreSQL
+
+                    //Begin: Create table ClazzMember for PostgreSQL
+                    database.execSQL("ALTER TABLE ClazzMember RENAME to ClazzMember_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS clazzmember_clazzmemberuid_seq RENAME to clazzmember_clazzmemberuid_seq_old;")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember (  clazzMemberPersonUid  BIGINT , clazzMemberClazzUid  BIGINT , clazzMemberDateJoined  BIGINT , clazzMemberDateLeft  BIGINT , clazzMemberRole  INTEGER , clazzMemberAttendancePercentage  FLOAT , clazzMemberActive  BOOL , clazzMemberLocalChangeSeqNum  BIGINT , clazzMemberMasterChangeSeqNum  BIGINT , clazzMemberLastChangedBy  INTEGER , clazzMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("DROP TABLE ClazzMember_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS clazzmember_clazzmemberuid_seq_old""")
+
+
+
+                    database.execSQL("ALTER TABLE Role RENAME to Role_OLD")
+                    database.execSQL("ALTER SEQUENCE IF EXISTS role_roleuid_seq RENAME to role_roleuid_seq_old;")
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS Role (
+                        roleName  TEXT , roleActive  BOOL , roleMasterCsn  BIGINT , 
+                        roleLocalCsn  BIGINT , roleLastChangedBy  INTEGER , 
+                        rolePermissions  BIGINT , roleUid  BIGSERIAL  PRIMARY KEY  NOT NULL )""")
+                    database.execSQL("""INSERT INTO Role (
+                        roleUid, roleName, roleActive, roleMasterCsn, 
+                        roleLocalCsn, roleLastChangedBy, rolePermissions
+                        ) 
+                        SELECT roleUid, roleName, true, roleMasterCsn, 
+                        roleLocalCsn, roleLastChangedBy, rolePermissions 
+                        FROM Role_OLD""")
+                    database.execSQL("DROP TABLE Role_OLD")
+                    database.execSQL("""DROP SEQUENCE IF EXISTS role_roleuid_seq_old""")
+
+                    //Begin: Create table ClazzLog for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzLog RENAME to ClazzLog_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog (  clazzLogClazzUid  BIGINT , logDate  BIGINT , timeRecorded  BIGINT , clazzLogDone  BOOL , clazzLogCancelled  BOOL , clazzLogNumPresent  INTEGER , clazzLogNumAbsent  INTEGER , clazzLogNumPartial  INTEGER , clazzLogScheduleUid  BIGINT , clazzLogMSQN  BIGINT , clazzLogLCSN  BIGINT , clazzLogLCB  INTEGER , clazzLogUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzLog (clazzLogUid, clazzLogClazzUid, logDate, timeRecorded, clazzLogDone, clazzLogCancelled, clazzLogNumPresent, clazzLogNumAbsent, clazzLogNumPartial, clazzLogScheduleUid, clazzLogMSQN, clazzLogLCSN, clazzLogLCB) SELECT clazzLogUid, clazzLogClazzUid, logDate, timeRecorded, clazzLogDone, clazzLogCancelled, clazzLogNumPresent, clazzLogNumAbsent, clazzLogNumPartial, clazzLogScheduleUid, clazzLogMSQN, clazzLogLCSN, clazzLogLCB FROM ClazzLog_OLD")
+                    database.execSQL("DROP TABLE ClazzLog_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLog_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLog_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_14_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ClazzLog SET clazzLogLCSN =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+                    | ELSE NEXTVAL('ClazzLog_lcsn_seq') END),
+                    | clazzLogMSQN = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ClazzLog_mcsn_seq') 
+                    | ELSE NEW.clazzLogMSQN END)
+                    | WHERE clazzLogUid = NEW.clazzLogUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_14_trig 
+                    |AFTER UPDATE OR INSERT ON ClazzLog 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_14_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_14_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_14")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER NOT NULL, rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzLog_trk_clientId_epk_rx_csn 
+                    |ON ClazzLog_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzLog for PostgreSQL
+
+                    //Begin: Create table ClazzLogAttendanceRecord for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzLogAttendanceRecord RENAME to ClazzLogAttendanceRecord_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord (  clazzLogAttendanceRecordClazzLogUid  BIGINT , clazzLogAttendanceRecordClazzMemberUid  BIGINT , attendanceStatus  INTEGER , clazzLogAttendanceRecordMasterChangeSeqNum  BIGINT , clazzLogAttendanceRecordLocalChangeSeqNum  BIGINT , clazzLogAttendanceRecordLastChangedBy  INTEGER , clazzLogAttendanceRecordUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzLogAttendanceRecord (clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordClazzMemberUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy) SELECT clazzLogAttendanceRecordUid, clazzLogAttendanceRecordClazzLogUid, clazzLogAttendanceRecordClazzMemberUid, attendanceStatus, clazzLogAttendanceRecordMasterChangeSeqNum, clazzLogAttendanceRecordLocalChangeSeqNum, clazzLogAttendanceRecordLastChangedBy FROM ClazzLogAttendanceRecord_OLD")
+                    database.execSQL("DROP TABLE ClazzLogAttendanceRecord_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLogAttendanceRecord_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLogAttendanceRecord_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_15_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum 
+                    | ELSE NEXTVAL('ClazzLogAttendanceRecord_lcsn_seq') END),
+                    | clazzLogAttendanceRecordMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ClazzLogAttendanceRecord_mcsn_seq') 
+                    | ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END)
+                    | WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_15_trig 
+                    |AFTER UPDATE OR INSERT ON ClazzLogAttendanceRecord 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_15_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_15_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_15")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn 
+                    |ON ClazzLogAttendanceRecord_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzLogAttendanceRecord for PostgreSQL
+
+                    //Begin: Create table FeedEntry for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE FeedEntry RENAME to FeedEntry_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  feedEntryPersonUid  BIGINT , title  TEXT , description  TEXT , link  TEXT , feedEntryClazzName  TEXT , deadline  BIGINT , feedEntryHash  BIGINT , feedEntryDone  BOOL , feedEntryClazzLogUid  BIGINT , dateCreated  BIGINT , feedEntryCheckType  INTEGER , feedEntryLocalChangeSeqNum  BIGINT , feedEntryMasterChangeSeqNum  BIGINT , feedEntryLastChangedBy  INTEGER , feedEntryUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO FeedEntry (feedEntryUid, feedEntryPersonUid, title, description, link, feedEntryClazzName, deadline, feedEntryHash, feedEntryDone, feedEntryClazzLogUid, dateCreated, feedEntryCheckType, feedEntryLocalChangeSeqNum, feedEntryMasterChangeSeqNum, feedEntryLastChangedBy) SELECT feedEntryUid, feedEntryPersonUid, title, description, link, feedEntryClazzName, deadline, feedEntryHash, feedEntryDone, feedEntryClazzLogUid, dateCreated, feedEntryCheckType, feedEntryLocalChangeSeqNum, feedEntryMasterChangeSeqNum, feedEntryLastChangedBy FROM FeedEntry_OLD")
+                    database.execSQL("DROP TABLE FeedEntry_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS FeedEntry_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS FeedEntry_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_121_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE FeedEntry SET feedEntryLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.feedEntryLocalChangeSeqNum 
+                    | ELSE NEXTVAL('FeedEntry_lcsn_seq') END),
+                    | feedEntryMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('FeedEntry_mcsn_seq') 
+                    | ELSE NEW.feedEntryMasterChangeSeqNum END)
+                    | WHERE feedEntryUid = NEW.feedEntryUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_121_trig 
+                    |AFTER UPDATE OR INSERT ON FeedEntry 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_121_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_121_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_121")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_FeedEntry_trk_clientId_epk_rx_csn 
+                    |ON FeedEntry_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table FeedEntry for PostgreSQL
+
+                    //Begin: Create table PersonField for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE PersonField RENAME to PersonField_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField (  fieldName  TEXT , labelMessageId  INTEGER , fieldIcon  TEXT , personFieldMasterChangeSeqNum  BIGINT , personFieldLocalChangeSeqNum  BIGINT , personFieldLastChangedBy  INTEGER , personCustomFieldUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO PersonField (personCustomFieldUid, fieldName, labelMessageId, fieldIcon, personFieldMasterChangeSeqNum, personFieldLocalChangeSeqNum, personFieldLastChangedBy) SELECT personCustomFieldUid, fieldName, labelMessageId, fieldIcon, personFieldMasterChangeSeqNum, personFieldLocalChangeSeqNum, personFieldLastChangedBy FROM PersonField_OLD")
+                    database.execSQL("DROP TABLE PersonField_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonField_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonField_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_20_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE PersonField SET personFieldLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personFieldLocalChangeSeqNum 
+                    | ELSE NEXTVAL('PersonField_lcsn_seq') END),
+                    | personFieldMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('PersonField_mcsn_seq') 
+                    | ELSE NEW.personFieldMasterChangeSeqNum END)
+                    | WHERE personCustomFieldUid = NEW.personCustomFieldUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_20_trig 
+                    |AFTER UPDATE OR INSERT ON PersonField 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_20_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_20_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_20")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonField_trk_clientId_epk_rx_csn 
+                    |ON PersonField_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table PersonField for PostgreSQL
+
+                    //Begin: Create table PersonDetailPresenterField for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE PersonDetailPresenterField RENAME to PersonDetailPresenterField_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonDetailPresenterField (  fieldUid  BIGINT , fieldType  INTEGER , fieldIndex  INTEGER , labelMessageId  INTEGER , fieldIcon  TEXT , headerMessageId  INTEGER , viewModeVisible  BOOL , editModeVisible  BOOL , isReadyOnly  BOOL , personDetailPresenterFieldMasterChangeSeqNum  BIGINT , personDetailPresenterFieldLocalChangeSeqNum  BIGINT , personDetailPresenterFieldLastChangedBy  INTEGER , personDetailPresenterFieldUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO PersonDetailPresenterField (personDetailPresenterFieldUid, fieldUid, fieldType, fieldIndex, labelMessageId, fieldIcon, headerMessageId, viewModeVisible, editModeVisible, isReadyOnly, personDetailPresenterFieldMasterChangeSeqNum, personDetailPresenterFieldLocalChangeSeqNum, personDetailPresenterFieldLastChangedBy) SELECT personDetailPresenterFieldUid, fieldUid, fieldType, fieldIndex, labelMessageId, fieldIcon, headerMessageId, viewModeVisible, editModeVisible, isReadyOnly, personDetailPresenterFieldMasterChangeSeqNum, personDetailPresenterFieldLocalChangeSeqNum, personDetailPresenterFieldLastChangedBy FROM PersonDetailPresenterField_OLD")
+                    database.execSQL("DROP TABLE PersonDetailPresenterField_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonDetailPresenterField_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonDetailPresenterField_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_19_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE PersonDetailPresenterField SET personDetailPresenterFieldLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personDetailPresenterFieldLocalChangeSeqNum 
+                    | ELSE NEXTVAL('PersonDetailPresenterField_lcsn_seq') END),
+                    | personDetailPresenterFieldMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('PersonDetailPresenterField_mcsn_seq') 
+                    | ELSE NEW.personDetailPresenterFieldMasterChangeSeqNum END)
+                    | WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_19_trig 
+                    |AFTER UPDATE OR INSERT ON PersonDetailPresenterField 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_19_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_19_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_19")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonDetailPresenterField_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_PersonDetailPresenterField_trk_clientId_epk_rx_csn 
+                    |ON PersonDetailPresenterField_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table PersonDetailPresenterField for PostgreSQL
+
+                    //Begin: Create table SelQuestion for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestion RENAME to SelQuestion_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion (  questionText  TEXT , selQuestionSelQuestionSetUid  BIGINT , questionIndex  INTEGER , assignToAllClasses  BOOL , multiNominations  BOOL , questionType  INTEGER , questionActive  BOOL , selQuestionMasterChangeSeqNum  BIGINT , selQuestionLocalChangeSeqNum  BIGINT , selQuestionLastChangedBy  INTEGER , selQuestionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestion (selQuestionUid, questionText, selQuestionSelQuestionSetUid, questionIndex, assignToAllClasses, multiNominations, questionType, questionActive, selQuestionMasterChangeSeqNum, selQuestionLocalChangeSeqNum, selQuestionLastChangedBy) SELECT selQuestionUid, questionText, selQuestionSelQuestionSetUid, questionIndex, assignToAllClasses, multiNominations, questionType, questionActive, selQuestionMasterChangeSeqNum, selQuestionLocalChangeSeqNum, selQuestionLastChangedBy FROM SelQuestion_OLD")
+                    database.execSQL("DROP TABLE SelQuestion_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestion_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestion_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_22_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE SelQuestion SET selQuestionLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionLocalChangeSeqNum 
+                    | ELSE NEXTVAL('SelQuestion_lcsn_seq') END),
+                    | selQuestionMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('SelQuestion_mcsn_seq') 
+                    | ELSE NEW.selQuestionMasterChangeSeqNum END)
+                    | WHERE selQuestionUid = NEW.selQuestionUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_22_trig 
+                    |AFTER UPDATE OR INSERT ON SelQuestion 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_22_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_22_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_22")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestion_trk_clientId_epk_rx_csn 
+                    |ON SelQuestion_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestion for PostgreSQL
+
+                    //Begin: Create table SelQuestionResponse for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionResponse RENAME to SelQuestionResponse_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponse (  selQuestionResponseSelQuestionSetResponseUid  BIGINT , selQuestionResponseSelQuestionUid  BIGINT , selQuestionResponseMasterChangeSeqNum  BIGINT , selQuestionResponseLocalChangeSeqNum  BIGINT , selQuestionResponseLastChangedBy  INTEGER , selQuestionResponseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionResponse (selQuestionResponseUid, selQuestionResponseSelQuestionSetResponseUid, selQuestionResponseSelQuestionUid, selQuestionResponseMasterChangeSeqNum, selQuestionResponseLocalChangeSeqNum, selQuestionResponseLastChangedBy) SELECT selQuestionResponseUid, selQuestionResponseSelQuestionSetResponseUid, selQuestionResponseSelQuestionUid, selQuestionResponseMasterChangeSeqNum, selQuestionResponseLocalChangeSeqNum, selQuestionResponseLastChangedBy FROM SelQuestionResponse_OLD")
+                    database.execSQL("DROP TABLE SelQuestionResponse_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionResponse_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionResponse_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_23_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE SelQuestionResponse SET selQuestionResponseLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionResponseLocalChangeSeqNum 
+                    | ELSE NEXTVAL('SelQuestionResponse_lcsn_seq') END),
+                    | selQuestionResponseMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('SelQuestionResponse_mcsn_seq') 
+                    | ELSE NEW.selQuestionResponseMasterChangeSeqNum END)
+                    | WHERE selQuestionResponseUid = NEW.selQuestionResponseUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_23_trig 
+                    |AFTER UPDATE OR INSERT ON SelQuestionResponse 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_23_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_23_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_23")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponse_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionResponse_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionResponse_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionResponse for PostgreSQL
+
+                    //Begin: Create table SelQuestionResponseNomination for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionResponseNomination RENAME to SelQuestionResponseNomination_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination (  selqrnClazzMemberUid  BIGINT , selqrnSelQuestionResponseUId  BIGINT , nominationActive  BOOL , selqrnMCSN  BIGINT , selqrnMCSNLCSN  BIGINT , selqrnMCSNLCB  INTEGER , selqrnUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionResponseNomination (selqrnUid, selqrnClazzMemberUid, selqrnSelQuestionResponseUId, nominationActive, selqrnMCSN, selqrnMCSNLCSN, selqrnMCSNLCB) SELECT selqrnUid, selqrnClazzMemberUid, selqrnSelQuestionResponseUId, nominationActive, selqrnMCSN, selqrnMCSNLCSN, selqrnMCSNLCB FROM SelQuestionResponseNomination_OLD")
+                    database.execSQL("DROP TABLE SelQuestionResponseNomination_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionResponseNomination_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionResponseNomination_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_24_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE SelQuestionResponseNomination SET selqrnMCSNLCSN =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selqrnMCSNLCSN 
+                    | ELSE NEXTVAL('SelQuestionResponseNomination_lcsn_seq') END),
+                    | selqrnMCSN = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('SelQuestionResponseNomination_mcsn_seq') 
+                    | ELSE NEW.selqrnMCSN END)
+                    | WHERE selqrnUid = NEW.selqrnUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_24_trig 
+                    |AFTER UPDATE OR INSERT ON SelQuestionResponseNomination 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_24_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_24_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_24")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionResponseNomination_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionResponseNomination_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionResponseNomination for PostgreSQL
+
+                    //Begin: Create table SelQuestionSet for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionSet RENAME to SelQuestionSet_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSet (  title  TEXT , selQuestionSetMasterChangeSeqNum  BIGINT , selQuestionSetLocalChangeSeqNum  BIGINT , selQuestionSetLastChangedBy  INTEGER , selQuestionSetUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionSet (selQuestionSetUid, title, selQuestionSetMasterChangeSeqNum, selQuestionSetLocalChangeSeqNum, selQuestionSetLastChangedBy) SELECT selQuestionSetUid, title, selQuestionSetMasterChangeSeqNum, selQuestionSetLocalChangeSeqNum, selQuestionSetLastChangedBy FROM SelQuestionSet_OLD")
+                    database.execSQL("DROP TABLE SelQuestionSet_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionSet_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionSet_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_25_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE SelQuestionSet SET selQuestionSetLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetLocalChangeSeqNum 
+                    | ELSE NEXTVAL('SelQuestionSet_lcsn_seq') END),
+                    | selQuestionSetMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('SelQuestionSet_mcsn_seq') 
+                    | ELSE NEW.selQuestionSetMasterChangeSeqNum END)
+                    | WHERE selQuestionSetUid = NEW.selQuestionSetUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_25_trig 
+                    |AFTER UPDATE OR INSERT ON SelQuestionSet 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_25_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_25_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_25")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSet_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionSet_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionSet_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionSet for PostgreSQL
+
+                    //Begin: Create table SelQuestionSetRecognition for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionSetRecognition RENAME to SelQuestionSetRecognition_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition (  selqsrSelQuestionSetResponseUid  BIGINT , selQuestionSetRecognitionClazzMemberUid  BIGINT , isSelQuestionSetRecognitionRecognized  BOOL , selQuestionSetRecognitionMasterChangeSeqNum  BIGINT , selQuestionSetRecognitionLocalChangeSeqNum  BIGINT , selQuestionSetRecognitionLastChangedBy  INTEGER , selQuestionSetRecognitionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionSetRecognition (selQuestionSetRecognitionUid, selqsrSelQuestionSetResponseUid, selQuestionSetRecognitionClazzMemberUid, isSelQuestionSetRecognitionRecognized, selQuestionSetRecognitionMasterChangeSeqNum, selQuestionSetRecognitionLocalChangeSeqNum, selQuestionSetRecognitionLastChangedBy) SELECT selQuestionSetRecognitionUid, selqsrSelQuestionSetResponseUid, selQuestionSetRecognitionClazzMemberUid, isSelQuestionSetRecognitionRecognized, selQuestionSetRecognitionMasterChangeSeqNum, selQuestionSetRecognitionLocalChangeSeqNum, selQuestionSetRecognitionLastChangedBy FROM SelQuestionSetRecognition_OLD")
+                    database.execSQL("DROP TABLE SelQuestionSetRecognition_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionSetRecognition_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionSetRecognition_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_26_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE SelQuestionSetRecognition SET selQuestionSetRecognitionLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetRecognitionLocalChangeSeqNum 
+                    | ELSE NEXTVAL('SelQuestionSetRecognition_lcsn_seq') END),
+                    | selQuestionSetRecognitionMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('SelQuestionSetRecognition_mcsn_seq') 
+                    | ELSE NEW.selQuestionSetRecognitionMasterChangeSeqNum END)
+                    | WHERE selQuestionSetRecognitionUid = NEW.selQuestionSetRecognitionUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_26_trig 
+                    |AFTER UPDATE OR INSERT ON SelQuestionSetRecognition 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_26_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_26_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_26")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionSetRecognition_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionSetRecognition_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionSetRecognition for PostgreSQL
+
+                    //Begin: Create table SelQuestionSetResponse for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionSetResponse RENAME to SelQuestionSetResponse_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetResponse (  selQuestionSetResponseSelQuestionSetUid  BIGINT , selQuestionSetResponseClazzMemberUid  BIGINT , selQuestionSetResponseStartTime  BIGINT , selQuestionSetResponseFinishTime  BIGINT , selQuestionSetResponseRecognitionPercentage  FLOAT , selQuestionSetResponseMasterChangeSeqNum  BIGINT , selQuestionSetResponseLocalChangeSeqNum  BIGINT , selQuestionSetResponseLastChangedBy  INTEGER , selQuestionSetResposeUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionSetResponse (selQuestionSetResposeUid, selQuestionSetResponseSelQuestionSetUid, selQuestionSetResponseClazzMemberUid, selQuestionSetResponseStartTime, selQuestionSetResponseFinishTime, selQuestionSetResponseRecognitionPercentage, selQuestionSetResponseMasterChangeSeqNum, selQuestionSetResponseLocalChangeSeqNum, selQuestionSetResponseLastChangedBy) SELECT selQuestionSetResposeUid, selQuestionSetResponseSelQuestionSetUid, selQuestionSetResponseClazzMemberUid, selQuestionSetResponseStartTime, selQuestionSetResponseFinishTime, selQuestionSetResponseRecognitionPercentage, selQuestionSetResponseMasterChangeSeqNum, selQuestionSetResponseLocalChangeSeqNum, selQuestionSetResponseLastChangedBy FROM SelQuestionSetResponse_OLD")
+                    database.execSQL("DROP TABLE SelQuestionSetResponse_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionSetResponse_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionSetResponse_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_27_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE SelQuestionSetResponse SET selQuestionSetResponseLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionSetResponseLocalChangeSeqNum 
+                    | ELSE NEXTVAL('SelQuestionSetResponse_lcsn_seq') END),
+                    | selQuestionSetResponseMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('SelQuestionSetResponse_mcsn_seq') 
+                    | ELSE NEW.selQuestionSetResponseMasterChangeSeqNum END)
+                    | WHERE selQuestionSetResposeUid = NEW.selQuestionSetResposeUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_27_trig 
+                    |AFTER UPDATE OR INSERT ON SelQuestionSetResponse 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_27_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_27_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_27")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetResponse_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionSetResponse_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionSetResponse_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionSetResponse for PostgreSQL
+
+                    //Begin: Create table Schedule for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE Schedule RENAME to Schedule_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule (  sceduleStartTime  BIGINT , scheduleEndTime  BIGINT , scheduleDay  INTEGER , scheduleMonth  INTEGER , scheduleFrequency  INTEGER , umCalendarUid  BIGINT , scheduleClazzUid  BIGINT , scheduleMasterChangeSeqNum  BIGINT , scheduleLocalChangeSeqNum  BIGINT , scheduleLastChangedBy  INTEGER , scheduleActive  BOOL , scheduleUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO Schedule (scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleActive) SELECT scheduleUid, sceduleStartTime, scheduleEndTime, scheduleDay, scheduleMonth, scheduleFrequency, umCalendarUid, scheduleClazzUid, scheduleMasterChangeSeqNum, scheduleLocalChangeSeqNum, scheduleLastChangedBy, scheduleActive FROM Schedule_OLD")
+                    database.execSQL("DROP TABLE Schedule_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Schedule_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Schedule_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_21_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE Schedule SET scheduleLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduleLocalChangeSeqNum 
+                    | ELSE NEXTVAL('Schedule_lcsn_seq') END),
+                    | scheduleMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('Schedule_mcsn_seq') 
+                    | ELSE NEW.scheduleMasterChangeSeqNum END)
+                    | WHERE scheduleUid = NEW.scheduleUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_21_trig 
+                    |AFTER UPDATE OR INSERT ON Schedule 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_21_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_21_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_21")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_Schedule_trk_clientId_epk_rx_csn 
+                    |ON Schedule_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table Schedule for PostgreSQL
+
+                    //Begin: Create table DateRange for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE DateRange RENAME to DateRange_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange (  dateRangeLocalChangeSeqNum  BIGINT , dateRangeMasterChangeSeqNum  BIGINT , dateRangLastChangedBy  INTEGER , dateRangeFromDate  BIGINT , dateRangeToDate  BIGINT , dateRangeUMCalendarUid  BIGINT , dateRangeName  TEXT , dateRangeDesc  TEXT , dateRangeActive  BOOL , dateRangeUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO DateRange (dateRangeUid, dateRangeLocalChangeSeqNum, dateRangeMasterChangeSeqNum, dateRangLastChangedBy, dateRangeFromDate, dateRangeToDate, dateRangeUMCalendarUid, dateRangeName, dateRangeDesc, dateRangeActive) SELECT dateRangeUid, dateRangeLocalChangeSeqNum, dateRangeMasterChangeSeqNum, dateRangLastChangedBy, dateRangeFromDate, dateRangeToDate, dateRangeUMCalendarUid, dateRangeName, dateRangeDesc, dateRangeActive FROM DateRange_OLD")
+                    database.execSQL("DROP TABLE DateRange_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS DateRange_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS DateRange_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_17_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE DateRange SET dateRangeLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.dateRangeLocalChangeSeqNum 
+                    | ELSE NEXTVAL('DateRange_lcsn_seq') END),
+                    | dateRangeMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('DateRange_mcsn_seq') 
+                    | ELSE NEW.dateRangeMasterChangeSeqNum END)
+                    | WHERE dateRangeUid = NEW.dateRangeUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_17_trig 
+                    |AFTER UPDATE OR INSERT ON DateRange 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_17_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_17_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_17")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_DateRange_trk_clientId_epk_rx_csn 
+                    |ON DateRange_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table DateRange for PostgreSQL
+
+                    //Begin: Create table UMCalendar for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE UMCalendar RENAME to UMCalendar_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UMCalendar (  umCalendarName  TEXT , umCalendarCategory  INTEGER , umCalendarActive  BOOL , isUmCalendarFlag  BOOL , umCalendarMasterChangeSeqNum  BIGINT , umCalendarLocalChangeSeqNum  BIGINT , umCalendarLastChangedBy  INTEGER , umCalendarUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO UMCalendar (umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, isUmCalendarFlag, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy) SELECT umCalendarUid, umCalendarName, umCalendarCategory, umCalendarActive, isUmCalendarFlag, umCalendarMasterChangeSeqNum, umCalendarLocalChangeSeqNum, umCalendarLastChangedBy FROM UMCalendar_OLD")
+                    database.execSQL("DROP TABLE UMCalendar_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS UMCalendar_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS UMCalendar_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_28_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE UMCalendar SET umCalendarLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.umCalendarLocalChangeSeqNum 
+                    | ELSE NEXTVAL('UMCalendar_lcsn_seq') END),
+                    | umCalendarMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('UMCalendar_mcsn_seq') 
+                    | ELSE NEW.umCalendarMasterChangeSeqNum END)
+                    | WHERE umCalendarUid = NEW.umCalendarUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_28_trig 
+                    |AFTER UPDATE OR INSERT ON UMCalendar 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_28_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_28_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_28")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS UMCalendar_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_UMCalendar_trk_clientId_epk_rx_csn 
+                    |ON UMCalendar_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table UMCalendar for PostgreSQL
+
+                    //Begin: Create table ClazzActivity for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzActivity RENAME to ClazzActivity_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity (  clazzActivityClazzActivityChangeUid  BIGINT , isClazzActivityGoodFeedback  BOOL , clazzActivityNotes  TEXT , clazzActivityLogDate  BIGINT , clazzActivityClazzUid  BIGINT , clazzActivityDone  BOOL , clazzActivityQuantity  BIGINT , clazzActivityMasterChangeSeqNum  BIGINT , clazzActivityLocalChangeSeqNum  BIGINT , clazzActivityLastChangedBy  INTEGER , clazzActivityUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzActivity (clazzActivityUid, clazzActivityClazzActivityChangeUid, isClazzActivityGoodFeedback, clazzActivityNotes, clazzActivityLogDate, clazzActivityClazzUid, clazzActivityDone, clazzActivityQuantity, clazzActivityMasterChangeSeqNum, clazzActivityLocalChangeSeqNum, clazzActivityLastChangedBy) SELECT clazzActivityUid, clazzActivityClazzActivityChangeUid, isClazzActivityGoodFeedback, clazzActivityNotes, clazzActivityLogDate, clazzActivityClazzUid, clazzActivityDone, clazzActivityQuantity, clazzActivityMasterChangeSeqNum, clazzActivityLocalChangeSeqNum, clazzActivityLastChangedBy FROM ClazzActivity_OLD")
+                    database.execSQL("DROP TABLE ClazzActivity_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzActivity_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzActivity_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_11_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ClazzActivity SET clazzActivityLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityLocalChangeSeqNum 
+                    | ELSE NEXTVAL('ClazzActivity_lcsn_seq') END),
+                    | clazzActivityMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ClazzActivity_mcsn_seq') 
+                    | ELSE NEW.clazzActivityMasterChangeSeqNum END)
+                    | WHERE clazzActivityUid = NEW.clazzActivityUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_11_trig 
+                    |AFTER UPDATE OR INSERT ON ClazzActivity 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_11_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_11_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_11")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzActivity_trk_clientId_epk_rx_csn 
+                    |ON ClazzActivity_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzActivity for PostgreSQL
+
+                    //Begin: Create table ClazzActivityChange for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzActivityChange RENAME to ClazzActivityChange_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivityChange (  clazzActivityChangeTitle  TEXT , clazzActivityDesc  TEXT , clazzActivityUnitOfMeasure  INTEGER , isClazzActivityChangeActive  BOOL , clazzActivityChangeLastChangedBy  INTEGER , clazzActivityChangeMasterChangeSeqNum  BIGINT , clazzActivityChangeLocalChangeSeqNum  BIGINT , clazzActivityLastChangedBy  INTEGER , clazzActivityChangeUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzActivityChange (clazzActivityChangeUid, clazzActivityChangeTitle, clazzActivityDesc, clazzActivityUnitOfMeasure, isClazzActivityChangeActive, clazzActivityChangeLastChangedBy, clazzActivityChangeMasterChangeSeqNum, clazzActivityChangeLocalChangeSeqNum, clazzActivityLastChangedBy) SELECT clazzActivityChangeUid, clazzActivityChangeTitle, clazzActivityDesc, clazzActivityUnitOfMeasure, isClazzActivityChangeActive, clazzActivityChangeLastChangedBy, clazzActivityChangeMasterChangeSeqNum, clazzActivityChangeLocalChangeSeqNum, clazzActivityLastChangedBy FROM ClazzActivityChange_OLD")
+                    database.execSQL("DROP TABLE ClazzActivityChange_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzActivityChange_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzActivityChange_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_32_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ClazzActivityChange SET clazzActivityChangeLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzActivityChangeLocalChangeSeqNum 
+                    | ELSE NEXTVAL('ClazzActivityChange_lcsn_seq') END),
+                    | clazzActivityChangeMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ClazzActivityChange_mcsn_seq') 
+                    | ELSE NEW.clazzActivityChangeMasterChangeSeqNum END)
+                    | WHERE clazzActivityChangeUid = NEW.clazzActivityChangeUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_32_trig 
+                    |AFTER UPDATE OR INSERT ON ClazzActivityChange 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_32_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_32_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_32")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivityChange_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzActivityChange_trk_clientId_epk_rx_csn 
+                    |ON ClazzActivityChange_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzActivityChange for PostgreSQL
+
+                    //Begin: Create table SelQuestionOption for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE SelQuestionOption RENAME to SelQuestionOption_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionOption (  optionText  TEXT , selQuestionOptionQuestionUid  BIGINT , selQuestionOptionMasterChangeSeqNum  BIGINT , selQuestionOptionLocalChangeSeqNum  BIGINT , selQuestionOptionLastChangedBy  INTEGER , optionActive  BOOL , selQuestionOptionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO SelQuestionOption (selQuestionOptionUid, optionText, selQuestionOptionQuestionUid, selQuestionOptionMasterChangeSeqNum, selQuestionOptionLocalChangeSeqNum, selQuestionOptionLastChangedBy, optionActive) SELECT selQuestionOptionUid, optionText, selQuestionOptionQuestionUid, selQuestionOptionMasterChangeSeqNum, selQuestionOptionLocalChangeSeqNum, selQuestionOptionLastChangedBy, optionActive FROM SelQuestionOption_OLD")
+                    database.execSQL("DROP TABLE SelQuestionOption_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionOption_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SelQuestionOption_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_52_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE SelQuestionOption SET selQuestionOptionLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.selQuestionOptionLocalChangeSeqNum 
+                    | ELSE NEXTVAL('SelQuestionOption_lcsn_seq') END),
+                    | selQuestionOptionMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('SelQuestionOption_mcsn_seq') 
+                    | ELSE NEW.selQuestionOptionMasterChangeSeqNum END)
+                    | WHERE selQuestionOptionUid = NEW.selQuestionOptionUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_52_trig 
+                    |AFTER UPDATE OR INSERT ON SelQuestionOption 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_52_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_52_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_52")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionOption_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_SelQuestionOption_trk_clientId_epk_rx_csn 
+                    |ON SelQuestionOption_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table SelQuestionOption for PostgreSQL
+
+                    //Begin: Create table ScheduledCheck for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ScheduledCheck RENAME to ScheduledCheck_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ScheduledCheck (  checkTime  BIGINT , checkType  INTEGER , checkUuid  TEXT , checkParameters  TEXT , scClazzLogUid  BIGINT , scheduledCheckMasterCsn  BIGINT , scheduledCheckLocalCsn  BIGINT , scheduledCheckLastChangedBy  INTEGER , scheduledCheckUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ScheduledCheck (scheduledCheckUid, checkTime, checkType, checkUuid, checkParameters, scClazzLogUid, scheduledCheckMasterCsn, scheduledCheckLocalCsn, scheduledCheckLastChangedBy) SELECT scheduledCheckUid, checkTime, checkType, checkUuid, checkParameters, scClazzLogUid, scheduledCheckMasterCsn, scheduledCheckLocalCsn, scheduledCheckLastChangedBy FROM ScheduledCheck_OLD")
+                    database.execSQL("DROP TABLE ScheduledCheck_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ScheduledCheck_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ScheduledCheck_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_173_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ScheduledCheck SET scheduledCheckLocalCsn =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduledCheckLocalCsn 
+                    | ELSE NEXTVAL('ScheduledCheck_lcsn_seq') END),
+                    | scheduledCheckMasterCsn = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ScheduledCheck_mcsn_seq') 
+                    | ELSE NEW.scheduledCheckMasterCsn END)
+                    | WHERE scheduledCheckUid = NEW.scheduledCheckUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_173_trig 
+                    |AFTER UPDATE OR INSERT ON ScheduledCheck 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_173_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_173_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_173")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ScheduledCheck_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ScheduledCheck_trk_clientId_epk_rx_csn 
+                    |ON ScheduledCheck_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ScheduledCheck for PostgreSQL
+
+                    //Begin: Create table AuditLog for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE AuditLog RENAME to AuditLog_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS AuditLog (  auditLogMasterChangeSeqNum  BIGINT , auditLogLocalChangeSeqNum  BIGINT , auditLogLastChangedBy  INTEGER , auditLogActorPersonUid  BIGINT , auditLogTableUid  INTEGER , auditLogEntityUid  BIGINT , auditLogDate  BIGINT , notes  TEXT , auditLogUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO AuditLog (auditLogUid, auditLogMasterChangeSeqNum, auditLogLocalChangeSeqNum, auditLogLastChangedBy, auditLogActorPersonUid, auditLogTableUid, auditLogEntityUid, auditLogDate, notes) SELECT auditLogUid, auditLogMasterChangeSeqNum, auditLogLocalChangeSeqNum, auditLogLastChangedBy, auditLogActorPersonUid, auditLogTableUid, auditLogEntityUid, auditLogDate, notes FROM AuditLog_OLD")
+                    database.execSQL("DROP TABLE AuditLog_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS AuditLog_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS AuditLog_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_53_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE AuditLog SET auditLogLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.auditLogLocalChangeSeqNum 
+                    | ELSE NEXTVAL('AuditLog_lcsn_seq') END),
+                    | auditLogMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('AuditLog_mcsn_seq') 
+                    | ELSE NEW.auditLogMasterChangeSeqNum END)
+                    | WHERE auditLogUid = NEW.auditLogUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_53_trig 
+                    |AFTER UPDATE OR INSERT ON AuditLog 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_53_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_53_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_53")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS AuditLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_AuditLog_trk_clientId_epk_rx_csn 
+                    |ON AuditLog_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table AuditLog for PostgreSQL
+
+                    //Begin: Create table CustomField for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE CustomField RENAME to CustomField_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField (  customFieldName  TEXT , customFieldNameAlt  TEXT , customFieldLabelMessageID  INTEGER , customFieldIcon  TEXT , customFieldType  INTEGER , customFieldEntityType  INTEGER , customFieldActive  BOOL , customFieldDefaultValue  TEXT , customFieldMCSN  BIGINT , customFieldLCSN  BIGINT , customFieldLCB  INTEGER , customFieldUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO CustomField (customFieldUid, customFieldName, customFieldNameAlt, customFieldLabelMessageID, customFieldIcon, customFieldType, customFieldEntityType, customFieldActive, customFieldDefaultValue, customFieldMCSN, customFieldLCSN, customFieldLCB) SELECT customFieldUid, customFieldName, customFieldNameAlt, customFieldLabelMessageID, customFieldIcon, customFieldType, customFieldEntityType, customFieldActive, customFieldDefaultValue, customFieldMCSN, customFieldLCSN, customFieldLCB FROM CustomField_OLD")
+                    database.execSQL("DROP TABLE CustomField_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomField_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomField_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_56_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE CustomField SET customFieldLCSN =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldLCSN 
+                    | ELSE NEXTVAL('CustomField_lcsn_seq') END),
+                    | customFieldMCSN = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('CustomField_mcsn_seq') 
+                    | ELSE NEW.customFieldMCSN END)
+                    | WHERE customFieldUid = NEW.customFieldUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_56_trig 
+                    |AFTER UPDATE OR INSERT ON CustomField 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_56_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_56_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_56")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_CustomField_trk_clientId_epk_rx_csn 
+                    |ON CustomField_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table CustomField for PostgreSQL
+
+                    //Begin: Create table CustomFieldValue for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE CustomFieldValue RENAME to CustomFieldValue_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue (  customFieldValueFieldUid  BIGINT , customFieldValueEntityUid  BIGINT , customFieldValueValue  TEXT , customFieldValueMCSN  BIGINT , customFieldValueLCSN  BIGINT , customFieldValueLCB  INTEGER , customFieldValueUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO CustomFieldValue (customFieldValueUid, customFieldValueFieldUid, customFieldValueEntityUid, customFieldValueValue, customFieldValueMCSN, customFieldValueLCSN, customFieldValueLCB) SELECT customFieldValueUid, customFieldValueFieldUid, customFieldValueEntityUid, customFieldValueValue, customFieldValueMCSN, customFieldValueLCSN, customFieldValueLCB FROM CustomFieldValue_OLD")
+                    database.execSQL("DROP TABLE CustomFieldValue_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomFieldValue_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomFieldValue_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_57_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE CustomFieldValue SET customFieldValueLCSN =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueLCSN 
+                    | ELSE NEXTVAL('CustomFieldValue_lcsn_seq') END),
+                    | customFieldValueMCSN = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('CustomFieldValue_mcsn_seq') 
+                    | ELSE NEW.customFieldValueMCSN END)
+                    | WHERE customFieldValueUid = NEW.customFieldValueUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_57_trig 
+                    |AFTER UPDATE OR INSERT ON CustomFieldValue 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_57_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_57_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_57")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_CustomFieldValue_trk_clientId_epk_rx_csn 
+                    |ON CustomFieldValue_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table CustomFieldValue for PostgreSQL
+
+                    //Begin: Create table CustomFieldValueOption for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE CustomFieldValueOption RENAME to CustomFieldValueOption_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption (  customFieldValueOptionName  TEXT , customFieldValueOptionFieldUid  BIGINT , customFieldValueOptionIcon  TEXT , customFieldValueOptionMessageId  INTEGER , customFieldValueOptionActive  BOOL , customFieldValueOptionMCSN  BIGINT , customFieldValueOptionLCSN  BIGINT , customFieldValueOptionLCB  INTEGER , customFieldValueOptionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO CustomFieldValueOption (customFieldValueOptionUid, customFieldValueOptionName, customFieldValueOptionFieldUid, customFieldValueOptionIcon, customFieldValueOptionMessageId, customFieldValueOptionActive, customFieldValueOptionMCSN, customFieldValueOptionLCSN, customFieldValueOptionLCB) SELECT customFieldValueOptionUid, customFieldValueOptionName, customFieldValueOptionFieldUid, customFieldValueOptionIcon, customFieldValueOptionMessageId, customFieldValueOptionActive, customFieldValueOptionMCSN, customFieldValueOptionLCSN, customFieldValueOptionLCB FROM CustomFieldValueOption_OLD")
+                    database.execSQL("DROP TABLE CustomFieldValueOption_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomFieldValueOption_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomFieldValueOption_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_55_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE CustomFieldValueOption SET customFieldValueOptionLCSN =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueOptionLCSN 
+                    | ELSE NEXTVAL('CustomFieldValueOption_lcsn_seq') END),
+                    | customFieldValueOptionMCSN = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('CustomFieldValueOption_mcsn_seq') 
+                    | ELSE NEW.customFieldValueOptionMCSN END)
+                    | WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_55_trig 
+                    |AFTER UPDATE OR INSERT ON CustomFieldValueOption 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_55_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_55_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_55")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_CustomFieldValueOption_trk_clientId_epk_rx_csn 
+                    |ON CustomFieldValueOption_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table CustomFieldValueOption for PostgreSQL
+
+
+                    //Begin: Create table School for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE School RENAME to School_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS School (  schoolName  TEXT , schoolDesc  TEXT , schoolAddress  TEXT , schoolActive  BOOL , schoolFeatures  BIGINT , schoolLocationLong  DOUBLE precision , schoolLocationLatt  DOUBLE precision, schoolMasterChangeSeqNum  BIGINT , schoolLocalChangeSeqNum  BIGINT , schoolLastChangedBy  INTEGER , schoolUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO School (schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy) SELECT schoolUid, schoolName, schoolDesc, schoolAddress, schoolActive, schoolFeatures, schoolLocationLong, schoolLocationLatt, schoolMasterChangeSeqNum, schoolLocalChangeSeqNum, schoolLastChangedBy FROM School_OLD")
+                    database.execSQL("DROP TABLE School_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS School_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS School_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_164_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE School SET schoolLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolLocalChangeSeqNum 
+                    | ELSE NEXTVAL('School_lcsn_seq') END),
+                    | schoolMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('School_mcsn_seq') 
+                    | ELSE NEW.schoolMasterChangeSeqNum END)
+                    | WHERE schoolUid = NEW.schoolUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_164_trig 
+                    |AFTER UPDATE OR INSERT ON School 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_164_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_164_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_164")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS School_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_School_trk_clientId_epk_rx_csn 
+                    |ON School_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table School for PostgreSQL
+
+                    //Begin: Create table ClazzAssignment for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzAssignment RENAME to ClazzAssignment_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment (  clazzAssignmentTitle  TEXT , clazzAssignmentClazzUid  BIGINT , clazzAssignmentInactive  BOOL , clazzAssignmentStartDate  BIGINT , clazzAssignmentDueDate  BIGINT , clazzAssignmentCreationDate  BIGINT , clazzAssignmentUpdateDate  BIGINT , clazzAssignmentInstructions  TEXT , clazzAssignmentGrading  INTEGER , clazzAssignmentRequireAttachment  BOOL , clazzAssignmentMCSN  BIGINT , clazzAssignmentLCSN  BIGINT , clazzAssignmentLCB  INTEGER , clazzAssignmentUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzAssignment (clazzAssignmentUid, clazzAssignmentTitle, clazzAssignmentClazzUid, clazzAssignmentInactive, clazzAssignmentStartDate, clazzAssignmentDueDate, clazzAssignmentCreationDate, clazzAssignmentUpdateDate, clazzAssignmentInstructions, clazzAssignmentGrading, clazzAssignmentRequireAttachment, clazzAssignmentMCSN, clazzAssignmentLCSN, clazzAssignmentLCB) SELECT clazzAssignmentUid, clazzAssignmentTitle, clazzAssignmentClazzUid, clazzAssignmentInactive, clazzAssignmentStartDate, clazzAssignmentDueDate, clazzAssignmentCreationDate, clazzAssignmentUpdateDate, clazzAssignmentInstructions, clazzAssignmentGrading, clazzAssignmentRequireAttachment, clazzAssignmentMCSN, clazzAssignmentLCSN, clazzAssignmentLCB FROM ClazzAssignment_OLD")
+                    database.execSQL("DROP TABLE ClazzAssignment_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzAssignment_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzAssignment_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_176_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ClazzAssignment SET clazzAssignmentLCSN =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzAssignmentLCSN 
+                    | ELSE NEXTVAL('ClazzAssignment_lcsn_seq') END),
+                    | clazzAssignmentMCSN = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ClazzAssignment_mcsn_seq') 
+                    | ELSE NEW.clazzAssignmentMCSN END)
+                    | WHERE clazzAssignmentUid = NEW.clazzAssignmentUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_176_trig 
+                    |AFTER UPDATE OR INSERT ON ClazzAssignment 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_176_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_176_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_176")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzAssignment_trk_clientId_epk_rx_csn 
+                    |ON ClazzAssignment_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzAssignment for PostgreSQL
+
+                    //Begin: Create table ClazzAssignmentContentJoin for PostgreSQL
+                    /* START MIGRATION:
+                    database.execSQL("ALTER TABLE ClazzAssignmentContentJoin RENAME to ClazzAssignmentContentJoin_OLD")
+                    END MIGRATION */
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin (  clazzAssignmentContentJoinContentUid  BIGINT , clazzAssignmentContentJoinClazzAssignmentUid  BIGINT , clazzAssignmentContentJoinInactive  BOOL , clazzAssignmentContentJoinDateAdded  BIGINT , clazzAssignmentContentJoinMCSN  BIGINT , clazzAssignmentContentJoinLCSN  BIGINT , clazzAssignmentContentJoinLCB  INTEGER , clazzAssignmentContentJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    /* START MIGRATION:
+                    database.execSQL("INSERT INTO ClazzAssignmentContentJoin (clazzAssignmentContentJoinUid, clazzAssignmentContentJoinContentUid, clazzAssignmentContentJoinClazzAssignmentUid, clazzAssignmentContentJoinInactive, clazzAssignmentContentJoinDateAdded, clazzAssignmentContentJoinMCSN, clazzAssignmentContentJoinLCSN, clazzAssignmentContentJoinLCB) SELECT clazzAssignmentContentJoinUid, clazzAssignmentContentJoinContentUid, clazzAssignmentContentJoinClazzAssignmentUid, clazzAssignmentContentJoinInactive, clazzAssignmentContentJoinDateAdded, clazzAssignmentContentJoinMCSN, clazzAssignmentContentJoinLCSN, clazzAssignmentContentJoinLCB FROM ClazzAssignmentContentJoin_OLD")
+                    database.execSQL("DROP TABLE ClazzAssignmentContentJoin_OLD")
+                    END MIGRATION*/
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzAssignmentContentJoin_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzAssignmentContentJoin_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_177_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ClazzAssignmentContentJoin SET clazzAssignmentContentJoinLCSN =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzAssignmentContentJoinLCSN 
+                    | ELSE NEXTVAL('ClazzAssignmentContentJoin_lcsn_seq') END),
+                    | clazzAssignmentContentJoinMCSN = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ClazzAssignmentContentJoin_mcsn_seq') 
+                    | ELSE NEW.clazzAssignmentContentJoinMCSN END)
+                    | WHERE clazzAssignmentContentJoinUid = NEW.clazzAssignmentContentJoinUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_177_trig 
+                    |AFTER UPDATE OR INSERT ON ClazzAssignmentContentJoin 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_177_fn()
+                    """.trimMargin())
+                    /* START MIGRATION:
+                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_177_fn")
+                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_177")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX index_ClazzAssignmentContentJoin_trk_clientId_epk_rx_csn 
+                    |ON ClazzAssignmentContentJoin_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+                    //End: Create table ClazzAssignmentContentJoin for PostgreSQL
                 }
             }
         }
@@ -2735,8 +6000,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34)
-
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35)
             return builder
         }
     }

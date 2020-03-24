@@ -29,6 +29,7 @@ class ClazzAssignmentListPresenterTest : AbstractSetup() {
         val impl = UstadMobileSystemImpl.instance
 
         val db = UmAppDatabase.getInstance(Any())
+        db.clearAllTables()
 
         //do inserts
         insert(db, true)
