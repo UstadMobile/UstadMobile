@@ -71,9 +71,12 @@ interface UstadView {
         const val ARG_CONTENT_ENTRY_UID = "entryid"
 
         const val ARG_CLAZZ_UID = "clazzUid"
+
         const val ARG_CLAZZ_ASSIGNMENT_UID = "clazzAssignmentUid"
 
         const val ARG_LISTMODE = "listMode"
+
+        const val ARG_GETRESULTMODE = "getResultMode"
 
         const val ARG_LISTADDMODE = "listAddMode"
 

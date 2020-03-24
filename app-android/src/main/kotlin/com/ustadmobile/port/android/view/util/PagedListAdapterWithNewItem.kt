@@ -12,7 +12,7 @@ import com.ustadmobile.core.view.OnClickNewListItemListener
 abstract class PagedListAdapterWithNewItem<T>(
         diffcallback: DiffUtil.ItemCallback<T>,
         newItemVisible: Boolean = false,
-        var onClickNewItem: OnClickNewListItemListener? = null)
+        var onClickNewItem: View.OnClickListener? = null)
     : PagedListAdapter<T, RecyclerView.ViewHolder>(diffcallback) {
 
     var newItemVisible: Boolean = newItemVisible
@@ -47,7 +47,7 @@ abstract class PagedListAdapterWithNewItem<T>(
         if(viewType == ITEMVIEWTYPE_NEW) {
             val newItemView = LayoutInflater
                     .from(parent.context).inflate(R.layout.item_createnew, parent, false)
-            newItemView.setOnClickListener { onClickNewItem?.onClickNewListItem() }
+            newItemView.setOnClickListener(onClickNewItem)
             return NewItemViewHolder(newItemView)
         }
 

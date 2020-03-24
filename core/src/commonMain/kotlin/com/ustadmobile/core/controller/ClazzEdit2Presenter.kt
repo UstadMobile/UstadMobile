@@ -29,10 +29,6 @@ class ClazzEdit2Presenter(context: Any,
     : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendar>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
-    interface ClazzEditDoneListener {
-        fun onClazzEditDone(clazz: Clazz, requestCode: Int)
-    }
-
     private val scheduleOneToManyJoinEditHelper
             = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
             ARG_SAVEDSTATE_SCHEDULES, Schedule.serializer().list,

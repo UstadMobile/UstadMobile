@@ -10,6 +10,4 @@ interface UstadEditView<RT>: UstadView {
 
     fun finishWithResult(result: RT)
 
-    fun finish()
-
 }

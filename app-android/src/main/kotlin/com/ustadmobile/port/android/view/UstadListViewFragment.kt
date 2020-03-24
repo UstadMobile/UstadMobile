@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 
 interface ListViewResultListener<RT> {
 
@@ -26,12 +27,12 @@ interface ListViewResultListener<RT> {
 
 }
 
-abstract class UstadListViewFragment<RT, DT, VH: RecyclerView.ViewHolder>: UstadBaseFragment(),
+abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener {
 
     protected var mRecyclerView: RecyclerView? = null
 
-    protected var mRecyclerViewAdapter: PagedListAdapter<DT, VH>? = null
+    protected var mRecyclerViewAdapter: PagedListAdapterWithNewItem<DT>? = null
         set(value) {
             field = value
             mRecyclerView?.adapter = value

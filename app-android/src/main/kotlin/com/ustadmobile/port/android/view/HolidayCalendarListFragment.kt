@@ -18,25 +18,22 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.GetResultMode
-import com.ustadmobile.core.view.HolidayCalendarListView
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.OnClickNewListItemListener
+import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 
-class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries, RecyclerView.ViewHolder>(),
-        HolidayCalendarListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, OnClickNewListItemListener{
+class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries>(),
+        HolidayCalendarListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     private var mPresenter: HolidayCalendarListPresenter? = null
 
     private var dbRepo: UmAppDatabase? = null
 
-    class HolidayCalendarListRecyclerAdapter(var presenter: HolidayCalendarListPresenter?, onClickNewItem: OnClickNewListItemListener)
-        : PagedListAdapterWithNewItem<HolidayCalendarWithNumEntries>(DIFF_CALLBACK, newItemVisible = true, onClickNewItem = onClickNewItem) {
+    class HolidayCalendarListRecyclerAdapter(var presenter: HolidayCalendarListPresenter?, newItemVisible: Boolean, onClickNewItem: View.OnClickListener)
+        : PagedListAdapterWithNewItem<HolidayCalendarWithNumEntries>(DIFF_CALLBACK, newItemVisible = newItemVisible, onClickNewItem = onClickNewItem) {
 
         class HolidayCalendarListViewHolder(val itemBinding: ItemHolidaycalendarListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -73,17 +70,17 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter, this)
+        mRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter, false, this)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }
 
-    override fun onClickNewListItem() {
+    override fun onClick(view: View?) {
         activity?.prepareCall(HolidayCalendarActivityResultContract(requireContext())) {
             if(it != null) {
                 finishWithResult(it)
             }
-        }?.launch(GetResultMode.CREATENEW)
+        }?.launch(mapOf(UstadView.ARG_GETRESULTMODE to GetResultMode.CREATENEW.toString()))
     }
 
     override fun onDestroyView() {

@@ -19,27 +19,33 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.@Entity@ListView
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.@DisplayEntity@
+import com.ustadmobile.core.view.GetResultMode
 
-class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@, @Entity@ListFragment.@Entity@ListRecyclerAdapter.@Entity@ListViewHolder>(),
-        @Entity@ListView, MessageIdSpinner.OnMessageIdOptionSelectedListener{
+class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),
+        @Entity@ListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     private var mPresenter: @Entity@ListPresenter? = null
 
     private var dbRepo: UmAppDatabase? = null
 
-    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?): PagedListAdapter<@DisplayEntity@, @Entity@ListRecyclerAdapter.@Entity@ListViewHolder>(DIFF_CALLBACK) {
+    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?): PagedListAdapterWithNewItem<@DisplayEntity@>(DIFF_CALLBACK, newItemVisible: Boolean, onClickNewItem: View.OnClickListener) {
 
         class @Entity@ListViewHolder(val itemBinding: Item@Entity_ViewBinding_VariableName@ListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): @Entity@ListViewHolder {
-            val itemBinding = Item@Entity_ViewBinding_VariableName@ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-
-            return @Entity@ListViewHolder(itemBinding)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            if(viewType == ITEMVIEWTYPE_NEW) {
+                return super.onCreateViewHolder(parent, viewType)
+            }else {
+                val itemBinding = Item@Entity_ViewBinding_VariableName@ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                return@Entity @ListViewHolder(itemBinding)
+            }
         }
 
-        override fun onBindViewHolder(holder: @Entity@ListViewHolder, position: Int) {
-            holder.itemBinding.@Entity_VariableName@ = getItem(position)
-            holder.itemBinding.presenter = presenter
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            if(holder is @Entity@ListViewHolder) {
+                holder.itemBinding.@Entity_VariableName@ = getItem(position)
+                holder.itemBinding.presenter = presenter
+            }
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -58,9 +64,17 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@, @
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = @Entity@ListRecyclerAdapter(mPresenter)
+        mRecyclerViewAdapter = @Entity@ListRecyclerAdapter(mPresenter, false, this)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
+    }
+
+    override fun onClick(view: View?) {
+        activity?.prepareCall(@Entity@ActivityResultContract(requireContext())) {
+            if(it != null) {
+                finishWithResult(it)
+            }
+        }?.launch(GetResultMode.CREATENEW)
     }
 
     override fun onDestroyView() {
@@ -92,6 +106,12 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@, @
             override fun areContentsTheSame(oldItem: @DisplayEntity@,
                                             newItem: @DisplayEntity@): Boolean {
                 return oldItem == newItem
+            }
+        }
+
+        fun newInstance(bundle: Bundle?) : @Entity@ListFragment {
+            return @Entity@ListFragment().apply {
+                arguments = bundle
             }
         }
     }
