@@ -28,6 +28,10 @@ object ScraperTypes {
 
     const val KHAN_TOPIC_INDEXER = "khanTopicIndexer"
 
+    const val KHAN_CHANNEL_INDEXER = "khanChannelIndexer"
+
+    const val KHAN_PLAYLIST_INDEXER = "khanPlaylistIndexer"
+
     val indexerTypeMap = mapOf(
             DDL_FRONT_PAGE_INDEXER to IndexerMap(DdlFrontPageIndexer::class.java, "https://www.ddl.af/"),
             DDL_SUBJECT_INDEXER to IndexerMap(DdlSubjectIndexer::class.java, null),
@@ -38,7 +42,9 @@ object ScraperTypes {
             KHAN_FRONT_PAGE_INDEXER to IndexerMap(KhanFrontPageIndexer::class.java, "https://www.khanacademy.org/"),
             KHAN_LITE_INDEXER to IndexerMap(KhanLiteIndexer::class.java, null),
             KHAN_FULL_INDEXER to IndexerMap(KhanFullIndexer::class.java, null),
-            KHAN_TOPIC_INDEXER to IndexerMap(KhanTopicIndexer::class.java, null))
+            KHAN_TOPIC_INDEXER to IndexerMap(KhanTopicIndexer::class.java, null),
+            KHAN_CHANNEL_INDEXER to IndexerMap(KhanYoutubeChannelIndexer::class.java, null),
+            KHAN_PLAYLIST_INDEXER to IndexerMap(KhanYoutubePlaylistIndexer::class.java, null))
 
 
     const val DDL_ARTICLE_SCRAPER = "ddlArticleScraper"
@@ -53,12 +59,15 @@ object ScraperTypes {
 
     const val KHAN_FULL_ARTICLE_SCRAPER = "khanFullArticleScraper"
 
+    const val KHAN_YOUTUBE_SCRAPER = "khanYoutubeScraper"
+
     val scraperTypeMap = mapOf(
             DDL_ARTICLE_SCRAPER to DdlContentScraper::class.java,
             HAB_YOUTUBE_SCRAPER to HabVideoScraper::class.java,
             KHAN_FULL_VIDEO_SCRAPER to KhanVideoScraper::class.java,
             KHAN_FULL_ARTICLE_SCRAPER to KhanArticleScraper::class.java,
             KHAN_FULL_EXERCISE_SCRAPER to KhanExerciseScraper::class.java,
-            KHAN_LITE_VIDEO_SCRAPER to KhanLiteVideoScraper::class.java)
+            KHAN_LITE_VIDEO_SCRAPER to KhanLiteVideoScraper::class.java,
+            KHAN_YOUTUBE_SCRAPER to KhanYoutubeScraper::class.java)
 
 }

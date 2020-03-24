@@ -89,7 +89,6 @@ fun scrapeUrlwithHar(proxy: BrowserMobProxyServer, driver: ChromeDriver, url: St
         } catch (e: Exception) {
             UMLogUtil.logError("Index url failed at${it.request.url}")
             UMLogUtil.logDebug(e.message!!)
-
         }
 
         driver.quit()

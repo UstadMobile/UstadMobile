@@ -228,7 +228,6 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
                 }
 
-
             }
 
             entries.add(addHarEntry(
@@ -398,8 +397,10 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         chromeDriver.quit()
         proxy.stop()
 
-        if (entry == null) {
-            // TODO close scraper, exercise doesnt have practice url
+        if (entry?.response?.content?.text.isNullOrEmpty()) {
+            hideContentEntry()
+            setScrapeDone(false, ERROR_TYPE_PRACTICE_CONTENT_NOT_FOUND)
+            throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "no practice found for $sourceUrl")
         }
 
         return entry?.response?.content?.text

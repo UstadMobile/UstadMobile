@@ -34,6 +34,8 @@ abstract class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db:
 
         val ytExeFile = File(ytPath)
         if (!ytExeFile.exists()) {
+            close()
+            setIndexerDone(false, Scraper.ERROR_TYPE_MISSING_EXECUTABLE)
             throw IOException("Webp executable does not exist: $ytPath")
         }
 
