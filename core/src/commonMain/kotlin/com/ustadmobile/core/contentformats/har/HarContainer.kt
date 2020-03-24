@@ -53,9 +53,6 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
 
         val entries = harContent.log.entries
 
-
-        val found = entries.find { it.request!!.url!!.contains("3/ass") }
-
         entries.forEach {
 
             val pair = Pair(it.request!!.method!!, it.request.url!!)

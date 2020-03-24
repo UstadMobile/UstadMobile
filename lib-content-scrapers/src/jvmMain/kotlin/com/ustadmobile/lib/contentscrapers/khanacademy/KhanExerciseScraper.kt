@@ -134,6 +134,8 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 entry.response.content.text = doc.html()
 
             }
+
+
             entry
         }, regexes = harExtra.regexes!!) {
 

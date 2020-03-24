@@ -7,6 +7,7 @@ import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
@@ -46,6 +47,10 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
     private val cleanUpRegex = "[^a-zA-Z0-9\\.\\-]".toRegex()
     val gson: Gson
+
+    private val offlineRegex = Regex("window.addEventListener\\(\"(online|offline)\"")
+
+    private val offlineReplacement = "window.addEventListener(\\\"offlineDisabled\\\""
 
     data class HarScraperResult(val updated: Boolean, val containerManager: ContainerManager?)
 
@@ -146,6 +151,9 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
                 filters.forEach { filterFn ->
                     filterFn.invoke(it)
+                }
+                if(it.response.content.mimeType == MIMETYPE_JS){
+                    it.response.content.text = it.response.content.text.replace(offlineRegex, offlineReplacement)
                 }
 
                 if (it.response == null) {
