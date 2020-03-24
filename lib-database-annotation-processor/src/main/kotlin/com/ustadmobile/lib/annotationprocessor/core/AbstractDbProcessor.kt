@@ -551,6 +551,7 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
                     .add(beforeInsertCode.invoke(accessorVarName, it.value, true))
             transactionCodeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($accessorVarName)\n")
         }else {
+            codeBlock.takeIf { entry -> it.key.isNotEmpty() }?.add("?.")
             codeBlock
                 .add(it.key.joinToString (prefix = "", separator = "?.", postfix = ""))
                 .add("\n")

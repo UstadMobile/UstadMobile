@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.PopupMenu
@@ -22,9 +23,16 @@ import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.GetResultMode
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 interface ClazzEdit2ActivityEventHandler {
@@ -32,6 +40,8 @@ interface ClazzEdit2ActivityEventHandler {
     fun showNewScheduleDialog()
 
     fun showEditScheduleDialog(schedule: Schedule)
+
+    fun showHolidayCalendarPicker()
 
     fun handleClickTimeZone()
 
@@ -88,6 +98,11 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
                 UmAccountManager.getRepositoryForActiveAccount(this))
         scheduleRecyclerAdapter?.presenter = mPresenter
         mPresenter.onCreate(savedInstanceState.toNullableStringMap())
+
+        GlobalScope.launch {
+            UmAccountManager.getRepositoryForActiveAccount(this).holidayCalendarDao
+                    .replaceList(listOf(HolidayCalendar().apply { umCalendarName = "Test 1"}))
+        }
     }
 
     override fun onChanged(t: List<Schedule?>?) {
@@ -101,6 +116,15 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
     override fun showEditScheduleDialog(schedule: Schedule) {
         val scheduleEditDialog = ScheduleEditDialogFragment.newInstance(schedule)
         scheduleEditDialog.show(supportFragmentManager, TAG_SCHEDULE_EDIT_DIALOG)
+    }
+
+    override fun showHolidayCalendarPicker() {
+        prepareCall(HolidayCalendarActivityResultContract(this)) {
+            if(it != null) {
+                entity?.holidayCalendar = it[0]
+                rootView?.clazz = rootView?.clazz
+            }
+        }.launch(GetResultMode.FROMLIST)
     }
 
     override fun handleClickTimeZone() {
@@ -131,7 +155,7 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
             value?.observe(this, this)
         }
 
-    override var entity: Clazz? = null
+    override var entity: ClazzWithHolidayCalendar? = null
         get() = field
         set(value) {
             field = value
@@ -145,7 +169,7 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
             rootView?.fieldsEnabled = value
         }
 
-    override fun finishWithResult(result: Clazz) {
+    override fun finishWithResult(result: ClazzWithHolidayCalendar) {
         TODO("Not yet implemented")
     }
 

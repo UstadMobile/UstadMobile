@@ -30,7 +30,7 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
 
     private val context = Any()
 
-    private var arguments: HashMap<String, String?> = hashMapOf()
+    private var arguments: HashMap<String, String> = hashMapOf()
 
 
     @Before

@@ -24,10 +24,10 @@ open class HolidayCalendar() {
     var umCalendarName: String? = null
 
     //Category
-    var umCalendarCategory: Int = 0
+    var umCalendarCategory: Int = CATEGORY_HOLIDAY
 
     //active
-    var umCalendarActive: Boolean = false
+    var umCalendarActive: Boolean = true
     
     @MasterChangeSeqNum
     var umCalendarMasterChangeSeqNum: Long = 0

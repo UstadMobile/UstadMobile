@@ -31,11 +31,11 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
         super.onCreate(savedState)
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { HolidayCalendarListSortOption(it, context) }
+        view.list = repo.holidayCalendarDao.findAllHolidaysWithEntriesCount()
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        TODO("check on add permission for this account: e.g. " +
-                "repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)")
+        return true
     }
 
     private fun updateListOnView() {
@@ -50,13 +50,12 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     override fun handleClickEntry(entry: HolidayCalendar) {
-        /* TODO: Add code to go to the appropriate detail view or make a selection
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(HolidayCalendarDetailView.VIEW_NAME,
-                mapOf(HolidayCalendarDetailView.ARG_ENTITY_UID to uid, context)
+//            ListViewMode.BROWSER -> systemImpl.go(HolidayCalendarDetailView.VIEW_NAME,
+//                mapOf(HolidayCalendarDetailView.ARG_ENTITY_UID to uid, context)
         }
-        */
+
     }
 
     override fun handleClickCreateNew() {

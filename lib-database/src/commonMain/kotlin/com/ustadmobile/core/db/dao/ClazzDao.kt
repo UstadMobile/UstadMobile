@@ -55,6 +55,11 @@ abstract class ClazzDao : BaseDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Clazz?
 
+    @Query("""SELECT Clazz.*, HolidayCalendar.* FROM Clazz 
+            LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
+            WHERE Clazz.clazzUid = :uid""")
+    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): ClazzWithHolidayCalendar?
+
     @Update
     abstract suspend fun updateAsync(entity: Clazz): Int
 

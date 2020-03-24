@@ -33,6 +33,10 @@ package com.ustadmobile.core.view
 import kotlinx.coroutines.Runnable
 import kotlin.js.JsName
 
+enum class GetResultMode {
+    CREATENEW, FROMLIST
+}
+
 /**
  *
  * @author mike

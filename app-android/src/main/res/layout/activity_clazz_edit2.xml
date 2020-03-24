@@ -8,7 +8,7 @@
 
         <variable
             name="clazz"
-            type="com.ustadmobile.lib.db.entities.Clazz" />
+            type="com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar" />
 
         <variable
             name="loading"
@@ -234,6 +234,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"
+                    android:onClick="@{() -> activityEventHandler.showHolidayCalendarPicker()}"
+                    android:text="@{clazz.holidayCalendar.umCalendarName}"
+                    android:focusable="false"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_holiday_calendar_heading"/>

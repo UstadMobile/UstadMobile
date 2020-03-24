@@ -84,8 +84,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     @Volatile
     private var bleServiceBound = false
 
-    private var fragmentList: MutableList<WeakReference<Fragment>>? = null
-
     private var localeOnCreate: String? = null
 
     private var runAfterFileSelection: Runnable? = null
@@ -231,7 +229,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         }
         //bind to the LRS forwarding service
         instance.handleActivityCreate(this, savedInstanceState)
-        fragmentList = ArrayList()
         super.onCreate(savedInstanceState)
         localeOnCreate = instance.getDisplayedLocale(this)
 
@@ -362,7 +359,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     protected fun setUMToolbar(toolbarID: Int) {
         umToolbar = findViewById<View>(toolbarID) as Toolbar
         setSupportActionBar(umToolbar)
-        supportActionBar!!.setHomeButtonEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
     }
 
     protected fun setProgressBar() {
@@ -417,14 +414,9 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onAttachFragment(fragment: Fragment) {
-        super.onAttachFragment(fragment)
-        fragmentList!!.add(WeakReference<Fragment>(fragment))
-    }
-
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if (resultCode == RESULT_OK) {
             if (requestCode == FILE_SELECTION_REQUEST_CODE) {
                 selectedFileUri = data?.data
@@ -443,27 +435,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     }
 
-
-    /**
-     * Handle our own delegation of back button presses.  This allows UstadBaseFragment child classes
-     * to handle back button presses if they want to.
-     */
-    override fun onBackPressed() {
-        for (fragmentReference in fragmentList!!) {
-            if (fragmentReference.get() == null)
-                continue
-
-            if (!fragmentReference.get()!!.isVisible)
-                continue
-
-            if (fragmentReference.get() is UstadBaseFragment && (fragmentReference.get() as UstadBaseFragment).canGoBack()) {
-                (fragmentReference.get() as UstadBaseFragment).goBack()
-                return
-            }
-        }
-
-        super.onBackPressed()
-    }
 
     //The devMinApi21 flavor has SDK Min 21, but other flavors have a lower SDK
     @SuppressLint("ObsoleteSdkInt")
@@ -579,6 +550,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
                                             grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             RUN_TIME_REQUEST_CODE -> {
                 var allPermissionGranted = grantResults.size == permissions.size
