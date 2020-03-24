@@ -174,10 +174,9 @@ suspend fun Application.initLamsustadContent(db: UmAppDatabase, containerPath: S
             }
         }
 
-        val loadData = LoadInitialData(_restApplicationDb)
-        loadData.loadData()
-
     }
+    val loadData = LoadInitialData(_restApplicationDb)
+    loadData.loadData()
 }
 
 private suspend fun handleInvalidRequest(call: ApplicationCall){
