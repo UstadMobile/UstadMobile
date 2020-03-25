@@ -23,6 +23,7 @@ import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.subTitleUrl
 import com.ustadmobile.lib.contentscrapers.util.SrtFormat
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
@@ -36,6 +37,10 @@ import java.util.*
 
 
 class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid) {
+
+
+    private var tempDir: File? = null
+
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -97,9 +102,7 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
 
         val youtubeId = content.youtubeId!!
 
-
-
-        val tempDir = Files.createTempDirectory(khanId).toFile()
+        tempDir = Files.createTempDirectory(khanId).toFile()
         val langList = khanFullMap + khanLiteMap
         val defaultSrtFile = File(tempDir, "$SUBTITLE_FILENAME-${langList[lang]?.title?.replace("'", "")}$SRT_EXT")
         val defaultSrtText = saveSrtContent(defaultSrtFile, lang, youtubeId, gson, type)
@@ -122,6 +125,13 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
                 FileUtils.deleteQuietly(srtFile)
                 return@forEach
             }
+        }
+
+        val commonSourceUrl = "%${sourceUrl.substringBefore(".")}%"
+        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
+        commonEntryList.forEach{
+            ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
+                    ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION)
         }
 
         if (isValid) {
@@ -160,7 +170,7 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
                 runBlocking {
 
                     val fileMap = HashMap<File, String>()
-                    ContentScraperUtil.createContainerFromDirectory(tempDir, fileMap)
+                    ContentScraperUtil.createContainerFromDirectory(tempDir!!, fileMap)
                     fileMap.forEach {
                         containerManager.addEntries(ContainerManager.FileEntrySource(it.component1(), it.component2()))
                     }
@@ -180,25 +190,32 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
                 setScrapeDone(false, 0)
                 throw e
             } finally {
+                close()
                 conn?.disconnect()
             }
 
 
         } else {
 
+            hideContentEntry()
+            setScrapeDone(false, ERROR_TYPE_YOUTUBE_ERROR)
+            close()
 
-            val ytUrl = getYoutubeUrl(youtubeId)
+           /* val ytUrl = getYoutubeUrl(youtubeId)
             try {
                 scrapeYoutubeLink(ytUrl)
             } catch (e: Exception) {
                 hideContentEntry()
                 throw e
-            }
+            }*/
 
         }
 
-        tempDir.deleteRecursively()
+    }
 
+    override fun close() {
+        super.close()
+        tempDir?.deleteRecursively()
     }
 
     private fun saveSrtContent(srtFile: File, code: String, youtubeId: String, gson: Gson, type: Type): String {

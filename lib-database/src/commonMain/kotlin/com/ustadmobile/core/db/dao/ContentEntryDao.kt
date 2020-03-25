@@ -172,7 +172,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
 
 
-    @Query("SELECT * FROM ContentEntry WHERE sourceUrl LIKE '%:sourceUrl%'")
+    @Query("SELECT * FROM ContentEntry WHERE sourceUrl LIKE :sourceUrl")
     @JsName("findSimilarIdEntryForKhan")
     abstract fun findSimilarIdEntryForKhan(sourceUrl: String): List<ContentEntry>
 

@@ -19,6 +19,7 @@ class KhanYoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: Um
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, khanEntry, 12)
 
         parentEntry = createKangLangEntry("ps", "Pashto", "https://ps.khanacademy.org/", db)
+        hideContentEntry(parentEntry.contentEntryUid)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, khanEntry, parentEntry, 0)
 

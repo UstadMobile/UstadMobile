@@ -16,6 +16,7 @@ import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.KHAN_CSS
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.regexUrlPrefix
 import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.core.har.HarEntry
 import org.apache.commons.io.IOUtils
@@ -149,6 +150,12 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
             scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
         }
 
+        val commonSourceUrl = "%${sourceUrl.substringBefore(".")}%"
+        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
+        commonEntryList.forEach{
+            ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
+                    ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION)
+        }
 
         setScrapeDone(true, 0)
         close()

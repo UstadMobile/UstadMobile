@@ -37,7 +37,6 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 import java.util.regex.Pattern
-import kotlin.collections.HashMap
 
 class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
 
@@ -345,7 +344,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         harExtra.links = linksList
 
 
-        val commonSourceUrl = sourceUrl.substringBefore(".")
+        val commonSourceUrl = "%${sourceUrl.substringBefore(".")}%"
         val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
         commonEntryList.forEach{
             ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
