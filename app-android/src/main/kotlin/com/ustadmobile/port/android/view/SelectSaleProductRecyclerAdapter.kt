@@ -21,10 +21,7 @@ import com.ustadmobile.core.db.dao.SaleProductPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.SaleProduct
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import java.io.File
 
 class SelectSaleProductRecyclerAdapter
@@ -79,6 +76,43 @@ class SelectSaleProductRecyclerAdapter
         holder.imageLoadJob?.cancel()
 
         imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+
+//        holder.imageLoadJob = GlobalScope.launch {
+//            //Load the local image first
+//            val saleProductPictureLocal = productPictureDao!!.findBySaleProductUidAsync2(
+//                    entity!!.saleProductUid)
+//            imagePathLocal = productPictureDaoRepo!!.getAttachmentPath(saleProductPictureLocal!!)!!;
+//
+//            val context=  holder.itemView.context
+//            (context as UstadBaseActivity).runOnUiThread(Runnable {
+//                if (imagePathLocal.isNotEmpty())
+//                    setPictureOnView(imagePathLocal, imageView)
+//                else
+//                    imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+//            })
+//
+//
+//            //Get the server image
+//            val saleProductPictureServer =
+//                    productPictureDaoRepo!!.findBySaleProductUidAsync2(entity.saleProductUid)
+//            imagePathServer =
+//                    productPictureDaoRepo!!.getAttachmentPath(saleProductPictureServer!!)!!;
+//
+//            (context as UstadBaseActivity).runOnUiThread(Runnable {
+//                //If local is not server (suggesting picture/entity update)
+//                if(saleProductPictureLocal != saleProductPictureServer) {
+//
+//                    if (imagePathServer.isNotEmpty())
+//                        setPictureOnView(imagePathServer, imageView)
+//                    else
+//                        imageView.setImageResource(R.drawable.ic_card_giftcard_black_24dp)
+//                }else{
+//                    //Do nothing
+//                }
+//            })
+//
+//        }
+
         holder.imageLoadJob = GlobalScope.async(Dispatchers.Main) {
 
             //Load the local image first

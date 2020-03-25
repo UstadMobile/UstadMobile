@@ -61,6 +61,8 @@ interface SaleDetailView : UstadView {
 
     fun updateBalanceDue(balance: Long)
 
+    fun enableAddItems(enable: Boolean)
+
     companion object {
 
 

@@ -112,7 +112,6 @@ class SelectSaleProductPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String?>?) {
         super.onCreate(savedState)
-//        updateProviders()
 
         GlobalScope.launch {
             loggedInPerson = personDao.findByUidAsync(loggedInPersonUid)
@@ -123,7 +122,9 @@ class SelectSaleProductPresenter(context: Any,
 
         if(inventoryMode){
             val selectTypeTitle = impl.getString(MessageID.select_type, context)
-            view.updateToolbar(selectTypeTitle)
+            view.runOnUiThread(Runnable {
+                view.updateToolbar(selectTypeTitle)
+            })
         }
     }
 
@@ -140,8 +141,9 @@ class SelectSaleProductPresenter(context: Any,
             if(loggedInPerson!=null) {
                 view.setAddCategoryVisibility(loggedInPerson?.admin?:false)
             }
+            view.setRecentProvider(recentProvider)
         })
-        view.setRecentProvider(recentProvider)
+
 
     }
 
@@ -149,14 +151,18 @@ class SelectSaleProductPresenter(context: Any,
 
         categoryProvider = saleProductDao.sortAndFindActiveCategoriesProvider(loggedInPersonUid,
                 searchQuery,0, impl.getLocale(context))
-        view.setCategoryProvider(categoryProvider)
+        view.runOnUiThread(Runnable {
+            view.setCategoryProvider(categoryProvider)
+        })
 
     }
 
     private fun updateCollectionProvider() {
         collectionProvider = productParentJoinDao.findAllCategoriesInCollection(loggedInPersonUid,
                 searchQuery)
-        view.setCollectionProvider(collectionProvider)
+        view.runOnUiThread(Runnable {
+            view.setCollectionProvider(collectionProvider)
+        })
     }
 
     fun handleClickProduct(productUid: Long, isCategory: Boolean){

@@ -57,6 +57,8 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
     private lateinit var addItemCL: ConstraintLayout
     private lateinit var customerET: EditText
     private var customerUid : Long = 0L
+    private lateinit var addImageButton : ImageView
+    private lateinit var addItemTextView: TextView
 
     private lateinit var c1: TextView
     private lateinit var c2: TextView
@@ -378,6 +380,8 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
         playIB = findViewById(R.id.activity_sale_detail_order_notes_play_image_button)
         stopIB = findViewById(R.id.activity_sale_detail_order_notes_delete_ib)
         customerET = findViewById(R.id.activity_sale_detail_customer_edittext)
+        addImageButton = findViewById(R.id.activity_sale_detail_add_image)
+        addItemTextView = findViewById(R.id.activity_sale_detail_add_text)
 
         c1 = findViewById(R.id.textView21)
         c2 = findViewById(R.id.activity_sale_detail_disc_currency4)
@@ -433,8 +437,6 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
             }
         })
 
-        addItemCL.setOnClickListener { mPresenter.handleClickAddSaleItem() }
-
         addPaymentCL.setOnClickListener { mPresenter.handleClickAddPayment() }
 
         addDeliveriesCL.setOnClickListener{mPresenter.handleClickAddDelivery() }
@@ -475,6 +477,18 @@ class SaleDetailActivity : SelectSaleTypeDialogFragment.SaleTypeDialogListener,
                 mPresenter.updateBalanceDueFromTotal(java.lang.Float.valueOf(s.toString()))
             }
         })
+    }
+
+    override fun enableAddItems(enable: Boolean) {
+        if(enable){
+            addImageButton.setColorFilter(R.color.icons)
+            addItemTextView.setTextColor(resources.getColor(R.color.primary_text))
+            addItemCL.setOnClickListener { mPresenter.handleClickAddSaleItem() }
+        }else{
+            addImageButton.setColorFilter(R.color.color_gray)
+            addItemTextView.setTextColor(resources.getColor(R.color.color_gray))
+            addItemCL.setOnClickListener{}
+        }
     }
 
     override fun updateCustomerNameOnView(customerName: String) {

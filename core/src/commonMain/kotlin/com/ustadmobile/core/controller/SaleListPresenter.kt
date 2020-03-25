@@ -24,6 +24,7 @@ import com.ustadmobile.core.view.SaleDetailView.Companion.ARG_SALE_UID
 import com.ustadmobile.core.view.SaleListSearchView
 import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.lib.db.entities.SaleListDetail
+import kotlinx.coroutines.Runnable
 
 
 /**
@@ -118,7 +119,9 @@ class SaleListPresenter(context: Any,
 
         val sortPresets = arrayListToStringArray(presetAL)
 
-        view.updateSortSpinner(sortPresets)
+        view.runOnUiThread(Runnable {
+            view.updateSortSpinner(sortPresets)
+        })
     }
 
 
@@ -130,7 +133,9 @@ class SaleListPresenter(context: Any,
             saleDao.filterAndSortSaleByLeUid(loggedInPersonUid!!, filterSelected,
                     sortCode, impl.getLocale(context))
         }
-        view.setListProvider(umProvider!!, false, preOrderTab = false)
+        view.runOnUiThread(Runnable {
+            view.setListProvider(umProvider!!, false, preOrderTab = false)
+        })
 
     }
 
@@ -139,7 +144,9 @@ class SaleListPresenter(context: Any,
 
         //Get provider
         umProvider = saleDao.findAllActiveAsSaleListDetailProvider(loggedInPersonUid!!)
-        view.setListProvider(umProvider!!, paymentsDueTab = false, preOrderTab = false)
+        view.runOnUiThread(Runnable {
+            view.setListProvider(umProvider!!, paymentsDueTab = false, preOrderTab = false)
+        })
 
         idToOrderInteger = HashMap()
         updateSortSpinnerPreset()
@@ -161,36 +168,46 @@ class SaleListPresenter(context: Any,
 
     }
 
-    fun handlePreOrderCountUpdate(count: Int?) {
-        if (count != null) {
-            view.updatePreOrderCounter(count)
-        }
+    private fun handlePreOrderCountUpdate(count: Int?) {
+        view.runOnUiThread(Runnable {
+            if (count != null) {
+                view.updatePreOrderCounter(count)
+            }
+        })
     }
 
-    fun handlePaymentDueCountUpdate(count: Int?) {
-        if (count != null) {
-            view.updatePaymentDueCounter(count)
-        }
+    private fun handlePaymentDueCountUpdate(count: Int?) {
+        view.runOnUiThread(Runnable {
+            if (count != null) {
+                view.updatePaymentDueCounter(count)
+            }
+        })
     }
 
     fun filterAll() {
         filterSelected = ALL_SELECTED
         umProvider = saleDao.findAllActiveAsSaleListDetailProvider(loggedInPersonUid!!)
-        view.setListProvider(umProvider!!, paymentsDueTab = false, preOrderTab = false)
+        view.runOnUiThread(Runnable {
+            view.setListProvider(umProvider!!, paymentsDueTab = false, preOrderTab = false)
+        })
 
     }
 
     fun filterPreOrder() {
         filterSelected = PREORDER_SELECTED
         umProvider = saleDao.findAllActiveSaleListDetailPreOrdersProvider(loggedInPersonUid!!)
-        view.setListProvider(umProvider!!, paymentsDueTab = false, preOrderTab = true)
+        view.runOnUiThread(Runnable {
+            view.setListProvider(umProvider!!, paymentsDueTab = false, preOrderTab = true)
+        })
 
     }
 
     fun filterPaymentDue() {
         filterSelected = PAYMENT_SELECTED
         umProvider = saleDao.findAllActiveSaleListDetailPaymentDueProvider(loggedInPersonUid!!)
-        view.setListProvider(umProvider!!, paymentsDueTab = true, preOrderTab = false)
+        view.runOnUiThread(Runnable {
+            view.setListProvider(umProvider!!, paymentsDueTab = true, preOrderTab = false)
+        })
     }
 
     fun handleClickSale(saleUid: Long, saleName: String?) {

@@ -65,7 +65,9 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
                             personPictureDao.findByPersonUidAsync(loggedInPerson!!.personUid)
                     if (personPicture != null) {
                         val picturePath = personPictureDao.getAttachmentPath(personPicture)
-                        view.updateImageOnView(picturePath!!, true)
+                        view.runOnUiThread(Runnable {
+                            view.updateImageOnView(picturePath!!, true)
+                        })
                     }
                 }
             }
@@ -81,15 +83,16 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
         }
     }
 
-    fun updateLastSyncTime(latestTimeStamp: Long?){
+    private fun updateLastSyncTime(latestTimeStamp: Long?){
         if(latestTimeStamp != null) {
             val lastSyncedText = impl.getString(MessageID.last_synced_at, context)
-//            val lastSyncedText2 = UMCalendarUtil.getPrettyDateWithTimeFromLongSimple(latestTimeStamp)
             val tzu = TimeZoneUtil()
             val lastSyncedText2 = tzu.getPrettyDateWithTimeFromLongSimple(latestTimeStamp,
                     impl.getLocale(context))
             val lastSynced = lastSyncedText + " " + lastSyncedText2
-            view.updateLastSyncedText(lastSynced)
+            view.runOnUiThread(Runnable {
+                view.updateLastSyncedText(lastSynced)
+            })
         }
     }
 
@@ -150,7 +153,9 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
 
                 //Update view with path
                 val picturePath = personPictureDao.getAttachmentPath(existingPP)
-                view.updateImageOnView(picturePath!!, true)
+                view.runOnUiThread(Runnable {
+                    view.updateImageOnView(picturePath!!, true)
+                })
             }catch(e:Exception){
                 throw e
             }
@@ -171,7 +176,9 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
     }
 
     fun handleShowLanguageOptions(){
-        view.setLanguageOption(languageOptions.values.sorted().toMutableList())
+        view.runOnUiThread(Runnable {
+            view.setLanguageOption(languageOptions.values.sorted().toMutableList())
+        })
     }
 
     /**
@@ -179,6 +186,8 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
      */
     fun handleClickLastSync(){
         //TODO Start the sync process.
-        view.forceSync()
+        view.runOnUiThread(Runnable {
+            view.forceSync()
+        })
     }
 }

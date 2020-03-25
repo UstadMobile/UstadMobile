@@ -116,7 +116,7 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
             " " + QUERY_SORT_BY_NAME_ASC )
     abstract fun findAllItemsAndCategoriesInCollection(leUid: Long, query:String): DataSource.Factory<Int, SaleProduct>
 
-    @Query(QUERY_SELECT_ALL_SALE_PRODUCT + QUERY_WHERE_SEARCH +
+    @Query(QUERY_SELECT_ALL_SALE_PRODUCT_WITHOUT_ADDED_CHECK + QUERY_WHERE_SEARCH +
             " AND SaleProductParentJoin.saleProductParentJoinParentUid = " +
             "   (SELECT SaleProduct.saleProductUid FROM SaleProduct " +
             "   WHERE SaleProduct.saleProductName = 'Collections' " +
@@ -192,6 +192,21 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
                     WHERE CAST(SaleProductParentJoin.saleProductParentJoinActive AS INTEGER) = 1
                     AND CAST(child.saleProductActive AS INTEGER) = 1 
                     AND (CAST(LE.admin AS INTEGER) = 1 OR child.saleProductPersonAdded = LE.personUid)
+                    AND productPicture.saleProductPictureIndex = 
+                    (SELECT MAX(SaleProductPicture.saleproductpictureIndex) from saleproductpicture 
+                    where SaleProductPicture.saleProductPictureSaleProductUid = child.saleProductUid ) 
+                """
+
+        const val QUERY_SELECT_ALL_SALE_PRODUCT_WITHOUT_ADDED_CHECK =
+                """
+                    SELECT child.* 
+                    FROM SaleProductParentJoin 
+                    LEFT JOIN Person as LE on LE.personUid = :leUid 
+                    LEFT JOIN SaleProduct child ON child.saleProductUid = SaleProductParentJoin.saleProductParentJoinChildUid 
+                    LEFT JOIN SaleProduct parent ON parent.saleProductUid = SaleProductParentJoin.saleProductParentJoinParentUid 
+                    LEFT JOIN SaleProductPicture productPicture ON productPicture.saleProductPictureSaleProductUid = child.saleProductUid
+                    WHERE CAST(SaleProductParentJoin.saleProductParentJoinActive AS INTEGER) = 1
+                    AND CAST(child.saleProductActive AS INTEGER) = 1 
                     AND productPicture.saleProductPictureIndex = 
                     (SELECT MAX(SaleProductPicture.saleproductpictureIndex) from saleproductpicture 
                     where SaleProductPicture.saleProductPictureSaleProductUid = child.saleProductUid ) 

@@ -9,7 +9,6 @@ import com.ustadmobile.core.db.dao.InventoryItemDao.Companion.SORT_ORDER_NAME_AS
 import com.ustadmobile.core.db.dao.InventoryItemDao.Companion.SORT_ORDER_NAME_DESC
 import com.ustadmobile.core.db.dao.InventoryItemDao.Companion.SORT_ORDER_STOCK_ASC
 import com.ustadmobile.core.db.dao.InventoryItemDao.Companion.SORT_ORDER_STOCK_DESC
-import com.ustadmobile.core.db.dao.SaleDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -17,10 +16,8 @@ import com.ustadmobile.core.view.InventoryDetailView
 import com.ustadmobile.core.view.InventoryDetailView.Companion.ARG_INVENTORY_DETAIL_SALE_PRODUCT_UID
 import com.ustadmobile.core.view.InventoryListView
 import com.ustadmobile.core.view.NewInventoryItemView
-import com.ustadmobile.core.view.SelectProducersView.Companion.ARG_SELECT_PRODUCERS_INVENTORY_ADDITION
-import com.ustadmobile.core.view.SelectSaleProductView
-import com.ustadmobile.core.view.SelectSaleProductView.Companion.ARG_INVENTORY_MODE
 import com.ustadmobile.lib.db.entities.SaleProductWithInventoryCount
+import kotlinx.coroutines.Runnable
 
 /**
  *  Presenter for InventoryListPresenter view
@@ -75,7 +72,9 @@ class InventoryListPresenter(context: Any,
 
     private fun getAndSetProvider(sortCode: Int) {
         factory = rvDao.findAllInventoryByProduct(loggedInPersonUid, searchQuery, sortCode)
-        view.setListProvider(factory)
+        view.runOnUiThread(Runnable {
+            view.setListProvider(factory)
+        })
     }
 
     /**
@@ -109,7 +108,9 @@ class InventoryListPresenter(context: Any,
 
         val sortPresets = SaleListPresenter.arrayListToStringArray(presetAL)
 
-        view.updateSortSpinner(sortPresets)
+        view.runOnUiThread(Runnable {
+            view.updateSortSpinner(sortPresets)
+        })
     }
 
     fun updateProviders(){

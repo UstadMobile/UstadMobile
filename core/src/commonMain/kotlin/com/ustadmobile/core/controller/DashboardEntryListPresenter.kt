@@ -123,7 +123,9 @@ class DashboardEntryListPresenter(context: Any, arguments: Map<String, String?>,
             pos++
         }
         var tagPresets = tagList.toTypedArray()
-        view.loadChips(tagPresets)
+        view.runOnUiThread(Runnable {
+            view.loadChips(tagPresets)
+        })
     }
 
     fun handleClickSearch() {
@@ -198,8 +200,9 @@ class DashboardEntryListPresenter(context: Any, arguments: Map<String, String?>,
     }
 
     fun handleChangeTitle(entryUid: Long, existingTitle: String) {
-
-        view.showSetTitle(existingTitle, entryUid)
+        view.runOnUiThread(Runnable {
+            view.showSetTitle(existingTitle, entryUid)
+        })
     }
 
     fun handlePinEntry(entryUid: Long, pinned: Boolean) {

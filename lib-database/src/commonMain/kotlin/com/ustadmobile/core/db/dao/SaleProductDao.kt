@@ -154,9 +154,9 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
         """
 
         const val ALL_ACTIVE_QUERY_WITH_SEARCH =
-                """ AND (lower(SaleProduct.saleProductName) like :query OR
-                 lower(SaleProduct.saleProductNameDari) like :query OR 
-                lower(SaleProduct.saleProductNamePashto) like :query )"""
+                    """ AND (lower(SaleProduct.saleProductName) like :query OR
+                     lower(SaleProduct.saleProductNameDari) like :query OR 
+                    lower(SaleProduct.saleProductNamePashto) like :query )"""
 
         const val SORT_BY_NAME_ENG_ASC_QUERY = " ORDER BY SaleProduct.saleProductName ASC "
         const val SORT_BY_NAME_DARI_ASC_QUERY = " ORDER BY SaleProduct.saleProductNameDari ASC "

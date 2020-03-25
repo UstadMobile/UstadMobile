@@ -122,6 +122,11 @@ class SaleDetailPresenter(context: Any,
 
     private fun initFromSale(saleUid: Long) {
 
+        //Enable add, etc
+        view.runOnUiThread(Runnable {
+            view.enableAddItems(true)
+        })
+
         if(saleUid != null) {
             val thisP = this
 
@@ -151,7 +156,9 @@ class SaleDetailPresenter(context: Any,
 
     private fun updateDeliveriesProvider(saleUid: Long){
         dProvider = saleDeliveryDao.findAllDeliveriesBySaleUid(saleUid)
-        view.setDeliveriesProvider(dProvider)
+        view.runOnUiThread(Runnable {
+            view.setDeliveriesProvider(dProvider)
+        })
     }
 
     private fun updateSaleOnView(sale:Sale?){
@@ -175,13 +182,17 @@ class SaleDetailPresenter(context: Any,
     private fun updateSaleItemProvider(saleUid: Long) {
         //Get provider
         umProvider = saleItemDao.findAllSaleItemListDetailActiveBySaleProvider(saleUid)
-        view.setListProvider(umProvider)
+        view.runOnUiThread(Runnable {
+            view.setListProvider(umProvider)
+        })
     }
 
     fun updatePaymentItemProvider(saleUid: Long) {
         //Get provider
         pProvider = salePaymentDao.findBySaleProvider(saleUid)
-        view.setPaymentProvider(pProvider)
+        view.runOnUiThread(Runnable {
+            view.setPaymentProvider(pProvider)
+        })
     }
 
     fun getTotalSaleOrderAndDiscountAndUpdateView(saleUid: Long) {
@@ -276,7 +287,9 @@ class SaleDetailPresenter(context: Any,
     }
 
     fun updateBalance() {
-        view.updateBalanceDue(totalAfterDiscount - totalPayment)
+        view.runOnUiThread(Runnable {
+            view.updateBalanceDue(totalAfterDiscount - totalPayment)
+        })
     }
 
     private fun getPaymentTotalAndUpdateView() {
@@ -285,7 +298,9 @@ class SaleDetailPresenter(context: Any,
                 val result =
                         salePaymentDao.findTotalPaidBySaleAsync(currentSaleItem.saleItemUid)
                 if(result!=null)
-                    view.updatePaymentTotal(result.toLong())
+                    view.runOnUiThread(Runnable {
+                        view.updatePaymentTotal(result.toLong())
+                    })
             }
         }
     }
@@ -323,8 +338,10 @@ class SaleDetailPresenter(context: Any,
             }
         }
 
-        view.updateCustomerNameOnView(changedCustomer!!.fullName(
-                UstadMobileSystemImpl.instance.getLocale(context)))
+        view.runOnUiThread(Runnable {
+            view.updateCustomerNameOnView(changedCustomer!!.fullName(
+                    UstadMobileSystemImpl.instance.getLocale(context)))
+        })
     }
 
     private fun handleLocationsChanged(changedLocations: List<Location>?) {
@@ -358,7 +375,9 @@ class SaleDetailPresenter(context: Any,
 
         var locationPreset = locationList.toTypedArray<String>()
 
-        view.setLocationPresets(locationPreset, selectedPosition)
+        view.runOnUiThread(Runnable {
+            view.setLocationPresets(locationPreset, selectedPosition)
+        })
 
     }
 
@@ -368,7 +387,9 @@ class SaleDetailPresenter(context: Any,
             if(updatedSale!!.saleCustomerUid == 0L){
                 val selectCustomerMessage = impl.getString(
                         MessageID.please_select_customer, context)
-                view.sendMessage(selectCustomerMessage)
+                view.runOnUiThread(Runnable {
+                    view.sendMessage(selectCustomerMessage)
+                })
             }else{
                 updatedSale!!.saleActive = true
                 if (updatedSale!!.saleLocationUid == 0L) {
@@ -398,7 +419,6 @@ class SaleDetailPresenter(context: Any,
                         resultLive.observeWithPresenter(thisP, thisP::handleUpdateSaleName)
                     })
                 }
-
             }
         }
     }
@@ -481,7 +501,11 @@ class SaleDetailPresenter(context: Any,
         val args = HashMap<String, String>()
         args[SelectSaleProductView.ARG_INVENTORY_MODE] = "true"
         args[SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION] = "true"
-        args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID] = currentSale!!.saleUid.toString()
+        var currentSaleUid = 0L
+        if(currentSale != null){
+            currentSaleUid = currentSale?.saleUid?:0
+        }
+        args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID] = currentSaleUid.toString()
         impl.go(SelectSaleProductView.VIEW_NAME, args, context)
     }
 
@@ -490,7 +514,11 @@ class SaleDetailPresenter(context: Any,
         val args = HashMap<String, String>()
         args[SelectSaleProductView.ARG_INVENTORY_MODE] = "true"
         args[SelectProducersView.ARG_SELECT_PRODUCERS_INVENTORY_SELECTION] = "false"
-        args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID] = currentSale!!.saleUid.toString()
+        var currentSaleUid = 0L
+        if(currentSale != null){
+            currentSaleUid = currentSale?.saleUid?:0
+        }
+        args[SelectProducersView.ARG_SELECT_PRODUCERS_SALE_UID] = currentSaleUid.toString()
         args[ARG_SELECT_PRODUCERS_SALE_ITEM_PREORDER] = "true"
         impl.go(SelectSaleProductView.VIEW_NAME, args, context)
     }
@@ -498,7 +526,9 @@ class SaleDetailPresenter(context: Any,
     fun handleDiscountChanged(discount: Long) {
         if(updatedSale!!.saleDiscount != discount) {
             updatedSale!!.saleDiscount = discount
-            view.updateOrderTotalAfterDiscount(discount)
+            view.runOnUiThread(Runnable {
+                view.updateOrderTotalAfterDiscount(discount)
+            })
             //Update the sale
             GlobalScope.launch {
                 saleDao.updateAsync(updatedSale!!)
