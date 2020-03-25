@@ -75,8 +75,8 @@ fun scrapeUrlwithHar(proxy: BrowserMobProxyServer, driver: ChromeDriver, url: St
 
             filter?.invoke(it)
 
-            when {
-                response.content.encoding == "base64" -> {
+            when (response.content.encoding) {
+                "base64" -> {
                     var base = Base64.getDecoder().decode(response.content.text)
                     FileUtils.writeByteArrayToFile(file, base)
                 }
@@ -87,8 +87,8 @@ fun scrapeUrlwithHar(proxy: BrowserMobProxyServer, driver: ChromeDriver, url: St
 
 
         } catch (e: Exception) {
-            UMLogUtil.logError("Index url failed at${it.request.url}")
-            UMLogUtil.logDebug(e.message!!)
+            UMLogUtil.logError("har scrapped url failed for request url ${it.request.url}")
+            UMLogUtil.logError(e.message!!)
         }
 
         driver.quit()

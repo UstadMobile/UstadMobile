@@ -143,7 +143,7 @@ abstract class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntr
 
         const val baseRetry: Float = 10f
 
-        private val youtubeLocker = ReentrantLock()
+        val youtubeLocker = ReentrantLock()
 
     }
 }

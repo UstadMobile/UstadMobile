@@ -14,18 +14,22 @@ class HabPlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabas
     override fun indexUrl(sourceUrl: String) {
 
         var counter = 0
-        startPlayListIndexer(sourceUrl){
+        try {
+            startPlayListIndexer(sourceUrl) {
 
-            val youtubeEntry = ContentScraperUtil.createOrUpdateContentEntry(it.id!!, it.fulltitle,
-                    it.webpage_url!!, ScraperConstants.HAB, ContentEntry.LICENSE_TYPE_OTHER, arabicLang.langUid, null,
-                    it.description, true, ScraperConstants.EMPTY_STRING, it.thumbnail,
-                    ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ContentEntry.VIDEO_TYPE, contentEntryDao)
+                val youtubeEntry = ContentScraperUtil.createOrUpdateContentEntry(it.id!!, it.fulltitle,
+                        it.webpage_url!!, ScraperConstants.HAB, ContentEntry.LICENSE_TYPE_OTHER, arabicLang.langUid, null,
+                        it.description, true, ScraperConstants.EMPTY_STRING, it.thumbnail,
+                        ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ContentEntry.VIDEO_TYPE, contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, youtubeEntry, counter++)
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, youtubeEntry, counter++)
 
-            createQueueItem(it.webpage_url!!, youtubeEntry, ScraperTypes.HAB_YOUTUBE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+                createQueueItem(it.webpage_url!!, youtubeEntry, ScraperTypes.HAB_YOUTUBE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
 
-            it
+                it
+            }
+        }catch (e: Exception){
+            throw e
         }
         setIndexerDone(true, 0)
 

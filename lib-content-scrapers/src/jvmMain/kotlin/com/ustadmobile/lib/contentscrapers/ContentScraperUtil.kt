@@ -122,7 +122,7 @@ object ContentScraperUtil {
     val SEARCH_LOCATIONS = mapOf(
             CHROME_PATH_KEY to listOf("/usr/bin/chromedriver"),
             FFMPEG_PATH_KEY to listOf("/usr/bin/ffmpeg"),
-            CODEC2_PATH_KEY to listOf("/usr/bin/c2enc"),
+            CODEC2_PATH_KEY to listOf("/usr/bin/c2enc", "/usr/local/bin/c2enc"),
             WEBP_PATH_KEY to listOf("/usr/bin/cwebp"),
             MOGRIFY_PATH_KEY to listOf("/usr/bin/mogrify"),
             YOUTUBE_DL_PATH_KEY to listOf("/usr/local/bin/youtube-dl"))

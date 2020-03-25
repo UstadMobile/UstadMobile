@@ -51,6 +51,10 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
         queueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
     }
 
+    fun hideContentEntry(contentEntryUid: Long) {
+        contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
+    }
+
     abstract fun indexUrl(sourceUrl: String)
 
     abstract fun close()

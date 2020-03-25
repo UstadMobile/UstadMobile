@@ -16,6 +16,7 @@ import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.regexUrlPre
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.secondExerciseUrl
 import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
@@ -48,6 +49,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         }
 
         if (entry == null) {
+            close()
             hideContentEntry()
             setScrapeDone(false, ERROR_TYPE_ENTRY_NOT_CREATED)
             throw ScraperException(ERROR_TYPE_ENTRY_NOT_CREATED, "Content Entry was not found for url $sourceUrl")
@@ -81,6 +83,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         val content = contentList.find { sourceUrl.contains(it.nodeSlug!!) }
 
         if (content == null) {
+            close()
             hideContentEntry()
             setScrapeDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
             throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "no content was found in url : $sourceUrl")
@@ -99,6 +102,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         }
 
         if (!isContentUpdated) {
+            close()
             showContentEntry()
             setScrapeDone(true, 0)
             return
@@ -339,6 +343,15 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             }
         }
         harExtra.links = linksList
+
+
+        val commonSourceUrl = sourceUrl.substringBefore(".")
+        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
+        commonEntryList.forEach{
+            ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
+                    ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION)
+        }
+
 
         runBlocking {
             scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))

@@ -4,6 +4,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.waitForJSandJQueryToLoad
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE_CONTENT_NOT_FOUND
+import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE_LINK_NOT_FOUND
 import io.github.bonigarcia.wdm.WebDriverManager
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
@@ -43,6 +45,8 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDataba
         try {
             chromeDriver.navigate().to(sourceUrl)
         } catch (e: InvalidArgumentException) {
+            setIndexerDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
+            close()
             throw IllegalArgumentException(e)
         }
 
@@ -67,7 +71,9 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDataba
             }
 
             if (fileEntry == null) {
-                throw ScraperException(Scraper.ERROR_TYPE_LINK_NOT_FOUND, "no request found for link")
+                setIndexerDone(false, ERROR_TYPE_LINK_NOT_FOUND)
+                close()
+                throw ScraperException(ERROR_TYPE_LINK_NOT_FOUND, "no request found for link")
             }
 
 
@@ -78,6 +84,8 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDataba
             }
 
             if (fileEntry.response.content.text.isNullOrEmpty()) {
+                setIndexerDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
+                close()
                 throw ScraperException(Scraper.ERROR_TYPE_CONTENT_NOT_FOUND, "file didnt load for ${fileEntry.request.url} for source url $sourceUrl")
             }
 

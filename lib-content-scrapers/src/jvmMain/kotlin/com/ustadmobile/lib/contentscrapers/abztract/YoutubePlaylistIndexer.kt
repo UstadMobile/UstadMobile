@@ -8,6 +8,7 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.HAB
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.YoutubeData
 import org.apache.commons.io.FileUtils.readFileToString
@@ -15,6 +16,10 @@ import java.io.File
 import java.io.IOException
 import java.lang.Exception
 import java.nio.file.Files
+import kotlin.concurrent.withLock
+import kotlin.math.pow
+import kotlin.random.Random
+import kotlin.system.exitProcess
 
 
 typealias ModifyYoutubeJson = (jsonFile: YoutubeData) -> YoutubeData
@@ -41,28 +46,54 @@ abstract class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db:
 
         val tempDir = Files.createTempDirectory(sourceUrl.substringAfter("=")).toFile()
 
-        val builder = ProcessBuilder(ytPath, "--write-info-json", "--skip-download",
+        val builder = ProcessBuilder(ytPath, "--limit-rate", "1M", "--retries", "1", "--write-info-json", "--skip-download",
                 "-o", "${tempDir.absolutePath}/%(playlist_index)s", sourceUrl)
 
-        var process: Process? = null
-        try {
-            process = builder.start()
-            process!!.waitFor()
-            val exitValue = process.exitValue()
-            if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src $sourceUrl with error code  ${UMIOUtils.readStreamToString(process.errorStream)}")
-                println(UMIOUtils.readStreamToString(process.errorStream))
-                Thread.sleep(60000)
-                throw IOException()
+        YoutubeScraper.youtubeLocker.withLock {
+
+            var retryFlag = true
+            var numberOfFailures = 1
+            while (retryFlag) {
+
+                var process: Process? = null
+                try {
+                    Thread.sleep(Random.nextLong(10000, 30000))
+                    process = builder.start()
+                    process!!.waitFor()
+                    val exitValue = process.exitValue()
+                    if (exitValue != 0) {
+                        val error = UMIOUtils.readStreamToString(process.errorStream)
+                        UMLogUtil.logError("Error Stream for src $sourceUrl with error code  $error")
+                        if (!error.contains("429")) {
+                            throw ScraperException(Scraper.ERROR_TYPE_UNKNOWN_YOUTUBE, "unknown error: $error")
+                        }
+                        throw IOException("Failed $numberOfFailures for  $sourceUrl")
+                    }
+                    retryFlag = false
+                } catch (s: ScraperException) {
+                    setIndexerDone(false, Scraper.ERROR_TYPE_UNKNOWN_YOUTUBE)
+                    close()
+                    throw s
+                }catch (e: Exception) {
+                    if (numberOfFailures > 5) {
+                        setIndexerDone(false, Scraper.ERROR_TYPE_YOUTUBE_ERROR)
+                        exitProcess(1)
+                    }
+
+                    YoutubeScraper.lockedUntil = YoutubeScraper.baseRetry.pow(numberOfFailures) * 1000
+                    UMLogUtil.logError("caught youtube exception with lockedUntil value of ${YoutubeScraper.lockedUntil.toLong()}")
+                    Thread.sleep(YoutubeScraper.lockedUntil.toLong())
+
+                    numberOfFailures++
+                } finally {
+                    process?.destroy()
+                }
+
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            throw e
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        } finally {
-            process?.destroy()
+
         }
+        UMLogUtil.logTrace("ending youtube lock")
+
 
 
         tempDir.listFiles()?.forEachIndexed { i, file ->
@@ -79,16 +110,12 @@ abstract class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db:
                 modify?.invoke(youtubeData)
 
             } catch (e: Exception) {
-                UMLogUtil.logError("${HAB} Exception - Error with data for index $i in playlist $sourceUrl")
+                UMLogUtil.logError("$KHAN Exception - Error with data for index $i in playlist $sourceUrl")
             }
 
         }
 
         tempDir.deleteRecursively()
-
-
-        Thread.sleep(4000)
-
     }
 
 }

@@ -29,6 +29,7 @@ import org.apache.commons.io.IOUtils
 import java.io.File
 import java.lang.reflect.Type
 import java.net.HttpURLConnection
+import java.net.MalformedURLException
 import java.net.URL
 import java.nio.file.Files
 import java.util.*
@@ -85,20 +86,18 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
 
         val khanId = content.id
         val mp4Link = content.downloadUrls?.mp4 ?: content.downloadUrls?.mp4Low
-        val mp4Url = URL(url, mp4Link)
-        val isValid = isUrlValid(mp4Url)
+        var mp4Url: URL? = null
+        var isValid: Boolean
+        try{
+            mp4Url = URL(url, mp4Link)
+            isValid = isUrlValid(mp4Url)
+        }catch (e: MalformedURLException){
+            isValid = false
+        }
+
         val youtubeId = content.youtubeId!!
 
-        val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
 
-        if (recentContainer != null) {
-            val isUpdated = isUrlContentUpdated(mp4Url, recentContainer)
-            if (!isUpdated) {
-                showContentEntry()
-                setScrapeDone(true, 0)
-                return
-            }
-        }
 
         val tempDir = Files.createTempDirectory(khanId).toFile()
         val langList = khanFullMap + khanLiteMap
@@ -129,7 +128,7 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
 
             var conn: HttpURLConnection? = null
             try {
-                conn = (mp4Url.openConnection() as HttpURLConnection)
+                conn = (mp4Url?.openConnection() as HttpURLConnection)
                 val eTag = conn.getHeaderField("etag")
                 var mimetype = conn.contentType
                 val length = conn.contentLengthLong

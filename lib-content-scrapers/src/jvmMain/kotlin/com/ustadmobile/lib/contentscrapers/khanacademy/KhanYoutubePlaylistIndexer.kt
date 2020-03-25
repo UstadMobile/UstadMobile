@@ -12,19 +12,24 @@ class KhanYoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAp
     override fun indexUrl(sourceUrl: String) {
 
         var counter = 0
-        startPlayListIndexer(sourceUrl){
+        try {
+            startPlayListIndexer(sourceUrl) {
 
-            val youtubeEntry = ContentScraperUtil.createOrUpdateContentEntry(it.id!!, it.fulltitle,
-                    it.webpage_url!!, ScraperConstants.HAB, ContentEntry.LICENSE_TYPE_OTHER,
-                    parentcontentEntry?.primaryLanguageUid ?: 0, parentcontentEntry?.languageVariantUid,
-                    it.description, true, ScraperConstants.EMPTY_STRING, it.thumbnail,
-                    ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ContentEntry.VIDEO_TYPE, contentEntryDao)
+                val youtubeEntry = ContentScraperUtil.createOrUpdateContentEntry(it.id!!, it.fulltitle,
+                        it.webpage_url!!, ScraperConstants.HAB, ContentEntry.LICENSE_TYPE_OTHER,
+                        parentcontentEntry?.primaryLanguageUid
+                                ?: 0, parentcontentEntry?.languageVariantUid,
+                        it.description, true, ScraperConstants.EMPTY_STRING, it.thumbnail,
+                        ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ContentEntry.VIDEO_TYPE, contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, youtubeEntry, counter++)
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, youtubeEntry, counter++)
 
-            createQueueItem(it.webpage_url!!, youtubeEntry, ScraperTypes.KHAN_YOUTUBE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+                createQueueItem(it.webpage_url!!, youtubeEntry, ScraperTypes.KHAN_YOUTUBE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
 
-            it
+                it
+            }
+        }catch (e : Exception){
+            throw e
         }
         setIndexerDone(true, 0)
     }

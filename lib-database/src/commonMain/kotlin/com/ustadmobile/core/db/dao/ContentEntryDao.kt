@@ -171,6 +171,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("getContentEntryUidFromXapiObjectId")
     abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
 
+
+    @Query("SELECT * FROM ContentEntry WHERE sourceUrl LIKE '%:sourceUrl%'")
+    @JsName("findSimilarIdEntryForKhan")
+    abstract fun findSimilarIdEntryForKhan(sourceUrl: String): List<ContentEntry>
+
     /**
      * This query is used to tell the client how big a download job is, even if the client does
      * not yet have the indexes

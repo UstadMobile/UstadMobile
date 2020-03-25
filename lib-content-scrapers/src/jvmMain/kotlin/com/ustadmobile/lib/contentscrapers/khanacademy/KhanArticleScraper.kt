@@ -38,6 +38,7 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
         }
 
         if (entry == null) {
+            close()
             hideContentEntry()
             setScrapeDone(false, ERROR_TYPE_ENTRY_NOT_CREATED)
             throw ScraperException(ERROR_TYPE_ENTRY_NOT_CREATED, "Does not have the article data id which we need to scrape the page for url $sourceUrl")
@@ -64,6 +65,7 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
         }
 
         if (contentList.isEmpty()) {
+            close()
             hideContentEntry()
             setScrapeDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
             throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "Does not have the article data id which we need to scrape the page for url $sourceUrl")
@@ -72,6 +74,7 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
         val content = contentList.find { sourceUrl.contains(it.relativeUrl!!) }
 
         if (content == null) {
+            close()
             hideContentEntry()
             setScrapeDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
             throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "No content found in contentModel for url: $sourceUrl")
@@ -91,6 +94,7 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
         }
 
         if (!isContentUpdated) {
+            close()
             showContentEntry()
             setScrapeDone(true, 0)
             return

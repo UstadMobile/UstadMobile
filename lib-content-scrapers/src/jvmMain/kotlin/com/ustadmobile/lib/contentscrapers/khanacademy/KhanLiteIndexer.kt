@@ -9,6 +9,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.contentscrapers.abztract.SeleniumIndexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import org.jsoup.nodes.Document
 import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.net.URL
@@ -30,10 +31,13 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, khanEntry, parentEntry, 0)
 
-        val document = startSeleniumIndexer(sourceUrl) {
-
-            it.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#library-content-main")))
-
+        val document: Document
+        try {
+            document = startSeleniumIndexer(sourceUrl) {
+                it.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#library-content-main")))
+            }
+        }catch (e: Exception){
+            throw e
         }
 
         val fullList = document.select("div#library-content-main div[data-role=page]")

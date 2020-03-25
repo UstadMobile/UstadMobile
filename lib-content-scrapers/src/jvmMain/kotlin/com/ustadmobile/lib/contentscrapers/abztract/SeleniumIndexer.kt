@@ -29,6 +29,8 @@ abstract class SeleniumIndexer(parentContentEntry: Long, runUid: Int, db: UmAppD
         try {
             chromeDriver.navigate().to(url)
         } catch (e: InvalidArgumentException) {
+            setIndexerDone(false, Scraper.ERROR_TYPE_CONTENT_NOT_FOUND)
+            close()
             throw IllegalArgumentException(e)
         }
 
