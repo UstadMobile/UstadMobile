@@ -74,9 +74,10 @@ class AddSaleProductToSaleCategoryPresenter(context: Any, arguments: Map<String,
         impl.go(SaleProductDetailView.VIEW_NAME, args, context)
     }
 
-    fun handleClickProduct(productUid: Long) {
+    private fun handleClickProduct(productUid: Long) {
         GlobalScope.launch{
-        productParentJoinDao.createJoin(productUid, assignToThisSaleProductCategoryUid, true)
+            productParentJoinDao.createJoin(productUid, assignToThisSaleProductCategoryUid,
+                    true)
         }
         view.finish()
 

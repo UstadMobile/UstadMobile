@@ -177,6 +177,10 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
         }
     }
 
+    override fun showAddCategory(show: Boolean) {
+        subCategoryActionButton.isVisible = show
+    }
+
     override fun setListProvider(listProvider: DataSource.Factory<Int, SaleProduct>,
                                  allMode: Boolean) {
 

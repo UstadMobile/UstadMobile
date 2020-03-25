@@ -42,6 +42,8 @@ interface SaleProductCategoryListView : UstadView {
 
     fun updateToolbar(title: String?)
 
+    fun showAddCategory(show: Boolean)
+
     companion object {
 
 

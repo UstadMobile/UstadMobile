@@ -62,6 +62,7 @@ abstract class SaleProductParentJoinDao : BaseDao<SaleProductParentJoin> {
          CAST(SaleProduct.saleProductCategory AS INTEGER) = 1
          AND CAST(SaleProduct.saleProductActive AS INTEGER) = 1 
          AND SaleProduct.saleProductUid != :saleProductUid
+         AND SaleProduct.saleProductName != 'Collections'
     """)
     abstract fun findAllSelectedCategoriesForSaleProductProvider2(saleProductUid: Long)
             : DataSource.Factory<Int,SaleProductSelected>

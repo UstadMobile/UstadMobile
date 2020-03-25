@@ -183,6 +183,11 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
                 "   AND CAST(SaleProduct.saleProductActive AS INTEGER) = 1) " +
                 " AND SaleProduct.saleProductUid != :saleProductCategoryUid "
 
+        const val AND_NOT_COLLECTIONS =
+                """
+                    AND SaleProduct.saleProductName != 'Collections'
+                """
+
         const  val ACTIVE_PRODUCTS_QUERY = ALL_ACTIVE_QUERY_WITH_LE_FILTER + ALL_ACTIVE_QUERY_WITH_SEARCH +
                 AND_IS_NOT_CATEGORY + " ORDER BY SaleProduct.saleProductDateAdded DESC "
 
@@ -193,7 +198,8 @@ abstract class SaleProductDao : BaseDao<SaleProduct> {
                 ALL_ACTIVE_QUERY_WITH_LE_FILTER + AND_IS_NOT_CATEGORY + AND_NOT_IN_CATEGORY
 
         const val ACTIVE_CATEGORIES_NOT_IN_CATEGORY_QUERY =
-                ALL_ACTIVE_QUERY_WITH_LE_FILTER + AND_IS_CATEGORY + AND_NOT_IN_CATEGORY
+                ALL_ACTIVE_QUERY_WITH_LE_FILTER + AND_IS_CATEGORY + AND_NOT_IN_CATEGORY +
+                        AND_NOT_COLLECTIONS
 
 
         //LOOK UP

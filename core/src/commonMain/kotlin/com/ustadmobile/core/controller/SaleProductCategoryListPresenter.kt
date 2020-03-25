@@ -124,6 +124,9 @@ class SaleProductCategoryListPresenter(context: Any,
 
         GlobalScope.launch {
             loggedInPerson = repository.personDao.findByUidAsync(loggedInPersonUid)
+            view.runOnUiThread(Runnable {
+                view.showAddCategory(loggedInPerson?.admin?:false)
+            })
         }
 
         val thisP = this
