@@ -21,6 +21,8 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
+import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
+import com.ustadmobile.port.android.view.util.CrudActivityResultContract
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
@@ -80,7 +82,7 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
             if(it != null) {
                 finishWithResult(it)
             }
-        }?.launch(mapOf(UstadView.ARG_GETRESULTMODE to GetResultMode.CREATENEW.toString()))
+        }?.launch(CrudActivityResultContract.argsForNew())
     }
 
     override fun onDestroyView() {
@@ -100,8 +102,7 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
 
     override fun finishWithResult(result: List<HolidayCalendar>) {
         val resultIntent = Intent().apply {
-            putExtra(HolidayCalendarActivityResultContract.RESULT_EXTRA_KEY,
-                    Json.stringify(HolidayCalendar.serializer().list, result))
+            putExtraResultAsJson(HolidayCalendarActivityResultContract.RESULT_EXTRA_KEY, result)
         }
         activity?.setResult(Activity.RESULT_OK, resultIntent)
         activity?.finish()

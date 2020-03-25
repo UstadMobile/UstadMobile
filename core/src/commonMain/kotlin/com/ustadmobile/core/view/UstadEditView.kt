@@ -1,10 +1,6 @@
 package com.ustadmobile.core.view
 
-interface UstadEditView<RT>: UstadView {
-
-    var entity: RT?
-
-    var loading: Boolean
+interface UstadEditView<RT>: UstadSingleEntityView<RT> {
 
     var fieldsEnabled: Boolean
 

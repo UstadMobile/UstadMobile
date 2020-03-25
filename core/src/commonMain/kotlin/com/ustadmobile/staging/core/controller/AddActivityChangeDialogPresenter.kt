@@ -1,6 +1,7 @@
-package com.ustadmobile.core.controller
+package com.ustadmobile.staging.core.controller
 
 
+import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl

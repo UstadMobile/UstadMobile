@@ -215,16 +215,20 @@ subprojects { project -> afterEvaluate {
 }}
 
 
-task newListPresenter(type: Copy) {
+task newFromTemplate(type: Copy) {
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
     def replacementTokens = new Properties()
+    def templateName = project.hasProperty("template") ? project.property("template") : "listscreen"
+
     replacementTokens["Entity"] = project.hasProperty("Entity") ? project.property("Entity") : "Entity"
     replacementTokens["DisplayEntity"] = project.hasProperty("DisplayEntity") ? project.properties["DisplayEntity"] : replacementTokens["Entity"]
+    replacementTokens["EditEntity"] = project.hasProperty("EditEntity") ? project.properties["EditEntity"] : replacementTokens["Entity"]
     replacementTokens["Entity_VariableName"] = replacementTokens["Entity"].substring(0, 1).toLowerCase() + replacementTokens["Entity"].substring(1)
     replacementTokens["DisplayEntity_VariableName"] = replacementTokens["DisplayEntity"].substring(0, 1).toLowerCase() + replacementTokens["DisplayEntity"].substring(1)
     replacementTokens["Entity_LowerCase"] = replacementTokens["Entity"].toLowerCase()
     replacementTokens["DisplayEntity_LowerCase"] = replacementTokens["DisplayEntity"].toLowerCase()
     replacementTokens["Entity_ViewBinding_VariableName"] = replacementTokens["Entity"].substring(0, 1) + replacementTokens["Entity"].substring(1).toLowerCase()
-    from 'templates/listscreen/'
+    from "templates/$templateName/"
     filter(ReplaceTokens, tokens: replacementTokens)
 
     into "./"

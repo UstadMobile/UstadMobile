@@ -124,7 +124,7 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
                 entity?.holidayCalendar = it[0]
                 rootView?.clazz = rootView?.clazz
             }
-        }.launch(GetResultMode.FROMLIST)
+        }.launch(mapOf(UstadView.ARG_GETRESULTMODE to GetResultMode.FROMLIST.toString()))
     }
 
     override fun handleClickTimeZone() {

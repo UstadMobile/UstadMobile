@@ -12,7 +12,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.AddQuestionOptionDialogPresenter
+import com.ustadmobile.staging.core.controller.AddQuestionOptionDialogPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.AddQuestionOptionDialogView
 import com.ustadmobile.core.view.DismissableDialog

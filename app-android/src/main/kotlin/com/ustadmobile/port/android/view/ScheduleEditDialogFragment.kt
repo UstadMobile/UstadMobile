@@ -119,10 +119,6 @@ class ScheduleEditDialogFragment : UstadDialogFragment(), ScheduleEditView,
         dismiss()
     }
 
-    override fun finish() {
-        dismiss()
-    }
-
     override fun onClick(dialog: DialogInterface?, which: Int) {
 
     }

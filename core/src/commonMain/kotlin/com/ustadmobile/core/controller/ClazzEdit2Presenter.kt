@@ -93,7 +93,7 @@ class ClazzEdit2Presenter(context: Any,
                 it.scheduleClazzUid = entity.clazzUid
             }
 
-            view.finish()
+            view.finishWithResult(entity)
         }
     }
 

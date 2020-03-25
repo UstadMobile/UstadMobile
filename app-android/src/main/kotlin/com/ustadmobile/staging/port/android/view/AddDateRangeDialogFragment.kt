@@ -12,7 +12,7 @@ import android.widget.DatePicker
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.AddDateRangeDialogPresenter
+import com.ustadmobile.staging.core.controller.AddDateRangeDialogPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.AddDateRangeDialogView

@@ -31,4 +31,11 @@ abstract class CrudActivityResultContract<T>(val context: Context,
         }
     }
 
+    companion object{
+
+        fun argsForNew() = mapOf(UstadView.ARG_GETRESULTMODE to GetResultMode.CREATENEW.toString())
+
+        fun argsForPickFromList() = mapOf(UstadView.ARG_GETRESULTMODE to GetResultMode.FROMLIST.toString())
+
+    }
 }

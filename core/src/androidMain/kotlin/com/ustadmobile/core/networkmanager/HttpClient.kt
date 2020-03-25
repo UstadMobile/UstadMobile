@@ -2,6 +2,7 @@ package com.ustadmobile.core.networkmanager
 
 import android.content.Context
 import android.os.Build
+import com.google.gson.Gson
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import io.ktor.client.HttpClient
@@ -31,6 +32,10 @@ private val okHttpClient = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
 }
 
 private val defaultGsonSerializer = GsonSerializer()
+
+private val defaultGson: Gson by lazy {Gson()}
+
+fun defaultGson() = defaultGson
 
 private val httpClient = if(Build.VERSION.SDK_INT < OK_HTTP_MIN_SDKVERSION) {
     HttpClient(Android) {

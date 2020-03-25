@@ -251,7 +251,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
 
     companion object {
-        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf(
+        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
                 ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
                 HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java,
                 ReportDashboardView.VIEW_NAME to ReportDashboardFragment::class.java,

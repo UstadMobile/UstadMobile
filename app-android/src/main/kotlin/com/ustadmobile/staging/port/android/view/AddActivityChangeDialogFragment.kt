@@ -18,7 +18,7 @@ import androidx.appcompat.app.AlertDialog
 
 import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.AddActivityChangeDialogPresenter
+import com.ustadmobile.staging.core.controller.AddActivityChangeDialogPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.AddActivityChangeDialogView
 import com.ustadmobile.core.view.DismissableDialog
