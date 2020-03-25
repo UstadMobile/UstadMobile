@@ -46,7 +46,7 @@ class @Entity@EditPresenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): @EditEntity@? {
-        return clazz
+        return TODO("Implement load from Database or return null if using PERSISTENCE_MODE.JSON")
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): @EditEntity@? {
@@ -79,10 +79,12 @@ class @Entity@EditPresenter(context: Any,
                 repo.@Entity_LowerCase@Dao.updateAsync(entity)
             }
 
-            //TODO: call commitToDatabase on any One to Many Join Helpers here
+            //TODO: call commitToDatabase on any One to Many Join Helpers here e.g.
+            /*
             scheduleOneToManyJoinEditHelper.commitToDatabase(repo.scheduleDao) {
                 it.scheduleClazzUid = entity.clazzUid
             }
+            */
 
             view.finishWithResult(entity)
         }

@@ -216,7 +216,6 @@ subprojects { project -> afterEvaluate {
 
 
 task newFromTemplate(type: Copy) {
-    duplicatesStrategy DuplicatesStrategy.EXCLUDE
     def replacementTokens = new Properties()
     def templateName = project.hasProperty("template") ? project.property("template") : "listscreen"
 
@@ -231,7 +230,13 @@ task newFromTemplate(type: Copy) {
     from "templates/$templateName/"
     filter(ReplaceTokens, tokens: replacementTokens)
 
-    into "./"
+    into project.rootDir
     rename('@Entity@', replacementTokens["Entity"])
     rename('@Entity_LowerCase@', replacementTokens["Entity_LowerCase"])
+
+    eachFile {
+        if(it.relativePath.getFile(project.rootDir).exists()) {
+            it.exclude()
+        }
+    }
 }

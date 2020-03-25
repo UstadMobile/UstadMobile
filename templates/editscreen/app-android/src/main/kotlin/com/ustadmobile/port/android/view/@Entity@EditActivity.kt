@@ -3,18 +3,10 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.BR
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ActivityClazzEdit2Binding
-import com.toughra.ustadmobile.databinding.ItemSchedule2Binding
+import com.toughra.ustadmobile.databinding.Activity@Entity_ViewBinding_VariableName@EditBinding
 import com.ustadmobile.core.controller.@Entity@EditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -22,15 +14,11 @@ import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.@Entity@EditView
-import com.ustadmobile.core.view.GetResultMode
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.@EditEntity@
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
+import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
 
 interface @Entity@ActivityEventHandler {
 
@@ -80,7 +68,7 @@ class @Entity@EditActivity : UstadBaseActivity(), @Entity@EditView,
         }
 
     override fun finishWithResult(result: @EditEntity@) {
-        setResult(Intent().apply {
+        setResult(RESULT_OK, Intent().apply {
             putExtraResultAsJson(@Entity@ActivityResultContract.RESULT_EXTRA_KEY, listOf(result))
         })
     }
