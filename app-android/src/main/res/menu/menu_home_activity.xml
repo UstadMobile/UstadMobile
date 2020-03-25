@@ -39,7 +39,7 @@
         app:showAsAction="never"/>
 
     <item
-        android:visible="true"
+        android:visible="false"
         android:id="@+id/action_clear_history"
         android:title="@string/clear_history"
         app:showAsAction="never"/>
@@ -56,6 +56,7 @@
         app:showAsAction="never"/>
 
     <item
+        android:visible="false"
         android:id="@+id/action_send_feedback"
         android:title="@string/send_feedback"
         app:showAsAction="never" />

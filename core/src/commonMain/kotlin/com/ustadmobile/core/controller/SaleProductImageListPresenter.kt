@@ -82,6 +82,12 @@ class SaleProductImageListPresenter(context: Any,
     }
 
     fun deleteProductPicture(saleProductPictureUid: Long){
-
+        GlobalScope.launch {
+            val pp = productPictureDao.findByUidAsync(saleProductPictureUid)
+            if(pp != null){
+                pp.saleProductPictureSaleProductUid = 0
+                productPictureDao.update(pp)
+            }
+        }
     }
 }

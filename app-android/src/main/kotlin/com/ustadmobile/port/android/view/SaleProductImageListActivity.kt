@@ -181,7 +181,7 @@ class SaleProductImageListActivity : UstadBaseActivity(), SaleProductImageListVi
     override fun showGetImageAlertDialog() {
         val adb = AlertDialog.Builder(this)
                 .setTitle("")
-                .setMessage("Select image from Camera or Gallery")
+                .setMessage(getText(R.string.select_image_from_camera_or_gallery))
 
                 .setPositiveButton(R.string.camera) { dialog, which ->
                     addImageFromCamera()

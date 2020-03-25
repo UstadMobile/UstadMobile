@@ -126,6 +126,7 @@ class SaleProductCategoryListPresenter(context: Any,
             loggedInPerson = repository.personDao.findByUidAsync(loggedInPersonUid)
             view.runOnUiThread(Runnable {
                 view.showAddCategory(loggedInPerson?.admin?:false)
+                view.hideEditMenu(!(loggedInPerson?.admin?:false))
             })
         }
 
@@ -243,7 +244,7 @@ class SaleProductCategoryListPresenter(context: Any,
         if (currentSaleProductCategory!!.saleProductUid != 0L) {
 
             if(loggedInPerson != null) {
-                view.hideEditMenu(!loggedInPerson!!.admin)
+                view.hideEditMenu(!(loggedInPerson?.admin?:false))
             }else{
                 view.hideEditMenu(true)
             }

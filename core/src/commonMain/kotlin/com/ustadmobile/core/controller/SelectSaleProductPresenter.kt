@@ -216,8 +216,7 @@ class SelectSaleProductPresenter(context: Any,
                 if(editMode){
                     args[ARG_SALE_PRODUCT_UID] = productUid.toString()
                     impl.go(SaleProductDetailView.VIEW_NAME, args, context)
-//                    args[ARG_SALE_PRODUCT_SHOWCASE_SALE_PRODUCT_UID] = productUid.toString()
-//                    impl.go(SaleProductShowcaseView.VIEW_NAME, args, context)
+
                 }else {
                     args[ARG_SALEPRODUCT_UID] = productUid.toString()
                     impl.go(SaleProductCategoryListView.VIEW_NAME, args, context)

@@ -112,21 +112,21 @@ class SelectProducersPresenter(context: Any,
                     })
                 }
                 SORT_ORDER_NAME_DESC -> {
-                    val peopleWithInventory = providerDaoDB.findStockByPersonAsc(saleProductUid,
+                    val peopleWithInventory = providerDaoDB.findStockByPersonDesc(saleProductUid,
                             loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 SORT_ORDER_STOCK_ASC -> {
-                    val peopleWithInventory = providerDaoDB.findStockByPersonAsc(saleProductUid,
+                    val peopleWithInventory = providerDaoDB.findStockByPersonStockAsc(saleProductUid,
                             loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)
                     })
                 }
                 SORT_ORDER_STOCK_DESC -> {
-                    val peopleWithInventory = providerDaoDB.findStockByPersonAsc(saleProductUid,
+                    val peopleWithInventory = providerDaoDB.findStockByPersonStockDesc(saleProductUid,
                             loggedInPersonUid)
                     view.runOnUiThread(Runnable {
                         view.updateProducersOnView(peopleWithInventory)

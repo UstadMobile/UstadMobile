@@ -125,7 +125,7 @@ class SaleProductImageListRecyclerAdapter internal constructor(
 
                 //inflating menu from xml resource
                 popup.inflate(R.menu.menu_edit_delete)
-                popup.menu.findItem(R.id.edit).isVisible = true
+                popup.menu.findItem(R.id.edit).isVisible = false
                 //displaying the popup
                 popup.show()
             }

@@ -199,8 +199,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
             -1 as inventoryCountDelivered
         FROM Person
         LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
-        WHERE 
-            CAST(Person.mPersonGroupUid AS INTEGER)= 0 AND 
+        WHERE
             CAST(Person.admin AS INTEGER) = 0 AND 
             CAST(Person.personRoleUid AS INTEGER) = 0 AND 
             CAST(Person.active AS INTEGER) = 1 AND
