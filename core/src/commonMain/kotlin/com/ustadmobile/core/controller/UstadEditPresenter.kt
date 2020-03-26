@@ -22,7 +22,4 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT>(context: Any,
 
     abstract fun handleClickSave(entity: RT)
 
-    companion object {
-        const val ARG_SAVEDSTATE_ENTITY = "entity"
-    }
 }

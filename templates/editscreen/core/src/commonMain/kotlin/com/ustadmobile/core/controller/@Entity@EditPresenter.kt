@@ -50,7 +50,7 @@ class @Entity@EditPresenter(context: Any,
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): @EditEntity@? {
-        val entityJsonStr = bundle[ARG_SAVEDSTATE_ENTITY]
+        val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: @EditEntity@? = null
         if(entityJsonStr != null) {
             editEntity = Json.parse(@EditEntity@.serializer(), entityJsonStr)
@@ -65,7 +65,7 @@ class @Entity@EditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_SAVEDSTATE_ENTITY, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
 
         //TODO: call onSaveState for any One to Many Join Helpers here

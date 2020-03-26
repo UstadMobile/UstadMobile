@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemHolidaycalendarListItemBinding
@@ -22,10 +21,9 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
-import com.ustadmobile.port.android.view.util.CrudActivityResultContract
+import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
+import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
 
 class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries>(),
         HolidayCalendarListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -78,11 +76,11 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
     }
 
     override fun onClick(view: View?) {
-        activity?.prepareCall(HolidayCalendarActivityResultContract(requireContext())) {
-            if(it != null) {
-                finishWithResult(it)
-            }
-        }?.launch(CrudActivityResultContract.argsForNew())
+//        activity?.prepareCall(HolidayCalendarEditActivityResultContract(requireContext())) {
+//            if(it != null) {
+//                finishWithResult(it)
+//            }
+//        }?.launch(CrudEditActivityResultContract.argsForNew())
     }
 
     override fun onDestroyView() {
@@ -102,7 +100,7 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
 
     override fun finishWithResult(result: List<HolidayCalendar>) {
         val resultIntent = Intent().apply {
-            putExtraResultAsJson(HolidayCalendarActivityResultContract.RESULT_EXTRA_KEY, result)
+            putExtraResultAsJson(EXTRA_RESULT_KEY, result)
         }
         activity?.setResult(Activity.RESULT_OK, resultIntent)
         activity?.finish()

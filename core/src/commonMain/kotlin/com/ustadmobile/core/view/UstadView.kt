@@ -34,7 +34,7 @@ import kotlinx.coroutines.Runnable
 import kotlin.js.JsName
 
 enum class GetResultMode {
-    CREATENEW, FROMLIST
+    EDITORNEW, FROMLIST
 }
 
 /**
@@ -66,6 +66,9 @@ interface UstadView {
 
 
         //Begin common arguments
+
+        const val ARG_ENTITY_UID = "entityUid"
+
         const val ARG_CONTAINER_UID = "containerUid"
 
         const val ARG_CONTENT_ENTRY_UID = "entryid"

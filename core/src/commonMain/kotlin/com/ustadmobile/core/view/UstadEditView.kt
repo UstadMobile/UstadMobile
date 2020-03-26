@@ -6,4 +6,10 @@ interface UstadEditView<RT>: UstadSingleEntityView<RT> {
 
     fun finishWithResult(result: RT)
 
+    companion object {
+
+        const val ARG_ENTITY_JSON = "entity"
+
+    }
+
 }

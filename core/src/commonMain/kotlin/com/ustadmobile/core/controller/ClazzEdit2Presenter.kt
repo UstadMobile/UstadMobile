@@ -6,16 +6,14 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.http.content.TextContent
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
@@ -34,8 +32,8 @@ class ClazzEdit2Presenter(context: Any,
             ARG_SAVEDSTATE_SCHEDULES, Schedule.serializer().list,
             Schedule.serializer().list) {scheduleUid = it}
 
-    override val persistenceMode: PERSISTENCE_MODE
-        get() = PERSISTENCE_MODE.DB
+    override val persistenceMode: PersistenceMode
+        get() = PersistenceMode.DB
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -61,7 +59,7 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ClazzWithHolidayCalendar? {
-        val clazzJsonStr = bundle[ARG_SAVEDSTATE_ENTITY]
+        val clazzJsonStr = bundle[ARG_ENTITY_JSON]
         var clazz: ClazzWithHolidayCalendar? = null
         if(clazzJsonStr != null) {
             clazz = Json.parse(ClazzWithHolidayCalendar.serializer(), clazzJsonStr)
@@ -76,7 +74,7 @@ class ClazzEdit2Presenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_SAVEDSTATE_ENTITY, null,
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                     entityVal)
         scheduleOneToManyJoinEditHelper.onSaveState(savedState)
     }

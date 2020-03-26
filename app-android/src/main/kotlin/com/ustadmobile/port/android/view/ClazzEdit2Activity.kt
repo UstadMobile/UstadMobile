@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -11,12 +9,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.BR
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityClazzEdit2Binding
 import com.toughra.ustadmobile.databinding.ItemSchedule2Binding
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
-import com.ustadmobile.core.controller.ScheduleEditPresenter
+import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toBundle
@@ -24,10 +21,8 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.GetResultMode
-import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
@@ -48,8 +43,7 @@ interface ClazzEdit2ActivityEventHandler {
 }
 
 class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Schedule?>>,
-        ClazzEdit2ActivityEventHandler, ScheduleEditPresenter.ScheduleEditDoneListener,
-        OnTimeZoneSelectedListener {
+        ClazzEdit2ActivityEventHandler, OnTimeZoneSelectedListener {
 
     private var rootView: ActivityClazzEdit2Binding? = null
 
@@ -110,31 +104,32 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
     }
 
     override fun showNewScheduleDialog() {
-        ScheduleEditDialogFragment().show(supportFragmentManager, TAG_SCHEDULE_EDIT_DIALOG)
+        prepareScheduleEditCall {
+            val scheduleCreated = it?.firstOrNull() ?: return@prepareScheduleEditCall
+            mPresenter.handleAddOrEditSchedule(scheduleCreated)
+        }.launchScheduleEdit(null)
     }
 
     override fun showEditScheduleDialog(schedule: Schedule) {
-        val scheduleEditDialog = ScheduleEditDialogFragment.newInstance(schedule)
-        scheduleEditDialog.show(supportFragmentManager, TAG_SCHEDULE_EDIT_DIALOG)
+        prepareScheduleEditCall {
+            val scheduleCreated = it?.firstOrNull() ?: return@prepareScheduleEditCall
+            mPresenter.handleAddOrEditSchedule(scheduleCreated)
+        }.launchScheduleEdit(schedule)
     }
 
     override fun showHolidayCalendarPicker() {
-        prepareCall(HolidayCalendarActivityResultContract(this)) {
+        prepareHolidayCalendarPickFromListCall {
             if(it != null) {
                 entity?.holidayCalendar = it[0]
                 rootView?.clazz = rootView?.clazz
             }
-        }.launch(mapOf(UstadView.ARG_GETRESULTMODE to GetResultMode.FROMLIST.toString()))
+        }.launch(mapOf())
     }
 
     override fun handleClickTimeZone() {
         val timezoneDialog = TimeZoneListDialogFragment.newInstance(
                 rootView?.clazz?.clazzTimeZone ?: "")
         timezoneDialog.show(supportFragmentManager, TAG_TIMEZONE_DIALOG)
-    }
-
-    override fun onScheduleEditDone(schedule: Schedule, requestCode: Int) {
-        mPresenter.handleAddOrEditSchedule(schedule)
     }
 
     override fun onTimeZoneSelected(timeZone: TimeZone) {

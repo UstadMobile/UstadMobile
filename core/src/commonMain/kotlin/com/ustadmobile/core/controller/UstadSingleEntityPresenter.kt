@@ -23,11 +23,11 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
 
     protected var entity: RT? = null
 
-    enum class PERSISTENCE_MODE{
+    enum class PersistenceMode{
         DB, JSON, LIVEDATA
     }
 
-    abstract val persistenceMode: PERSISTENCE_MODE
+    abstract val persistenceMode: PersistenceMode
 
 
     override fun onCreate(savedState: Map<String, String>?) {
@@ -36,7 +36,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
         if(savedState != null) {
             entity = onLoadFromJson(savedState)
             view.entity = entity
-        }else if(persistenceMode == PERSISTENCE_MODE.DB) {
+        }else if(persistenceMode == PersistenceMode.DB) {
             view.loading = true
             (view as? UstadEditView<*>)?.fieldsEnabled = false
             GlobalScope.launch(doorMainDispatcher()) {
@@ -48,7 +48,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
                 view.loading = false
                 (view as? UstadEditView<*>)?.fieldsEnabled = true
             }
-        }else if(persistenceMode == PERSISTENCE_MODE.JSON){
+        }else if(persistenceMode == PersistenceMode.JSON){
             entity = onLoadFromJson(arguments)
             view.entity = entity
         }

@@ -16,8 +16,8 @@ lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl, db: UmApp
     repo: UmAppDatabase, activeAccount: DoorLiveData<UmAccount?>)
     : UstadEditPresenter<ScheduleEditView, Schedule>(context, args, view, lifecycleOwner, systemImpl, db, repo, activeAccount) {
 
-    override val persistenceMode: PERSISTENCE_MODE
-        get() = PERSISTENCE_MODE.JSON
+    override val persistenceMode: PersistenceMode
+        get() = PersistenceMode.JSON
 
     interface ScheduleEditDoneListener {
         fun onScheduleEditDone(schedule: Schedule, requestCode: Int)

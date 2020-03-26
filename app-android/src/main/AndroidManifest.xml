@@ -98,6 +98,9 @@
             android:name="com.ustadmobile.port.android.view.XapiReportDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" />
 
+        <activity android:name="com.ustadmobile.port.android.view.ScheduleEditActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"/>
+
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true" />
