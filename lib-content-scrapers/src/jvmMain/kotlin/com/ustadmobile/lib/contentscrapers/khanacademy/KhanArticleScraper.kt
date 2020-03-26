@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_HAR
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
@@ -91,7 +92,20 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
         val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
 
         val isContentUpdated = if (recentContainer == null) true else {
-            dateModified > recentContainer.cntLastModified
+            recentContainer.mimeType != MIMETYPE_HAR && dateModified > recentContainer.cntLastModified
+        }
+
+        val sourceId = entry!!.sourceUrl!!
+        val commonSourceUrl = "%${sourceId.substringBefore(".")}%"
+        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
+        commonEntryList.forEach{
+
+            if(it.sourceUrl == sourceId){
+                return@forEach
+            }
+
+            ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
+                    ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION)
         }
 
         if (!isContentUpdated) {
@@ -148,13 +162,6 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
 
         runBlocking {
             scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
-        }
-
-        val commonSourceUrl = "%${sourceUrl.substringBefore(".")}%"
-        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
-        commonEntryList.forEach{
-            ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
-                    ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION)
         }
 
         setScrapeDone(true, 0)

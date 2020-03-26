@@ -19,8 +19,9 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
     @Query("UPDATE ScrapeQueueItem SET status = :status, errorCode = :errorCode WHERE sqiUid = :uid")
     abstract fun updateSetStatusById(uid: Int, status: Int, errorCode: Int)
 
-    @Query("SELECT * from ScrapeQueueItem WHERE runId = :runId AND scrapeUrl = :indexUrl LIMIT 1")
-    abstract fun getExistingQueueItem(runId: Int, indexUrl: String): ScrapeQueueItem?
+    @Query("SELECT * from ScrapeQueueItem WHERE runId = :runId AND sqiContentEntryParentUid = :indexUrl LIMIT 1")
+    abstract fun getExistingQueueItem(runId: Int, entryUid: Long): ScrapeQueueItem?
+
 
     @Query("UPDATE ScrapeQueueItem SET timeStarted = :timeStarted WHERE sqiUid = :uid")
     abstract fun setTimeStarted(uid: Int, timeStarted: Long)

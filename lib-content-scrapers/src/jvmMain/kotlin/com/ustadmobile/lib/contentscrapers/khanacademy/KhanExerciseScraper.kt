@@ -6,6 +6,7 @@ import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_HAR
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.POST_METHOD
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
@@ -97,7 +98,19 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
 
         val isContentUpdated = if (recentContainer == null) true else {
-            dateModified > recentContainer.cntLastModified
+            recentContainer.mimeType != MIMETYPE_HAR && dateModified > recentContainer.cntLastModified
+        }
+
+        val sourceId = entry!!.sourceUrl!!
+        val commonSourceUrl = "%${sourceId.substringBefore(".")}%"
+        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
+        commonEntryList.forEach{
+
+            if(it.sourceUrl == sourceId){
+                return@forEach
+            }
+            ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
+                    ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION)
         }
 
         if (!isContentUpdated) {
@@ -106,7 +119,6 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             setScrapeDone(true, 0)
             return
         }
-
 
         val harExtra = HarExtra()
         harExtra.regexes = listOf(
@@ -158,6 +170,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 val reservedList = practiceJson.taskJson?.reservedItems
 
                 if (reservedList.isNullOrEmpty()) {
+                    close()
                     hideContentEntry()
                     setScrapeDone(false, ERROR_TYPE_MISSING_QUESTIONS)
                     throw ScraperException(ERROR_TYPE_MISSING_QUESTIONS, "no questions found for exercise")
@@ -343,15 +356,6 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         }
         harExtra.links = linksList
 
-
-        val commonSourceUrl = "%${sourceUrl.substringBefore(".")}%"
-        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
-        commonEntryList.forEach{
-            ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
-                    ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION)
-        }
-
-
         runBlocking {
             scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
         }
@@ -410,6 +414,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         proxy.stop()
 
         if (entry?.response?.content?.text.isNullOrEmpty()) {
+            close()
             hideContentEntry()
             setScrapeDone(false, ERROR_TYPE_PRACTICE_CONTENT_NOT_FOUND)
             throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "no practice found for $sourceUrl")

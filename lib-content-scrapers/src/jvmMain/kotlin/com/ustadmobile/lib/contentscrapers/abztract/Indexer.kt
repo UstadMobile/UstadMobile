@@ -32,7 +32,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
     }
 
     fun createQueueItem(queueUrl: String, contentEntry: ContentEntry, contentType: String, scraperType: Int, priority: Int = 1) {
-        var item = queueDao.getExistingQueueItem(runUid, queueUrl)
+        var item = queueDao.getExistingQueueItem(runUid, contentEntry.contentEntryUid)
         if (item == null) {
             item = ScrapeQueueItem()
             item.scrapeUrl = queueUrl

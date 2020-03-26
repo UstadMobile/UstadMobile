@@ -100,6 +100,19 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
             isValid = false
         }
 
+        val sourceId = entry!!.sourceUrl!!
+        val commonSourceUrl = "%${sourceId.substringBefore(".")}%"
+        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
+        commonEntryList.forEach{
+
+            if(it.sourceUrl == sourceId){
+                return@forEach
+            }
+
+            ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
+                    ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION)
+        }
+
         val youtubeId = content.youtubeId!!
 
         tempDir = Files.createTempDirectory(khanId).toFile()
@@ -125,13 +138,6 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
                 FileUtils.deleteQuietly(srtFile)
                 return@forEach
             }
-        }
-
-        val commonSourceUrl = "%${sourceUrl.substringBefore(".")}%"
-        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
-        commonEntryList.forEach{
-            ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
-                    ContentEntryRelatedEntryJoin.REL_TYPE_TRANSLATED_VERSION)
         }
 
         if (isValid) {
