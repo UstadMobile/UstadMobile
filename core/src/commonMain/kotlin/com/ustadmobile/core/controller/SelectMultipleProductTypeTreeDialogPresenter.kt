@@ -21,7 +21,7 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
 
     val selectedOptions: HashMap<String, Long>
 
-    private var selectedProductTypeUidsList: List<Long>? = null
+    var selectedProductTypeUidsList: MutableList<Long> = mutableListOf()
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 
@@ -29,7 +29,8 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
 
         if (arguments!!.containsKey(ARG_PRODUCT_SELECTED_SET)) {
             val productTypesArrayString = arguments.get(ARG_PRODUCT_SELECTED_SET).toString()
-            selectedProductTypeUidsList = convertCSVStringToLongList(productTypesArrayString)
+            val selectedProductTypeUidsListNM = convertCSVStringToLongList(productTypesArrayString)
+            selectedProductTypeUidsList = selectedProductTypeUidsListNM.toMutableList()
         }
 
         selectedOptions = HashMap()
@@ -69,23 +70,17 @@ class SelectMultipleProductTypeTreeDialogPresenter(context: Any, arguments:
         view.finish()
     }
 
-
-    fun getSelectedProductTypeUidsList(): List<Long> {
-
-        if (selectedProductTypeUidsList == null){
-            return ArrayList()
-        }
-
-        return selectedProductTypeUidsList as List<Long>
-
-
-    }
-
     override fun entityChecked(entityName: String, entityUid: Long, checked: Boolean) {
         if (checked) {
             selectedOptions.put(entityName, entityUid)
+            if(!selectedProductTypeUidsList.contains(entityUid)){
+                selectedProductTypeUidsList.add(entityUid)
+            }
         } else {
             selectedOptions.remove(entityName)
+            if(selectedProductTypeUidsList.contains(entityUid)){
+                selectedProductTypeUidsList.remove(entityUid)
+            }
         }
     }
 

@@ -204,7 +204,7 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
 
         //Hide values on top of every bar
         barChart.barData.setDrawValues(false)
-        
+
         return barChart
     }
 

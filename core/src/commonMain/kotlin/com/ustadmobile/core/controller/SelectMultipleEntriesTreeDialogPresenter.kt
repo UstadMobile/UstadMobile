@@ -11,7 +11,7 @@ class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<Stri
                                                private val contentEntryParentChildJoinDao: ContentEntryParentChildJoinDao) :
         CommonEntityHandlerPresenter<SelectMultipleEntriesTreeDialogView>(context, arguments, view) {
 
-    var selectedEntriesList: List<Long> = listOf()
+    var selectedEntriesList: MutableList<Long> = mutableListOf()
 
     var selectedOptions = mutableMapOf<String, Long>()
 
@@ -19,9 +19,10 @@ class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<Stri
 
     init {
         val entryArray = arguments.getValue(SelectMultipleEntriesTreeDialogView.ARG_CONTENT_ENTRY_SET)
-        selectedEntriesList = entryArray!!.split(",").filter { it.isNotEmpty() }.map {
+        val selectedEntriesListNM = entryArray!!.split(",").filter { it.isNotEmpty() }.map {
             it.trim().toLong()
         }
+        selectedEntriesList = selectedEntriesListNM.toMutableList()
         getTopEntries()
     }
 
@@ -42,8 +43,14 @@ class SelectMultipleEntriesTreeDialogPresenter(context: Any, arguments: Map<Stri
     override fun entityChecked(entityName: String, entityUid: Long, checked: Boolean) {
         if (checked) {
             selectedOptions[entityName] = entityUid
+            if(!selectedEntriesList.contains(entityUid)){
+                selectedEntriesList.add(entityUid)
+            }
         } else {
             selectedOptions.remove(entityName)
+            if(selectedEntriesList.contains(entityUid)){
+                selectedEntriesList.remove(entityUid)
+            }
         }
     }
 

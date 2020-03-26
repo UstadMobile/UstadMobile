@@ -123,6 +123,7 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
         for (everyTopLocation in locations) {
             val topLocationUid = everyTopLocation.locationUid
             var selected = false
+            selectedLocationList = mPresenter.selectedLocationsList
             if (selectedLocationList?.contains(topLocationUid) == true) {
                 selected = true
             }
@@ -207,6 +208,7 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
                 for (everyLocation in locationList) {
                     val locationUid = everyLocation.locationUid
                     var selected = false
+                    selectedLocationList = mPresenter.selectedLocationsList
                     if (selectedLocationList!!.contains(locationUid)) {
                         selected = true
                     }
@@ -283,7 +285,11 @@ class SelectMultipleLocationTreeDialogFragment : UstadDialogFragment(), SelectMu
             val displayNodeContent = displayNode!!.content as EntityLayoutType
             val locationUid = displayNodeContent.uid
 
-            locationCB.isChecked = selectMultipleTreeDialogFragment.selectedLocationList != null && selectMultipleTreeDialogFragment.selectedLocationList!!.contains(locationUid)
+            selectedLocationList = mPresenter.selectedLocationsList
+            locationCB.isChecked = selectMultipleTreeDialogFragment.selectedLocationList != null
+                    && selectMultipleTreeDialogFragment.selectedLocationList!!.contains(locationUid)
+
+
 
             arrowIV.visibility = if (displayNodeContent.leaf) View.INVISIBLE else View.VISIBLE
 

@@ -15,16 +15,17 @@ class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<Str
                                                 private val locationDao: LocationDao)
     : CommonEntityHandlerPresenter<SelectMultipleLocationTreeDialogView>(context, arguments, view) {
 
-    var selectedLocationsList: List<Long> = listOf()
+    var selectedLocationsList: MutableList<Long> = mutableListOf()
 
     var selectedOptions = mutableMapOf<String, Long>()
 
     init {
         if(arguments.containsKey(ARG_LOCATIONS_SET)){
             val locationsArray = arguments.getValue(ARG_LOCATIONS_SET)
-            selectedLocationsList = locationsArray!!.split(",").filter { it.isNotEmpty() }.map {
+            val selectedLocationsListNM = locationsArray!!.split(",").filter { it.isNotEmpty() }.map {
                 it.trim().toLong()
             }
+            selectedLocationsList = selectedLocationsListNM.toMutableList()
         }
 
         getTopLocations()
@@ -33,9 +34,16 @@ class SelectMultipleLocationTreeDialogPresenter(context: Any, arguments: Map<Str
     override fun entityChecked(entityName: String, entityUid: Long, checked: Boolean) {
         if (checked) {
             selectedOptions[entityName] = entityUid
+            if(!selectedLocationsList.contains(entityUid)){
+                selectedLocationsList.add(entityUid)
+            }
         } else {
             selectedOptions.remove(entityName)
+            if(selectedLocationsList.contains(entityUid)){
+                selectedLocationsList.remove(entityUid)
+            }
         }
+
     }
 
     private fun handleGetTopLocations(locations:List<Location>?){

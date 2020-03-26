@@ -128,7 +128,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(),
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
-        selectedSaleProductUidList = mPresenter.getSelectedProductTypeUidsList()
+        selectedSaleProductUidList = mPresenter.selectedProductTypeUidsList
 
         dialog = AlertDialog.Builder(context!!, R.style.FullScreenDialogStyle)
                 .setView(rootView)
@@ -161,6 +161,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(),
                 for (everyProduct in locationList) {
                     val locationUid = everyProduct.saleProductUid
                     var selected = false
+                    selectedSaleProductUidList = mPresenter.selectedProductTypeUidsList
                     if (selectedSaleProductUidList!!.contains(locationUid)) {
                         selected = true
                     }
@@ -182,6 +183,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(),
         for (everyProductType in productTypes) {
             val childLocationUid = everyProductType.saleProductUid
             var selected = false
+            selectedSaleProductUidList = mPresenter.selectedProductTypeUidsList
             if (selectedSaleProductUidList!!.contains(childLocationUid)) {
                 selected = true
             }
@@ -286,46 +288,6 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(),
     }
 
 
-//    /**
-//     * A Custom callback - on success will check the return list of entities,
-//     * loop over them, and add them to the node as children on the view.
-//     * If there are no entities returned, it will treat the current node as a leaf.
-//     */
-//    private inner class PopulateSaleProductTreeNodeCallback private constructor(private val node: TreeNode) : UmCallback<List<SaleProduct>> {
-//
-//        override fun onSuccess(result: List<SaleProduct>) {
-//            runOnUiThread {
-//                for (childLocations in result) {
-//                    val childLocationUid = childLocations.saleProductUid
-//                    var selected = false
-//                    if (selectedSaleProductUidList!!.contains(childLocationUid)) {
-//                        selected = true
-//                    }
-//
-//                    node.addChild(TreeNode(
-//                            EntityLayoutType(childLocations.saleProductName!!,
-//                                    childLocationUid, selected, false)))
-//                }
-//                if (!result.isEmpty()) {
-//                    (node.getContent() as EntityLayoutType).leaf = false
-//                } else {
-//                    (node.getContent() as EntityLayoutType).leaf = true
-//                }
-//
-//            }
-//
-//            if (!result.isEmpty()) {
-//                (node.getContent() as EntityLayoutType).leaf = false
-//            } else {
-//                (node.getContent() as EntityLayoutType).leaf = true
-//            }
-//        }
-//
-//        override fun onFailure(exception: Throwable) {
-//            exception.printStackTrace()
-//        }
-//    }
-
     /**
      * Custom TreeView Adapter written so that we can work with onBindView and manipulate the
      * view on every tree node. The type is of the EntityLayoutType POJO
@@ -361,6 +323,7 @@ class SelectMultipleProductTypeTreeDialogFragment : UstadDialogFragment(),
             val displayNodeContent = displayNode!!.getContent() as EntityLayoutType
             val locationUid = displayNodeContent.uid!!
 
+            selectedSaleProductUidList = mPresenter.selectedProductTypeUidsList
             if (selectMultipleTreeDialogFragment.selectedSaleProductUidList != null
                     && selectMultipleTreeDialogFragment.selectedSaleProductUidList!!.contains(locationUid)) {
                 locationCB.isChecked = true

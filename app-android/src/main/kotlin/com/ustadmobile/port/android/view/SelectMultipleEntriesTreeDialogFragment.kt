@@ -132,6 +132,7 @@ class SelectMultipleEntriesTreeDialogFragment : UstadDialogFragment(), SelectMul
                 for (everyLocation in entriesList) {
                     val parentUid = everyLocation.contentEntryUid
                     var selected = false
+                    selectedEntriesList = presenter.selectedEntriesList
                     if (selectedEntriesList!!.contains(parentUid)) {
                         selected = true
                     }
@@ -156,6 +157,7 @@ class SelectMultipleEntriesTreeDialogFragment : UstadDialogFragment(), SelectMul
         for (everyTopLocation in locations) {
             val topLocationUid = everyTopLocation.contentEntryUid
             var selected = false
+            selectedEntriesList = presenter.selectedEntriesList
             if (selectedEntriesList?.contains(topLocationUid) == true) {
                 selected = true
             }
@@ -297,6 +299,7 @@ class SelectMultipleEntriesTreeDialogFragment : UstadDialogFragment(), SelectMul
             val displayNodeContent = displayNode!!.content as EntityLayoutType
             val locationUid = displayNodeContent.uid
 
+            selectedEntriesList = presenter.selectedEntriesList
             locationCB.isChecked = selectMultipleTreeDialogFragment.selectedEntriesList != null && selectMultipleTreeDialogFragment.selectedEntriesList!!.contains(locationUid)
 
             arrowIV.visibility = if (displayNodeContent.leaf) View.INVISIBLE else View.VISIBLE
