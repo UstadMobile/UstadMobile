@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.content
 
 
 /**
@@ -52,7 +53,16 @@ class ReportChartViewComponentPresenter(context: Any,
         if (arguments.containsKey(ARG_REPORT_OPTIONS)) {
             reportOptionsString = arguments[ARG_REPORT_OPTIONS].toString()
             val json = Json(JsonConfiguration.Stable)
+            reportOptions = ReportOptions()
             reportOptions = json.parse(ReportOptions.serializer(), reportOptionsString)
+
+            reportOptions.fromDate = json.parseJson(reportOptionsString).jsonObject["fromDate"]?.content?.toLong()?:reportOptions.fromDate
+            reportOptions.toDate = json.parseJson(reportOptionsString).jsonObject["toDate"]?.content?.toLong()?:reportOptions.toDate
+
+
+            reportOptions.fromPrice = json.parseJson(reportOptionsString).jsonObject["fromPrice"]?.content?.toInt()?:reportOptions.fromPrice
+            reportOptions.toPrice = json.parseJson(reportOptionsString).jsonObject["toPrice"]?.content?.toInt()?:reportOptions.toPrice
+
 
             val pts = (json.parseJson(reportOptionsString) as JsonObject).get("productTypes")?.jsonArray
             val pt = mutableListOf<Long>()
@@ -101,6 +111,18 @@ class ReportChartViewComponentPresenter(context: Any,
 
             val thisP = this
             GlobalScope.launch {
+                val theLes = reportOptions.les
+                if(theLes == null || theLes.isEmpty()){
+                    val loggedInPerson = repository.personDao.findByUidAsync(loggedInPersonUid)
+                    if(loggedInPerson != null) {
+                        if (!loggedInPerson.admin) {
+                            leFlag = 1
+                            val les = mutableListOf<Long>()
+                            les.add(loggedInPersonUid)
+                            reportOptions.les = les
+                        }
+                    }
+                }
 
                 val resultLive = saleDao.getSalesPerformanceReportSumGroupedByLocationLive(reportOptions.les!!,
                         producerUids, reportOptions.locations, reportOptions.productTypes!!,

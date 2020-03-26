@@ -43,7 +43,7 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
         runOnUiThread (Runnable {
             removeAllViews()
             barChart = createSalesBarChart(dataSet)
-            addView(barChart!!)
+            addView(barChart)
         })
 
     }
@@ -69,6 +69,12 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
         barColorsList.add("#bc5090")
         barColorsList.add("#58508d")
         barColorsList.add("#003f5c")
+        barColorsList.add("#2f4b7c")
+        barColorsList.add("#665191")
+        barColorsList.add("#a05195")
+        barColorsList.add("#d45087")
+        barColorsList.add("#f95d6a")
+        barColorsList.add("#ff7c43")
         val barColors = barColorsList.toTypedArray()
 
 
@@ -178,7 +184,7 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
 
         val xAxis = barChart.xAxis
         xAxis.valueFormatter = IndexAxisValueFormatter(yAxisValues)
-        barChart.axisLeft.axisMinimum = 0f
+        //barChart.axisLeft.axisMinimum = 0f
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.granularity = 1f
         xAxis.setCenterAxisLabels(true)
@@ -189,8 +195,8 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
         val groupCount = yAxisValueList.size
 
         data.barWidth = 0.15f
-        barChart.xAxis.axisMinimum = 0f
-        barChart.xAxis.axisMaximum = 0 + barChart.barData.getGroupWidth(groupSpace, barSpace) * groupCount
+        //barChart.xAxis.axisMinimum = 0f
+        //barChart.xAxis.axisMaximum = 0 + barChart.barData.getGroupWidth(groupSpace, barSpace) * groupCount
 
         if (colorPos > 1) {
             barChart.groupBars(0f, groupSpace, barSpace)
@@ -198,7 +204,7 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
 
         //Hide values on top of every bar
         barChart.barData.setDrawValues(false)
-
+        
         return barChart
     }
 
