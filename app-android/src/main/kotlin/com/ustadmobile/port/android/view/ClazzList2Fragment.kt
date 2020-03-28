@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzlist2ClazzBinding
@@ -20,6 +19,7 @@ import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
+import com.ustadmobile.port.android.view.util.getDataItemViewHolder
 
 class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
         ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener{
@@ -42,9 +42,10 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            if(holder is ClazzList2ViewHolder) {
-                holder.itemBinding.clazz = getItem(position)
-                holder.itemBinding.presenter = presenter
+            val itemHolder = holder.getDataItemViewHolder()
+            if(itemHolder is ClazzList2ViewHolder) {
+                itemHolder.itemBinding.clazz = getItem(position)
+                itemHolder.itemBinding.presenter = presenter
             }
         }
 

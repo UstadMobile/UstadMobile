@@ -41,6 +41,7 @@
 
     <dimen name="catalog_entry_see_also_icon_size">75dp</dimen>
 
+    <dimen name="dimen_0dp">0dp</dimen>
     <dimen name="dimen_2dp">2dp</dimen>
     <dimen name="dimen_4dp">4dp</dimen>
     <dimen name="dimen_8dp">8dp</dimen>
@@ -55,5 +56,8 @@
     <dimen name="dimen_70dp">70dp</dimen>
     <dimen name="text_hint">16sp</dimen>
     <dimen name="dimen_24dp">24dp</dimen>
+
+    <dimen name="dimen_fab_clearance">54dp</dimen>
+
 
 </resources>

@@ -22,8 +22,8 @@ import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
-import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
+import com.ustadmobile.port.android.view.util.getDataItemViewHolder
 
 class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries>(),
         HolidayCalendarListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -48,9 +48,10 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            if(holder is HolidayCalendarListViewHolder) {
-                holder.itemBinding.holidayCalendar = getItem(position)
-                holder.itemBinding.presenter = presenter
+            val itemHolder = holder.getDataItemViewHolder()
+            if(itemHolder is HolidayCalendarListViewHolder) {
+                itemHolder.itemBinding.holidayCalendar = getItem(position)
+                itemHolder.itemBinding.presenter = presenter
             }
         }
 
@@ -76,11 +77,11 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
     }
 
     override fun onClick(view: View?) {
-//        activity?.prepareCall(HolidayCalendarEditActivityResultContract(requireContext())) {
-//            if(it != null) {
-//                finishWithResult(it)
-//            }
-//        }?.launch(CrudEditActivityResultContract.argsForNew())
+        activity?.prepareHolidayCalendarPickFromListCall {
+            if(it != null) {
+                finishWithResult(it)
+            }
+        }?.launch(mapOf())
     }
 
     override fun onDestroyView() {

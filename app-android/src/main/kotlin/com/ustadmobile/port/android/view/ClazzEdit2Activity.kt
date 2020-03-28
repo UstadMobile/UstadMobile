@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.Toolbar
@@ -26,6 +27,9 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
+import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract
+import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -165,7 +169,10 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
         }
 
     override fun finishWithResult(result: ClazzWithHolidayCalendar) {
-        TODO("Not yet implemented")
+        setResult(RESULT_OK, Intent().apply {
+            putExtraResultAsJson(EXTRA_RESULT_KEY, listOf(result))
+        })
+        finish()
     }
 
     override var loading: Boolean = false

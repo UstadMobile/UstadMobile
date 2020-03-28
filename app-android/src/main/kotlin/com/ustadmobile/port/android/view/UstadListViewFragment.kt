@@ -64,6 +64,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         get() = field
         set(value) {
             mDataBinding?.addMode = value
+            mRecyclerViewAdapter?.newItemVisible = (value == ListViewAddMode.FIRST_ITEM)
             field = value
         }
 
