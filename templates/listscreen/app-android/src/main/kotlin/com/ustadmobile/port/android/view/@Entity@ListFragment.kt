@@ -20,6 +20,8 @@ import com.ustadmobile.core.view.@Entity@ListView
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.@DisplayEntity@
 import com.ustadmobile.core.view.GetResultMode
+import com.ustadmobile.port.android.view.util.getDataItemViewHolder
+
 
 class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),
         @Entity@ListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -28,7 +30,9 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
 
     private var dbRepo: UmAppDatabase? = null
 
-    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?): PagedListAdapterWithNewItem<@DisplayEntity@>(DIFF_CALLBACK, newItemVisible: Boolean, onClickNewItem: View.OnClickListener) {
+    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?, newItemVisible: Boolean,
+                                      onClickNewItem: View.OnClickListener)
+        : PagedListAdapterWithNewItem<@DisplayEntity@>(DIFF_CALLBACK, newItemVisible, onClickNewItem, R.string.) {
 
         class @Entity@ListViewHolder(val itemBinding: Item@Entity_ViewBinding_VariableName@ListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -42,9 +46,10 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            if(holder is @Entity@ListViewHolder) {
-                holder.itemBinding.@Entity_VariableName@ = getItem(position)
-                holder.itemBinding.presenter = presenter
+            val itemHolder = holder.getDataItemViewHolder()
+            if(itemHolder is @Entity@ListViewHolder) {
+                itemHolder.itemBinding.@Entity_VariableName@ = getItem(position)
+                itemHolder.itemBinding.presenter = presenter
             }
         }
 

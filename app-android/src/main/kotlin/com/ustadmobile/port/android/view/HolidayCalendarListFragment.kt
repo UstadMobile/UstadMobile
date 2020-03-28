@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemHolidaycalendarListItemBinding
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -32,8 +33,12 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
 
     private var dbRepo: UmAppDatabase? = null
 
-    class HolidayCalendarListRecyclerAdapter(var presenter: HolidayCalendarListPresenter?, newItemVisible: Boolean, onClickNewItem: View.OnClickListener)
-        : PagedListAdapterWithNewItem<HolidayCalendarWithNumEntries>(DIFF_CALLBACK, newItemVisible = newItemVisible, onClickNewItem = onClickNewItem) {
+    class HolidayCalendarListRecyclerAdapter(var presenter: HolidayCalendarListPresenter?,
+                                             newItemVisible: Boolean, onClickNewItem: View.OnClickListener)
+        : PagedListAdapterWithNewItem<HolidayCalendarWithNumEntries>(DIFF_CALLBACK,
+            newItemVisible = newItemVisible,
+            onClickNewItem = onClickNewItem,
+            createNewEntityTypeName = R.string.holiday_calendar) {
 
         class HolidayCalendarListViewHolder(val itemBinding: ItemHolidaycalendarListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -77,11 +82,11 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
     }
 
     override fun onClick(view: View?) {
-        activity?.prepareHolidayCalendarPickFromListCall {
+        activity?.prepareHolidayCalendarEditCall {
             if(it != null) {
                 finishWithResult(it)
             }
-        }?.launch(mapOf())
+        }?.launchHolidayCalendarEdit(null)
     }
 
     override fun onDestroyView() {

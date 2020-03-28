@@ -55,13 +55,10 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
 //            ListViewMode.BROWSER -> systemImpl.go(HolidayCalendarDetailView.VIEW_NAME,
 //                mapOf(HolidayCalendarDetailView.ARG_ENTITY_UID to uid, context)
         }
-
     }
 
-    override fun handleClickCreateNew() {
-        /* TODO: Add code to go to the edit view
-        systemImpl.go(HolidayCalendarEditView.VIEW_NAME, mapOf(), context)
-         */
+    override fun handleClickCreateNewFab() {
+        //TODO: go to the view
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {

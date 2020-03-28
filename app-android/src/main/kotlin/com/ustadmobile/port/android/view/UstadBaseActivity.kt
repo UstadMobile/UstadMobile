@@ -404,9 +404,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                val impl = instance
-                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null,
-                        this), this)
+                finish()
                 return true
             }
         }

@@ -61,7 +61,7 @@ abstract class UstadListPresenter<V: UstadView, RT>(context: Any, arguments: Map
 
     }
 
-    abstract fun handleClickCreateNew()
+    abstract fun handleClickCreateNewFab()
 
 
 }

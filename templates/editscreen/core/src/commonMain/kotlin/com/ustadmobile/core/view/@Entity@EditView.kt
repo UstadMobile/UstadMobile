@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.@Entity@
-import com.ustadmobile.lib.db.entities.@EditEntity@
+@EditEntity_Import@
 
 interface @Entity@EditView: UstadEditView<@EditEntity@> {
 

@@ -60,8 +60,10 @@ class @Entity@ListPresenter(context: Any, arguments: Map<String, String>, view: 
         */
     }
 
-    override fun handleClickCreateNew() {
-        /* TODO: Add code to go to the edit view
+    override fun handleClickCreateNewFab() {
+        /* TODO: Add code to go to the edit view when the user clicks the new item FAB. This is only
+         * called when the fab is clicked, not if the first item is create new item (e.g. picker mode).
+         * That has to be handled at a platform level to use prepareCall etc.
         systemImpl.go(@Entity@EditView.VIEW_NAME, mapOf(), context)
          */
     }

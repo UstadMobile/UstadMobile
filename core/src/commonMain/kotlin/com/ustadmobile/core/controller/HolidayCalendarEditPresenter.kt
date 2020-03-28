@@ -5,13 +5,13 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.@Entity@EditView
+import com.ustadmobile.core.view.HolidayCalendarEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.@Entity@
-@EditEntity_Import@
+import com.ustadmobile.lib.db.entities.HolidayCalendar
+
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
@@ -22,13 +22,13 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 
 
-class @Entity@EditPresenter(context: Any,
-                          arguments: Map<String, String>, view: @Entity@EditView,
+class HolidayCalendarEditPresenter(context: Any,
+                          arguments: Map<String, String>, view: HolidayCalendarEditView,
                           lifecycleOwner: DoorLifecycleOwner,
                           systemImpl: UstadMobileSystemImpl,
                           db: UmAppDatabase, repo: UmAppDatabase,
                           activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<@Entity@EditView, @EditEntity@>(context, arguments, view, lifecycleOwner, systemImpl,
+    : UstadEditPresenter<HolidayCalendarEditView, HolidayCalendar>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
     override val persistenceMode: PersistenceMode
@@ -48,18 +48,18 @@ class @Entity@EditPresenter(context: Any,
         //TODO: setup any joined fields etc. here
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): @EditEntity@? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): HolidayCalendar? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         return TODO("Implement load from Database or return null if using PERSISTENCE_MODE.JSON")
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): @EditEntity@? {
+    override fun onLoadFromJson(bundle: Map<String, String>): HolidayCalendar? {
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: @EditEntity@? = null
+        var editEntity: HolidayCalendar? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(@EditEntity@.serializer(), entityJsonStr)
+            editEntity = Json.parse(HolidayCalendar.serializer(), entityJsonStr)
         }else {
-            editEntity = @EditEntity@()
+            editEntity = HolidayCalendar()
         }
 
         //TODO: Call onLoadFromJsonSavedState on any One to Many Join Helpers here
@@ -75,12 +75,12 @@ class @Entity@EditPresenter(context: Any,
         //TODO: call onSaveState for any One to Many Join Helpers here
     }
 
-    override fun handleClickSave(entity: @EditEntity@) {
+    override fun handleClickSave(entity: HolidayCalendar) {
         GlobalScope.launch(doorMainDispatcher()) {
-            if(entity.@Entity_VariableName@Uid == 0L) {
-                entity.@Entity_VariableName@Uid = repo.@Entity_VariableName@Dao.insertAsync(entity)
+            if(entity.umCalendarUid == 0L) {
+                entity.umCalendarUid = repo.holidayCalendarDao.insertAsync(entity)
             }else {
-                repo.@Entity_VariableName@Dao.updateAsync(entity)
+                repo.holidayCalendarDao.updateAsync(entity)
             }
 
             //TODO: call commitToDatabase on any One to Many Join Helpers here e.g.

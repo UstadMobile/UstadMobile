@@ -2,7 +2,16 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import com.toughra.ustadmobile.R
+import androidx.activity.ComponentActivity
+import com.ustadmobile.lib.db.entities.@Entity@
+import com.ustadmobile.port.android.view.util.CrudListActivityResultContract
 
+
+fun ComponentActivity.prepare@Entity@PickFromListCall(callback: (List<@Entity@>?) -> Unit)
+        = prepareCall(CrudListActivityResultContract(this, @Entity@::class.java,
+            @Entity@ListActivity::class.java)) {
+    callback.invoke(it)
+}
 
 class @Entity@ListActivity: UstadBaseActivity(){
 

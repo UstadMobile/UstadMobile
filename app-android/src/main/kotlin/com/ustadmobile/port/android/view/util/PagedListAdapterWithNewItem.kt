@@ -8,6 +8,7 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.ItemCreatenewBinding
 
 /**
  * The PagedListAdapterWithNewItem will create a special viewholder for the first item that wraps
@@ -28,7 +29,8 @@ fun RecyclerView.ViewHolder.getDataItemViewHolder(): RecyclerView.ViewHolder {
 abstract class PagedListAdapterWithNewItem<T>(
         diffcallback: DiffUtil.ItemCallback<T>,
         newItemVisible: Boolean = false,
-        var onClickNewItem: View.OnClickListener? = null)
+        var onClickNewItem: View.OnClickListener? = null,
+        var createNewEntityTypeName: Int = R.string.unset)
     : PagedListAdapter<T, RecyclerView.ViewHolder>(diffcallback) {
 
     var newItemVisible: Boolean = newItemVisible
@@ -68,10 +70,11 @@ abstract class PagedListAdapterWithNewItem<T>(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if(viewType == ITEMVIEWTYPE_NEW) {
-            val newItemView = LayoutInflater
-                    .from(parent.context).inflate(R.layout.item_createnew, parent, false)
-            newItemView.findViewById<View>(R.id.item_createnew_newitemlayout)
-                    .setOnClickListener(onClickNewItem)
+            val newItemBinding = ItemCreatenewBinding.inflate(LayoutInflater.from(parent.context),
+                    parent, false)
+            newItemBinding.createNewEntityTypeName = parent.context.getString(createNewEntityTypeName)
+            newItemBinding.onClickNew = onClickNewItem
+            val newItemView = newItemBinding.root
 
             val viewHolderLinearLayout: LinearLayout = newItemView.findViewById(R.id.item_createnew_linearlayout1)
             val nestedViewHolder = onCreateViewHolder(viewHolderLinearLayout, ITEMVIEWTYPE_DEFAULT)

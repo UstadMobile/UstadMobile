@@ -61,11 +61,10 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
 
     override fun handleClickEntry(entry: Clazz) {
         val args = mapOf(UstadView.ARG_CLAZZ_UID to entry.clazzUid.toString())
-        //systemImpl.go(ClazzDetailView.VIEW_NAME, args, context)
         systemImpl.go(ClazzEdit2View.VIEW_NAME, args, context)
     }
 
-    override fun handleClickCreateNew() {
+    override fun handleClickCreateNewFab() {
         systemImpl.go(ClazzEdit2View.VIEW_NAME, mapOf(), context)
     }
 

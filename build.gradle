@@ -217,11 +217,13 @@ subprojects { project -> afterEvaluate {
 
 task newFromTemplate(type: Copy) {
     def replacementTokens = new Properties()
-    def templateName = project.hasProperty("template") ? project.property("template") : "listscreen"
+    def templateName = project.hasProperty("template") ? project.property("template") : "editscreen"
 
     replacementTokens["Entity"] = project.hasProperty("Entity") ? project.property("Entity") : "Entity"
+    replacementTokens["Entity_SnakeCase"] = replacementTokens["Entity"].replaceAll("([^_A-Z])([A-Z])", '$1_$2')
     replacementTokens["DisplayEntity"] = project.hasProperty("DisplayEntity") ? project.properties["DisplayEntity"] : replacementTokens["Entity"]
     replacementTokens["EditEntity"] = project.hasProperty("EditEntity") ? project.properties["EditEntity"] : replacementTokens["Entity"]
+    replacementTokens["EditEntity_Import"] = replacementTokens["EditEntity"] != replacementTokens["Entity"] ? "import ${replacementTokens['EditEntity']}" : ""
     replacementTokens["Entity_VariableName"] = replacementTokens["Entity"].substring(0, 1).toLowerCase() + replacementTokens["Entity"].substring(1)
     replacementTokens["DisplayEntity_VariableName"] = replacementTokens["DisplayEntity"].substring(0, 1).toLowerCase() + replacementTokens["DisplayEntity"].substring(1)
     replacementTokens["Entity_LowerCase"] = replacementTokens["Entity"].toLowerCase()

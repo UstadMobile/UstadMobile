@@ -3,9 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <import type="android.view.View.OnClickListener"/>
         <variable
             name="onClickNew"
-            type="com.ustadmobile.core.view.OnClickNewListItemListener" />
+            type="OnClickListener" />
+        <variable
+            name="createNewEntityTypeName"
+            type="java.lang.String" />
+
+        <import type="com.toughra.ustadmobile.R"/>
     </data>
 
     <LinearLayout
@@ -20,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
-            android:onClick="@{() -> onClickNew.onClickNewListItem()}">
+            android:onClick="@{(view) -> onClickNew.onClick(view)}">
 
             <androidx.appcompat.widget.AppCompatImageView
                 app:srcCompat="@drawable/ic_add_black_24dp"
@@ -31,7 +37,8 @@
                 android:paddingTop="@dimen/dimen_8dp" />
 
             <TextView
-                android:text="@string/add"
+                app:createNewFormatText="@{R.string.create_new}"
+                app:createNewFormatArg="@{createNewEntityTypeName}"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />

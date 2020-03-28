@@ -800,4 +800,10 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="use_device_language">Use device language</string>
 
+    <!-- The title shown when we ask the user to select a specific type of item. E.g. "Select class", or "select person".-->
+    <string name="select_item">Select %1$s</string>
+
+    <!-- Allow the user to create a new item - e.g. when the user is selecting a class it would say "Create a new class" -->
+    <string name="create_new">Create a new %1$s</string>
+
 </resources>

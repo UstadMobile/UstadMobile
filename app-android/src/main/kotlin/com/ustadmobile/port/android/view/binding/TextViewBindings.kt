@@ -46,3 +46,8 @@ fun TextView.setTimeZoneText(timeZone: TimeZone) {
     val plusMinSymbol = if(timeZone.rawOffset >= 0) "+" else ""
     text = "(GMT$plusMinSymbol$gmtOffset) ${timeZone.id}"
 }
+
+@BindingAdapter(value = ["createNewFormatText", "createNewFormatArg"], requireAll = true)
+fun TextView.setCreateNewItemText(formatTextId: Int, formatArg: String) {
+    text = context.resources.getString(formatTextId, formatArg)
+}
