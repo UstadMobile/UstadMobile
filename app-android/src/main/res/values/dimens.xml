@@ -59,5 +59,22 @@
 
     <dimen name="dimen_fab_clearance">54dp</dimen>
 
+    <dimen name="form_margin_horizontal">16dp</dimen>
+
+    <dimen name="form_margin_horizontal_heading">8dp</dimen>
+    <dimen name="formitem_margin_vertical">8dp</dimen>
+
+    <!-- two line list item sizing as per https://material.io/components/lists/#specs-->
+    <dimen name="list_twoline1_margin_vertical">16dp</dimen>
+    <dimen name="list_twoline1_margin_horizontal">16dp</dimen>
+    <dimen name="list_twoline1_imagesize">40dp</dimen>
+    <dimen name="list_twoline1_textsize_line1">16sp</dimen>
+    <dimen name="list_twoline1_textsize_line2">12sp</dimen>
+
+    <dimen name="list_oneline1_margin_vertical">8dp</dimen>
+    <dimen name="list_oneline1_margin_horizontal">16dp</dimen>
+    <dimen name="list_oneline1_imagesize">40dp</dimen>
+    <dimen name="list_oneline1_textsize_line1">16sp</dimen>
+
 
 </resources>

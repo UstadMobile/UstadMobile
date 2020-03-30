@@ -10,6 +10,7 @@ import android.widget.AdapterView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.ItemHolidayCalendarBinding
 import com.toughra.ustadmobile.databinding.ItemHolidaycalendarListItemBinding
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -40,13 +41,13 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
             onClickNewItem = onClickNewItem,
             createNewEntityTypeName = R.string.holiday_calendar) {
 
-        class HolidayCalendarListViewHolder(val itemBinding: ItemHolidaycalendarListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+        class HolidayCalendarListViewHolder(val itemBinding: ItemHolidayCalendarBinding): RecyclerView.ViewHolder(itemBinding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             if(viewType == ITEMVIEWTYPE_NEW) {
                 return super.onCreateViewHolder(parent, viewType)
             }else {
-                val itemBinding = ItemHolidaycalendarListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                val itemBinding = ItemHolidayCalendarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 return HolidayCalendarListViewHolder(itemBinding)
             }
 

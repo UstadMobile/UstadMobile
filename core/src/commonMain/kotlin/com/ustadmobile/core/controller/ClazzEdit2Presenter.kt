@@ -30,7 +30,7 @@ class ClazzEdit2Presenter(context: Any,
     private val scheduleOneToManyJoinEditHelper
             = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
             ARG_SAVEDSTATE_SCHEDULES, Schedule.serializer().list,
-            Schedule.serializer().list) {scheduleUid = it}
+            Schedule.serializer().list, this) {scheduleUid = it}
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -59,6 +59,7 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ClazzWithHolidayCalendar? {
+        super.onLoadFromJson(bundle)
         val clazzJsonStr = bundle[ARG_ENTITY_JSON]
         var clazz: ClazzWithHolidayCalendar? = null
         if(clazzJsonStr != null) {
@@ -67,7 +68,6 @@ class ClazzEdit2Presenter(context: Any,
             clazz = ClazzWithHolidayCalendar()
         }
 
-        scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
         return clazz
     }
 
@@ -76,7 +76,6 @@ class ClazzEdit2Presenter(context: Any,
         val entityVal = entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                     entityVal)
-        scheduleOneToManyJoinEditHelper.onSaveState(savedState)
     }
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendar) {

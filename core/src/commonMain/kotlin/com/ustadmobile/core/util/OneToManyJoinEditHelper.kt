@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.dao.OneToManyJoinDao
 import com.ustadmobile.door.DoorMutableLiveData
 import kotlinx.serialization.DeserializationStrategy
@@ -20,14 +21,19 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
                                          val serializationStrategy: SerializationStrategy<List<T>>? = null,
                                          val deserializationStrategy: DeserializationStrategy<List<T>>? = null,
                                          val newPk: K,
+                                         editPresenter: UstadEditPresenter<*, *>?,
                                     val pkSetter: T.(K) -> Unit,
-    open protected val fakePkGenerator: () -> K) {
+    open protected val fakePkGenerator: () -> K): UstadEditPresenter.JsonLoadListener  {
 
     val liveList: DoorMutableLiveData<List<T>> = DoorMutableLiveData(listOf())
 
     private val pksToInsert = mutableListOf<K>()
 
     private val pksToDeactivate = mutableListOf<K>()
+
+    init {
+        editPresenter?.addJsonLoadListener(this)
+    }
 
     fun onEditResult(entity: T) {
         val pk = pkGetter(entity)
@@ -62,13 +68,13 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
     val entitiesToDeactivate: List<T>
         get() = liveList.getValue()?.filter { pkGetter(it) in pksToDeactivate } ?: listOf()
 
-    fun onSaveState(savedState: MutableMap<String, String>) {
+    override fun onSaveState(outState: MutableMap<String, String>) {
         val listVal = liveList.getValue() ?: return
         val serializer = serializationStrategy ?: return
-        savedState[serializationKey] = Json.stringify(serializationStrategy, listVal)
+        outState[serializationKey] = Json.stringify(serializationStrategy, listVal)
     }
 
-    fun onLoadFromJsonSavedState(savedState: Map<String, String>?) {
+    override fun onLoadFromJsonSavedState(savedState: Map<String, String>?) {
         val listJsonStr = savedState?.get(serializationKey) ?: return
         val deserializer = deserializationStrategy ?: return
         val listVal = Json.parse(deserializer, listJsonStr)

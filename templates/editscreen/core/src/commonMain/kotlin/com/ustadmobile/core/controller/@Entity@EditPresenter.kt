@@ -34,26 +34,32 @@ class @Entity@EditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = TODO("PERSISTENCE_MODE.DB OR PERSISTENCE_MODE.JSON")
 
-    //TODO: Add any required one to many join helpers here. e.g.
     /*
-    private val fooOneToManyJoinEditHelper
-            = DefaultOneToManyJoinEditHelper<Foo>(Foo::scheduleUid,
-            ARG_SAVEDSTATE_FOOS, Foo.serializer().list,
-            Foo.serializer().list) {fooUid = it}
+     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
+     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
      */
-
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        //TODO: setup any joined fields etc. here
+        //TODO: Set any additional fields (e.g. joinlist) on the view
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): @EditEntity@? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+
+        //TODO: Load the list for any one to many join helper here
+        /* e.g.
+         val @Entity_VariableName@ = withTimeoutOrNull {
+             db.@Entity_VariableName@.findByUid(entityUid)
+         } ?: @Entity@()
+         return @Entity_VariableName@
+         */
         return TODO("Implement load from Database or return null if using PERSISTENCE_MODE.JSON")
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): @EditEntity@? {
+        super.onLoadFromJson(bundle)
+
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: @EditEntity@? = null
         if(entityJsonStr != null) {
@@ -62,7 +68,6 @@ class @Entity@EditPresenter(context: Any,
             editEntity = @EditEntity@()
         }
 
-        //TODO: Call onLoadFromJsonSavedState on any One to Many Join Helpers here
         return editEntity
     }
 
@@ -71,8 +76,6 @@ class @Entity@EditPresenter(context: Any,
         val entityVal = entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
-
-        //TODO: call onSaveState for any One to Many Join Helpers here
     }
 
     override fun handleClickSave(entity: @EditEntity@) {
@@ -83,29 +86,10 @@ class @Entity@EditPresenter(context: Any,
                 repo.@Entity_VariableName@Dao.updateAsync(entity)
             }
 
-            //TODO: call commitToDatabase on any One to Many Join Helpers here e.g.
-            /*
-            scheduleOneToManyJoinEditHelper.commitToDatabase(repo.scheduleDao) {
-                it.scheduleClazzUid = entity.clazzUid
-            }
-            */
-
+            //TODO: Call commitToDatabase on any onetomany join helpers
             view.finishWithResult(entity)
         }
     }
-
-
-    //TODO: Add handleAddOrEdit and handleRemove functions that handle when one-many joins are changed
-    //e.g.
-    /*
-    fun handleAddOrEditFoo(foo: Foo) {
-        fooOneToManyJoinEditHelper.onEditResult(foo)
-    }
-
-    fun handleRemoveFoo(foo: foo) {
-        fooOneToManyJoinEditHelper.onDeactivateEntity(schedule)
-    }
-     */
 
     companion object {
 

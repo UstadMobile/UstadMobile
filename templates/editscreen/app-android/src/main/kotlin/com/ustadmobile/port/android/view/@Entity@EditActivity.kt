@@ -39,16 +39,22 @@ fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<@Entity@
 
 
 
-interface @Entity@ActivityEventHandler {
+interface @Entity@EditActivityEventHandler {
 
 }
 
 class @Entity@EditActivity : UstadBaseActivity(), @Entity@EditView,
-        @Entity@ActivityEventHandler {
+    @Entity@EditActivityEventHandler {
 
     private var rootView: Activity@Entity_ViewBinding_VariableName@EditBinding? = null
 
     private lateinit var mPresenter: @Entity@EditPresenter
+
+    /*
+     * TODO: Add any required one to many join relationships - use the following templates (then hit tab)
+     *  onetomanyadapter - adds a recycler adapter, observer, and handler methods for a one-many field
+     *  diffutil - adds a diffutil.itemcallback for an entity (put in the companion object)
+     */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +96,7 @@ class @Entity@EditActivity : UstadBaseActivity(), @Entity@EditView,
         setResult(RESULT_OK, Intent().apply {
             putExtraResultAsJson(EXTRA_RESULT_KEY, listOf(result))
         })
+        finish()
     }
 
     override var loading: Boolean = false

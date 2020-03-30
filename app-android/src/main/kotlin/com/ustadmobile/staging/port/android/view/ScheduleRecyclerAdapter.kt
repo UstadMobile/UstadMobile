@@ -58,7 +58,7 @@ class ScheduleRecyclerAdapter internal constructor(diffCallback: DiffUtil.ItemCa
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
 
         val scheduleListItem = LayoutInflater.from(theContext).inflate(
-                R.layout.item_schedule, parent, false)
+                R.layout.item_schedule_old, parent, false)
         return ScheduleViewHolder(scheduleListItem)
     }
 

@@ -6,6 +6,8 @@
     <data>
         <import type="android.view.View"/>
 
+        <import type="com.toughra.ustadmobile.R"/>
+
         <variable
             name="holidaycalendar"
             type="com.ustadmobile.lib.db.entities.HolidayCalendar" />
@@ -20,11 +22,11 @@
 
         <variable
             name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.HolidayCalendarActivityEventHandler" />
+            type="com.ustadmobile.port.android.view.HolidayCalendarEditActivityEventHandler" />
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/activity_holidaycalendar_edit_cl"
@@ -35,9 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/activity_holidaycalendar_edit_toolbar"
@@ -57,26 +57,59 @@
         </com.google.android.material.appbar.AppBarLayout>
 
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:id="@+id/activity_holidaycalendar_edit_scroll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/activity_holidaycalendar_edit_appbar">
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/activity_clazz_edit_edit_clx"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-
                 <!-- TODO: Put the actual view for editing HolidayCalendar here using two-way data binding -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/activity_holiday_calendar_name_text"
+                    android:enabled="@{fieldsEnabled}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/form_margin_horizontal"
+                    android:hint="@string/name"
+                    app:hintEnabled="true"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:text="@={holidaycalendar.umCalendarName}"
+                        android:enabled="@{fieldsEnabled}"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <include layout="@layout/item_createnew"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:onClickNew="@{() -> activityEventHandler.onClickNewDateRange()}"
+                    app:createNewEntityTypeName="@{@string/date_range}"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_holiday_calendar_name_text"
+                    app:layout_constraintStart_toStartOf="parent"
+                    />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:listitem="@layout/item_date_range"
+                    tools:itemCount="2"
+                    app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
+                    app:layout_constraintStart_toStartOf="parent" />
+
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

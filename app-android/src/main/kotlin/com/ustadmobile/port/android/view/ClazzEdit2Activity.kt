@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityClazzEdit2Binding
-import com.toughra.ustadmobile.databinding.ItemSchedule2Binding
+import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.impl.UmAccountManager
@@ -60,10 +60,10 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
     class ScheduleRecyclerAdapter(val activityEventHandler: ClazzEdit2ActivityEventHandler,
         var presenter: ClazzEdit2Presenter?): ListAdapter<Schedule, ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {
 
-        class ScheduleViewHolder(val binding: ItemSchedule2Binding): RecyclerView.ViewHolder(binding.root)
+        class ScheduleViewHolder(val binding: ItemScheduleBinding): RecyclerView.ViewHolder(binding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
-            val viewHolder = ScheduleViewHolder(ItemSchedule2Binding.inflate(
+            val viewHolder = ScheduleViewHolder(ItemScheduleBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
             viewHolder.binding.mActivity = activityEventHandler
@@ -96,11 +96,6 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
                 UmAccountManager.getRepositoryForActiveAccount(this))
         scheduleRecyclerAdapter?.presenter = mPresenter
         mPresenter.onCreate(savedInstanceState.toNullableStringMap())
-
-        GlobalScope.launch {
-            UmAccountManager.getRepositoryForActiveAccount(this).holidayCalendarDao
-                    .replaceList(listOf(HolidayCalendar().apply { umCalendarName = "Test 1"}))
-        }
     }
 
     override fun onChanged(t: List<Schedule?>?) {
@@ -200,6 +195,7 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
     }
 
     companion object {
+
         const val TAG_SCHEDULE_EDIT_DIALOG = "scheduleEdit"
 
         const val TAG_TIMEZONE_DIALOG = "timezoneDialog"

@@ -20,6 +20,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.lib.db.entities.DateRange
 
 
 class HolidayCalendarEditPresenter(context: Any,
@@ -32,28 +33,41 @@ class HolidayCalendarEditPresenter(context: Any,
         db, repo, activeAccount) {
 
     override val persistenceMode: PersistenceMode
-        get() = TODO("PERSISTENCE_MODE.DB OR PERSISTENCE_MODE.JSON")
+        get() = PersistenceMode.DB
 
-    //TODO: Add any required one to many join helpers here. e.g.
-    /*
-    private val fooOneToManyJoinEditHelper
-            = DefaultOneToManyJoinEditHelper<Foo>(Foo::scheduleUid,
-            ARG_SAVEDSTATE_FOOS, Foo.serializer().list,
-            Foo.serializer().list) {fooUid = it}
-     */
+    val dateRangeOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<DateRange>(DateRange::dateRangeUid,
+            "state_DateRange_list", DateRange.serializer().list,
+            DateRange.serializer().list, this) { dateRangeUid = it }
+
+    fun handleAddOrEditDateRange(dateRange: DateRange) {
+        dateRangeOneToManyJoinEditHelper.onEditResult(dateRange)
+    }
+
+    fun handleRemoveSchedule(dateRange: DateRange) {
+        dateRangeOneToManyJoinEditHelper.onDeactivateEntity(dateRange)
+    }
+
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
-        //TODO: setup any joined fields etc. here
+        view.dateRangeList = dateRangeOneToManyJoinEditHelper.liveList
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): HolidayCalendar? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        return TODO("Implement load from Database or return null if using PERSISTENCE_MODE.JSON")
+        val holidayCalendar = withTimeoutOrNull(2000) {
+            db.holidayCalendarDao.findByUid(entityUid)
+        } ?: HolidayCalendar()
+
+        val dateRangeList = db.dateRangeDao.findByHolidayCalendar(entityUid)
+        dateRangeOneToManyJoinEditHelper.liveList.sendValue(dateRangeList)
+
+        return holidayCalendar
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): HolidayCalendar? {
+        super.onLoadFromJson(bundle)
+
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: HolidayCalendar? = null
         if(entityJsonStr != null) {
@@ -62,7 +76,6 @@ class HolidayCalendarEditPresenter(context: Any,
             editEntity = HolidayCalendar()
         }
 
-        //TODO: Call onLoadFromJsonSavedState on any One to Many Join Helpers here
         return editEntity
     }
 
@@ -71,8 +84,6 @@ class HolidayCalendarEditPresenter(context: Any,
         val entityVal = entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
-
-        //TODO: call onSaveState for any One to Many Join Helpers here
     }
 
     override fun handleClickSave(entity: HolidayCalendar) {
@@ -83,29 +94,14 @@ class HolidayCalendarEditPresenter(context: Any,
                 repo.holidayCalendarDao.updateAsync(entity)
             }
 
-            //TODO: call commitToDatabase on any One to Many Join Helpers here e.g.
-            /*
-            scheduleOneToManyJoinEditHelper.commitToDatabase(repo.scheduleDao) {
-                it.scheduleClazzUid = entity.clazzUid
+            dateRangeOneToManyJoinEditHelper.commitToDatabase(repo.dateRangeDao) {
+               it.dateRangeUMCalendarUid = entity.umCalendarUid
             }
-            */
 
             view.finishWithResult(entity)
         }
     }
 
-
-    //TODO: Add handleAddOrEdit and handleRemove functions that handle when one-many joins are changed
-    //e.g.
-    /*
-    fun handleAddOrEditFoo(foo: Foo) {
-        fooOneToManyJoinEditHelper.onEditResult(foo)
-    }
-
-    fun handleRemoveFoo(foo: foo) {
-        fooOneToManyJoinEditHelper.onDeactivateEntity(schedule)
-    }
-     */
 
     companion object {
 

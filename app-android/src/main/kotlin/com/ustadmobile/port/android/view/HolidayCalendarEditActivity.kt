@@ -9,8 +9,13 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityHolidaycalendarEditBinding
+import com.toughra.ustadmobile.databinding.ItemDateRangeBinding
 import com.ustadmobile.core.controller.HolidayCalendarEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -18,6 +23,8 @@ import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayCalendarEditView
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.DateRange
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 
 import kotlinx.coroutines.GlobalScope
@@ -39,16 +46,87 @@ fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<HolidayC
 
 
 
-interface HolidayCalendarActivityEventHandler {
+interface HolidayCalendarEditActivityEventHandler {
 
+    fun onClickNewDateRange()
+
+    fun onClickEditDateRange(dateRange: DateRange?)
 }
 
 class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView,
-        HolidayCalendarActivityEventHandler {
+        HolidayCalendarEditActivityEventHandler {
 
     private var rootView: ActivityHolidaycalendarEditBinding? = null
 
     private lateinit var mPresenter: HolidayCalendarEditPresenter
+
+
+
+    class DateRangeRecyclerAdapter(val activityEventHandler: HolidayCalendarEditActivityEventHandler,
+            var presenter: HolidayCalendarEditPresenter?): ListAdapter<DateRange, DateRangeRecyclerAdapter.DateRangeViewHolder>(DIFF_CALLBACK_DATERANGE) {
+
+            class DateRangeViewHolder(val binding: ItemDateRangeBinding): RecyclerView.ViewHolder(binding.root)
+
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DateRangeViewHolder {
+                val viewHolder = DateRangeViewHolder(ItemDateRangeBinding.inflate(
+                        LayoutInflater.from(parent.context), parent, false))
+                viewHolder.binding.mPresenter = presenter
+                viewHolder.binding.mActivity = activityEventHandler
+                return viewHolder
+            }
+
+            override fun onBindViewHolder(holder: DateRangeViewHolder, position: Int) {
+                holder.binding.dateRange = getItem(position)
+            }
+        }
+
+    override var dateRangeList: DoorLiveData<List<DateRange>>? = null
+        get() = field
+        set(value) {
+            field?.removeObserver(dateRangeObserver)
+            field = value
+            value?.observe(this, dateRangeObserver)
+        }
+
+    private var dateRangeRecyclerAdapter: DateRangeRecyclerAdapter? = null
+
+    private var dateRangeRecyclerView: RecyclerView? = null
+
+    private val dateRangeObserver = Observer<List<DateRange>?> {
+        t -> dateRangeRecyclerAdapter?.submitList(t)
+    }
+
+    override fun onClickEditDateRange(dateRange: DateRange?) {
+//        prepareDateRangeEditCall {
+//            val dateRangeCreated = it?.firstOrNull() ?: return@prepareDateRangeEditCall
+//            mPresenter.handleAddOrEditDateRange(dateRangeCreated)
+//        }.launchDateRangeEdit(dateRange)
+    }
+
+    override fun onClickNewDateRange() = onClickEditDateRange(null)
+
+    /*
+    TODO 1: Put these method signatures into the HolidayCalendarEditActivityEventHandler interface (at the top)
+    fun onClickEditDateRange(dateRange: DateRange?)
+    fun onClickNewDateRange()
+    */
+
+    /*
+    TODO 2: put this into onCreate:
+    dateRangeRecyclerView = findViewById(R.id.activity_DateRange_recycleradapter
+    dateRangeRecyclerAdapter = DateRangeRecyclerAdapter(this, null)
+    dateRangeRecyclerView?.adapter = dateRangeRecyclerAdapter
+    dateRangeRecyclerView?.layoutManager = LinearLayoutManager(this)
+
+    //After the presenter is created
+    dateRangeRecyclerAdapter?.presenter = mPresenter
+    */
+
+    /*
+    TODO 3
+    Make a layout for the item in the recyclerview named item_DateRange (PS: convert DateRange to snake case).
+    Use the Ustad Edit Screen 1-N ListItem XML (right click on res/layout, click new, and select the template)
+    */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +168,7 @@ class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView
         setResult(RESULT_OK, Intent().apply {
             putExtraResultAsJson(EXTRA_RESULT_KEY, listOf(result))
         })
+        finish()
     }
 
     override var loading: Boolean = false
@@ -117,6 +196,16 @@ class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView
     }
 
     companion object {
+
+        val DIFF_CALLBACK_DATERANGE = object : DiffUtil.ItemCallback<DateRange>() {
+            override fun areItemsTheSame(oldItem: DateRange, newItem: DateRange): Boolean {
+                return oldItem.dateRangeUid == newItem.dateRangeUid
+            }
+
+            override fun areContentsTheSame(oldItem: DateRange, newItem: DateRange): Boolean {
+                return oldItem == newItem
+            }
+        }
 
     }
 

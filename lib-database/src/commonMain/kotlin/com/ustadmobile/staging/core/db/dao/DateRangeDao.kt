@@ -13,7 +13,7 @@ import com.ustadmobile.lib.db.entities.DateRange
         insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
-abstract class DateRangeDao : BaseDao<DateRange> {
+abstract class DateRangeDao : BaseDao<DateRange>, OneToManyJoinDao<DateRange> {
 
     @Insert
     abstract override fun insert(entity: DateRange): Long
@@ -21,8 +21,20 @@ abstract class DateRangeDao : BaseDao<DateRange> {
     @Update
     abstract override fun update(entity: DateRange)
 
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+            updateDateRangeActive(it, false)
+        }
+    }
+
+    @Query("UPDATE DateRange SET dateRangeActive = :active WHERE dateRangeUid = :dateRangeUid")
+    abstract suspend fun updateDateRangeActive(dateRangeUid: Long, active: Boolean)
+
     @Query("SELECT * FROM DateRange WHERE dateRangeUMCalendarUid = :calendarUid")
     abstract fun findAllDatesInCalendar(calendarUid: Long): DataSource.Factory<Int, DateRange>
+
+    @Query("SELECT * FROM DateRange WHERE dateRangeUMCalendarUid = :holidayCalendarUid")
+    abstract fun findByHolidayCalendar(holidayCalendarUid: Long): List<DateRange>
 
     @Query("SELECT * FROM DateRange WHERE dateRangeUid = :uid")
     abstract fun findByUid(uid: Long): DateRange?

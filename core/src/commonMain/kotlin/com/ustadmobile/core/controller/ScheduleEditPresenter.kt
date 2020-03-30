@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ScheduleEditView
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Schedule
@@ -52,7 +53,7 @@ lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl, db: UmApp
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): Schedule? {
-        val scheduleData = arguments[ScheduleEditView.ARG_SCHEDULE]
+        val scheduleData = arguments[UstadEditView.ARG_ENTITY_JSON]
         return if(scheduleData != null) {
             Json.parse(Schedule.serializer(), scheduleData)
         }else {

@@ -169,50 +169,35 @@
                         android:layout_height="wrap_content" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+
                 <TextView
                     android:id="@+id/activity_clazz_edit_schedule_heading"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="@dimen/form_margin_horizontal_heading"
+                    android:layout_marginTop="@dimen/formitem_margin_vertical"
+                    android:layout_marginBottom="@dimen/formitem_margin_vertical"
                     android:text="@string/schedule"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_start_date_edittext" />
 
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/activity_clazz_edit_add_schedule"
-                    style="?android:attr/borderlessButtonStyle"
+                <include layout="@layout/item_createnew"
                     android:layout_width="match_parent"
-                    android:layout_height="37dp"
-                    android:backgroundTint="@android:color/transparent"
-                    android:drawableStart="@drawable/ic_add_circle"
-                    android:drawablePadding="@dimen/dimen_16dp"
-                    android:text="@string/add_class_day"
-                    android:textAlignment="textStart"
-                    android:textSize="14sp"
-                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_height="wrap_content"
+                    app:onClickNew="@{() -> activityEventHandler.showNewScheduleDialog()}"
+                    app:createNewEntityTypeName="@{@string/schedule}"
                     app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_heading"
-                    android:drawableLeft="@drawable/ic_add_circle"
-                    android:gravity="start"
-                    android:onClick="@{() -> activityEventHandler.showNewScheduleDialog()}" />
-
+                    app:layout_constraintStart_toStartOf="parent"
+                    />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/activity_clazz_edit_schedule_recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginStart="32dp"
-                    android:layout_marginEnd="8dp"
-                    android:scrollbars="vertical"
-                    android:visibility="visible"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_add_schedule"
-                    android:layout_marginLeft="32dp"
-                    android:layout_marginRight="8dp" />
-
+                    tools:listitem="@layout/item_date_range"
+                    tools:itemCount="2"
+                    app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
                     android:id="@+id/activity_clazz_edit_holiday_calendar_heading"

@@ -4,29 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="android.view.View.OnClickListener"/>
         <variable
-            name="onClickNew"
-            type="OnClickListener" />
+            name="holidayCalendar"
+            type="com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries" />
         <variable
-            name="createNewEntityTypeName"
-            type="java.lang.String" />
-
-        <import type="com.toughra.ustadmobile.R"/>
+            name="presenter"
+            type="com.ustadmobile.core.controller.HolidayCalendarListPresenter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="@{() -> presenter.handleClickEntry(holidayCalendar)}"
         android:background="?attr/selectableItemBackground"
-        android:id="@+id/item_createnew_layout"
-        android:onClick="@{(view) -> onClickNew.onClick(view)}"
         >
 
+        <!-- TODO: Change or remove this icon -->
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/item_createnew_newitemicon"
+            android:visibility="invisible"
+            android:id="@+id/item_holidaycalendar_newitemicon"
             app:srcCompat="@drawable/ic_add_black_24dp"
-            android:padding="8dp"
             android:layout_width="@dimen/list_twoline1_imagesize"
             android:layout_height="@dimen/list_twoline1_imagesize"
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
@@ -35,19 +32,17 @@
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             />
 
         <!-- Line 1-->
         <TextView
-            tools:text="Create new FooBar"
-            android:id="@+id/item_createnew_line1_text"
-            app:createNewFormatText="@{R.string.create_new}"
-            app:createNewFormatArg="@{createNewEntityTypeName}"
+            android:id="@+id/item_holidaycalendar_line1_text"
+            android:text="@{holidayCalendar.umCalendarName}"
+            tools:text="Holiday Calendar Name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/item_createnew_newitemicon"
+            app:layout_constraintStart_toEndOf="@+id/item_holidaycalendar_newitemicon"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
@@ -56,7 +51,17 @@
             android:textColor="@color/text_primary"
             />
 
+        <!-- Line 2-->
+        <TextView
+            android:id="@+id/item_holidaycalendar_line2_text"
+            android:text="Num holidays"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/item_holidaycalendar_line1_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_holidaycalendar_line1_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </layout>

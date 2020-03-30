@@ -20,7 +20,7 @@
 
         <variable
             name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.@Entity@ActivityEventHandler" />
+            type="com.ustadmobile.port.android.view.@Entity@EditActivityEventHandler" />
 
     </data>
 
@@ -72,6 +72,9 @@
 
 
                 <!-- TODO: Put the actual view for editing @Entity@ here using two-way data binding -->
+                <!-- Available templates:
+                onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
+                -->
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

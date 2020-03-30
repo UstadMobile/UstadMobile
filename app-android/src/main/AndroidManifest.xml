@@ -231,6 +231,8 @@
         <activity
             android:name="com.ustadmobile.staging.port.android.view.HolidayCalendarListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity android:name="com.ustadmobile.port.android.view.HolidayCalendarEditActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <activity
             android:name="com.ustadmobile.port.android.view.HolidayCalendarListActivity"

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemCreatenewBinding
+import com.toughra.ustadmobile.databinding.ItemCreatenewContainerBinding
 
 /**
  * The PagedListAdapterWithNewItem will create a special viewholder for the first item that wraps
@@ -48,7 +49,7 @@ abstract class PagedListAdapterWithNewItem<T>(
 
         var createNewItemVisible: Boolean = false
             set(value) {
-                itemView.findViewById<View>(R.id.item_createnew_newitemlayout).visibility = if(value) {
+                itemView.findViewById<View>(R.id.item_createnew_layout).visibility = if(value) {
                     View.VISIBLE
                 }else {
                     View.GONE
@@ -70,7 +71,7 @@ abstract class PagedListAdapterWithNewItem<T>(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if(viewType == ITEMVIEWTYPE_NEW) {
-            val newItemBinding = ItemCreatenewBinding.inflate(LayoutInflater.from(parent.context),
+            val newItemBinding = ItemCreatenewContainerBinding.inflate(LayoutInflater.from(parent.context),
                     parent, false)
             newItemBinding.createNewEntityTypeName = parent.context.getString(createNewEntityTypeName)
             newItemBinding.onClickNew = onClickNewItem
