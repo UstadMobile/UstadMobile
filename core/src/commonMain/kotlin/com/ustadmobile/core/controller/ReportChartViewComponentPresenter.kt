@@ -26,7 +26,7 @@ import kotlinx.serialization.json.content
 class ReportChartViewComponentPresenter(context: Any,
                                         arguments: Map<String, String>?,
                                         view: ReportBarChartComponentView)
-    : UstadBaseController<ReportBarChartComponentView>(context, arguments!!, view) {
+    : CommonReportPresenter<ReportBarChartComponentView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
     internal lateinit var reportOptions: ReportOptions
@@ -138,10 +138,16 @@ class ReportChartViewComponentPresenter(context: Any,
 
     }
 
-
     private fun handleReportLive(result : List<ReportSalesPerformance>?){
         view.runOnUiThread(Runnable {
             view.setChartData(result as List<Any>)
         })
+    }
+
+    override fun downloadReport() {
+        view.runOnUiThread(Runnable {
+            view.downloadReport()
+        }
+        )
     }
 }

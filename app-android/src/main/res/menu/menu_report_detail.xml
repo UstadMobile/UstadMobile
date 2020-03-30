@@ -9,7 +9,7 @@
         app:showAsAction="always"/>
 
     <item android:id="@+id/menu_report_detail_download"
-        android:icon="@drawable/ic_file_download_white_24dp"
+        android:icon="@drawable/ic_file_download_black_24dp"
         android:title="@string/done"
         android:iconTint="@color/icons"
         app:showAsAction="always"/>

@@ -2,10 +2,12 @@ package com.ustadmobile.port.android.view
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.content.FileProvider
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
@@ -19,10 +21,16 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ReportBarChartComponentView
 import com.ustadmobile.lib.db.entities.ReportSalesPerformance
 import kotlinx.coroutines.Runnable
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
 import java.util.*
 
 class ReportSalesPerformanceChartComponent : LinearLayout,
         ReportBarChartComponentView {
+
+    var currentDataSet: List<Any>? = null
+
     override val viewContext: Any
         get() = context!!
 
@@ -40,11 +48,68 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
             : super(context, attrs, defStyleAttr) {}
 
     override fun setChartData(dataSet: List<Any>) {
+        currentDataSet = dataSet
         runOnUiThread (Runnable {
             removeAllViews()
             barChart = createSalesBarChart(dataSet)
             addView(barChart)
         })
+
+    }
+
+    /**
+     * Used to construct the export report (has line by line information)
+     */
+    internal lateinit var tableTextData: MutableList<Array<String?>>
+
+
+    override fun downloadReport() {
+        //TODO: Work with currentDataSet
+        tableTextData = ArrayList()
+        println("TODO: This")
+
+        val csvReportFilePath: String
+        //Create the file.
+
+        val dir = context.filesDir
+        val output = File(dir, "overall_attendance_activity_" +
+                System.currentTimeMillis() + ".csv")
+        csvReportFilePath = output.absolutePath
+
+        try {
+            val fileWriter = FileWriter(csvReportFilePath)
+
+            for (aTableTextData in tableTextData) {
+                var firstDone = false
+                for (aLineArray in aTableTextData) {
+                    if (firstDone) {
+                        fileWriter.append(",")
+                    }
+                    firstDone = true
+                    fileWriter.append(aLineArray)
+                }
+                fileWriter.append("\n")
+            }
+            fileWriter.close()
+
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        val applicationId = context.packageName
+        val sharedUri = FileProvider.getUriForFile(context,
+                "$applicationId.provider",
+                File(csvReportFilePath))
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "*/*"
+        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri)
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        if (shareIntent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(shareIntent)
+        }
+
 
     }
 

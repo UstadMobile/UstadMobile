@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.ReportOptions
 import com.ustadmobile.core.util.ext.observeWithPresenter
+import com.ustadmobile.core.view.CommonReportView
 import com.ustadmobile.core.view.ReportTableListComponentView
 
 import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_OPTIONS
@@ -24,7 +25,7 @@ import kotlinx.serialization.json.JsonConfiguration
 class ReportSalesLogComponentPresenter(context: Any,
                                        arguments: Map<String, String>?,
                                        view: ReportTableListComponentView)
-    : UstadBaseController<ReportTableListComponentView>(context, arguments!!, view) {
+    : CommonReportPresenter<ReportTableListComponentView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
     private var reportOptions: ReportOptions? = null
@@ -70,6 +71,10 @@ class ReportSalesLogComponentPresenter(context: Any,
 
     private fun handleSalesLogResultLive(result: List<ReportSalesLog>?){
         view.setSalesLogData((result as List<Any>?)!!)
+    }
+
+    override fun downloadReport() {
+        view.downloadReport()
     }
 
 

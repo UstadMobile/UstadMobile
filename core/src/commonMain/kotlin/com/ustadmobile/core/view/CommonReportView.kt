@@ -1,18 +1,18 @@
 package com.ustadmobile.core.view
 
+
 /**
- * Component for presenter access
+ * Core View. Screen is for ReportDetail's View
  */
-interface ReportBarChartComponentView : CommonReportView {
+interface CommonReportView : UstadView {
 
     //Any argument keys:
-
-    fun setChartData(dataSet: List<Any>)
+    fun downloadReport()
 
     companion object {
 
         // This defines the view name that is an argument value in the go() in impl.
-        val VIEW_NAME = "ReportBarChartComponentView"
+        val VIEW_NAME = "ReportDetail"
     }
 
 }

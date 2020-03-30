@@ -20,7 +20,8 @@ import kotlinx.coroutines.launch
  * Presenter for ReportDetailView view - common for every report view.
  */
 class ReportDetailPresenter(context: Any, arguments: Map<String, String?>,
-                            view: ReportDetailView) : UstadBaseController<ReportDetailView>(context, arguments!!, view) {
+                            view: ReportDetailView)
+    : UstadBaseController<ReportDetailView>(context, arguments!!, view) {
 
 
     internal var repository: UmAppDatabase
@@ -113,5 +114,6 @@ class ReportDetailPresenter(context: Any, arguments: Map<String, String?>,
 
     fun handleClickDownloadReport() {
         //TODO:
+
     }
 }

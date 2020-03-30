@@ -9,11 +9,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ReportChartViewComponentPresenter
-import com.ustadmobile.core.controller.ReportDetailPresenter
-import com.ustadmobile.core.controller.ReportSalesLogComponentPresenter
-import com.ustadmobile.core.controller.ReportTopLEsComponentPresenter
+import com.ustadmobile.core.controller.*
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.view.CommonReportView
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportOptionsDetailView.Companion.ARG_REPORT_OPTIONS
 import com.ustadmobile.lib.db.entities.DashboardEntry
@@ -25,6 +23,7 @@ class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {
 
     private var toolbar: Toolbar? = null
     private var mPresenter: ReportDetailPresenter? = null
+    private var rPresenter: CommonReportPresenter<CommonReportView>? = null
     private var fab: FloatingTextButton? = null
     internal var menu: Menu? = null
     private var fabVisibility = true
@@ -66,6 +65,9 @@ class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {
 
         } else if (i == R.id.menu_report_detail_download) {
             mPresenter!!.handleClickDownloadReport()
+            if(rPresenter!= null) {
+                rPresenter!!.downloadReport()
+            }
             return true
         } else if (i == R.id.menu_report_detail_edit) {
             mPresenter!!.handleClickEditReport()
@@ -147,12 +149,14 @@ class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {
         //Create the chart component, sets its layout and call the presenter on the view.
         val chartComponent = ReportSalesPerformanceChartComponent(this)
         chartComponent.layoutParams = params
-        val cPresenter = ReportChartViewComponentPresenter(this, args, chartComponent)
-        cPresenter.onCreate(args)
+        rPresenter = ReportChartViewComponentPresenter(this, args, chartComponent)
+                as CommonReportPresenter<CommonReportView>
+        rPresenter!!.onCreate(args)
 
         chartLL!!.addView(chartComponent)
 
     }
+
 
     override fun showSalesLogReport() {
 
@@ -172,8 +176,9 @@ class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {
         //Create View, presenter and add it to the view
         val salesLogComponent = ReportTableListComponent(this)
         salesLogComponent.layoutParams = params
-        val lPresenter = ReportSalesLogComponentPresenter(this, args, salesLogComponent)
-        lPresenter.onCreate(args)
+        rPresenter = ReportSalesLogComponentPresenter(this, args, salesLogComponent)
+                as CommonReportPresenter<CommonReportView>
+        rPresenter!!.onCreate(args)
 
         chartLL!!.addView(salesLogComponent)
 

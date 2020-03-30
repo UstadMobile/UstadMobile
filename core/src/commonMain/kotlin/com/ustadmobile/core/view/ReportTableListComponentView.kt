@@ -3,7 +3,7 @@ package com.ustadmobile.core.view
 /**
  * For presenter's access to Custom views (that implement this)
  */
-interface ReportTableListComponentView : UstadView {
+interface ReportTableListComponentView : CommonReportView {
 
     //Any argument keys:
 

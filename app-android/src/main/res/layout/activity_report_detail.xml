@@ -1,20 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/activity_report_sales_performance_detail_appbar"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:elevation="4dp" android:theme="@style/ToolbarDark"
-        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:background="@color/primary"
+        android:titleTextColor="@color/toolbar"
+        android:theme="@style/ToolbarDark"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/activity_report_sales_performance_detail_toolbar"
-            android:layout_width="match_parent" android:layout_height="?android:attr/actionBarSize"
-            android:background="@color/primary" app:layout_scrollFlags="scroll|enterAlways"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/primary"
+            android:titleTextColor="@color/toolbar"
+            android:theme="@style/ToolbarDark"
+            app:layout_scrollFlags="scroll|enterAlways"
             app:title="@string/sales_performance_report" />
 
     </com.google.android.material.appbar.AppBarLayout>
