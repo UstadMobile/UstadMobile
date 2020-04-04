@@ -75,11 +75,11 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
     }
 
     override fun onClick(view: View?) {
-        activity?.prepareCall(@Entity@ActivityResultContract(requireContext())) {
+        activity?.prepare@Entity@EditCall {
             if(it != null) {
                 finishWithResult(it)
             }
-        }?.launch(GetResultMode.CREATENEW)
+        }.launch@Entity@Edit(null)
     }
 
     override fun onDestroyView() {

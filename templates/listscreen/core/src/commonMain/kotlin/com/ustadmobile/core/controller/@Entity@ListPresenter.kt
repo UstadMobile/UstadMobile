@@ -28,7 +28,7 @@ class @Entity@ListPresenter(context: Any, arguments: Map<String, String>, view: 
 
     class @Entity@ListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { @Entity@ListSortOption(it, context) }

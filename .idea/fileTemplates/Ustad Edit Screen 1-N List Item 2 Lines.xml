@@ -77,7 +77,7 @@
             app:srcCompat="@drawable/ic_more_vert_black_24dp"
             android:contentDescription="@string/edit"
             app:onClickEditPopupMenu="@{() -> mActivity.onClickEdit${entity}(${entityVarName})}"
-            app:onClickDeletePopupMenu="@{() -> mPresenter.handleRemoveSchedule(${entityVarName})}"
+            app:onClickDeletePopupMenu="@{() -> mPresenter.handleRemove${entity}(${entityVarName})}"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
