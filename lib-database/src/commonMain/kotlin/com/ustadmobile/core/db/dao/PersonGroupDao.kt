@@ -7,7 +7,7 @@ import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.GroupWithMemberCount
+import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
 import com.ustadmobile.lib.db.entities.PersonGroup
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN, 
@@ -17,24 +17,24 @@ import com.ustadmobile.lib.db.entities.PersonGroup
 abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
     @Query("SELECT *, 0 AS memberCount FROM PersonGroup")
-    abstract fun findAllGroups(): DataSource.Factory<Int, GroupWithMemberCount>
+    abstract fun findAllGroups(): DataSource.Factory<Int, PersonGroupWithMemberCount>
 
     @Query("SELECT PersonGroup.*, " +
             " (SELECT COUNT(*) FROM PersonGroupMember " +
             "  WHERE groupMemberGroupUid = PersonGroup.groupUid AND" +
             "  CAST(groupMemberActive AS INTEGER) = 1) AS memberCount " +
             "FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 ORDER BY PersonGroup.groupName ASC")
-    abstract fun findAllActiveGroups(): DataSource.Factory<Int, GroupWithMemberCount>
+    abstract fun findAllActiveGroups(): DataSource.Factory<Int, PersonGroupWithMemberCount>
 
     @Query("SELECT PersonGroup.*, " +
             " (SELECT COUNT(*) FROM PersonGroupMember " +
             "  WHERE groupMemberGroupUid = PersonGroup.groupUid AND" +
             "  CAST(groupMemberActive AS INTEGER) = 1) AS memberCount " +
             "FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 AND groupPersonUid = 0 ORDER BY PersonGroup.groupName ASC")
-    abstract fun findAllActiveGroupsWithoutIndividualGroup(): DataSource.Factory<Int, GroupWithMemberCount>
+    abstract fun findAllActiveGroupsWithoutIndividualGroup(): DataSource.Factory<Int, PersonGroupWithMemberCount>
 
     @Query("SELECT *, 0 AS memberCount FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1")
-    abstract fun findAllActiveGroupsLive(): DoorLiveData<List<GroupWithMemberCount>>
+    abstract fun findAllActiveGroupsLive(): DoorLiveData<List<PersonGroupWithMemberCount>>
 
     @Query("SELECT * FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1")
     abstract fun findAllActivePersonGroupsLive(): DoorLiveData<List<PersonGroup>>

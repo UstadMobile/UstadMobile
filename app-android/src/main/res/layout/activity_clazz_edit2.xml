@@ -194,7 +194,7 @@
                     android:id="@+id/activity_clazz_edit_schedule_recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:listitem="@layout/item_date_range"
+                    tools:listitem="@layout/item_holiday"
                     tools:itemCount="2"
                     app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
                     app:layout_constraintStart_toStartOf="parent" />

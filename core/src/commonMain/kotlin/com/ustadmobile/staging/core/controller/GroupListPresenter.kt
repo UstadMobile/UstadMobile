@@ -9,7 +9,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.GroupDetailView
 import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
 import com.ustadmobile.core.view.GroupListView
-import com.ustadmobile.lib.db.entities.GroupWithMemberCount
+import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -20,7 +20,7 @@ class GroupListPresenter(context: Any, arguments: Map<String, String>?, view: Gr
                          val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
         UstadBaseController<GroupListView>(context, arguments!!, view) {
 
-    private var umProvider: DataSource.Factory<Int, GroupWithMemberCount>? = null
+    private var umProvider: DataSource.Factory<Int, PersonGroupWithMemberCount>? = null
     internal var repository: UmAppDatabase
     private val providerDao: PersonGroupDao
 

@@ -11,11 +11,12 @@ import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityHolidaycalendarEditBinding
-import com.toughra.ustadmobile.databinding.ItemDateRangeBinding
+import com.toughra.ustadmobile.databinding.ItemHolidayBinding
 import com.ustadmobile.core.controller.HolidayCalendarEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -24,11 +25,9 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayCalendarEditView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.DateRange
+import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
 
@@ -48,9 +47,9 @@ fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<HolidayC
 
 interface HolidayCalendarEditActivityEventHandler {
 
-    fun onClickNewDateRange()
+    fun onClickEditHoliday(holiday: Holiday?)
 
-    fun onClickEditDateRange(dateRange: DateRange?)
+    fun onClickNewHoliday()
 }
 
 class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView,
@@ -61,72 +60,39 @@ class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView
     private lateinit var mPresenter: HolidayCalendarEditPresenter
 
 
+    class HolidayRecyclerAdapter(val activityEventHandler: HolidayCalendarEditActivityEventHandler,
+            var presenter: HolidayCalendarEditPresenter?): ListAdapter<Holiday, HolidayRecyclerAdapter.HolidayViewHolder>(DIFF_CALLBACK_HOLIDAY) {
 
-    class DateRangeRecyclerAdapter(val activityEventHandler: HolidayCalendarEditActivityEventHandler,
-            var presenter: HolidayCalendarEditPresenter?): ListAdapter<DateRange, DateRangeRecyclerAdapter.DateRangeViewHolder>(DIFF_CALLBACK_DATERANGE) {
+            class HolidayViewHolder(val binding: ItemHolidayBinding): RecyclerView.ViewHolder(binding.root)
 
-            class DateRangeViewHolder(val binding: ItemDateRangeBinding): RecyclerView.ViewHolder(binding.root)
-
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DateRangeViewHolder {
-                val viewHolder = DateRangeViewHolder(ItemDateRangeBinding.inflate(
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HolidayViewHolder {
+                val viewHolder = HolidayViewHolder(ItemHolidayBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false))
                 viewHolder.binding.mPresenter = presenter
                 viewHolder.binding.mActivity = activityEventHandler
                 return viewHolder
             }
 
-            override fun onBindViewHolder(holder: DateRangeViewHolder, position: Int) {
-                holder.binding.dateRange = getItem(position)
+            override fun onBindViewHolder(holder: HolidayViewHolder, position: Int) {
+                holder.binding.holiday = getItem(position)
             }
         }
 
-    override var dateRangeList: DoorLiveData<List<DateRange>>? = null
+    override var holidayList: DoorLiveData<List<Holiday>>? = null
         get() = field
         set(value) {
-            field?.removeObserver(dateRangeObserver)
+            field?.removeObserver(holidayObserver)
             field = value
-            value?.observe(this, dateRangeObserver)
+            value?.observe(this, holidayObserver)
         }
 
-    private var dateRangeRecyclerAdapter: DateRangeRecyclerAdapter? = null
+    private var holidayRecyclerAdapter: HolidayRecyclerAdapter? = null
 
-    private var dateRangeRecyclerView: RecyclerView? = null
+    private var holidayRecyclerView: RecyclerView? = null
 
-    private val dateRangeObserver = Observer<List<DateRange>?> {
-        t -> dateRangeRecyclerAdapter?.submitList(t)
+    private val holidayObserver = Observer<List<Holiday>?> {
+        t -> holidayRecyclerAdapter?.submitList(t)
     }
-
-    override fun onClickEditDateRange(dateRange: DateRange?) {
-//        prepareDateRangeEditCall {
-//            val dateRangeCreated = it?.firstOrNull() ?: return@prepareDateRangeEditCall
-//            mPresenter.handleAddOrEditDateRange(dateRangeCreated)
-//        }.launchDateRangeEdit(dateRange)
-    }
-
-    override fun onClickNewDateRange() = onClickEditDateRange(null)
-
-    /*
-    TODO 1: Put these method signatures into the HolidayCalendarEditActivityEventHandler interface (at the top)
-    fun onClickEditDateRange(dateRange: DateRange?)
-    fun onClickNewDateRange()
-    */
-
-    /*
-    TODO 2: put this into onCreate:
-    dateRangeRecyclerView = findViewById(R.id.activity_DateRange_recycleradapter
-    dateRangeRecyclerAdapter = DateRangeRecyclerAdapter(this, null)
-    dateRangeRecyclerView?.adapter = dateRangeRecyclerAdapter
-    dateRangeRecyclerView?.layoutManager = LinearLayoutManager(this)
-
-    //After the presenter is created
-    dateRangeRecyclerAdapter?.presenter = mPresenter
-    */
-
-    /*
-    TODO 3
-    Make a layout for the item in the recyclerview named item_DateRange (PS: convert DateRange to snake case).
-    Use the Ustad Edit Screen 1-N ListItem XML (right click on res/layout, click new, and select the template)
-    */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -138,17 +104,33 @@ class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        holidayRecyclerView = findViewById(R.id.activity_holidaycalendar_holiday_recyclerview)
+        holidayRecyclerAdapter = HolidayRecyclerAdapter(this, null)
+        holidayRecyclerView?.adapter = holidayRecyclerAdapter
+        holidayRecyclerView?.layoutManager = LinearLayoutManager(this)
+
         mPresenter = HolidayCalendarEditPresenter(this, intent.extras.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(this),
                 UmAccountManager.getRepositoryForActiveAccount(this))
+        holidayRecyclerAdapter?.presenter= mPresenter
         mPresenter.onCreate(savedInstanceState.toNullableStringMap())
     }
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putAll(mutableMapOf<String, String>().apply { mPresenter.onSaveInstanceState(this) }.toBundle())
     }
+
+    override fun onClickEditHoliday(holiday: Holiday?) {
+        prepareHolidayEditCall {
+            val holidayCreated = it?.firstOrNull() ?: return@prepareHolidayEditCall
+            mPresenter.handleAddOrEditHoliday(holidayCreated)
+        }.launchHolidayEdit(holiday)
+    }
+
+    override fun onClickNewHoliday() = onClickEditHoliday(null)
 
     override var entity: HolidayCalendar? = null
         get() = field
@@ -197,12 +179,12 @@ class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView
 
     companion object {
 
-        val DIFF_CALLBACK_DATERANGE = object : DiffUtil.ItemCallback<DateRange>() {
-            override fun areItemsTheSame(oldItem: DateRange, newItem: DateRange): Boolean {
-                return oldItem.dateRangeUid == newItem.dateRangeUid
+        val DIFF_CALLBACK_HOLIDAY = object: DiffUtil.ItemCallback<Holiday>() {
+            override fun areItemsTheSame(oldItem: Holiday, newItem: Holiday): Boolean {
+                return oldItem.holUid == newItem.holUid
             }
 
-            override fun areContentsTheSame(oldItem: DateRange, newItem: DateRange): Boolean {
+            override fun areContentsTheSame(oldItem: Holiday, newItem: Holiday): Boolean {
                 return oldItem == newItem
             }
         }

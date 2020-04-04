@@ -79,6 +79,8 @@ class @Entity@EditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: @EditEntity@) {
+        //TODO: Any validation that is needed before accepting / saving this entity
+        //TODO: Only save to the database when the persistence mode is PERSISTENCE_MODE.DB
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.@Entity_VariableName@Uid == 0L) {
                 entity.@Entity_VariableName@Uid = repo.@Entity_VariableName@Dao.insertAsync(entity)

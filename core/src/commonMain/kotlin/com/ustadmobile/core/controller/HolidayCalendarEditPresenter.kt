@@ -6,21 +6,18 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.HolidayCalendarEditView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 
 import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.http.content.TextContent
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.lib.db.entities.DateRange
+import com.ustadmobile.lib.db.entities.Holiday
 
 
 class HolidayCalendarEditPresenter(context: Any,
@@ -35,22 +32,24 @@ class HolidayCalendarEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    val dateRangeOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<DateRange>(DateRange::dateRangeUid,
-            "state_DateRange_list", DateRange.serializer().list,
-            DateRange.serializer().list, this) { dateRangeUid = it }
 
-    fun handleAddOrEditDateRange(dateRange: DateRange) {
-        dateRangeOneToManyJoinEditHelper.onEditResult(dateRange)
+    val holidayOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Holiday>(Holiday::holUid,
+            "state_Holiday_list", Holiday.serializer().list,
+            Holiday.serializer().list, this) { holUid = it }
+
+    fun handleAddOrEditHoliday(holiday: Holiday) {
+        holidayOneToManyJoinEditHelper.onEditResult(holiday)
     }
 
-    fun handleRemoveSchedule(dateRange: DateRange) {
-        dateRangeOneToManyJoinEditHelper.onDeactivateEntity(dateRange)
+    fun handleRemoveHoliday(holiday: Holiday) {
+        holidayOneToManyJoinEditHelper.onDeactivateEntity(holiday)
     }
 
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.dateRangeList = dateRangeOneToManyJoinEditHelper.liveList
+
+        view.holidayList = holidayOneToManyJoinEditHelper.liveList
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): HolidayCalendar? {
@@ -59,8 +58,10 @@ class HolidayCalendarEditPresenter(context: Any,
             db.holidayCalendarDao.findByUid(entityUid)
         } ?: HolidayCalendar()
 
-        val dateRangeList = db.dateRangeDao.findByHolidayCalendar(entityUid)
-        dateRangeOneToManyJoinEditHelper.liveList.sendValue(dateRangeList)
+        val holidayList = withTimeoutOrNull(2000) {
+            db.holidayDao.findByHolidayCalendaUid(entityUid)
+        } ?: listOf()
+        holidayOneToManyJoinEditHelper.liveList.sendValue(holidayList)
 
         return holidayCalendar
     }
@@ -94,8 +95,8 @@ class HolidayCalendarEditPresenter(context: Any,
                 repo.holidayCalendarDao.updateAsync(entity)
             }
 
-            dateRangeOneToManyJoinEditHelper.commitToDatabase(repo.dateRangeDao) {
-               it.dateRangeUMCalendarUid = entity.umCalendarUid
+            holidayOneToManyJoinEditHelper.commitToDatabase(repo.holidayDao) {
+                it.holHolidayCalendarUid = entity.umCalendarUid
             }
 
             view.finishWithResult(entity)

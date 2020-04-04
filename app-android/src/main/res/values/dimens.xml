@@ -60,6 +60,7 @@
     <dimen name="dimen_fab_clearance">54dp</dimen>
 
     <dimen name="form_margin_horizontal">16dp</dimen>
+    <dimen name="form_margin_vertical_itemspace">8dp</dimen>
 
     <dimen name="form_margin_horizontal_heading">8dp</dimen>
     <dimen name="formitem_margin_vertical">8dp</dimen>

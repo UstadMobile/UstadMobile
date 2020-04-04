@@ -15,7 +15,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.GroupListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.GroupListView
-import com.ustadmobile.lib.db.entities.GroupWithMemberCount
+import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
 import com.ustadmobile.port.android.view.UstadBaseActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -78,7 +78,7 @@ class GroupListActivity : UstadBaseActivity(), GroupListView {
 
     }
 
-    override fun setListProvider(factory: DataSource.Factory<Int, GroupWithMemberCount>) {
+    override fun setListProvider(factory: DataSource.Factory<Int, PersonGroupWithMemberCount>) {
         val recyclerAdapter = GroupListRecyclerAdapter(DIFF_CALLBACK, mPresenter!!, this,
                 applicationContext)
 
@@ -89,7 +89,7 @@ class GroupListActivity : UstadBaseActivity(), GroupListView {
         val thisP = this
         GlobalScope.launch(Dispatchers.Main) {
             data.observe(thisP,
-                    Observer<PagedList<GroupWithMemberCount>> { recyclerAdapter.submitList(it) })
+                    Observer<PagedList<PersonGroupWithMemberCount>> { recyclerAdapter.submitList(it) })
         }
 
         //set the adapter
@@ -101,14 +101,14 @@ class GroupListActivity : UstadBaseActivity(), GroupListView {
         /**
          * The DIFF CALLBACK
          */
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<GroupWithMemberCount> = object : DiffUtil.ItemCallback<GroupWithMemberCount>() {
-            override fun areItemsTheSame(oldItem: GroupWithMemberCount,
-                                         newItem: GroupWithMemberCount): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonGroupWithMemberCount> = object : DiffUtil.ItemCallback<PersonGroupWithMemberCount>() {
+            override fun areItemsTheSame(oldItem: PersonGroupWithMemberCount,
+                                         newItem: PersonGroupWithMemberCount): Boolean {
                 return oldItem == newItem
             }
 
-            override fun areContentsTheSame(oldItem: GroupWithMemberCount,
-                                            newItem: GroupWithMemberCount): Boolean {
+            override fun areContentsTheSame(oldItem: PersonGroupWithMemberCount,
+                                            newItem: PersonGroupWithMemberCount): Boolean {
                 return oldItem.groupUid == newItem.groupUid
             }
         }

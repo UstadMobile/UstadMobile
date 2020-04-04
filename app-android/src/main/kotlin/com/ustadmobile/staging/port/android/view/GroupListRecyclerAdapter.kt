@@ -14,14 +14,14 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.GroupListPresenter
-import com.ustadmobile.lib.db.entities.GroupWithMemberCount
+import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
 
 class GroupListRecyclerAdapter(
-        diffCallback: DiffUtil.ItemCallback<GroupWithMemberCount>,
+        diffCallback: DiffUtil.ItemCallback<PersonGroupWithMemberCount>,
         internal var mPresenter: GroupListPresenter,
         internal var theActivity: Activity,
         internal var theContext: Context)
-    : PagedListAdapter<GroupWithMemberCount, GroupListRecyclerAdapter.GroupListViewHolder>(diffCallback) {
+    : PagedListAdapter<PersonGroupWithMemberCount, GroupListRecyclerAdapter.GroupListViewHolder>(diffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupListViewHolder {
 

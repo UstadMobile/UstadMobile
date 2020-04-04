@@ -91,16 +91,17 @@
                 <include layout="@layout/item_createnew"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:onClickNew="@{() -> activityEventHandler.onClickNewDateRange()}"
-                    app:createNewEntityTypeName="@{@string/date_range}"
+                    app:onClickNew="@{() -> activityEventHandler.onClickNewHoliday()}"
+                    app:createNewEntityTypeName="@{@string/holiday}"
                     app:layout_constraintTop_toBottomOf="@+id/activity_holiday_calendar_name_text"
                     app:layout_constraintStart_toStartOf="parent"
                     />
 
                 <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/activity_holidaycalendar_holiday_recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:listitem="@layout/item_date_range"
+                    tools:listitem="@layout/item_holiday"
                     tools:itemCount="2"
                     app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
                     app:layout_constraintStart_toStartOf="parent" />

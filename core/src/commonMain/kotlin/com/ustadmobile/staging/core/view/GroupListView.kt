@@ -1,8 +1,7 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmProvider
-import com.ustadmobile.lib.db.entities.GroupWithMemberCount
+import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
 
 
 /**
@@ -23,7 +22,7 @@ interface GroupListView : UstadView {
      *
      * @param listProvider The provider to set to the view
      */
-    fun setListProvider(listProvider: DataSource.Factory<Int, GroupWithMemberCount>)
+    fun setListProvider(listProvider: DataSource.Factory<Int, PersonGroupWithMemberCount>)
 
     companion object {
 

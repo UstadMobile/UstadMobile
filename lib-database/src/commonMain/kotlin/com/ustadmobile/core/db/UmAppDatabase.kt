@@ -15,7 +15,7 @@ import kotlin.jvm.Volatile
     PersonDetailPresenterField::class,SelQuestion::class,
     SelQuestionResponse::class, SelQuestionResponseNomination::class, SelQuestionSet::class,
     SelQuestionSetRecognition::class, SelQuestionSetResponse::class,
-    Schedule::class, DateRange::class, HolidayCalendar::class,
+    Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
     ClazzActivity::class, ClazzActivityChange::class,
     SelQuestionOption::class, ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
@@ -211,6 +211,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val selQuestionSetDao : SelQuestionSetDao
     abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
     abstract val holidayCalendarDao : HolidayCalendarDao
+    abstract val holidayDao: HolidayDao
     abstract val schoolDao : SchoolDao
     abstract val clazzAssignmentDao : ClazzAssignmentDao
     abstract val clazzAssignmentContentJoinDao : ClazzAssignmentContentJoinDao
