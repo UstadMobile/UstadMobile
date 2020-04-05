@@ -45,6 +45,12 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
             val listVal = liveList.getValue() ?: return
             val newList = listVal + entity
             liveList.sendValue(newList)
+        }else {
+            val newList = liveList.getValue()?.toMutableList() ?: return
+            val editedPk = pkGetter(entity)
+            val entityIndex = newList.indexOfFirst { pkGetter(it) == editedPk }
+            newList[entityIndex] = entity
+            liveList.sendValue(newList)
         }
     }
 

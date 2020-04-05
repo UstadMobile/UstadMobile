@@ -35,11 +35,13 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
     private var dbRepo: UmAppDatabase? = null
 
     class HolidayCalendarListRecyclerAdapter(var presenter: HolidayCalendarListPresenter?,
-                                             newItemVisible: Boolean, onClickNewItem: View.OnClickListener)
+                                             newItemVisible: Boolean,
+                                             onClickNewItem: View.OnClickListener,
+                                             createNewText: String)
         : PagedListAdapterWithNewItem<HolidayCalendarWithNumEntries>(DIFF_CALLBACK,
             newItemVisible = newItemVisible,
             onClickNewItem = onClickNewItem,
-            createNewEntityTypeName = R.string.holiday_calendar) {
+            createNewText = createNewText) {
 
         class HolidayCalendarListViewHolder(val itemBinding: ItemHolidayCalendarBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -77,7 +79,8 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter, false, this)
+        mRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter, false, this,
+            requireContext().getString(R.string.create_new, requireContext().getString(R.string.holiday_calendar)))
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }

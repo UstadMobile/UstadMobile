@@ -31,8 +31,8 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
     private var dbRepo: UmAppDatabase? = null
 
     class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?, newItemVisible: Boolean,
-                                      onClickNewItem: View.OnClickListener)
-        : PagedListAdapterWithNewItem<@DisplayEntity@>(DIFF_CALLBACK, newItemVisible, onClickNewItem, R.string.) {
+                                      onClickNewItem: View.OnClickListener, createNewText: String)
+        : PagedListAdapterWithNewItem<@DisplayEntity@>(DIFF_CALLBACK, newItemVisible, onClickNewItem, createNewText) {
 
         class @Entity@ListViewHolder(val itemBinding: Item@Entity_ViewBinding_VariableName@ListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -69,7 +69,10 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = @Entity@ListRecyclerAdapter(mPresenter, false, this)
+        val createNewText = requireContext().getString(R.string.create_new,
+                requireContext().getString(R.string.@Entity_LowerCase@))
+        mRecyclerViewAdapter = @Entity@ListRecyclerAdapter(mPresenter, false, this,
+            createNewText)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }

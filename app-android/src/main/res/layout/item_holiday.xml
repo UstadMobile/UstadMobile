@@ -52,9 +52,10 @@
             android:textColor="@color/text_primary"
             />
 
-        <!-- Line 2-->
         <TextView
             android:id="@+id/item_daterange_line2_text"
+            app:textDateRangeFrom="@{holiday.holStartTime}"
+            app:textDateRangeTo="@{holiday.holEndTime}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="@+id/item_daterange_line1_text"

@@ -5,12 +5,10 @@
 
     <data>
         <import type="android.view.View.OnClickListener"/>
-        <variable
-            name="onClickNew"
-            type="OnClickListener" />
-        <variable
-            name="createNewEntityTypeName"
-            type="java.lang.String" />
+        <variable name="onClickNew" type="OnClickListener" />
+
+        <!-- Text to show to trigger create a new item e.g. "Create new Widget" -->
+        <variable name="createNewText" type="java.lang.String"/>
 
         <import type="com.toughra.ustadmobile.R"/>
     </data>
@@ -42,8 +40,7 @@
         <TextView
             tools:text="Create new FooBar"
             android:id="@+id/item_createnew_line1_text"
-            app:createNewFormatText="@{R.string.create_new}"
-            app:createNewFormatArg="@{createNewEntityTypeName}"
+            android:text="@{createNewText}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"

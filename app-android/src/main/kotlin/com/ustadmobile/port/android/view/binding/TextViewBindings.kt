@@ -1,8 +1,10 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
+import android.text.format.DateFormat
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.Schedule
@@ -50,4 +52,11 @@ fun TextView.setTimeZoneText(timeZone: TimeZone) {
 @BindingAdapter(value = ["createNewFormatText", "createNewFormatArg"], requireAll = true)
 fun TextView.setCreateNewItemText(formatTextId: Int, formatArg: String) {
     text = context.resources.getString(formatTextId, formatArg)
+}
+
+@BindingAdapter(value=["textDateRangeFrom", "textDateRangeTo"], requireAll = true)
+fun TextView.setTextDateRange(fromDate: Long, toDate: Long) {
+    val dateFormatter = DateFormat.getDateFormat(context)
+    text = context.getString(R.string.from_to_date, dateFormatter.format(fromDate),
+        dateFormatter.format(toDate))
 }

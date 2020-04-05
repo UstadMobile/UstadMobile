@@ -54,7 +54,8 @@
         <!-- Line 2-->
         <TextView
             android:id="@+id/item_holidaycalendar_line2_text"
-            android:text="Num holidays"
+            android:text="@{@string/num_items_with_name(holidayCalendar.numEntries, @string/holidays)}"
+            tools:text="Num holidays"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="@+id/item_holidaycalendar_line1_text"

@@ -33,8 +33,10 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
     private var dbRepo: UmAppDatabase? = null
 
     class PersonGroupListRecyclerAdapter(var presenter: PersonGroupListPresenter?, newItemVisible: Boolean,
-                                      onClickNewItem: View.OnClickListener)
-        : PagedListAdapterWithNewItem<PersonGroupWithMemberCount>(DIFF_CALLBACK, newItemVisible, onClickNewItem, R.string.s_person_group) {
+                                      onClickNewItem: View.OnClickListener,
+                                        createNewText: String)
+        : PagedListAdapterWithNewItem<PersonGroupWithMemberCount>(DIFF_CALLBACK, newItemVisible,
+            onClickNewItem, createNewText) {
 
         class PersonGroupListViewHolder(val itemBinding: ItemPersongroupListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -71,7 +73,8 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter, false, this)
+        mRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter, false, this,
+            requireContext().getString(R.string.create_new, requireContext().getString(R.string.s_person_group)))
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }

@@ -217,7 +217,7 @@ subprojects { project -> afterEvaluate {
 
 task newFromTemplate(type: Copy) {
     def replacementTokens = new Properties()
-    def templateName = project.hasProperty("template") ? project.property("template") : "editscreen"
+    def templateName = project.hasProperty("Template") ? project.property("Template") : "editscreen"
 
     replacementTokens["Entity"] = project.hasProperty("Entity") ? project.property("Entity") : "Entity"
     replacementTokens["Entity_SnakeCase"] = replacementTokens["Entity"].replaceAll("([^_A-Z])([A-Z])", '$1_$2')

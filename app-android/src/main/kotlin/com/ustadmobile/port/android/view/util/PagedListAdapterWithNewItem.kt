@@ -31,7 +31,7 @@ abstract class PagedListAdapterWithNewItem<T>(
         diffcallback: DiffUtil.ItemCallback<T>,
         newItemVisible: Boolean = false,
         var onClickNewItem: View.OnClickListener? = null,
-        var createNewEntityTypeName: Int = R.string.unset)
+        var createNewText: String? = null)
     : PagedListAdapter<T, RecyclerView.ViewHolder>(diffcallback) {
 
     var newItemVisible: Boolean = newItemVisible
@@ -73,8 +73,10 @@ abstract class PagedListAdapterWithNewItem<T>(
         if(viewType == ITEMVIEWTYPE_NEW) {
             val newItemBinding = ItemCreatenewContainerBinding.inflate(LayoutInflater.from(parent.context),
                     parent, false)
-            newItemBinding.createNewEntityTypeName = parent.context.getString(createNewEntityTypeName)
+
+            newItemBinding.createNewText = createNewText
             newItemBinding.onClickNew = onClickNewItem
+
             val newItemView = newItemBinding.root
 
             val viewHolderLinearLayout: LinearLayout = newItemView.findViewById(R.id.item_createnew_linearlayout1)

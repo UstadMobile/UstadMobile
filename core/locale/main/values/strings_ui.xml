@@ -424,6 +424,8 @@
     <string name="class_description">Class description</string>
     <string name="add_class_day">Add a class day</string>
     <string name="to">to</string>
+    <string name="holiday">Holiday</string>
+    <string name="holidays">Holidays</string>
     <string name="holiday_calendar">Holiday Calendar</string>
     <string name="features_enabled">Features enabled</string>
     <string name="class_setup">Class Setup</string>
@@ -805,5 +807,18 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <!-- Allow the user to create a new item - e.g. when the user is selecting a class it would say "Create a new class" -->
     <string name="create_new">Create a new %1$s</string>
+
+    <!-- This is used to display a duration - e.g. "04/Apr/2020 - 03/May/2020". %1$s and %1$2s will
+    be replaced with the from and to date respectively and will be formatted according to the
+    language settings in the app-->
+    <string name="from_to_date">%1$s - %2$s</string>
+
+    <!-- Used to show a quantity and name e.g. "5 oranges". %1$d will be replaced with the number
+    and %2$s will be replaced with the name of the item-->
+    <string name="num_items_with_name">%1$d %2$s</string>
+
+    <!-- Used to create a prompt to the user to add something e.g. "Add Holiday". %1$s will be
+    replaced with the name of the item (e.g. Holiday)-->
+    <string name="add_a">Add a %1$s</string>
 
 </resources>
