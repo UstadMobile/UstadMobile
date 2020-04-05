@@ -82,7 +82,7 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
             if(it != null) {
                 finishWithResult(it)
             }
-        }.launch@Entity@Edit(null)
+        }?.launch@Entity@Edit(null)
     }
 
     override fun onDestroyView() {

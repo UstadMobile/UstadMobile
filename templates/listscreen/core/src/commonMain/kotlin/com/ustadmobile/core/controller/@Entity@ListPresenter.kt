@@ -55,7 +55,7 @@ class @Entity@ListPresenter(context: Any, arguments: Map<String, String>, view: 
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> systemImpl.go(@Entity@DetailView.VIEW_NAME,
-                mapOf(@Entity@DetailView.ARG_ENTITY_UID to uid, context)
+                mapOf(UstadView.ARG_ENTITY_UID to uid, context)
         }
         */
     }
