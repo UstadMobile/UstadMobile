@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -44,6 +45,23 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     protected var mListViewResultListener: ListViewResultListener<RT>? = null
 
+    protected var mActivityWithFab: UstadListViewActivityWithFab? = null
+        get() {
+            /*
+             The getter will return null so that if the current fragment is not actually visible
+             no changes will be sent through
+             */
+            return if(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                field
+            }else {
+                null
+            }
+        }
+
+        set(value) {
+            field = value
+        }
+
     /**
      *
      */
@@ -65,6 +83,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         set(value) {
             mDataBinding?.addMode = value
             mRecyclerViewAdapter?.newItemVisible = (value == ListViewAddMode.FIRST_ITEM)
+            mActivityWithFab?.activityFloatingActionButton?.visibility = if(value == ListViewAddMode.FAB) View.VISIBLE else View.GONE
             field = value
         }
 
@@ -98,11 +117,26 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mListViewResultListener = context as? ListViewResultListener<RT>
+        mActivityWithFab = context as? UstadListViewActivityWithFab
     }
 
     override fun onDetach() {
         super.onDetach()
         mListViewResultListener = null
+        mActivityWithFab = null
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        mActivityWithFab?.activityFloatingActionButton?.setOnClickListener {
+            mDataBinding?.presenter?.handleClickCreateNewFab()
+        }
+
+        mActivityWithFab?.activityFloatingActionButton?.visibility = if(addMode == ListViewAddMode.FAB) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+    }
 }

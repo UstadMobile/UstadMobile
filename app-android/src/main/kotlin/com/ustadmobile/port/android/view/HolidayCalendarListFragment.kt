@@ -85,6 +85,11 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
         return view
     }
 
+    override fun onResume() {
+        super.onResume()
+        mActivityWithFab?.activityFloatingActionButton?.text = requireContext().getString(R.string.holiday_calendar)
+    }
+
     override fun onClick(view: View?) {
         activity?.prepareHolidayCalendarEditCall {
             if(it != null) {

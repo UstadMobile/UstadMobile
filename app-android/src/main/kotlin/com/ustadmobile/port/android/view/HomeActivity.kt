@@ -44,8 +44,6 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     private lateinit var presenter: HomePresenter
 
-    private lateinit var downloadAllBtn: FloatingTextButton
-
     private lateinit var profileImage: CircleImageView
 
     val impl = UstadMobileSystemImpl.instance
@@ -78,18 +76,12 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         setContentView(R.layout.activity_home)
 
         mPager = findViewById(R.id.home_view_pager)
-        downloadAllBtn = findViewById(R.id.download_all)
 
         val toolbar = findViewById<Toolbar>(R.id.entry_toolbar)
         coordinatorLayout = findViewById(R.id.coordinationLayout)
         profileImage = findViewById(R.id.profile_image)
         setSupportActionBar(toolbar)
         findViewById<TextView>(R.id.toolBarTitle).setText(R.string.app_name)
-
-
-        downloadAllBtn.setOnClickListener {
-            presenter.handleDownloadAllClicked()
-        }
 
         presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
                 this, UmAccountManager.getActiveDatabase(this).personDao,
@@ -108,7 +100,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     }
 
     override fun showDownloadAllButton(show: Boolean) {
-        downloadAllBtn.visibility = if(show) View.VISIBLE else View.GONE
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
