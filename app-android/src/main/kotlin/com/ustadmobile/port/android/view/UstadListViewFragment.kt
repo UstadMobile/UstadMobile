@@ -129,11 +129,14 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
     override fun onResume() {
         super.onResume()
 
-        mActivityWithFab?.activityFloatingActionButton?.setOnClickListener {
+        val theFab = mActivityWithFab?.activityFloatingActionButton
+
+        theFab?.setOnClickListener {
             mDataBinding?.presenter?.handleClickCreateNewFab()
         }
 
-        mActivityWithFab?.activityFloatingActionButton?.visibility = if(addMode == ListViewAddMode.FAB) {
+        theFab?.visibility = View.VISIBLE
+        theFab?.visibility = if(addMode == ListViewAddMode.FAB) {
             View.VISIBLE
         } else {
             View.GONE

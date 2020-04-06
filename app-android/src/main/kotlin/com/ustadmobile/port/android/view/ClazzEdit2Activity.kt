@@ -120,6 +120,7 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
         prepareHolidayCalendarPickFromListCall {
             if(it != null) {
                 entity?.holidayCalendar = it[0]
+                entity?.clazzHolidayUMCalendarUid = it[0].umCalendarUid
                 rootView?.clazz = rootView?.clazz
             }
         }.launch(mapOf())
