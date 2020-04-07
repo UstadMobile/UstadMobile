@@ -291,6 +291,7 @@ abstract class InventoryItemDao: BaseDao<InventoryItem> {
                     AND CAST(groupMemberActive  AS INTEGER) = 1 ) 
                     OR 
                     CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
+            ORDER BY Person.firstNames ASC
             
         """
         const val QUERY_SORT_BY_PERSON_ASC = " ORDER BY Person.firstNames||' '||Person.lastName ASC "

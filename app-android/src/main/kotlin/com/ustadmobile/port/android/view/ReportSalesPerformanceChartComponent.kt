@@ -25,11 +25,14 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class ReportSalesPerformanceChartComponent : LinearLayout,
         ReportBarChartComponentView {
 
-    var currentDataSet: List<Any>? = null
+    var currentDataSet: List<Any> = mutableListOf()
+    var plainData =  HashMap<String, HashMap<String, String>>()
 
     override val viewContext: Any
         get() = context!!
@@ -60,19 +63,29 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
     /**
      * Used to construct the export report (has line by line information)
      */
-    internal lateinit var tableTextData: MutableList<Array<String?>>
+    internal lateinit var tableTextData: MutableList<Array<String>>
 
 
     override fun downloadReport() {
-        //TODO: Work with currentDataSet
         tableTextData = ArrayList()
-        println("TODO: This")
+
+        val plainDataIterator = plainData.iterator()
+        while(plainDataIterator.hasNext()){
+            val d = plainDataIterator.next()
+            val locationName = d.key
+            val locationDataIterator = d.value.iterator()
+            while(locationDataIterator.hasNext()){
+                val data = locationDataIterator.next()
+                val array = arrayOf(locationName, data.key, data.value)
+                tableTextData.add(array)
+            }
+        }
 
         val csvReportFilePath: String
         //Create the file.
 
         val dir = context.filesDir
-        val output = File(dir, "overall_attendance_activity_" +
+        val output = File(dir, "report_sales_performance_" +
                 System.currentTimeMillis() + ".csv")
         csvReportFilePath = output.absolutePath
 
@@ -147,6 +160,9 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
         val locationToBarEntriesMap = HashMap<Long, ArrayList<BarEntry>>()
         val allDateOccurences = ArrayList<String>()
 
+        //Same map for report download
+        val locationToDateAndValue = HashMap<Long, HashMap<String, String>>()
+
         //Map of LocationUid -> Name for Label searching
         val locationUidToName = HashMap<Long, String>()
 
@@ -217,6 +233,17 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
             //Get entries (values plotted)
             val locationEntry = locationToBarEntriesMap[barEntry]!!
 
+            var locationData = HashMap<String, String>()
+            val ali = locationEntry.iterator()
+            while(ali.hasNext()){
+                val a = ali.next()
+                val index = a.x
+                val date = allDateOccurences[index.toInt() -1]
+                val value = a.y
+                locationData.put(date, value.toString())
+            }
+
+            plainData.put(locationName, locationData)
 
             //Create BarDataSet
             val barDataSet = BarDataSet(locationEntry, locationName)
@@ -238,7 +265,7 @@ class ReportSalesPerformanceChartComponent : LinearLayout,
 
         //Get yAxis for chart of date occurrences
         for (everyDateOccurrence in allDateOccurences) {
-            val prettyDate = UMCalendarUtil.getPrettyDateSuperSimpleFromLong(
+            val prettyDate = UMCalendarUtil.getPrettyDateSimpleWithoutYearFromLong(
                     UMCalendarUtil.convertYYYYMMddToLong(everyDateOccurrence), null)
             yAxisValueList.add(prettyDate)
         }

@@ -78,19 +78,18 @@ class ReportTableListComponent : LinearLayout, ReportTableListComponentView {
     /**
      * Used to construct the export report (has line by line information)
      */
-    internal lateinit var tableTextData: MutableList<Array<String?>>
+    internal lateinit var tableTextData: MutableList<Array<String>>
 
 
     override fun downloadReport() {
-        //TODO: Work with currentDataSet
-        tableTextData = ArrayList()
-        println("TODO: This")
+
+
 
         val csvReportFilePath: String
         //Create the file.
 
         val dir = context.filesDir
-        val output = File(dir, "overall_attendance_activity_" +
+        val output = File(dir, "report_table_log_" +
                 System.currentTimeMillis() + ".csv")
         csvReportFilePath = output.absolutePath
 
@@ -132,6 +131,8 @@ class ReportTableListComponent : LinearLayout, ReportTableListComponentView {
     }
 
     private fun createSalesLog(dataSet: List<Any>): LinearLayout {
+        tableTextData = ArrayList()
+
         val topLL = LinearLayout(mContext)
         topLL.orientation = LinearLayout.VERTICAL
         val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -172,6 +173,11 @@ class ReportTableListComponent : LinearLayout, ReportTableListComponentView {
             d1.setPadding(0, 0, 0, 8)
             topLL.addView(d1)
             topLL.addView(horizontalLine)
+
+
+            val array = arrayOf(t1.text.toString(), v1.text.toString(), l1.text.toString(),
+                    d1.text.toString())
+            tableTextData.add(array)
         }
 
         return topLL
@@ -179,6 +185,7 @@ class ReportTableListComponent : LinearLayout, ReportTableListComponentView {
     }
 
     private fun createTopLEs(dataSet: List<Any>): LinearLayout {
+        tableTextData = ArrayList()
 
         val topLL = LinearLayout(mContext)
         topLL.orientation = LinearLayout.VERTICAL
@@ -199,6 +206,9 @@ class ReportTableListComponent : LinearLayout, ReportTableListComponentView {
             topLL.addView(v1)
             v1.setPadding(0, 0, 0, 8)
             topLL.addView(horizontalLine)
+
+            val array = arrayOf(t1.text.toString(), v1.text.toString())
+            tableTextData.add(array)
         }
 
 

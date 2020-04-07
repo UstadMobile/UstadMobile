@@ -185,7 +185,6 @@ class UserProfilePresenter (context: Any, arguments: Map<String, String?>, view:
      * Starts the sync process
      */
     fun handleClickLastSync(){
-        //TODO Start the sync process.
         view.runOnUiThread(Runnable {
             view.forceSync()
         })

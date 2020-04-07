@@ -111,7 +111,7 @@ class SaleProductCategoryListActivity : UstadBaseActivity(), SaleProductCategory
                 onBackPressed()
                 true
             }
-            R.id.action_search -> //TODO: Handle search
+            R.id.action_search ->
                 true
             R.id.action_edit -> {
                 mPresenter.handleClickEditThisCategory()

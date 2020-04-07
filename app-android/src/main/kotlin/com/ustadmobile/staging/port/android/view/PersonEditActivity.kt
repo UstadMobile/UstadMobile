@@ -65,6 +65,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -390,7 +391,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
 
                     //Add the Header
                     val header = TextView(this)
-                    header.text = label!!.toUpperCase()
+                    header.text = label!!.toUpperCase(Locale.ROOT)
                     header.textSize = HEADER_TEXT_SIZE.toFloat()
                     header.setPadding(DEFAULT_PADDING, 0, 0, DEFAULT_PADDING_HEADER_BOTTOM)
                     thisLinearLayout.addView(header)
@@ -546,7 +547,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
             fieldHLayout.addView(fieldView)
         }
 
-        mLinearLayout!!.addView(fieldHLayout)
+        mLinearLayout.addView(fieldHLayout)
 
     }
 
@@ -651,7 +652,7 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     Observer<PagedList<ClazzWithNumStudents>> { recyclerAdapter.submitList(it) })
         }
 
-        mRecyclerView!!.setAdapter(recyclerAdapter)
+        mRecyclerView.setAdapter(recyclerAdapter)
     }
 
     override fun setRoleAssignmentListProvider(factory:
@@ -669,12 +670,12 @@ class PersonEditActivity : UstadBaseActivity(), PersonEditView {
                     Observer<PagedList<EntityRoleWithGroupName>> { recyclerAdapter.submitList(it) })
         }
 
-        mRecyclerView2!!.setAdapter(recyclerAdapter)
+        mRecyclerView2.adapter = recyclerAdapter
 
     }
 
     override fun updateToolbarTitle(titleName: String) {
-        toolbar.setTitle(titleName)
+        toolbar.title = titleName
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }

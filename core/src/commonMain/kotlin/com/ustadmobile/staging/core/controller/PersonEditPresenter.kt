@@ -273,6 +273,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
             if (person != null) {
                 setFieldsOnView(person, headersAndFields!!, view)
                 updatedPerson = person
+                personWEGroupUid = updatedPerson?.mPersonGroupUid?:0L
             }
         }
     }
@@ -837,7 +838,7 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                 val finalValueString = valueString
                 GlobalScope.launch {
                     val result =
-                            customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(
+                            customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
                                     customFieldUid, personUid)
                     val customFieldValue: CustomFieldValue?
                     if (result == null) {
@@ -845,11 +846,11 @@ class PersonEditPresenter (context: Any, arguments: Map<String, String>?, view: 
                         customFieldValue.customFieldValueEntityUid = personUid
                         customFieldValue.customFieldValueFieldUid = customFieldUid
                         customFieldValue.customFieldValueValue = finalValueString
-                        customFieldValueDao!!.insert(customFieldValue)
+                        customFieldValueDao.insert(customFieldValue)
                     } else {
                         customFieldValue = result
                         customFieldValue.customFieldValueValue = finalValueString
-                        customFieldValueDao!!.update(customFieldValue)
+                        customFieldValueDao.update(customFieldValue)
                     }
                 }
             }

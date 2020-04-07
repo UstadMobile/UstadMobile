@@ -272,7 +272,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
      * Compress the image set using Compressor.
      *
      */
-    fun compressImage() {
+    private fun compressImage() {
         val imageFile = File(imagePathFromCamera)
 
         val c = Compressor(this)
@@ -516,7 +516,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
 
     }
 
-    override fun addComponent(value: String, label: String) {
+    override fun addCustomFieldComponent(value: String, label: String) {
         var value = value
 
         val hll = LinearLayout(this)

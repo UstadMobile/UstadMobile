@@ -151,7 +151,7 @@ class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {
         chartComponent.layoutParams = params
         rPresenter = ReportChartViewComponentPresenter(this, args, chartComponent)
                 as CommonReportPresenter<CommonReportView>
-        rPresenter!!.onCreate(args)
+        rPresenter?.onCreate(args)
 
         chartLL!!.addView(chartComponent)
 
@@ -178,7 +178,7 @@ class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {
         salesLogComponent.layoutParams = params
         rPresenter = ReportSalesLogComponentPresenter(this, args, salesLogComponent)
                 as CommonReportPresenter<CommonReportView>
-        rPresenter!!.onCreate(args)
+        rPresenter?.onCreate(args)
 
         chartLL!!.addView(salesLogComponent)
 
@@ -202,8 +202,10 @@ class ReportDetailActivity : UstadBaseActivity(), ReportDetailView {
         //Create View, presenter and add it to the view
         val topLEsComponent = ReportTableListComponent(this)
         topLEsComponent.layoutParams = params
-        val tPresenter = ReportTopLEsComponentPresenter(this, args, topLEsComponent)
-        tPresenter.onCreate(args)
+        rPresenter = ReportTopLEsComponentPresenter(this, args, topLEsComponent)
+                as CommonReportPresenter<CommonReportView>
+        rPresenter?.onCreate(args)
+
 
         chartLL!!.addView(topLEsComponent)
 

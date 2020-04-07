@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
@@ -128,8 +127,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         }
     }
 
-
-
     /**
      * Getting custom fields (new way)
      */
@@ -139,14 +136,15 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
         //1. Get all custom fields
         GlobalScope.launch {
-            val result = customFieldDao!!.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID)
-            for (c in result!!) {
+            val result = customFieldDao.findAllCustomFieldsProviderForEntityAsync(Person.TABLE_ID)
+            for (c in result) {
 
                 //Get value as well
-                val result2 = customFieldValueDao!!.findValueByCustomFieldUidAndEntityUid(c.customFieldUid, personUid)
+                val result2 = customFieldValueDao.findValueByCustomFieldUidAndEntityUid(
+                        c.customFieldUid, personUid)
 
                 var valueString: String? = ""
-                var valueSelection = 0
+                var valueSelection = -1
 
                 if (c.customFieldType == CustomField.FIELD_TYPE_TEXT) {
 
@@ -160,7 +158,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                         }
                         //view.addCustomFieldText(c, finalValueString);
                         val cfName = c.getNameByLocale(impl.getLocale(context))
-                        view.addComponent(finalValueString[0], cfName!!)
+                        view.addCustomFieldComponent(finalValueString[0], cfName!!)
                     })
 
                 } else if (c.customFieldType == CustomField.FIELD_TYPE_DROPDOWN) {
@@ -168,7 +166,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                         try {
                             valueSelection = result2.customFieldValueValue!!.toInt()
                         } catch (nfe: NumberFormatException) {
-                            valueSelection = 0
+                            valueSelection = -1
                         }
 
                     }
@@ -181,13 +179,13 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                     }
                     //Get value
                     var valueString = "-"
-                    if (finalValueSelection > 0) {
+                    if (finalValueSelection > -1) {
                         valueString = options[finalValueSelection]
                     }
                     val finalValueString = valueString
                     view.runOnUiThread(Runnable{
                         val cfName = c.getNameByLocale(impl.getLocale(context))
-                        view.addComponent(finalValueString, cfName)
+                        view.addCustomFieldComponent(finalValueString, cfName)
 
                     })
                 }
@@ -227,19 +225,25 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
     private fun handleFabLive(result:Boolean?){
         if(result != null) {
-            view.showFAB(result!!)
+            view.runOnUiThread(Runnable {
+                view.showFAB(result)
+            })
         }
     }
 
     private fun handleImageButtonLive(result:Boolean?){
         if(result != null) {
-            view.showUpdateImageButton(result!!)
+            view.runOnUiThread(Runnable {
+                view.showUpdateImageButton(result)
+            })
         }
     }
 
     private fun handleDropoutAndEnrollLive(result:Boolean?){
         //view.showDropout(result!!)
-        view.showEnrollInClass(result!!)
+        view.runOnUiThread(Runnable {
+            view.showEnrollInClass(result!!)
+        })
     }
 
     /**
@@ -296,11 +300,15 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
      * Sets the Class List provider of ClazzNumWithStudents type to the view.
      */
     private fun setClazzListOnView() {
-        view.setClazzListProvider(assignedClazzes!!)
+        view.runOnUiThread(Runnable {
+            view.setClazzListProvider(assignedClazzes!!)
+        })
     }
 
     private fun setRoleAssignmentsOnView(){
-        view.setRoleAssignmentListProvider(assignedRoleAssignments!!)
+        view.runOnUiThread(Runnable {
+            view.setRoleAssignmentListProvider(assignedRoleAssignments!!)
+        })
     }
 
     /**
@@ -548,7 +556,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
             } else {//this is actually a custom field
 
-                var cf = customFieldWithFieldValueMap!![field.fieldUid]
+                val cf = customFieldWithFieldValueMap!![field.fieldUid]
                 var cfLabelMessageId = 0
                 var cfFieldIcon: String? = ""
                 var cfValue: Any? = null
@@ -593,7 +601,11 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
             }
         }
 
-        view.doneSettingFields()
+        view.runOnUiThread(Runnable {
+            view.doneSettingFields()
+        })
+
+        getAllPersonCustomFields()
     }
 
     private fun handleAverageLive(result:Float?){
@@ -618,8 +630,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
         presenterFields = cleanedFields
         customFieldWithFieldValueMap = HashMap()
-
-        getAllPersonCustomFields()
 
         //Get the attendance average for this person.
         GlobalScope.launch {
@@ -703,7 +713,9 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
      * @param number The phone number
      */
     fun handleClickCall(number: String) {
-        view.handleClickCall(number)
+        view.runOnUiThread(Runnable {
+            view.handleClickCall(number)
+        })
     }
 
     /**
@@ -713,7 +725,9 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
      * @param number The phone number
      */
     fun handleClickText(number: String) {
-        view.handleClickText(number)
+        view.runOnUiThread(Runnable {
+            view.handleClickText(number)
+        })
     }
 
     fun goToUpdateUsernamePassword() {

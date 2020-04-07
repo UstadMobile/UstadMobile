@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.SyncResult
+import com.ustadmobile.door.SyncResult.Companion.STATUS_SUCCESS
 import com.ustadmobile.lib.database.annotation.UmRepository
 
 @UmRepository
@@ -13,7 +14,7 @@ abstract class SyncResultDao : BaseDao<SyncResult> {
     @Query("SELECT timestamp from SyncResult ORDER BY timestamp DESC LIMIT 1")
     abstract suspend fun getLatestTimeStamp(): Long
 
-    @Query("SELECT timestamp from SyncResult ORDER BY timestamp DESC LIMIT 1")
+    @Query("SELECT timestamp from SyncResult WHERE status = " + STATUS_SUCCESS + " ORDER BY timestamp DESC LIMIT 1")
     abstract fun getLatestTimeStampLive(): DoorLiveData<Long>
 
     companion object {

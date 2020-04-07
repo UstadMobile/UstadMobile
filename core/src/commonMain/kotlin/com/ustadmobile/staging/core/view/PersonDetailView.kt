@@ -85,7 +85,7 @@ interface PersonDetailView : UstadView {
 
     fun clearAllCustomFields()
 
-    fun addComponent(value: String, label: String)
+    fun addCustomFieldComponent(value: String, label: String)
 
     fun updateToolbar(name: String)
 

@@ -20,7 +20,7 @@ import kotlinx.serialization.json.JsonConfiguration
 class ReportTopLEsComponentPresenter(context: Any,
                                      arguments: Map<String, String>?,
                                      view: ReportTableListComponentView)
-    : UstadBaseController<ReportTableListComponentView>(context, arguments!!, view) {
+    : CommonReportPresenter<ReportTableListComponentView>(context, arguments!!, view) {
 
     internal var repository: UmAppDatabase
     internal lateinit var reportOptions: ReportOptions
@@ -74,4 +74,7 @@ class ReportTopLEsComponentPresenter(context: Any,
         })
     }
 
+    override fun downloadReport() {
+        view.downloadReport()
+    }
 }

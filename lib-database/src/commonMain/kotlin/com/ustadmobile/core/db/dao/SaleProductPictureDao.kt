@@ -36,7 +36,8 @@ abstract class SaleProductPictureDao : BaseDao<SaleProductPicture> {
     }
 
     @Query(""" SELECT * FROM SaleProductPicture WHERE 
-        saleProductPictureSaleProductUid = :saleProductUid AND saleProductPictureIndex = 0""")
+        saleProductPictureSaleProductUid = :saleProductUid AND saleProductPictureIndex = 
+         ( SELECT MIN(saleProductPictureIndex) FROM SaleProductPicture WHERE saleProductPictureSaleProductUid = :saleProductUid ) """)
     abstract suspend fun findBySaleProductUidAsync2(saleProductUid: Long): SaleProductPicture?
 
     @Query("""SELECT * FROM SaleProductPicture WHERE 
