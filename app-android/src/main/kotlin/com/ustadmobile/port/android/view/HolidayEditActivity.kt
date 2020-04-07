@@ -1,17 +1,17 @@
 package com.ustadmobile.port.android.view
 
-import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
-import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
-import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import android.content.Intent
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityHolidayEditBinding
 import com.ustadmobile.core.controller.HolidayEditPresenter
+import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toBundle
@@ -19,11 +19,10 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.lib.db.entities.Holiday
-
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
+import com.ustadmobile.port.android.view.ext.setEditActivityTitle
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
+import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
 
 
 fun ComponentActivity.prepareHolidayEditCall(callback: (List<Holiday>?) -> Unit) = prepareCall(CrudEditActivityResultContract(this, Holiday::class.java,
@@ -64,6 +63,7 @@ class HolidayEditActivity : UstadBaseActivity(), HolidayEditView,
         val toolbar = findViewById<Toolbar>(R.id.activity_holiday_edit_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setEditActivityTitle(R.string.holiday)
 
         mPresenter = HolidayEditPresenter(this, intent.extras.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
