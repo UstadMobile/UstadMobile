@@ -23,7 +23,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> presenter.handleClickEntry(@Entity_VariableName@)}"
+        android:background="?attr/selectableItemBackground">
 
         <!-- TODO: Change or remove this icon -->
         <androidx.appcompat.widget.AppCompatImageView
@@ -45,8 +47,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/item_${entityLowerCase}_newitemicon"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
@@ -65,20 +68,19 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
 
-
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_${entityLowerCase}_secondary_menu_imageview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:padding="@dimen/list_twoline1_padding_secondactionimagebutton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_more_vert_black_24dp"
-            android:contentDescription="@string/edit"
-            app:onClickEditPopupMenu="@{() -> mActivity.onClickEdit${entity}(${entityVarName})}"
-            app:onClickDeletePopupMenu="@{() -> mPresenter.handleRemove${entity}(${entityVarName})}"
-            />
+            app:srcCompat="@drawable/ic_delete_black_24dp"
+            app:tint="@color/secondary_text"
+            android:contentDescription="@string/delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="@{() -> mPresenter.handleRemove${entity}(${entityVarName})}" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
