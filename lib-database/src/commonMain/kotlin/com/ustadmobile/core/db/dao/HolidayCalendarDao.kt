@@ -21,9 +21,8 @@ abstract class HolidayCalendarDao : BaseDao<HolidayCalendar> {
     abstract override fun update(entity: HolidayCalendar)
 
     @Query("SELECT HolidayCalendar.* ," +
-            " (SELECT COUNT(*) FROM DateRange " +
-            "   WHERE dateRangeUMCalendarUid = HolidayCalendar.umCalendarUid " +
-            "   AND dateRange.dateRangeActive = 1) AS numEntries " +
+            " ( SELECT COUNT(*) FROM Holiday WHERE " +
+            " holHolidayCalendarUid = HolidayCalendar.umCalendarUid) AS numEntries " +
             " FROM HolidayCalendar WHERE CAST(umCalendarActive AS INTEGER) = 1 AND " +
             " umCalendarCategory = " + HolidayCalendar.CATEGORY_HOLIDAY)
     abstract fun findAllHolidaysWithEntriesCount(): DataSource.Factory<Int, HolidayCalendarWithNumEntries>

@@ -7,7 +7,7 @@ import com.ustadmobile.core.db.dao.DateRangeDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.AddDateRangeDialogView
 import com.ustadmobile.core.view.AddDateRangeDialogView.Companion.DATERANGE_UID
-import com.ustadmobile.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDAR_UID
+import com.ustadmobile.staging.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDAR_UID
 import com.ustadmobile.lib.db.entities.DateRange
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

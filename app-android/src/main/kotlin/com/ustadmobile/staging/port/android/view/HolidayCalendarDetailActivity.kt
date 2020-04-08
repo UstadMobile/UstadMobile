@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.HolidayCalendarDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.HolidayCalendarDetailView
+import com.ustadmobile.staging.core.view.HolidayCalendarDetailView
 import com.ustadmobile.lib.db.entities.DateRange
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.port.android.view.UstadBaseActivity

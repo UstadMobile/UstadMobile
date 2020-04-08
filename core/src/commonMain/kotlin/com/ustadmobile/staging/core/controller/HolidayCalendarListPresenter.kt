@@ -7,8 +7,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.HolidayCalendarDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.HolidayCalendarDetailView
-import com.ustadmobile.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDAR_UID
+import com.ustadmobile.staging.core.view.HolidayCalendarDetailView
+import com.ustadmobile.staging.core.view.HolidayCalendarDetailView.Companion.ARG_CALENDAR_UID
 import com.ustadmobile.staging.core.view.HolidayCalendarListView
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import kotlinx.coroutines.GlobalScope

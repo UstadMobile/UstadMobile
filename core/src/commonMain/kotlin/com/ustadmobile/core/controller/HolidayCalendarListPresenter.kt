@@ -52,13 +52,13 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
     override fun handleClickEntry(entry: HolidayCalendar) {
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-//            ListViewMode.BROWSER -> systemImpl.go(HolidayCalendarDetailView.VIEW_NAME,
-//                mapOf(HolidayCalendarDetailView.ARG_ENTITY_UID to uid, context)
+            ListViewMode.BROWSER -> systemImpl.go(HolidayCalendarEditView.VIEW_NAME,
+                mapOf(UstadView.ARG_ENTITY_UID to entry.umCalendarUid.toString()), context)
         }
     }
 
     override fun handleClickCreateNewFab() {
-        //TODO: go to the view
+        systemImpl.go(HolidayCalendarEditView.VIEW_NAME, mapOf(), context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {

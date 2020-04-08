@@ -1,7 +1,8 @@
-package com.ustadmobile.core.view
+package com.ustadmobile.staging.core.view
 
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.DateRange
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 

@@ -13,7 +13,7 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: Set
 
     fun goToSELQuestionSets() {
         val args = HashMap<String, String>()
-        impl.go(SELQuestionSetsView.VIEW_NAME, args, context)
+        impl.go(SelQuestionSetListView.VIEW_NAME, args, context)
     }
 
     fun goToHolidayCalendarList() {

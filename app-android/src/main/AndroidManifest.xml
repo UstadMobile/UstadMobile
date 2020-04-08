@@ -190,7 +190,7 @@
             android:name="com.ustadmobile.staging.port.android.view.BulkUploadMasterActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.SettingsActivity"
+            android:name="com.ustadmobile.port.android.view.SettingsActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.SELQuestionSetsActivity"
@@ -323,6 +323,19 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/assignment"
             android:theme="@style/Theme.UstadTheme" />
+
+        <activity
+            android:name="com.ustadmobile.port.android.view.SelQuestionSetListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/sel_question_set"
+            android:theme="@style/Theme.UstadTheme" />
+
+        <activity
+            android:name="com.ustadmobile.port.android.view.SelQuestionSetEditActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/questions"
+            android:theme="@style/Theme.UstadTheme" />
+
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"

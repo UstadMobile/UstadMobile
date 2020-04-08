@@ -1,15 +1,11 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import java.util.Formatter
 import androidx.activity.ComponentActivity
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
 import com.ustadmobile.port.android.view.util.CrudListActivityResultContract
 
 fun ComponentActivity.prepareHolidayCalendarPickFromListCall(callback: (List<HolidayCalendar>?) -> Unit)

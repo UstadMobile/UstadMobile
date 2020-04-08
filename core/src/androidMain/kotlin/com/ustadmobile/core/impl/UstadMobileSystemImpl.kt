@@ -49,6 +49,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.*
+import com.ustadmobile.staging.core.view.HolidayCalendarDetailView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.InputStream
@@ -145,7 +146,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ReportNumberOfDaysClassesOpenView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportNumberOfDaysClassesOpenActivity"),
             ReportAttendanceGroupedByThresholdsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportAttendanceGroupedByThresholdsActivity"),
             BulkUploadMasterView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}BulkUploadMasterActivity"),
-            SettingsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SettingsActivity"),
             SELQuestionSetsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetsActivity"),
             AddQuestionSetDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddQuestionSetDialogFragment"),
             SELQuestionSetDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetDetailActivity"),
@@ -158,7 +158,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ReportSELView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSELActivity"),
             PersonListSearchView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonListSearchActivity"),
             BaseReportView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSelectionFragment"),
-            HolidayCalendarListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}HolidayCalendarListActivity"),
             HolidayCalendarDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}HolidayCalendarDetailActivity"),
             RoleListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleListActivity"),
             RoleDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleDetailActivity"),
@@ -185,7 +184,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
             ClazzAssignmentEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentEditActivity"),
             ClazzAssignmentDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentDetailActivity"),
-            SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"))
+            SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"),
+            SettingsView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SettingsActivity"),
+            SelQuestionSetListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelQuestionSetListActivity"),
+            SelQuestionSetEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelQuestionSetEditActivity"),
+            HolidayCalendarListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HolidayCalendarListActivity"),
+            HolidayCalendarEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HolidayCalendarEditActivity")
+    )
 
 
 

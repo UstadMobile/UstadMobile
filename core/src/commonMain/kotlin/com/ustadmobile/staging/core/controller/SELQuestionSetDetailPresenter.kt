@@ -73,7 +73,7 @@ SELQuestionSetDetailView, val impl : UstadMobileSystemImpl = UstadMobileSystemIm
         super.onCreate(savedState)
 
         GlobalScope.launch {
-            questionUmProvider = selQuestionDao.findAllActivrQuestionsInSet(questionSetUid)
+            //questionUmProvider = selQuestionDao.findAllActivrQuestionsInSet(questionSetUid)
             view.setListProvider(questionUmProvider!!)
             view.updateToolbarTitle(questionSetName)
         }

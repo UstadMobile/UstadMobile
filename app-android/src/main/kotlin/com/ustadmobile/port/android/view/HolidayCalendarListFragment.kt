@@ -27,8 +27,10 @@ import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 import com.ustadmobile.port.android.view.util.getDataItemViewHolder
 
-class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries>(),
-        HolidayCalendarListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class HolidayCalendarListFragment()
+    : UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries>(),
+        HolidayCalendarListView, MessageIdSpinner.OnMessageIdOptionSelectedListener,
+        View.OnClickListener{
 
     private var mPresenter: HolidayCalendarListPresenter? = null
 
@@ -43,16 +45,17 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
             onClickNewItem = onClickNewItem,
             createNewText = createNewText) {
 
-        class HolidayCalendarListViewHolder(val itemBinding: ItemHolidayCalendarBinding): RecyclerView.ViewHolder(itemBinding.root)
+        class HolidayCalendarListViewHolder(val itemBinding: ItemHolidayCalendarBinding)
+            : RecyclerView.ViewHolder(itemBinding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             if(viewType == ITEMVIEWTYPE_NEW) {
                 return super.onCreateViewHolder(parent, viewType)
             }else {
-                val itemBinding = ItemHolidayCalendarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                val itemBinding = ItemHolidayCalendarBinding.inflate(
+                        LayoutInflater.from(parent.context), parent, false)
                 return HolidayCalendarListViewHolder(itemBinding)
             }
-
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -79,8 +82,8 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter, false, this,
-            requireContext().getString(R.string.create_new, requireContext().getString(R.string.holiday_calendar)))
+        mRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter, false,
+                this, requireContext().getString(R.string.create_new, requireContext().getString(R.string.holiday_calendar)))
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }
