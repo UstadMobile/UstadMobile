@@ -77,6 +77,12 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
         return view
     }
 
+    override run onResume() {
+        super.onResume()
+        mActivityWithFab?.activityFloatingActionButton?.text =
+                requireContext().getString(R.string.@Entity_LowerCase@)
+    }
+
     override fun onClick(view: View?) {
         activity?.prepare@Entity@EditCall {
             if(it != null) {

@@ -13,7 +13,7 @@ fun ComponentActivity.prepare@Entity@PickFromListCall(callback: (List<@Entity@>?
     callback.invoke(it)
 }
 
-class @Entity@ListActivity: UstadBaseActivity(){
+class @Entity@ListActivity: UstadListViewActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

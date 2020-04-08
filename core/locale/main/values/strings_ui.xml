@@ -821,4 +821,12 @@ Content is provided under license by external content providers. Ustad Mobile, u
     replaced with the name of the item (e.g. Holiday)-->
     <string name="add_a">Add a %1$s</string>
 
+    <!-- Used to set the title on an edit screen where the user is creating a new entity e.g.
+    new class, new assignment, etc. -->
+    <string name="new_entity">New %1$s</string>
+
+    <!-- Used to set the title on an edit screen where the user is editing an existing entity
+     e.g. Edit Class, Edit Assignment, etc -->
+    <string name="edit_entity">Edit %1$s</string>
+
 </resources>

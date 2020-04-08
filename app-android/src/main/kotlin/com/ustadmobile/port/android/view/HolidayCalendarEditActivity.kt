@@ -29,6 +29,7 @@ import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
+import com.ustadmobile.port.android.view.ext.setEditActivityTitle
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
 
 
@@ -103,6 +104,7 @@ class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView
         val toolbar = findViewById<Toolbar>(R.id.activity_holidaycalendar_edit_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setEditActivityTitle(R.string.holiday_calendar)
 
         holidayRecyclerView = findViewById(R.id.activity_holidaycalendar_holiday_recyclerview)
         holidayRecyclerAdapter = HolidayRecyclerAdapter(this, null)

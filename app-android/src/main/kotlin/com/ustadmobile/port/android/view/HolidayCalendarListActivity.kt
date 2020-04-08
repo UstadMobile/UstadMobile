@@ -14,16 +14,11 @@ fun ComponentActivity.prepareHolidayCalendarPickFromListCall(callback: (List<Hol
     callback.invoke(it)
 }
 
-
-
-class HolidayCalendarListActivity: UstadBaseActivity(){
+class HolidayCalendarListActivity: UstadListViewActivity(), UstadListViewActivityWithFab{
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_listfragment_holder)
-        setSupportActionBar(findViewById(R.id.activity_listfragment_toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = if(intent?.getStringExtra(UstadView.ARG_LISTMODE) == ListViewMode.PICKER.toString()) {
             resources.getString(R.string.select_item, resources.getString(R.string.holiday_calendar))
         }else {

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemClazzlist2ClazzBinding
 import com.ustadmobile.core.controller.ClazzList2Presenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -83,6 +84,11 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
         //do nothing
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mActivityWithFab?.activityFloatingActionButton?.text = requireContext().getText(R.string.clazz)
     }
 
     override val displayTypeRepo: Any?

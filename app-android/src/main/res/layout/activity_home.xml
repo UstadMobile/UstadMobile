@@ -1,107 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:id="@+id/coordinationLayout"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <data>
+        <import type="android.view.View"/>
+
+        <variable
+            name="bottomNavVisible"
+            type="boolean" />
+
+
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:id="@+id/appBar"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        app:elevation="@dimen/dimen_4dp">
+        android:id="@+id/coordinationLayout"
+        android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/collapsing_toolbar"
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:id="@+id/appBar"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            app:elevation="@dimen/dimen_4dp">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/collapsing_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:contentScrim="?colorPrimary"
+                app:expandedTitleMarginStart="0dp"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:titleEnabled="false">
+
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/entry_toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/colorPrimary"
+                    app:elevation="0dp"
+                    android:minHeight="?attr/actionBarSize"
+                    android:titleTextColor="@color/toolbar">
+
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+                            android:id="@+id/profile_image"
+                            android:layout_width="@dimen/dimen_30dp"
+                            android:layout_height="@dimen/dimen_30dp"
+                            android:layout_centerVertical="true"
+                            android:visibility="visible"
+                            app:civ_border_color="@color/primary_light"
+                            app:civ_border_width="2dp" />
+
+
+                        <TextView
+                            android:id="@+id/toolBarTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="56dp"
+                            android:layout_marginStart="@dimen/dimen_16dp"
+                            android:layout_toEndOf="@+id/profile_image"
+                            android:background="?attr/colorPrimary"
+                            android:gravity="center_vertical|start"
+                            android:minHeight="?attr/actionBarSize"
+                            android:textColor="@color/primary_text"
+                            android:textSize="@dimen/text_title"
+                            android:textStyle="bold" />
+                    </RelativeLayout>
+
+
+                </androidx.appcompat.widget.Toolbar>
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!--
+            Note the bottom padding is set dynamically in the HomeActivity based on whether or
+            not the bottom navigation is visible
+
+
+            -->
+        <com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager
+            android:id="@+id/home_view_pager"
+            android:layout_below="@id/appBar"
+            android:paddingBottom="@dimen/bottom_navigation_height"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:contentScrim="?colorPrimary"
-            app:expandedTitleMarginStart="0dp"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:titleEnabled="false">
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:layout_marginBottom="@{bottomNavVisible ? @dimen/dimen_40dp : @dimen/dimen_0dp }"
+            tools:layout_marginBottom="54dp"
+            />
 
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/activity_home_fab"
+            android:text="-"
+            android:visibility="gone"
+            tools:text="Entity"
+            android:textColor="@color/primary_text"
+            android:backgroundTint="@color/accent"
+            app:icon="@drawable/ic_add_black_24dp"
+            app:iconTint="@color/primary_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="@{bottomNavVisible ? @dimen/dimen_64dp : @dimen/dimen_24dp}"
+            tools:layout_marginBottom="24dp"
+            tools:ignore="HardcodedText" />
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/entry_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/colorPrimary"
-                app:elevation="0dp"
-                android:minHeight="?attr/actionBarSize"
-                android:titleTextColor="@color/toolbar">
+        <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+            app:layout_anchorGravity="bottom"
+            android:id="@+id/umBottomNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom" />
 
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        xmlns:app="http://schemas.android.com/apk/res-auto"
-                        android:id="@+id/profile_image"
-                        android:layout_width="@dimen/dimen_30dp"
-                        android:layout_height="@dimen/dimen_30dp"
-                        android:layout_centerVertical="true"
-                        android:visibility="visible"
-                        app:civ_border_color="@color/primary_light"
-                        app:civ_border_width="2dp" />
-
-
-                    <TextView
-                        android:id="@+id/toolBarTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="56dp"
-                        android:layout_marginStart="@dimen/dimen_16dp"
-                        android:layout_toEndOf="@+id/profile_image"
-                        android:background="?attr/colorPrimary"
-                        android:gravity="center_vertical|start"
-                        android:minHeight="?attr/actionBarSize"
-                        android:textColor="@color/primary_text"
-                        android:textSize="@dimen/text_title"
-                        android:textStyle="bold" />
-                </RelativeLayout>
-
-
-            </androidx.appcompat.widget.Toolbar>
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!--
-        Note the bottom padding is set dynamically in the HomeActivity based on whether or
-        not the bottom navigation is visible
-        -->
-    <com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager
-        android:id="@+id/home_view_pager"
-        android:layout_below="@id/appBar"
-        android:paddingBottom="@dimen/bottom_navigation_height"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
-
-    <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
-        app:layout_anchorGravity="bottom"
-        android:visibility="gone"
-        android:id="@+id/umBottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"/>
-
-    <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:elevation="8dp"
-        android:layout_marginBottom="@dimen/dimen_40dp"
-        app:layout_anchor="@id/home_view_pager"
-        android:id="@+id/download_all"
-        android:layout_width="wrap_content"
-        android:padding="@dimen/dimen_8dp"
-        android:layout_height="wrap_content"
-        app:floating_background_color="@color/accent"
-        app:floating_left_icon="@drawable/ic_filedownload_bitmap"
-        app:floating_title="@string/download_all"
-        app:layout_anchorGravity="bottom|center"
-        app:floating_title_color="@android:color/black" />
-
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

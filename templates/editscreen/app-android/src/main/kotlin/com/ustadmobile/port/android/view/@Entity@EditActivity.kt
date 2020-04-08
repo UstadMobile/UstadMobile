@@ -24,6 +24,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
+import com.ustadmobile.port.android.view.ext.setEditActivityTitle
+
 
 
 fun ComponentActivity.prepare@Entity@EditCall(callback: (List<@Entity@>?) -> Unit) = prepareCall(CrudEditActivityResultContract(this, @Entity@::class.java,
@@ -65,6 +67,7 @@ class @Entity@EditActivity : UstadBaseActivity(), @Entity@EditView,
         val toolbar = findViewById<Toolbar>(R.id.activity_@Entity_LowerCase@_edit_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setEditActivityTitle(R.string.@Entity_LowerCase@)
 
         mPresenter = @Entity@EditPresenter(this, intent.extras.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,

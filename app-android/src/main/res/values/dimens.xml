@@ -53,6 +53,7 @@
     <dimen name="dimen_30dp">30dp</dimen>
     <dimen name="dimen_40dp">40dp</dimen>
     <dimen name="dimen_50dp">50dp</dimen>
+    <dimen name="dimen_64dp">64dp</dimen>
     <dimen name="dimen_70dp">70dp</dimen>
     <dimen name="text_hint">16sp</dimen>
     <dimen name="dimen_24dp">24dp</dimen>
@@ -68,6 +69,9 @@
     <!-- two line list item sizing as per https://material.io/components/lists/#specs-->
     <dimen name="list_twoline1_margin_vertical">16dp</dimen>
     <dimen name="list_twoline1_margin_horizontal">16dp</dimen>
+    <dimen name="list_twoline1_padding_secondactionimagebutton">16dp</dimen>
+    <!-- the margin between the start and the start of text -->
+    <dimen name="list_twoline1_margin_text_start">56dp</dimen>
     <dimen name="list_twoline1_imagesize">40dp</dimen>
     <dimen name="list_twoline1_textsize_line1">16sp</dimen>
     <dimen name="list_twoline1_textsize_line2">12sp</dimen>

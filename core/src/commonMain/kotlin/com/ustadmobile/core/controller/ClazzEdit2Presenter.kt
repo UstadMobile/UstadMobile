@@ -41,7 +41,7 @@ class ClazzEdit2Presenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendar? {
-        val clazzUid = arguments[UstadView.ARG_CLAZZ_UID]?.toLong() ?: 0L
+        val clazzUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         val clazz = withTimeoutOrNull(2000) {
             db.clazzDao.takeIf {clazzUid != 0L }?.findByUidWithHolidayCalendarAsync(clazzUid) ?:
                 ClazzWithHolidayCalendar().also {

@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
+import com.ustadmobile.port.android.view.ext.setEditActivityTitle
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
 import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
 
@@ -46,6 +47,7 @@ class ScheduleEditActivity : UstadBaseActivity(), ScheduleEditView{
         val toolbar = findViewById<Toolbar>(R.id.activity_schedule_edit_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setEditActivityTitle(R.string.schedule)
 
         mPresenter = ScheduleEditPresenter(this, intent.extras.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,

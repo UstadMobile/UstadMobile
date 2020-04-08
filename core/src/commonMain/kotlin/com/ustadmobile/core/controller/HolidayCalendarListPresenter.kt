@@ -18,20 +18,9 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
         db, repo, activeAccount) {
 
 
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
-
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
-
-    class HolidayCalendarListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
-
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { HolidayCalendarListSortOption(it, context) }
-        view.list = repo.holidayCalendarDao.findAllHolidaysWithEntriesCount()
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -39,14 +28,7 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     private fun updateListOnView() {
-        /* TODO: Update the list on the view from the appropriate DAO query, e.g.
-        view.list = when(sortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.daoName.findAllActiveClazzesSortByNameAsc(
-                    searchQuery, loggedInPersonUid)
-            SortOrder.ORDER_NAME_DSC -> repo.daoName.findAllActiveClazzesSortByNameDesc(
-                    searchQuery, loggedInPersonUid)
-        }
-        */
+        view.list = repo.holidayCalendarDao.findAllHolidaysWithEntriesCount()
     }
 
     override fun handleClickEntry(entry: HolidayCalendar) {
@@ -62,10 +44,6 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? HolidayCalendarListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
+        //no sort options here
     }
 }

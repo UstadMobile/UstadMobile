@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Build
-import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -14,13 +13,16 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.ActivityHomeBinding
 import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -36,16 +38,13 @@ import com.ustadmobile.staging.port.android.view.PeopleListFragment
 import com.ustadmobile.staging.port.android.view.ReportSelectionFragment
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_home.*
-import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.lang.IllegalArgumentException
 
 
-class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener{
+class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener,
+    UstadListViewActivityWithFab{
 
     private lateinit var presenter: HomePresenter
-
-    private lateinit var downloadAllBtn: FloatingTextButton
-
     private lateinit var profileImage: CircleImageView
 
     val impl = UstadMobileSystemImpl.instance
@@ -53,6 +52,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     private var options: List<Pair<Int, String>> = listOf()
 
     private lateinit var mPager: ViewPager
+
+    private lateinit var mBinder: ActivityHomeBinding
 
     private class HomePagerAdapter(fm: FragmentManager,
                                    val options: List<Pair<Int, String>>): FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
@@ -73,23 +74,20 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         override fun getCount() = options.size
     }
 
+    override val activityFloatingActionButton: ExtendedFloatingActionButton?
+        get() = findViewById(R.id.activity_home_fab)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
+        mBinder = DataBindingUtil.setContentView(this, R.layout.activity_home)
 
         mPager = findViewById(R.id.home_view_pager)
-        downloadAllBtn = findViewById(R.id.download_all)
 
         val toolbar = findViewById<Toolbar>(R.id.entry_toolbar)
         coordinatorLayout = findViewById(R.id.coordinationLayout)
         profileImage = findViewById(R.id.profile_image)
         setSupportActionBar(toolbar)
         findViewById<TextView>(R.id.toolBarTitle).setText(R.string.app_name)
-
-
-        downloadAllBtn.setOnClickListener {
-            presenter.handleDownloadAllClicked()
-        }
 
         presenter = HomePresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
                 this, UmAccountManager.getActiveDatabase(this).personDao,
@@ -108,7 +106,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     }
 
     override fun showDownloadAllButton(show: Boolean) {
-        downloadAllBtn.visibility = if(show) View.VISIBLE else View.GONE
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -132,19 +130,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
         }
 
-        if(options.size > 1) {
-            umBottomNavigation.visibility = View.VISIBLE
-
-            mPager.apply {
-                setPadding(paddingLeft, paddingTop, paddingRight, TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP, 40f, resources.displayMetrics).toInt())
-            }
-        }else {
-            umBottomNavigation.visibility = View.INVISIBLE
-            mPager.apply {
-                setPadding(paddingLeft, paddingTop, paddingRight, 0)
-            }
-        }
+        mBinder.bottomNavVisible = options.size > 1
 
         umBottomNavigation.defaultBackgroundColor = ContextCompat.getColor(this, R.color.icons)
         umBottomNavigation.accentColor = ContextCompat.getColor(this, R.color.primary)
@@ -155,17 +141,25 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
         umBottomNavigation.setOnTabSelectedListener { position: Int, _: Boolean ->
             mPager.setCurrentItem(position)
-            updateElevation(options[position].second)
+            updateElevationAndFab(options[position].second)
             true
         }
 
         mPager.adapter = HomePagerAdapter(supportFragmentManager, options)
-        updateElevation(options[0].second)
+        updateElevationAndFab(options[0].second)
     }
 
     @SuppressLint("ObsoleteSdkInt") //We have build flavors that target lower than SDK 21
-    private fun updateElevation(optionUri: String) {
+    private fun updateElevationAndFab(optionUri: String) {
         val viewName = optionUri.substringBefore('?')
+        val fragmentClass = VIEW_NAME_TO_FRAGMENT_CLASS[viewName]
+
+        //if the fragment is an UstadListViewFragment - it will come back to us and tell us what it wants for the FAB
+        if(fragmentClass != null && UstadListViewFragment::class.java.isAssignableFrom(fragmentClass) == false) {
+            activityFloatingActionButton?.visibility = View.GONE
+            activityFloatingActionButton?.setOnClickListener(null)
+        }
+
         ViewCompat.setElevation(findViewById(R.id.appBar), if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
             0f
         }else {
@@ -259,7 +253,6 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                 ContentEntryListView.VIEW_NAME to HomeContentEntryTabsFragment::class.java,
                 FeedListView.VIEW_NAME to FeedListFragment::class.java,
                 ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
-                ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
                 ClazzList2View.VIEW_NAME to ClazzList2Fragment::class.java,
                 PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
                 HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java)

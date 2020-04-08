@@ -2,7 +2,10 @@ package com.ustadmobile.port.android.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -14,24 +17,18 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityClazzEdit2Binding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
-import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.GetResultMode
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
-import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
-import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract
+import com.ustadmobile.port.android.view.ext.setEditActivityTitle
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.util.*
 
 interface ClazzEdit2ActivityEventHandler {
@@ -82,9 +79,9 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
         rootView?.activityEventHandler = this
 
         val toolbar = findViewById<Toolbar>(R.id.activity_clazz_edit_toolbar)
-        toolbar.setTitle(R.string.class_setup)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setEditActivityTitle(R.string.clazz)
         scheduleRecyclerAdapter = ScheduleRecyclerAdapter(this, null)
         scheduleRecyclerView = findViewById(R.id.activity_clazz_edit_schedule_recyclerview)
         scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
@@ -120,6 +117,7 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
         prepareHolidayCalendarPickFromListCall {
             if(it != null) {
                 entity?.holidayCalendar = it[0]
+                entity?.clazzHolidayUMCalendarUid = it[0].umCalendarUid
                 rootView?.clazz = rootView?.clazz
             }
         }.launch(mapOf())
