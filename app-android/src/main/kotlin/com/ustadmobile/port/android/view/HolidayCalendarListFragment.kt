@@ -13,6 +13,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemHolidayCalendarBinding
 import com.toughra.ustadmobile.databinding.ItemHolidaycalendarListItemBinding
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
@@ -34,6 +35,9 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
 
     private var dbRepo: UmAppDatabase? = null
 
+    override val listPresenter: UstadListPresenter<*, in HolidayCalendarWithNumEntries>?
+        get() = mPresenter
+
     class HolidayCalendarListRecyclerAdapter(var presenter: HolidayCalendarListPresenter?,
                                              newItemVisible: Boolean,
                                              onClickNewItem: View.OnClickListener,
@@ -50,6 +54,8 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
                 return super.onCreateViewHolder(parent, viewType)
             }else {
                 val itemBinding = ItemHolidayCalendarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                itemBinding.selectionListener = this
+                itemBinding.selectedItems = selectedItems
                 return HolidayCalendarListViewHolder(itemBinding)
             }
 
@@ -81,6 +87,7 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
         mDataBinding?.onSortSelected = this
         mRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter, false, this,
             requireContext().getString(R.string.create_new, requireContext().getString(R.string.holiday_calendar)))
+        mRecyclerViewAdapter?.selectedItemsLiveData?.observe(this, selectionObserver)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }

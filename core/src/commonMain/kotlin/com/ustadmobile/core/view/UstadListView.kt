@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 
 enum class ListViewMode(val mode: String) {
@@ -15,6 +16,14 @@ enum class ListViewAddMode {
 }
 
 /**
+ * Options that can be shown when the user makes selections in a list.
+ */
+enum class SelectionOption(val messageId: Int, val commandId: Int) {
+    EDIT(MessageID.edit, 1),
+    DELETE(MessageID.delete, 2)
+}
+
+/**
  *
  */
 interface UstadListView<RT, DT>: UstadView {
@@ -24,6 +33,8 @@ interface UstadListView<RT, DT>: UstadView {
     var list: DataSource.Factory<Int, DT>?
 
     var sortOptions: List<MessageIdOption>?
+
+    var selectionOptions: List<SelectionOption>?
 
     fun finishWithResult(result: List<RT>)
 

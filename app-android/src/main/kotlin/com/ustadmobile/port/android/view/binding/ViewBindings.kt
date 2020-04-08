@@ -19,3 +19,12 @@ fun View.setMarginStartValue(marginValue: Float) =
 @BindingAdapter("android:layout_marginEnd")
 fun View.setMarginEndValue(marginValue: Float) =
         (layoutParams as? ViewGroup.MarginLayoutParams)?.apply { rightMargin = marginValue.toInt() }
+
+@BindingAdapter("onLongPress")
+fun View.setOnLongPress(onLongClick: View.OnClickListener) {
+    setOnLongClickListener {
+        onLongClick.onClick(this)
+
+        true
+    }
+}

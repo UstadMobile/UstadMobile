@@ -4,19 +4,33 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries"/>
         <variable
             name="holidayCalendar"
             type="com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries" />
+
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.HolidayCalendarListPresenter" />
+
+        <variable
+            name="selectionListener"
+            type="com.ustadmobile.port.android.view.util.PagedItemSelectionListener&lt;HolidayCalendarWithNumEntries&gt;" />
+
+        <variable
+            name="selectedItems"
+            type="java.util.List&lt;HolidayCalendarWithNumEntries&gt;"/>
+
+
     </data>
 
+    <!-- android:background="@{selected ? android.R.attr.selectableItemBackground : android.R.attr.state_selected}"-->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> presenter.handleClickEntry(holidayCalendar)}"
-        android:background="?attr/selectableItemBackground"
+        android:onClick="@{(view) -> selectedItems.size() == 0 ? presenter.handleClickEntry(holidayCalendar) : selectionListener.onItemSelectedChanged(view, holidayCalendar)}"
+        app:onLongPress="@{(view) -> selectionListener.onItemSelectedChanged(view, holidayCalendar)}"
+        android:background="@drawable/bg_listitem"
         >
 
         <!-- TODO: Change or remove this icon -->

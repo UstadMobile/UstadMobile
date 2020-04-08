@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemClazzlist2ClazzBinding
 import com.ustadmobile.core.controller.ClazzList2Presenter
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
@@ -28,6 +29,9 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
     private var mPresenter: ClazzList2Presenter? = null
 
     private var dbRepo: UmAppDatabase? = null
+
+    override val listPresenter: UstadListPresenter<*, in ClazzWithNumStudents>?
+        get() = mPresenter
 
     class ClazzList2RecyclerAdapter(var presenter: ClazzList2Presenter?): PagedListAdapterWithNewItem<ClazzWithNumStudents>(DIFF_CALLBACK) {
 

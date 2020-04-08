@@ -5,10 +5,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.view.ListViewAddMode
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadListView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
@@ -50,6 +47,10 @@ abstract class UstadListPresenter<V: UstadView, RT>(context: Any, arguments: Map
     }
 
     abstract fun handleClickEntry(entry: RT)
+
+    open fun handleClickSelectionOption(selectedItem: List<RT>, option: SelectionOption) {
+
+    }
 
     /**
      * This should be implemented to check if the given user has permission to add entries (and hence
