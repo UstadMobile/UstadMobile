@@ -41,7 +41,7 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
                 return super.onCreateViewHolder(parent, viewType)
             }else {
                 val itemBinding = Item@Entity_ViewBinding_VariableName@ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                return@Entity@ListViewHolder(itemBinding)
+                return @Entity@ListViewHolder(itemBinding)
             }
         }
 
