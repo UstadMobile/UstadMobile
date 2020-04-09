@@ -2,8 +2,10 @@ package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
 import android.text.format.DateFormat
+import android.widget.EditText
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
+import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -59,4 +61,16 @@ fun TextView.setTextDateRange(fromDate: Long, toDate: Long) {
     val dateFormatter = DateFormat.getDateFormat(context)
     text = context.getString(R.string.from_to_date, dateFormatter.format(fromDate),
         dateFormatter.format(toDate))
+}
+
+@BindingAdapter("runOnClickWhenFocused")
+fun TextInputEditText.setRunOnClickWhenFocused(runOnClickWhenFocused: Boolean) {
+    if(runOnClickWhenFocused) {
+        setOnFocusChangeListener { v, hasFocus ->
+            if(hasFocus)
+                v.callOnClick()
+        }
+    }else {
+        setOnFocusChangeListener(null)
+    }
 }

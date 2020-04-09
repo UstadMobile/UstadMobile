@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemHolidayCalendarBinding
-import com.toughra.ustadmobile.databinding.ItemHolidaycalendarListItemBinding
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
