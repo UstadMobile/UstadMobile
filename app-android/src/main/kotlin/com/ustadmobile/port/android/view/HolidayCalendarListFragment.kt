@@ -24,6 +24,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
+import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 import com.ustadmobile.port.android.view.util.getDataItemViewHolder
@@ -54,8 +55,8 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
                 return super.onCreateViewHolder(parent, viewType)
             }else {
                 val itemBinding = ItemHolidayCalendarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                itemBinding.selectionListener = this
-                itemBinding.selectedItems = selectedItems
+                itemBinding.pagedListAdapter = this
+                itemBinding.presenter = presenter
                 return HolidayCalendarListViewHolder(itemBinding)
             }
 
@@ -64,8 +65,9 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val itemHolder = holder.getDataItemViewHolder()
             if(itemHolder is HolidayCalendarListViewHolder) {
-                itemHolder.itemBinding.holidayCalendar = getItem(position)
-                itemHolder.itemBinding.presenter = presenter
+                val item = getItem(position)
+                itemHolder.itemBinding.holidayCalendar = item
+                itemHolder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
             }
         }
 

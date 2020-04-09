@@ -21,12 +21,6 @@ fun RecyclerView.ViewHolder.getDataItemViewHolder(): RecyclerView.ViewHolder {
 }
 
 
-interface PagedItemSelectionListener<T> {
-
-    fun onItemSelectedChanged(view: View, item: T)
-
-}
-
 /**
  * This adapter helps make a list where the user can select an existing item, or choose to create
  * a new one. The first ViewHolder is always a NewItemViewHolder, which contains a nested view holder
@@ -39,7 +33,8 @@ abstract class PagedListAdapterWithNewItem<T>(
         newItemVisible: Boolean = false,
         var onClickNewItem: View.OnClickListener? = null,
         var createNewText: String? = null)
-    : PagedListAdapter<T, RecyclerView.ViewHolder>(diffcallback), PagedItemSelectionListener<T> {
+    : PagedListAdapter<T, RecyclerView.ViewHolder>(diffcallback), PagedItemSelectionListener<T>,
+    SelectableViewHelper{
 
     protected val selectedItems = mutableListOf<T>()
 
@@ -55,7 +50,6 @@ abstract class PagedListAdapterWithNewItem<T>(
         }
 
     override fun onItemSelectedChanged(view: View, item: T) {
-        view.isSelected = !view.isSelected
         if(view.isSelected) {
             selectedItems += item
         }else {
@@ -69,6 +63,9 @@ abstract class PagedListAdapterWithNewItem<T>(
         selectedItems.clear()
         selectedItemsLiveData.sendValue(selectedItems.toList())
     }
+
+    override val isInSelectionMode: Boolean
+        get() = selectedItems.isNotEmpty()
 
     class NewItemViewHolder(itemView: View, val nestedViewHolder: RecyclerView.ViewHolder)
         : RecyclerView.ViewHolder(itemView) {

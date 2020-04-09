@@ -21,6 +21,8 @@ import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.@DisplayEntity@
 import com.ustadmobile.core.view.GetResultMode
 import com.ustadmobile.port.android.view.util.getDataItemViewHolder
+import com.ustadmobile.port.android.view.ext.setSelectedIfInList
+import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 
 
 class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),
@@ -30,8 +32,10 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
 
     private var dbRepo: UmAppDatabase? = null
 
-    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?, newItemVisible: Boolean,
-                                      onClickNewItem: View.OnClickListener, createNewText: String)
+    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?,
+                                        newItemVisible: Boolean,
+                                        onClickNewItem: View.OnClickListener,
+                                        createNewText: String)
         : PagedListAdapterWithNewItem<@DisplayEntity@>(DIFF_CALLBACK, newItemVisible, onClickNewItem, createNewText) {
 
         class @Entity@ListViewHolder(val itemBinding: Item@Entity_ViewBinding_VariableName@ListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
@@ -41,6 +45,8 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
                 return super.onCreateViewHolder(parent, viewType)
             }else {
                 val itemBinding = Item@Entity_ViewBinding_VariableName@ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                itemBinding.presenter = presenter
+                itemBinding.pagedListAdapter = this
                 return @Entity@ListViewHolder(itemBinding)
             }
         }
@@ -48,8 +54,9 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val itemHolder = holder.getDataItemViewHolder()
             if(itemHolder is @Entity@ListViewHolder) {
-                itemHolder.itemBinding.@Entity_VariableName@ = getItem(position)
-                itemHolder.itemBinding.presenter = presenter
+                val item = getItem(position)
+                itemHolder.itemBinding.@Entity_VariableName@ = item
+                itemHolder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
             }
         }
 

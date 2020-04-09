@@ -43,6 +43,8 @@ abstract class UstadListPresenter<V: UstadView, RT>(context: Any, arguments: Map
                 hasAddPermission && mListMode == ListViewMode.PICKER -> ListViewAddMode.FIRST_ITEM
                 else -> ListViewAddMode.NONE
             }
+
+            listView.selectionOptions = onCheckListSelectionOptions(account)
         }
     }
 
@@ -57,6 +59,13 @@ abstract class UstadListPresenter<V: UstadView, RT>(context: Any, arguments: Map
      * control what add buttons are or are not shown on the view)
      */
     abstract suspend fun onCheckAddPermission(account: UmAccount?): Boolean
+
+    /**
+     * Override this method to set the options that a user will see if they start making selections
+     */
+    open suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
+        return listOf()
+    }
 
     open fun handleClickSortOrder(sortOption: MessageIdOption) {
 
