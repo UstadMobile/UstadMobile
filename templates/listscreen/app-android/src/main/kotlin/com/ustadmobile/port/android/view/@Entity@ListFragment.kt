@@ -77,7 +77,7 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
         return view
     }
 
-    override run onResume() {
+    override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(R.string.@Entity_LowerCase@)
