@@ -25,6 +25,7 @@
 
     </data>
 
+    <!--
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         tools:context="com.ustadmobile.port.android.view.ClazzList2Fragment"
         android:layout_width="match_parent"
@@ -80,4 +81,17 @@
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    -->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fragment_list_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:clipToPadding="false"
+        android:paddingBottom="@{addMode == ListViewAddMode.FAB ? @dimen/dimen_fab_clearance: @dimen/dimen_0dp}"
+        tools:itemCount="8"
+        tools:listitem="@layout/item_holiday_calendar"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
 </layout>

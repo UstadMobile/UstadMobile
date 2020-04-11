@@ -45,9 +45,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.findNavController
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -188,6 +190,10 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"))
 
 
+    val destinationProvider: DestinationProvider by lazy {
+        Class.forName("com.ustadmobile.port.android.impl.ViewNameToDestMap").newInstance() as DestinationProvider
+    }
+
 
     private abstract class UmCallbackAsyncTask<A, P, R>
     (protected var umCallback: UmCallback<R>) : AsyncTask<A, P, R>() {
@@ -280,6 +286,14 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
+        val ustadDestination = destinationProvider.lookupDestinationName(viewName)
+        if(ustadDestination != null) {
+            val navController = (context as Activity).findNavController(destinationProvider.navControllerViewId)
+            navController.navigate(ustadDestination.destinationId, args.toBundleWithNullableValues())
+            return
+        }
+
+
         val androidImplClass = viewNameToAndroidImplMap[viewName]
         val ctx = context as Context
         val argsBundle = UMAndroidUtil.mapToBundle(args)

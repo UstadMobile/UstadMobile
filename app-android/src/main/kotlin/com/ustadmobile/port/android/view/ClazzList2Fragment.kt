@@ -22,6 +22,8 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 import com.ustadmobile.port.android.view.util.getDataItemViewHolder
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
         ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener{
@@ -72,6 +74,12 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
         mDataBinding?.onSortSelected = this
         mRecyclerViewAdapter = ClazzList2RecyclerAdapter(mPresenter)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
+
+        GlobalScope.launch {
+            val clazzList = (1..20).map { Clazz("Clazz $it")}
+
+            dbRepo?.clazzDao?.insertList(clazzList)
+        }
         return view
     }
 

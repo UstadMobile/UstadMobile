@@ -122,6 +122,14 @@ abstract class PagedListAdapterWithNewItem<T>(
         }
     }
 
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        boundNewItemViewHolders.clear()
+        selectedItems.clear()
+        onClickNewItem = null
+
+    }
+
     companion object {
 
         const val ITEMVIEWTYPE_NEW = 2

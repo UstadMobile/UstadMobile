@@ -122,7 +122,7 @@ open class Clazz() {
         this.clazzName = clazzName
         this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or
                 CLAZZ_FEATURE_SEL or CLAZZ_FEATURE_ASSIGNMENT
-        this.isClazzActive = false
+        this.isClazzActive = true
     }
 
     constructor(clazzName: String, clazzLocationUid: Long) : this() {
@@ -130,7 +130,7 @@ open class Clazz() {
         this.clazzLocationUid = clazzLocationUid
         this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or
                 CLAZZ_FEATURE_SEL or CLAZZ_FEATURE_ASSIGNMENT
-        this.isClazzActive = false
+        this.isClazzActive = true
     }
 
     companion object {

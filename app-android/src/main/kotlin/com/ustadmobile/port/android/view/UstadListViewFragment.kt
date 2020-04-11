@@ -153,12 +153,32 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         return rootView
     }
 
+    override fun onDestroyView() {
+        mRecyclerView?.adapter = null
+        mRecyclerView = null
+        mDataBinding = null
+        mRecyclerView = null
+        currentLiveData?.removeObserver(this)
+        currentLiveData = null
+
+        super.onDestroyView()
+    }
+
+
+
+
     override var addMode: ListViewAddMode = ListViewAddMode.NONE
         get() = field
         set(value) {
             mDataBinding?.addMode = value
             mRecyclerViewAdapter?.newItemVisible = (value == ListViewAddMode.FIRST_ITEM)
-            mActivityWithFab?.activityFloatingActionButton?.visibility = if(value == ListViewAddMode.FAB) View.VISIBLE else View.GONE
+            val fab = mActivityWithFab?.activityFloatingActionButton
+//            if(value == ListViewAddMode.FAB) {
+//                fab?.show()
+//            }
+
+            fab?.visibility = if(value == ListViewAddMode.FAB) View.VISIBLE else View.GONE
+
             field = value
         }
 

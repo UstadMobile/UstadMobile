@@ -68,6 +68,8 @@ class ClazzEdit2Presenter(context: Any,
             clazz = ClazzWithHolidayCalendar()
         }
 
+        scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
+
         return clazz
     }
 

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -33,9 +34,10 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        if(savedState != null) {
+        if(savedState != null && savedState[ARG_ENTITY_JSON] != null) {
             entity = onLoadFromJson(savedState)
             view.entity = entity
+            (view as? UstadEditView<*>)?.fieldsEnabled = true
         }else if(persistenceMode == PersistenceMode.DB) {
             view.loading = true
             (view as? UstadEditView<*>)?.fieldsEnabled = false

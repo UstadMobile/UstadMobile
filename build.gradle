@@ -165,6 +165,7 @@ ext {
     version_android_fab_extended = "0.0.4"
     version_android_rotatelayout = "3.0.0"
     version_android_bottom_nav = "2.3.4"
+    version_android_navigation = "2.3.0-alpha04"
     version_play_core = "1.6.4"
     version_android_leakcanary = "2.1"
     version_android_play_services_safetynet = "17.0.0"
