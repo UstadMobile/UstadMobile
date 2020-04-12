@@ -28,7 +28,7 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: Set
 
     fun goToGroupsList() {
         val args = HashMap<String, String>()
-        impl.go(GroupListView.VIEW_NAME, args, context)
+        impl.go(PersonGroupListView.VIEW_NAME, args, context)
     }
 
     fun goToRolesAssignmentList() {

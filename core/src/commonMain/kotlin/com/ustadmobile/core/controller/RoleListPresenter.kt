@@ -2,20 +2,19 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.RoleListView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.PersonGroup
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 
-class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, view: PersonGroupListView,
+class RoleListPresenter(context: Any, arguments: Map<String, String>, view: RoleListView,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
                           db: UmAppDatabase, repo: UmAppDatabase,
                           activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<PersonGroupListView, PersonGroup>(context, arguments, view, lifecycleOwner, systemImpl,
+    : UstadListPresenter<RoleListView, Role>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
 
@@ -26,15 +25,17 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    class PersonGroupListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    class RoleListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { PersonGroupListSortOption(it, context) }
+        view.sortOptions = SortOrder.values().toList().map { RoleListSortOption(it, context) }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
+        //TODO("check on add permission for this account: e.g. " +
+        //      "repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)")
         return true
     }
 
@@ -44,27 +45,31 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
             SortOrder.ORDER_NAME_ASC -> repo.daoName.findAllActiveClazzesSortByNameAsc(
                     searchQuery, loggedInPersonUid)
             SortOrder.ORDER_NAME_DSC -> repo.daoName.findAllActiveClazzesSortByNameDesc(
-                    searchQuery, loggedInPersonUid)q
+                    searchQuery, loggedInPersonUid)
         }
         */
     }
 
-    override fun handleClickEntry(entry: PersonGroup) {
+    override fun handleClickEntry(entry: Role) {
         /* TODO: Add code to go to the appropriate detail view or make a selection
-        */
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(PersonGroupEditView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to entry.groupPersonUid.toString()), context)
+            ListViewMode.BROWSER -> systemImpl.go(RoleDetailView.VIEW_NAME,
+                mapOf(UstadView.ARG_ENTITY_UID to uid, context)
         }
+        */
     }
 
     override fun handleClickCreateNewFab() {
-        systemImpl.go(PersonGroupEditView.VIEW_NAME, mapOf(), context)
+        /* TODO: Add code to go to the edit view when the user clicks the new item FAB. This is only
+         * called when the fab is clicked, not if the first item is create new item (e.g. picker mode).
+         * That has to be handled at a platform level to use prepareCall etc.
+        systemImpl.go(RoleEditView.VIEW_NAME, mapOf(), context)
+         */
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? PersonGroupListSortOption)?.sortOrder ?: return
+        val sortOrder = (sortOption as? RoleListSortOption)?.sortOrder ?: return
         if(sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder
             updateListOnView()

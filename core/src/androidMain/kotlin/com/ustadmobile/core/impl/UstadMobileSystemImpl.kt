@@ -159,7 +159,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             PersonListSearchView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonListSearchActivity"),
             BaseReportView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSelectionFragment"),
             HolidayCalendarDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}HolidayCalendarDetailActivity"),
-            RoleListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleListActivity"),
             RoleDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleDetailActivity"),
             GroupListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupListActivity"),
             GroupDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupDetailActivity"),
@@ -189,7 +188,10 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SelQuestionSetListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelQuestionSetListActivity"),
             SelQuestionSetEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelQuestionSetEditActivity"),
             HolidayCalendarListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HolidayCalendarListActivity"),
-            HolidayCalendarEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HolidayCalendarEditActivity")
+            HolidayCalendarEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HolidayCalendarEditActivity"),
+            PersonGroupListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupListActivity"),
+            PersonGroupEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupEditActivity"),
+            RoleListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}RoleListActivity")
     )
 
 
