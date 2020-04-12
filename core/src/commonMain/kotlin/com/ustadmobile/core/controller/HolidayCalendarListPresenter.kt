@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
@@ -21,6 +20,7 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
+        view.selectionOptions = listOf(SelectionOption.EDIT, SelectionOption.DELETE)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {

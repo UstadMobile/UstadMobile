@@ -57,7 +57,7 @@ class AddScheduleDialogFragment : UstadDialogFragment(), AddScheduleDialogView,
         errorMessageTextView = rootView.findViewById(R.id.fragment_add_schedule_dialog_error_message)
         fromET = rootView.findViewById(R.id.fragment_add_schedule_dialog_from_time)
         toET = rootView.findViewById(R.id.fragment_add_schedule_dialog_to_time)
-        scheduleSpinner = rootView.findViewById(R.id.fragment_add_schedule_dialog_schedule_spinner)
+        scheduleSpinner = rootView.findViewById(R.id.fragment_add_schedule_dialog_schedule_textinputlayout)
         daySpinner = rootView.findViewById(R.id.fragment_add_schedule_dialog_day_spinner)
 
         //Date format to show in the Date picker

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersongroupListItemBinding
 import com.ustadmobile.core.controller.PersonGroupListPresenter
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
@@ -31,6 +32,9 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
     private var mPresenter: PersonGroupListPresenter? = null
 
     private var dbRepo: UmAppDatabase? = null
+
+    override val listPresenter: UstadListPresenter<*, in PersonGroupWithMemberCount>?
+        get() = mPresenter
 
     class PersonGroupListRecyclerAdapter(var presenter: PersonGroupListPresenter?, newItemVisible: Boolean,
                                       onClickNewItem: View.OnClickListener,

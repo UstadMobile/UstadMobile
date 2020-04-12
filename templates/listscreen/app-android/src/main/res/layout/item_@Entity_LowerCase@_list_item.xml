@@ -3,19 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <import type="com.ustadmobile.lib.db.entities.@DisplayEntity@"/>
+
         <variable
             name="@Entity_VariableName@"
-            type="com.ustadmobile.lib.db.entities.@DisplayEntity@" />
+            type="@DisplayEntity@" />
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.@Entity@ListPresenter" />
+
+        <variable
+            name="pagedListAdapter"
+            type="com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem&lt;@DisplayEntity@&gt;" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> presenter.handleClickEntry(@Entity_VariableName@)}"
-        android:background="?attr/selectableItemBackground"
+        app:selectableViewHelper="@{pagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> pagedListAdapter.onItemSelectedChanged(view, @Entity_VariableName@)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(@Entity_VariableName@)}"
+        android:background="@drawable/bg_listitem"
         >
 
         <!-- TODO: Change or remove this icon -->
@@ -38,8 +46,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/item_@Entity_LowerCase@_newitemicon"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"

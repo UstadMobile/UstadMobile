@@ -1,2 +1,13 @@
 <resources>
+
+    <!-- This needs to be here in v21, otherwise the Action Mode (e.g. actionbar items when a
+    selection is made) will appear on above the normal action bar (eg. showing two action bars) -->
+    <style name="Theme.UstadTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:dialogTheme">@style/CustomDialog</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+
 </resources>

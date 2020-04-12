@@ -11,8 +11,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemHolidayCalendarBinding
-import com.toughra.ustadmobile.databinding.ItemHolidaycalendarListItemBinding
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
@@ -23,6 +23,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
+import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 import com.ustadmobile.port.android.view.util.getDataItemViewHolder
@@ -35,6 +36,9 @@ class HolidayCalendarListFragment()
     private var mPresenter: HolidayCalendarListPresenter? = null
 
     private var dbRepo: UmAppDatabase? = null
+
+    override val listPresenter: UstadListPresenter<*, in HolidayCalendarWithNumEntries>?
+        get() = mPresenter
 
     class HolidayCalendarListRecyclerAdapter(var presenter: HolidayCalendarListPresenter?,
                                              newItemVisible: Boolean,
@@ -52,8 +56,14 @@ class HolidayCalendarListFragment()
             if(viewType == ITEMVIEWTYPE_NEW) {
                 return super.onCreateViewHolder(parent, viewType)
             }else {
+<<<<<<< HEAD
                 val itemBinding = ItemHolidayCalendarBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false)
+=======
+                val itemBinding = ItemHolidayCalendarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                itemBinding.pagedListAdapter = this
+                itemBinding.presenter = presenter
+>>>>>>> d0e48a161608068e75ba580e696578295fea6542
                 return HolidayCalendarListViewHolder(itemBinding)
             }
         }
@@ -61,8 +71,9 @@ class HolidayCalendarListFragment()
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val itemHolder = holder.getDataItemViewHolder()
             if(itemHolder is HolidayCalendarListViewHolder) {
-                itemHolder.itemBinding.holidayCalendar = getItem(position)
-                itemHolder.itemBinding.presenter = presenter
+                val item = getItem(position)
+                itemHolder.itemBinding.holidayCalendar = item
+                itemHolder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
             }
         }
 
@@ -82,8 +93,9 @@ class HolidayCalendarListFragment()
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter, false,
-                this, requireContext().getString(R.string.create_new, requireContext().getString(R.string.holiday_calendar)))
+        mRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter, false, this,
+            requireContext().getString(R.string.create_new, requireContext().getString(R.string.holiday_calendar)))
+        mRecyclerViewAdapter?.selectedItemsLiveData?.observe(this, selectionObserver)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }

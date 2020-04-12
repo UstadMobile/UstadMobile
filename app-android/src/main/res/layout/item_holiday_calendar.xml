@@ -4,19 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries"/>
         <variable
             name="holidayCalendar"
             type="com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries" />
+
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.HolidayCalendarListPresenter" />
+
+        <variable
+            name="pagedListAdapter"
+            type="com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem&lt;HolidayCalendarWithNumEntries&gt;" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> presenter.handleClickEntry(holidayCalendar)}"
-        android:background="?attr/selectableItemBackground"
+        app:selectableViewHelper="@{pagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> pagedListAdapter.onItemSelectedChanged(view, holidayCalendar)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(holidayCalendar)}"
+        android:background="@drawable/bg_listitem"
         >
 
         <!-- TODO: Change or remove this icon -->

@@ -829,4 +829,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
      e.g. Edit Class, Edit Assignment, etc -->
     <string name="edit_entity">Edit %1$s</string>
 
+    <string name="items_selected">%1$d selected</string>
+
 </resources>

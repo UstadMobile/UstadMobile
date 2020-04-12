@@ -5,10 +5,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.view.ListViewAddMode
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadListView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
@@ -46,16 +43,29 @@ abstract class UstadListPresenter<V: UstadView, RT>(context: Any, arguments: Map
                 hasAddPermission && mListMode == ListViewMode.PICKER -> ListViewAddMode.FIRST_ITEM
                 else -> ListViewAddMode.NONE
             }
+
+            listView.selectionOptions = onCheckListSelectionOptions(account)
         }
     }
 
     abstract fun handleClickEntry(entry: RT)
+
+    open fun handleClickSelectionOption(selectedItem: List<RT>, option: SelectionOption) {
+
+    }
 
     /**
      * This should be implemented to check if the given user has permission to add entries (and hence
      * control what add buttons are or are not shown on the view)
      */
     abstract suspend fun onCheckAddPermission(account: UmAccount?): Boolean
+
+    /**
+     * Override this method to set the options that a user will see if they start making selections
+     */
+    open suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
+        return listOf()
+    }
 
     open fun handleClickSortOrder(sortOption: MessageIdOption) {
 

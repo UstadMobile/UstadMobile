@@ -29,7 +29,7 @@
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/activity_schedule_edit_cl"
@@ -49,7 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?android:attr/actionBarSize"
                 android:background="@color/primary"
-                app:layout_scrollFlags="scroll|enterAlways" />
+                app:layout_scrollFlags="noScroll" />
 
             <ProgressBar
                 android:visibility="@{loading ? View.VISIBLE : View.GONE}"
@@ -57,12 +57,14 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
                 android:id="@+id/activity_schedule_edit_progressbar"
-                android:layout_height="@dimen/dimen_4dp" />
+                android:layout_height="@dimen/dimen_4dp"
+                app:layout_scrollFlags="noScroll"
+                />
 
         </com.google.android.material.appbar.AppBarLayout>
 
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:id="@+id/activity_schedule_edit_scroll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,121 +77,98 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/fragment_add_schedule_dialog_schedule_heading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/schedule"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.ustadmobile.port.android.view.MessageIdSpinner
-                    android:id="@+id/fragment_add_schedule_dialog_schedule_spinner"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/fragment_add_schedule_dialog_schedule_textinputlayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginEnd="24dp"
-                    android:paddingTop="20dp"
-                    android:spinnerMode="dialog"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                    android:layout_marginTop="@dimen/form_margin_horizontal"
+                    android:hint="@string/frequency"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_schedule_heading"
-                    app:selectedMessageIdOption="@={schedule.scheduleFrequency}"
-                    app:messageIdOptions="@{frequencyOptions}"/>
+                    app:layout_constraintTop_toTopOf="parent">
 
+                    <com.ustadmobile.port.android.view.MessageIdAutocompleteTextView
+                        android:inputType="none"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:selectedMessageIdOption="@={schedule.scheduleFrequency}"
+                        app:messageIdOptions="@{frequencyOptions}" />
 
-                <TextView
-                    android:id="@+id/fragment_add_schedule_dialog_day_heading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/day"
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/fragment_add_schedule_dialog_day_textinputlayout"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_schedule_spinner"
-                    android:layout_marginLeft="16dp" />
-
-
-                <com.ustadmobile.port.android.view.MessageIdSpinner
-                    android:id="@+id/fragment_add_schedule_dialog_day_spinner"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_schedule_textinputlayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="24dp"
-                    android:paddingTop="20dp"
-                    android:spinnerMode="dialog"
-                    app:selectedMessageIdOption="@={schedule.scheduleDay}"
-                    app:messageIdOptions="@{dayOptions}"
+                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                    android:layout_marginTop="@dimen/formitem_margin_vertical"
+                    android:hint="@string/day">
+
+                    <com.ustadmobile.port.android.view.MessageIdAutocompleteTextView
+                        android:inputType="none"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:selectedMessageIdOption="@={schedule.scheduleDay}"
+                        app:messageIdOptions="@{dayOptions}" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/activity_schedule_edit_from_textinputlayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_textinputlayout"
+                    app:layout_constraintEnd_toStartOf="@+id/activity_schedule_edit_to_textinputlayout"
+                    android:hint="@string/from"
+                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                    android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    >
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        app:runOnClickWhenFocused="@{true}"
+                        android:cursorVisible="false"
+                        app:timeValue="@={schedule.sceduleStartTime}"
+                        />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/activity_schedule_edit_to_textinputlayout"
+                    android:layout_width="@dimen/dimen_0dp"
+                    android:layout_height="wrap_content"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_heading" />
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_textinputlayout"
+                    app:layout_constraintStart_toEndOf="@+id/activity_schedule_edit_from_textinputlayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                    android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                    android:hint="@string/toC"
+                    >
 
-                <TextView
-                    android:id="@+id/fragment_add_schedule_dialog_from_heading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/fromC"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_spinner"
-                    android:layout_marginLeft="16dp" />
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:cursorVisible="false"
+                        app:runOnClickWhenFocused="@{true}"
+                        app:timeValue="@={schedule.scheduleEndTime}"
+                        />
 
-                <TextView
-                    android:id="@+id/fragment_add_schedule_dialog_to_heading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="124dp"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/toC"
-                    app:layout_constraintStart_toEndOf="@+id/fragment_add_schedule_dialog_from_heading"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_day_spinner"
-                    android:layout_marginLeft="124dp" />
-
-
-                <EditText
-                    android:id="@+id/fragment_add_schedule_dialog_from_time"
-                    android:layout_width="97dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_from_heading"
-                    app:timeValue="@={schedule.sceduleStartTime}"
-                    android:focusable="false"
-                    android:layout_marginLeft="16dp" />
-
-                <EditText
-                    android:id="@+id/fragment_add_schedule_dialog_to_time"
-                    android:layout_width="97dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    app:timeValue="@={schedule.scheduleEndTime}"
-                    android:focusable="false"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/fragment_add_schedule_dialog_from_time"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_to_heading" />
-
-                <TextView
-                    android:id="@+id/fragment_add_schedule_dialog_error_message"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_from_time" />
+                </com.google.android.material.textfield.TextInputLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

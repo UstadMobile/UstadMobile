@@ -8,8 +8,8 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ItemCreatenewBinding
 import com.toughra.ustadmobile.databinding.ItemCreatenewContainerBinding
+import com.ustadmobile.door.DoorMutableLiveData
 
 /**
  * The PagedListAdapterWithNewItem will create a special viewholder for the first item that wraps
@@ -19,6 +19,7 @@ import com.toughra.ustadmobile.databinding.ItemCreatenewContainerBinding
 fun RecyclerView.ViewHolder.getDataItemViewHolder(): RecyclerView.ViewHolder {
     return (this as? PagedListAdapterWithNewItem.NewItemViewHolder)?.nestedViewHolder ?: this
 }
+
 
 /**
  * This adapter helps make a list where the user can select an existing item, or choose to create
@@ -32,7 +33,12 @@ abstract class PagedListAdapterWithNewItem<T>(
         newItemVisible: Boolean = false,
         var onClickNewItem: View.OnClickListener? = null,
         var createNewText: String? = null)
-    : PagedListAdapter<T, RecyclerView.ViewHolder>(diffcallback) {
+    : PagedListAdapter<T, RecyclerView.ViewHolder>(diffcallback), PagedItemSelectionListener<T>,
+    SelectableViewHelper{
+
+    protected val selectedItems = mutableListOf<T>()
+
+    val selectedItemsLiveData: DoorMutableLiveData<List<T>> = DoorMutableLiveData(listOf())
 
     var newItemVisible: Boolean = newItemVisible
         set(value) {
@@ -43,6 +49,23 @@ abstract class PagedListAdapterWithNewItem<T>(
             boundNewItemViewHolders.forEach { it.createNewItemVisible = value }
         }
 
+    override fun onItemSelectedChanged(view: View, item: T) {
+        if(view.isSelected) {
+            selectedItems += item
+        }else {
+            selectedItems -= item
+        }
+
+        selectedItemsLiveData.sendValue(selectedItems.toList())
+    }
+
+    fun clearSelection() {
+        selectedItems.clear()
+        selectedItemsLiveData.sendValue(selectedItems.toList())
+    }
+
+    override val isInSelectionMode: Boolean
+        get() = selectedItems.isNotEmpty()
 
     class NewItemViewHolder(itemView: View, val nestedViewHolder: RecyclerView.ViewHolder)
         : RecyclerView.ViewHolder(itemView) {
