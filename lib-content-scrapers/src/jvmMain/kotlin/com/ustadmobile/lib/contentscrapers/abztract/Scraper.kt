@@ -95,6 +95,7 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         const val ERROR_TYPE_MISSING_QUESTIONS = 240
         const val ERROR_TYPE_ILLEGAL_STATE = 250
         const val ERROR_TYPE_PRACTICE_CONTENT_NOT_FOUND = 260
+        const val ERROR_TYPE_TIMEOUT = 300
 
     }
 

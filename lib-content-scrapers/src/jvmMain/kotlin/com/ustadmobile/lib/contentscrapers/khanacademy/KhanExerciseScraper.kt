@@ -104,9 +104,9 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         val sourceId = entry!!.sourceUrl!!
         val commonSourceUrl = "%${sourceId.substringBefore(".")}%"
         val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
-        commonEntryList.forEach{
+        commonEntryList.forEach {
 
-            if(it.sourceUrl == sourceId){
+            if (it.sourceUrl == sourceId) {
                 return@forEach
             }
             ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, it, entry!!,
@@ -126,223 +126,243 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 HarRegexPair("last_seen_problem_sha=(.*)&", ""),
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attempt\\?)(.*)",
                         "https://www.khanacademy.org/attempt"),
+                   /*  HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attemptProblem\\?)(.*)",
+                             "https://www.khanacademy.org/attemptProblem"),*/
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/Take-a-hint\\?)(.*)",
                         "https://www.khanacademy.org/take-a-hint"),
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/hint\\?)(.*)",
                         "https://www.khanacademy.org/hint"))
 
 
-        val realPractice = loginKhanAcademy(sourceUrl, lang)
-        val scraperResult = startHarScrape(sourceUrl, {
+        val scraperResult: HarScraperResult
+        try {
+            val realPractice = loginKhanAcademy(sourceUrl, lang)
+            scraperResult = startHarScrape(sourceUrl, {
 
-            it.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(
-                    By.cssSelector("div.perseus-renderer div")))
+                it.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector("div.perseus-renderer div")))
 
-        }, filters = listOf { entry ->
+            }, filters = listOf { entry ->
 
-            if (entry.request.url == sourceUrl) {
+                if (entry.request.url == sourceUrl) {
 
-                val doc = Jsoup.parse(entry.response.content.text)
-                doc.head().append(KhanConstants.KHAN_CSS)
-                doc.head().append(KhanConstants.KHAN_COOKIE)
+                    val doc = Jsoup.parse(entry.response.content.text)
+                    doc.head().append(KhanConstants.KHAN_CSS)
+                    doc.head().append(KhanConstants.KHAN_COOKIE)
 
-                entry.response.content.text = doc.html()
+                    entry.response.content.text = doc.html()
 
-            }
-
-
-            entry
-        }, regexes = harExtra.regexes!!) {
-
-            val entries = it.har.log.entries
-
-            val sourceEntry = it.har.log.entries.find { url -> url.request.url == sourceUrl }
-            if (sourceEntry != null) {
-                it.har.log.entries.remove(sourceEntry)
-                it.har.log.entries.add(0, sourceEntry)
-            }
-
-
-            val practiceEntry = it.har.log.entries.find { it.request.url.contains("/task/practice/") }
-            if (practiceEntry != null) {
-
-                val practiceJson = gson.fromJson(realPractice, PracticeJson::class.java)
-                val reservedList = practiceJson.taskJson?.reservedItems
-
-                if (reservedList.isNullOrEmpty()) {
-                    close()
-                    hideContentEntry()
-                    setScrapeDone(false, ERROR_TYPE_MISSING_QUESTIONS)
-                    throw ScraperException(ERROR_TYPE_MISSING_QUESTIONS, "no questions found for exercise")
                 }
 
-                reservedList.forEachIndexed { index, item ->
 
-                    val split = item.split("|")
-                    val exercise = split[0]
-                    val assessmentItem = split[1]
+                entry
+            }, regexes = harExtra.regexes!!) {
 
-                    val practiceUrl = URL(url, "$secondExerciseUrl$exercise$exerciseMidleUrl$assessmentItem$exercisePostUrl$lang")
+                val entries = it.har.log.entries
 
-                    val problemUrl = URL(url, "$secondExerciseUrl$slug/problems/${index + 1}$exercisePostUrl$lang")
+                val sourceEntry = it.har.log.entries.find { url -> url.request.url == sourceUrl }
+                if (sourceEntry != null) {
+                    it.har.log.entries.remove(sourceEntry)
+                    it.har.log.entries.add(0, sourceEntry)
+                }
 
-                    val itemData = IOUtils.toString(practiceUrl, ScraperConstants.UTF_ENCODING)
 
-                    val itemResponse = gson.fromJson(itemData, ItemResponse::class.java)
+                val practiceEntry = it.har.log.entries.find { urlEntry -> urlEntry.request.url.contains("/task/practice/") /*|| urlEntry.request.url.contains("/getOrCreatePracticeTask")*/ }
+                if (practiceEntry != null) {
 
-                    entries.add(addHarEntry(
-                            itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
-                            requestUrl = problemUrl.toString()))
+                    val practiceJson = gson.fromJson(realPractice, PracticeJson::class.java)
+                 //   val practiceTask = gson.fromJson(realPractice, PracticeTask::class.java)
+                    val reservedList = practiceJson.taskJson?.reservedItems
+                   //   ?: practiceTask.data?.getOrCreatePracticeTask?.result?.userTask?.task?.reservedItems
 
-                    entries.add(addHarEntry(
-                            itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
-                            requestUrl = practiceUrl.toString()))
-
-                    val linkPattern = Pattern.compile("(https://|web\\+graphie://)([^\")]*)")
-                    val matcher = linkPattern.matcher(itemResponse.itemData)
-
-                    val imageList = mutableSetOf<String>()
-                    while (matcher.find()) {
-                        imageList.add(matcher.group())
+                    if (reservedList.isNullOrEmpty()) {
+                        close()
+                        hideContentEntry()
+                        setScrapeDone(false, ERROR_TYPE_MISSING_QUESTIONS)
+                        throw ScraperException(ERROR_TYPE_MISSING_QUESTIONS, "no questions found for exercise")
                     }
 
-                    for (imageValue in imageList) {
-                        var conn: HttpURLConnection? = null
-                        try {
-                            val image = imageValue.replace(ScraperConstants.EMPTY_SPACE.toRegex(), ScraperConstants.EMPTY_STRING)
-                            var imageUrlString = image
-                            if (image.contains(ScraperConstants.GRAPHIE)) {
-                                imageUrlString = ScraperConstants.KHAN_GRAPHIE_PREFIX + image.substring(image.lastIndexOf("/") + 1) + ScraperConstants.SVG_EXT
-                            }
+                    reservedList.forEachIndexed { index, item ->
 
-                            val imageUrl = URL(imageUrlString)
-                            conn = imageUrl.openConnection() as HttpURLConnection
-                            conn.requestMethod = ScraperConstants.REQUEST_HEAD
-                            val mimeType = conn.contentType
-                            val length = conn.contentLength
+                        val split = item.split("|")
+                        val exercise = split[0]
+                        val assessmentItem = split[1]
 
-                            val base64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(imageUrl))
+                        val practiceUrl = URL(url, "$secondExerciseUrl$exercise$exerciseMidleUrl$assessmentItem$exercisePostUrl$lang")
 
-                            entries.add(addHarEntry(
-                                    base64, encoding = "base64",
-                                    size = length,
-                                    mimeType = mimeType,
-                                    requestUrl = imageUrl.toString()))
+                        val problemUrl = URL(url, "$secondExerciseUrl$slug/problems/${index + 1}$exercisePostUrl$lang")
 
+                        val itemData = IOUtils.toString(practiceUrl, ScraperConstants.UTF_ENCODING)
 
-                        } catch (e: MalformedURLException) {
-                            UMLogUtil.logDebug(ExceptionUtils.getStackTrace(e))
-                        } catch (e: Exception) {
-                            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-                            UMLogUtil.logError("Error downloading an image for index log$imageValue with url $sourceUrl")
-                        } finally {
-                            conn?.disconnect()
+                        val itemResponse = gson.fromJson(itemData, ItemResponse::class.java)
+
+                        entries.add(addHarEntry(
+                                itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
+                                requestUrl = problemUrl.toString()))
+
+                        entries.add(addHarEntry(
+                                itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
+                                requestUrl = practiceUrl.toString()))
+
+                        val linkPattern = Pattern.compile("(https://|web\\+graphie://)([^\")]*)")
+                        val matcher = linkPattern.matcher(itemResponse.itemData)
+
+                        val imageList = mutableSetOf<String>()
+                        while (matcher.find()) {
+                            imageList.add(matcher.group())
                         }
 
-                    }
+                        for (imageValue in imageList) {
+                            var conn: HttpURLConnection? = null
+                            try {
+                                val image = imageValue.replace(ScraperConstants.EMPTY_SPACE.toRegex(), ScraperConstants.EMPTY_STRING)
+                                var imageUrlString = image
+                                if (image.contains(ScraperConstants.GRAPHIE)) {
+                                    imageUrlString = ScraperConstants.KHAN_GRAPHIE_PREFIX + image.substring(image.lastIndexOf("/") + 1) + ScraperConstants.SVG_EXT
+                                }
 
+                                val imageUrl = URL(imageUrlString)
+                                conn = imageUrl.openConnection() as HttpURLConnection
+                                conn.requestMethod = ScraperConstants.REQUEST_HEAD
+                                val mimeType = conn.contentType
+                                val length = conn.contentLength
+
+                                val base64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(imageUrl))
+
+                                entries.add(addHarEntry(
+                                        base64, encoding = "base64",
+                                        size = length,
+                                        mimeType = mimeType,
+                                        requestUrl = imageUrl.toString()))
+
+
+                            } catch (e: MalformedURLException) {
+                                UMLogUtil.logDebug(ExceptionUtils.getStackTrace(e))
+                            } catch (e: Exception) {
+                                UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+                                UMLogUtil.logError("Error downloading an image for index log$imageValue with url $sourceUrl")
+                            } finally {
+                                conn?.disconnect()
+                            }
+
+                        }
+
+
+                    }
 
                 }
 
-            }
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.KHAN_CSS_LINK), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_CSS,
-                    requestUrl = "https://www.khanacademy.org/khanscraper.css"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.KHAN_TAKE_HINT_LINK), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_TEXT,
-                    requestUrl = "https://www.khanacademy.org/take-a-hint",
-                    requestMethod = POST_METHOD))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_JSON_LINK), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_JSON,
-                    requestUrl = "https://www.khanacademy.org/attempt",
-                    requestMethod = POST_METHOD))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.HINT_JSON_LINK), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_JSON,
-                    requestUrl = "https://www.khanacademy.org/hint",
-                    requestMethod = POST_METHOD))
-
-            val fileList = KhanConstants.fileMap[lang]
-
-            fileList?.forEach { file ->
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.KHAN_CSS_LINK), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_CSS,
+                        requestUrl = "https://www.khanacademy.org/khanscraper.css"))
 
                 entries.add(addHarEntry(
-                        IOUtils.toString(javaClass.getResourceAsStream(file.fileLocation), ScraperConstants.UTF_ENCODING),
-                        mimeType = file.mimeType,
-                        requestUrl = file.url))
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.KHAN_TAKE_HINT_LINK), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_TEXT,
+                        requestUrl = "https://www.khanacademy.org/take-a-hint",
+                        requestMethod = POST_METHOD))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_JSON_LINK), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_JSON,
+                        requestUrl = "https://www.khanacademy.org/attempt",
+                        requestMethod = POST_METHOD))
+/*
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_PROBLEM_JSON_LINK), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_JSON,
+                        requestUrl = "https://www.khanacademy.org/attemptProblem",
+                        requestMethod = POST_METHOD))*/
+
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.HINT_JSON_LINK), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_JSON,
+                        requestUrl = "https://www.khanacademy.org/hint",
+                        requestMethod = POST_METHOD))
+
+                val fileList = KhanConstants.fileMap[lang]
+
+                fileList?.forEach { file ->
+
+                    entries.add(addHarEntry(
+                            IOUtils.toString(javaClass.getResourceAsStream(file.fileLocation), ScraperConstants.UTF_ENCODING),
+                            mimeType = file.mimeType,
+                            requestUrl = file.url))
+                }
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.CORRECT_KHAN_LINK), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_SVG,
+                        requestUrl = "https://cdn.kastatic.org/images/exercise-correct.svg"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.TRY_AGAIN_KHAN_LINK), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_SVG,
+                        requestUrl = "https://cdn.kastatic.org/images/exercise-try-again.svg"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_KHAN_LINK), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_SVG,
+                        requestUrl = "https://cdn.kastatic.org/images/end-of-task-card/star-attempted.svg"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.COMPLETE_KHAN_LINK), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_SVG,
+                        requestUrl = "https://cdn.kastatic.org/images/end-of-task-card/star-complete.svg"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.END_OF_TASK_AUDIO), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_OGG,
+                        requestUrl = "https://cdn.kastatic.org/sounds/end-of-task.ogg"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.LATO_LATIN_REGULAR_WOFF), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_WOFF2,
+                        requestUrl = "https://cdn.kastatic.org/fonts/LatoLatin-Regular.woff2"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.LATO_LATIN_BOLD_WOFF), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_WOFF2,
+                        requestUrl = "https://cdn.kastatic.org/fonts/LatoLatin-Bold.woff2"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.LATO_LATIN_ITALITC_WOFF), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_WOFF2,
+                        requestUrl = "https://cdn.kastatic.org/fonts/LatoLatin-Italic.woff2"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.NOTO_REGULAR_WOFF), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_WOFF2,
+                        requestUrl = "https://cdn.kastatic.org/fonts/armenian/NotoSansArmenian-Regular.woff2"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.NOTO_BOLD_WOFF), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_WOFF2,
+                        requestUrl = "https://cdn.kastatic.org/fonts/armenian/NotoSansArmenian-Bold.woff2"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.MATH_JAX_4_REG_WOFF), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_WOFF2,
+                        requestUrl = "https://cdn.kastatic.org/third_party/javascript-khansrc/khan-mathjax/2.1/fonts/HTML-CSS/TeX/woff/MathJax_Size4-Regular.woff"))
+
+                entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.MATH_JAX_4_REG_OTF), ScraperConstants.UTF_ENCODING),
+                        mimeType = ScraperConstants.MIMETYPE_OTF,
+                        requestUrl = "https://cdn.kastatic.org/third_party/javascript-khansrc/khan-mathjax/2.1/fonts/HTML-CSS/TeX/otf/MathJax_Size4-Regular.otf"))
+
+
+                true
             }
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.CORRECT_KHAN_LINK), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_SVG,
-                    requestUrl = "https://cdn.kastatic.org/images/exercise-correct.svg"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.TRY_AGAIN_KHAN_LINK), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_SVG,
-                    requestUrl = "https://cdn.kastatic.org/images/exercise-try-again.svg"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_KHAN_LINK), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_SVG,
-                    requestUrl = "https://cdn.kastatic.org/images/end-of-task-card/star-attempted.svg"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.COMPLETE_KHAN_LINK), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_SVG,
-                    requestUrl = "https://cdn.kastatic.org/images/end-of-task-card/star-complete.svg"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.END_OF_TASK_AUDIO), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_OGG,
-                    requestUrl = "https://cdn.kastatic.org/sounds/end-of-task.ogg"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.LATO_LATIN_REGULAR_WOFF), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_WOFF2,
-                    requestUrl = "https://cdn.kastatic.org/fonts/LatoLatin-Regular.woff2"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.LATO_LATIN_BOLD_WOFF), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_WOFF2,
-                    requestUrl = "https://cdn.kastatic.org/fonts/LatoLatin-Bold.woff2"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.LATO_LATIN_ITALITC_WOFF), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_WOFF2,
-                    requestUrl = "https://cdn.kastatic.org/fonts/LatoLatin-Italic.woff2"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.NOTO_REGULAR_WOFF), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_WOFF2,
-                    requestUrl = "https://cdn.kastatic.org/fonts/armenian/NotoSansArmenian-Regular.woff2"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.NOTO_BOLD_WOFF), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_WOFF2,
-                    requestUrl = "https://cdn.kastatic.org/fonts/armenian/NotoSansArmenian-Bold.woff2"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.MATH_JAX_4_REG_WOFF), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_WOFF2,
-                    requestUrl = "https://cdn.kastatic.org/third_party/javascript-khansrc/khan-mathjax/2.1/fonts/HTML-CSS/TeX/woff/MathJax_Size4-Regular.woff"))
-
-            entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.MATH_JAX_4_REG_OTF), ScraperConstants.UTF_ENCODING),
-                    mimeType = ScraperConstants.MIMETYPE_OTF,
-                    requestUrl = "https://cdn.kastatic.org/third_party/javascript-khansrc/khan-mathjax/2.1/fonts/HTML-CSS/TeX/otf/MathJax_Size4-Regular.otf"))
-
-
-            true
+        } catch (e: ScraperException) {
+            throw e
+        } catch (e: Exception) {
+            close()
+            hideContentEntry()
+            setScrapeDone(false, 0)
+            throw e
         }
-
         val linksList = mutableListOf<HarRegexPair>()
         val navList = navData.navItems
         if (navList != null) {
@@ -408,7 +428,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         waitDriver.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(
                 By.cssSelector("div.perseus-renderer div")))
 
-        val entry = proxy.har.log.entries.find { it.request.url.contains("/task/practice/") }
+        val entry = proxy.har.log.entries.find { it.request.url.contains("/task/practice/") || it.request.url.contains("/getOrCreatePracticeTask") }
 
         chromeDriver.quit()
         proxy.stop()

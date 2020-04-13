@@ -1,17 +1,14 @@
 package com.ustadmobile.core.contentformats.har
 
+
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.io.RangeInputStream
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.util.parseRangeRequestHeader
-import io.ktor.client.request.request
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.internal.HashMapSerializer
-import kotlinx.serialization.internal.StringSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import kotlinx.serialization.list
+
 
 class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl: String) -> Unit) {
 
@@ -111,7 +108,7 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
         }
 
         val mutMap = mutableMapOf<String, String>()
-        mutMap.putAll(harEntry.response.headers.map { it.name!! to it.value!! }.toMap())
+        mutMap.putAll(harEntry.response.headers.map { it.name to it.value }.toMap())
         if (containerEntry.containerEntryFile!!.compression == ContainerEntryFile.COMPRESSION_GZIP) {
             mutMap["Content-Encoding"] = "gzip"
             mutMap["Content-Length"] = containerEntry.containerEntryFile!!.ceCompressedSize.toString()
@@ -184,6 +181,5 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
             }
         }
     }
-
 
 }

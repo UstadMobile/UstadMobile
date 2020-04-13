@@ -98,6 +98,7 @@ object KhanConstants {
 
     const val regexUrlPrefix = "https://((.*).khanacademy.org|cdn.kastatic.org)/(.*)"
     const val KHAN_CSS = "<link rel='stylesheet' href='https://www.khanacademy.org/khanscraper.css' type='text/css'/>"
+
     const val KHAN_COOKIE = "<script> document.cookie = \"fkey=abcde;\" </script>"
 
     const val subTitleUrl = "http://www.khanacademy.org/api/internal/videos/"

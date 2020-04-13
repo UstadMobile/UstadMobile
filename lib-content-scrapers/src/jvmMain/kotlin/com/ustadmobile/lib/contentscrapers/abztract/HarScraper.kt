@@ -249,7 +249,9 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
     override fun close() {
         chromeDriver.quit()
-        proxy.stop()
+        if(!proxy.isStopped){
+            proxy.stop()
+        }
     }
 
 

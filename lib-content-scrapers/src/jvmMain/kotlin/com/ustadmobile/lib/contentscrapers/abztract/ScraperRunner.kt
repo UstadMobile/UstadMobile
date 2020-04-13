@@ -6,12 +6,12 @@ import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE_TIMEOUT
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.apache.commons.cli.*
 import org.apache.commons.lang.exception.ExceptionUtils
 import java.io.File
@@ -35,7 +35,68 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
     }
 
 
+    fun getParentEntry(parentUid: Long): ContentEntry? {
+
+        var parentEntry: ContentEntry? = null
+        if (parentUid != 0L) {
+            runBlocking {
+                parentEntry = contentEntryDao.findByEntryId(parentUid)
+            }
+        }
+        return parentEntry
+
+    }
+
+    fun createEntry(startingUrl: String, entryTitle: String?, entryLang: String, parentUid: Long, publisher: String) {
+
+        val parentEntry = getParentEntry(parentUid)
+        if (parentUid != 0L && parentEntry == null) {
+            System.err.println("Parent Uid given does not exist")
+            exitProcess(1)
+        }
+
+        val langSplit = entryLang.split("-")
+        val primaryLang = langSplit[0]
+        val langVariant = langSplit.getOrNull(1)
+
+        val lang = when (primaryLang.length) {
+            2 -> {
+                ContentScraperUtil.insertOrUpdateLanguageByTwoCode(db.languageDao, primaryLang)
+            }
+            3 -> {
+                ContentScraperUtil.insertOrUpdateLanguageByThreeCode(db.languageDao, primaryLang)
+            }
+            else -> {
+                null
+            }
+        } ?: return
+
+        val variant = ContentScraperUtil.insertOrUpdateLanguageVariant(db.languageVariantDao, langVariant, lang)
+
+        val entry: ContentEntry?
+        if (entryTitle != null) {
+            entry = ContentScraperUtil.createOrUpdateContentEntry("", entryTitle, startingUrl,
+                    publisher, 0, lang.langUid, variant?.langVariantUid,
+                    "", false, "", "",
+                    "", "", 0, contentEntryDao)
+
+            println("EntryUid: ${entry.contentEntryUid}")
+            contentEntryDao.updateContentEntryInActive(entry.contentEntryUid, true)
+
+            if (parentEntry != null) {
+                ContentScraperUtil.insertOrUpdateParentChildJoin(db.contentEntryParentChildJoinDao, parentEntry, entry, 100)
+            }
+
+            exitProcess(1)
+        }
+    }
+
     fun start(startingUrl: String, scraperType: String, parentUid: Long) {
+        val parentEntry = getParentEntry(parentUid)
+        if (parentUid != 0L && parentEntry == null) {
+            System.err.println("Parent Uid given does not exist")
+            exitProcess(1)
+        }
 
         val runId = runDao.insert(ScrapeRun(scraperType,
                 ScrapeQueueItemDao.STATUS_PENDING)).toInt()
@@ -68,6 +129,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
 
             queueDao.setTimeStarted(it.sqiUid, startTime)
             try {
+
                 val indexerClazz = ScraperTypes.indexerTypeMap[it.contentType]
                 val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, UmAppDatabase::class.java, Int::class.java)
                 val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, db, it.sqiUid) as Indexer?
@@ -97,15 +159,23 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             UMLogUtil.logInfo("Started scraper url ${it.scrapeUrl} at start time: $startTime")
 
             queueDao.setTimeStarted(it.sqiUid, startTime)
+            var obj: Scraper? = null
             try {
+                withTimeout(900000) {
 
-                val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
-                val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java, Int::class.java)
-                val obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid, it.sqiUid)
-                obj?.scrapeUrl(it.scrapeUrl!!)
-            } catch (e: Exception) {
-                UMLogUtil.logError("Exception running scrapeContent ${it.scrapeUrl}")
-                UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+                    val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
+                    val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java, Int::class.java)
+                    obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid, it.sqiUid)
+                    obj?.scrapeUrl(it.scrapeUrl!!)
+                }
+            } catch(t: TimeoutCancellationException) {
+                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, ERROR_TYPE_TIMEOUT)
+                contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
+            }catch (e: Exception) {
+                    UMLogUtil.logError("Exception running scrapeContent ${it.scrapeUrl}")
+                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+            }finally {
+                obj?.close()
             }
 
             queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
@@ -135,6 +205,9 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
         private const val SCRAPER_ARGS = "scraper"
         private const val START_URL_ARGS = "url"
         private const val PARENT_ENTRY_UID_ARGS = "parentUid"
+        private const val ENTRY_TITLE_ARGS = "title"
+        private const val ENTRY_LANG_ARGS = "lang"
+        private const val ENTRY_PUBLISHER_ARGS = "publisher"
 
         const val ERROR_TYPE_UNKNOWN = 10
 
@@ -200,6 +273,29 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                     .desc("set the total number of scrapers should be running together")
                     .build()
             options.addOption(scraperOption)
+
+            val entryTitleOption = Option.builder(ENTRY_TITLE_ARGS)
+                    .argName("entry title args")
+                    .hasArg()
+                    .desc("set the title of the new contentEntry")
+                    .build()
+            options.addOption(entryTitleOption)
+
+            val entryLangOption = Option.builder(ENTRY_LANG_ARGS)
+                    .argName("entry lang args")
+                    .hasArg()
+                    .desc("set the language of the new contentEntry")
+                    .build()
+            options.addOption(entryLangOption)
+
+            val entryPubOption = Option.builder(ENTRY_PUBLISHER_ARGS)
+                    .argName("entry publisher args")
+                    .hasArg()
+                    .desc("set the publisher of the new contentEntry")
+                    .build()
+            options.addOption(entryPubOption)
+
+
             val cmd: CommandLine
             try {
 
@@ -221,13 +317,24 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             val runner = ScraperRunner(cmd.getOptionValue(CONTAINER_ARGS), indexTotal, scraperTotal)
             if (cmd.hasOption(RUN_ID_ARGS)) {
                 runner.resume(cmd.getOptionValue(RUN_ID_ARGS).toInt())
+            } else if (cmd.hasOption(ENTRY_TITLE_ARGS)) {
+
+                val startingUrl = cmd.getOptionValue(START_URL_ARGS)
+                val entryTitle = cmd?.getOptionValue(ENTRY_TITLE_ARGS)
+                val entryLang = cmd?.getOptionValue(ENTRY_LANG_ARGS) ?: "en"
+                val entryPub = cmd?.getOptionValue(ENTRY_PUBLISHER_ARGS) ?: ""
+                val parentUid = cmd?.getOptionValue(PARENT_ENTRY_UID_ARGS)?.toLongOrNull() ?: 0
+
+                runner.createEntry(startingUrl, entryTitle, entryLang, parentUid, entryPub)
+
             } else {
 
-                val parentUid = cmd?.getOptionValue(PARENT_ENTRY_UID_ARGS)?.toLongOrNull() ?: 0
                 val scraperType = cmd.getOptionValue(CLAZZ_ARGS)
                 val startingUrl = cmd.getOptionValue(START_URL_ARGS)
                         ?: ScraperTypes.indexerTypeMap[scraperType]?.defaultUrl
                         ?: throw IllegalArgumentException("No default url for this scraperType, please provide")
+
+                val parentUid = cmd?.getOptionValue(PARENT_ENTRY_UID_ARGS)?.toLongOrNull() ?: 0
 
                 runner.start(startingUrl, scraperType, parentUid)
             }

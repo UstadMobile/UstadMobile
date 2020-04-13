@@ -8,6 +8,7 @@ import android.webkit.WebView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.HarPresenter
 import com.ustadmobile.core.impl.HarWebViewClient
+import com.ustadmobile.core.impl.PayloadRecorder
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
@@ -18,13 +19,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+
 class HarActivity : UstadBaseActivity(), UstadViewWithSnackBar, HarAndroidView {
 
     private val clientDeferred = CompletableDeferred<HarWebViewClient>()
 
     private lateinit var mWebView: WebView
     private lateinit var mPresenter: HarPresenter
-
+    val recorder = PayloadRecorder()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +44,7 @@ class HarActivity : UstadBaseActivity(), UstadViewWithSnackBar, HarAndroidView {
         mWebView.settings.allowUniversalAccessFromFileURLs = true
         mWebView.settings.allowFileAccessFromFileURLs = true
         mWebView.settings.mediaPlaybackRequiresUserGesture = false
+        mWebView.addJavascriptInterface(recorder, "recorder")
 
         val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = HarPresenter(this, UMAndroidUtil.bundleToMap(intent.extras), this, true, repository)
@@ -102,6 +105,7 @@ class HarActivity : UstadBaseActivity(), UstadViewWithSnackBar, HarAndroidView {
 
     override fun setChromeClient(client: HarWebViewClient) {
         mWebView.webViewClient = client
+        client.setRecoder(recorder)
         clientDeferred.complete(client)
     }
 

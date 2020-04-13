@@ -5,15 +5,12 @@ import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.HAB
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.YoutubeData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import org.apache.commons.io.FileUtils.readFileToString
+import org.apache.commons.io.FileUtils
 import java.io.File
 import java.io.IOException
 import java.lang.Exception
@@ -24,18 +21,21 @@ import kotlin.random.Random
 import kotlin.system.exitProcess
 
 
-open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
+class YoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntryUid, runUid, db, sqiUid) {
+
 
     private val ytPath: String
     private val gson: Gson
 
+
     init {
-        checkIfPathsToDriversExist()
+        ContentScraperUtil.checkIfPathsToDriversExist()
         ytPath = System.getProperty(ContentScraperUtil.YOUTUBE_DL_PATH_KEY)
         gson = GsonBuilder().disableHtmlEscaping().create()
     }
 
     override fun indexUrl(sourceUrl: String) {
+
         val ytExeFile = File(ytPath)
         if (!ytExeFile.exists()) {
             close()
@@ -43,11 +43,12 @@ open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmA
             throw IOException("Webp executable does not exist: $ytPath")
         }
 
-        val builder = ProcessBuilder(ytPath, "--retries", "1", "-i", "-J", "--flat-playlist", sourceUrl)
+        val builder = ProcessBuilder(ytPath, "--retries", "1",
+                "-J", "-i", "--flat-playlist", sourceUrl)
 
         var data: String? = null
         YoutubeScraper.youtubeLocker.withLock {
-            UMLogUtil.logTrace("starting youtube lock playlist")
+            UMLogUtil.logTrace("starting youtube lock channel")
             var retryFlag = true
             var numberOfFailures = 1
             while (retryFlag) {
@@ -90,50 +91,39 @@ open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmA
             }
 
         }
-        UMLogUtil.logTrace("ending youtube lock playlist")
+        UMLogUtil.logTrace("ending youtube lock channel")
 
-        if (data == null) {
+        if(data == null){
             setIndexerDone(false, 0)
             close()
             throw ScraperException(0, "No Data Found after running youtube-dl")
         }
 
         val youtubeData = gson.fromJson(data, YoutubeData::class.java)
-
-
-        val contentEntry = ContentScraperUtil.createOrUpdateContentEntry(
-                youtubeData.id!!, youtubeData.title!!, sourceUrl,
-                parentcontentEntry?.publisher ?: "", parentcontentEntry?.licenseType ?: 0,
-                parentcontentEntry?.primaryLanguageUid ?: 0,
-                parentcontentEntry?.languageVariantUid ?: 0,
-                youtubeData.description ?: "", false, "",
-                youtubeData.thumbnail ?: "",
-                "", "", 0, contentEntryDao)
-
-
-        youtubeData.entries?.forEachIndexed { counter, entry ->
+        youtubeData.entries?.forEachIndexed{ counter, entry ->
 
             if (entry.url == null) {
                 return@forEachIndexed
             }
 
-            val youtubeUrl = "https://www.youtube.com/watch?v=${entry.url!!}"
+            val playlistEntry = ContentScraperUtil.insertTempYoutubeContentEntry(
+                    contentEntryDao, entry.url!!,
+                    parentcontentEntry?.primaryLanguageUid?: 0, "",
+                    parentcontentEntry?.publisher?: "", parentcontentEntry?.licenseType?: 0,
+                    parentcontentEntry?.languageVariantUid?: 0)
 
-            val youtubeEntry = ContentScraperUtil.insertTempYoutubeContentEntry(
-                    contentEntryDao, youtubeUrl,
-                    parentcontentEntry?.primaryLanguageUid ?: 0, entry.title!!,
-                    parentcontentEntry?.publisher ?: "", parentcontentEntry?.licenseType ?: 0,
-                    parentcontentEntry?.languageVariantUid ?: 0)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, playlistEntry, counter)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, youtubeEntry, counter)
-
-            createQueueItem(youtubeUrl, youtubeEntry, ScraperTypes.YOUTUBE_VIDEO_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+            createQueueItem(entry.url!!, playlistEntry, ScraperTypes.YOUTUBE_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
         }
 
         setIndexerDone(true, 0)
+
     }
 
     override fun close() {
+
     }
+
 
 }

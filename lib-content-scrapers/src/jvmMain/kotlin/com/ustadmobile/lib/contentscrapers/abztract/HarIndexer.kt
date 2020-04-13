@@ -102,6 +102,9 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDataba
 
     override fun close() {
         chromeDriver.quit()
-        proxy.stop()
+        if(!proxy.isStopped){
+            proxy.stop()
+        }
+
     }
 }

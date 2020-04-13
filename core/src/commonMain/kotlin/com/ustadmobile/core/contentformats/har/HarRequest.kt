@@ -17,4 +17,6 @@ class HarRequest {
 
     var bodySize: Long? = null
 
+    var body: String? = null
+
 }

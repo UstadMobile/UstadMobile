@@ -11,3 +11,33 @@ class PracticeJson {
     }
 
 }
+
+class PracticeTask {
+
+    var data: Data? = null
+
+    class Data {
+
+        var getOrCreatePracticeTask: Task? = null
+
+        class Task {
+
+            var result: Result? = null
+
+            class Result {
+
+                var userTask: UserTask? = null
+
+                class UserTask {
+
+                    var task: PracticeJson.TaskJson? = null
+
+                }
+
+            }
+
+        }
+
+    }
+
+}

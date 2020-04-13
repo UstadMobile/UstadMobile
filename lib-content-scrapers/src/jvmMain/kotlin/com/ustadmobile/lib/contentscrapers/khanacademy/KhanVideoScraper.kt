@@ -15,7 +15,6 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ShrinkerUtil
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.fileMap
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.khanFullMap
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.khanLiteMap
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.subTitlePostUrl
@@ -93,19 +92,19 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
         val mp4Link = content.downloadUrls?.mp4 ?: content.downloadUrls?.mp4Low
         var mp4Url: URL? = null
         var isValid: Boolean
-        try{
+        try {
             mp4Url = URL(url, mp4Link)
             isValid = isUrlValid(mp4Url)
-        }catch (e: MalformedURLException){
+        } catch (e: MalformedURLException) {
             isValid = false
         }
 
         val sourceId = entry!!.sourceUrl!!
         val commonSourceUrl = "%${sourceId.substringBefore(".")}%"
         val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
-        commonEntryList.forEach{
+        commonEntryList.forEach {
 
-            if(it.sourceUrl == sourceId){
+            if (it.sourceUrl == sourceId) {
                 return@forEach
             }
 
@@ -131,7 +130,7 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
                 return@forEach
             }
 
-            val srtFile = File(tempDir, "$SUBTITLE_FILENAME-${khanLang.value.title.replace("'","")}$SRT_EXT")
+            val srtFile = File(tempDir, "$SUBTITLE_FILENAME-${khanLang.value.title.replace("'", "")}$SRT_EXT")
             val langSrtText = saveSrtContent(srtFile, code, youtubeId, gson, type)
 
             if (langSrtText.isEmpty() || defaultSrtText == langSrtText) {
@@ -207,9 +206,9 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
             setScrapeDone(false, ERROR_TYPE_YOUTUBE_ERROR)
             close()
 
-           /* val ytUrl = getYoutubeUrl(youtubeId)
-            try {
-                scrapeYoutubeLink(ytUrl)
+           /* try {
+                val ytUrl = getYoutubeUrl(youtubeId)
+                super.scrapeYoutubeVideo(ytUrl, "worst[ext=webm]/worst")
             } catch (e: Exception) {
                 hideContentEntry()
                 throw e

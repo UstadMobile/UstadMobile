@@ -1061,7 +1061,7 @@ object ContentScraperUtil {
                         subjectEntry: ContentEntry, destination: File,
                         type: String, runId: Int, itemType: Int): ScrapeQueueItem? {
 
-        var item = queueDao.getExistingQueueItem(runId, subjectUrl.toString())
+        var item = queueDao.findExistingQueueItem(runId, subjectEntry.contentEntryUid)
         if (item == null) {
             item = ScrapeQueueItem()
             item.destDir = destination.path
@@ -1420,6 +1420,20 @@ object ContentScraperUtil {
             this.sourceUrl = url
             this.primaryLanguageUid = primaryLanguageUid
             this.title = title
+            leaf = true
+            this.contentEntryUid = contentEntryDao.insert(this)
+        }
+    }
+
+
+    fun insertTempYoutubeContentEntry(contentEntryDao: ContentEntryDao, url: String, primaryLanguageUid: Long, title: String, publisherText: String, license: Int, langVariant: Long): ContentEntry {
+        return contentEntryDao.findBySourceUrl(url) ?: ContentEntry().apply {
+            this.sourceUrl = url
+            this.primaryLanguageUid = primaryLanguageUid
+            this.languageVariantUid = langVariant
+            this.title = title
+            this.publisher = publisherText
+            this.licenseType = license
             leaf = true
             this.contentEntryUid = contentEntryDao.insert(this)
         }

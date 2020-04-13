@@ -15,4 +15,12 @@ class YoutubeData {
     var thumbnail: String? = null
 
     var upload_date: String? = null
+
+    var playlist_id: String? = null
+
+    var playlist_title: String? = null
+
+    var url: String? = null
+
+    var entries: List<YoutubeData>? = null
 }

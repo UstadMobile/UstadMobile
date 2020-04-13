@@ -98,9 +98,9 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
         val sourceId = entry!!.sourceUrl!!
         val commonSourceUrl = "%${sourceId.substringBefore(".")}%"
         val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
-        commonEntryList.forEach{
+        commonEntryList.forEach {
 
-            if(it.sourceUrl == sourceId){
+            if (it.sourceUrl == sourceId) {
                 return@forEach
             }
 
@@ -117,34 +117,41 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
 
         val harExtra = HarExtra()
 
+        val scraperResult: HarScraperResult
+        try {
 
-        val scraperResult = startHarScrape(sourceUrl, {
+            scraperResult = startHarScrape(sourceUrl, {
 
-            it.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(
-                    By.cssSelector("div[id*=discussiontabbedpanel]")))
+                it.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector("div[id*=discussiontabbedpanel]")))
 
-        }, filters = listOf { entry ->
+            }, filters = listOf { entry ->
 
-            if (entry.request.url == sourceUrl) {
+                if (entry.request.url == sourceUrl) {
 
-                val doc = Jsoup.parse(entry.response.content.text)
-                doc.head().append(KHAN_CSS)
-                doc.head().append(KHAN_COOKIE)
+                    val doc = Jsoup.parse(entry.response.content.text)
+                    doc.head().append(KHAN_CSS)
+                    doc.head().append(KHAN_COOKIE)
 
-                entry.response.content.text = doc.html()
+                    entry.response.content.text = doc.html()
 
+                }
+                entry
+            }) {
+
+                it.har.log.entries.add(addHarEntry(
+                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.KHAN_CSS_LINK), UTF_ENCODING),
+                        mimeType = MIMETYPE_CSS,
+                        requestUrl = "https://www.khanacademy.org/khanscraper.css"))
+
+                true
             }
-            entry
-        }) {
-
-            it.har.log.entries.add(addHarEntry(
-                    IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.KHAN_CSS_LINK), UTF_ENCODING),
-                    mimeType = MIMETYPE_CSS,
-                    requestUrl = "https://www.khanacademy.org/khanscraper.css"))
-
-            true
+        }catch (e: Exception){
+            hideContentEntry()
+            setScrapeDone(false, 0)
+            close()
+            throw e
         }
-
 
         val linksList = mutableListOf<HarRegexPair>()
         val navList = navData.navItems
