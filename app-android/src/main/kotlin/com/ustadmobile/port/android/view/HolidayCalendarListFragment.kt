@@ -1,7 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,11 +20,10 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
-import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 import com.ustadmobile.port.android.view.util.getDataItemViewHolder
+
 
 class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries>(),
         HolidayCalendarListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -119,14 +116,6 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
         //do nothing
-    }
-
-    override fun finishWithResult(result: List<HolidayCalendar>) {
-        val resultIntent = Intent().apply {
-            putExtraResultAsJson(EXTRA_RESULT_KEY, result)
-        }
-        activity?.setResult(Activity.RESULT_OK, resultIntent)
-        activity?.finish()
     }
 
     override val displayTypeRepo: Any?

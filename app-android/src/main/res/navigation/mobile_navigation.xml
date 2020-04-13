@@ -10,13 +10,15 @@
 
     <fragment
         android:id="@+id/clazz_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzEditFragment"
-        android:label="@string/edit"/>
+        android:name="com.ustadmobile.port.android.view.ClazzEditFragment" />
 
     <fragment
         android:id="@+id/schedule_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ScheduleEditFragment"
-        android:label="@string/schedule"/>
+        android:name="com.ustadmobile.port.android.view.ScheduleEditFragment" />
+
+    <fragment
+        android:id="@+id/holidaycalendar_list_dest"
+        android:name="com.ustadmobile.port.android.view.HolidayCalendarListFragment"/>
 
 
 </navigation>

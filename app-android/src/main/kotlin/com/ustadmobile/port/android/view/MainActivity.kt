@@ -53,8 +53,10 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
     override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
         val ustadDestination = UstadMobileSystemImpl.instance.destinationProvider.lookupDestinationById(destination.id)
 
-        if(ustadDestination?.hasFab != true)
+        if(ustadDestination?.hasFab != true) {
             activityFloatingActionButton?.visibility = View.GONE
+            activityFloatingActionButton?.setOnClickListener(null)
+        }
 
         mAppBar.setExpanded(true)
 

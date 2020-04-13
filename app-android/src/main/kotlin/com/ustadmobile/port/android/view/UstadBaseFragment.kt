@@ -55,8 +55,24 @@ open class UstadBaseFragment : Fragment() {
 
     companion object {
 
+        /**
+         * Argument to pass to tell a fragment where on the back stack a result (e.g. entity selected
+         * from a list or newly created) should be saved. This works along the principles outlined
+         * here: https://developer.android.com/guide/navigation/navigation-programmatic#returning_a_result .
+         *
+         * The difference between the approach taken here and the approach in the link above is that
+         * we do not automatically save the result to the previous entry in the back stack. When the
+         * user goes from fragment a to a list to pick an entity, and then selects to create a new
+         * entity, we want to go back directly back from the new entity edit fragment to fragment a
+         * (e.g. skip the intermediary list).
+         *
+         * @see com.ustadmobile.port.android.view.ext.FragmentExtKt#saveResultToBackStackSavedStateHandle
+         */
         const val ARG_RESULT_DEST_ID = "result_dest"
 
+        /**
+         * The key to use in the SavedStateHandle to save the result
+         */
         const val ARG_RESULT_DEST_KEY = "result_key"
 
     }

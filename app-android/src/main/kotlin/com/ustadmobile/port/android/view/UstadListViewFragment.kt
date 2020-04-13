@@ -24,6 +24,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.children
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 
 interface ListViewResultListener<RT> {
@@ -74,22 +75,26 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         }
 
     // See https://developer.android.com/guide/topics/ui/menus#CAB
-    private val actionModeCallback: ActionMode.Callback = object : ActionMode.Callback {
+
+    private class ListViewActionModeCallback<RT, DT>(var fragmentHost: UstadListViewFragment<RT, DT>?) : ActionMode.Callback {
+
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            val selectedItemsList = mRecyclerViewAdapter?.selectedItemsLiveData?.value ?: return false
+            val selectedItemsList = fragmentHost?.mRecyclerViewAdapter?.selectedItemsLiveData?.value ?: return false
             val option = SelectionOption.values().first { it.commandId == item.itemId }
-            listPresenter?.handleClickSelectionOption(selectedItemsList, option)
+            fragmentHost?.listPresenter?.handleClickSelectionOption(selectedItemsList, option)
             mode.finish()
             return true
         }
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             val systemImpl = UstadMobileSystemImpl.instance
-            selectionOptions?.forEachIndexed { index, item ->
+            val fragmentContext = fragmentHost?.requireContext() ?: return false
+
+            fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
                 menu.add(0, item.commandId, index,
-                        systemImpl.getString(item.messageId, requireContext())).apply {
-                    val drawable = requireContext().getDrawable(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp) ?: return@forEachIndexed
-                    DrawableCompat.setTint(drawable, ContextCompat.getColor(requireContext(), R.color.primary_text))
+                        systemImpl.getString(item.messageId, fragmentContext)).apply {
+                    val drawable = fragmentContext.getDrawable(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp) ?: return@forEachIndexed
+                    DrawableCompat.setTint(drawable, ContextCompat.getColor(fragmentContext, R.color.primary_text))
                     icon = drawable
                 }
             }
@@ -102,9 +107,9 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            actionMode = null
-            mRecyclerViewAdapter?.clearSelection()
-            mRecyclerView?.children?.forEach {
+            fragmentHost?.actionMode = null
+            fragmentHost?.mRecyclerViewAdapter?.clearSelection()
+            fragmentHost?.mRecyclerView?.children?.forEach {
                 it.isSelected = false
 
                 //Check if this is the first item where the data view is actually nested
@@ -112,16 +117,26 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
                     it.children.forEach { it.isSelected = false }
                 }
             }
+
+            //This MUST be done to avoid a memory leak. Finishing the action mode does not seem to
+            //clear the reference to this callback.
+            fragmentHost = null
         }
     }
+
+    private var actionModeCallback: ActionMode.Callback? = null
 
     private var numItemsSelected = 0
 
     protected val selectionObserver = object: Observer<List<DT>> {
         override fun onChanged(t: List<DT>?) {
             val actionModeVal = actionMode
+
             if(!t.isNullOrEmpty() && actionModeVal == null) {
-                actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(actionModeCallback)
+                val actionModeCallbackVal = ListViewActionModeCallback(this@UstadListViewFragment).also {
+                    this@UstadListViewFragment.actionModeCallback = it
+                }
+                actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(actionModeCallbackVal)
             }else if(actionModeVal != null && t.isNullOrEmpty()) {
                 actionModeVal.finish()
             }
@@ -160,6 +175,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         mRecyclerView = null
         currentLiveData?.removeObserver(this)
         currentLiveData = null
+        actionModeCallback = null
+        actionMode?.finish()
 
         super.onDestroyView()
     }
@@ -203,7 +220,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         }
 
     override fun finishWithResult(result: List<RT>) {
-        mListViewResultListener?.onListItemsSelected(result)
+        saveResultToBackStackSavedStateHandle(result)
     }
 
     override val viewContext: Any

@@ -20,9 +20,13 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.navigateToEditEntity
+import com.ustadmobile.port.android.util.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.util.ext.saveStateToCurrentBackStackStateHandle
+import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2ActivityEventHandler {
 
@@ -91,16 +95,19 @@ class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2Activ
 
     override fun showNewScheduleDialog() {
         saveStateToBackStack()
-        findNavController().navigateToScheduleEdit(null)
+        findNavController().navigateToEditEntity(null, R.id.schedule_edit_dest,
+                Schedule::class.java)
     }
 
     override fun showEditScheduleDialog(schedule: Schedule) {
         saveStateToBackStack()
-        findNavController().navigateToScheduleEdit(schedule)
+        findNavController().navigateToEditEntity(schedule, R.id.schedule_edit_dest,
+                Schedule::class.java)
     }
 
     override fun showHolidayCalendarPicker() {
-        TODO("Not yet implemented")
+        saveStateToBackStack()
+        findNavController().navigateToPickEntityFromList(HolidayCalendar::class.java, R.id.holidaycalendar_list_dest)
     }
 
     override fun handleClickTimeZone() {
@@ -138,6 +145,19 @@ class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2Activ
             val schedule = it.firstOrNull() ?: return@observeResult
             mPresenter?.handleAddOrEditSchedule(schedule)
         }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                HolidayCalendar::class.java) {
+            val holidayCalendar = it.firstOrNull() ?: return@observeResult
+            entity?.holidayCalendar = holidayCalendar
+            entity?.clazzHolidayUMCalendarUid = holidayCalendar.umCalendarUid
+            mDataBinding?.clazz = entity
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setEditFragmentTitle(R.string.clazz)
     }
 
     override fun onDestroyView() {
