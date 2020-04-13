@@ -64,6 +64,6 @@ lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl, db: UmApp
     }
 
     override fun handleClickSave(entity: Schedule) {
-        view.finishWithResult(entity)
+        view.finishWithResult(listOf(entity))
     }
 }

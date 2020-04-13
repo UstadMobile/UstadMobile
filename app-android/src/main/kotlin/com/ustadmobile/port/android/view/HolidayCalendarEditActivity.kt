@@ -148,11 +148,11 @@ class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView
             rootView?.fieldsEnabled = value
         }
 
-    override fun finishWithResult(result: HolidayCalendar) {
-        setResult(RESULT_OK, Intent().apply {
-            putExtraResultAsJson(EXTRA_RESULT_KEY, listOf(result))
-        })
-        finish()
+    override fun finishWithResult(result: List<HolidayCalendar>) {
+//        setResult(RESULT_OK, Intent().apply {
+//            putExtraResultAsJson(EXTRA_RESULT_KEY, listOf(result))
+//        })
+//        finish()
     }
 
     override var loading: Boolean = false

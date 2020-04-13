@@ -14,6 +14,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
@@ -27,10 +28,13 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
         get() = findViewById(R.id.activity_listfragmelayout_behaviornt_fab)
 
+    private lateinit var mAppBar: AppBarLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        mAppBar = findViewById(R.id.appBar)
         val toolbar = findViewById<Toolbar>(R.id.activity_main_toolbar)
         setSupportActionBar(toolbar)
 
@@ -51,6 +55,8 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
 
         if(ustadDestination?.hasFab != true)
             activityFloatingActionButton?.visibility = View.GONE
+
+        mAppBar.setExpanded(true)
 
     }
 

@@ -52,4 +52,13 @@ open class UstadBaseFragment : Fragment() {
             runnables.remove()
         }
     }
+
+    companion object {
+
+        const val ARG_RESULT_DEST_ID = "result_dest"
+
+        const val ARG_RESULT_DEST_KEY = "result_key"
+
+    }
+
 }

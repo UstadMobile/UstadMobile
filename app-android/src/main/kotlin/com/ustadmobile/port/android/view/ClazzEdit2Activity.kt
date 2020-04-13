@@ -100,27 +100,27 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
     }
 
     override fun showNewScheduleDialog() {
-        prepareScheduleEditCall {
-            val scheduleCreated = it?.firstOrNull() ?: return@prepareScheduleEditCall
-            mPresenter.handleAddOrEditSchedule(scheduleCreated)
-        }.launchScheduleEdit(null)
+//        prepareScheduleEditCall {
+//            val scheduleCreated = it?.firstOrNull() ?: return@prepareScheduleEditCall
+//            mPresenter.handleAddOrEditSchedule(scheduleCreated)
+//        }.launchScheduleEdit(null)
     }
 
     override fun showEditScheduleDialog(schedule: Schedule) {
-        prepareScheduleEditCall {
-            val scheduleCreated = it?.firstOrNull() ?: return@prepareScheduleEditCall
-            mPresenter.handleAddOrEditSchedule(scheduleCreated)
-        }.launchScheduleEdit(schedule)
+//        prepareScheduleEditCall {
+//            val scheduleCreated = it?.firstOrNull() ?: return@prepareScheduleEditCall
+//            mPresenter.handleAddOrEditSchedule(scheduleCreated)
+//        }.launchScheduleEdit(schedule)
     }
 
     override fun showHolidayCalendarPicker() {
-        prepareHolidayCalendarPickFromListCall {
-            if(it != null) {
-                entity?.holidayCalendar = it[0]
-                entity?.clazzHolidayUMCalendarUid = it[0].umCalendarUid
-                rootView?.clazz = rootView?.clazz
-            }
-        }.launch(mapOf())
+//        prepareHolidayCalendarPickFromListCall {
+//            if(it != null) {
+//                entity?.holidayCalendar = it[0]
+//                entity?.clazzHolidayUMCalendarUid = it[0].umCalendarUid
+//                rootView?.clazz = rootView?.clazz
+//            }
+//        }.launch(mapOf())
     }
 
     override fun handleClickTimeZone() {
@@ -161,9 +161,9 @@ class ClazzEdit2Activity : UstadBaseActivity(), ClazzEdit2View, Observer<List<Sc
             rootView?.fieldsEnabled = value
         }
 
-    override fun finishWithResult(result: ClazzWithHolidayCalendar) {
+    override fun finishWithResult(result: List<ClazzWithHolidayCalendar>) {
         setResult(RESULT_OK, Intent().apply {
-            putExtraResultAsJson(EXTRA_RESULT_KEY, listOf(result))
+            putExtraResultAsJson(EXTRA_RESULT_KEY, result)
         })
         finish()
     }

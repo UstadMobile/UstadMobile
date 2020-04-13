@@ -16,16 +16,13 @@ import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultGson
-import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.ext.setAllFromMap
-import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.saveStateToCurrentBackStackStateHandle
 
 class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2ActivityEventHandler {
 
@@ -90,26 +87,16 @@ class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2Activ
             //TODO: set this on activity
         }
 
-    override fun showNewScheduleDialog() {
-        val navController = findNavController()
-        mutableMapOf<String, String>().apply {
-            mPresenter?.onSaveInstanceState(this)
-            navController.currentBackStackEntry?.savedStateHandle?.setAllFromMap(this)
-        }
+    private fun saveStateToBackStack() = mPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
 
-        findNavController().navigate(R.id.schedule_edit_dest)
+    override fun showNewScheduleDialog() {
+        saveStateToBackStack()
+        findNavController().navigateToScheduleEdit(null)
     }
 
     override fun showEditScheduleDialog(schedule: Schedule) {
-        val navController = findNavController()
-        mutableMapOf<String, String>().apply {
-            mPresenter?.onSaveInstanceState(this)
-            navController.currentBackStackEntry?.savedStateHandle?.setAllFromMap(this)
-        }
-
-        findNavController().navigate(R.id.schedule_edit_dest, Bundle().apply {
-            putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, schedule)
-        })
+        saveStateToBackStack()
+        findNavController().navigateToScheduleEdit(schedule)
     }
 
     override fun showHolidayCalendarPicker() {
@@ -122,7 +109,6 @@ class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2Activ
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-
 
         mDataBinding = FragmentClazzEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
@@ -145,16 +131,13 @@ class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2Activ
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
-        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
-        val savedStateMap = savedStateHandle?.toStringMap()
 
-        mPresenter?.onCreate(savedStateMap)
-        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String?>("schedule")
-                ?.observe(this, Observer {
-                    val jsonStr = it ?: return@Observer
-                    mPresenter?.handleAddOrEditSchedule(defaultGson().fromJson(jsonStr, Schedule::class.java))
-                    navController.currentBackStackEntry?.savedStateHandle?.set("schedule", null)
-                })
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Schedule::class.java) {
+            val schedule = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditSchedule(schedule)
+        }
     }
 
     override fun onDestroyView() {
@@ -170,7 +153,7 @@ class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2Activ
         outState.putAll(mutableMapOf<String, String>().apply { mPresenter?.onSaveInstanceState(this) }.toBundle())
     }
 
-    override fun finishWithResult(result: ClazzWithHolidayCalendar) {
+    override fun finishWithResult(result: List<ClazzWithHolidayCalendar>) {
         //pass this as per https://developer.android.com/guide/navigation/navigation-programmatic
     }
 
