@@ -46,12 +46,6 @@ fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<HolidayC
 
 
 
-interface HolidayCalendarEditActivityEventHandler {
-
-    fun onClickEditHoliday(holiday: Holiday?)
-
-    fun onClickNewHoliday()
-}
 
 class HolidayCalendarEditActivity : UstadBaseActivity(), HolidayCalendarEditView,
         HolidayCalendarEditActivityEventHandler {
