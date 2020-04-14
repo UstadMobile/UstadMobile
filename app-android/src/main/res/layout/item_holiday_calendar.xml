@@ -5,6 +5,8 @@
 
     <data>
         <import type="com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries"/>
+        <import type="com.ustadmobile.port.android.view.HolidayCalendarListFragment"/>
+
         <variable
             name="holidayCalendar"
             type="com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries" />
@@ -15,7 +17,7 @@
 
         <variable
             name="pagedListAdapter"
-            type="com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem&lt;HolidayCalendarWithNumEntries&gt;" />
+            type="com.ustadmobile.port.android.view.HolidayCalendarListFragment.HolidayCalendarListRecyclerAdapter" />
 
     </data>
 

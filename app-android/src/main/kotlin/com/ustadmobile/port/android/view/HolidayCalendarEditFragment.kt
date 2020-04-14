@@ -121,6 +121,7 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
         mBinding = null
         mPresenter = null
         holidayRecyclerView?.adapter = null
+        holidayRecyclerView = null
         holidayRecyclerAdapter = null
         holidayList = null
     }

@@ -20,8 +20,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
-import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
-import com.ustadmobile.port.android.view.util.getDataItemViewHolder
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -35,25 +34,18 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
     override val listPresenter: UstadListPresenter<*, in ClazzWithNumStudents>?
         get() = mPresenter
 
-    class ClazzList2RecyclerAdapter(var presenter: ClazzList2Presenter?): PagedListAdapterWithNewItem<ClazzWithNumStudents>(DIFF_CALLBACK) {
+    class ClazzList2RecyclerAdapter(var presenter: ClazzList2Presenter?): SelectablePagedListAdapter<ClazzWithNumStudents, ClazzList2RecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
 
         class ClazzList2ViewHolder(val itemBinding: ItemClazzlist2ClazzBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            if(viewType == ITEMVIEWTYPE_NEW) {
-                return super.onCreateViewHolder(parent, viewType)
-            }else {
-                val itemBinding = ItemClazzlist2ClazzBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                return ClazzList2ViewHolder(itemBinding)
-            }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzList2ViewHolder {
+            val itemBinding = ItemClazzlist2ClazzBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            return ClazzList2ViewHolder(itemBinding)
         }
 
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val itemHolder = holder.getDataItemViewHolder()
-            if(itemHolder is ClazzList2ViewHolder) {
-                itemHolder.itemBinding.clazz = getItem(position)
-                itemHolder.itemBinding.presenter = presenter
-            }
+        override fun onBindViewHolder(holder: ClazzList2ViewHolder, position: Int) {
+            holder.itemBinding.clazz = getItem(position)
+            holder.itemBinding.presenter = presenter
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -72,7 +64,8 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = ClazzList2RecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ClazzList2RecyclerAdapter(mPresenter)
+        mRecyclerView?.adapter = mDataRecyclerViewAdapter
         mPresenter?.onCreate(savedInstanceState.toStringMap())
 
         GlobalScope.launch {

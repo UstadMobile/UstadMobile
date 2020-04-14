@@ -22,10 +22,12 @@ import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.children
+import androidx.recyclerview.widget.MergeAdapter
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
-import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
+import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 interface ListViewResultListener<RT> {
 
@@ -38,11 +40,11 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     protected var mRecyclerView: RecyclerView? = null
 
-    protected var mRecyclerViewAdapter: PagedListAdapterWithNewItem<DT>? = null
-        set(value) {
-            field = value
-            mRecyclerView?.adapter = value
-        }
+    protected var mNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+
+    protected var mDataRecyclerViewAdapter: SelectablePagedListAdapter<DT, *>? = null
+
+    protected var mMergeRecyclerViewAdapter: MergeAdapter? = null
 
     protected var mDataBinding: FragmentListBinding? = null
 
@@ -79,7 +81,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
     private class ListViewActionModeCallback<RT, DT>(var fragmentHost: UstadListViewFragment<RT, DT>?) : ActionMode.Callback {
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            val selectedItemsList = fragmentHost?.mRecyclerViewAdapter?.selectedItemsLiveData?.value ?: return false
+            val selectedItemsList = fragmentHost?.mDataRecyclerViewAdapter?.selectedItemsLiveData?.value ?: return false
             val option = SelectionOption.values().first { it.commandId == item.itemId }
             fragmentHost?.listPresenter?.handleClickSelectionOption(selectedItemsList, option)
             mode.finish()
@@ -108,7 +110,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
         override fun onDestroyActionMode(mode: ActionMode) {
             fragmentHost?.actionMode = null
-            fragmentHost?.mRecyclerViewAdapter?.clearSelection()
+            fragmentHost?.mDataRecyclerViewAdapter?.clearSelection()
             fragmentHost?.mRecyclerView?.children?.forEach {
                 it.isSelected = false
 
@@ -161,8 +163,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         val rootView: View
         mDataBinding = FragmentListBinding.inflate(inflater, container, false).also {
             rootView = it.root
+            mRecyclerView = it.fragmentListRecyclerview
         }
-        mRecyclerView = rootView.findViewById(R.id.fragment_list_recyclerview)
         mRecyclerView?.layoutManager = LinearLayoutManager(context)
 
         return rootView
@@ -188,7 +190,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         get() = field
         set(value) {
             mDataBinding?.addMode = value
-            mRecyclerViewAdapter?.newItemVisible = (value == ListViewAddMode.FIRST_ITEM)
+            mNewItemRecyclerViewAdapter?.newItemVisible = (value == ListViewAddMode.FIRST_ITEM)
             val fab = mActivityWithFab?.activityFloatingActionButton
 //            if(value == ListViewAddMode.FAB) {
 //                fab?.show()
@@ -209,7 +211,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         }
 
     override fun onChanged(t: PagedList<DT>?) {
-        mRecyclerViewAdapter?.submitList(t)
+        mDataRecyclerViewAdapter?.submitList(t)
     }
 
     override var sortOptions: List<MessageIdOption>? = null

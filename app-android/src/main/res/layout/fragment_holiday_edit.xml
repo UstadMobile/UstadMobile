@@ -19,10 +19,6 @@
             name="fieldsEnabled"
             type="boolean" />
 
-        <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.HolidayEditActivityEventHandler" />
-
     </data>
 
     <androidx.core.widget.NestedScrollView

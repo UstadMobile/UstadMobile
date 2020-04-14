@@ -527,9 +527,9 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
      * Over here, we open the AddScheduleDialogView Dialog for that Class.
      */
     fun handleClickAddSchedule() {
-        val args = HashMap<String, String>()
-        args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
-        impl.go(AddScheduleDialogView.VIEW_NAME, args, context)
+//        val args = HashMap<String, String>()
+//        args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
+//        impl.go(AddScheduleDialogView.VIEW_NAME, args, context)
     }
 
     fun handleSaveCustomFieldValues(viewId: Int, type: Int, value: Any) {
@@ -626,7 +626,7 @@ class ClazzEditPresenter(context: Any, arguments: Map<String, String>?, view: Cl
         val args = HashMap<String, String>()
         args.put(ARG_CLAZZ_UID, currentClazzUid.toString())
         args.put(ARG_SCHEDULE_UID, arg.toString())
-        impl.go(AddScheduleDialogView.VIEW_NAME, args, context)
+        //impl.go(AddScheduleDialogView.VIEW_NAME, args, context)
     }
 
     /**

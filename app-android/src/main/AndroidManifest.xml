@@ -157,9 +157,6 @@
             android:name="com.ustadmobile.staging.port.android.view.ClazzEditActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.AddScheduleDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.ClazzActivityEditActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
@@ -233,9 +230,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.ReportSelectionFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.HolidayCalendarDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.RoleListActivity"
