@@ -21,7 +21,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
-import com.ustadmobile.port.android.util.ext.navigateToEditEntity
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 import com.ustadmobile.port.android.view.util.getDataItemViewHolder
@@ -98,8 +98,7 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
     }
 
     override fun onClick(view: View?) {
-        findNavController().navigateToEditEntity(null, R.id.holidaycalendar_edit_dest,
-            HolidayCalendar::class.java)
+        navigateToEditEntity(null, R.id.holidaycalendar_edit_dest, HolidayCalendar::class.java)
     }
 
     override fun onDestroyView() {

@@ -24,5 +24,9 @@
         android:id="@+id/holidaycalendar_edit_dest"
         android:name="com.ustadmobile.port.android.view.HolidayCalendarEditFragment"/>
 
+    <fragment
+        android:id="@+id/holiday_edit_dest"
+        android:name="com.ustadmobile.port.android.view.HolidayEditFragment"/>
+
 
 </navigation>

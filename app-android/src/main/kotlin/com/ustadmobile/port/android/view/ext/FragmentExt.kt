@@ -1,13 +1,20 @@
 package com.ustadmobile.port.android.view.ext
 
+import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.networkmanager.defaultGson
+import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.port.android.util.ext.putResultDestInfo
 import com.ustadmobile.port.android.view.UstadBaseFragment
+import com.ustadmobile.port.android.view.UstadEditFragment
 
 /**
  * Set the title of an edit fragment to "New Widget" or "Edit Widget" based on whether or not a new
@@ -41,5 +48,74 @@ fun Fragment.saveResultToBackStackSavedStateHandle(result: List<*>) {
     }else{
         navController.navigateUp()
     }
+}
+
+private val fragmentNavDefaultOptions: NavOptions by lazy {
+        navOptions {
+        anim {
+            enter = R.anim.anim_slide_in_right
+            exit = R.anim.anim_slide_out_left
+            popEnter = android.R.anim.slide_in_left
+            popExit = R.anim.anim_slide_out_right
+        }
+    }
+}
+/**
+ * Navigate to an edit view and instruct the destination to save the result to the back stack
+ *
+ * @entity the entity to be edited (null to create a new entity)
+ * @param entityClass The class for the entity type that is going to be selected
+ * @param destinationId The destination id as per the navigation map
+ * @param overwriteDestination If true, the ARG_RESULT_DEST_ID will be replaced with this fragment.
+ *
+ * This should normally be done when the user has gone through multiple edit screens e.g. when navigating
+ * to holiday calendar edit from edit class and the back stack is as follows:
+ *  Person Edit - Class List - Edit Class - Holiday Calendar List - Holiday Calendar Edit
+ * The result should be saved into the savedStateHandle for Edit Class, not Person Edit.
+ *
+ * By default this will be true when navigating from an edit fragment (the likely destination
+ * of anything that is being picked), false otherwise (e.g. when the user went via a list screen)
+ * @navOptions navOptions to pass to navController.navigate
+ */
+fun <T> Fragment.navigateToEditEntity(entity: T?, destinationId: Int, entityClass: Class<T>,
+                                           destinationResultKey: String = entityClass.simpleName,
+                                           overwriteDestination: Boolean? = null,
+                                            navOptions: NavOptions? = fragmentNavDefaultOptions) {
+    val navController = findNavController()
+    val argBundle = Bundle()
+    val backStateEntryVal = navController.currentBackStackEntry
+
+    if(backStateEntryVal != null) {
+        argBundle.putResultDestInfo(backStateEntryVal, destinationResultKey,
+            overwriteDest = overwriteDestination ?: (this is UstadEditFragment<*>))
+    }
+
+    if(entity != null)
+        argBundle.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, entity)
+
+    navController.navigate(destinationId, argBundle, navOptions)
+}
+
+/**
+ * Navigate to a list view in picker mode for the given entity type and destination id
+ *
+ * @param entityClass The class for the entity type that is going to be selected
+ * @param destinationId The destination id as per the navigation map
+ * @param args optional additional args to pass to the list view
+ * @param destinationResultKey the key to use in the SavedStateHandle
+ */
+fun Fragment.navigateToPickEntityFromList(entityClass: Class<*>, destinationId: Int,
+                                               args: Bundle = Bundle(),
+                                               destinationResultKey: String = entityClass.simpleName,
+                                              overwriteDestination: Boolean? = null,
+                                              navOptions: NavOptions? = fragmentNavDefaultOptions){
+    val navController = findNavController()
+    val currentBackStateEntryVal = navController.currentBackStackEntry
+    if(currentBackStateEntryVal != null)
+        args.putResultDestInfo(currentBackStateEntryVal, destinationResultKey,
+                overwriteDest = overwriteDestination ?: (this is UstadEditFragment<*>))
+
+    args.putString(UstadView.ARG_LISTMODE, ListViewMode.PICKER.toString())
+    navController.navigate(destinationId, args, navOptions)
 }
 

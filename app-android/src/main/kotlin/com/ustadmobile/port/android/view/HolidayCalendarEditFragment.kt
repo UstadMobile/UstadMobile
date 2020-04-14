@@ -12,16 +12,19 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentHolidaycalendarEditBinding
 import com.toughra.ustadmobile.databinding.ItemHolidayBinding
 import com.ustadmobile.core.controller.HolidayCalendarEditPresenter
+import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayCalendarEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 
@@ -38,6 +41,9 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
     private var mBinding: FragmentHolidaycalendarEditBinding? = null
 
     private var mPresenter: HolidayCalendarEditPresenter? = null
+
+    override val mEditPresenter: UstadEditPresenter<*, HolidayCalendar>?
+        get() = mPresenter
 
     class HolidayRecyclerAdapter(val activityEventHandler: HolidayCalendarEditActivityEventHandler,
                                  var presenter: HolidayCalendarEditPresenter?): ListAdapter<Holiday, HolidayRecyclerAdapter.HolidayViewHolder>(DIFF_CALLBACK_HOLIDAY) {
@@ -77,6 +83,8 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
         val rootView: View
         mBinding = FragmentHolidaycalendarEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
+            it.activityEventHandler = this
+
         }
 
         holidayRecyclerView = rootView.findViewById(R.id.activity_holidaycalendar_holiday_recyclerview)
@@ -99,8 +107,22 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
 
-        holidayRecyclerAdapter?.presenter= mPresenter
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Holiday::class.java) {
+            val holiday = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditHoliday(holiday)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mBinding = null
+        mPresenter = null
+        holidayRecyclerView?.adapter = null
+        holidayRecyclerAdapter = null
+        holidayList = null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -109,7 +131,8 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
     }
 
     override fun onClickEditHoliday(holiday: Holiday?) {
-
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(holiday, R.id.holiday_edit_dest, Holiday::class.java)
     }
 
     override fun onClickNewHoliday() = onClickEditHoliday(null)
@@ -134,18 +157,6 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
             field = value
             mBinding?.loading = value
         }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
-            R.id.menu_done -> {
-                val entityVal = entity ?: return false
-                mPresenter?.handleClickSave(entityVal)
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
 
 
     companion object {

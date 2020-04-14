@@ -44,6 +44,7 @@
                 android:enabled="@{fieldsEnabled}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_margin="@dimen/form_margin_horizontal"
                 android:hint="@string/name"
                 app:hintEnabled="true"

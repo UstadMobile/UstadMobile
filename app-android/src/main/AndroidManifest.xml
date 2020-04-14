@@ -235,12 +235,6 @@
             android:name="com.ustadmobile.staging.port.android.view.ReportSelectionFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.port.android.view.HolidayCalendarEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.HolidayEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.HolidayCalendarDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity

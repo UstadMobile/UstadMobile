@@ -14,25 +14,29 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
+import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.util.ext.navigateToEditEntity
-import com.ustadmobile.port.android.util.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.android.util.ext.saveStateToCurrentBackStackStateHandle
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
-class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2ActivityEventHandler {
+class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), ClazzEdit2View, ClazzEdit2ActivityEventHandler {
 
     private var mDataBinding: FragmentClazzEditBinding? = null
 
     private var mPresenter: ClazzEdit2Presenter? = null
+
+    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendar>?
+        get() = mPresenter
 
     private var scheduleRecyclerAdapter: ScheduleRecyclerAdapter? = null
 
@@ -91,23 +95,21 @@ class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2Activ
             //TODO: set this on activity
         }
 
-    private fun saveStateToBackStack() = mPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
+
 
     override fun showNewScheduleDialog() {
-        saveStateToBackStack()
-        findNavController().navigateToEditEntity(null, R.id.schedule_edit_dest,
-                Schedule::class.java)
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(null, R.id.schedule_edit_dest, Schedule::class.java)
     }
 
     override fun showEditScheduleDialog(schedule: Schedule) {
-        saveStateToBackStack()
-        findNavController().navigateToEditEntity(schedule, R.id.schedule_edit_dest,
-                Schedule::class.java)
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(schedule, R.id.schedule_edit_dest, Schedule::class.java)
     }
 
     override fun showHolidayCalendarPicker() {
-        saveStateToBackStack()
-        findNavController().navigateToPickEntityFromList(HolidayCalendar::class.java, R.id.holidaycalendar_list_dest)
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(HolidayCalendar::class.java, R.id.holidaycalendar_list_dest)
     }
 
     override fun handleClickTimeZone() {
@@ -166,15 +168,6 @@ class ClazzEditFragment() : UstadBaseFragment(), ClazzEdit2View, ClazzEdit2Activ
         scheduleRecyclerView = null
         scheduleRecyclerAdapter = null
         clazzSchedules = null
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putAll(mutableMapOf<String, String>().apply { mPresenter?.onSaveInstanceState(this) }.toBundle())
-    }
-
-    override fun finishWithResult(result: List<ClazzWithHolidayCalendar>) {
-        //pass this as per https://developer.android.com/guide/navigation/navigation-programmatic
     }
 
     companion object {
