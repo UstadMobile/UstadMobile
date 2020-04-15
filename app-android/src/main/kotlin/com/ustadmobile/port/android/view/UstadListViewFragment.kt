@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.content.Context
 import android.os.Bundle
 import android.view.*
+import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
@@ -23,17 +24,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.children
 import androidx.recyclerview.widget.MergeAdapter
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-
-interface ListViewResultListener<RT> {
-
-    fun onListItemsSelected(items: List<RT>)
-
-}
 
 abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener {
@@ -50,7 +48,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     protected var currentLiveData: LiveData<PagedList<DT>>? = null
 
-    protected var mListViewResultListener: ListViewResultListener<RT>? = null
+    protected var dbRepo: UmAppDatabase? = null
 
     protected var mActivityWithFab: UstadListViewActivityWithFab? = null
         get() {
@@ -78,6 +76,9 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     // See https://developer.android.com/guide/topics/ui/menus#CAB
 
+    /**
+     * This iscor a Contextual Action Mode Callback that handles showing list selection mode
+     */
     private class ListViewActionModeCallback<RT, DT>(var fragmentHost: UstadListViewFragment<RT, DT>?) : ActionMode.Callback {
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
@@ -165,9 +166,23 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             rootView = it.root
             mRecyclerView = it.fragmentListRecyclerview
         }
+
+        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         mRecyclerView?.layoutManager = LinearLayoutManager(context)
 
         return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mDataBinding?.presenter = listPresenter
+        mDataBinding?.onSortSelected = this
+        mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter, mDataRecyclerViewAdapter)
+        mRecyclerView?.adapter = mMergeRecyclerViewAdapter
+        mDataRecyclerViewAdapter?.selectedItemsLiveData?.observe(this.viewLifecycleOwner,
+                selectionObserver)
+        listPresenter?.onCreate(savedInstanceState.toStringMap())
     }
 
     override fun onDestroyView() {
@@ -179,12 +194,10 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         currentLiveData = null
         actionModeCallback = null
         actionMode?.finish()
+        dbRepo = null
 
         super.onDestroyView()
     }
-
-
-
 
     override var addMode: ListViewAddMode = ListViewAddMode.NONE
         get() = field
@@ -214,6 +227,14 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         mDataRecyclerViewAdapter?.submitList(t)
     }
 
+    override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
+        listPresenter?.handleClickSortOrder(messageIdOption)
+    }
+
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
+        //do nothing
+    }
+
     override var sortOptions: List<MessageIdOption>? = null
         get() = field
         set(value) {
@@ -230,13 +251,11 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        mListViewResultListener = context as? ListViewResultListener<RT>
         mActivityWithFab = context as? UstadListViewActivityWithFab
     }
 
     override fun onDetach() {
         super.onDetach()
-        mListViewResultListener = null
         mActivityWithFab = null
     }
 

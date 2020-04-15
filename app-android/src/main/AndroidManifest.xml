@@ -36,9 +36,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="com.ustadmobile.port.android.view.ClazzEdit2Activity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity android:name="com.ustadmobile.port.android.view.RepoLoadingStatusTestActivity" />
         <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity" />
         <activity
@@ -260,9 +257,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.AuditLogListActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.AddDateRangeDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.SelectClazzFeaturesDialogFragment"

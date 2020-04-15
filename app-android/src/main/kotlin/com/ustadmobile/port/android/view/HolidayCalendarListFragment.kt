@@ -32,8 +32,6 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
 
     private var mPresenter: HolidayCalendarListPresenter? = null
 
-    private var dbRepo: UmAppDatabase? = null
-
     override val listPresenter: UstadListPresenter<*, in HolidayCalendarWithNumEntries>?
         get() = mPresenter
 
@@ -63,21 +61,15 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+
         mPresenter = HolidayCalendarListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
-        mDataBinding?.presenter = mPresenter
-        mDataBinding?.onSortSelected = this
         mDataRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
                 requireContext().getString(R.string.create_new, requireContext().getString(R.string.holiday_calendar)))
-        mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter, mDataRecyclerViewAdapter)
-        mRecyclerView?.adapter = mMergeRecyclerViewAdapter
-        mDataRecyclerViewAdapter?.selectedItemsLiveData?.observe(this, selectionObserver)
-        mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }
 
@@ -93,17 +85,8 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
-        dbRepo = null
     }
 
-
-    override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
-        mPresenter?.handleClickSortOrder(messageIdOption)
-    }
-
-    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
-        //do nothing
-    }
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.holidayCalendarDao

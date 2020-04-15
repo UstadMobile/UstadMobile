@@ -18,6 +18,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 
 
@@ -48,6 +49,8 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav_view)
         bottomNav?.setupWithNavController(navController)
         setupActionBarWithNavController(navController)
+
+        DbPreloadWorker.queuePreloadWorker(applicationContext)
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {

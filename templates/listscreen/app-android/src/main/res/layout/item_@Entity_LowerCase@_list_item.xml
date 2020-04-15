@@ -4,7 +4,7 @@
 
     <data>
         <import type="com.ustadmobile.lib.db.entities.@DisplayEntity@"/>
-
+        <import type="com.port.android.view.@Entity@ListRecyclerAdapter.@Entity@ListFragment"/>
         <variable
             name="@Entity_VariableName@"
             type="@DisplayEntity@" />
@@ -13,15 +13,15 @@
             type="com.ustadmobile.core.controller.@Entity@ListPresenter" />
 
         <variable
-            name="pagedListAdapter"
-            type="com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem&lt;@DisplayEntity@&gt;" />
+            name="selectablePagedListAdapter"
+            type="@Entity@ListFragment.@Entity@ListRecyclerAdapter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:selectableViewHelper="@{pagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> pagedListAdapter.onItemSelectedChanged(view, @Entity_VariableName@)}"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, @Entity_VariableName@)}"
         app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(@Entity_VariableName@)}"
         android:background="@drawable/bg_listitem"
         >

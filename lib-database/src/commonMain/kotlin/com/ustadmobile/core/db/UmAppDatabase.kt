@@ -32,7 +32,8 @@ import kotlin.jvm.Volatile
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class
+    SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class,
+    TimeZoneEntity::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -220,6 +221,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val xLangMapEntryDao: XLangMapEntryDao
 
     abstract val locallyAvailableContainerDao: LocallyAvailableContainerDao
+
+    @JsName("timeZoneEntityDao")
+    abstract val timeZoneEntityDao: TimeZoneEntityDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

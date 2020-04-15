@@ -134,7 +134,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SELQuestionEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionEditActivity"),
             SELRecognitionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELRecognitionActivity"),
             ClazzEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzEditActivity"),
-            ClazzEdit2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzEdit2Activity"),
             ClazzActivityEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzActivityEditActivity"),
             AddActivityChangeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddActivityChangeDialogFragment"),
             ReportEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportEditActivity"),

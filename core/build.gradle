@@ -259,6 +259,7 @@ kotlin {
                 implementation "com.soywiz:klock-android:$version_klock"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+                implementation "androidx.work:work-runtime:$version_android_workmanager"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation project(":lib-database-android")
                 implementation "org.jsoup:jsoup:$version_jsoup"

@@ -28,8 +28,6 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
 
     private var mPresenter: PersonGroupListPresenter? = null
 
-    private var dbRepo: UmAppDatabase? = null
-
     override val listPresenter: UstadListPresenter<*, in PersonGroupWithMemberCount>?
         get() = mPresenter
 

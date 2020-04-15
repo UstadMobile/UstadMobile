@@ -8,17 +8,16 @@ import android.widget.AdapterView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.Item@Entity_ViewBinding_VariableName@ListItemBinding
-import com.ustadmobile.core.controller.@Entity@ListPresenter
+import com.toughra.ustadmobile.databinding.ItemTimezoneentityListItemBinding
+import com.ustadmobile.core.controller.TimeZoneEntityListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.@Entity@ListView
-import com.ustadmobile.lib.db.entities.@Entity@
-import com.ustadmobile.lib.db.entities.@DisplayEntity@
+import com.ustadmobile.core.view.TimeZoneEntityListView
+import com.ustadmobile.lib.db.entities.TimeZoneEntity
 import com.ustadmobile.core.view.GetResultMode
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -27,29 +26,29 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
-class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),
-        @Entity@ListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class TimeZoneEntityListFragment(): UstadListViewFragment<TimeZoneEntity, TimeZoneEntity>(),
+        TimeZoneEntityListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
-    private var mPresenter: @Entity@ListPresenter? = null
+    private var mPresenter: TimeZoneEntityListPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in @DisplayEntity@>?
+    override val listPresenter: UstadListPresenter<*, in TimeZoneEntity>?
         get() = mPresenter
 
-    class @Entity@ListViewHolder(val itemBinding: Item@Entity_ViewBinding_VariableName@ListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class TimeZoneEntityListViewHolder(val itemBinding: ItemTimezoneentityListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?)
-        : SelectablePagedListAdapter<@DisplayEntity@, @Entity@ListViewHolder>(DIFF_CALLBACK) {
+    class TimeZoneEntityListRecyclerAdapter(var presenter: TimeZoneEntityListPresenter?)
+        : SelectablePagedListAdapter<TimeZoneEntity, TimeZoneEntityListViewHolder>(DIFF_CALLBACK) {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): @Entity@ListViewHolder {
-            val itemBinding = Item@Entity_ViewBinding_VariableName@ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimeZoneEntityListViewHolder {
+            val itemBinding = ItemTimezoneentityListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
-            return @Entity@ListViewHolder(itemBinding)
+            return TimeZoneEntityListViewHolder(itemBinding)
         }
 
-        override fun onBindViewHolder(holder: @Entity@ListViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: TimeZoneEntityListViewHolder, position: Int) {
             val item = getItem(position)
-            holder.itemBinding.@Entity_VariableName@ = item
+            holder.itemBinding.timeZoneEntity = item
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
@@ -61,15 +60,16 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        mPresenter = @Entity@ListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
+        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+        mPresenter = TimeZoneEntityListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
 
-        mDataRecyclerViewAdapter = @Entity@ListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = TimeZoneEntityListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,
-                requireContext().getString(R.string.@Entity_LowerCase@))
+                requireContext().getString(R.string.timezone))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view
     }
@@ -77,15 +77,14 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.@Entity_LowerCase@)
+                requireContext().getString(R.string.timezone)
     }
 
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.@Entity_LowerCase@_edit_dest, @Entity@::class.java)
+        //we do not allow creating a new timezone
     }
 
     override fun onDestroyView() {
@@ -95,18 +94,18 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
     }
 
     override val displayTypeRepo: Any?
-        get() = TODO("Provide repo e.g. dbRepo.@Entity@Dao")
+        get() = dbRepo?.timeZoneEntityDao
 
     companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<@DisplayEntity@> = object
-            : DiffUtil.ItemCallback<@DisplayEntity@>() {
-            override fun areItemsTheSame(oldItem: @DisplayEntity@,
-                                         newItem: @DisplayEntity@): Boolean {
-                TODO("e.g. insert primary keys here return oldItem.@Entity_VariableName@ == newItem.@Entity_VariableName@")
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<TimeZoneEntity> = object
+            : DiffUtil.ItemCallback<TimeZoneEntity>() {
+            override fun areItemsTheSame(oldItem: TimeZoneEntity,
+                                         newItem: TimeZoneEntity): Boolean {
+                return oldItem.id == newItem.id
             }
 
-            override fun areContentsTheSame(oldItem: @DisplayEntity@,
-                                            newItem: @DisplayEntity@): Boolean {
+            override fun areContentsTheSame(oldItem: TimeZoneEntity,
+                                            newItem: TimeZoneEntity): Boolean {
                 return oldItem == newItem
             }
         }

@@ -29,9 +29,7 @@
         android:id="@+id/activity_clazz_edit_fields_scrollview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_appbar">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_clazz_edit_edit_clx"
@@ -111,13 +109,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_basic_details_heading">
 
+                <!-- android:inputType="textCapWords" -->
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/activity_clazz_edit_name_text"
                     android:enabled="@{fieldsEnabled}"
                     android:text="@={clazz.clazzName}"
-                    android:inputType="textCapWords" />
+                     />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout

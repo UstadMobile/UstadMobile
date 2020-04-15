@@ -20,14 +20,24 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
-import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
+
+interface ClazzEdit2ActivityEventHandler {
+
+    fun showNewScheduleDialog()
+
+    fun showEditScheduleDialog(schedule: Schedule)
+
+    fun showHolidayCalendarPicker()
+
+    fun handleClickTimeZone()
+
+}
+
 
 class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), ClazzEdit2View, ClazzEdit2ActivityEventHandler {
 
@@ -113,7 +123,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), Clazz
     }
 
     override fun handleClickTimeZone() {
-        TODO("Not yet implemented")
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(TimeZoneEntity::class.java, R.id.timezoneentity_list_dest)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -155,6 +166,14 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), Clazz
             entity?.clazzHolidayUMCalendarUid = holidayCalendar.umCalendarUid
             mDataBinding?.clazz = entity
         }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+            TimeZoneEntity::class.java) {
+            val timeZone = it.firstOrNull() ?: return@observeResult
+            entity?.clazzTimeZone = timeZone.id
+            mDataBinding?.clazz = entity
+        }
+
     }
 
     override fun onResume() {
