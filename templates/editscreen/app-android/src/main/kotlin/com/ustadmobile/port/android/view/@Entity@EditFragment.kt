@@ -3,33 +3,38 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentScheduleEditBinding
-import com.ustadmobile.core.controller.ScheduleEditPresenter
+import com.toughra.ustadmobile.databinding.Fragment@Entity_ViewBinding_VariableName@EditBinding
+import com.ustadmobile.core.controller.@Entity@EditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ScheduleEditView
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.core.view.@Entity@EditView
+import com.ustadmobile.lib.db.entities.@Entity@
+@EditEntity_Import@
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
-class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
+interface @Entity@EditFragmentEventHandler {
 
-    private var mBinding: FragmentScheduleEditBinding? = null
+}
 
-    private var mPresenter: ScheduleEditPresenter? = null
+class @Entity@EditFragment: UstadEditFragment<@Entity@>(), @Entity@EditView, @Entity@EditFragmentEventHandler {
 
-    override val mEditPresenter: UstadEditPresenter<*, Schedule>?
+    private var rootView: Fragment@Entity_ViewBinding_VariableName@EditBinding? = null
+
+    private var mPresenter: @Entity@EditPresenter? = null
+
+    override val mEditPresenter: UstadEditPresenter<*, @Entity@>?
         get() = mPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentScheduleEditBinding.inflate(inflater, container, false).also {
+        mBinding = Fragment@Entity_ViewBinding_VariableName@EditBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
 
-        mPresenter = ScheduleEditPresenter(requireContext(), arguments.toStringMap(), this,
+        mPresenter = @Entity@EditPresenter(requireContext(), arguments.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
@@ -48,12 +53,10 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.schedule)
+        setEditFragmentTitle(R.string.@Entity_LowerCase@)
     }
 
-    override var loading: Boolean = false
-
-    override var entity: Schedule? = null
+    override var entity: @EditEntity@? = null
         get() = field
         set(value) {
             field = value
@@ -66,19 +69,4 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
             field = value
             mBinding?.fieldsEnabled = value
         }
-
-    override var frequencyOptions: List<ScheduleEditPresenter.FrequencyMessageIdOption>? = null
-        get() = field
-        set(value) {
-            mBinding?.frequencyOptions = value
-            field  = value
-        }
-
-    override var dayOptions: List<ScheduleEditPresenter.DayMessageIdOption>? = null
-        get() = field
-        set(value) {
-            mBinding?.dayOptions = value
-            field = value
-        }
-
 }

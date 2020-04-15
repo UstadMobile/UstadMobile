@@ -13,10 +13,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
+import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.door.DoorMutableLiveData
@@ -35,6 +37,8 @@ interface ClazzEdit2ActivityEventHandler {
     fun showHolidayCalendarPicker()
 
     fun handleClickTimeZone()
+
+    fun showFeaturePicker()
 
 }
 
@@ -122,6 +126,12 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), Clazz
         navigateToPickEntityFromList(HolidayCalendar::class.java, R.id.holidaycalendar_list_dest)
     }
 
+    override fun showFeaturePicker() {
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(LongWrapper(entity?.clazzFeatures ?: 0L), R.id.bitmask_edit_dest,
+                LongWrapper::class.java, destinationResultKey = CLAZZ_FEATURES_KEY)
+    }
+
     override fun handleClickTimeZone() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(TimeZoneEntity::class.java, R.id.timezoneentity_list_dest)
@@ -133,6 +143,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), Clazz
         mDataBinding = FragmentClazzEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.activityEventHandler = this
+            it.featuresBitmaskFlags = BitmaskEditPresenter.FLAGS_AVAILABLE
         }
 
         scheduleRecyclerAdapter = ScheduleRecyclerAdapter(this, null)
@@ -174,6 +185,13 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), Clazz
             mDataBinding?.clazz = entity
         }
 
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                LongWrapper::class.java, CLAZZ_FEATURES_KEY) {
+            val clazzFeatures = it.firstOrNull() ?: return@observeResult
+            entity?.clazzFeatures = clazzFeatures.longValue
+            mDataBinding?.clazz = entity
+        }
+
     }
 
     override fun onResume() {
@@ -190,6 +208,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), Clazz
     }
 
     companion object {
+
+        const val CLAZZ_FEATURES_KEY = "clazzFeatures"
 
         val DIFF_CALLBACK_SCHEDULE: DiffUtil.ItemCallback<Schedule> = object: DiffUtil.ItemCallback<Schedule>() {
             override fun areItemsTheSame(oldItem: Schedule, newItem: Schedule): Boolean {

@@ -40,7 +40,7 @@ open class Clazz() {
     var clazzEndTime: Long = 0
 
     //Clazz features
-    var clazzFeatures: Long = 0
+    var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ASSIGNMENT)
 
     @MasterChangeSeqNum
     var clazzMasterChangeSeqNum: Long = 0

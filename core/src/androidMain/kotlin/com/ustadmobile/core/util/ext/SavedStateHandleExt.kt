@@ -44,7 +44,7 @@ fun <T> SavedStateHandle.observeResult(lifecycleOwner: LifecycleOwner,
     getLiveData<String>(resultKey).observe(lifecycleOwner, Observer {
         val jsonStr = it ?: return@Observer
         val entity = defaultGson().fromJson<List<T>>(jsonStr,
-                TypeToken.getParameterized(List::class.java,typeToken.type).type)
+                TypeToken.getParameterized(List::class.java, typeToken.type).type)
         block(entity)
         set(resultKey, null)
     })

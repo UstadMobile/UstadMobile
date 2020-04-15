@@ -24,6 +24,13 @@ abstract class UstadEditFragment<T>: UstadBaseFragment(), UstadEditView<T> {
     override val viewContext: Any
         get() = requireContext()
 
+    override var loading: Boolean = false
+        get() = false
+        set(value) {
+            //TODO: set this on the main activity
+            field = value
+        }
+
     override fun finishWithResult(result: List<T>) {
         saveResultToBackStackSavedStateHandle(result)
     }

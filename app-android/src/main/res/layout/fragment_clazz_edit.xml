@@ -6,6 +6,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
+        <import type="com.ustadmobile.core.model.BitmaskFlag"/>
 
         <variable
             name="clazz"
@@ -22,6 +23,10 @@
         <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.ClazzEdit2ActivityEventHandler" />
+
+        <variable
+            name="featuresBitmaskFlags"
+            type="java.util.List&lt;BitmaskFlag&gt;" />
 
     </data>
 
@@ -185,34 +190,32 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:onClick="@{() -> activityEventHandler.showHolidayCalendarPicker()}"
                     android:text="@{clazz.holidayCalendar.umCalendarName}"
-                    android:focusable="false"
+                    app:runOnClickWhenFocused="@{true}"
+                    android:inputType="@{InputType.TYPE_NULL}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
 
-            <TextView
-                android:id="@+id/activity_clazz_edit_features_heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/features_enabled"
-                android:visibility="visible"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_holiday_calendar_selected" />
-
-            <TextView
-                android:id="@+id/activity_clazz_edit_features_selected"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:visibility="visible"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_features_heading" />
+                app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_holiday_calendar_selected"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:hint="@string/features_enabled">
+                <com.google.android.material.textfield.TextInputEditText
+                    app:runOnClickWhenFocused="@{true}"
+                    android:onClick="@{() -> activityEventHandler.showFeaturePicker()}"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:textBitmaskFlags="@{featuresBitmaskFlags}"
+                    app:textBitmaskValue="@{clazz.clazzFeatures}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <View
                 android:id="@+id/activity_clazz_edit_hline"
