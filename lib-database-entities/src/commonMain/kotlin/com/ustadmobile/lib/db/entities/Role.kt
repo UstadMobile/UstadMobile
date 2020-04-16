@@ -8,6 +8,7 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
+
 @Entity
 @SyncableEntity(tableId = 45)
 @Serializable
@@ -17,6 +18,8 @@ class Role() {
     var roleUid: Long = 0
 
     var roleName: String? = null
+
+    var roleActive: Boolean = true
 
     @MasterChangeSeqNum
     var roleMasterCsn: Long = 0
@@ -30,12 +33,19 @@ class Role() {
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0
 
-    constructor(roleName: String, rolePermissions: Long) : this() {
+
+    constructor(roleName: String, rolePermissions: Long):this() {
         this.roleName = roleName
         this.rolePermissions = rolePermissions
     }
 
     companion object {
+
+        const val ROLE_NAME_TEACHER = "teacher"
+        const val ROLE_NAME_OFFICER = "officer"
+        const val ROLE_NAME_MNE = "mne"
+        const val ROLE_NAME_SEL = "sel"
+        const val ROLE_NAME_SITE_STAFF = "sitestaff"
 
         const val PERMISSION_CLAZZ_SELECT: Long = 1
 
@@ -82,5 +92,15 @@ class Role() {
         const val PERMISSION_PERSON_PICTURE_INSERT: Long = 2097152
 
         const val PERMISSION_PERSON_PICTURE_UPDATE: Long = 4194304
+
+        const val PERMISSION_CLAZZ_ASSIGNMENT_VIEW : Long = 8388608
+
+        const val PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE : Long = 16777216
+
+        /**
+         * Permission to view reports. In reality, this is really just a UI permission, and does not
+         * affect access to the underlying data.
+         */
+        val PERMISSION_REPORTS_VIEW: Long = 8388608
     }
 }

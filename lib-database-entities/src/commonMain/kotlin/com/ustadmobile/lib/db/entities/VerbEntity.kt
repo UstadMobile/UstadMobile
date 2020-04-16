@@ -13,12 +13,10 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
-class VerbEntity {
-
-    @PrimaryKey(autoGenerate = true)
-    var verbUid: Long = 0
-
-    var urlId: String? = null
+class VerbEntity(
+        @PrimaryKey(autoGenerate = true)
+        var verbUid: Long = 0,
+        var urlId: String? = null) {
 
     @MasterChangeSeqNum
     var verbMasterChangeSeqNum: Long = 0
@@ -32,5 +30,17 @@ class VerbEntity {
     companion object {
 
         const val TABLE_ID = 62
+
+        const val VERB_PROGRESSED_URL = "http://adlnet.gov/expapi/verbs/progressed"
+
+        const val VERB_PROGRESSED_UID = 10000L
+
+        const val VERB_COMPLETED_URL = "http://adlnet.gov/expapi/verbs/completed"
+
+        const val VERB_COMPLETED_UID = 10001L
+
+        val FIXED_UIDS = mapOf(VERB_PROGRESSED_URL to VERB_PROGRESSED_UID,
+                VERB_COMPLETED_URL to VERB_COMPLETED_UID)
+
     }
 }

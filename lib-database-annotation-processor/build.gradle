@@ -1,17 +1,32 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id 'java-library'
     id 'kotlin'
     id "org.jetbrains.kotlin.kapt"
     id 'maven-publish'
-    id 'com.github.psxpaul.execfork' version '0.1.11'
+    id 'com.github.psxpaul.execfork' version '0.1.13'
+    id 'com.github.johnrengelman.shadow'
 }
 
 task fatJar(type: Jar) {
     baseName = 'lib-database-annotation-processor-all-in-one'
     duplicatesStrategy = "exclude"
-    from { configurations.jvmDefault.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
     from('src/jvmMain/resources')
     with jar
+}
+
+task testJar(type: ShadowJar) {
+    classifier = "tests"
+    from sourceSets.main.output, sourceSets.test.output
+    manifest {
+        attributes 'Main-Class': 'io.ktor.server.netty.EngineMain'
+    }
+    configurations = [project.configurations.runtimeClasspath, project.configurations.testRuntimeClasspath]
+
+    //Without this exclude other INDEX.LIST files will get pulled in and java -jar will not find the class, even when it's in the jar!
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
 }
 
 kapt {
@@ -35,6 +50,9 @@ task testWebAppRun(type: JavaExec) {
 }
 
 
+/*
+ * Unfortunately there is a bug on JavaExecFork and Gradle 5.6+
+ */
 task testWebAppRunFork(type: com.github.psxpaul.task.JavaExecFork) {
     //outputs.upToDateWhen { false }
     classpath = sourceSets.test.runtimeClasspath
@@ -44,6 +62,16 @@ task testWebAppRunFork(type: com.github.psxpaul.task.JavaExecFork) {
     workingDir = "$projectDir/"
     standardOutput = "$projectDir/build/tmp/daemon.log"
     errorOutput = "$projectDir/build/tmp/daemon-error.log"
+}
+
+task startTestWebAppServer(type: Exec) {
+    commandLine './testserver.sh', 'start'
+}
+
+startTestWebAppServer.dependsOn(testJar)
+
+task stopTestWebAppServer(type: Exec) {
+    commandLine './testserver.sh', 'stop'
 }
 
 

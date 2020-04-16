@@ -49,8 +49,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     /**
      * Get a string for use in the UI
      */
-    @JsName("getString")
-    actual fun getString(messageCode: Int, context: Any): String {
+    actual override fun getString(messageCode: Int, context: Any): String {
         val map : dynamic = this.stringMap
         val mapVal = map[messageCode]
         return mapVal?.toString() ?: ""

@@ -6,24 +6,23 @@ import android.view.View
 import android.webkit.WebView
 import android.widget.TextView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.AboutController
+import com.ustadmobile.core.controller.AboutPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.AboutView
-import java.util.*
 
 class AboutActivity : UstadBaseActivity(), AboutView {
 
-    private var mAboutController: AboutController? = null
+    private lateinit var mAboutPresenter: AboutPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
         setUMToolbar(R.id.um_toolbar)
         setTitle(R.string.about)
-        mAboutController = AboutController(this,
-                Objects.requireNonNull(bundleToMap(intent.extras)),
+        mAboutPresenter = AboutPresenter(this,
+                bundleToMap(intent.extras),
                 this)
-        mAboutController!!.onCreate(bundleToMap(savedInstanceState))
+        mAboutPresenter.onCreate(bundleToMap(savedInstanceState))
 
         setUMToolbar(R.id.um_toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)

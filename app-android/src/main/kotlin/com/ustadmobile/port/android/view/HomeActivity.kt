@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Build
 import android.util.TypedValue
@@ -12,8 +13,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation
@@ -26,12 +29,13 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.core.view.ContentEntryListView
-import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.ReportDashboardView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.staging.port.android.view.ClazzListFragment
+import com.ustadmobile.staging.port.android.view.FeedListFragment
+import com.ustadmobile.staging.port.android.view.PeopleListFragment
+import com.ustadmobile.staging.port.android.view.ReportSelectionFragment
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_home.*
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
@@ -54,26 +58,19 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     private lateinit var mPager: ViewPager
 
     private class HomePagerAdapter(fm: FragmentManager,
-                                   val options: List<Pair<Int, String>>): FragmentStatePagerAdapter(fm) {
+                                   val options: List<Pair<Int, String>>): FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
-        private val weakFragmentMap: MutableMap<Int, Fragment> = WeakHashMap()
 
         override fun getItem(position: Int): Fragment {
-            var thisFragment = weakFragmentMap[position]
-            if(thisFragment == null) {
-                val viewUri = options[position].second // the ViewName followed by ? and any arguments
-                val viewName = viewUri.substringBefore('?')
-                val fragmentClass = VIEW_NAME_TO_FRAGMENT_CLASS[viewName]
-                if(fragmentClass == null) {
-                    throw IllegalArgumentException("HomeActivity does not know Fragment to create for $viewName")
-                }
+            val viewUri = options[position].second // the ViewName followed by ? and any arguments
 
-                thisFragment = fragmentClass.newInstance()
-                thisFragment.arguments = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(viewUri))
-                weakFragmentMap[position] = thisFragment
+            val viewName = viewUri.substringBefore('?')
+            val fragmentClass = VIEW_NAME_TO_FRAGMENT_CLASS[viewName] ?:
+                throw IllegalArgumentException("HomeActivity does not know Fragment to create for $viewName")
+
+            return fragmentClass.newInstance().also {
+                it.arguments = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(viewUri))
             }
-
-            return thisFragment
         }
 
         override fun getCount() = options.size
@@ -127,6 +124,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     override fun setOptions(options: List<Pair<Int, String>>) {
         this.options = options
 
+        umBottomNavigation.removeAllItems()
         options.forEach {
             val navIcon = BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP[it.first]
             if(navIcon != null){
@@ -168,16 +166,14 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         updateElevation(options[0].second)
     }
 
+    @SuppressLint("ObsoleteSdkInt") //We have build flavors that target lower than SDK 21
     private fun updateElevation(optionUri: String) {
-        if(Build.VERSION.SDK_INT < 21)
-            return //this is not applicable pre-Android 5
-
         val viewName = optionUri.substringBefore('?')
-        findViewById<AppBarLayout>(R.id.appBar).elevation = if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
+        ViewCompat.setElevation(findViewById(R.id.appBar), if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
             0f
         }else {
             10f
-        }
+        })
     }
 
     override fun onPageScrollStateChanged(state: Int) {}
@@ -203,6 +199,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
             R.id.action_open_about -> UstadMobileSystemImpl.instance.go(AboutView.VIEW_NAME, this)
             R.id.action_send_feedback -> hearShake()
             R.id.action_share_app -> presenter.handleClickShareApp()
+            R.id.menu_home_activity_settings -> presenter.handleClickSettings()
         }
 
         return super.onOptionsItemSelected(item)
@@ -261,14 +258,24 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf(
                 ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
                 HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java,
-                ReportDashboardView.VIEW_NAME to ReportDashboardFragment::class.java)
+                ReportDashboardView.VIEW_NAME to ReportDashboardFragment::class.java,
+                ContentEntryListView.VIEW_NAME to HomeContentEntryTabsFragment::class.java,
+                FeedListView.VIEW_NAME to FeedListFragment::class.java,
+                ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
+                ClazzListView.VIEW_NAME to ClazzListFragment::class.java,
+                PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
+                HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java)
 
         /**
          * In case we have addition bottom nav items, add icons here and map to their labels
          */
         private val BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP = mapOf(
                 MessageID.reports to R.drawable.ic_pie_chart_black_24dp,
-                MessageID.contents to R.drawable.ic_local_library_black_24dp
+                MessageID.contents to R.drawable.ic_local_library_black_24dp,
+                MessageID.bottomnav_feed_title to FeedListFragment.icon,
+                MessageID.bottomnav_classes_title to ClazzListFragment.icon,
+                MessageID.bottomnav_people_title to PeopleListFragment.icon,
+                MessageID.bottomnav_reports_title to ReportSelectionFragment.icon
         )
     }
 }

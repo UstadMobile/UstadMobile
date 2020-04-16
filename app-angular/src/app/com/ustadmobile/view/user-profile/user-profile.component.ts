@@ -15,7 +15,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 export class UserProfileComponent extends UmBaseComponent implements OnDestroy,
  core.com.ustadmobile.core.view.UserProfileView {
 
-  private presenter: core.com.ustadmobile.core.controller.UserProfilePresenter
+  private presenter: core.com.ustadmobile.core.controller.UserProfilePresenter2
   private navigationSubscription: Subscription;
   umFormLanguage: FormGroup;
   supportedLanguages = []
@@ -56,7 +56,7 @@ export class UserProfileComponent extends UmBaseComponent implements OnDestroy,
 
   onCreate(){
     super.onCreate()
-    this.presenter = new core.com.ustadmobile.core.controller.UserProfilePresenter(
+    this.presenter = new core.com.ustadmobile.core.controller.UserProfilePresenter2(
       this.context, UmAngularUtil.getArgumentsFromQueryParams(), this,
       this.umService.getDbInstance().personDao,this.systemImpl)
     this.presenter.onCreate(null)

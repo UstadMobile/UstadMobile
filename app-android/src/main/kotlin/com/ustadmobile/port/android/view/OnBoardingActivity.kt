@@ -1,12 +1,16 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.text.TextUtilsCompat
+import androidx.core.view.ViewCompat
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.rd.PageIndicatorView
@@ -16,7 +20,7 @@ import com.ustadmobile.core.controller.OnBoardingPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
-import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.port.android.db.DbPreloadWorker
 
 class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemSelectedListener {
 
@@ -26,9 +30,11 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
     private lateinit var languageOptions: Spinner
 
-    private var viewPager: ViewPager? = null
+    private lateinit var viewPager: ViewPager
 
     private var getStartedBtn: Button? = null
+
+    private lateinit var screenList: List<OnBoardScreen>
 
     override val viewContext: Any
         get() = this
@@ -53,7 +59,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
     private inner class OnBoardingPagerAdapter internal constructor(private val context: Context) : PagerAdapter() {
 
         override fun instantiateItem(collection: ViewGroup, position: Int): Any {
-            val onBoardScreen = OnBoardScreen.values()[position]
+            val onBoardScreen = screenList[position]
             val inflater = LayoutInflater.from(context)
             val layout = inflater.inflate(onBoardScreen.layoutResId,
                     collection, false) as ViewGroup
@@ -70,7 +76,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         }
 
         override fun getCount(): Int {
-            return OnBoardScreen.values().size
+            return screenList.size
         }
 
         override fun isViewFromObject(view: View, `object`: Any): Boolean {
@@ -79,6 +85,8 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
     }
 
+    //We target lower than SDK 19, this check is a false flag when the devMinApi21Debug variant is selected
+    @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_on_boarding)
@@ -87,17 +95,55 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         pageIndicatorView = findViewById(R.id.pageIndicatorView)
         languageOptions = findViewById(R.id.language_option)
 
+        pageIndicatorView?.setAnimationType(AnimationType.WORM)
+        getStartedBtn?.setOnClickListener { presenter?.handleClickGetStarted() }
+
+
+        val isRtl = TextUtilsCompat.getLayoutDirectionFromLocale(resources.configuration.locale) == ViewCompat.LAYOUT_DIRECTION_RTL
+        var firstScreenIndex = 0
+        screenList = when(isRtl) {
+            true -> {
+                firstScreenIndex = OnBoardScreen.values().size - 1
+                OnBoardScreen.values().reversed()
+            }
+            else -> OnBoardScreen.values().toList()
+        }
+
+        if(Build.VERSION.SDK_INT <= 19) {
+            getStartedBtn?.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)
+            getStartedBtn?.setTextColor(ContextCompat.getColor(this,
+                    R.color.pre_lollipop_btn_selector_txt_onboarding))
+        }
+
+        viewPager.adapter = OnBoardingPagerAdapter(this)
+        viewPager.currentItem = firstScreenIndex
+
+
+        if (pageIndicatorView != null) {
+            viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+                override fun onPageScrolled(position: Int, positionOffset: Float,
+                                            positionOffsetPixels: Int) {
+                }
+
+                override fun onPageSelected(position: Int) {
+                    pageIndicatorView?.setSelected(position)
+
+                }
+
+                override fun onPageScrollStateChanged(state: Int) {}
+            })
+        }
+
+
+
         presenter = OnBoardingPresenter(this,
                 bundleToMap(intent.extras), this, UstadMobileSystemImpl.instance)
-        presenter!!.onCreate(bundleToMap(savedInstanceState))
-        pageIndicatorView!!.setAnimationType(AnimationType.WORM)
-
-        getStartedBtn!!.setOnClickListener { presenter!!.handleGetStarted() }
-
+        presenter?.onCreate(bundleToMap(savedInstanceState))
+        DbPreloadWorker.scheduleWorkerIfNeeded(this.applicationContext)
     }
 
-    override fun setLanguageOptions(languages: MutableList<String>) {
-        val adapter = ArrayAdapter(this,android.R.layout.simple_spinner_item, languages)
+    override fun setLanguageOptions(languages: List<String>) {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         languageOptions.adapter = adapter
 
@@ -107,37 +153,11 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
     override fun onNothingSelected(parent: AdapterView<*>?) {}
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        presenter!!.handleLanguageSelected(position)
-    }
-
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
-        super.onBleNetworkServiceBound(networkManagerBle)
-        if (networkManagerBle.isVersionKitKatOrBelow) {
-            getStartedBtn!!.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)
-            getStartedBtn!!.setTextColor(ContextCompat.getColor(this,
-                    R.color.pre_lollipop_btn_selector_txt_onboarding))
-        }
+        presenter?.handleLanguageSelected(position)
     }
 
     override fun restartUI() {
         onResume()
     }
 
-    override fun setScreenList() {
-        viewPager!!.adapter = OnBoardingPagerAdapter(this)
-        if (pageIndicatorView != null) {
-            viewPager!!.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-                override fun onPageScrolled(position: Int, positionOffset: Float,
-                                            positionOffsetPixels: Int) {
-                }
-
-                override fun onPageSelected(position: Int) {
-                    pageIndicatorView!!.setSelected(position)
-
-                }
-
-                override fun onPageScrollStateChanged(state: Int) {}
-            })
-        }
-    }
 }

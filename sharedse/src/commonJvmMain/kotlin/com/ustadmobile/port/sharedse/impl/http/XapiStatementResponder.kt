@@ -54,6 +54,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
     override fun put(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         val repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase::class.java)
 
+        val contentEntryUid = urlParams[URLPARAM_CONTENTENTRYUID]?.toLongOrNull() ?: 0L
         val gson = createGson()
         var content: ByteArray? = null
         var fin: FileInputStream? = null
@@ -85,7 +86,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
                 val statements = getStatementsFromJson(statement!!.trim { it <= ' ' }, gson)
                 val endpoint = StatementEndpoint(repo, gson)
-                endpoint.storeStatements(statements, statementId)
+                endpoint.storeStatements(statements, statementId, contentEntryUid = contentEntryUid)
             } else {
                 throw StatementRequestException("no content found", 204)
             }
@@ -115,7 +116,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
     override fun post(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         val repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase::class.java)
-
+        val contentEntryUid = urlParams[URLPARAM_CONTENTENTRYUID]?.toLongOrNull() ?: 0L
         val gson = createGson()
         val uuids: List<String>
         var `is`: InputStream? = null
@@ -139,7 +140,8 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
             val statements = getStatementsFromJson(statement, gson)
 
             val endpoint = StatementEndpoint(repo, gson)
-            uuids = endpoint.storeStatements(statements, "")
+            uuids = endpoint.storeStatements(statements, "",
+                    contentEntryUid = contentEntryUid)
             `is` = ByteArrayInputStream(gson.toJson(uuids).toByteArray())
 
             return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK,
@@ -196,5 +198,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
         private val WANTED_KEYS = arrayOf(PARAM_STATEMENT_ID, PARAM_VOID_STATEMENT_ID, PARAM_ATTACHMENTS, PARAM_FORMAT)
 
         private const val PARAM_APPREPO_INDEX = 0
+
+        const val URLPARAM_CONTENTENTRYUID = "contentEntryUid"
     }
 }

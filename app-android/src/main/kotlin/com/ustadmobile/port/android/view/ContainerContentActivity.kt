@@ -6,8 +6,8 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import com.ustadmobile.sharedse.network.EmbeddedHttpdService
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import com.ustadmobile.sharedse.network.EmbeddedHttpdService
 
 
 abstract class ContainerContentActivity: UstadBaseActivity() {

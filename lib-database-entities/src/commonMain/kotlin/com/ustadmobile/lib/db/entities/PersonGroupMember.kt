@@ -18,6 +18,9 @@ class PersonGroupMember() {
     @PrimaryKey(autoGenerate = true)
     var groupMemberUid: Long = 0
 
+
+    var groupMemberActive: Boolean = false
+
     @ColumnInfo(index = true)
     var groupMemberPersonUid: Long = 0
 
@@ -32,4 +35,9 @@ class PersonGroupMember() {
 
     @LastChangedBy
     var groupMemberLastChangedBy: Int = 0
+
+    constructor(personUid:Long, groupUid:Long) : this(){
+        this.groupMemberPersonUid = personUid
+        this.groupMemberGroupUid = groupUid
+    }
 }

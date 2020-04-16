@@ -1,306 +1,316 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:id="@+id/coordinationLayout"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.core.widget.NestedScrollView
+    <data>
+        <variable
+            name="contentEntryModel"
+            type="com.ustadmobile.port.android.view.ContentEntryDetailActivity.ContentEntryModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        android:id="@+id/nested_scroll"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:id="@+id/coordinationLayout"
+        android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/entry_detail_thumbnail"
-                android:layout_width="110dp"
-                android:layout_height="110dp"
-                android:layout_margin="8dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/entry_detail_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:textColor="@android:color/black"
-                android:textSize="20sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Content Title" />
-
-            <TextView
-                android:id="@+id/entry_detail_author"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_title"
-                tools:text="Author" />
-
-            <TextView
-                android:id="@+id/entry_detail_publisher"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_author"
-                tools:text="Publisher" />
-
-            <TextView
-                android:id="@+id/entry_detail_license_label"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"
-                android:text="@string/entry_details_license"
-                app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
-                tools:text="BY_SA" />
-
-
-            <TextView
-                android:id="@+id/entry_detail_license"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/entry_detail_license_label"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
-                tools:text="BY_SA" />
-
-            <androidx.constraintlayout.widget.Barrier
-                android:id="@+id/labelBarrier"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:barrierDirection="bottom"
-                app:constraint_referenced_ids="entry_detail_license,entry_detail_thumbnail" />
-
-            <LinearLayout
-                android:id="@+id/entry_detail_anchor_download"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelBarrier">
-
-                <Button
-                    android:textStyle="bold"
-                    android:id="@+id/entry_download_open_button"
-                    android:layout_width="match_parent"
-                    android:padding="@dimen/dimen_16dp"
-                    android:layout_height="wrap_content"
-                    app:backgroundTint="@color/primary"
-                    android:textColor="@android:color/white" />
-
-                <com.ustadmobile.port.android.view.DownloadProgressView
-                    android:id="@+id/entry_detail_progress"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone" />
-
-            </LinearLayout>
-
-
-            <View
-                android:id="@+id/library_size_divider"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_margin="8dp"
-                android:background="@color/secondary_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_anchor_download" />
-
-
-            <ImageView
-                android:id="@+id/image_content_size"
-                android:layout_width="@dimen/dimen_16dp"
-                android:layout_height="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_8dp"
-                app:layout_constraintEnd_toEndOf="@id/entry_detail_content_size"
-                app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
-                app:layout_constraintTop_toBottomOf="@id/library_size_divider"
-                app:srcCompat="@drawable/download_archive_tray" />
-
-
-            <TextView
-                android:id="@+id/entry_detail_content_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.1"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/image_content_size"
-                tools:text="50 mb" />
-
-            <ImageView
-                android:visibility="gone"
-                android:id="@+id/content_status_icon"
-                android:layout_width="@dimen/dimen_16dp"
-                android:layout_height="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_8dp"
-                app:layout_constraintEnd_toEndOf="@id/content_status_text"
-                app:layout_constraintStart_toStartOf="@id/content_status_text"
-                app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
-
-
-            <TextView
-                android:visibility="gone"
-                android:layout_marginEnd="@dimen/dimen_16dp"
-                android:id="@+id/content_status_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_marginTop="8dp"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.973"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/image_content_size"
-                tools:text="Locally Available"
-                android:layout_marginRight="@dimen/dimen_16dp" />
-
-            <View
-                android:id="@+id/description_divider"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_margin="8dp"
-                android:background="@color/secondary_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_content_size" />
-
-            <TextView
-                android:id="@+id/entry_detail_description_label"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/entry_details_description"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/description_divider" />
-
-            <TextView
-                android:id="@+id/entry_detail_description"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_description_label" />
-
-            <View
-                android:id="@+id/language_divider"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_margin="8dp"
-                android:background="@color/secondary_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_description" />
-
-            <TextView
-                android:id="@+id/entry_detail_available_label"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/also_available_in"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/language_divider" />
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/entry_detail_flex"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_available_label" />
-
-            <TextView
-                android:id="@+id/entry_detail_see_also_label"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="SEE ALSO"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_flex" />
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:fitsSystemWindows="true"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/content_entry_list_collapsing_toolbar"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:contentScrim="?colorPrimary"
-            app:expandedTitleMarginStart="48dp"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:titleEnabled="false">
+            android:scrollbars="vertical"
+            android:id="@+id/nested_scroll"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/entry_detail_thumbnail"
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
+                    android:layout_margin="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/entry_detail_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="20sp"
+                    android:text="@{contentEntryModel.contentEntry.title}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Content Title" />
+
+                <TextView
+                    android:id="@+id/entry_detail_author"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_title"
+                    android:text="@{contentEntryModel.contentEntry.author}"
+                    tools:text="Author" />
+
+                <TextView
+                    android:id="@+id/entry_detail_publisher"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_author"
+                    tools:text="Publisher" />
+
+                <TextView
+                    android:id="@+id/entry_detail_license_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:text="@string/entry_details_license"
+                    app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
+                    tools:text="BY_SA" />
 
 
-            <include
-                android:id="@+id/entry_detail_toolbar"
-                layout="@layout/toolbar_with_progress" />
+                <TextView
+                    android:id="@+id/entry_detail_license"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/entry_detail_license_label"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
+                    tools:text="BY_SA" />
 
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/labelBarrier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="bottom"
+                    app:constraint_referenced_ids="entry_detail_license,entry_detail_thumbnail" />
 
-    </com.google.android.material.appbar.AppBarLayout>
+                <LinearLayout
+                    android:id="@+id/entry_detail_anchor_download"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/labelBarrier">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/edit_content"
-        android:visibility="gone"
-        android:background="@color/accent"
-        app:srcCompat="@drawable/ic_edit_black_24dp"
-        android:layout_margin="@dimen/dimen_16dp"
-        app:layout_anchor="@id/nested_scroll"
-        android:layout_width="wrap_content"
-        app:layout_anchorGravity="bottom|right|end"
-        android:layout_height="wrap_content" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+                    <Button
+                        android:textStyle="bold"
+                        android:id="@+id/entry_download_open_button"
+                        android:layout_width="match_parent"
+                        android:padding="@dimen/dimen_16dp"
+                        android:layout_height="wrap_content"
+                        app:backgroundTint="@color/primary"
+                        android:textColor="@android:color/white" />
+
+                    <com.ustadmobile.port.android.view.DownloadProgressView
+                        android:id="@+id/entry_detail_progress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+
+                <View
+                    android:id="@+id/library_size_divider"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_margin="8dp"
+                    android:background="@color/secondary_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_anchor_download" />
+
+
+                <ImageView
+                    android:id="@+id/image_content_size"
+                    android:layout_width="@dimen/dimen_16dp"
+                    android:layout_height="@dimen/dimen_16dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    app:layout_constraintEnd_toEndOf="@id/entry_detail_content_size"
+                    app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
+                    app:layout_constraintTop_toBottomOf="@id/library_size_divider"
+                    app:srcCompat="@drawable/download_archive_tray" />
+
+
+                <TextView
+                    android:id="@+id/entry_detail_content_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/image_content_size"
+                    tools:text="50 mb" />
+
+                <ImageView
+                    android:visibility="gone"
+                    android:id="@+id/content_status_icon"
+                    android:layout_width="@dimen/dimen_16dp"
+                    android:layout_height="@dimen/dimen_16dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    app:layout_constraintEnd_toEndOf="@id/content_status_text"
+                    app:layout_constraintStart_toStartOf="@id/content_status_text"
+                    app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
+
+
+                <TextView
+                    android:visibility="gone"
+                    android:layout_marginEnd="@dimen/dimen_16dp"
+                    android:id="@+id/content_status_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.973"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/image_content_size"
+                    tools:text="Locally Available"
+                    android:layout_marginRight="@dimen/dimen_16dp" />
+
+                <View
+                    android:id="@+id/description_divider"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_margin="8dp"
+                    android:background="@color/secondary_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_content_size" />
+
+                <TextView
+                    android:id="@+id/entry_detail_description_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text='@{contentEntryModel.descriptionHtml}'
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/description_divider" />
+
+                <TextView
+                    android:id="@+id/entry_detail_description"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_description_label" />
+
+                <View
+                    android:id="@+id/language_divider"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_margin="8dp"
+                    android:background="@color/secondary_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_description" />
+
+                <TextView
+                    android:id="@+id/entry_detail_available_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/also_available_in"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/language_divider" />
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/entry_detail_flex"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_available_label" />
+
+                <TextView
+                    android:id="@+id/entry_detail_see_also_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="SEE ALSO"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/entry_detail_flex" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:fitsSystemWindows="true"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/content_entry_list_collapsing_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:contentScrim="?colorPrimary"
+                app:expandedTitleMarginStart="48dp"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:titleEnabled="false">
+
+
+                <include
+                    android:id="@+id/entry_detail_toolbar"
+                    layout="@layout/toolbar_with_progress" />
+
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/edit_content"
+            android:visibility="gone"
+            android:background="@color/accent"
+            app:srcCompat="@drawable/ic_edit_black_24dp"
+            android:layout_margin="@dimen/dimen_16dp"
+            app:layout_anchor="@id/nested_scroll"
+            android:layout_width="wrap_content"
+            app:layout_anchorGravity="bottom|right|end"
+            android:layout_height="wrap_content" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

@@ -161,6 +161,14 @@ object UMTinCanUtil {
         return time?.totalMilliseconds?.toLong() ?: 0L
     }
 
+    fun parse8601DurationOrDefault(duration: String?, defaultDuration: Long = 0L): Long {
+        return if(duration != null) {
+            parse8601Duration(duration)
+        }else {
+            defaultDuration
+        }
+    }
+
 
     /**
      * Makes an actor JSON in the form of

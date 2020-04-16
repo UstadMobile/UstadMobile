@@ -16,33 +16,33 @@ open class NetworkNode() {
     var nodeId: Long = 0
 
     /**
-     * Method which is used to get NetworkNode's Bluetooth address
-     * @return String: Device bluetooth address.
+     * Method which is used to get NetworkNode's Bluetooth personAddress
+     * @return String: Device bluetooth personAddress.
      */
     /**
-     * Method which is used to set NetworkNode's Bluetooth address
-     * @param bluetoothMacAddress Device bluetooth address
+     * Method which is used to set NetworkNode's Bluetooth personAddress
+     * @param bluetoothMacAddress Device bluetooth personAddress
      */
     @ColumnInfo(index = true)
     var bluetoothMacAddress: String? = null
 
     /**
-     * Method which is used to get NetworkNode's IP address
-     * @return String: Device IP address
+     * Method which is used to get NetworkNode's IP personAddress
+     * @return String: Device IP personAddress
      */
     /**
-     * Method which is used to set NetworkNode's IP address
-     * @param ipAddress Device IP address
+     * Method which is used to set NetworkNode's IP personAddress
+     * @param ipAddress Device IP personAddress
      */
     var ipAddress: String? = null
 
     /**
-     * Method which is used to get NetworkNode's MAC address
-     * @return String: Device MAC address
+     * Method which is used to get NetworkNode's MAC personAddress
+     * @return String: Device MAC personAddress
      */
     /**
-     * Method which is used to set NetworkNode's MAC address
-     * @param wifiDirectMacAddress Device MAC address
+     * Method which is used to set NetworkNode's MAC personAddress
+     * @param wifiDirectMacAddress Device MAC personAddress
      */
     var wifiDirectMacAddress: String? = null
 
@@ -119,8 +119,8 @@ open class NetworkNode() {
 
     /**
      * Creating a NetworkNode
-     * @param wifiDirectMacAddress Device Wi-Fi MAC address
-     * @param ipAddress Device IP address
+     * @param wifiDirectMacAddress Device Wi-Fi MAC personAddress
+     * @param ipAddress Device IP personAddress
      */
     constructor(bluetoothMacAddress: String, ipAddress: String) : this() {
         this.bluetoothMacAddress = bluetoothMacAddress

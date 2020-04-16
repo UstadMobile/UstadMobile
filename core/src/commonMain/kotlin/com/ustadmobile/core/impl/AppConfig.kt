@@ -29,13 +29,25 @@ object AppConfig {
 
     const val KEY_SHOW_DOWNLOAD_ALL_BTN = "homescreen.show_download_all_button"
 
+    const val KEY_SHOW_LOCATION_PERMISSION_PROMPT = "homescreen.show_location_permission_prompt"
+
     const val KEY_PRELOAD_LIBRARIES = "app.preload_contents"
 
     const val KEY_SUPPORTED_LANGUAGES = "app.ui_languages"
 
     const val KEY_SHOW_REGISTER = "app.register_before_open"
 
+    const val BULK_UPLOAD_VISIBILITY = "bulk_upload_visibility"
+
+    const val NAVIGATION_ITEMS = "navigation_items"
+
+    const val ACTION_CLEAR_HISTORY_VISIBILITY = "action_clear_history_visibility"
+
+    const val ACTION_SHARE_APP_VISIBILITY = "action_share_app_visibility"
+
     const val KEY_NO_IFRAME = "app.no_iframe_domans"
+
+    const val LOGIN_TOOLBAR_VISIBILITY = "login_toolbar_visibility"
 
     const val KEY_SHOW_REGISTER_CODE = "app.show_register_code"
 

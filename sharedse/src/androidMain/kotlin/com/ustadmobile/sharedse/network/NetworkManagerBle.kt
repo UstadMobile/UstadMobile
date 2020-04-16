@@ -816,7 +816,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                             routeInfo.gateway shr 16 and 0xff,
                             routeInfo.gateway shr 24 and 0xff)
                     UMLog.l(UMLog.INFO, 693,
-                            "Trying to ping gateway IP address $gatewayIp")
+                            "Trying to ping gateway IP personAddress $gatewayIp")
                     if (ping(gatewayIp, 1000)) {
                         UMLog.l(UMLog.INFO, 693,
                                 "Ping successful! $ssid")
