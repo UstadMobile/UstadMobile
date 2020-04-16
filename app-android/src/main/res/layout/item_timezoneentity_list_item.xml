@@ -12,20 +12,22 @@
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.TimeZoneEntityListPresenter" />
-
         <variable
             name="selectablePagedListAdapter"
             type="TimeZoneEntityListRecyclerAdapter" />
     </data>
 
+    <!--
+
+
+        android:background="@drawable/bg_listitem"
+        -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, timeZoneEntity)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(timeZoneEntity)}"
-        android:background="@drawable/bg_listitem"
-        >
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(timeZoneEntity)}">
 
         <!-- Line 1-->
         <TextView

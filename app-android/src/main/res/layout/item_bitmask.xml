@@ -18,23 +18,15 @@
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/item_bitmask_switch"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/list_twoline1_margin_vertical"
+        android:layout_marginHorizontal="@dimen/list_twoline1_margin_horizontal"
+        app:textMessageId="@{bitmaskFlag.messageId}"
+        android:checked="@={bitmaskFlag.enabled}"
+        tools:text="Message ID"/>
 
-        <Switch
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:id="@+id/item_bitmask_switch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginHorizontal="@dimen/list_twoline1_margin_horizontal"
-            app:textMessageId="@{bitmaskFlag.messageId}"
-            android:checked="@={bitmaskFlag.enabled}"
-            tools:text="Message ID"/>
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>
