@@ -203,6 +203,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_holiday_calendar_selected"
+                app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -217,15 +218,7 @@
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <View
-                android:id="@+id/activity_clazz_edit_hline"
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:layout_marginStart="8dp"
-                android:background="?android:attr/listDivider"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/activity_clazz_edit_features_selected" />
-
+            <!--
             <LinearLayout
                 android:id="@+id/activity_clazz_edit_customfields_ll"
                 android:layout_width="match_parent"
@@ -236,7 +229,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_hline"></LinearLayout>
-
+            -->
 
 
             <com.google.android.material.textfield.TextInputLayout

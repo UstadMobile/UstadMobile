@@ -21,7 +21,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ReportSELView
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 import com.ustadmobile.port.android.view.UstadBaseActivity
-import com.ustadmobile.staging.port.android.view.ClazzEditActivity.Companion.dpToPx
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.io.File
 import java.io.FileWriter
@@ -93,7 +92,7 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
     //crossIV.setLayoutParams(imageLP);
     val cross: View
         get() {
-            imageLP.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
+            //imageLP.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
             val crossIV = AppCompatImageView(this)
             crossIV.setImageResource(R.drawable.ic_clear_black_24dp)
             crossIV.setColorFilter(Color.GRAY)
@@ -285,11 +284,11 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
         //Work with: reportLinearLayout linear layout
         val headingParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT)
-        headingParams.setMargins(dpToPx(8), dpToPx(32), dpToPx(8), dpToPx(16))
+        //headingParams.setMargins(dpToPx(8), dpToPx(32), dpToPx(8), dpToPx(16))
 
         val everyItemParam = TableRow.LayoutParams(
                 TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT)
-        everyItemParam.setMargins(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4))
+        //everyItemParam.setMargins(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4))
         everyItemParam.gravity = Gravity.CENTER_VERTICAL
 
         //For every clazz:
@@ -483,12 +482,12 @@ class ReportSELActivity : UstadBaseActivity(), ReportSELView, PopupMenu.OnMenuIt
 
         val everyItemParam = TableRow.LayoutParams(
                 TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT)
-        everyItemParam.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
+//        everyItemParam.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
         everyItemParam.gravity = Gravity.CENTER_VERTICAL
 
         val tableParams = TableLayout.LayoutParams(
                 TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT)
-        tableParams.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
+//        tableParams.setMargins(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
 
         //Create a new table layout
         val selTableLayout = TableLayout(applicationContext)

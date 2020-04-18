@@ -4,27 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemTimezoneentityListItemBinding
 import com.ustadmobile.core.controller.TimeZoneEntityListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.TimeZoneEntityListView
 import com.ustadmobile.lib.db.entities.TimeZoneEntity
-import com.ustadmobile.core.view.GetResultMode
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class TimeZoneEntityListFragment(): UstadListViewFragment<TimeZoneEntity, TimeZoneEntity>(),
         TimeZoneEntityListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
