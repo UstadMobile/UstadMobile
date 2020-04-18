@@ -9,6 +9,11 @@
         android:label="@string/classes" />
 
     <fragment
+        android:id="@+id/home_personlist_dest"
+        android:name="com.ustadmobile.port.android.view.PersonListFragment"
+        android:label="@string/people"/>
+
+    <fragment
         android:id="@+id/clazz_edit_dest"
         android:name="com.ustadmobile.port.android.view.ClazzEditFragment" />
 

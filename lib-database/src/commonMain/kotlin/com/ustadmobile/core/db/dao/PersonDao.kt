@@ -271,6 +271,13 @@ abstract class PersonDao : BaseDao<Person> {
     @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
     abstract fun findAllPeopleWithEnrollmentSortNameAsc(): DataSource.Factory<Int, PersonWithEnrollment>
 
+    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_DESC)
+    abstract fun findAllPeopleWithDisplayDetailsSortNameDesc(): DataSource.Factory<Int, PersonWithDisplayDetails>
+
+    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
+    abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(): DataSource.Factory<Int, PersonWithDisplayDetails>
+
+
     @Query("SELECT * FROM Person where CAST(active AS INTEGER) = 1")
     abstract fun findAllActiveLive(): DoorLiveData<List<Person>>
 
