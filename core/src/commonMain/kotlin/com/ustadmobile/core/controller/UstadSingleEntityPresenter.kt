@@ -60,7 +60,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
         return null
     }
 
-    open fun onLoadLiveData(repo: UmAppDatabase): RT?{
+    open fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<RT>?{
         return null
     }
 

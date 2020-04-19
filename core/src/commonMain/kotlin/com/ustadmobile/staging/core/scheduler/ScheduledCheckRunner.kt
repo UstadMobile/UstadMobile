@@ -12,7 +12,7 @@ import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClassLogDetailView
 import com.ustadmobile.core.view.ClassLogDetailView.Companion.ARG_MOST_RECENT_BY_CLAZZ_UID
 import com.ustadmobile.core.view.ClazzListView
-import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.staging.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="customFieldValue"
+            type="com.ustadmobile.lib.db.entities.CustomFieldValue" />
+    </data>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:text="@={customFieldValue.customFieldValueValue}"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/formitem_margin_vertical"
+        android:layout_marginHorizontal="@dimen/form_margin_horizontal">
+
+    </com.google.android.material.textfield.TextInputLayout>
+</layout>

@@ -9,7 +9,7 @@ import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON_TYPE
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope

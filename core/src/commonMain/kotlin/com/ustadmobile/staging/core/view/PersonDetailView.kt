@@ -1,7 +1,9 @@
-package com.ustadmobile.core.view
+package com.ustadmobile.staging.core.view
 
 import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmProvider
+import com.ustadmobile.core.view.PersonDetailViewField
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName

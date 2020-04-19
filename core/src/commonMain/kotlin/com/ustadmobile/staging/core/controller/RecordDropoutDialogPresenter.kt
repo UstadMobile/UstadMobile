@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzMemberDao
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.RecordDropoutDialogView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

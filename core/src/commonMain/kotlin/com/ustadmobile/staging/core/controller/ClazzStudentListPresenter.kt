@@ -13,8 +13,8 @@ import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_ATTENDANCE_D
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_NAME_ASC
 import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_NAME_DESC
 import com.ustadmobile.core.view.ClazzStudentListView
-import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.staging.core.view.PersonDetailView
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import com.ustadmobile.lib.db.entities.Role
