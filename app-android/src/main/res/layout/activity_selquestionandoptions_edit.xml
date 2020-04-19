@@ -19,6 +19,13 @@
             type="boolean" />
 
         <variable
+            name="typeOptions"
+            type="java.util.List&lt;com.ustadmobile.core.util.MessageIdOption&gt;"/>
+
+        <variable
+            name="multichoicevalue"
+            type="int" />
+        <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.SelQuestionAndOptionsEditActivityEventHandler" />
 
@@ -104,15 +111,28 @@
                     app:layout_constraintTop_toBottomOf=
                         "@+id/activity_selquestionandoptions_edit_questionset_name_til" />
 
-                <Spinner
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/actvity_selquestionandoptions_edit_type_actv"
+                    app:layout_constraintStart_toStartOf="parent"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/form_margin_horizontal_heading"
+                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                     android:layout_marginTop="@dimen/formitem_margin_vertical"
-                    android:layout_marginBottom="@dimen/formitem_margin_vertical"
-                    android:id="@+id/actvity_selquestionandoptions_edit_type_spinner"
                     app:layout_constraintTop_toBottomOf="@+id/activity_selquestionandoptions_edit_type_tv"
-                    />
+                    android:hint="@string/question_type">
+
+                    <com.ustadmobile.port.android.view.MessageIdAutocompleteTextView
+                        android:id="@+id/actvity_selquestionandoptions_edit_type_midactv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:messageIdOptions="@{typeOptions}"
+                        app:selectedMessageIdOption="@={selquestionandoptions.selQuestion.questionType}" />
+
+                </com.google.android.material.textfield.TextInputLayout>
 
 
                 <!-- TODO: Put the actual view for editing SelQuestionAndOptions here using two-way data binding -->
@@ -127,9 +147,11 @@
                     android:layout_marginTop="@dimen/formitem_margin_vertical"
                     android:layout_marginBottom="@dimen/formitem_margin_vertical"
                     android:text="@string/options"
+                    android:visibility=
+                        "@{selquestionandoptions.selQuestion.questionType == multichoicevalue ?View.VISIBLE:View.GONE}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf=
-                        "@+id/actvity_selquestionandoptions_edit_type_spinner" />
+                        "@+id/actvity_selquestionandoptions_edit_type_actv" />
 
                 <include layout="@layout/item_createnew"
                     android:layout_width="match_parent"
@@ -138,6 +160,8 @@
                     app:createNewText="@{@string/add_option}"
                     app:layout_constraintTop_toBottomOf=
                         "@+id/activity_selquestionandoptions_edit_create_new_tv"
+                    android:visibility=
+                        "@{selquestionandoptions.selQuestion.questionType == multichoicevalue ?View.VISIBLE:View.GONE}"
                     app:layout_constraintStart_toStartOf="parent"
                     />
 
@@ -147,7 +171,10 @@
                     android:layout_height="wrap_content"
                     tools:listitem="@layout/item_sel_question_option"
                     tools:itemCount="2"
-                    app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
+                    android:visibility=
+                        "@{selquestionandoptions.selQuestion.questionType == multichoicevalue ?View.VISIBLE:View.GONE}"
+
+                app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
                     app:layout_constraintStart_toStartOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

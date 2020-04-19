@@ -1,9 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.SelQuestionDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.SelQuestionAndOptionsEditView
 import com.ustadmobile.core.view.UstadView
@@ -54,22 +57,20 @@ class SelQuestionAndOptionsEditPresenter(context: Any,
     }
 
 
-    //
-
-    //TODO: Add code to handleClickSave to save the result to the database
-    // entityClass.commitToDatabase(repo.entityClassDao) {
-    //   it.fk = entity.fk
-    // }
-    //
-
     enum class QuestionOptions(val optionVal: Int, val messageId: Int){
-
+        NOMINATION(SelQuestionDao.SEL_QUESTION_TYPE_NOMINATION, MessageID.sel_question_type_nomination),
+        MULTI_CHOICE(SelQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE, MessageID.sel_question_type_multiple_choise),
+        FREE_TEXT(SelQuestionDao.SEL_QUESTION_TYPE_FREE_TEXT, MessageID.sel_question_type_free_text)
     }
+
+    class OptionTypeMessageIdOption(day: QuestionOptions, context: Any) : MessageIdOption(day.messageId, context, day.optionVal)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         view.selQuestionOptionList = selQuestionOptionOneToManyJoinEditHelper.liveList
+
+        view.typeOptions = QuestionOptions.values().map { OptionTypeMessageIdOption(it, context) }
 
         selQuestionOptionOneToManyJoinEditHelper.liveList.sendValue(
                 entity?.options?: mutableListOf())
@@ -77,16 +78,7 @@ class SelQuestionAndOptionsEditPresenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SelQuestionAndOptions? {
-        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-
-        //TODO: Load the list for any one to many join helper here
-        /* e.g.
-         val selQuestionAndOptions = withTimeoutOrNull {
-             db.selQuestionAndOptions.findByUid(entityUid)
-         } ?: SelQuestionAndOptions()
-         return selQuestionAndOptions
-         */
-        return TODO("Implement load from Database or return null if using PERSISTENCE_MODE.JSON")
+        return null
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): SelQuestionAndOptions? {

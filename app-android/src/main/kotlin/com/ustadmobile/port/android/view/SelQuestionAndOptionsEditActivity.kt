@@ -20,6 +20,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivitySelquestionandoptionsEditBinding
 import com.toughra.ustadmobile.databinding.ItemSelquestionoptionBinding
 import com.ustadmobile.core.controller.SelQuestionAndOptionsEditPresenter
+import com.ustadmobile.core.db.dao.SelQuestionDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toBundle
@@ -121,8 +122,14 @@ class SelQuestionAndOptionsEditActivity : UstadBaseActivity(), SelQuestionAndOpt
             field?.removeObserver(entityClassObserver)
             field = value
             value?.observe(this, entityClassObserver)
-        } 
-    
+        }
+    override var typeOptions: List<SelQuestionAndOptionsEditPresenter.OptionTypeMessageIdOption>? = null
+        get() = field
+        set(value) {
+            rootView?.typeOptions = value
+            field = value
+        }
+
     private var entityClassRecyclerAdapter: EntityClassRecyclerAdapter? = null
     
     private var entityClassRecyclerView: RecyclerView? = null
@@ -130,12 +137,6 @@ class SelQuestionAndOptionsEditActivity : UstadBaseActivity(), SelQuestionAndOpt
     private val entityClassObserver = Observer<List<SelQuestionOption>?> {
         t -> entityClassRecyclerAdapter?.submitList(t)
     }
-
-    /* 
-    TODO 3
-    Make a layout for the item in the recyclerview named item_EntityClass (PS: convert EntityClass to snake case).
-    Use the Ustad Edit Screen 1-N ListItem XML (right click on res/layout, click new, and select the template)
-    */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -160,7 +161,11 @@ class SelQuestionAndOptionsEditActivity : UstadBaseActivity(), SelQuestionAndOpt
                 UmAccountManager.getRepositoryForActiveAccount(this))
         mPresenter.onCreate(savedInstanceState.toNullableStringMap())
 
+        rootView?.multichoicevalue = SelQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE
+
         entityClassRecyclerAdapter?.presenter = mPresenter
+
+        rootView?.selquestionandoptions = rootView?.selquestionandoptions
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
