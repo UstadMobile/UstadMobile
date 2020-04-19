@@ -28,28 +28,32 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SelQuestionSetEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.SelQuestion
+import com.ustadmobile.lib.db.entities.SelQuestionAndOptions
 import com.ustadmobile.lib.db.entities.SelQuestionSet
 import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
+import com.ustadmobile.port.android.view.ext.setEditActivityTitle
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
 import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
 
 
 fun ComponentActivity.prepareSelQuestionSetEditCall(callback: (List<SelQuestionSet>?) -> Unit) =
         prepareCall(CrudEditActivityResultContract(this, SelQuestionSet::class.java,
-        SelQuestionSetEditActivity::class.java, SelQuestionSet::selQuestionSetUid)) {
+        SelQuestionSetEditActivity::class.java,
+        SelQuestionSet::selQuestionSetUid)) {
     callback.invoke(it)
 }
 
 fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<SelQuestionSet>>
-        .launchSelQuestionSetEdit(schedule: SelQuestionSet?, extraArgs: Map<String, String> = mapOf()) {
+        .launchSelQuestionSetEdit(schedule: SelQuestionSet?,
+                                  extraArgs: Map<String, String> = mapOf()) {
     launch(CrudEditActivityResultContract.CrudEditInput(schedule,
             UstadSingleEntityPresenter.PersistenceMode.DB, extraArgs))
 }
 
-
 interface SelQuestionSetEditActivityEventHandler {
-    fun onClickEditSelQuestion(selQuestion: SelQuestion?)
+    fun onClickEditSelQuestion(selQuestion: SelQuestionAndOptions?)
     fun onClickNewSelQuestion()
+    fun handleRemoveSelQuestion(selQuestion: SelQuestionAndOptions)
 }
 
 class SelQuestionSetEditActivity : UstadBaseActivity(), SelQuestionSetEditView,
@@ -59,7 +63,6 @@ class SelQuestionSetEditActivity : UstadBaseActivity(), SelQuestionSetEditView,
 
     private lateinit var mPresenter: SelQuestionSetEditPresenter
 
-
     /*
      * required one to many join relationships - use the following templates (then hit tab)
      *  onetomanyadapter - adds a recycler adapter, observer, and handler methods for a one-many field
@@ -67,10 +70,12 @@ class SelQuestionSetEditActivity : UstadBaseActivity(), SelQuestionSetEditView,
      */
 
     class SelQuestionRecyclerAdapter(val activityEventHandler: SelQuestionSetEditActivityEventHandler,
-            var presenter: SelQuestionSetEditPresenter?): ListAdapter<SelQuestion,
-            SelQuestionRecyclerAdapter.SelQuestionViewHolder>(DIFF_CALLBACK_SELQUESTION) {
+            var presenter: SelQuestionSetEditPresenter?)
+        : ListAdapter<SelQuestionAndOptions,
+            SelQuestionRecyclerAdapter.SelQuestionViewHolder>(DIFF_CALLBACK_SELQUESTIONANDOPTIONS) {
 
-            class SelQuestionViewHolder(val binding: ItemSelquestionBinding): RecyclerView.ViewHolder(binding.root)
+            class SelQuestionViewHolder(val binding: ItemSelquestionBinding)
+                : RecyclerView.ViewHolder(binding.root)
 
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelQuestionViewHolder {
                 val viewHolder = SelQuestionViewHolder(ItemSelquestionBinding.inflate(
@@ -81,11 +86,12 @@ class SelQuestionSetEditActivity : UstadBaseActivity(), SelQuestionSetEditView,
             }
 
             override fun onBindViewHolder(holder: SelQuestionViewHolder, position: Int) {
+                //TODO: Check this
                 holder.binding.selQuestion = getItem(position)
             }
         }
 
-    override var selQuestionList: DoorLiveData<List<SelQuestion>>? = null
+    override var selQuestionList: DoorLiveData<List<SelQuestionAndOptions>>? = null
         get() = field
         set(value) {
             field?.removeObserver(selQuestionObserver)
@@ -97,22 +103,26 @@ class SelQuestionSetEditActivity : UstadBaseActivity(), SelQuestionSetEditView,
 
     private var selQuestionRecyclerView: RecyclerView? = null
 
-    private val selQuestionObserver = Observer<List<SelQuestion>?> {
+    private val selQuestionObserver = Observer<List<SelQuestionAndOptions>?> {
         t -> selQuestionRecyclerAdapter?.submitList(t)
     }
 
-    override fun onClickEditSelQuestion(selQuestion: SelQuestion?) {
-//        prepareSelQuestionEditCall {
-//            val selQuestionCreated = it?.firstOrNull() ?: return@prepareSelQuestionEditCall
-//            mPresenter.handleAddOrEditSelQuestion(selQuestionCreated)
-//        }.launchSelQuestionEdit(selQuestion)
+    override fun onClickEditSelQuestion(selQuestion: SelQuestionAndOptions?) {
+        prepareSelQuestionAndOptionsEditCall {
+            val selQuestionCreated = it?.firstOrNull() ?: return@prepareSelQuestionAndOptionsEditCall
+            mPresenter.handleAddOrEditSelQuestion(selQuestionCreated)
+        }.launchSelQuestionAndOptionsEdit(selQuestion)
     }
 
-    override fun onClickNewSelQuestion() = onClickEditSelQuestion(null)
+    override fun onClickNewSelQuestion() =
+            onClickEditSelQuestion(null)
 
 
+    override fun handleRemoveSelQuestion(selQuestion: SelQuestionAndOptions) {
+        mPresenter.handleRemoveSelQuestion(selQuestion)
+    }
 
-    /*
+    /*16
     TODO 2: put this into onCreate:
 
     */
@@ -129,16 +139,16 @@ class SelQuestionSetEditActivity : UstadBaseActivity(), SelQuestionSetEditView,
         rootView = DataBindingUtil.setContentView(this, R.layout.activity_selquestionset_edit)
         rootView?.activityEventHandler = this
 
-        selQuestionRecyclerView = findViewById(R.id.activity_selquestion_recycleradapter)
-        selQuestionRecyclerAdapter = SelQuestionRecyclerAdapter(this, null)
-        selQuestionRecyclerView?.adapter = selQuestionRecyclerAdapter
-        selQuestionRecyclerView?.layoutManager = LinearLayoutManager(this)
-
-
 
         val toolbar = findViewById<Toolbar>(R.id.activity_selquestionset_edit_toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setEditActivityTitle(R.string.question_set)
+
+        selQuestionRecyclerView = findViewById(R.id.activity_selquestion_recycleradapter)
+        selQuestionRecyclerAdapter = SelQuestionRecyclerAdapter(this, null)
+        selQuestionRecyclerView?.adapter = selQuestionRecyclerAdapter
+        selQuestionRecyclerView?.layoutManager = LinearLayoutManager(this)
 
         mPresenter = SelQuestionSetEditPresenter(this, intent.extras.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
@@ -202,12 +212,12 @@ class SelQuestionSetEditActivity : UstadBaseActivity(), SelQuestionSetEditView,
 
     companion object {
 
-        val DIFF_CALLBACK_SELQUESTION = object: DiffUtil.ItemCallback<SelQuestion>() {
-            override fun areItemsTheSame(oldItem: SelQuestion, newItem: SelQuestion): Boolean {
-                return oldItem.selQuestionUid == newItem.selQuestionUid
+        val DIFF_CALLBACK_SELQUESTIONANDOPTIONS = object: DiffUtil.ItemCallback<SelQuestionAndOptions>() {
+            override fun areItemsTheSame(oldItem: SelQuestionAndOptions, newItem: SelQuestionAndOptions): Boolean {
+                return oldItem.selQuestion.selQuestionUid == newItem.selQuestion.selQuestionUid
             }
 
-            override fun areContentsTheSame(oldItem: SelQuestion, newItem: SelQuestion): Boolean {
+            override fun areContentsTheSame(oldItem: SelQuestionAndOptions, newItem: SelQuestionAndOptions): Boolean {
                 return oldItem == newItem
             }
         }

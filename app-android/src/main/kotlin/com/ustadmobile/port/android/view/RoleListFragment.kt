@@ -5,12 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemRoleListItemBinding
 import com.ustadmobile.core.controller.RoleListPresenter
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
@@ -19,30 +19,37 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RoleListView
 import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.core.view.GetResultMode
 import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
-import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem.Companion.ITEMVIEWTYPE_NEW
 import com.ustadmobile.port.android.view.util.getDataItemViewHolder
 
 
 class RoleListFragment(): UstadListViewFragment<Role, Role>(),
         RoleListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
+    override val listPresenter: UstadListPresenter<*, in Role>?
+        get() = mPresenter
+
     private var mPresenter: RoleListPresenter? = null
 
     private var dbRepo: UmAppDatabase? = null
 
-    class RoleListRecyclerAdapter(var presenter: RoleListPresenter?, newItemVisible: Boolean,
-                                      onClickNewItem: View.OnClickListener, createNewText: String)
-        : PagedListAdapterWithNewItem<Role>(DIFF_CALLBACK, newItemVisible, onClickNewItem, createNewText) {
+    class RoleListRecyclerAdapter(var presenter: RoleListPresenter?,
+                                  newItemVisible: Boolean,
+                                  onClickNewItem: View.OnClickListener,
+                                  createNewText: String)
+        : PagedListAdapterWithNewItem<Role>(DIFF_CALLBACK,
+            newItemVisible, onClickNewItem, createNewText) {
 
-        class RoleListViewHolder(val itemBinding: ItemRoleListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+        class RoleListViewHolder(val itemBinding: ItemRoleListItemBinding)
+            : RecyclerView.ViewHolder(itemBinding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
+                : RecyclerView.ViewHolder {
             if(viewType == ITEMVIEWTYPE_NEW) {
                 return super.onCreateViewHolder(parent, viewType)
             }else {
-                val itemBinding = ItemRoleListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                val itemBinding = ItemRoleListItemBinding.inflate(
+                        LayoutInflater.from(parent.context), parent, false)
                 return RoleListViewHolder(itemBinding)
             }
         }
@@ -61,7 +68,8 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         mPresenter = RoleListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
@@ -73,8 +81,8 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
         mDataBinding?.onSortSelected = this
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.role))
-        mRecyclerViewAdapter = RoleListRecyclerAdapter(mPresenter, false, this,
-            createNewText)
+        mRecyclerViewAdapter = RoleListRecyclerAdapter(mPresenter, false,
+                this, createNewText)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }
@@ -86,12 +94,12 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
     }
 
     override fun onClick(view: View?) {
-        //TODO: Uncomment when Edit stuff in there
-//        activity?.prepareRoleEditCall {
-//            if(it != null) {
-//                finishWithResult(it)
-//            }
-//        }?.launchRoleEdit(null)
+        //TODOne: Uncomment when Edit stuff in there
+        activity?.prepareRoleEditCall {
+            if(it != null) {
+                finishWithResult(it)
+            }
+        }?.launchRoleEdit(null)
     }
 
     override fun onDestroyView() {
@@ -101,7 +109,8 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
     }
 
 
-    override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
+    override fun onMessageIdOptionSelected(view: AdapterView<*>?,
+                                           messageIdOption: MessageIdOption) {
         mPresenter?.handleClickSortOrder(messageIdOption)
     }
 
@@ -117,7 +126,7 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
             : DiffUtil.ItemCallback<Role>() {
             override fun areItemsTheSame(oldItem: Role,
                                          newItem: Role): Boolean {
-                oldItem.roleUid == newItem.roleUid
+                return oldItem.roleUid == newItem.roleUid
             }
 
             override fun areContentsTheSame(oldItem: Role,

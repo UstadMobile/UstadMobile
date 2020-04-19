@@ -353,6 +353,17 @@
             android:theme="@style/Theme.UstadTheme" />
 
         <activity
+            android:name="com.ustadmobile.port.android.view.RoleEditActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/role"
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.SelQuestionAndOptionsEditActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/questions"
+            android:theme="@style/Theme.UstadTheme" />
+
+        <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/app_name"

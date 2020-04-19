@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = 22)
 @Entity
 @Serializable
-class SelQuestion {
+open class SelQuestion {
 
     @PrimaryKey(autoGenerate = true)
     var selQuestionUid: Long = 0

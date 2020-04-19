@@ -10,9 +10,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.SelQuestionSet
 
-import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
 import kotlinx.coroutines.*
@@ -20,7 +18,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.lib.db.entities.SelQuestion
+import com.ustadmobile.lib.db.entities.*
 
 
 class SelQuestionSetEditPresenter(context: Any,
@@ -28,26 +26,30 @@ class SelQuestionSetEditPresenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner,
                           systemImpl: UstadMobileSystemImpl,
                           db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<SelQuestionSetEditView, SelQuestionSet>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          activeAccount: DoorLiveData<UmAccount?> =
+                                          UmAccountManager.activeAccountLiveData)
+    : UstadEditPresenter<SelQuestionSetEditView, SelQuestionSet>(context, arguments, view,
+        lifecycleOwner, systemImpl, db, repo, activeAccount) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
     /*
-     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
+     * TODOne: Add any required one to many join helpers here - use these templates (type then hit tab)
      * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
      */
-    val selQuestionOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<SelQuestion>(SelQuestion::selQuestionUid,
-            "state_SelQuestion_list", SelQuestion.serializer().list,
-            SelQuestion.serializer().list, this) { selQuestionUid = it }
+    val selQuestionOneToManyJoinEditHelper =
+            DefaultOneToManyJoinEditHelper<SelQuestionAndOptions>(
+                    { it.selQuestion.selQuestionUid},
+                    "state_SelQuestion_list", SelQuestionAndOptions.serializer().list,
+                    SelQuestionAndOptions.serializer().list, this)
+            { selQuestion.selQuestionUid = it }
 
-    fun handleAddOrEditSelQuestion(selQuestion: SelQuestion) {
+    fun handleAddOrEditSelQuestion(selQuestion: SelQuestionAndOptions) {
         selQuestionOneToManyJoinEditHelper.onEditResult(selQuestion)
     }
 
-    fun handleRemoveSelQuestion(selQuestion: SelQuestion) {
+    fun handleRemoveSelQuestion(selQuestion: SelQuestionAndOptions) {
         selQuestionOneToManyJoinEditHelper.onDeactivateEntity(selQuestion)
     }
 
@@ -61,15 +63,22 @@ class SelQuestionSetEditPresenter(context: Any,
         //TODO: Set any additional fields (e.g. joinlist) on the view
     }
 
+
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SelQuestionSet? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         // code to the onLoadEntityFromDb to set the list if loading from the database, e.g.
-         val selQuestionList = withTimeoutOrNull(2000) {
-            db.selQuestionDao.findAllActiveQuestionsInSetAsList(entityUid)
-         }?: listOf()
 
-         selQuestionOneToManyJoinEditHelper.liveList.sendValue(selQuestionList)
+        val questionAndOptions: List<SelQuestionAndOptionRow> = withTimeoutOrNull(2000) {
+            db.selQuestionDao.findAllActiveQuestionsWithOpensInSetAsListAsc(entityUid)
+        }?: listOf()
+        val questionsWithOptionsList: List<SelQuestionAndOptions> =
+                questionAndOptions.groupBy { it.selQuestion }.entries
+                    .map { SelQuestionAndOptions(
+                            it.key?:SelQuestion(),
+                            it.value.map { it.selQuestionOption?:SelQuestionOption() }) }
+
+         selQuestionOneToManyJoinEditHelper.liveList.sendValue(questionsWithOptionsList)
 
         // Load the list for any one to many join helper here
          val selQuestionSet = withTimeoutOrNull(2000) {
@@ -100,8 +109,8 @@ class SelQuestionSetEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: SelQuestionSet) {
-        //TODO: Any validation that is needed before accepting / saving this entity
-        //TODO: Only save to the database when the persistence mode is PERSISTENCE_MODE.DB
+        //TODOne: Any validation that is needed before accepting / saving this entity
+        //TODOne: Only save to the database when the persistence mode is PERSISTENCE_MODE.DB
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.selQuestionSetUid == 0L) {
                 entity.selQuestionSetUid = repo.selQuestionSetDao.insertAsync(entity)
@@ -109,12 +118,56 @@ class SelQuestionSetEditPresenter(context: Any,
                 repo.selQuestionSetDao.updateAsync(entity)
             }
 
-            //TODO: Call commitToDatabase on any onetomany join helpers
-            // code to handleClickSave to save the result to the database
-            selQuestionOneToManyJoinEditHelper.commitToDatabase(repo.selQuestionDao) {
-               it.selQuestionSelQuestionSetUid = entity.selQuestionSetUid
-             }
+           //TODO: Check. Persist list
+            val eti : List<SelQuestionAndOptions> =
+                    selQuestionOneToManyJoinEditHelper.entitiesToInsert
+            eti.iterator().forEach {
+                val options = it.options
+                val question = it.selQuestion
+                question.selQuestionSelQuestionSetUid = entity.selQuestionSetUid
+                question.selQuestionUid = 0L
+                //Since all are for insert only
+                question.selQuestionUid = repo.selQuestionDao.insertAsync(question)
+                options?.forEach {
+                    //TODO: Check if insert or update
+                    it.selQuestionOptionQuestionUid = question.selQuestionUid
+                    if(it.selQuestionOptionUid < 1) {
+                        it.selQuestionOptionUid = 0L
+                        repo.selQuestionOptionDao.insertAsync(it)
+                    }else{
+                        repo.selQuestionOptionDao.updateAsync(it)
+                    }
+                }
+            }
 
+            val etu : List<SelQuestionAndOptions> =
+                    selQuestionOneToManyJoinEditHelper.entitiesToUpdate
+            etu.iterator().forEach {
+                val options = it.options
+                val question = it.selQuestion
+                question.selQuestionSelQuestionSetUid = entity.selQuestionSetUid
+                //Since all are for update only
+                repo.selQuestionDao.updateAsync(question)
+                options?.forEach {
+                    //TODO: Check if insert or update
+                    it.selQuestionOptionQuestionUid = question.selQuestionUid
+                    if(it.selQuestionOptionUid < 1) {
+                        it.selQuestionOptionUid = 0L
+                        repo.selQuestionOptionDao.insertAsync(it)
+                    }else{
+                        repo.selQuestionOptionDao.updateAsync(it)
+                    }
+                }
+            }
+
+            //TODO: Check why it is not working
+            val etd : List<SelQuestionAndOptions> =
+                    selQuestionOneToManyJoinEditHelper.entitiesToDeactivate
+            etd.iterator().forEach {
+                val question  = it.selQuestion
+                question.questionActive = false
+                repo.selQuestionDao.updateAsync(question)
+            }
 
             view.finishWithResult(entity)
         }

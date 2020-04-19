@@ -14,8 +14,8 @@ import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SELQuestionEditPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.SELQuestionEditView
 import com.ustadmobile.port.android.view.UstadBaseActivity
+import com.ustadmobile.staging.core.view.SELQuestionEditView
 import java.util.*
 
 

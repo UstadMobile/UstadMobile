@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemSelquestionsetListItemBinding
 import com.ustadmobile.core.controller.SelQuestionSetListPresenter
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
@@ -23,22 +24,26 @@ import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
 import com.ustadmobile.port.android.view.util.getDataItemViewHolder
 
 
-class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet, SELQuestionSetWithNumQuestions>(),
-        SelQuestionSetListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet,
+        SELQuestionSetWithNumQuestions>(), SelQuestionSetListView,
+        MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     private var mPresenter: SelQuestionSetListPresenter? = null
 
     private var dbRepo: UmAppDatabase? = null
 
-    class SelQuestionSetListRecyclerAdapter(var presenter: SelQuestionSetListPresenter?, newItemVisible: Boolean,
-                                      onClickNewItem: View.OnClickListener, createNewText: String)
+    class SelQuestionSetListRecyclerAdapter(var presenter: SelQuestionSetListPresenter?,
+                                            newItemVisible: Boolean,
+                                            onClickNewItem: View.OnClickListener,
+                                            createNewText: String)
         : PagedListAdapterWithNewItem<SELQuestionSetWithNumQuestions>(DIFF_CALLBACK,
             newItemVisible, onClickNewItem, createNewText) {
 
         class SelQuestionSetListViewHolder(val itemBinding: ItemSelquestionsetListItemBinding)
             : RecyclerView.ViewHolder(itemBinding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
+                : RecyclerView.ViewHolder {
             if(viewType == ITEMVIEWTYPE_NEW) {
                 return super.onCreateViewHolder(parent, viewType)
             }else {
@@ -62,11 +67,14 @@ class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet, SELQue
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
-        mPresenter = SelQuestionSetListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
+        mPresenter = SelQuestionSetListPresenter(requireContext(),
+                UMAndroidUtil.bundleToMap(arguments), this, this,
+                UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
@@ -74,10 +82,16 @@ class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet, SELQue
         mDataBinding?.onSortSelected = this
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.sel_question_set))
-        mRecyclerViewAdapter = SelQuestionSetListRecyclerAdapter(mPresenter, false, this,
-            createNewText)
+        mRecyclerViewAdapter = SelQuestionSetListRecyclerAdapter(mPresenter,
+                false, this, createNewText)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mActivityWithFab?.activityFloatingActionButton?.text =
+                requireContext().getString(R.string.sel_question_set)
     }
 
     override fun onClick(view: View?) {
@@ -95,7 +109,8 @@ class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet, SELQue
     }
 
 
-    override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
+    override fun onMessageIdOptionSelected(
+            view: AdapterView<*>?, messageIdOption: MessageIdOption) {
         mPresenter?.handleClickSortOrder(messageIdOption)
     }
 
@@ -126,4 +141,7 @@ class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet, SELQue
             }
         }
     }
+
+    override val listPresenter: UstadListPresenter<*, in SELQuestionSetWithNumQuestions>?
+        get() = mPresenter
 }

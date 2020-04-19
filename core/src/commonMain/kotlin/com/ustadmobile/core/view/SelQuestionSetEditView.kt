@@ -2,12 +2,12 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.SelQuestion
+import com.ustadmobile.lib.db.entities.SelQuestionAndOptions
 import com.ustadmobile.lib.db.entities.SelQuestionSet
-
 
 interface SelQuestionSetEditView: UstadEditView<SelQuestionSet> {
 
-    abstract var selQuestionList: DoorLiveData<List<SelQuestion>>?
+    var selQuestionList: DoorLiveData<List<SelQuestionAndOptions>>?
 
     companion object {
 

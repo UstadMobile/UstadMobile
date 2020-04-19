@@ -9,7 +9,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import androidx.appcompat.widget.Toolbar
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.RoleDetailPresenter
+import com.ustadmobile.staging.core.controller.RoleDetailPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.RoleDetailView
 import com.ustadmobile.lib.db.entities.Role

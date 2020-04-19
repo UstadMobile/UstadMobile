@@ -50,6 +50,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.*
 import com.ustadmobile.staging.core.view.HolidayCalendarDetailView
+import com.ustadmobile.staging.core.view.SELQuestionEditView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.InputStream
@@ -191,7 +192,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             HolidayCalendarEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HolidayCalendarEditActivity"),
             PersonGroupListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupListActivity"),
             PersonGroupEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupEditActivity"),
-            RoleListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}RoleListActivity")
+            RoleListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}RoleListActivity"),
+            RoleEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}RoleEditActivity"),
+            SelQuestionAndOptionsEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelQuestionAndOptionsEditActivity")
     )
 
 

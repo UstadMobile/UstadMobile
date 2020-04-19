@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <variable name="selQuestion" type="com.ustadmobile.lib.db.entities.SelQuestion" />
+        <variable name="selQuestion" type="com.ustadmobile.lib.db.entities.SelQuestionAndOptions" />
 
         <variable name="mPresenter"
             type="com.ustadmobile.core.controller.SelQuestionSetEditPresenter" />
@@ -15,6 +15,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
+        android:onClick="@{() -> mActivity.onClickEditSelQuestion(selQuestion)}"
         android:layout_height="wrap_content">
 
         <!-- TODO: Change or remove this icon -->
@@ -40,7 +41,7 @@
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
             android:textSize="@dimen/list_twoline1_textsize_line1"
             tools:text="Question A"
-            android:text="@{selQuestion.questionText}"
+            android:text="@{selQuestion.selQuestion.questionText}"
             android:textColor="@color/text_primary" />
 
         <!-- Line 2-->
@@ -64,7 +65,7 @@
             app:srcCompat="@drawable/ic_more_vert_black_24dp"
             android:contentDescription="@string/edit"
             app:onClickEditPopupMenu="@{() -> mActivity.onClickEditSelQuestion(selQuestion)}"
-            app:onClickDeletePopupMenu="@{() -> mPresenter.handleRemoveSelQuestion(selQuestion)}" />
+            app:onClickDeletePopupMenu="@{() -> mActivity.handleRemoveSelQuestion(selQuestion)}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

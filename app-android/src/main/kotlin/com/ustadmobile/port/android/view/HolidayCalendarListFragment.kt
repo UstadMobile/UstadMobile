@@ -56,14 +56,9 @@ class HolidayCalendarListFragment()
             if(viewType == ITEMVIEWTYPE_NEW) {
                 return super.onCreateViewHolder(parent, viewType)
             }else {
-<<<<<<< HEAD
-                val itemBinding = ItemHolidayCalendarBinding.inflate(
-                        LayoutInflater.from(parent.context), parent, false)
-=======
                 val itemBinding = ItemHolidayCalendarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 itemBinding.pagedListAdapter = this
                 itemBinding.presenter = presenter
->>>>>>> d0e48a161608068e75ba580e696578295fea6542
                 return HolidayCalendarListViewHolder(itemBinding)
             }
         }

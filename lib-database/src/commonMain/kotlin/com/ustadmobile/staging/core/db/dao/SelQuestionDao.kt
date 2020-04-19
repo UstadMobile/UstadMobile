@@ -9,6 +9,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SelQuestion
+import com.ustadmobile.lib.db.entities.SelQuestionAndOptionRow
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
@@ -45,6 +46,18 @@ abstract class SelQuestionDao : BaseDao<SelQuestion>, OneToManyJoinDao<SelQuesti
             "selQuestionSelQuestionSetUid = :questionSetUid AND " +
             " CAST(questionActive AS INTEGER) = 1")
     abstract fun findAllActiveQuestionsInSetAsList(questionSetUid: Long): List<SelQuestion>
+
+
+    @Query("""
+        SELECT SelQuestion.* , SelQuestionOption.* FROM SelQuestion 
+        LEFT JOIN SelQuestionOption ON 
+            SelQuestionOption.selQuestionOptionQuestionUid = SelQuestion.selQuestionUid 
+        WHERE 
+        selQuestionSelQuestionSetUid = :questionSetUid AND 
+        CAST(questionActive AS INTEGER) = 1
+        """)
+    abstract fun findAllActiveQuestionsWithOpensInSetAsListAsc(questionSetUid: Long): List<SelQuestionAndOptionRow>
+
 
     @Query("SELECT * FROM SelQuestion WHERE " +
             " selQuestionSelQuestionSetUid = :questionSetUid " +

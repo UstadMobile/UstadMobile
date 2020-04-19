@@ -19,9 +19,11 @@ class SelQuestionSetListPresenter(context: Any, arguments: Map<String, String>,
     : UstadListPresenter<SelQuestionSetListView, SelQuestionSet>(context, arguments, view,
         lifecycleOwner, systemImpl, db, repo, activeAccount) {
 
+    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
     enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc)
+        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
+        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
     class SelQuestionSetListSortOption(val sortOrder: SortOrder, context: Any)
@@ -41,7 +43,10 @@ class SelQuestionSetListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     private fun updateListOnView() {
-        view.list = repo.selQuestionSetDao.findAllQuestionSetsWithNumQuestions()
+        view.list = when(currentSortOrder){
+            SortOrder.ORDER_NAME_ASC ->  repo.selQuestionSetDao.findAllQuestionSetsWithNumQuestions()
+            SortOrder.ORDER_NAME_DSC ->  repo.selQuestionSetDao.findAllQuestionSetsWithNumQuestions()
+        }
     }
 
     override fun handleClickEntry(entry: SelQuestionSet) {
