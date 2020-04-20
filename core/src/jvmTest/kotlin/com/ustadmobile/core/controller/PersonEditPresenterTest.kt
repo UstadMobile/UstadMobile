@@ -2,23 +2,19 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.CustomField
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.TYPE_FIELD
-import com.ustadmobile.lib.db.entities.PresenterFieldRow
 import com.ustadmobile.util.test.checkJndiSetup
-import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.util.concurrent.atomic.AtomicReference
 
 class PersonEditPresenterTest {
 
@@ -34,7 +30,13 @@ class PersonEditPresenterTest {
 
     private lateinit var personDetailPresenterFieldCustomId: PersonDetailPresenterField
 
-    private lateinit var customField: CustomField
+    private lateinit var personDetailPresenterFieldCustomDropdown: PersonDetailPresenterField
+
+    private lateinit var customIdField: CustomField
+
+    private lateinit var customDropDownField: CustomField
+
+    private lateinit var customDropDownFieldOptions: List<CustomFieldValueOption>
 
     private lateinit var mockView: PersonEditView
 
@@ -50,10 +52,24 @@ class PersonEditPresenterTest {
                 fieldType = TYPE_FIELD, fieldIndex = 0)
         personDetailPresenterFieldCustomId = PersonDetailPresenterField(
                 fieldUid = 1042L, fieldType = TYPE_FIELD, fieldIndex = 1)
-        customField = CustomField(1042L, customFieldName = "Our Custom ID")
+        personDetailPresenterFieldCustomDropdown = PersonDetailPresenterField(
+                fieldUid = 1043L, fieldType = TYPE_FIELD, fieldIndex = 2)
+
+        customIdField = CustomField(1042L, customFieldName = "Our Custom ID")
+        customDropDownField = CustomField(1043L, customFieldName = "Custom Dropdown")
         db.personDetailPresenterFieldDao.insertList(listOf(personDetailPresenterFieldFirstNames,
-                personDetailPresenterFieldCustomId))
-        db.customFieldDao.insert(customField)
+                personDetailPresenterFieldCustomId, personDetailPresenterFieldCustomDropdown))
+        db.customFieldDao.insertList(listOf(customIdField, customDropDownField))
+        db.customFieldValueOptionDao.insertList(
+                listOf(CustomFieldValueOption().apply {
+                    customFieldValueOptionFieldUid = 1043L
+                    customFieldValueOptionName = "Option 1"
+                },
+                CustomFieldValueOption().apply {
+                    customFieldValueOptionFieldUid = 1043L
+                    customFieldValueOptionName = "Option 2"
+                }
+                ))
 
         systemImpl = UstadMobileSystemImpl.instance
         mockView = mock { }
@@ -90,11 +106,19 @@ class PersonEditPresenterTest {
 
     @Test
     fun givenNullEntity_whenUpdatedAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
+        val capturedPresenterFieldList = AtomicReference<List<PresenterFieldRow>>()
         createPresenterSetValsAndSave(mapOf(UstadView.ARG_ENTITY_UID to "0")) {
+            capturedPresenterFieldList.set(it.getValue()!!)
             val newList = it.getValue()!!.toMutableList()
             newList[0].customFieldValue!!.customFieldValueValue = "Bob"
             it.setVal(newList)
         }
+
+        assertEquals("Presenter sets 3 presenterfieldrows as per db",
+                3, capturedPresenterFieldList.get().size)
+        val fieldWithOptions = capturedPresenterFieldList.get().find { it.customFieldOptions.isNotEmpty() }
+        assertEquals("Multi choice option field has 2 options", 2,
+                fieldWithOptions?.customFieldOptions?.size)
 
         val personInDb = db.personDao.findByFirstnames("Bob")
         assertEquals("Person name found in database is the same as set by view", "Bob",

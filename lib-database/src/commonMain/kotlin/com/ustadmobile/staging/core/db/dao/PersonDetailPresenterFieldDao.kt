@@ -7,6 +7,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
+import com.ustadmobile.lib.db.entities.PresenterFieldQueryRow
 import com.ustadmobile.lib.db.entities.PresenterFieldRow
 
 @UmDao(updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
@@ -36,17 +37,20 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
 
 
     @Query(FIND_BYPERSON_UID_WITH_FIELD_AND_VALUE_SQL)
-    abstract fun findByPersonUidWithFieldAndValue(personUid: Long): DoorLiveData<List<PresenterFieldRow>>
+    abstract fun findByPersonUidWithFieldAndValue(personUid: Long): DoorLiveData<List<PresenterFieldQueryRow>>
 
     @Query(FIND_BYPERSON_UID_WITH_FIELD_AND_VALUE_SQL)
-    abstract fun findByPersonUidWithFieldAndValueAsList(personUid: Long): List<PresenterFieldRow>
+    abstract fun findByPersonUidWithFieldAndValueAsList(personUid: Long): List<PresenterFieldQueryRow>
+
 
     companion object {
         const val FIND_BYPERSON_UID_WITH_FIELD_AND_VALUE_SQL =
-            """SELECT PersonDetailPresenterField.*, CustomField.*, CustomFieldValue.*
+            """SELECT PersonDetailPresenterField.*, CustomField.*, CustomFieldValue.*,
+             CustomFieldValueOption.*
              FROM PersonDetailPresenterField
              LEFT JOIN CustomField ON PersonDetailPresenterField.fieldUid = CustomField.customFieldUid
              LEFT JOIN CustomFieldValue ON CustomFieldValue.customFieldValueEntityUid = :personUid AND CustomFieldValue.customFieldValueFieldUid = CustomField.customFieldUid
+             LEFT JOIN CustomFieldValueOption ON CustomFieldValueOption.customFieldValueOptionFieldUid = CustomField.customFieldUid
             """
     }
 

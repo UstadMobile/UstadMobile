@@ -7,7 +7,6 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.TYPE_FIELD
 import com.ustadmobile.lib.db.entities.PresenterFieldRow
 import org.junit.Assert
-import org.junit.Assert.*
 import org.junit.Test
 
 class PersonExtTest {
@@ -25,7 +24,7 @@ class PersonExtTest {
             firstNames = "Bob"
         }
 
-        val asFieldRowList = testPerson.asPresenterFieldList(testCustomFields)
+        val asFieldRowList = testPerson.populatePresenterFields(testCustomFields)
         asFieldRowList.first { it.presenterField?.fieldUid == PersonDetailPresenterField.PERSON_FIELD_UID_FIRST_NAMES.toLong() }
                 .customFieldValue?.customFieldValueValue = "Joe"
 

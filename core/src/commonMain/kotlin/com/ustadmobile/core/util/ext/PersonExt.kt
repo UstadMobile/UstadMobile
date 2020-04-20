@@ -9,13 +9,20 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
  * Get the CustomField and CustomFieldValue for a given field uid
  * @param fieldUid as per PERSON_FIELD_UID constants on PersonDetailPresenterField
  */
-fun Person.getCustomFieldValue(fieldUid: Int): Pair<CustomField, CustomFieldValue>? {
-    val customField = personCoreFieldsMap[fieldUid] ?: return null
-    return when(fieldUid) {
-        PERSON_FIELD_UID_FIRST_NAMES -> Pair(customField, CustomFieldValue(customFieldValueValue = firstNames))
-        PERSON_FIELD_UID_LAST_NAME -> Pair(customField, CustomFieldValue(customFieldValueValue = lastName))
-        else -> null
+fun Person.populatePresenterFieldRow(presenterFieldRow: PresenterFieldRow): Boolean {
+    val fieldUid = presenterFieldRow.presenterField?.fieldUid?.toInt() ?: return false
+    presenterFieldRow.customField = personCoreFieldsMap[fieldUid]
+
+    when(fieldUid) {
+        PERSON_FIELD_UID_FIRST_NAMES -> {
+            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueValue = firstNames)
+        }
+        PERSON_FIELD_UID_LAST_NAME -> {
+            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueValue = lastName)
+        }
     }
+
+    return presenterFieldRow.customField != null
 }
 
 /**
@@ -27,16 +34,15 @@ fun Person.getCustomFieldValue(fieldUid: Int): Pair<CustomField, CustomFieldValu
  * @return List of PresenterFieldRow where the placeholders for fields that come from the Person
  * entity itself are filled in with the values from this Person instance
  */
-fun Person.asPresenterFieldList(presenterFields: List<PresenterFieldRow>): List<PresenterFieldRow> {
-    return presenterFields.map {
+fun Person.populatePresenterFields(presenterFields: List<PresenterFieldRow>): List<PresenterFieldRow> {
+    presenterFields.forEach {
         if(it.customField == null
                 && it.presenterField?.fieldType == PersonDetailPresenterField.TYPE_FIELD) {
-            val fieldAndValue = getCustomFieldValue(it.presenterField?.fieldUid?.toInt() ?: 0)
-            PresenterFieldRow(it.presenterField, fieldAndValue?.first, fieldAndValue?.second)
-        }else {
-            it
+            populatePresenterFieldRow(it)
         }
     }
+
+    return presenterFields
 }
 
 /**

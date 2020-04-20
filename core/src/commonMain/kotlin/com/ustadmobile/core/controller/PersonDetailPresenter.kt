@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.getCustomFieldValue
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -43,8 +42,8 @@ class PersonDetailPresenter(context: Any,
         //TODO: Set any additional fields (e.g. joinlist) on the view
         repo.personDao.findByUidLive(entityUid).observeWithPresenter(this,
                 this::onPersonChanged)
-        repo.personDetailPresenterFieldDao.findByPersonUidWithFieldAndValue(entityUid)
-                .observeWithPresenter(this, this::onPresenterFieldsChanged)
+//        repo.personDetailPresenterFieldDao.findByPersonUidWithFieldAndValue(entityUid)
+//                .observeWithPresenter(this, this::onPresenterFieldsChanged)
 
     }
 
@@ -56,18 +55,18 @@ class PersonDetailPresenter(context: Any,
     fun onPresenterFieldsChanged(presenterFieldRows: List<PresenterFieldRow>?) {
         this.presenterFields = presenterFieldRows
 
-        val displayFields = presenterFields?.map {
-            if(it.customField == null
-                    && it.presenterField?.fieldType == PersonDetailPresenterField.TYPE_FIELD) {
-                val fieldAndValue = person?.getCustomFieldValue(it.presenterField?.fieldIndex ?: 0)
-                PresenterFieldRow(it.presenterField, fieldAndValue?.first, fieldAndValue?.second)
-            }else {
-                it
-            }
-        }
+//        val displayFields = presenterFields?.map {
+//            if(it.customField == null
+//                    && it.presenterField?.fieldType == PersonDetailPresenterField.TYPE_FIELD) {
+//                val fieldAndValue = person?.getCustomFieldValue(it.presenterField?.fieldIndex ?: 0)
+//                PresenterFieldRow(it.presenterField, fieldAndValue?.first, fieldAndValue?.second)
+//            }else {
+//                it
+//            }
+//        }
 
-        if(displayFields != null)
-            displayPresenterFields.setVal(displayFields)
+//        if(displayFields != null)
+//            displayPresenterFields.setVal(displayFields)
     }
 
 

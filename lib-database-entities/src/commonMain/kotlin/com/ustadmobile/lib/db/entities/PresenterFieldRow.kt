@@ -6,16 +6,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 class PresenterFieldRow(
 
-    @Embedded
     var presenterField: PersonDetailPresenterField? = null,
 
-    @Embedded
     var customField: CustomField? = null,
 
-    @Embedded
-    var customFieldValue: CustomFieldValue? = null
+    var customFieldValue: CustomFieldValue? = null,
 
-//    @Embedded
-//    var customFieldValueOption: CustomFieldValueOption? = null
-
+    var customFieldOptions: List<CustomFieldValueOption> = listOf()
 )

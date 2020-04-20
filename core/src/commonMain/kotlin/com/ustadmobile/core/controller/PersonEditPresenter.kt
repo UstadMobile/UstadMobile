@@ -3,25 +3,19 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.http.content.TextContent
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.TYPE_FIELD
 import com.ustadmobile.lib.db.entities.PresenterFieldRow
 
 
@@ -58,8 +52,8 @@ class PersonEditPresenter(context: Any,
         } ?: Person()
 
         val dbPresenterFieldRows = db.personDetailPresenterFieldDao
-                .findByPersonUidWithFieldAndValueAsList(entityUid)
-        presenterFieldRows.sendValue(person.asPresenterFieldList(dbPresenterFieldRows))
+                .findByPersonUidWithFieldAndValueAsList(entityUid).toPresenterFieldRows()
+        presenterFieldRows.sendValue(person.populatePresenterFields(dbPresenterFieldRows))
 
         return person
     }
