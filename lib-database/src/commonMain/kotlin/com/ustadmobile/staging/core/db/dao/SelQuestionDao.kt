@@ -9,11 +9,12 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SelQuestion
+import com.ustadmobile.lib.db.entities.SelQuestionAndOptionRow
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 @Dao
-abstract class SelQuestionDao : BaseDao<SelQuestion> {
+abstract class SelQuestionDao : BaseDao<SelQuestion>, OneToManyJoinDao<SelQuestion> {
 
     @Insert
     abstract override fun insert(entity: SelQuestion): Long
@@ -42,9 +43,21 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
     abstract suspend fun getMaxIndexByQuestionSetAsync(questionSetUid: Long): Int
 
     @Query("SELECT * FROM SelQuestion WHERE " +
-            "selQuestionSelQuestionSetUid = :questionUid AND " +
-            "questionActive = 1")
-    abstract fun findAllActivrQuestionsInSet(questionUid: Long): DataSource.Factory<Int, SelQuestion>
+            "selQuestionSelQuestionSetUid = :questionSetUid AND " +
+            " CAST(questionActive AS INTEGER) = 1")
+    abstract fun findAllActiveQuestionsInSetAsList(questionSetUid: Long): List<SelQuestion>
+
+
+    @Query("""
+        SELECT SelQuestion.* , SelQuestionOption.* FROM SelQuestion 
+        LEFT JOIN SelQuestionOption ON 
+            SelQuestionOption.selQuestionOptionQuestionUid = SelQuestion.selQuestionUid 
+        WHERE 
+        selQuestionSelQuestionSetUid = :questionSetUid AND 
+        CAST(questionActive AS INTEGER) = 1
+        """)
+    abstract fun findAllActiveQuestionsWithOpensInSetAsListAsc(questionSetUid: Long): List<SelQuestionAndOptionRow>
+
 
     @Query("SELECT * FROM SelQuestion WHERE " +
             " selQuestionSelQuestionSetUid = :questionSetUid " +
@@ -57,11 +70,20 @@ abstract class SelQuestionDao : BaseDao<SelQuestion> {
             " questionActive = 1")
     abstract fun findTotalNumberOfActiveQuestionsInAQuestionSet(questionSetUid: Long): Int
 
+    @Query("UPDATE SelQuestion SET questionActive = :active WHERE selQuestionUid = :selQuestionUid ")
+    abstract suspend fun updateActiveBySelQuestionUid(selQuestionUid: Long, active : Boolean)
+
     companion object {
 
         val SEL_QUESTION_TYPE_NOMINATION = 0
         val SEL_QUESTION_TYPE_MULTI_CHOICE = 1
         val SEL_QUESTION_TYPE_FREE_TEXT = 2
+    }
+
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+            updateActiveBySelQuestionUid(it, false)
+        }
     }
 
 

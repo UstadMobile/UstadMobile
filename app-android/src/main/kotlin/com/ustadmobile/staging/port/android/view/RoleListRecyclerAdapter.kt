@@ -12,7 +12,7 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.RoleListPresenter
+import com.ustadmobile.staging.core.controller.RoleListPresenter
 import com.ustadmobile.lib.db.entities.Role
 
 class RoleListRecyclerAdapter(

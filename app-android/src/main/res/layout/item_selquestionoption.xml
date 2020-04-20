@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="selQuestionOption"
+            type="com.ustadmobile.lib.db.entities.SelQuestionOption" />
+        <variable
+            name="mPresenter"
+            type="com.ustadmobile.core.controller.SelQuestionAndOptionsEditPresenter" />
+        <variable
+            name="mActivityEventHandler"
+            type="com.ustadmobile.port.android.view.SelQuestionAndOptionsEditActivityEventHandler" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:background="?android:selectableItemBackground"
+        android:layout_height="wrap_content">
+
+
+        <androidx.appcompat.widget.AppCompatImageView android:id="@+id/item_selquestionoption_newitemicon"
+            app:srcCompat="@drawable/ic_add_black_24dp"
+            android:layout_width="@dimen/list_twoline1_imagesize"
+            android:layout_height="@dimen/list_twoline1_imagesize"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent" />
+
+
+        <EditText
+            android:id="@+id/item_sel_question_option_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:maxLines="3"
+            android:text="@={selQuestionOption.optionText}"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_sel_question_option_secondary_menu_imageview"
+            app:layout_constraintStart_toStartOf="@+id/item_selquestionoption_newitemicon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Option 1" />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_selquestionoption_secondary_menu_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:srcCompat="@drawable/ic_more_vert_black_24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:onClickDeletePopupMenu="@{() -> mPresenter.handleRemoveSelQuestionOption(selQuestionOption)}"
+            android:layout_marginRight="8dp" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

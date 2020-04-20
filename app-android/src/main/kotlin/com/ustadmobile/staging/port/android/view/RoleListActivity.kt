@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.RoleListPresenter
+import com.ustadmobile.staging.core.controller.RoleListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.RoleListView
+import com.ustadmobile.staging.core.view.RoleListView
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.port.android.view.UstadBaseActivity
 import kotlinx.coroutines.Dispatchers

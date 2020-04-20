@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.SelQuestionDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.view.SELQuestionEditView
+import com.ustadmobile.staging.core.view.SELQuestionEditView
 import com.ustadmobile.lib.db.entities.SelQuestion
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

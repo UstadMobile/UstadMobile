@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
@@ -20,6 +21,8 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.AboutView
+import com.ustadmobile.core.view.SettingsView
 
 
 class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavController.OnDestinationChangedListener {
@@ -69,9 +72,26 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
         return findNavController(R.id.activity_main_navhost_fragment).navigateUp()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            R.id.menu_main_settings -> handleClickSettings()
+        }
         return item.onNavDestinationSelected(findNavController(R.id.activity_main_navhost_fragment))
                 || super.onOptionsItemSelected(item)
+    }
+
+    /**
+     * When settings gear clicked in the menu options - Goes to the settings activity.
+     */
+    fun handleClickSettings() {
+        UstadMobileSystemImpl.instance.go(SettingsView.VIEW_NAME, mapOf(), this)
+
     }
 }

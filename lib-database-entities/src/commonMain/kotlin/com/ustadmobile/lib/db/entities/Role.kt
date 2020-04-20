@@ -14,6 +14,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 class Role() {
 
+    data class BitmaskFlag(val flagVal : Int, val messageId: Int,
+                           val enabled: Boolean)
+
     @PrimaryKey(autoGenerate = true)
     var roleUid: Long = 0
 
@@ -38,6 +41,8 @@ class Role() {
         this.roleName = roleName
         this.rolePermissions = rolePermissions
     }
+
+
 
     companion object {
 
@@ -102,5 +107,33 @@ class Role() {
          * affect access to the underlying data.
          */
         val PERMISSION_REPORTS_VIEW: Long = 8388608
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Role
+
+        if (roleUid != other.roleUid) return false
+        if (roleName != other.roleName) return false
+        if (roleActive != other.roleActive) return false
+        if (roleMasterCsn != other.roleMasterCsn) return false
+        if (roleLocalCsn != other.roleLocalCsn) return false
+        if (roleLastChangedBy != other.roleLastChangedBy) return false
+        if (rolePermissions != other.rolePermissions) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = roleUid.hashCode()
+        result = 31 * result + (roleName?.hashCode() ?: 0)
+        result = 31 * result + roleActive.hashCode()
+        result = 31 * result + roleMasterCsn.hashCode()
+        result = 31 * result + roleLocalCsn.hashCode()
+        result = 31 * result + roleLastChangedBy
+        result = 31 * result + rolePermissions.hashCode()
+        return result
     }
 }
