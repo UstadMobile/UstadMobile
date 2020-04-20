@@ -33,7 +33,7 @@ open class Person() {
 
     var gender: Int = 0
 
-    var active: Boolean = false
+    var active: Boolean = true
 
     var admin: Boolean = false
 

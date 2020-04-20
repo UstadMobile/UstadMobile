@@ -1,33 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <variable
-            name="customFieldValue"
-            type="com.ustadmobile.lib.db.entities.CustomFieldValue" />
+        <import type="com.ustadmobile.port.android.view.binding.DatePickerBindingAdapterKt"/>
+        <import type="android.text.InputType" />
         <variable
             name="customField"
             type="com.ustadmobile.lib.db.entities.CustomField" />
+
+        <variable
+            name="customFieldValue"
+            type="com.ustadmobile.lib.db.entities.CustomFieldValue" />
 
     </data>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_marginVertical="@dimen/formitem_margin_vertical"
         android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        tools:hint="Field Name"
-        app:hintMessageId="@{customField.customFieldLabelMessageID}"
-        >
+        app:customFieldHint="@{customField}">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="Field Value"
-            android:text="@={customFieldValue.customFieldValueValue}"/>
+            app:dateLongString="@={customFieldValue.customFieldValueValue}"
+            app:dateUseSpinners="@{true}"
+            android:inputType="@{InputType.TYPE_NULL}"
+            android:cursorVisible="false"
+            app:runOnClickWhenFocused="@{true}"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 </layout>

@@ -2,8 +2,14 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.CustomField.Companion.FIELD_TYPE_DATE_SPINNER
+import com.ustadmobile.lib.db.entities.CustomField.Companion.FIELD_TYPE_TEXT
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ADDRESS
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_BIRTHDAY
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_FIRST_NAMES
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_LAST_NAME
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PHONE_NUMBER
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_USERNAME
 
 /**
  * Get the CustomField and CustomFieldValue for a given field uid
@@ -60,6 +66,19 @@ fun Person.updateFromFieldList(presenterFields: List<PresenterFieldRow>) {
 }
 
 private val personCoreFieldsMap: Map<Int, CustomField> by lazy {
-    mapOf(PERSON_FIELD_UID_FIRST_NAMES to CustomField(customFieldLabelMessageID = MessageID.first_names))
+    mapOf(
+        PERSON_FIELD_UID_FIRST_NAMES to CustomField(customFieldLabelMessageID = MessageID.first_names,
+            customFieldType = FIELD_TYPE_TEXT),
+        PERSON_FIELD_UID_LAST_NAME to CustomField(customFieldLabelMessageID =  MessageID.last_name,
+                customFieldType = FIELD_TYPE_TEXT),
+        PERSON_FIELD_UID_BIRTHDAY to CustomField(customFieldLabelMessageID = MessageID.birthday,
+                customFieldType = FIELD_TYPE_DATE_SPINNER),
+        PERSON_FIELD_UID_ADDRESS to CustomField(customFieldLabelMessageID = MessageID.home_address,
+                customFieldType = FIELD_TYPE_TEXT),
+        PERSON_FIELD_UID_USERNAME to CustomField(customFieldLabelMessageID = MessageID.username,
+                customFieldType = FIELD_TYPE_TEXT),
+        PERSON_FIELD_UID_PHONE_NUMBER to CustomField(customFieldLabelMessageID =  MessageID.phone_number,
+                customFieldType = FIELD_TYPE_TEXT)
+    )
 }
 

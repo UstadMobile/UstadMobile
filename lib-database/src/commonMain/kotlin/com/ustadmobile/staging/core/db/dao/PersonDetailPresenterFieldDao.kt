@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -18,6 +19,9 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
 
     @Insert
     abstract override fun insert(entity: PersonDetailPresenterField): Long
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract fun insertListAbortConflicts(entityList: List<PersonDetailPresenterField>)
 
     @Query("SELECT * FROM PersonDetailPresenterField WHERE personDetailPresenterFieldUid = :uid")
     abstract fun findByUid(uid: Long): PersonDetailPresenterField?
@@ -51,6 +55,7 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
              LEFT JOIN CustomField ON PersonDetailPresenterField.fieldUid = CustomField.customFieldUid
              LEFT JOIN CustomFieldValue ON CustomFieldValue.customFieldValueEntityUid = :personUid AND CustomFieldValue.customFieldValueFieldUid = CustomField.customFieldUid
              LEFT JOIN CustomFieldValueOption ON CustomFieldValueOption.customFieldValueOptionFieldUid = CustomField.customFieldUid
+             ORDER BY PersonDetailPresenterField.fieldIndex
             """
     }
 

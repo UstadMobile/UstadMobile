@@ -91,8 +91,12 @@ class PersonDetailPresenterField(
         val PERSON_FIELD_UID_ADDRESS = 13
 
         val PERSON_FIELD_UID_USERNAME = 14
+
         val PERSON_FIELD_UID_PASSWORD = 15
+
         val PERSON_FIELD_UID_CONFIRM_PASSWORD = 16
+
+        val PERSON_FIELD_UID_PHONE_NUMBER = 17
 
         val TYPE_FIELD = 1
 

@@ -59,5 +59,7 @@ class CustomField(
         val FIELD_TYPE_TEXT = 5
 
         val FIELD_TYPE_DROPDOWN = 6
+
+        val FIELD_TYPE_DATE_SPINNER = 7
     }
 }

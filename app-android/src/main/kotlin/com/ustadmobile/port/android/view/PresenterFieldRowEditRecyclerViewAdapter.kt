@@ -6,6 +6,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.ItemPresenterFieldDateBinding
+import com.toughra.ustadmobile.databinding.ItemPresenterFieldRowHeaderBinding
 import com.toughra.ustadmobile.databinding.ItemPresenterFieldRowTextBinding
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
@@ -23,9 +26,30 @@ class PresenterFieldRowEditRecyclerViewAdapter : ListAdapter<PresenterFieldRow, 
             set(value) {
                 super.presenterFieldRow = value
                 binding.customFieldValue = presenterFieldRow?.customFieldValue
+                binding.customField = presenterFieldRow?.customField
             }
     }
 
+    class DateFieldRowViewHolder(var binding: ItemPresenterFieldDateBinding) : PresenterFieldRowViewHolder(binding.root) {
+        override var presenterFieldRow: PresenterFieldRow?
+            get() = super.presenterFieldRow
+            set(value) {
+                super.presenterFieldRow = value
+                binding.customField = presenterFieldRow?.customField
+                binding.customFieldValue = presenterFieldRow?.customFieldValue
+            }
+    }
+
+    class HeaderFieldRowViewHolder(var binding: ItemPresenterFieldRowHeaderBinding) : PresenterFieldRowViewHolder(binding.root) {
+        override var presenterFieldRow: PresenterFieldRow?
+            get() = super.presenterFieldRow
+            set(value) {
+                super.presenterFieldRow = value
+                binding.presenterField = presenterFieldRow?.presenterField
+            }
+    }
+
+    class UnsupportedFieldRowViewHolder(view: View): PresenterFieldRowViewHolder(view)
 
 
     override fun getItemViewType(position: Int): Int {
@@ -38,8 +62,13 @@ class PresenterFieldRowEditRecyclerViewAdapter : ListAdapter<PresenterFieldRow, 
         return when(viewType) {
             CustomField.FIELD_TYPE_TEXT -> TextFieldRowViewHolder(
                     ItemPresenterFieldRowTextBinding.inflate(inflater, parent, false))
-            //TODO make this return a text field or something - don't crash it all.
-            else -> throw IllegalStateException("Invalid view type!")
+            PersonDetailPresenterField.TYPE_HEADER -> HeaderFieldRowViewHolder(
+                    ItemPresenterFieldRowHeaderBinding.inflate(inflater, parent, false))
+            CustomField.FIELD_TYPE_DATE_SPINNER -> DateFieldRowViewHolder(
+                    ItemPresenterFieldDateBinding.inflate(inflater, parent, false))
+
+            else -> UnsupportedFieldRowViewHolder(
+                    inflater.inflate(R.layout.item_presenter_field_row_unsupported,parent, false))
         }
     }
 

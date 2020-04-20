@@ -61,11 +61,11 @@ class PersonEditPresenter(context: Any,
     override fun onLoadFromJson(bundle: Map<String, String>): Person? {
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: PersonWithDisplayDetails? = null
+        var editEntity: Person? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(PersonWithDisplayDetails.serializer(), entityJsonStr)
+            editEntity = Json.parse(Person.serializer(), entityJsonStr)
         }else {
-            editEntity = PersonWithDisplayDetails()
+            editEntity = Person()
         }
 
         return editEntity
