@@ -20,6 +20,7 @@ import com.toughra.ustadmobile.databinding.ItemSelquestionoptionBinding
 import com.ustadmobile.core.controller.SelQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.controller.UstadSingleEntityPresenter
+import com.ustadmobile.core.db.dao.SelQuestionDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeResult
@@ -68,45 +69,21 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
 
     private var mPresenter: SelQuestionAndOptionsEditPresenter? = null
 
-    
-    class EntityClassRecyclerAdapter(val activityEventHandler: SelQuestionAndOptionsEditActivityEventHandler,
-            var presenter: SelQuestionAndOptionsEditPresenter?)
-        : ListAdapter<SelQuestionOption,
-            EntityClassRecyclerAdapter.EntityClassViewHolder>(DIFF_CALLBACK_SEL_QUESTION_OPTION) {
-    
-            class EntityClassViewHolder(val binding: ItemSelquestionoptionBinding)
-                : RecyclerView.ViewHolder(binding.root)
-    
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntityClassViewHolder {
-                val viewHolder = EntityClassViewHolder(ItemSelquestionoptionBinding.inflate(
-                        LayoutInflater.from(parent.context), parent, false))
-                viewHolder.binding.mPresenter = presenter
-                viewHolder.binding.mActivityEventHandler = activityEventHandler
-                return viewHolder
-            }
+    override val mEditPresenter: UstadEditPresenter<*, SelQuestionAndOptions>?
+        get() = mPresenter
+
+    private var entityClassRecyclerAdapter: EntityClassRecyclerAdapter? = null
+
+    private var entityClassRecyclerView: RecyclerView? = null
+
+    private val entityClassObserver = Observer<List<SelQuestionOption>?> {
+        t -> entityClassRecyclerAdapter?.submitList(t)
+    }
+
+    override val viewContext: Any
+        get() = requireContext()
 
 
-            override fun onBindViewHolder(holder: EntityClassViewHolder, position: Int) {
-                val option = getItem(position)
-                holder.binding.selQuestionOption = option
-
-                var textWatcher = object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        presenter?.updateQuestionOptionTitle(option, s.toString())
-                    }
-
-                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                        //Nothing
-                    }
-
-                    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                        //Nothing
-                    }
-                }
-                holder.binding.itemSelQuestionOptionText.addTextChangedListener(textWatcher)
-            }
-        }
-    
     override var selQuestionOptionList: DoorLiveData<List<SelQuestionOption>>? = null
         get() = field
         set(value) {
@@ -114,66 +91,44 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
             field = value
             value?.observe(this, entityClassObserver)
         }
-    override var typeOptions: List<SelQuestionAndOptionsEditPresenter.OptionTypeMessageIdOption>? = null
-        get() = field
-        set(value) {
-            mBinding?.typeOptions = value
-            field = value
+
+    class EntityClassRecyclerAdapter(
+            val activityEventHandler: SelQuestionAndOptionsEditActivityEventHandler,
+            var presenter: SelQuestionAndOptionsEditPresenter?)
+        : ListAdapter<SelQuestionOption,
+            EntityClassRecyclerAdapter.EntityClassViewHolder>(DIFF_CALLBACK_SEL_QUESTION_OPTION) {
+
+        class EntityClassViewHolder(val binding: ItemSelquestionoptionBinding)
+            : RecyclerView.ViewHolder(binding.root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntityClassViewHolder {
+            val viewHolder = EntityClassViewHolder(ItemSelquestionoptionBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false))
+            viewHolder.binding.mPresenter = presenter
+            viewHolder.binding.mActivityEventHandler = activityEventHandler
+            return viewHolder
         }
 
-    private var entityClassRecyclerAdapter: EntityClassRecyclerAdapter? = null
-    
-    private var entityClassRecyclerView: RecyclerView? = null
-    
-    private val entityClassObserver = Observer<List<SelQuestionOption>?> {
-        t -> entityClassRecyclerAdapter?.submitList(t)
-    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView : View
-        mBinding = ActivitySelquestionandoptionsEditBinding.inflate(inflater, container, false)
-                .also{
-                    rootView = it.root
-                    it.activityEventHandler = this
+        override fun onBindViewHolder(holder: EntityClassViewHolder, position: Int) {
+            val option = getItem(position)
+            holder.binding.selQuestionOption = option
+
+            val textWatcher = object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    presenter?.updateQuestionOptionTitle(option, s.toString())
                 }
 
-        entityClassRecyclerView = rootView.findViewById(R.id.activity_selquestion_recycleradapter)
-        entityClassRecyclerAdapter = EntityClassRecyclerAdapter(this, null)
-        entityClassRecyclerView?.adapter = entityClassRecyclerAdapter
-        entityClassRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                    //Nothing
+                }
 
-        mPresenter = SelQuestionAndOptionsEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()))
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-
-        //After the presenter is created
-        entityClassRecyclerAdapter?.presenter = mPresenter
-
-        setEditFragmentTitle(R.string.question)
-
-        return rootView
-
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val navController = findNavController()
-
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                SelQuestionOption::class.java) {
-            val selQuestionOption = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditSelQuestionOption(selQuestionOption)
+                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                    //Nothing
+                }
+            }
+            holder.binding.itemSelQuestionOptionText.addTextChangedListener(textWatcher)
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putAll(mutableMapOf<String, String>().apply {
-            mPresenter?.onSaveInstanceState(this) }.toBundle())
     }
 
     override var entity: SelQuestionAndOptions? = null
@@ -198,6 +153,74 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
             mBinding?.loading = value
         }
 
+    override var typeOptions
+            : List<SelQuestionAndOptionsEditPresenter.OptionTypeMessageIdOption>? = null
+        get() = field
+        set(value) {
+            mBinding?.typeOptions = value
+            field = value
+        }
+
+    override fun onClickNewQuestionOption() {
+        mPresenter?.addNewBlankQuestionOption()
+    }
+
+    override fun updateQuestionOptionText(questionOption: SelQuestionOption) {
+        //TODO Check, resolved already?
+    }
+
+    override fun handleRemoveSelQuestionOption(questionOption: SelQuestionOption) {
+        //TODO
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        val rootView : View
+        mBinding = ActivitySelquestionandoptionsEditBinding.inflate(inflater, container,
+                false).also{
+                    rootView = it.root
+                    it.activityEventHandler = this
+                }
+
+        mBinding?.multichoicevalue = SelQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE
+
+        entityClassRecyclerView = rootView.findViewById(R.id.activity_selquestionandoptions_edit_rv)
+        entityClassRecyclerAdapter = EntityClassRecyclerAdapter(this, null)
+        entityClassRecyclerView?.adapter = entityClassRecyclerAdapter
+        entityClassRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
+        mPresenter = SelQuestionAndOptionsEditPresenter(requireContext(), arguments.toStringMap(),
+                this, this, UstadMobileSystemImpl.instance,
+                UmAccountManager.getActiveDatabase(requireContext()),
+                UmAccountManager.getRepositoryForActiveAccount(requireContext()))
+
+        //After the presenter is created
+        entityClassRecyclerAdapter?.presenter = mPresenter
+
+        setEditFragmentTitle(R.string.question)
+
+        return rootView
+
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val navController = findNavController()
+
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                SelQuestionOption::class.java) {
+            val selQuestionOption = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditSelQuestionOption(selQuestionOption)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setEditFragmentTitle(R.string.question)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null
@@ -221,20 +244,8 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
         }
     }
 
-    override fun onClickNewQuestionOption() {
-        mPresenter?.addNewBlankQuestionOption()
-        //TODO Check
-    }
 
-    override fun updateQuestionOptionText(questionOption: SelQuestionOption) {
-        //TODO
-    }
 
-    override fun handleRemoveSelQuestionOption(questionOption: SelQuestionOption) {
-        //TODO
-    }
 
-    override val mEditPresenter: UstadEditPresenter<*, SelQuestionAndOptions>?
-        get() = mPresenter
 
 }

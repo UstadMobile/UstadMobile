@@ -38,7 +38,7 @@ class SelQuestionSetEditPresenter(context: Any,
      * TODOne: Add any required one to many join helpers here - use these templates (type then hit tab)
      * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
      */
-    val selQuestionOneToManyJoinEditHelper =
+    private val selQuestionOneToManyJoinEditHelper =
             DefaultOneToManyJoinEditHelper<SelQuestionAndOptions>(
                     { it.selQuestion.selQuestionUid},
                     "state_SelQuestion_list", SelQuestionAndOptions.serializer().list,
@@ -60,7 +60,6 @@ class SelQuestionSetEditPresenter(context: Any,
         // code to onCreate to set the liveList on the view, e.g:
         view.selQuestionList = selQuestionOneToManyJoinEditHelper.liveList
 
-        //TODO: Set any additional fields (e.g. joinlist) on the view
     }
 
 
@@ -78,12 +77,12 @@ class SelQuestionSetEditPresenter(context: Any,
                             it.key?:SelQuestion(),
                             it.value.map { it.selQuestionOption?:SelQuestionOption() }) }
 
-         selQuestionOneToManyJoinEditHelper.liveList.sendValue(questionsWithOptionsList)
-
         // Load the list for any one to many join helper here
          val selQuestionSet = withTimeoutOrNull(2000) {
              db.selQuestionSetDao.findByUid(entityUid)
          } ?: SelQuestionSet()
+
+        selQuestionOneToManyJoinEditHelper.liveList.sendValue(questionsWithOptionsList)
          return selQuestionSet
     }
 
@@ -97,6 +96,8 @@ class SelQuestionSetEditPresenter(context: Any,
         }else {
             editEntity = SelQuestionSet()
         }
+
+        selQuestionOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
 
         return editEntity
     }
@@ -117,7 +118,6 @@ class SelQuestionSetEditPresenter(context: Any,
                 repo.selQuestionSetDao.updateAsync(entity)
             }
 
-           //TODO: Check. Persist list
             val eti : List<SelQuestionAndOptions> =
                     selQuestionOneToManyJoinEditHelper.entitiesToInsert
             eti.iterator().forEach {
@@ -173,9 +173,6 @@ class SelQuestionSetEditPresenter(context: Any,
     }
 
     companion object {
-
-        //TODO: Add constants for keys that would be used for any One To Many Join helpers
-
     }
 
 }

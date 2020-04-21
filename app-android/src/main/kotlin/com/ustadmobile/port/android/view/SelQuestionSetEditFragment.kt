@@ -65,26 +65,16 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
     override val mEditPresenter: UstadEditPresenter<*, SelQuestionSet>?
         get() = mPresenter
 
-    class SelQuestionRecyclerAdapter(val activityEventHandler: SelQuestionSetEditActivityEventHandler,
-            var presenter: SelQuestionSetEditPresenter?)
-        : ListAdapter<SelQuestionAndOptions,
-            SelQuestionRecyclerAdapter.SelQuestionViewHolder>(DIFF_CALLBACK_SELQUESTIONANDOPTIONS) {
+    private var selQuestionRecyclerAdapter: SelQuestionRecyclerAdapter? = null
 
-            class SelQuestionViewHolder(val binding: ItemSelquestionBinding)
-                : RecyclerView.ViewHolder(binding.root)
+    private var selQuestionRecyclerView: RecyclerView? = null
 
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelQuestionViewHolder {
-                val viewHolder = SelQuestionViewHolder(ItemSelquestionBinding.inflate(
-                        LayoutInflater.from(parent.context), parent, false))
-                viewHolder.binding.mPresenter = presenter
-                viewHolder.binding.mActivity = activityEventHandler
-                return viewHolder
-            }
+    private val selQuestionObserver = Observer<List<SelQuestionAndOptions>?> {
+        t -> selQuestionRecyclerAdapter?.submitList(t)
+    }
 
-            override fun onBindViewHolder(holder: SelQuestionViewHolder, position: Int) {
-                holder.binding.selQuestion = getItem(position)
-            }
-        }
+    override val viewContext: Any
+        get() = requireContext()
 
     override var selQuestionList: DoorLiveData<List<SelQuestionAndOptions>>? = null
         get() = field
@@ -94,17 +84,54 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
             value?.observe(this, selQuestionObserver)
         }
 
-    private var selQuestionRecyclerAdapter: SelQuestionRecyclerAdapter? = null
+    class SelQuestionRecyclerAdapter(
+            val activityEventHandler: SelQuestionSetEditActivityEventHandler,
+            var presenter: SelQuestionSetEditPresenter?)
+        : ListAdapter<SelQuestionAndOptions,
+            SelQuestionRecyclerAdapter.SelQuestionViewHolder>(DIFF_CALLBACK_SELQUESTIONANDOPTIONS) {
 
-    private var selQuestionRecyclerView: RecyclerView? = null
+        class SelQuestionViewHolder(val binding: ItemSelquestionBinding)
+            : RecyclerView.ViewHolder(binding.root)
 
-    private val selQuestionObserver = Observer<List<SelQuestionAndOptions>?> {
-        t -> selQuestionRecyclerAdapter?.submitList(t)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelQuestionViewHolder {
+            val viewHolder = SelQuestionViewHolder(ItemSelquestionBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false))
+            viewHolder.binding.mPresenter = presenter
+            viewHolder.binding.mActivity = activityEventHandler
+            return viewHolder
+        }
+
+        override fun onBindViewHolder(holder: SelQuestionViewHolder, position: Int) {
+            holder.binding.selQuestion = getItem(position)
+        }
     }
+
+    override var entity: SelQuestionSet? = null
+        get() = field
+        set(value) {
+            mBinding?.selquestionset = value
+            field = value
+        }
+
+    override var fieldsEnabled: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.fieldsEnabled = value
+        }
+
+    override var loading: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.loading = value
+        }
+
 
     override fun onClickEditSelQuestion(selQuestion: SelQuestionAndOptions?) {
         onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(selQuestion, R.id.selquestionandoptions_edit_dest, SelQuestionAndOptions::class.java)
+        navigateToEditEntity(selQuestion, R.id.selquestionandoptions_edit_dest,
+                SelQuestionAndOptions::class.java)
     }
 
     override fun onClickNewSelQuestion() =
@@ -117,7 +144,8 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
 
 
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView : View
         mBinding = ActivitySelquestionsetEditBinding.inflate(inflater, container, false)
                 .also{
@@ -130,11 +158,11 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
         selQuestionRecyclerView?.adapter = selQuestionRecyclerAdapter
         selQuestionRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-        mPresenter = SelQuestionSetEditPresenter(this, arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
+        mPresenter = SelQuestionSetEditPresenter(requireContext(), arguments.toStringMap(),
+                this, this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()))
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+        //mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         //After the presenter is created
         selQuestionRecyclerAdapter?.presenter = mPresenter
@@ -158,32 +186,12 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putAll(mutableMapOf<String, String>().apply {
-            mPresenter?.onSaveInstanceState(this) }.toBundle())
+    override fun onResume() {
+        super.onResume()
+        setEditFragmentTitle(R.string.sel_question_set)
     }
 
-    override var entity: SelQuestionSet? = null
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.selquestionset = value
-        }
 
-    override var fieldsEnabled: Boolean = false
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.fieldsEnabled = value
-        }
-
-    override var loading: Boolean = false
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.loading = value
-        }
 
     override fun onDestroyView() {
         super.onDestroyView()

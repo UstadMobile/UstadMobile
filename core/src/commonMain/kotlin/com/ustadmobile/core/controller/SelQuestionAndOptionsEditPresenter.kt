@@ -9,22 +9,18 @@ import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.SelQuestionAndOptionsEditView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.SelQuestion
 import com.ustadmobile.lib.db.entities.SelQuestionAndOptions
-
+import com.ustadmobile.lib.db.entities.SelQuestionOption
 import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.http.content.TextContent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.lib.db.entities.SelQuestion
-import com.ustadmobile.lib.db.entities.SelQuestionOption
 
 
 class SelQuestionAndOptionsEditPresenter(context: Any,
@@ -39,13 +35,9 @@ class SelQuestionAndOptionsEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
-    /*
-     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
-     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
-     */
-    val selQuestionOptionOneToManyJoinEditHelper =
+    private val selQuestionOptionOneToManyJoinEditHelper =
             DefaultOneToManyJoinEditHelper<SelQuestionOption>(SelQuestionOption::selQuestionOptionUid,
-            "state_EntityClass_list", SelQuestionOption.serializer().list,
+            "state_selquestionoption_list", SelQuestionOption.serializer().list,
             SelQuestionOption.serializer().list, this) { selQuestionOptionUid = it }
 
     fun handleAddOrEditSelQuestionOption(entityClass: SelQuestionOption) {
@@ -92,6 +84,8 @@ class SelQuestionAndOptionsEditPresenter(context: Any,
             editEntity = SelQuestionAndOptions(SelQuestion().apply { questionActive = true },
                     listOf())
         }
+
+        selQuestionOptionOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
 
         return editEntity
     }
