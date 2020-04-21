@@ -98,6 +98,10 @@ class PersonDetailPresenterField(
 
         val PERSON_FIELD_UID_PHONE_NUMBER = 17
 
+        val PERSON_FIELD_UID_GENDER = 18
+
+        val PERSON_FIELD_UID_EMAIL = 19
+
         val TYPE_FIELD = 1
 
         val TYPE_HEADER = 2

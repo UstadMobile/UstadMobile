@@ -25,6 +25,8 @@ class CustomFieldValue(
     //value as String
     var customFieldValueValue: String? = null,
 
+    var customFieldValueCustomFieldValueOptionUid: Long = 0,
+
     @MasterChangeSeqNum
     var customFieldValueMCSN: Long = 0,
 

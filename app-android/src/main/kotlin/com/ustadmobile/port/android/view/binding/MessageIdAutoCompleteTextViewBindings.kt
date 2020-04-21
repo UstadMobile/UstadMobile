@@ -6,28 +6,28 @@ import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.port.android.view.MessageIdAutocompleteTextView
-import com.ustadmobile.port.android.view.MessageIdSpinner
+import com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView
+import com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
 
 @BindingAdapter(value=["messageIdOptions", "selectedMessageIdOption"], requireAll =  false)
-fun MessageIdAutocompleteTextView.setMessageIdOptions(messageIdOptions: MutableList<MessageIdOption>?, selectedMessageIdOption: Int?) {
+fun MessageIdAutoCompleteTextView.setMessageIdOptions(messageIdOptions: MutableList<MessageIdOption>?, selectedMessageIdOption: Int?) {
     val sortOptionsToUse = messageIdOptions ?: mutableListOf()
-    if(sortOptionsToUse == this.messageIdOptions)
+    if(sortOptionsToUse == this.dropDownOptions)
         return
 
-    this.messageIdOptions = sortOptionsToUse
+    this.dropDownOptions = sortOptionsToUse
 
     if(selectedMessageIdOption != null)
-        this.selectedMessageIdOption = selectedMessageIdOption
+        this.selectedDropDownOptionId = selectedMessageIdOption.toLong()
 }
 
 @InverseBindingAdapter(attribute = "selectedMessageIdOption")
-fun MessageIdAutocompleteTextView.getSelectedMessageIdOption(): Int {
-    return this.selectedMessageIdOption
+fun MessageIdAutoCompleteTextView.getSelectedMessageIdOption(): Int {
+    return this.selectedDropDownOptionId.toInt()
 }
 
 @BindingAdapter("selectedMessageIdOptionAttrChanged")
-fun MessageIdAutocompleteTextView.setSelectedMessageIdListener(inverseBindingListener: InverseBindingListener) {
+fun MessageIdAutoCompleteTextView.setSelectedMessageIdListener(inverseBindingListener: InverseBindingListener) {
     onItemClickListener = object : AdapterView.OnItemClickListener {
         override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
             inverseBindingListener.onChange()
@@ -37,6 +37,6 @@ fun MessageIdAutocompleteTextView.setSelectedMessageIdListener(inverseBindingLis
 
 
 @BindingAdapter("onMessageIdOptionSelected")
-fun MessageIdAutocompleteTextView.setOnMessageIdOptionSelected(itemSelectedListener: MessageIdAutocompleteTextView.OnMessageIdOptionSelectedListener?) {
-    this.messageIdOptionSelectedListener = itemSelectedListener
+fun MessageIdAutoCompleteTextView.setOnMessageIdOptionSelected(itemSelectedListener: DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>?) {
+    this.onDropDownListItemSelectedListener = itemSelectedListener
 }

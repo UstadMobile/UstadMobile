@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPresenterFieldDateBinding
+import com.toughra.ustadmobile.databinding.ItemPresenterFieldRowDropDownBinding
 import com.toughra.ustadmobile.databinding.ItemPresenterFieldRowHeaderBinding
 import com.toughra.ustadmobile.databinding.ItemPresenterFieldRowTextBinding
 import com.ustadmobile.lib.db.entities.CustomField
@@ -49,6 +50,18 @@ class PresenterFieldRowEditRecyclerViewAdapter : ListAdapter<PresenterFieldRow, 
             }
     }
 
+    class DropdownFieldRowViewHolder(var binding: ItemPresenterFieldRowDropDownBinding) : PresenterFieldRowViewHolder(binding.root) {
+        override var presenterFieldRow: PresenterFieldRow?
+            get() = super.presenterFieldRow
+            set(value) {
+                super.presenterFieldRow = value
+                binding.customFieldValue = presenterFieldRow?.customFieldValue
+                binding.customFieldValueOptions = presenterFieldRow?.customFieldOptions
+                binding.customField = presenterFieldRow?.customField
+            }
+    }
+
+
     class UnsupportedFieldRowViewHolder(view: View): PresenterFieldRowViewHolder(view)
 
 
@@ -66,7 +79,8 @@ class PresenterFieldRowEditRecyclerViewAdapter : ListAdapter<PresenterFieldRow, 
                     ItemPresenterFieldRowHeaderBinding.inflate(inflater, parent, false))
             CustomField.FIELD_TYPE_DATE_SPINNER -> DateFieldRowViewHolder(
                     ItemPresenterFieldDateBinding.inflate(inflater, parent, false))
-
+            CustomField.FIELD_TYPE_DROPDOWN -> DropdownFieldRowViewHolder(
+                    ItemPresenterFieldRowDropDownBinding.inflate(inflater, parent, false))
             else -> UnsupportedFieldRowViewHolder(
                     inflater.inflate(R.layout.item_presenter_field_row_unsupported,parent, false))
         }

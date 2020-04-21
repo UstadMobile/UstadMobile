@@ -26,7 +26,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:dateLongString="@={customFieldValue.customFieldValueValue}"
+            app:dateLong="@={customFieldValue.customFieldValueCustomFieldValueOptionUid}"
             app:dateUseSpinners="@{true}"
             android:inputType="@{InputType.TYPE_NULL}"
             android:cursorVisible="false"
