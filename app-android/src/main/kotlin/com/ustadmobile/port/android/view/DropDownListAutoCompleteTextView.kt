@@ -170,11 +170,11 @@ open class DropDownListAutoCompleteTextView<T: Any>: androidx.appcompat.widget.A
     }
 
 
-
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         val selectedOption = mListBaseAdapter?.getItemTyped(position)
         if(selectedOption != null) {
             selectedItem = selectedOption
+            setText(dropDownListAdapter?.getText(selectedOption), false)
             onDropDownListItemSelectedListener?.onDropDownItemSelected(parent, selectedOption)
         }
 

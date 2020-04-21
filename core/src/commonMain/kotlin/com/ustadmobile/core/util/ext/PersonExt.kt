@@ -13,6 +13,48 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_LAST_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PHONE_NUMBER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_USERNAME
+import kotlin.reflect.KMutableProperty0
+
+class PersonPresenterFieldRowAdapter(val populateFn: (Person, PresenterFieldRow) -> Unit,
+    val updateFn: (Person, PresenterFieldRow) -> Unit)
+
+fun PresenterFieldRow.populateAsStringField(nameMessageId: Int, strValue: String?,
+        inputModeHint: Int = 0) {
+    customField = CustomField(customFieldLabelMessageID = nameMessageId,
+        customFieldType = FIELD_TYPE_TEXT)
+    customFieldValue = CustomFieldValue(customFieldValueValue = strValue)
+}
+
+fun PresenterFieldRow.populateAsDateField(nameMessageId: Int, dateValue: Long) {
+    customField = CustomField(customFieldLabelMessageID = nameMessageId,
+        customFieldType = FIELD_TYPE_DATE_SPINNER)
+    customFieldValue = CustomFieldValue(customFieldValueCustomFieldValueOptionUid = dateValue)
+}
+
+fun PresenterFieldRow.populateAsDropdown(nameMessageId: Int, currentValue: Int,
+                                         optionsList: List<Pair<Int, Int>>) {
+    customField = CustomField(customFieldLabelMessageID = nameMessageId,
+        customFieldType = FIELD_TYPE_DROPDOWN)
+    customFieldOptions = optionsList.map { CustomFieldValueOption().apply {
+        customFieldValueOptionMessageId =it.first
+        customFieldValueOptionUid = it.second.toLong()
+    } }
+    customFieldValue = CustomFieldValue(customFieldValueCustomFieldValueOptionUid = currentValue.toLong())
+}
+
+
+fun Person.updateStringFieldFromRow(property: KMutableProperty0<String?>, row: PresenterFieldRow?) {
+    property.set(row?.customFieldValue?.customFieldValueValue)
+    //setter(row?.customFieldValue?.customFieldValueValue)
+}
+
+fun Person.updateDateFieldFromRow(property:KMutableProperty0<Long>, row: PresenterFieldRow) {
+    property.set(row.customFieldValue?.customFieldValueCustomFieldValueOptionUid ?: 0L)
+}
+
+fun Person.updateIntFromDropDown(property: KMutableProperty0<Int>, row: PresenterFieldRow) {
+    property.set(row.customFieldValue?.customFieldValueCustomFieldValueOptionUid?.toInt() ?: 0)
+}
 
 /**
  * Get the CustomField and CustomFieldValue for a given field uid
@@ -20,37 +62,9 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
  */
 fun Person.populatePresenterFieldRow(presenterFieldRow: PresenterFieldRow): Boolean {
     val fieldUid = presenterFieldRow.presenterField?.fieldUid?.toInt() ?: return false
-    presenterFieldRow.customField = personCoreFieldsMap[fieldUid]
-
-    when(fieldUid) {
-        PERSON_FIELD_UID_FIRST_NAMES -> {
-            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueValue = firstNames)
-        }
-        PERSON_FIELD_UID_LAST_NAME -> {
-            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueValue = lastName)
-        }
-        PERSON_FIELD_UID_BIRTHDAY -> {
-            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueCustomFieldValueOptionUid = dateOfBirth)
-        }
-        PERSON_FIELD_UID_ADDRESS -> {
-            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueValue = personAddress)
-        }
-        PERSON_FIELD_UID_USERNAME -> {
-            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueValue = username)
-        }
-        PERSON_FIELD_UID_PHONE_NUMBER -> {
-            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueValue = phoneNum)
-        }
-        PERSON_FIELD_UID_GENDER -> {
-            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueCustomFieldValueOptionUid = gender.toLong())
-            presenterFieldRow.customFieldOptions = personGenderCustomFieldValueOptions
-        }
-        PERSON_FIELD_UID_EMAIL -> {
-            presenterFieldRow.customFieldValue = CustomFieldValue(customFieldValueValue = emailAddr)
-        }
-    }
-
-    return presenterFieldRow.customField != null
+    val adapter = ADAPTER_MAP[fieldUid] ?: return false
+    adapter.populateFn(this, presenterFieldRow)
+    return true
 }
 
 /**
@@ -81,16 +95,9 @@ fun Person.populatePresenterFields(presenterFields: List<PresenterFieldRow>): Li
  */
 fun Person.updateFromFieldList(presenterFields: List<PresenterFieldRow>) {
     presenterFields.filter { it.presenterField?.isCoreEntityField() ?: false}.forEach {
-        when(it.presenterField?.fieldUid?.toInt() ?: 0) {
-            PERSON_FIELD_UID_FIRST_NAMES -> this.firstNames = it.customFieldValue?.customFieldValueValue
-            PERSON_FIELD_UID_LAST_NAME -> this.lastName = it.customFieldValue?.customFieldValueValue
-            PERSON_FIELD_UID_BIRTHDAY -> this.dateOfBirth = it.customFieldValue?.customFieldValueCustomFieldValueOptionUid ?: 0L
-            PERSON_FIELD_UID_ADDRESS -> this.personAddress = it.customFieldValue?.customFieldValueValue
-            PERSON_FIELD_UID_PHONE_NUMBER -> this.phoneNum = it.customFieldValue?.customFieldValueValue
-            PERSON_FIELD_UID_USERNAME -> this.username = it.customFieldValue?.customFieldValueValue
-            PERSON_FIELD_UID_GENDER -> this.gender = it.customFieldValue?.customFieldValueCustomFieldValueOptionUid?.toInt() ?: 0
-            PERSON_FIELD_UID_EMAIL -> this.emailAddr = it.customFieldValue?.customFieldValueValue
-        }
+        val presenterFieldUid = it.presenterField?.fieldUid ?: return@forEach
+        val adapter = ADAPTER_MAP[presenterFieldUid.toInt()] ?: return@forEach
+        adapter.updateFn(this, it)
     }
 }
 
@@ -110,24 +117,33 @@ private val personGenderCustomFieldValueOptions = listOf(
     }
 )
 
-private val personCoreFieldsMap: Map<Int, CustomField> by lazy {
-    mapOf(
-        PERSON_FIELD_UID_FIRST_NAMES to CustomField(customFieldLabelMessageID = MessageID.first_names,
-            customFieldType = FIELD_TYPE_TEXT),
-        PERSON_FIELD_UID_LAST_NAME to CustomField(customFieldLabelMessageID =  MessageID.last_name,
-                customFieldType = FIELD_TYPE_TEXT),
-        PERSON_FIELD_UID_BIRTHDAY to CustomField(customFieldLabelMessageID = MessageID.birthday,
-                customFieldType = FIELD_TYPE_DATE_SPINNER),
-        PERSON_FIELD_UID_ADDRESS to CustomField(customFieldLabelMessageID = MessageID.home_address,
-                customFieldType = FIELD_TYPE_TEXT),
-        PERSON_FIELD_UID_USERNAME to CustomField(customFieldLabelMessageID = MessageID.username,
-                customFieldType = FIELD_TYPE_TEXT),
-        PERSON_FIELD_UID_PHONE_NUMBER to CustomField(customFieldLabelMessageID =  MessageID.phone_number,
-                customFieldType = FIELD_TYPE_TEXT),
-        PERSON_FIELD_UID_GENDER to CustomField(customFieldLabelMessageID = MessageID.gender_literal,
-                customFieldType = FIELD_TYPE_DROPDOWN),
-        PERSON_FIELD_UID_EMAIL to CustomField(customFieldLabelMessageID = MessageID.email,
-                customFieldType = FIELD_TYPE_TEXT)
-    )
-}
+val ADAPTER_MAP = mapOf(
+        PERSON_FIELD_UID_FIRST_NAMES to PersonPresenterFieldRowAdapter(
+                {person, row -> row.populateAsStringField(MessageID.first_names, person.firstNames)},
+                {person, row -> person.updateStringFieldFromRow(person::firstNames, row)}),
+        PERSON_FIELD_UID_LAST_NAME to PersonPresenterFieldRowAdapter(
+                {person, row -> row.populateAsStringField(MessageID.last_name, person.lastName)},
+                {person, row -> person.updateStringFieldFromRow(person::lastName, row)}),
+        PERSON_FIELD_UID_BIRTHDAY to PersonPresenterFieldRowAdapter(
+                {person, row -> row.populateAsDateField(MessageID.birthday, person.dateOfBirth)},
+                {person, row -> person.updateDateFieldFromRow(person::dateOfBirth, row)}),
+        PERSON_FIELD_UID_ADDRESS to PersonPresenterFieldRowAdapter(
+                {person, row -> row.populateAsStringField(MessageID.home_address, person.personAddress)},
+                {person, row -> person.updateStringFieldFromRow(person::personAddress, row)}),
+        PERSON_FIELD_UID_USERNAME to PersonPresenterFieldRowAdapter(
+                {person, row -> row.populateAsStringField(MessageID.username, person.username)},
+                {person, row -> person.updateStringFieldFromRow(person::username, row)}),
+        PERSON_FIELD_UID_PHONE_NUMBER to PersonPresenterFieldRowAdapter(
+                {person, row -> row.populateAsStringField(MessageID.phone_number, person.phoneNum)},
+                {person, row -> person.updateStringFieldFromRow(person::phoneNum, row)}),
+        PERSON_FIELD_UID_GENDER to PersonPresenterFieldRowAdapter(
+                {person, row -> row.populateAsDropdown(MessageID.gender_literal, person.gender,
+                    listOf(Pair(MessageID.male, Person.GENDER_MALE),
+                            Pair(MessageID.female, Person.GENDER_FEMALE)))},
+                {person, row -> person.updateIntFromDropDown(person::gender, row) }),
+        PERSON_FIELD_UID_EMAIL to PersonPresenterFieldRowAdapter(
+                {person, row -> row.populateAsStringField(MessageID.email, person.emailAddr)},
+                {person, row -> person.updateStringFieldFromRow(person::emailAddr, row)})
+)
+
 
