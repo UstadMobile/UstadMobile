@@ -2,7 +2,9 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.contentformats.har.HarExtra
+import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.KHAN_PROBLEM
 import com.ustadmobile.core.contentformats.har.HarRegexPair
+import com.ustadmobile.core.contentformats.har.Interceptors
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -64,7 +66,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         val jsonContent = getJsonContent(url)
 
-        val gson = GsonBuilder().disableHtmlEscaping().create()
+        val gson = GsonBuilder().disableHtmlEscaping().serializeNulls().create()
 
         var data: SubjectListResponse? = gson.fromJson(jsonContent, SubjectListResponse::class.java)
         if (data!!.componentProps == null) {
@@ -126,8 +128,10 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 HarRegexPair("last_seen_problem_sha=(.*)&", ""),
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attempt\\?)(.*)",
                         "https://www.khanacademy.org/attempt"),
-                   /*  HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attemptProblem\\?)(.*)",
-                             "https://www.khanacademy.org/attemptProblem"),*/
+                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/getAssessmentItem\\?)(.*)",
+                        "https://www.khanacademy.org/getAssessmentItem"),
+                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attemptProblem\\?)(.*)",
+                        "https://www.khanacademy.org/attemptProblem"),
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/Take-a-hint\\?)(.*)",
                         "https://www.khanacademy.org/take-a-hint"),
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/hint\\?)(.*)",
@@ -152,6 +156,8 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
                     entry.response.content.text = doc.html()
 
+                } else if (entry.request.url.contains("gvt1.com/edgedl/")) {
+                    entry.response = null
                 }
 
 
@@ -167,19 +173,25 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 }
 
 
-                val practiceEntry = it.har.log.entries.find { urlEntry -> urlEntry.request.url.contains("/task/practice/") /*|| urlEntry.request.url.contains("/getOrCreatePracticeTask")*/ }
+                val practiceEntry = it.har.log.entries.find { urlEntry -> urlEntry.request.url.contains("/task/practice/") || urlEntry.request.url.contains("/getOrCreatePracticeTask") }
                 if (practiceEntry != null) {
 
                     val practiceJson = gson.fromJson(realPractice, PracticeJson::class.java)
-                 //   val practiceTask = gson.fromJson(realPractice, PracticeTask::class.java)
+                    val practiceTask = gson.fromJson(realPractice, PracticeTask::class.java)
                     val reservedList = practiceJson.taskJson?.reservedItems
-                   //   ?: practiceTask.data?.getOrCreatePracticeTask?.result?.userTask?.task?.reservedItems
+                            ?: practiceTask.data?.getOrCreatePracticeTask?.result?.userTask?.task?.reservedItems
 
                     if (reservedList.isNullOrEmpty()) {
                         close()
                         hideContentEntry()
                         setScrapeDone(false, ERROR_TYPE_MISSING_QUESTIONS)
                         throw ScraperException(ERROR_TYPE_MISSING_QUESTIONS, "no questions found for exercise")
+                    }
+
+                    // since we have the 7 questions, we should remove the default one as it conflicts with the others
+                    val problemList = it.har.log.entries.filter { problemEntry -> problemEntry.request.url.contains("getAssessmentItem") }
+                    problemList.forEach{pEntry ->
+                        pEntry.response.content.text = null
                     }
 
                     reservedList.forEachIndexed { index, item ->
@@ -192,9 +204,28 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
                         val problemUrl = URL(url, "$secondExerciseUrl$slug/problems/${index + 1}$exercisePostUrl$lang")
 
+                        val assessmentItemUrl = URL(url, "/getAssessmentItem")
+
                         val itemData = IOUtils.toString(practiceUrl, ScraperConstants.UTF_ENCODING)
 
                         val itemResponse = gson.fromJson(itemData, ItemResponse::class.java)
+
+                        val assItem = Item()
+                        val data = Item.Data()
+                        val assignment = Item.Data.AssessmentItem()
+                        val dataItem = Item.Data.AssessmentItem.ItemData()
+                        dataItem.id = itemResponse.id
+                        dataItem.itemData = itemResponse.itemData
+                        dataItem.sha = itemResponse.sha
+                        dataItem.problemType = itemResponse.problemType
+                        dataItem.__typename = itemResponse.contentKind ?: itemResponse.kind
+                        assignment.item = dataItem
+                        assignment.__typename = "${itemResponse.contentKind
+                                ?: itemResponse.kind}OrError"
+                        data.assessmentItem = assignment
+                        assItem.data = data
+
+                        val assItemData = gson.toJson(assItem)
 
                         entries.add(addHarEntry(
                                 itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
@@ -203,6 +234,11 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                         entries.add(addHarEntry(
                                 itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
                                 requestUrl = practiceUrl.toString()))
+
+                        entries.add(addHarEntry(
+                                assItemData, mimeType = ScraperConstants.MIMETYPE_JSON,
+                                requestMethod = "POST",
+                                requestUrl = assessmentItemUrl.toString()))
 
                         val linkPattern = Pattern.compile("(https://|web\\+graphie://)([^\")]*)")
                         val matcher = linkPattern.matcher(itemResponse.itemData)
@@ -268,13 +304,12 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                         mimeType = ScraperConstants.MIMETYPE_JSON,
                         requestUrl = "https://www.khanacademy.org/attempt",
                         requestMethod = POST_METHOD))
-/*
+
                 entries.add(addHarEntry(
                         IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_PROBLEM_JSON_LINK), ScraperConstants.UTF_ENCODING),
                         mimeType = ScraperConstants.MIMETYPE_JSON,
                         requestUrl = "https://www.khanacademy.org/attemptProblem",
-                        requestMethod = POST_METHOD))*/
-
+                        requestMethod = POST_METHOD))
 
                 entries.add(addHarEntry(
                         IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.HINT_JSON_LINK), ScraperConstants.UTF_ENCODING),
@@ -301,6 +336,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                         IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.TRY_AGAIN_KHAN_LINK), ScraperConstants.UTF_ENCODING),
                         mimeType = ScraperConstants.MIMETYPE_SVG,
                         requestUrl = "https://cdn.kastatic.org/images/exercise-try-again.svg"))
+
 
                 entries.add(addHarEntry(
                         IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_KHAN_LINK), ScraperConstants.UTF_ENCODING),
@@ -375,6 +411,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             }
         }
         harExtra.links = linksList
+        harExtra.interceptors = listOf(Interceptors(KHAN_PROBLEM, ""))
 
         runBlocking {
             scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))

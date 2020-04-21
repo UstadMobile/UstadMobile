@@ -4,6 +4,8 @@ class ItemResponse {
 
     var contentId: String? = null
 
+    var problemType: String? = null
+
     var contentKind: String? = null
 
     var id: String? = null

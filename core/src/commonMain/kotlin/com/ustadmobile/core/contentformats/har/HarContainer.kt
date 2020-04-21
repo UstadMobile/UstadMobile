@@ -2,9 +2,11 @@ package com.ustadmobile.core.contentformats.har
 
 
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.interceptorMap
 import com.ustadmobile.core.io.RangeInputStream
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
@@ -16,6 +18,16 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
     private val linkPatterns = mutableMapOf<Regex, String>()
     var regexList: List<HarRegexPair>? = null
     var requestMap = mutableMapOf<Pair<String, String>, MutableList<HarEntry>>()
+    var interceptors: MutableMap<HarInterceptor, String?> = mutableMapOf()
+
+    val json = Json(JsonConfiguration(
+            encodeDefaults = true,
+            strictMode = false,
+            unquoted = false,
+            allowStructuredMapKeys = true,
+            prettyPrint = false,
+            useArrayPolymorphism = false
+    ))
 
     init {
 
@@ -26,23 +38,21 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
             throw Exception()
         }
 
-        val json = Json(JsonConfiguration(
-                encodeDefaults = true,
-                strictMode = false,
-                unquoted = false,
-                allowStructuredMapKeys = true,
-                prettyPrint = false,
-                useArrayPolymorphism = false
-        ))
-
         var harExtra = HarExtra()
         if (harExtraEntry != null) {
-            harExtra = json.parse(HarExtra.serializer(), UMIOUtils.readToString(containerManager.getInputStream(harExtraEntry)))
+            val data = UMIOUtils.readToString(containerManager.getInputStream(harExtraEntry))
+            harExtra = json.parse(HarExtra.serializer(), data)
         }
 
         regexList = harExtra.regexes
         harExtra.links?.forEach {
             linkPatterns[Regex(it.regex)] = it.replacement
+        }
+
+        interceptors[RecorderInterceptor()] = null
+        harExtra.interceptors?.forEach {
+            val key = interceptorMap[it.name] ?: return@forEach
+            interceptors[key] = it.jsonArgs
         }
 
 
@@ -52,86 +62,86 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
 
         entries.forEach {
 
-            val pair = Pair(it.request!!.method!!, it.request.url!!)
-            if(requestMap.containsKey(pair)){
-                val list = requestMap[pair]
-                list!!.add(it)
-            }else{
+            val requestMethod = it.request?.method ?: return@forEach
+            val requestUrl = it.request.method ?: return@forEach
+
+            val pair = Pair(requestMethod, requestUrl)
+            if (requestMap.containsKey(pair)) {
+                val list = requestMap.getValue(pair)
+                list.add(it)
+            } else {
                 requestMap[pair] = mutableListOf(it)
             }
         }
 
-        startingUrl = entries[0].request?.url ?: ""
+        startingUrl = entries[0].request?.url ?: "" // TODO throw error message for dialog
 
     }
 
 
     fun serve(request: HarRequest): HarResponse {
-        val url = request.url!!
-        print(url)
-        var regexedUrl = url
+        var regexedUrl = request.url ?: ""
         regexList?.forEach { itRegex ->
             regexedUrl = regexedUrl.replace(Regex(itRegex.regex), itRegex.replacement)
         }
 
+        request.url = regexedUrl
+
         checkWithPattern(regexedUrl)
 
-        val harList = requestMap[(Pair(request.method!!, regexedUrl))]
-
-        val harResponse = HarResponse()
-        val harContent = HarContent()
-
-        if (harList == null) {
-            harResponse.status = 401
-            harResponse.statusText = "OK"
-            harContent.mimeType = ""
-            harResponse.content = harContent
-
-            return harResponse
+        var response = getInitialResponse(request)
+        interceptors.forEach {
+            response = it.key.intercept(request, response, this, it.value)
         }
 
-        if(harList.size > 1){
-            println(regexedUrl)
+        return response
+    }
+
+    private fun getInitialResponse(request: HarRequest): HarResponse {
+        val harList = requestMap[(Pair(request.method, request.url))]
+
+        val defaultResponse = HarResponse()
+        val defaultHarContent = HarContent()
+
+        if (harList.isNullOrEmpty()) {
+            defaultResponse.status = 401
+            defaultResponse.statusText = "OK"
+            defaultHarContent.mimeType = ""
+            defaultResponse.content = defaultHarContent
+
+            return defaultResponse
         }
 
         val harEntry = harList[0]
 
-        val containerEntry = containerManager.getEntry(harEntry.response!!.content!!.text!!)
+        val harResponse = harEntry.response ?: defaultResponse
+        val harText = harResponse.content?.text
+        val containerEntry = containerManager.getEntry(harText ?: "")
 
-        if (containerEntry == null) {
+        val entryFile = containerEntry?.containerEntryFile
+        if (entryFile == null) {
             harResponse.status = 402
             harResponse.statusText = "Not Found"
 
-            harResponse.content = harContent
-
+            harResponse.content = defaultHarContent
             return harResponse
         }
 
-        val mutMap = mutableMapOf<String, String>()
-        mutMap.putAll(harEntry.response.headers.map { it.name to it.value }.toMap())
-        if (containerEntry.containerEntryFile!!.compression == ContainerEntryFile.COMPRESSION_GZIP) {
-            mutMap["Content-Encoding"] = "gzip"
-            mutMap["Content-Length"] = containerEntry.containerEntryFile!!.ceCompressedSize.toString()
-        }
-
-        if (!mutMap.containsKey("access-control-allow-origin")) {
-            mutMap["Access-Control-Allow-Origin"] = "*"
-        }
-        mutMap["Access-Control-Allow-Headers"] = "X-Requested-With"
-
-        harEntry.response.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
+        val mutMap = getHeaderMap(harResponse.headers, entryFile)
+        harResponse.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
 
         if (request.method == "OPTIONS") {
-            return harEntry.response
+            return harResponse
         }
 
         var data = containerManager.getInputStream(containerEntry)
 
-        harEntry.response.content!!.data = data
+        val harContent = harResponse.content ?: defaultHarContent
+        harContent.data = data
 
-        val rangeHeader: String? = mutMap["Range"] ?: return harEntry.response
+        val rangeHeader: String? = mutMap["Range"] ?: return harResponse
 
-        val totalLength = containerEntry.containerEntryFile!!.ceTotalSize
+        val totalLength = entryFile.ceTotalSize
         val isHEADRequest = request.method == "HEAD"
 
         val range = if (rangeHeader != null) {
@@ -146,18 +156,20 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
 
             range.responseHeaders.forEach { mutMap[it.key] = it.value }
 
-            harEntry.response.status = 206
+            harResponse.status = 206
             harResponse.statusText = "Partial Content"
-            harEntry.response.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
-            harEntry.response.content!!.data = if (isHEADRequest) null else data
+            harResponse.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
+            harContent.data = if (isHEADRequest) null else data
+            harResponse.content = harContent
 
-            return harEntry.response
+            return harResponse
 
         } else if (range?.statusCode == 416) {
 
-            harEntry.response.status = 416
+            harResponse.status = 416
             harResponse.statusText = if (isHEADRequest) "" else "Range request not satisfiable"
-            harEntry.response.content!!.data = null
+            harContent.data = null
+            harResponse.content = harContent
 
             return harResponse
         } else {
@@ -165,10 +177,26 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
             mutMap["Content-Length"] = totalLength.toString()
             mutMap["Connection"] = "close"
 
-            harEntry.response.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
+            harResponse.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
 
-            return harEntry.response
+            return harResponse
         }
+    }
+
+    fun getHeaderMap(harHeaders: List<HarNameValuePair>, containerEntryFile: ContainerEntryFile): MutableMap<String, String> {
+        val mutMap = mutableMapOf<String, String>()
+        mutMap.putAll(harHeaders.map { it.name to it.value }.toMap())
+        if (containerEntryFile.compression == ContainerEntryFile.COMPRESSION_GZIP) {
+            mutMap["Content-Encoding"] = "gzip"
+            mutMap["Content-Length"] = containerEntryFile.ceCompressedSize.toString()
+        }
+
+        if (!mutMap.containsKey("access-control-allow-origin")) {
+            mutMap["Access-Control-Allow-Origin"] = "*"
+        }
+        mutMap["Access-Control-Allow-Headers"] = "X-Requested-With"
+
+        return mutMap
     }
 
     fun checkWithPattern(requestUrl: String) {

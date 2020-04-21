@@ -54,8 +54,6 @@ object ScraperTypes {
 
     const val DDL_ARTICLE_SCRAPER = "ddlArticleScraper"
 
-    const val HAB_YOUTUBE_SCRAPER = "habVideoScraper"
-
     const val KHAN_LITE_VIDEO_SCRAPER = "khanLiteVideoScraper"
 
     const val KHAN_FULL_VIDEO_SCRAPER = "khanFullVideoScraper"
@@ -63,8 +61,6 @@ object ScraperTypes {
     const val KHAN_FULL_EXERCISE_SCRAPER = "khanFullExerciseScraper"
 
     const val KHAN_FULL_ARTICLE_SCRAPER = "khanFullArticleScraper"
-
-    const val KHAN_YOUTUBE_SCRAPER = "khanYoutubeScraper"
 
     const val YOUTUBE_VIDEO_SCRAPER = "youtubeVideoScraper"
 

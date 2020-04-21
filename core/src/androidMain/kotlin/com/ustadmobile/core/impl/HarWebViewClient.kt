@@ -1,19 +1,13 @@
 package com.ustadmobile.core.impl
 
 import android.annotation.TargetApi
-import android.graphics.Bitmap
-import android.net.http.SslError
 import android.os.Build
-import android.os.Message
-import android.view.KeyEvent
 import android.webkit.*
 import androidx.annotation.RequiresApi
 import com.ustadmobile.core.contentformats.har.HarContainer
 import com.ustadmobile.core.contentformats.har.HarNameValuePair
 import com.ustadmobile.core.contentformats.har.HarRequest
 import com.ustadmobile.core.contentformats.har.HarResponse
-import com.ustadmobile.core.util.UMIOUtils
-import org.jsoup.Jsoup
 
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -51,16 +45,14 @@ class HarWebViewClient(private val harContainer: HarContainer) : WebViewClient()
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-        val payload = recorder?.getPayload(request.method, request.url.toString())
-        val response = harContainer.serve(request.toHarRequest(payload))
-        val webResponse = response.toWebResourceResponse()
-        if(webResponse.mimeType.startsWith("text/html")){
-            val data = UMIOUtils.readStreamToString(webResponse.data)
-            val document = Jsoup.parse(data)
-            document.head().prepend(jsInject)
-            webResponse.data = document.toString().byteInputStream()
+        var payload = recorder?.getPayload(request.method, request.url.toString())
+        if(request.requestHeaders.containsKey("content-type")){
+            while(payload == null){
+                payload = recorder?.getPayload(request.method, request.url.toString())
+            }
         }
-        return webResponse
+        val response = harContainer.serve(request.toHarRequest(payload))
+        return response.toWebResourceResponse()
     }
 
     override fun doUpdateVisitedHistory(view: WebView?, url: String, isReload: Boolean) {
@@ -74,28 +66,7 @@ class HarWebViewClient(private val harContainer: HarContainer) : WebViewClient()
 
 }
 
-val worker = """
-    
-     const constantMock = window.fetch;
-        window.fetch = function() {
-            // Get the parameter in arguments
-            // Intercept the parameter here
-            
-             if(arguments.length > 0){
-                 var request = arguments[0].clone()
-                console.log(request.bodyUsed)
-                if (request.method !== 'GET' && request.method !== 'HEAD') { 
-                    request.text().then(function(body) {
-                            recorder.recordPayload(request.method, request.url, body);
-                    });
-                }
-            }
 
-            return constantMock.apply(this, arguments);
-        };
-"""
-
-val jsInject = "<script type=\"text/javascript\">$worker</script>"
 
 class PayloadRecorder {
 

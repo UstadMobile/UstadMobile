@@ -53,14 +53,21 @@ abstract class HarPresenterCommon(context: Any, arguments: Map<String, String?>,
                 })
             }
 
+            try {
+                val result = appRepo.containerDao.findByUidAsync(containerUid)!!
+                val containerManager = ContainerManager(result, UmAccountManager.getRepositoryForActiveAccount(context), appRepo)
+                harContainer = HarContainer(containerManager) {
+                    handleUrlLinkToContentEntry(it)
+                }
+                containerDeferred.complete(harContainer)
+                view.loadUrl(harContainer.startingUrl)
 
-            val result = appRepo.containerDao.findByUidAsync(containerUid)!!
-            val containerManager = ContainerManager(result, UmAccountManager.getRepositoryForActiveAccount(context), appRepo)
-            harContainer = HarContainer(containerManager){
-                handleUrlLinkToContentEntry(it)
+            }catch (e: Exception) {
+                view.runOnUiThread(Runnable {
+                    view.showError(UstadMobileSystemImpl.instance
+                            .getString(MessageID.error_opening_file, context))
+                })
             }
-            containerDeferred.complete(harContainer)
-            view.loadUrl(harContainer.startingUrl)
         }
     }
 

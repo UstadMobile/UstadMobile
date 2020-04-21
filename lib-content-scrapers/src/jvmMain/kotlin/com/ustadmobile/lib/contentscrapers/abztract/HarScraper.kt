@@ -129,7 +129,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
         val containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerDir.absolutePath)
 
-        entries.forEach {
+        entries.forEachIndexed { counter, it ->
 
             try {
 
@@ -137,11 +137,11 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
                 if (request.url.contains("accounts.google.com")) {
                     entries.remove(it)
-                    return@forEach
+                    return@forEachIndexed
                 }
 
                 val decodedUrl = URL(request.url)
-                val containerPath = request.url
+                var containerPath = request.url
 
                 // to remove timestamps from queries
                 var regexedString = decodedUrl.toString()
@@ -157,10 +157,14 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 }
 
                 if (it.response == null) {
-                    return@forEach
+                    return@forEachIndexed
                 }
 
                 runBlocking {
+
+                    if(containerManager.getEntry(containerPath) == null) {
+                        containerPath += counter
+                    }
                     containerManager.addEntries(HarEntrySource(it, listOf(containerPath)))
                 }
 
