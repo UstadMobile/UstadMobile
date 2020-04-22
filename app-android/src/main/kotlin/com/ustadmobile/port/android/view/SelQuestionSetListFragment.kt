@@ -36,8 +36,6 @@ class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet,
     class SelQuestionSetListRecyclerAdapter(var presenter: SelQuestionSetListPresenter?)
         : SelectablePagedListAdapter<SELQuestionSetWithNumQuestions, SelQuestionSetListViewHolder>(DIFF_CALLBACK) {
 
-
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
                 : SelQuestionSetListViewHolder {
             val itemBinding = ItemSelquestionsetListItemBinding.inflate(

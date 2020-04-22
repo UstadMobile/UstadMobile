@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Role
 
 
 interface RoleEditView: UstadEditView<Role> {
 
-    var permissionList : DoorLiveData<List<Role.BitmaskFlag>>
+    var permissionList : DoorLiveData<List<BitmaskFlag>>?
 
     companion object {
 

@@ -11,7 +11,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemRoleListItemBinding
 import com.ustadmobile.core.controller.RoleListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -20,6 +19,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RoleListView
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
+import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
@@ -38,18 +38,13 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
     class RoleListRecyclerAdapter(var presenter: RoleListPresenter?)
         : SelectablePagedListAdapter<Role, RoleListViewHolder>(DIFF_CALLBACK) {
 
-
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
                 : RoleListViewHolder {
 
             val itemBinding = ItemRoleListItemBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
-
             return RoleListViewHolder(itemBinding)
-
-
         }
 
         override fun onBindViewHolder(holder: RoleListViewHolder, position: Int) {
@@ -76,8 +71,9 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        val createNewText = requireContext().getString(R.string.create_new,
-                requireContext().getString(R.string.role))
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+                requireContext().getString(R.string.create_new,
+                        requireContext().getString(R.string.role)))
         mDataRecyclerViewAdapter = RoleListRecyclerAdapter(mPresenter)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view

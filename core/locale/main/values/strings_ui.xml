@@ -831,4 +831,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="items_selected">%1$d selected</string>
 
+    <string name="permission_clazz_assignment_view">View class assignments</string>
+    <string name="permission_clazz_asignment_edit">Create and edit class assignments</string>
+
 </resources>

@@ -24,12 +24,9 @@ import com.ustadmobile.core.db.dao.SelQuestionDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SelQuestionAndOptionsEditView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.SelQuestion
 import com.ustadmobile.lib.db.entities.SelQuestionAndOptions
 import com.ustadmobile.lib.db.entities.SelQuestionOption
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -49,7 +46,6 @@ fun ComponentActivity.prepareSelQuestionAndOptionsEditCall(
 fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<SelQuestionAndOptions>>
         .launchSelQuestionAndOptionsEdit(schedule: SelQuestionAndOptions?,
                                          extraArgs: Map<String, String> = mapOf()) {
-    //TODOne: Set PersistenceMode to JSON or DB here
     launch(CrudEditActivityResultContract.CrudEditInput(schedule,
             UstadSingleEntityPresenter.PersistenceMode.JSON, extraArgs))
 }

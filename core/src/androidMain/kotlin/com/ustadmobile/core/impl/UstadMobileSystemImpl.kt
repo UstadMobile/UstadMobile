@@ -52,7 +52,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
-import com.ustadmobile.staging.core.view.SELQuestionEditView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.InputStream
@@ -132,7 +131,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SELSelectConsentView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELSelectConsentActivity"),
             SELEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELEditActivity"),
             SELQuestionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionActivity"),
-            SELQuestionEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionEditActivity"),
             SELRecognitionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELRecognitionActivity"),
             ClazzActivityEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzActivityEditActivity"),
             AddActivityChangeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddActivityChangeDialogFragment"),
@@ -146,11 +144,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ReportNumberOfDaysClassesOpenView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportNumberOfDaysClassesOpenActivity"),
             ReportAttendanceGroupedByThresholdsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportAttendanceGroupedByThresholdsActivity"),
             BulkUploadMasterView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}BulkUploadMasterActivity"),
-            SELQuestionSetsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetsActivity"),
             AddQuestionSetDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddQuestionSetDialogFragment"),
-            SELQuestionSetDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetDetailActivity"),
             PersonPictureDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonPictureDialogFragment"),
-            SELQuestionDetail2View.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionDetail2Activity"),
             AddQuestionOptionDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddQuestionOptionDialogFragment"),
             ReportAtRiskStudentsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportAtRiskStudentsActivity"),
             CallPersonRelatedDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CallPersonRelatedDialogFragment"),
@@ -158,7 +153,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ReportSELView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSELActivity"),
             PersonListSearchView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonListSearchActivity"),
             BaseReportView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSelectionFragment"),
-            RoleDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleDetailActivity"),
             GroupListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupListActivity"),
             GroupDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupDetailActivity"),
             RoleAssignmentDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleAssignmentDetailActivity"),
@@ -183,9 +177,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ClazzAssignmentDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentDetailActivity"),
             SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"),
             PersonGroupListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupListActivity"),
-            PersonGroupEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupEditActivity"),
-            RoleListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}RoleListActivity"),
-            RoleEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}RoleEditActivity")
+            PersonGroupEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupEditActivity")
     )
 
 

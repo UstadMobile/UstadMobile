@@ -14,9 +14,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 class Role() {
 
-    data class BitmaskFlag(val flagVal : Int, val messageId: Int,
-                           val enabled: Boolean)
-
     @PrimaryKey(autoGenerate = true)
     var roleUid: Long = 0
 

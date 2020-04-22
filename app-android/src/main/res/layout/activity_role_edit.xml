@@ -18,9 +18,6 @@
             name="fieldsEnabled"
             type="boolean" />
 
-        <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.RoleEditActivityEventHandler" />
 
     </data>
 
@@ -28,36 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/activity_role_edit_cl"
-        tools:context="com.ustadmobile.port.android.view.RoleEditActivity">
-
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/activity_role_edit_appbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/activity_role_edit_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?android:attr/actionBarSize"
-                android:background="@color/primary"
-                app:layout_scrollFlags="noScroll" />
-
-            <ProgressBar
-                android:visibility="@{loading ? View.VISIBLE : View.GONE}"
-                android:indeterminate="true"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:id="@+id/activity_role_edit_progressbar"
-                android:layout_height="@dimen/dimen_4dp"
-                app:layout_scrollFlags="noScroll"
-                />
-
-        </com.google.android.material.appbar.AppBarLayout>
-
+        tools:context="com.ustadmobile.port.android.view.RoleEditFragment">
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/activity_role_edit_scroll"
@@ -72,12 +40,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/role_edit_permission_role_name_til"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/form_margin_horizontal"
+                    android:hint="@string/question_text"
+                    app:hintEnabled="true"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <!-- TODO: Put the actual view for editing Role here using two-way data binding -->
-                <!-- Available templates:
-                onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-                -->
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@={role.roleName}" />
 
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/role_edit_permission_bitmask_edit_rv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="16dp"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/role_edit_permission_role_name_til" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.core.widget.NestedScrollView>

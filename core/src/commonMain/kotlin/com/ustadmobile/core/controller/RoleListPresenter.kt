@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.RoleEditView
@@ -12,14 +13,16 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.serialization.list
 
 class RoleListPresenter(context: Any, arguments: Map<String, String>, view: RoleListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
+                        lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
+                        db: UmAppDatabase, repo: UmAppDatabase,
+                        activeAccount: DoorLiveData<UmAccount?>)
     : UstadListPresenter<RoleListView, Role>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
-
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
@@ -44,8 +47,6 @@ class RoleListPresenter(context: Any, arguments: Map<String, String>, view: Role
     }
 
     private fun updateListOnView() {
-        /* TODOne: Update the list on the view from the appropriate DAO query, e.g.
-        */
         view.list = when(currentSortOrder) {
             SortOrder.ORDER_NAME_ASC -> repo.roleDao.findAllActiveRoles()
             SortOrder.ORDER_NAME_DSC -> repo.roleDao.findAllActiveRoles()
@@ -53,20 +54,14 @@ class RoleListPresenter(context: Any, arguments: Map<String, String>, view: Role
     }
 
     override fun handleClickEntry(entry: Role) {
-        // TODOne: Add code to go to the appropriate detail view or make a selection
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> systemImpl.go(RoleEditView.VIEW_NAME,
                 mapOf(UstadView.ARG_ENTITY_UID to entry.roleUid.toString()), context)
         }
-
     }
 
     override fun handleClickCreateNewFab() {
-        /* TODOne: Add code to go to the edit view when the user clicks the new item FAB. This is only
-         * called when the fab is clicked, not if the first item is create new item (e.g. picker mode).
-         * That has to be handled at a platform level to use prepareCall etc.
-         */
         systemImpl.go(RoleEditView.VIEW_NAME, mapOf(), context)
     }
 
@@ -75,6 +70,13 @@ class RoleListPresenter(context: Any, arguments: Map<String, String>, view: Role
         if(sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder
             updateListOnView()
+        }
+    }
+
+    fun handleRemoveRole(role:Role){
+        GlobalScope.launch {
+            role.roleActive = false
+            repo.roleDao.updateAsync(role)
         }
     }
 }
