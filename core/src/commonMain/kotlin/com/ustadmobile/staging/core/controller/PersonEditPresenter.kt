@@ -1,6 +1,7 @@
-package com.ustadmobile.core.controller
+package com.ustadmobile.staging.core.controller
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
@@ -9,9 +10,12 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.observeWithPresenter
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ClazzDetailEnrollStudentView
 import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.view.PersonDetailEnrollClazzView
+import com.ustadmobile.core.view.PersonDetailViewField
+import com.ustadmobile.core.view.RoleAssignmentDetailView
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ADDRESS
@@ -50,6 +54,8 @@ import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_ROLE_
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_HEADING_USERNAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
 import com.ustadmobile.lib.util.encryptPassword
+import com.ustadmobile.staging.core.view.PersonDetailView
+import com.ustadmobile.staging.core.view.PersonEditView
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
@@ -78,7 +84,7 @@ class PersonEditPresenter
  */
 (context: Any, arguments: Map<String, String>?, view: PersonEditView,
  val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
-    :UstadBaseController<PersonEditView>(context, arguments!!, view) {
+    : UstadBaseController<PersonEditView>(context, arguments!!, view) {
 
     private var personLiveData: DoorLiveData<Person?>? = null
 

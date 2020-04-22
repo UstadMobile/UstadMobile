@@ -21,7 +21,8 @@ class ViewNameToDestMap: DestinationProvider {
             SelQuestionSetEditView.VIEW_NAME to UstadDestination(R.id.selquestionset_edit_dest, false),
             SelQuestionAndOptionsEditView.VIEW_NAME to UstadDestination(R.id.selquestionandoptions_edit_dest, false),
             RoleListView.VIEW_NAME to UstadDestination(R.id.role_list_dest, false),
-            RoleEditView.VIEW_NAME to UstadDestination(R.id.role_edit_dest, false)
+            RoleEditView.VIEW_NAME to UstadDestination(R.id.role_edit_dest, false),
+            PersonEditView.VIEW_NAME to UstadDestination(R.id.person_edit_dest, false)
     )
 
     override val navControllerViewId: Int

@@ -12,7 +12,7 @@ import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_ATTENDANCE_
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_NAME_ASC
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_NAME_DESC
 import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Person

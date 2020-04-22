@@ -221,10 +221,11 @@ task newFromTemplate(type: Copy) {
     def templateName = project.hasProperty("Template") ? project.property("Template") : "editscreen"
 
     replacementTokens["Entity"] = project.hasProperty("Entity") ? project.property("Entity") : "Entity"
-    replacementTokens["Entity_SnakeCase"] = replacementTokens["Entity"].replaceAll("([^_A-Z])([A-Z])", '$1_$2')
-    replacementTokens["DisplayEntity"] = project.hasProperty("DisplayEntity") ? project.properties["DisplayEntity"] : replacementTokens["Entity"]
+    replacementTokens["Entity_SnakeCase"] = replacementTokens["Entity"].replaceAll("([^_A-Z])([A-Z])", '$1_$2').toLowerCase()
+    replacementTokens["DisplayEntity"] = project.hasProperty("DisplayEntity") ? project.property("DisplayEntity") : replacementTokens["Entity"]
+    replacementTokens["DisplayEntity_Import"] = replacementTokens["DisplayEntity"] != replacementTokens["Entity"] ? "import com.ustadmobile.lib.db.entities." + replacementTokens['DisplayEntity'] : ""
     replacementTokens["EditEntity"] = project.hasProperty("EditEntity") ? project.properties["EditEntity"] : replacementTokens["Entity"]
-    replacementTokens["EditEntity_Import"] = replacementTokens["EditEntity"] != replacementTokens["Entity"] ? "import ${replacementTokens['EditEntity']}" : ""
+    replacementTokens["EditEntity_Import"] = replacementTokens["EditEntity"] != replacementTokens["Entity"] ? "import com.ustadmobile.lib.db.entities." + replacementTokens['EditEntity'] : ""
     replacementTokens["Entity_VariableName"] = replacementTokens["Entity"].substring(0, 1).toLowerCase() + replacementTokens["Entity"].substring(1)
     replacementTokens["DisplayEntity_VariableName"] = replacementTokens["DisplayEntity"].substring(0, 1).toLowerCase() + replacementTokens["DisplayEntity"].substring(1)
     replacementTokens["Entity_LowerCase"] = replacementTokens["Entity"].toLowerCase()
@@ -236,6 +237,7 @@ task newFromTemplate(type: Copy) {
     into project.rootDir
     rename('@Entity@', replacementTokens["Entity"])
     rename('@Entity_LowerCase@', replacementTokens["Entity_LowerCase"])
+    rename('@Entity_SnakeCase@', replacementTokens["Entity_SnakeCase"])
 
     eachFile {
         if(it.relativePath.getFile(project.rootDir).exists()) {

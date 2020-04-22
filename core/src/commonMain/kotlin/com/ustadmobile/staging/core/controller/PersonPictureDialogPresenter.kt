@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.PersonPictureDialogView
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope

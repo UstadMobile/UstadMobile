@@ -1,15 +1,16 @@
-package com.ustadmobile.core.controller
+package com.ustadmobile.staging.core.controller
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.observeWithPresenter
-import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonAuthDetailView.Companion.ARG_PERSONAUTH_PERSONUID
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.view.PersonDetailViewField
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_IMAGE_PATH
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_ADDRESS
@@ -28,6 +29,7 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_USERNAME
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
 import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_TEXT
+import com.ustadmobile.staging.core.view.PersonDetailView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -127,7 +129,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
      */
     private fun getAllPersonCustomFields() {
         //0. Clear all added custom fields on view.
-        view.runOnUiThread(Runnable{ view.clearAllCustomFields() })
+        //view.runOnUiThread(Runnable{ view.clearAllCustomFields() })
 
         //1. Get all custom fields
         GlobalScope.launch {
@@ -151,7 +153,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                             finalValueString[0] = "-"
                         }
                         //view.addCustomFieldText(c, finalValueString);
-                        view.addComponent(finalValueString[0], c.customFieldName!!)
+                        //view.addComponent(finalValueString[0], c.customFieldName!!)
                     })
 
                 } else if (c.customFieldType == CustomField.FIELD_TYPE_DROPDOWN) {
@@ -177,7 +179,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                     }
                     val finalValueString = valueString
                     view.runOnUiThread(Runnable{
-                        view.addComponent(finalValueString, c.customFieldName!!)
+                      //  view.addComponent(finalValueString, c.customFieldName!!)
 
                     })
                 }
@@ -257,7 +259,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
 
             //Update person and generate feeds for person
             val result = personDao.updatePersonAsync(currentPerson!!, loggedInPersonUid)
-            PersonEditPresenter.generateFeedsForPersonUpdate(repository, database, currentPerson!!)
+            //PersonEditPresenter.generateFeedsForPersonUpdate(repository, database, currentPerson!!)
 
             view.updateImageOnView(personPictureDao.getAttachmentPath(existingPP)!!)
         }
@@ -596,7 +598,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         //view.finish()
         val args = HashMap<String, String>()
         args.put(ARG_PERSON_UID, personUid.toString())
-        impl.go(PersonEditView.VIEW_NAME, args, view.viewContext)
+        //impl.go(PersonEditView.VIEW_NAME, args, view.viewContext)
     }
 
     /**
@@ -627,7 +629,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         val args = HashMap<String, String>()
         args.put(ARG_PERSON_IMAGE_PATH, imagePath)
         args.put(ARG_PERSON_UID, personUid.toString())
-        impl.go(PersonPictureDialogView.VIEW_NAME, args, context)
+        //impl.go(PersonPictureDialogView.VIEW_NAME, args, context)
     }
 
     /**
@@ -639,14 +641,14 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
         val args = HashMap<String, String>()
         args.put(ARG_PERSON_UID, personUid.toString())
 
-        impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context)
+        //impl.go(PersonDetailEnrollClazzView.VIEW_NAME, args, context)
     }
 
     fun handleClickRecordDropout() {
         val args = HashMap<String, String>()
         args.put(ARG_PERSON_UID, personUid.toString())
 
-        impl.go(RecordDropoutDialogView.VIEW_NAME, args, context)
+        //impl.go(RecordDropoutDialogView.VIEW_NAME, args, context)
     }
 
     /**
@@ -671,6 +673,6 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
     fun goToUpdateUsernamePassword() {
         val args = HashMap<String, String>()
         args.put(ARG_PERSONAUTH_PERSONUID, currentPerson!!.personUid.toString())
-        impl.go(PersonAuthDetailView.VIEW_NAME, args, context)
+        //impl.go(PersonAuthDetailView.VIEW_NAME, args, context)
     }
 }

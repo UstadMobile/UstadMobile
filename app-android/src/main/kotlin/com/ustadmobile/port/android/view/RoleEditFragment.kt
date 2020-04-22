@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +24,6 @@ import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RoleEditView
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
@@ -42,7 +42,7 @@ fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<Role>>
 }
 
 
-class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView, Observer<List<BitmaskFlag>?> {
+class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
 
     private var mBinding: ActivityRoleEditBinding? = null
 
@@ -63,25 +63,30 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView, Observer<List<
 
         }
 
-    override var permissionList: DoorLiveData<List<BitmaskFlag>>? = null
+    override var permissionList: LiveData<List<BitmaskFlag>>? = null
         get() = field
         set(value) {
-            field?.removeObserver(this)
+            field?.removeObserver(roleObserver)
             field = value
-            value?.observe(this, this)
+            value?.observe(this, roleObserver)
         }
 
-    override fun onChanged(t: List<BitmaskFlag>?) {
-        mRecyclerViewAdapter?.submitList(t)
+    private val roleObserver = Observer<List<BitmaskFlag>?>{
+        t -> mRecyclerViewAdapter?.submitList(t)
     }
 
-    class BitmaskViewHolder(val itemBinding: ItemBitmaskBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-    class BitmaskRecyclerViewAdapter: ListAdapter<BitmaskFlag, BitmaskViewHolder>(DIFFUTIL_BITMASKFLAG) {
+    class BitmaskViewHolder(val itemBinding: ItemBitmaskBinding)
+        : RecyclerView.ViewHolder(itemBinding.root)
+
+    class BitmaskRecyclerViewAdapter()
+        : ListAdapter<BitmaskFlag, BitmaskViewHolder>(DIFFUTIL_BITMASKFLAG) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BitmaskViewHolder {
-            return BitmaskViewHolder(ItemBitmaskBinding.inflate(LayoutInflater.from(parent.context),
+            val viewHolder =  BitmaskViewHolder(ItemBitmaskBinding.inflate(
+                    LayoutInflater.from(parent.context),
                     parent, false))
+            return viewHolder
         }
 
         override fun onBindViewHolder(holder: BitmaskViewHolder, position: Int) {
@@ -97,14 +102,12 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView, Observer<List<
             mRecyclerView = it.roleEditPermissionBitmaskEditRv
         }
 
-        //mBinding?.role = entity
-
         mPresenter = RoleEditPresenter(requireContext(), arguments.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+        //mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         mRecyclerViewAdapter = BitmaskRecyclerViewAdapter()
         mRecyclerView?.adapter = mRecyclerViewAdapter
@@ -118,7 +121,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView, Observer<List<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
     }
 
@@ -145,7 +148,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView, Observer<List<
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.new_role)
+        setEditFragmentTitle(R.string.role)
     }
 
 
@@ -157,7 +160,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView, Observer<List<
             }
 
             override fun areContentsTheSame(oldItem: BitmaskFlag, newItem: BitmaskFlag): Boolean {
-                return oldItem == newItem
+                return oldItem === newItem
             }
         }
     }

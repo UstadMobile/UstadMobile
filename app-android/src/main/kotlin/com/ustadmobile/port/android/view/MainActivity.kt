@@ -64,6 +64,8 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
             activityFloatingActionButton?.setOnClickListener(null)
         }
 
+        //TODO: Post menu visibilty call invalidateOptionsMenu()
+
         mAppBar.setExpanded(true)
 
     }
@@ -74,6 +76,9 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
+        //TODO: If dashboard , show settings, else hide
+
+        findNavController(R.id.activity_main_navhost_fragment).currentDestination
         return super.onCreateOptionsMenu(menu)
     }
 

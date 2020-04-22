@@ -4,7 +4,7 @@ package com.ustadmobile.core.controller
 import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.PersonDetailEnrollClazzView
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWithEnrollment
 import kotlinx.coroutines.GlobalScope

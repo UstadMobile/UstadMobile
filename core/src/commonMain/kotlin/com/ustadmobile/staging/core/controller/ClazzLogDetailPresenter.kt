@@ -8,7 +8,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ClassLogDetailView
-import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.staging.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED

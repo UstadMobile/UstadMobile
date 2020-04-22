@@ -132,6 +132,7 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
         set(value) {
             field = value
             mBinding?.selquestionandoptions = value
+            mBinding?.selquestion = value?.selQuestion
         }
 
     override var fieldsEnabled: Boolean = false

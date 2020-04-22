@@ -18,6 +18,10 @@
         android:name="com.ustadmobile.port.android.view.ClazzEditFragment" />
 
     <fragment
+        android:id="@+id/person_edit_dest"
+        android:name="com.ustadmobile.port.android.view.PersonEditFragment"/>
+
+    <fragment
         android:id="@+id/schedule_edit_dest"
         android:name="com.ustadmobile.port.android.view.ScheduleEditFragment" />
 
@@ -44,27 +48,24 @@
     <fragment
         android:id="@+id/settings_list_dest"
         android:name="com.ustadmobile.port.android.view.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="@string/settings" />
     <fragment
         android:id="@+id/selquestionset_list_dest"
         android:name="com.ustadmobile.port.android.view.SelQuestionSetListFragment"
-        android:label="SelQuestionSetListFragment" />
+        android:label="@string/sel_question_set" />
     <fragment
         android:id="@+id/selquestionset_edit_dest"
-        android:name="com.ustadmobile.port.android.view.SelQuestionSetEditFragment"
-        android:label="SelQuestionSetEditFragment" />
+        android:name="com.ustadmobile.port.android.view.SelQuestionSetEditFragment" />
     <fragment
         android:id="@+id/selquestionandoptions_edit_dest"
-        android:name="com.ustadmobile.port.android.view.SelQuestionAndOptionsEditFragment"
-        android:label="SelQuestionAndOptionsEditFragment" />
+        android:name="com.ustadmobile.port.android.view.SelQuestionAndOptionsEditFragment" />
     <fragment
         android:id="@+id/role_list_dest"
         android:name="com.ustadmobile.port.android.view.RoleListFragment"
-        android:label="RoleListFragment" />
+        android:label="@string/roles" />
     <fragment
         android:id="@+id/role_edit_dest"
-        android:name="com.ustadmobile.port.android.view.RoleEditFragment"
-        android:label="RoleEditFragment" />
+        android:name="com.ustadmobile.port.android.view.RoleEditFragment" />
 
 
 </navigation>

@@ -11,6 +11,10 @@
             type="com.ustadmobile.lib.db.entities.SelQuestionAndOptions" />
 
         <variable
+            name="selquestion"
+            type="com.ustadmobile.lib.db.entities.SelQuestion" />
+
+        <variable
             name="loading"
             type="boolean" />
 
@@ -25,6 +29,7 @@
         <variable
             name="multichoicevalue"
             type="int" />
+
         <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.SelQuestionAndOptionsEditActivityEventHandler" />
@@ -93,23 +98,18 @@
                     app:layout_constraintTop_toBottomOf="@+id/activity_selquestionandoptions_edit_type_tv"
                     android:hint="@string/question_type">
 
-                    <com.ustadmobile.port.android.view.MessageIdAutocompleteTextView
+                    <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
                         android:id="@+id/actvity_selquestionandoptions_edit_type_midactv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="none"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:messageIdOptions="@{typeOptions}"
-                        app:selectedMessageIdOption="@={selquestionandoptions.selQuestion.questionType}" />
+                        app:selectedMessageIdOption="@={selquestionandoptions.selQuestion.questionType}"
+                        app:messageIdOptions="@{typeOptions}"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-
-                <!-- TODO: Put the actual view for editing SelQuestionAndOptions here using two-way data binding -->
-                <!-- Available templates:
-                onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-                -->
                 <TextView
                     android:id="@+id/activity_selquestionandoptions_edit_create_new_tv"
                     android:layout_width="wrap_content"

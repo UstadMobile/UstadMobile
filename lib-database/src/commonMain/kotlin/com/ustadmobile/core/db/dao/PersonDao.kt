@@ -190,9 +190,15 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
 
+    @Query("SELECT Person.* FROM Person WHERE Person.firstNames = :firstNames")
+    abstract fun findByFirstnames(firstNames: String): Person?
+
     @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract suspend fun findByUid(uid: Long): Person?
+
+    @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
+    abstract fun findByUidSync(uid: Long): Person?
 
     @Query("SELECT * From Person WHERE personUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Person?>

@@ -20,10 +20,6 @@ lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl, db: UmApp
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
-    interface ScheduleEditDoneListener {
-        fun onScheduleEditDone(schedule: Schedule, requestCode: Int)
-    }
-
     enum class FrequencyOption(val optionVal: Int, val messageId: Int) {
         DAILY(Schedule.SCHEDULE_FREQUENCY_DAILY, MessageID.daily),
         WEEKLY(Schedule.SCHEDULE_FREQUENCY_WEEKLY, MessageID.weekly)

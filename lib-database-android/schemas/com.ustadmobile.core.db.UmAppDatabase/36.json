@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "a1fb65dc5d92ffbbcfd135a216ee2c9b",
+    "identityHash": "1c6a80bceb1192be16d3843fd88e939f",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -491,8 +491,26 @@
       },
       {
         "tableName": "PersonDetailPresenterField",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personDetailPresenterFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fieldUid` INTEGER NOT NULL, `fieldType` INTEGER NOT NULL, `fieldIndex` INTEGER NOT NULL, `labelMessageId` INTEGER NOT NULL, `fieldIcon` TEXT, `headerMessageId` INTEGER NOT NULL, `viewModeVisible` INTEGER NOT NULL, `editModeVisible` INTEGER NOT NULL, `isReadyOnly` INTEGER NOT NULL, `personDetailPresenterFieldMasterChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLocalChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personDetailPresenterFieldMastrChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLocalChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLastChangedBy` INTEGER NOT NULL, `personDetailPresenterFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fieldUid` INTEGER NOT NULL, `fieldType` INTEGER NOT NULL, `fieldIndex` INTEGER NOT NULL, `labelMessageId` INTEGER NOT NULL, `fieldIcon` TEXT, `headerMessageId` INTEGER NOT NULL, `viewModeVisible` INTEGER NOT NULL, `editModeVisible` INTEGER NOT NULL, `isReadyOnly` INTEGER NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "personDetailPresenterFieldMastrChangeSeqNum",
+            "columnName": "personDetailPresenterFieldMastrChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "personDetailPresenterFieldLocalChangeSeqNum",
+            "columnName": "personDetailPresenterFieldLocalChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "personDetailPresenterFieldLastChangedBy",
+            "columnName": "personDetailPresenterFieldLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "personDetailPresenterFieldUid",
             "columnName": "personDetailPresenterFieldUid",
@@ -550,24 +568,6 @@
           {
             "fieldPath": "isReadyOnly",
             "columnName": "isReadyOnly",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personDetailPresenterFieldMasterChangeSeqNum",
-            "columnName": "personDetailPresenterFieldMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personDetailPresenterFieldLocalChangeSeqNum",
-            "columnName": "personDetailPresenterFieldLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personDetailPresenterFieldLastChangedBy",
-            "columnName": "personDetailPresenterFieldLastChangedBy",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -1647,7 +1647,7 @@
       },
       {
         "tableName": "CustomFieldValue",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customFieldValueUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldValueFieldUid` INTEGER NOT NULL, `customFieldValueEntityUid` INTEGER NOT NULL, `customFieldValueValue` TEXT, `customFieldValueMCSN` INTEGER NOT NULL, `customFieldValueLCSN` INTEGER NOT NULL, `customFieldValueLCB` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customFieldValueUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldValueFieldUid` INTEGER NOT NULL, `customFieldValueEntityUid` INTEGER NOT NULL, `customFieldValueValue` TEXT, `customFieldValueCustomFieldValueOptionUid` INTEGER NOT NULL, `customFieldValueMCSN` INTEGER NOT NULL, `customFieldValueLCSN` INTEGER NOT NULL, `customFieldValueLCB` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "customFieldValueUid",
@@ -1672,6 +1672,12 @@
             "columnName": "customFieldValueValue",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "customFieldValueCustomFieldValueOptionUid",
+            "columnName": "customFieldValueCustomFieldValueOptionUid",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "customFieldValueMCSN",
@@ -8711,7 +8717,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a1fb65dc5d92ffbbcfd135a216ee2c9b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1c6a80bceb1192be16d3843fd88e939f')"
     ]
   }
 }

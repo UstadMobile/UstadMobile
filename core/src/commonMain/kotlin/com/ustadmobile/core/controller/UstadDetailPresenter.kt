@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.view.EditButtonVisibility
+import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -33,10 +33,10 @@ abstract class UstadDetailPresenter<V: UstadSingleEntityView<RT>, RT>(context: A
         val detailView  = (view as? UstadDetailView<*>) ?: return
         GlobalScope.launch(doorMainDispatcher()) {
             val canEdit = onCheckEditPermission(account)
-            detailView.editButtonVisibility = if(canEdit)
-                EditButtonVisibility.FAB
+            detailView.editButtonMode = if(canEdit)
+                EditButtonMode.FAB
             else
-                EditButtonVisibility.GONE
+                EditButtonMode.GONE
         }
     }
 

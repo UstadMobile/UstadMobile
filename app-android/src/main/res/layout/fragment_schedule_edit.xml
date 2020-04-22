@@ -54,7 +54,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.ustadmobile.port.android.view.MessageIdAutocompleteTextView
+                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
                     android:inputType="none"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
                 android:layout_marginTop="@dimen/formitem_margin_vertical"
                 android:hint="@string/day">
 
-                <com.ustadmobile.port.android.view.MessageIdAutocompleteTextView
+                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
                     android:inputType="none"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

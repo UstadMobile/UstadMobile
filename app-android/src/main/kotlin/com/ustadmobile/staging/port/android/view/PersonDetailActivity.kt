@@ -30,15 +30,15 @@ import com.google.android.material.textfield.TextInputLayout
 import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.PersonDetailPresenter
+import com.ustadmobile.staging.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.staging.core.view.PersonDetailView
 import com.ustadmobile.core.view.PersonDetailViewField
-import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_HEIGHT
-import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_MAX_WIDTH
-import com.ustadmobile.core.view.PersonEditView.Companion.IMAGE_QUALITY
+import com.ustadmobile.staging.core.view.PersonEditView.Companion.IMAGE_MAX_HEIGHT
+import com.ustadmobile.staging.core.view.PersonEditView.Companion.IMAGE_MAX_WIDTH
+import com.ustadmobile.staging.core.view.PersonEditView.Companion.IMAGE_QUALITY
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
@@ -206,6 +206,7 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
     //this is how you check permission grant task result.
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
                                             grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             CAMERA_PERMISSION_REQUEST -> if (grantResults.size > 0 && grantResults[0] ==
                     PackageManager.PERMISSION_GRANTED) {
@@ -550,19 +551,19 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
 
     override fun setRoleAssignmentListProvider(factory: DataSource.Factory<Int, EntityRoleWithGroupName>) {
 
-        val recyclerAdapter =
-                RoleAssignmentListRecyclerAdapter(DIFF_CALLBACK_ENTITY_ROLE_WITH_GROUPNAME,
-                        null, mPresenter!!, this, applicationContext)
-        // A warning is expected
-        val data = LivePagedListBuilder(factory, 20).build()
-        //Observe the data:
-        val thisP = this
-        GlobalScope.launch(Dispatchers.Main) {
-            data.observe(thisP,
-                    Observer<PagedList<EntityRoleWithGroupName>> { recyclerAdapter.submitList(it) })
-        }
-
-        mRecyclerView2!!.setAdapter(recyclerAdapter)
+//        val recyclerAdapter =
+//                RoleAssignmentListRecyclerAdapter(DIFF_CALLBACK_ENTITY_ROLE_WITH_GROUPNAME,
+//                        null, mPresenter!!, this, applicationContext)
+//        // A warning is expected
+//        val data = LivePagedListBuilder(factory, 20).build()
+//        //Observe the data:
+//        val thisP = this
+//        GlobalScope.launch(Dispatchers.Main) {
+//            data.observe(thisP,
+//                    Observer<PagedList<EntityRoleWithGroupName>> { recyclerAdapter.submitList(it) })
+//        }
+//
+//        mRecyclerView2!!.setAdapter(recyclerAdapter)
     }
 
     override fun handleClickCall(number: String) {

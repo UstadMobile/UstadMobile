@@ -47,6 +47,9 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
     override fun handleClickEntry(entry: Person) {
+        systemImpl.go(PersonEditView.VIEW_NAME,
+            mapOf(UstadView.ARG_ENTITY_UID to entry.personUid.toString()), context)
+
         /* TODO: Add code to go to the appropriate detail view or make a selection
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
@@ -57,11 +60,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
     override fun handleClickCreateNewFab() {
-        /* TODO: Add code to go to the edit view when the user clicks the new item FAB. This is only
-         * called when the fab is clicked, not if the first item is create new item (e.g. picker mode).
-         * That has to be handled at a platform level to use prepareCall etc.
         systemImpl.go(PersonEditView.VIEW_NAME, mapOf(), context)
-         */
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
