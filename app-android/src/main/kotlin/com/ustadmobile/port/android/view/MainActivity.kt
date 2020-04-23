@@ -1,15 +1,14 @@
 package com.ustadmobile.port.android.view
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
@@ -21,7 +20,6 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.core.view.SettingsView
 
 
@@ -66,6 +64,7 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
 
         //TODO: Post menu visibilty call invalidateOptionsMenu()
 
+        invalidateOptionsMenu()
         mAppBar.setExpanded(true)
 
     }
@@ -78,7 +77,13 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
         menuInflater.inflate(R.menu.menu_main, menu)
         //TODO: If dashboard , show settings, else hide
 
-        findNavController(R.id.activity_main_navhost_fragment).currentDestination
+        val currentFrag =
+                findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id?:0
+        if(BOTTOM_NAV_DEST.contains(currentFrag)){
+            menu.findItem(R.id.menu_main_settings).setVisible(true)
+        }else{
+            menu.findItem(R.id.menu_main_settings).setVisible(false)
+        }
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -98,5 +103,9 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
     fun handleClickSettings() {
         UstadMobileSystemImpl.instance.go(SettingsView.VIEW_NAME, mapOf(), this)
 
+    }
+
+    companion object{
+        val BOTTOM_NAV_DEST = listOf<Int>(R.id.home_clazzlist_dest, R.id.home_personlist_dest)
     }
 }
