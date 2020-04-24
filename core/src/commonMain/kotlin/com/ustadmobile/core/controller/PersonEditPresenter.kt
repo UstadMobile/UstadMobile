@@ -8,15 +8,12 @@ import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.PresenterFieldRow
+import com.ustadmobile.lib.db.entities.*
 
 
 class PersonEditPresenter(context: Any,
@@ -53,7 +50,14 @@ class PersonEditPresenter(context: Any,
 
         val dbPresenterFieldRows = db.personDetailPresenterFieldDao
                 .findByPersonUidWithFieldAndValueAsList(entityUid).toPresenterFieldRows()
-        presenterFieldRows.sendValue(person.populatePresenterFields(dbPresenterFieldRows))
+        person.populatePresenterFields(dbPresenterFieldRows)
+        val personPicture = withTimeoutOrNull(2000) {
+            db.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
+        } ?: PersonPicture()
+        personPicture.populatePresenterFields(dbPresenterFieldRows)
+
+        //TODO: update using the person picture dao
+        presenterFieldRows.sendValue(dbPresenterFieldRows)
 
         return person
     }

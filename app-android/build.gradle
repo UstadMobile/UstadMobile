@@ -307,6 +307,7 @@ dependencies {
 
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+    //implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
     kapt "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
 
     // Room (annotation processing takes place only on lib-database-android to improve build times)
@@ -354,7 +355,7 @@ dependencies {
     // shake detector
     implementation "com.squareup:seismic:$version_android_seismic"
 
-    implementation 'de.hdodenhof:circleimageview:2.1.0'
+    implementation "de.hdodenhof:circleimageview:$version_android_circleimageview"
 
     implementation "com.google.android.exoplayer:exoplayer:$version_exo_player"
 

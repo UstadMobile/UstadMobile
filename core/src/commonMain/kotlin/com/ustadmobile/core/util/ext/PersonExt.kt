@@ -19,9 +19,9 @@ class PersonPresenterFieldRowAdapter(val populateFn: (Person, PresenterFieldRow)
     val updateFn: (Person, PresenterFieldRow) -> Unit)
 
 fun PresenterFieldRow.populateAsStringField(nameMessageId: Int, strValue: String?,
-        inputModeHint: Int = 0) {
+                                            inputType: Int = CustomField.INPUT_TYPE_TEXT) {
     customField = CustomField(customFieldLabelMessageID = nameMessageId,
-        customFieldType = FIELD_TYPE_TEXT)
+        customFieldType = FIELD_TYPE_TEXT, customFieldInputType = inputType)
     customFieldValue = CustomFieldValue(customFieldValueValue = strValue)
 }
 
@@ -134,7 +134,8 @@ val ADAPTER_MAP = mapOf(
                 {person, row -> row.populateAsStringField(MessageID.username, person.username)},
                 {person, row -> person.updateStringFieldFromRow(person::username, row)}),
         PERSON_FIELD_UID_PHONE_NUMBER to PersonPresenterFieldRowAdapter(
-                {person, row -> row.populateAsStringField(MessageID.phone_number, person.phoneNum)},
+                {person, row -> row.populateAsStringField(MessageID.phone_number, person.phoneNum,
+                    inputType = CustomField.INPUT_TYPE_PHONENUM)},
                 {person, row -> person.updateStringFieldFromRow(person::phoneNum, row)}),
         PERSON_FIELD_UID_GENDER to PersonPresenterFieldRowAdapter(
                 {person, row -> row.populateAsDropdown(MessageID.gender_literal, person.gender,
@@ -142,7 +143,8 @@ val ADAPTER_MAP = mapOf(
                             Pair(MessageID.female, Person.GENDER_FEMALE)))},
                 {person, row -> person.updateIntFromDropDown(person::gender, row) }),
         PERSON_FIELD_UID_EMAIL to PersonPresenterFieldRowAdapter(
-                {person, row -> row.populateAsStringField(MessageID.email, person.emailAddr)},
+                {person, row -> row.populateAsStringField(MessageID.email, person.emailAddr,
+                    inputType = CustomField.INPUT_TYPE_EMAIL)},
                 {person, row -> person.updateStringFieldFromRow(person::emailAddr, row)})
 )
 

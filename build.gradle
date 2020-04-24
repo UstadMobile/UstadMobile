@@ -136,7 +136,7 @@ ext {
     //As per https://maven.google.com/web/index.html
     version_android_material = "1.1.0"
     version_androidx_appcompat = "1.1.0"
-    version_androidx_activity = "1.2.0-alpha02"
+    version_androidx_activity = "1.2.0-alpha03"
     version_androidx_fragment = "1.2.3"
     version_androidx_core = '1.2.0'
     version_androidx_cardview = "1.0.0"
@@ -169,6 +169,7 @@ ext {
     version_play_core = "1.6.4"
     version_android_leakcanary = "2.1"
     version_android_play_services_safetynet = "17.0.0"
+    version_android_circleimageview = "3.1.0"
 
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"

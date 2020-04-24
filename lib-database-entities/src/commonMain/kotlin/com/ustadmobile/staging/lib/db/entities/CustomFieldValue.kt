@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = 57)
 @Entity
 @Serializable
-class CustomFieldValue(
+data class CustomFieldValue(
 
     @PrimaryKey(autoGenerate = true)
     var customFieldValueUid: Long = 0,
