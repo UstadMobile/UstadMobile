@@ -4,10 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
-import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.*
 import androidx.work.WorkManager
 import com.ustadmobile.port.android.sync.UmAppDatabaseSyncWorker
 import java.util.concurrent.TimeUnit
@@ -17,7 +14,7 @@ import java.util.concurrent.TimeUnit
  * This service schedules the first WorkManager job for the sync, and then tracks if the app is
  * in the foreground (or not).
  */
-class UmAppDatabaseSyncService : Service(), LifecycleObserver {
+class UmAppDatabaseSyncService : Service() {
 
     private val mBinder = LocalServiceBinder()
 
@@ -27,34 +24,36 @@ class UmAppDatabaseSyncService : Service(), LifecycleObserver {
             get() = this@UmAppDatabaseSyncService
     }
 
+    val lifecycleObserver = object: DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner)
+            isInForeground = true
+        }
+
+        override fun onStop(owner: LifecycleOwner) {
+            super.onStop(owner)
+            isInForeground = false
+            lastForegroundTime = System.currentTimeMillis()
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         isInForeground = true
         WorkManager.getInstance().cancelAllWorkByTag(UmAppDatabaseSyncWorker.TAG)
 
         UmAppDatabaseSyncWorker.queueSyncWorker(100, TimeUnit.MILLISECONDS);
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
+        ProcessLifecycleOwner.get().lifecycle.removeObserver(lifecycleObserver)
     }
 
     override fun onBind(intent: Intent): IBinder? {
         return mBinder
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onEnterForeground() {
-        isInForeground = true
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    fun onEnterBackground() {
-        isInForeground = false
-        lastForegroundTime = System.currentTimeMillis()
     }
 
     companion object {

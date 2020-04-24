@@ -70,12 +70,7 @@ class PresenterFieldRowEditRecyclerViewAdapter(var imageHelper: PresenterFieldIm
     }
 
     class PictureFieldRowViewHolder(var binding: ItemPresenterFieldRowPictureBinding,
-                                    var imageHelper: PresenterFieldImageHelper?) : PresenterFieldRowViewHolder(binding.root), View.OnClickListener {
-
-        init {
-            binding.itemPresenterFieldRowPicturePhotoicon.setOnClickListener(this)
-        }
-
+                                    var imageHelper: PresenterFieldImageHelper?) : PresenterFieldRowViewHolder(binding.root) {
 
         override var presenterFieldRow: PresenterFieldRow?
             get() = super.presenterFieldRow
@@ -83,21 +78,6 @@ class PresenterFieldRowEditRecyclerViewAdapter(var imageHelper: PresenterFieldIm
                 super.presenterFieldRow = value
                 binding.customFieldValue = value?.customFieldValue
             }
-
-        override fun onClick(v: View) {
-            val items = listOf(R.string.remove_photo, R.string.take_new_photo_from_camera,
-                    R.string.select_new_photo_from_gallery).map { v.context.getString(it) }.toTypedArray()
-            MaterialAlertDialogBuilder(itemView.context)
-                    .setTitle(R.string.change_photo)
-                    .setItems(items) {dialog, which ->
-                        //handle this
-                        val presenterFieldRowVal = presenterFieldRow ?: return@setItems
-                        if(which == 1) {
-                            imageHelper?.onClickTakePicture(presenterFieldRowVal)
-                        }
-                    }
-                    .show()
-        }
     }
 
 

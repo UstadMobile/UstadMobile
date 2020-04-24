@@ -13,9 +13,10 @@
         android:layout_height="wrap_content">
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/item_presenter_field_row_image_view"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            app:imageFilePath="@{customFieldValue.customFieldValueValue}"
+            app:imageFilePath="@={customFieldValue.customFieldValueValue}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -26,6 +27,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             app:srcCompat="@drawable/ic_photo_camera_black_24dp"
+            android:onClick="@{() -> itemPresenterFieldRowImageView.callOnClick()}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
