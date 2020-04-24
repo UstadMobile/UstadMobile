@@ -306,8 +306,13 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
     //ViewModel and LiveData
-    implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
-    //implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
+
+    //Provides ProcessLifecycleOwner
+    implementation "androidx.lifecycle:lifecycle-process:$version_androidx_lifecycle"
+
+    //Provides findViewTreeLifecycleOwner useful for two-way data binding that uses prepareCall (e.g. images/files)
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_androidx_lifecycle"
     kapt "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
 
     // Room (annotation processing takes place only on lib-database-android to improve build times)
