@@ -19,6 +19,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
+import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import java.io.File
 
     /**
@@ -113,7 +114,9 @@ abstract class ViewActivityLauncherLifecycleObserver<V: View>(
     }
 
     protected fun takePictureInternal() {
-        val fileDest = File(view.context.cacheDir, "image.jpg")
+        val navController = view.findNavController()
+        val fileDest = navController.createTempFileForDestination(view.context,
+                "takePicture-${System.currentTimeMillis()}")
         val fileUri = FileProvider.getUriForFile(view.context.applicationContext,
                 "${view.context.packageName}.provider", fileDest)
 
