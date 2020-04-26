@@ -285,6 +285,41 @@ class PersonEditPresenterTest {
         verify(repoPersonPictureDao, times(1)).setAttachment(any(), any())
     }
 
+    @Test
+    fun givenExistingPicture_whenPictureIsSetToNull_thenShouldEraseDataAndSetAsInactive() {
+        val existingPerson = Person("username", "PersonWithPic", "Jones")
+        existingPerson.personUid = db.personDao.insert(existingPerson)
+
+        val existingPersonPicture = PersonPicture().apply {
+            personPicturePersonUid = existingPerson.personUid
+        }
+        existingPersonPicture.personPictureUid = repo.personPictureDao.insert(existingPersonPicture)
+        val tmpPicFile = makeTempPic(1)
+        repo.personPictureDao.setAttachment(existingPersonPicture, tmpPicFile)
+
+        val capturedPresenterFieldList = AtomicReference<List<PresenterFieldRow>>()
+        var capturePersonPicUri: String? = null
+        createPresenterSetValsAndSave(mapOf(UstadView.ARG_ENTITY_UID to existingPerson.personUid.toString())) {
+            capturedPresenterFieldList.set(it.getValue()!!)
+            val newList = it.getValue()!!.toMutableList()
+            val picturePresenterfield = newList.find {
+                it.presenterField?.fieldUid == PersonDetailPresenterField.PERSON_FIELD_UID_PICTURE.toLong()
+            }
+            capturePersonPicUri = picturePresenterfield!!.customFieldValue!!.customFieldValueValue
+
+            picturePresenterfield!!.customFieldValue!!.customFieldValueValue = null
+            it.setVal(newList)
+        }
+
+        verify(repoPersonPictureDao).update(argThat {
+            personPicturePersonUid == existingPerson.personUid && personPictureActive == false
+        })
+
+
+        val attachmentPath = repo.personPictureDao.getAttachmentPath(existingPersonPicture)
+        assertEquals("Content of picture is erased", 0,
+            File(attachmentPath).readBytes().size)
+    }
 
 
 

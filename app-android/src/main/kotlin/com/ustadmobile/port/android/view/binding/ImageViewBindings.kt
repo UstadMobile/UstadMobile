@@ -33,12 +33,12 @@ class ImageViewLifecycleObserver2(view: ImageView, registry: ActivityResultRegis
 @BindingAdapter("imageUri")
 fun ImageView.setImageFilePath(imageFilePath: String?) {
     //start observing
+    setTag(R.id.tag_imagefilepath, imageFilePath)
     if(imageFilePath == null){
         setImageResource(android.R.color.transparent)
         return
     }
 
-    setTag(R.id.tag_imagefilepath, imageFilePath)
     Picasso.get()
             .load(Uri.parse(imageFilePath))
             .noFade()
@@ -57,6 +57,6 @@ fun ImageView.getImageFilePath(inverseBindingListener: InverseBindingListener) {
 }
 
 @InverseBindingAdapter(attribute = "imageUri")
-fun ImageView.getRealImageFilePath(): String {
-    return (getTag(R.id.tag_imagefilepath) as? String) ?: ""
+fun ImageView.getRealImageFilePath(): String? {
+    return (getTag(R.id.tag_imagefilepath) as? String)
 }

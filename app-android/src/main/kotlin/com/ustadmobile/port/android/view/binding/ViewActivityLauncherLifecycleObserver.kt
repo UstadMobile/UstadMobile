@@ -95,6 +95,7 @@ abstract class ViewActivityLauncherLifecycleObserver<V: View>(
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
         when(OPTIONS_STRING_IDS[which]) {
+            R.string.remove_photo -> onPictureTakenOrSelected(null)
             R.string.take_new_photo_from_camera -> takePicture()
             R.string.select_new_photo_from_gallery -> openPicture()
         }

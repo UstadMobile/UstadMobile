@@ -32,6 +32,8 @@ open class PersonPicture() {
 
     var mimeType: String? = null
 
+    var personPictureActive: Boolean = true
+
     companion object {
 
         const val TABLE_ID = 50
@@ -51,6 +53,7 @@ open class PersonPicture() {
         if (fileSize != other.fileSize) return false
         if (picTimestamp != other.picTimestamp) return false
         if (mimeType != other.mimeType) return false
+        if (personPictureActive != other.personPictureActive) return false
 
         return true
     }
@@ -64,6 +67,7 @@ open class PersonPicture() {
         result = 31 * result + fileSize
         result = 31 * result + picTimestamp.hashCode()
         result = 31 * result + (mimeType?.hashCode() ?: 0)
+        result = 31 * result + (if(personPictureActive) 1 else 0)
         return result
     }
 

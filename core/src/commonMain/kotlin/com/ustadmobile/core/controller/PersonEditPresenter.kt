@@ -118,6 +118,11 @@ class PersonEditPresenter(context: Any,
                 }
                 personPicture.personPictureUid = repo.personPictureDao.insert(personPicture)
                 repo.personPictureDao.setAttachmentDataFromUri(personPicture, pictureRowUri, context)
+            }else if(personPicture != null && currentUri != null && pictureRowUri == null) {
+                //picture has been removed
+                personPicture.personPictureActive = false
+                repo.personPictureDao.setAttachmentDataFromUri(personPicture, null, context)
+                repo.personPictureDao.update(personPicture)
             }
 
             withContext(doorMainDispatcher()) {
