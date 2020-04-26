@@ -2,10 +2,12 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.SelQuestionSetEditView
+import com.ustadmobile.core.view.SelQuestionSetListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.SelQuestionSet
@@ -37,8 +39,7 @@ class SelQuestionSetListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //TODO("check on add permission for this account: e.g. " +
-        //        "repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)")
+        //TODO: Add permission
         return true
     }
 
