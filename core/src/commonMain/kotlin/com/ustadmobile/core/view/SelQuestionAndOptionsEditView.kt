@@ -9,7 +9,8 @@ import com.ustadmobile.lib.db.entities.SelQuestionOption
 
 interface SelQuestionAndOptionsEditView: UstadEditView<SelQuestionAndOptions> {
 
-    var selQuestionOptionList: DoorLiveData<List<SelQuestionOption>>?
+    var selQuestionOptionList: DoorMutableLiveData<List<SelQuestionOption>>?
+    var selQuestionOptionDeactivateList: DoorMutableLiveData<List<SelQuestionOption>>?
     var typeOptions: List<SelQuestionAndOptionsEditPresenter.OptionTypeMessageIdOption>?
 
     companion object {

@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SelQuestionSetListView
 import com.ustadmobile.lib.db.entities.SELQuestionSetWithNumQuestions
 import com.ustadmobile.lib.db.entities.SelQuestionSet
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -85,11 +86,7 @@ class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet,
     }
 
     override fun onClick(view: View?) {
-        activity?.prepareSelQuestionSetEditCall {
-            if(it != null) {
-                finishWithResult(it)
-            }
-        }?.launchSelQuestionSetEdit(null)
+        mPresenter?.handleClickCreateNewFab()
     }
 
     override fun onDestroyView() {
@@ -104,9 +101,6 @@ class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet,
         mPresenter?.handleClickSortOrder(messageIdOption)
     }
 
-    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
-        //do nothing
-    }
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.selQuestionSetDao
@@ -125,11 +119,6 @@ class SelQuestionSetListFragment(): UstadListViewFragment<SelQuestionSet,
             }
         }
 
-        fun newInstance(bundle: Bundle?) : SelQuestionSetListFragment {
-            return SelQuestionSetListFragment().apply {
-                arguments = bundle
-            }
-        }
     }
 
     override val listPresenter: UstadListPresenter<*, in SELQuestionSetWithNumQuestions>?

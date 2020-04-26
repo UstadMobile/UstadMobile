@@ -14,7 +14,9 @@
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:background="?attr/selectableItemBackground"
         android:onClick="@{() -> mActivity.onClickEditSelQuestion(selQuestion)}"
         android:layout_height="wrap_content">
 

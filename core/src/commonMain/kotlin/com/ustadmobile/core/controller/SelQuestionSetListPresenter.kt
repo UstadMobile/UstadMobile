@@ -44,8 +44,8 @@ class SelQuestionSetListPresenter(context: Any, arguments: Map<String, String>,
 
     private fun updateListOnView() {
         view.list = when(currentSortOrder){
-            SortOrder.ORDER_NAME_ASC ->  repo.selQuestionSetDao.findAllQuestionSetsWithNumQuestions()
-            SortOrder.ORDER_NAME_DSC ->  repo.selQuestionSetDao.findAllQuestionSetsWithNumQuestions()
+            SortOrder.ORDER_NAME_ASC ->  repo.selQuestionSetDao.findAllQuestionSetsWithNumQuestionsNameAsc()
+            SortOrder.ORDER_NAME_DSC ->  repo.selQuestionSetDao.findAllQuestionSetsWithNumQuestionsNameDesc()
         }
     }
 

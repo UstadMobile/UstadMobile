@@ -52,7 +52,7 @@
     <fragment
         android:id="@+id/selquestionset_list_dest"
         android:name="com.ustadmobile.port.android.view.SelQuestionSetListFragment"
-        android:label="@string/sel_question_set" />
+        android:label="@string/sel_question_sets" />
     <fragment
         android:id="@+id/selquestionset_edit_dest"
         android:name="com.ustadmobile.port.android.view.SelQuestionSetEditFragment" />

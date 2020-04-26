@@ -48,7 +48,6 @@ class RoleEditPresenter(context: Any,
                 FLAGS_AVAILABLE.map { BitmaskFlag(it.flagVal, it.messageId,
                         (role.rolePermissions and it.flagVal) == it.flagVal ) })
 
-        println("hi")
         return role
     }
 
@@ -80,13 +79,9 @@ class RoleEditPresenter(context: Any,
 
     override fun handleClickSave(entity: Role) {
 
-        val saveVal = view.permissionList?.getValue()?.fold(0L, {acc, flag ->
+        entity.rolePermissions = view.permissionList?.getValue()?.fold(0L, {acc, flag ->
             acc + (if(flag.enabled) flag.flagVal else 0)
         }) ?: 0L
-
-        val a = view.permissionList?.getValue()
-
-        entity.rolePermissions = saveVal
 
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.roleUid == 0L) {

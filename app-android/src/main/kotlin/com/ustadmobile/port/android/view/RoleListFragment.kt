@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -14,7 +13,6 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RoleListView
 import com.ustadmobile.lib.db.entities.Role
@@ -24,7 +22,7 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
 class RoleListFragment(): UstadListViewFragment<Role, Role>(),
-        RoleListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+        RoleListView, View.OnClickListener{
 
     override val listPresenter: UstadListPresenter<*, in Role>?
         get() = mPresenter
@@ -86,28 +84,13 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
     }
 
     override fun onClick(view: View?) {
-        //TODOne: Uncomment when Edit stuff in there
-        activity?.prepareRoleEditCall {
-            if(it != null) {
-                finishWithResult(it)
-            }
-        }?.launchRoleEdit(null)
+        mPresenter?.handleClickCreateNewFab()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
-    }
-
-
-    override fun onMessageIdOptionSelected(view: AdapterView<*>?,
-                                           messageIdOption: MessageIdOption) {
-        mPresenter?.handleClickSortOrder(messageIdOption)
-    }
-
-    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
-        //do nothing
     }
 
     override val displayTypeRepo: Any?
@@ -124,12 +107,6 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
             override fun areContentsTheSame(oldItem: Role,
                                             newItem: Role): Boolean {
                 return oldItem == newItem
-            }
-        }
-
-        fun newInstance(bundle: Bundle?) : RoleListFragment {
-            return RoleListFragment().apply {
-                arguments = bundle
             }
         }
     }

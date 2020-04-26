@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ActivitySelquestionsetEditBinding
+import com.toughra.ustadmobile.databinding.FragmentSelquestionsetEditBinding
 import com.toughra.ustadmobile.databinding.ItemSelquestionBinding
 import com.ustadmobile.core.controller.SelQuestionSetEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -34,21 +34,6 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
 
-
-fun ComponentActivity.prepareSelQuestionSetEditCall(callback: (List<SelQuestionSet>?) -> Unit) =
-        prepareCall(CrudEditActivityResultContract(this, SelQuestionSet::class.java,
-        SelQuestionSetEditFragment::class.java,
-        SelQuestionSet::selQuestionSetUid)) {
-    callback.invoke(it)
-}
-
-fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<SelQuestionSet>>
-        .launchSelQuestionSetEdit(schedule: SelQuestionSet?,
-                                  extraArgs: Map<String, String> = mapOf()) {
-    launch(CrudEditActivityResultContract.CrudEditInput(schedule,
-            UstadSingleEntityPresenter.PersistenceMode.DB, extraArgs))
-}
-
 interface SelQuestionSetEditActivityEventHandler {
     fun onClickEditSelQuestion(selQuestion: SelQuestionAndOptions?)
     fun onClickNewSelQuestion()
@@ -58,7 +43,7 @@ interface SelQuestionSetEditActivityEventHandler {
 class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuestionSetEditView,
     SelQuestionSetEditActivityEventHandler {
 
-    private var mBinding: ActivitySelquestionsetEditBinding? = null
+    private var mBinding: FragmentSelquestionsetEditBinding? = null
 
     private var mPresenter: SelQuestionSetEditPresenter? = null
 
@@ -147,7 +132,7 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView : View
-        mBinding = ActivitySelquestionsetEditBinding.inflate(inflater, container, false)
+        mBinding = FragmentSelquestionsetEditBinding.inflate(inflater, container, false)
                 .also{
                     rootView = it.root
                     it.activityEventHandler = this

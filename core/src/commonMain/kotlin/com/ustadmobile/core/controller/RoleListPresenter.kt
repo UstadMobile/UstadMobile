@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.RoleEditView
@@ -15,7 +14,6 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.list
 
 class RoleListPresenter(context: Any, arguments: Map<String, String>, view: RoleListView,
                         lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
@@ -41,8 +39,7 @@ class RoleListPresenter(context: Any, arguments: Map<String, String>, view: Role
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //TODO("check on add permission for this account: e.g. " +
-        //   "repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)")
+        //TODO: Get permission for this access.
         return true
     }
 

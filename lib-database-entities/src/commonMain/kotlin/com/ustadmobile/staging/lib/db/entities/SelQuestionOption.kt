@@ -30,6 +30,7 @@ open class SelQuestionOption {
     var selQuestionOptionLastChangedBy: Int = 0
 
     var optionActive: Boolean = false
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false

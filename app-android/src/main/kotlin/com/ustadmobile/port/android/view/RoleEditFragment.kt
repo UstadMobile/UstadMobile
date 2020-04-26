@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
@@ -13,11 +11,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ActivityRoleEditBinding
+import com.toughra.ustadmobile.databinding.FragmentRoleEditBinding
 import com.toughra.ustadmobile.databinding.ItemBitmaskBinding
 import com.ustadmobile.core.controller.RoleEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
@@ -26,25 +23,11 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RoleEditView
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
-import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
-
-
-fun ComponentActivity.prepareRoleEditCall(callback: (List<Role>?) -> Unit) =
-        prepareCall(CrudEditActivityResultContract(this, Role::class.java,
-        RoleEditFragment::class.java, Role::roleUid)) {
-    callback.invoke(it)
-}
-
-fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<Role>>
-        .launchRoleEdit(schedule: Role?, extraArgs: Map<String, String> = mapOf()) {
-    launch(CrudEditActivityResultContract.CrudEditInput(schedule,
-            UstadSingleEntityPresenter.PersistenceMode.JSON, extraArgs))
-}
 
 
 class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
 
-    private var mBinding: ActivityRoleEditBinding? = null
+    private var mBinding: FragmentRoleEditBinding? = null
 
     private var mRecyclerViewAdapter: BitmaskRecyclerViewAdapter? = null
 
@@ -97,7 +80,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView : View
-        mBinding = ActivityRoleEditBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentRoleEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             mRecyclerView = it.roleEditPermissionBitmaskEditRv
         }
@@ -107,7 +90,6 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
-        //mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         mRecyclerViewAdapter = BitmaskRecyclerViewAdapter()
         mRecyclerView?.adapter = mRecyclerViewAdapter
@@ -130,6 +112,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
         mBinding = null
         mPresenter = null
         entity = null
+        permissionList = null
     }
 
     override var fieldsEnabled: Boolean = false
@@ -160,6 +143,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
             }
 
             override fun areContentsTheSame(oldItem: BitmaskFlag, newItem: BitmaskFlag): Boolean {
+                //to ensure that the two-way binding saves the data to the latest reference of the object
                 return oldItem === newItem
             }
         }

@@ -32,10 +32,6 @@ class SelQuestionSetEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    /*
-     * TODOne: Add any required one to many join helpers here - use these templates (type then hit tab)
-     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
-     */
     private val selQuestionOneToManyJoinEditHelper =
             DefaultOneToManyJoinEditHelper<SelQuestionAndOptions>(
                     { it.selQuestion.selQuestionUid},
@@ -64,8 +60,10 @@ class SelQuestionSetEditPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SelQuestionSet? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        // code to the onLoadEntityFromDb to set the list if loading from the database, e.g.
-
+        //this query uses a left join and will therefor have multiple rows for each question -
+        // option combination (where the question is duplicated). The group by and map will
+        // eliminate the duplicates so that we have a list of question objects, each with it's own
+        // list of options.
         val questionAndOptions: List<SelQuestionAndOptionRow> = withTimeoutOrNull(2000) {
             db.selQuestionDao.findAllActiveQuestionsWithOpensInSetAsListAsc(entityUid)
         }?: listOf()
@@ -118,53 +116,36 @@ class SelQuestionSetEditPresenter(context: Any,
 
             val eti : List<SelQuestionAndOptions> =
                     selQuestionOneToManyJoinEditHelper.entitiesToInsert
-            eti.iterator().forEach {
-                val options = it.options
-                val question = it.selQuestion
-                question.selQuestionSelQuestionSetUid = entity.selQuestionSetUid
-                question.selQuestionUid = 0L
-                //Since all are for insert only
-                question.selQuestionUid = repo.selQuestionDao.insertAsync(question)
-                options?.forEach {
-                    //TODO: Check if insert or update
-                    it.selQuestionOptionQuestionUid = question.selQuestionUid
-                    if(it.selQuestionOptionUid < 1) {
-                        it.selQuestionOptionUid = 0L
-                        repo.selQuestionOptionDao.insertAsync(it)
-                    }else{
-                        repo.selQuestionOptionDao.updateAsync(it)
-                    }
-                }
-            }
-
             val etu : List<SelQuestionAndOptions> =
                     selQuestionOneToManyJoinEditHelper.entitiesToUpdate
-            etu.iterator().forEach {
-                val options = it.options
-                val question = it.selQuestion
-                question.selQuestionSelQuestionSetUid = entity.selQuestionSetUid
-                //Since all are for update only
-                repo.selQuestionDao.updateAsync(question)
-                options?.forEach {
-                    //TODO: Check if insert or update
-                    it.selQuestionOptionQuestionUid = question.selQuestionUid
-                    if(it.selQuestionOptionUid < 1) {
-                        it.selQuestionOptionUid = 0L
-                        repo.selQuestionOptionDao.insertAsync(it)
-                    }else{
-                        repo.selQuestionOptionDao.updateAsync(it)
-                    }
+            etu.forEach {
+                val questionUid = it.selQuestion.selQuestionUid
+                it.options.forEach {
+                    it.selQuestionOptionQuestionUid = questionUid
+                }
+            }
+            eti.forEach {
+                it.selQuestion.selQuestionSelQuestionSetUid = entity.selQuestionSetUid
+                it.selQuestion.selQuestionUid = 0L
+                val questionUid = repo.selQuestionDao.insertAsync(it.selQuestion)
+                it.selQuestion.selQuestionUid = questionUid
+                it.options.forEach {
+                    it.selQuestionOptionQuestionUid = questionUid
                 }
             }
 
-            //TODO: Check why it is not working
+            repo.selQuestionDao.updateListAsync(etu.map { it.selQuestion })
+
+            val allQuestions: List<SelQuestionAndOptions> = (eti + etu)
+            val allOptions = allQuestions.flatMap { it.options }
+            val splitList = allOptions.partition { it.selQuestionOptionUid == 0L }
+            repo.selQuestionOptionDao.insertList(splitList.first)
+            repo.selQuestionOptionDao.updateList(splitList.second)
+
+
             val etd : List<SelQuestionAndOptions> =
                     selQuestionOneToManyJoinEditHelper.entitiesToDeactivate
-            etd.iterator().forEach {
-                val question  = it.selQuestion
-                question.questionActive = false
-                repo.selQuestionDao.updateAsync(question)
-            }
+            repo.selQuestionDao.deactivateByUids(etd.map {it.selQuestion.selQuestionUid })
 
             view.finishWithResult(listOf(entity))
         }
