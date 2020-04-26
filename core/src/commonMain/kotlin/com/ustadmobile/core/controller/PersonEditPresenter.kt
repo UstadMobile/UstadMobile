@@ -53,10 +53,12 @@ class PersonEditPresenter(context: Any,
         person.populatePresenterFields(dbPresenterFieldRows)
         val personPicture = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
-        } ?: PersonPicture()
-        personPicture.populatePresenterFields(dbPresenterFieldRows)
+        }
 
-        //TODO: update using the person picture dao
+        if(db == repo) {
+            personPicture.populatePresenterFields(dbPresenterFieldRows, db.personPictureDao)
+        }
+
         presenterFieldRows.sendValue(dbPresenterFieldRows)
 
         return person
@@ -86,7 +88,7 @@ class PersonEditPresenter(context: Any,
         val fieldList = presenterFieldRows.getValue() ?: return
         entity.updateFromFieldList(fieldList)
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        GlobalScope.launch {
             if(entity.personUid == 0L) {
                 entity.personUid = repo.personDao.insertAsync(entity)
             }else {
@@ -99,7 +101,28 @@ class PersonEditPresenter(context: Any,
             repo.customFieldValueDao.insertListAsync(customFieldValuesParted.first)
             repo.customFieldValueDao.updateListAsync(customFieldValuesParted.second)
 
-            view.finishWithResult(listOf(entity))
+            val pictureRow = fieldList.firstOrNull {
+                it.presenterField?.fieldUid == PersonDetailPresenterField.PERSON_FIELD_UID_PICTURE.toLong()
+            }
+
+            var personPicture = db.personPictureDao.findByPersonUidAsync(entity.personUid)
+            val pictureRowUri = pictureRow?.customFieldValue?.customFieldValueValue
+            val currentUri = if(personPicture != null) repo.personPictureDao.getAttachmentUri(personPicture) else null
+
+            if(personPicture != null && pictureRowUri != null && currentUri != pictureRowUri) {
+                repo.personPictureDao.setAttachmentDataFromUri(personPicture, pictureRowUri, context)
+                repo.personPictureDao.update(personPicture)
+            }else if(pictureRowUri != null && currentUri != pictureRowUri) {
+                personPicture = PersonPicture().apply {
+                    personPicturePersonUid = entity.personUid
+                }
+                personPicture.personPictureUid = repo.personPictureDao.insert(personPicture)
+                repo.personPictureDao.setAttachmentDataFromUri(personPicture, pictureRowUri, context)
+            }
+
+            withContext(doorMainDispatcher()) {
+                view.finishWithResult(listOf(entity))
+            }
         }
     }
 
