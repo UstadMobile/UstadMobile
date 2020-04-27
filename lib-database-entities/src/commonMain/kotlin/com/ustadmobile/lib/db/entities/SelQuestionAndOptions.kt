@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class  SelQuestionAndOptions(
         @Embedded var selQuestion : SelQuestion,
-        var options: List<SelQuestionOption>)
+        var options: List<SelQuestionOption>,
+        var optionsToDeactivate: List<Long>)

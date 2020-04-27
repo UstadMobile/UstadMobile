@@ -65,7 +65,7 @@ class SelQuestionAndOptionsEditPresenter(context: Any,
             editEntity = Json.parse(SelQuestionAndOptions.serializer(), entityJsonStr)
         }else {
             editEntity = SelQuestionAndOptions(SelQuestion().apply { questionActive = true },
-                    listOf())
+                    listOf(), listOf())
         }
 
         //Construct it
@@ -112,14 +112,9 @@ class SelQuestionAndOptionsEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: SelQuestionAndOptions) {
-        val eti = view.selQuestionOptionList?.getValue()?: listOf()
-        entity.options = eti
-
+        entity.options = view.selQuestionOptionList?.getValue()?: listOf()
         val etd = view.selQuestionOptionDeactivateList?.getValue()?: listOf()
-        //TODO: Check if right thing to do
-        GlobalScope.launch {
-            db.selQuestionOptionDao.deactivateByUids(etd.flatMap { listOf(it.selQuestionOptionUid) })
-        }
+        entity.optionsToDeactivate = etd.flatMap { listOf(it.selQuestionOptionUid) }
 
         view.finishWithResult(listOf(entity))
     }

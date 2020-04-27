@@ -71,7 +71,7 @@ class SelQuestionSetEditPresenter(context: Any,
                 questionAndOptions.groupBy { it.selQuestion }.entries
                     .map { SelQuestionAndOptions(
                             it.key?:SelQuestion(),
-                            it.value.map { it.selQuestionOption?:SelQuestionOption() }) }
+                            it.value.map { it.selQuestionOption?:SelQuestionOption() }, listOf()) }
 
         // Load the list for any one to many join helper here
          val selQuestionSet = withTimeoutOrNull(2000) {
@@ -142,6 +142,8 @@ class SelQuestionSetEditPresenter(context: Any,
             repo.selQuestionOptionDao.insertList(splitList.first)
             repo.selQuestionOptionDao.updateList(splitList.second)
 
+            val deactivateOptions = allQuestions.flatMap { it.optionsToDeactivate }
+            db.selQuestionOptionDao.deactivateByUids(deactivateOptions)
 
             val etd : List<SelQuestionAndOptions> =
                     selQuestionOneToManyJoinEditHelper.entitiesToDeactivate
