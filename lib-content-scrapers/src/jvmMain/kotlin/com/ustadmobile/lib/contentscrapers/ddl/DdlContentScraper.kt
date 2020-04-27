@@ -283,7 +283,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                 setScrapeDone(false, ERROR_TYPE_NO_FILE_AVAILABLE)
                 throw ScraperException(ERROR_TYPE_NO_FILE_AVAILABLE, "no file found in the website")
             }
-            throw e
+            throw ScraperException(0, e.message)
         }
 
         if (!scraperResult.updated) {

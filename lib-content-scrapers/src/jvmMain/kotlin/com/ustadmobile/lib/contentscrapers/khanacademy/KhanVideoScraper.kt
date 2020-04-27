@@ -209,8 +209,12 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
             try {
                 val ytUrl = getYoutubeUrl(youtubeId)
                 super.scrapeYoutubeVideo(ytUrl, "worst[ext=webm]/worst")
-            } catch (e: Exception) {
+            } catch (s: ScraperException) {
                 hideContentEntry()
+                close()
+                throw s
+            } catch (e: Exception) {
+                close()
                 throw e
             }
 

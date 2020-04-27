@@ -400,7 +400,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
             close()
             hideContentEntry()
             setScrapeDone(false, 0)
-            throw e
+            throw ScraperException(0, e.message)
         }
         val linksList = mutableListOf<HarRegexPair>()
         val navList = navData.navItems

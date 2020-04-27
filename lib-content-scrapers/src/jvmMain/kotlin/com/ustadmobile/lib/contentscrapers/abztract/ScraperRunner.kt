@@ -168,13 +168,17 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                     obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid, it.sqiUid)
                     obj?.scrapeUrl(it.scrapeUrl!!)
                 }
-            } catch(t: TimeoutCancellationException) {
+            } catch (t: TimeoutCancellationException) {
                 queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, ERROR_TYPE_TIMEOUT)
                 contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
-            }catch (e: Exception) {
-                    UMLogUtil.logError("Exception running scrapeContent ${it.scrapeUrl}")
-                    UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            }finally {
+            } catch (s: ScraperException) {
+                UMLogUtil.logError("Known Exception ${s.message}")
+            } catch (e: Exception) {
+                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, 0)
+                contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
+                UMLogUtil.logError("Exception running scrapeContent ${it.scrapeUrl}")
+                UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+            } finally {
                 obj?.close()
             }
 

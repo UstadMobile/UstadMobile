@@ -19,15 +19,14 @@ import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import kotlinx.coroutines.runBlocking
-import net.lightbody.bmp.core.har.HarEntry
 import org.apache.commons.io.IOUtils
+import org.apache.commons.lang3.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.io.File
 import java.net.URL
-import java.util.*
 
 class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
 
@@ -150,7 +149,8 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
             hideContentEntry()
             setScrapeDone(false, 0)
             close()
-            throw e
+            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+            throw ScraperException(0, e.message)
         }
 
         val linksList = mutableListOf<HarRegexPair>()
