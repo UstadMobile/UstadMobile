@@ -29,7 +29,7 @@ class KhanProblemBody {
 
             var itemId: String? = null
 
-            var assessmentId: String? = null
+            var assessmentItemId: String? = null
 
             var quizProblemNumber: String? = null
 

@@ -8,6 +8,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
+import com.ustadmobile.lib.contentscrapers.abztract.YoutubeChannelIndexer
+import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanArticleScraper
@@ -18,6 +20,7 @@ import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScrap
 import com.ustadmobile.lib.contentscrapers.ytindexer.ChildYoutubeScraper
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -90,7 +93,7 @@ class TestPrathamContentScraper {
     @Before
     fun clearDb() {
         db = UmAppDatabase.getInstance(Any())
-       // db.clearAllTables()
+        // db.clearAllTables()
     }
 
 
@@ -179,15 +182,15 @@ class TestPrathamContentScraper {
         val jsonUrl = URL(parentUrl, "/api/internal/static/content${parentUrl.path}?lang=tr")
 
 
-       val containerDir = Files.createTempDirectory("container").toFile()
+        val containerDir = Files.createTempDirectory("container").toFile()
 
         val entry = ContentEntry()
         entry.sourceUrl = "https://bg.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-out-1-20-objects"
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
-       /* val scraper = DdlContentScraper(
-                containerDir, "en", db, entry.contentEntryUid)
-        scraper.scrapeUrl(entry.sourceUrl!!)*//*
+        /* val scraper = DdlContentScraper(
+                 containerDir, "en", db, entry.contentEntryUid)
+         scraper.scrapeUrl(entry.sourceUrl!!)*//*
 
         val child = ChildYoutubeScraper(containerDir, db,  entry.contentEntryUid, 0)
         child.scrapeYoutubeLink(entry.sourceUrl!!)
@@ -197,24 +200,46 @@ class TestPrathamContentScraper {
 
         var sourceUrl = "https://ddl.af/fa/resource/9398/"*/
 
-       // val khan = KhanArticleScraper(containerDir, db, entry.contentEntryUid, 0)
+        // val khan = KhanArticleScraper(containerDir, db, entry.contentEntryUid, 0)
         val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0)
         khan.scrapeUrl(entry.sourceUrl!!)
 
     }
 
     @Test
-    fun testVideo(){
+    fun testVideo() {
+
+        val containerDir = Files.createTempDirectory("container").toFile()
+
+
+        val entry = ContentEntry()
+        entry.sourceUrl = "a new  problem"
+        entry.contentEntryUid = db.contentEntryDao.insert(entry)
+
+        runBlocking {
+            val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0)
+            khan.scrapeUrl("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/one-more--one-less")
+        }
+
+
+    }
+
+    @Test
+    fun testYoutube() {
 
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val entry = ContentEntry()
-        entry.sourceUrl = "https://bg.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/v/counting-with-small-numbers/"
+        entry.sourceUrl = "https://bg.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-out-1-20-objects"
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
-        val khan = KhanVideoScraper(containerDir, db, entry.contentEntryUid, 0)
-        khan.scrapeUrl(entry.sourceUrl!!)
+        runBlocking {
+            val khan = YoutubeScraper(containerDir, db, entry.contentEntryUid, 0)
+            khan.scrapeUrl("https://www.youtube.com/watch?v=SGUJCVVryTU")
+        }
+
 
     }
+
 
 }

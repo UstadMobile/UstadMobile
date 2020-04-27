@@ -63,7 +63,7 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
         entries.forEach {
 
             val requestMethod = it.request?.method ?: return@forEach
-            val requestUrl = it.request.method ?: return@forEach
+            val requestUrl = it.request.url ?: return@forEach
 
             val pair = Pair(requestMethod, requestUrl)
             if (requestMap.containsKey(pair)) {

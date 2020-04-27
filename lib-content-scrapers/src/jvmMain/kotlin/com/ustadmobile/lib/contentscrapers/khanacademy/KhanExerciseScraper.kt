@@ -23,6 +23,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
+import net.lightbody.bmp.core.har.HarNameValuePair
 import net.lightbody.bmp.proxy.CaptureType
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -128,7 +129,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 HarRegexPair("last_seen_problem_sha=(.*)&", ""),
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attempt\\?)(.*)",
                         "https://www.khanacademy.org/attempt"),
-                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/getAssessmentItem\\?)(.*)",
+                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/api\\/internal\\/_mt\\/graphql\\/getAssessmentItem\\?)(.*)",
                         "https://www.khanacademy.org/getAssessmentItem"),
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attemptProblem\\?)(.*)",
                         "https://www.khanacademy.org/attemptProblem"),
@@ -172,121 +173,118 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                     it.har.log.entries.add(0, sourceEntry)
                 }
 
+                val practiceJson = gson.fromJson(realPractice, PracticeJson::class.java)
+                val practiceTask = gson.fromJson(realPractice, PracticeTask::class.java)
+                val reservedList = practiceJson.taskJson?.reservedItems
+                        ?: practiceTask.data?.getOrCreatePracticeTask?.result?.userTask?.task?.reservedItems
 
-                val practiceEntry = it.har.log.entries.find { urlEntry -> urlEntry.request.url.contains("/task/practice/") || urlEntry.request.url.contains("/getOrCreatePracticeTask") }
-                if (practiceEntry != null) {
+                if (reservedList.isNullOrEmpty()) {
+                    close()
+                    hideContentEntry()
+                    setScrapeDone(false, ERROR_TYPE_MISSING_QUESTIONS)
+                    throw ScraperException(ERROR_TYPE_MISSING_QUESTIONS, "no questions found for exercise")
+                }
 
-                    val practiceJson = gson.fromJson(realPractice, PracticeJson::class.java)
-                    val practiceTask = gson.fromJson(realPractice, PracticeTask::class.java)
-                    val reservedList = practiceJson.taskJson?.reservedItems
-                            ?: practiceTask.data?.getOrCreatePracticeTask?.result?.userTask?.task?.reservedItems
+                // since we have the 7 questions, we should remove the default one as it conflicts with the others
+                val problemList = it.har.log.entries.filter { problemEntry -> problemEntry.request.url.contains("getAssessmentItem") }
+                problemList.forEach { pEntry ->
+                    pEntry.response.content.text = null
+                }
 
-                    if (reservedList.isNullOrEmpty()) {
-                        close()
-                        hideContentEntry()
-                        setScrapeDone(false, ERROR_TYPE_MISSING_QUESTIONS)
-                        throw ScraperException(ERROR_TYPE_MISSING_QUESTIONS, "no questions found for exercise")
+                reservedList.forEachIndexed { index, item ->
+
+                    val split = item.split("|")
+                    val exercise = split[0]
+                    val assessmentItem = split[1]
+
+                    val practiceUrl = URL(url, "$secondExerciseUrl$exercise$exerciseMidleUrl$assessmentItem$exercisePostUrl$lang")
+
+                    val problemUrl = URL(url, "$secondExerciseUrl$slug/problems/${index + 1}$exercisePostUrl$lang")
+
+                    val assessmentItemUrl = URL(url, "/getAssessmentItem")
+
+                    val itemData = IOUtils.toString(practiceUrl, ScraperConstants.UTF_ENCODING)
+
+                    val itemResponse = gson.fromJson(itemData, ItemResponse::class.java)
+
+                    val assItem = Item()
+                    val data = Item.Data()
+                    val assignment = Item.Data.AssessmentItem()
+                    val dataItem = Item.Data.AssessmentItem.ItemData()
+                    dataItem.id = itemResponse.id
+                    dataItem.itemData = itemResponse.itemData
+                    dataItem.sha = itemResponse.sha
+                    dataItem.problemType = itemResponse.problemType
+                    dataItem.__typename = itemResponse.contentKind ?: itemResponse.kind
+                    assignment.item = dataItem
+                    assignment.__typename = "${itemResponse.contentKind
+                            ?: itemResponse.kind}OrError"
+                    data.assessmentItem = assignment
+                    assItem.data = data
+
+                    val assItemData = gson.toJson(assItem)
+
+                    entries.add(addHarEntry(
+                            itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
+                            requestUrl = problemUrl.toString()))
+
+                    entries.add(addHarEntry(
+                            itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
+                            requestUrl = practiceUrl.toString()))
+
+                    val problemEntry = addHarEntry(
+                            assItemData, mimeType = ScraperConstants.MIMETYPE_JSON,
+                            requestMethod = "POST",
+                            requestUrl = assessmentItemUrl.toString())
+                    problemEntry.request.headers.add(0, HarNameValuePair("itemId", assessmentItem))
+                    entries.add(problemEntry)
+
+                    val linkPattern = Pattern.compile("(https://|web\\+graphie://)([^\")]*)")
+                    val matcher = linkPattern.matcher(itemResponse.itemData)
+
+                    val imageList = mutableSetOf<String>()
+                    while (matcher.find()) {
+                        imageList.add(matcher.group())
                     }
 
-                    // since we have the 7 questions, we should remove the default one as it conflicts with the others
-                    val problemList = it.har.log.entries.filter { problemEntry -> problemEntry.request.url.contains("getAssessmentItem") }
-                    problemList.forEach{pEntry ->
-                        pEntry.response.content.text = null
-                    }
-
-                    reservedList.forEachIndexed { index, item ->
-
-                        val split = item.split("|")
-                        val exercise = split[0]
-                        val assessmentItem = split[1]
-
-                        val practiceUrl = URL(url, "$secondExerciseUrl$exercise$exerciseMidleUrl$assessmentItem$exercisePostUrl$lang")
-
-                        val problemUrl = URL(url, "$secondExerciseUrl$slug/problems/${index + 1}$exercisePostUrl$lang")
-
-                        val assessmentItemUrl = URL(url, "/getAssessmentItem")
-
-                        val itemData = IOUtils.toString(practiceUrl, ScraperConstants.UTF_ENCODING)
-
-                        val itemResponse = gson.fromJson(itemData, ItemResponse::class.java)
-
-                        val assItem = Item()
-                        val data = Item.Data()
-                        val assignment = Item.Data.AssessmentItem()
-                        val dataItem = Item.Data.AssessmentItem.ItemData()
-                        dataItem.id = itemResponse.id
-                        dataItem.itemData = itemResponse.itemData
-                        dataItem.sha = itemResponse.sha
-                        dataItem.problemType = itemResponse.problemType
-                        dataItem.__typename = itemResponse.contentKind ?: itemResponse.kind
-                        assignment.item = dataItem
-                        assignment.__typename = "${itemResponse.contentKind
-                                ?: itemResponse.kind}OrError"
-                        data.assessmentItem = assignment
-                        assItem.data = data
-
-                        val assItemData = gson.toJson(assItem)
-
-                        entries.add(addHarEntry(
-                                itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
-                                requestUrl = problemUrl.toString()))
-
-                        entries.add(addHarEntry(
-                                itemData, mimeType = ScraperConstants.MIMETYPE_JSON,
-                                requestUrl = practiceUrl.toString()))
-
-                        entries.add(addHarEntry(
-                                assItemData, mimeType = ScraperConstants.MIMETYPE_JSON,
-                                requestMethod = "POST",
-                                requestUrl = assessmentItemUrl.toString()))
-
-                        val linkPattern = Pattern.compile("(https://|web\\+graphie://)([^\")]*)")
-                        val matcher = linkPattern.matcher(itemResponse.itemData)
-
-                        val imageList = mutableSetOf<String>()
-                        while (matcher.find()) {
-                            imageList.add(matcher.group())
-                        }
-
-                        for (imageValue in imageList) {
-                            var conn: HttpURLConnection? = null
-                            try {
-                                val image = imageValue.replace(ScraperConstants.EMPTY_SPACE.toRegex(), ScraperConstants.EMPTY_STRING)
-                                var imageUrlString = image
-                                if (image.contains(ScraperConstants.GRAPHIE)) {
-                                    imageUrlString = ScraperConstants.KHAN_GRAPHIE_PREFIX + image.substring(image.lastIndexOf("/") + 1) + ScraperConstants.SVG_EXT
-                                }
-
-                                val imageUrl = URL(imageUrlString)
-                                conn = imageUrl.openConnection() as HttpURLConnection
-                                conn.requestMethod = ScraperConstants.REQUEST_HEAD
-                                val mimeType = conn.contentType
-                                val length = conn.contentLength
-
-                                val base64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(imageUrl))
-
-                                entries.add(addHarEntry(
-                                        base64, encoding = "base64",
-                                        size = length,
-                                        mimeType = mimeType,
-                                        requestUrl = imageUrl.toString()))
-
-
-                            } catch (e: MalformedURLException) {
-                                UMLogUtil.logDebug(ExceptionUtils.getStackTrace(e))
-                            } catch (e: Exception) {
-                                UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-                                UMLogUtil.logError("Error downloading an image for index log$imageValue with url $sourceUrl")
-                            } finally {
-                                conn?.disconnect()
+                    for (imageValue in imageList) {
+                        var conn: HttpURLConnection? = null
+                        try {
+                            val image = imageValue.replace(ScraperConstants.EMPTY_SPACE.toRegex(), ScraperConstants.EMPTY_STRING)
+                            var imageUrlString = image
+                            if (image.contains(ScraperConstants.GRAPHIE)) {
+                                imageUrlString = ScraperConstants.KHAN_GRAPHIE_PREFIX + image.substring(image.lastIndexOf("/") + 1) + ScraperConstants.SVG_EXT
                             }
 
-                        }
+                            val imageUrl = URL(imageUrlString)
+                            conn = imageUrl.openConnection() as HttpURLConnection
+                            conn.requestMethod = ScraperConstants.REQUEST_HEAD
+                            val mimeType = conn.contentType
+                            val length = conn.contentLength
 
+                            val base64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(imageUrl))
+
+                            entries.add(addHarEntry(
+                                    base64, encoding = "base64",
+                                    size = length,
+                                    mimeType = mimeType,
+                                    requestUrl = imageUrl.toString()))
+
+
+                        } catch (e: MalformedURLException) {
+                            UMLogUtil.logDebug(ExceptionUtils.getStackTrace(e))
+                        } catch (e: Exception) {
+                            UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+                            UMLogUtil.logError("Error downloading an image for index log$imageValue with url $sourceUrl")
+                        } finally {
+                            conn?.disconnect()
+                        }
 
                     }
 
+
                 }
+
 
                 entries.add(addHarEntry(
                         IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.KHAN_CSS_LINK), ScraperConstants.UTF_ENCODING),
@@ -305,8 +303,13 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                         requestUrl = "https://www.khanacademy.org/attempt",
                         requestMethod = POST_METHOD))
 
+
+                val regex = Regex("num_problems_\\d")
+                var problemText = IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_PROBLEM_JSON_LINK), ScraperConstants.UTF_ENCODING)
+                problemText = problemText.replace(regex, "num_problems_${reservedList.size}")
+
                 entries.add(addHarEntry(
-                        IOUtils.toString(javaClass.getResourceAsStream(ScraperConstants.ATTEMPT_PROBLEM_JSON_LINK), ScraperConstants.UTF_ENCODING),
+                        problemText,
                         mimeType = ScraperConstants.MIMETYPE_JSON,
                         requestUrl = "https://www.khanacademy.org/attemptProblem",
                         requestMethod = POST_METHOD))
