@@ -2,9 +2,9 @@ package com.ustadmobile.port.android.view.binding
 
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
-import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
 
@@ -42,4 +42,10 @@ fun TextView.setPresenterFieldHeader(presenterField: PersonDetailPresenterField)
     if(presenterField.headerMessageId != 0) {
         text = UstadMobileSystemImpl.instance.getString(presenterField.headerMessageId, context)
     }
+}
+
+@BindingAdapter(value= ["textMessageIdOptionSelected","textMessageIdOptions"], requireAll = true)
+fun TextView.setTextFromMessageIdList(textMessageIdOptionSelected: Int, textMessageIdOptions: List<MessageIdOption>) {
+    text = UstadMobileSystemImpl.instance.getString(textMessageIdOptions
+            ?.firstOrNull { it.code == textMessageIdOptionSelected }?.messageId ?: 0, context)
 }

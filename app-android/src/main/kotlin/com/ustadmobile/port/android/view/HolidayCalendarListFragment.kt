@@ -27,8 +27,10 @@ import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries>(),
-        HolidayCalendarListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class HolidayCalendarListFragment()
+    : UstadListViewFragment<HolidayCalendar, HolidayCalendarWithNumEntries>(),
+        HolidayCalendarListView, MessageIdSpinner.OnMessageIdOptionSelectedListener,
+        View.OnClickListener{
 
     private var mPresenter: HolidayCalendarListPresenter? = null
 
@@ -38,7 +40,8 @@ class HolidayCalendarListFragment(): UstadListViewFragment<HolidayCalendar, Holi
     class HolidayCalendarListViewHolder(val itemBinding: ItemHolidayCalendarBinding): RecyclerView.ViewHolder(itemBinding.root)
 
     class HolidayCalendarListRecyclerAdapter(var presenter: HolidayCalendarListPresenter?)
-        : SelectablePagedListAdapter<HolidayCalendarWithNumEntries, HolidayCalendarListViewHolder>(DIFF_CALLBACK) {
+        : SelectablePagedListAdapter<HolidayCalendarWithNumEntries,
+            HolidayCalendarListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HolidayCalendarListViewHolder {
             val itemBinding = ItemHolidayCalendarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
