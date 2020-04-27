@@ -1,10 +1,11 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.LiveData
+import android.widget.AdapterView
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -16,10 +17,10 @@ import com.toughra.ustadmobile.databinding.FragmentSelquestionandoptionsEditBind
 import com.toughra.ustadmobile.databinding.ItemSelquestionoptionBinding
 import com.ustadmobile.core.controller.SelQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.db.dao.SelQuestionDao
+import com.ustadmobile.core.db.dao.SelQuestionDao.Companion.SEL_QUESTION_TYPE_MULTI_CHOICE
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SelQuestionAndOptionsEditView
 import com.ustadmobile.door.DoorMutableLiveData
@@ -29,9 +30,13 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 
+interface QuestionAndOptionsEditEventHandler {
+    fun handleRemoveOption(option: SelQuestionOption, view: View)
+}
 
 class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOptions>(),
-        SelQuestionAndOptionsEditView {
+        SelQuestionAndOptionsEditView, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>,
+        QuestionAndOptionsEditEventHandler{
 
     private var mBinding: FragmentSelquestionandoptionsEditBinding? = null
 
@@ -69,7 +74,7 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
         : RecyclerView.ViewHolder(binding.root)
 
     class EntityClassRecyclerAdapter(
-            var presenter: SelQuestionAndOptionsEditPresenter?)
+            var presenter: SelQuestionAndOptionsEditPresenter?, var fragment: QuestionAndOptionsEditEventHandler)
         : ListAdapter<SelQuestionOption,
             EntityClassViewHolder>(DIFF_CALLBACK_SEL_QUESTION_OPTION) {
 
@@ -80,6 +85,7 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
                     LayoutInflater.from(parent.context), parent, false))
 
             viewHolder.binding.mPresenter = presenter
+            viewHolder.binding.mFragment = fragment
             return viewHolder
         }
 
@@ -89,12 +95,26 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
         }
     }
 
+    override fun handleRemoveOption(option: SelQuestionOption, view: View) {
+        /**
+         * IMPORTANT: If the item being deleted from a recyclerview has focus, the entire app will crash.
+         */
+        mBinding?.activitySelquestionandoptionsEditQuestionsetNameText?.requestFocus()
+        Handler().post {
+            mPresenter?.removeQuestionOption(option)
+        }
+    }
+
     override var entity: SelQuestionAndOptions? = null
         get() = field
         set(value) {
             field = value
-            mBinding?.selQuestionAndOptions = value
-            mBinding?.selquestion = value?.selQuestion
+            mBinding?.selQuestion = value?.selQuestion
+            mBinding?.optionsVisibility = if(value?.selQuestion?.questionType == SEL_QUESTION_TYPE_MULTI_CHOICE) {
+                View.VISIBLE
+            }else {
+                View.GONE
+            }
         }
 
     override var fieldsEnabled: Boolean = false
@@ -126,12 +146,11 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
         mBinding = FragmentSelquestionandoptionsEditBinding.inflate(inflater, container,
                 false).also{
                     rootView = it.root
+                    it.questionTypeSelectionListener = this
                 }
 
-        mBinding?.multichoicevalue = SelQuestionDao.SEL_QUESTION_TYPE_MULTI_CHOICE
-
         entityClassRecyclerView = rootView.findViewById(R.id.activity_selquestionandoptions_edit_rv)
-        entityClassRecyclerAdapter = EntityClassRecyclerAdapter(null)
+        entityClassRecyclerAdapter = EntityClassRecyclerAdapter(null, this)
         entityClassRecyclerView?.adapter = entityClassRecyclerAdapter
         entityClassRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
@@ -147,6 +166,15 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
         setEditFragmentTitle(R.string.question)
 
         return rootView
+    }
+
+
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
+        mBinding?.optionsVisibility = if(selectedOption.code == SEL_QUESTION_TYPE_MULTI_CHOICE) View.VISIBLE else View.GONE
+    }
+
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

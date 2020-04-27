@@ -2,11 +2,8 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -16,14 +13,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSelquestionsetEditBinding
 import com.toughra.ustadmobile.databinding.ItemSelquestionBinding
+import com.ustadmobile.core.controller.SelQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.SelQuestionSetEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SelQuestionSetEditView
 import com.ustadmobile.door.DoorLiveData
@@ -32,7 +28,6 @@ import com.ustadmobile.lib.db.entities.SelQuestionSet
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
-import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
 
 interface SelQuestionSetEditActivityEventHandler {
     fun onClickEditSelQuestion(selQuestion: SelQuestionAndOptions?)
@@ -41,7 +36,7 @@ interface SelQuestionSetEditActivityEventHandler {
 }
 
 class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuestionSetEditView,
-    SelQuestionSetEditActivityEventHandler {
+    SelQuestionSetEditActivityEventHandler{
 
     private var mBinding: FragmentSelquestionsetEditBinding? = null
 
@@ -83,6 +78,9 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
                     LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
             viewHolder.binding.mActivity = activityEventHandler
+            viewHolder.binding.questionTypeList =
+                    SelQuestionAndOptionsEditPresenter.QuestionOptions.values()
+                            .map { MessageIdOption(it.messageId, parent.context, it.optionVal) }
             return viewHolder
         }
 
@@ -90,6 +88,7 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
             holder.binding.selQuestion = getItem(position)
         }
     }
+
 
     override var entity: SelQuestionSet? = null
         get() = field

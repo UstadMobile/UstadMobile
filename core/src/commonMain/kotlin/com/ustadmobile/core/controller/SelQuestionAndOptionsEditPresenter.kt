@@ -9,7 +9,6 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.SelQuestionAndOptionsEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
@@ -17,8 +16,6 @@ import com.ustadmobile.lib.db.entities.SelQuestion
 import com.ustadmobile.lib.db.entities.SelQuestionAndOptions
 import com.ustadmobile.lib.db.entities.SelQuestionOption
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 class SelQuestionAndOptionsEditPresenter(context: Any,
@@ -101,12 +98,12 @@ class SelQuestionAndOptionsEditPresenter(context: Any,
 
         if(deleteMe.selQuestionOptionUid == 0L) {
             currentList.removeAll { it === deleteMe }
-            view.selQuestionOptionList?.setVal(currentList)
+            view.selQuestionOptionList?.sendValue(currentList)
         }else{
             val currentDeleteList = view.selQuestionOptionDeactivateList?.getValue()?.toMutableList()
                     ?: mutableListOf()
             val newList =  currentDeleteList + listOf(deleteMe)
-            view.selQuestionOptionDeactivateList?.setVal(newList)
+            view.selQuestionOptionDeactivateList?.sendValue(newList)
         }
 
     }

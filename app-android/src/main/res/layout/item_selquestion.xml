@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="java.util.List"/>
+        <import type="com.ustadmobile.core.util.MessageIdOption"/>
         <variable name="selQuestion" type="com.ustadmobile.lib.db.entities.SelQuestionAndOptions" />
 
         <variable name="mPresenter"
@@ -11,6 +13,9 @@
 
         <variable name="mActivity"
             type="com.ustadmobile.port.android.view.SelQuestionSetEditActivityEventHandler" />
+
+        <variable name="questionTypeList"
+            type="List&lt;MessageIdOption&gt;"/>
 
     </data>
 
@@ -46,14 +51,18 @@
             android:text="@{selQuestion.selQuestion.questionText}"
             android:textColor="@color/text_primary" />
 
-        <!-- Line 2-->
+        <!-- Line 2
+
+
+        -->
         <TextView android:id="@+id/item_selquestion_line2_text" android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="@+id/item_selquestion_line1_text"
             app:layout_constraintTop_toBottomOf="@+id/item_selquestion_line1_text"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Text type"
-            android:text="Insert type"
+            app:textMessageIdOptions="@{questionTypeList}"
+            app:textMessageIdOptionSelected="@{selQuestion.selQuestion.questionType}"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
 
@@ -64,10 +73,9 @@
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_more_vert_black_24dp"
-            android:contentDescription="@string/edit"
-            app:onClickEditPopupMenu="@{() -> mActivity.onClickEditSelQuestion(selQuestion)}"
-            app:onClickDeletePopupMenu="@{() -> mActivity.handleRemoveSelQuestion(selQuestion)}" />
+            app:srcCompat="@drawable/ic_delete_black_24dp"
+            android:contentDescription="@string/delete"
+            android:onClick="@{() -> mPresenter.handleRemoveSelQuestion(selQuestion)}"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

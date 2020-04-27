@@ -5,13 +5,11 @@
 
     <data>
         <import type="android.view.View"/>
-
+        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
         <variable
-            name="selQuestionAndOptions"
-            type="com.ustadmobile.lib.db.entities.SelQuestionAndOptions" />
-
-        <variable
-            name="selquestion"
+            name="selQuestion"
             type="com.ustadmobile.lib.db.entities.SelQuestion" />
 
         <variable
@@ -24,11 +22,15 @@
 
         <variable
             name="typeOptions"
-            type="java.util.List&lt;com.ustadmobile.core.util.MessageIdOption&gt;"/>
+            type="java.util.List&lt;MessageIdOption&gt;"/>
 
         <variable
-            name="multichoicevalue"
-            type="int" />
+            name="questionTypeSelectionListener"
+            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="optionsVisibility"
+            type="int"/>
 
         <variable
             name="presenter"
@@ -36,122 +38,91 @@
 
     </data>
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/activity_selquestionandoptions_edit_scroll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/activity_selquestionandoptions_edit_cl"
-        tools:context="com.ustadmobile.port.android.view.SelQuestionAndOptionsEditFragment">
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_selquestionandoptions_edit_appbar">
 
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/activity_selquestionandoptions_edit_scroll"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/activity_clazz_edit_edit_clx"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/activity_selquestionandoptions_edit_appbar">
+            android:layout_height="wrap_content">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/activity_clazz_edit_edit_clx"
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/activity_selquestionandoptions_edit_questionset_name_til"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/form_margin_horizontal"
+                android:hint="@string/question_text"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintEnabled="true"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/activity_selquestionandoptions_edit_questionset_name_text"
+                    android:text="@={selQuestion.questionText}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
 
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/actvity_selquestionandoptions_edit_type_actv"
+                app:layout_constraintStart_toStartOf="parent"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginTop="@dimen/formitem_margin_vertical"
+                app:layout_constraintTop_toBottomOf="@+id/activity_selquestionandoptions_edit_questionset_name_til"
+                android:hint="@string/question_type">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/activity_selquestionandoptions_edit_questionset_name_til"
+                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                    android:id="@+id/actvity_selquestionandoptions_edit_type_midactv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/form_margin_horizontal"
-                    android:hint="@string/question_text"
-                    app:hintEnabled="true"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:text="@={selQuestionAndOptions.selQuestion.questionText}"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-
-                <TextView
-                    android:id="@+id/activity_selquestionandoptions_edit_type_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/form_margin_horizontal_heading"
-                    android:layout_marginTop="@dimen/formitem_margin_vertical"
-                    android:layout_marginBottom="@dimen/formitem_margin_vertical"
-                    android:text="@string/question_type"
+                    android:inputType="none"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf=
-                        "@+id/activity_selquestionandoptions_edit_questionset_name_til" />
+                    app:onMessageIdOptionSelected="@{questionTypeSelectionListener}"
+                    app:selectedMessageIdOption="@={selQuestion.questionType}"
+                    app:messageIdOptions="@{typeOptions}"/>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/actvity_selquestionandoptions_edit_type_actv"
-                    app:layout_constraintStart_toStartOf="parent"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                    android:layout_marginTop="@dimen/formitem_margin_vertical"
-                    app:layout_constraintTop_toBottomOf="@+id/activity_selquestionandoptions_edit_type_tv"
-                    android:hint="@string/question_type">
-
-                    <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
-                        android:id="@+id/actvity_selquestionandoptions_edit_type_midactv"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:selectedMessageIdOption="@={selQuestionAndOptions.selQuestion.questionType}"
-                        app:messageIdOptions="@{typeOptions}"/>
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <TextView
-                    android:id="@+id/activity_selquestionandoptions_edit_create_new_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/form_margin_horizontal_heading"
-                    android:layout_marginTop="@dimen/formitem_margin_vertical"
-                    android:layout_marginBottom="@dimen/formitem_margin_vertical"
-                    android:text="@string/options"
-                    android:visibility=
-                        "@{selQuestionAndOptions.selQuestion.questionType == multichoicevalue ?View.VISIBLE:View.GONE}"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf=
-                        "@+id/actvity_selquestionandoptions_edit_type_actv" />
-
-                <include layout="@layout/item_createnew"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:onClickNew="@{() -> presenter.addNewBlankQuestionOption() }"
-                    app:createNewText="@{@string/add_option}"
-                    app:layout_constraintTop_toBottomOf=
-                        "@+id/activity_selquestionandoptions_edit_create_new_tv"
-                    android:visibility=
-                        "@{selQuestionAndOptions.selQuestion.questionType == multichoicevalue ?View.VISIBLE:View.GONE}"
-                    app:layout_constraintStart_toStartOf="parent"
-                    />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/activity_selquestionandoptions_edit_rv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:listitem="@layout/item_sel_question_option"
-                    tools:itemCount="2"
-                    android:visibility=
-                        "@{selQuestionAndOptions.selQuestion.questionType == multichoicevalue ?View.VISIBLE:View.GONE}"
-
-                app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </androidx.core.widget.NestedScrollView>
+            </com.google.android.material.textfield.TextInputLayout>
 
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+            <include layout="@layout/item_createnew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:onClickNew="@{() -> presenter.addNewBlankQuestionOption() }"
+                app:createNewText="@{@string/add_option}"
+                app:layout_constraintTop_toBottomOf=
+                    "@+id/actvity_selquestionandoptions_edit_type_actv"
+                android:visibility="@{optionsVisibility}"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/activity_selquestionandoptions_edit_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_sel_question_option"
+                tools:itemCount="2"
+                android:visibility="@{optionsVisibility}"
+
+            app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
 </layout>

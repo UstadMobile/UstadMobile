@@ -45,7 +45,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/form_margin_horizontal"
-                    android:hint="@string/question_text"
+                    android:hint="@string/role_name"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     app:hintEnabled="true"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
