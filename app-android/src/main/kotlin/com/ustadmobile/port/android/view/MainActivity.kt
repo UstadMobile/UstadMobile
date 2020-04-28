@@ -1,14 +1,14 @@
 package com.ustadmobile.port.android.view
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
@@ -21,6 +21,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
+import com.ustadmobile.core.view.SettingsView
 
 
 class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavController.OnDestinationChangedListener {
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
             activityFloatingActionButton?.setOnClickListener(null)
         }
 
+        invalidateOptionsMenu()
         mAppBar.setExpanded(true)
 
     }
@@ -71,9 +73,38 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
         return findNavController(R.id.activity_main_navhost_fragment).navigateUp()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+
+        val currentFrag =
+                findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id?:0
+        if(BOTTOM_NAV_DEST.contains(currentFrag)){
+            menu.findItem(R.id.menu_main_settings).setVisible(true)
+        }else{
+            menu.findItem(R.id.menu_main_settings).setVisible(false)
+        }
+        return super.onCreateOptionsMenu(menu)
+    }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            R.id.menu_main_settings -> handleClickSettings()
+        }
         return item.onNavDestinationSelected(findNavController(R.id.activity_main_navhost_fragment))
                 || super.onOptionsItemSelected(item)
+    }
+
+    /**
+     * When settings gear clicked in the menu options - Goes to the settings activity.
+     */
+    fun handleClickSettings() {
+        UstadMobileSystemImpl.instance.go(SettingsView.VIEW_NAME, mapOf(), this)
+
+    }
+
+    companion object{
+        val BOTTOM_NAV_DEST = listOf<Int>(R.id.home_clazzlist_dest, R.id.home_personlist_dest)
     }
 }

@@ -31,4 +31,14 @@ abstract class SelQuestionOptionDao : BaseDao<SelQuestionOption> {
 
     @Query("SELECT * FROM SelQuestionOption " + " WHERE selQuestionOptionQuestionUid = :questionUid AND optionActive = 1")
     abstract fun findAllActiveOptionsByQuestionUidProvider(questionUid: Long): DataSource.Factory<Int, SelQuestionOption>
+
+    suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+            updateActiveBySelQuestionOptionUid(it, false)
+        }
+    }
+
+    @Query("UPDATE SelQuestionOption SET optionActive = :active WHERE selQuestionOptionUid = :selQuestionOptionUid ")
+    abstract suspend fun updateActiveBySelQuestionOptionUid(selQuestionOptionUid: Long, active : Boolean)
+
 }

@@ -4,16 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <import type="com.ustadmobile.core.controller.BitmaskEditPresenter"/>
         <import type="com.ustadmobile.core.model.BitmaskFlag"/>
 
         <variable
             name="bitmaskFlag"
             type="BitmaskFlag" />
-
-        <variable
-            name="mPresenter"
-            type="com.ustadmobile.core.controller.BitmaskEditPresenter" />
 
 
     </data>
