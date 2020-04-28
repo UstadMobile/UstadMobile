@@ -175,7 +175,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
             ClazzAssignmentEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentEditActivity"),
             ClazzAssignmentDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentDetailActivity"),
-            SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"),
             PersonGroupListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupListActivity"),
             PersonGroupEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupEditActivity")
     )

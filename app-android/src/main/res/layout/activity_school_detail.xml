@@ -14,7 +14,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.ustadmobile.port.android.view.SchoolEditActivity">
+        tools:context="com.ustadmobile.staging.port.android.view.SchoolEditActivity">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/activity_school_detail_appbar"

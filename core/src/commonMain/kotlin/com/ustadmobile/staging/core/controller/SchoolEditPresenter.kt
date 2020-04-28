@@ -1,11 +1,12 @@
-package com.ustadmobile.core.controller
+package com.ustadmobile.staging.core.controller
 
 import androidx.paging.DataSource
+import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.SchoolDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.SchoolEditView
+import com.ustadmobile.staging.core.view.SchoolEditView
 import com.ustadmobile.lib.db.entities.School
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable

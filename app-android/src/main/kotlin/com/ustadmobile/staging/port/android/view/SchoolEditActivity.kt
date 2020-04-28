@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view
+package com.ustadmobile.staging.port.android.view
 
 import android.os.Bundle
 import android.view.Menu
@@ -7,10 +7,11 @@ import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivitySchoolDetailBinding
-import com.ustadmobile.core.controller.SchoolEditPresenter
+import com.ustadmobile.staging.core.controller.SchoolEditPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.SchoolEditView
+import com.ustadmobile.staging.core.view.SchoolEditView
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.port.android.view.UstadBaseActivity
 
 class SchoolEditActivity : UstadBaseActivity(), SchoolEditView {
 

@@ -28,6 +28,12 @@ open class School() {
     //Active
     var schoolActive: Boolean = false
 
+    var schoolPhoneNumber : Long = 0L
+
+    var schoolGender : Int? = 0
+
+    var schoolHolidayCalendarUid: Long = 0L
+
     // Features - bit mask
     var schoolFeatures: Long = 0
 

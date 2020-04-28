@@ -1,25 +1,12 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 
-/**
- * Core View. Screen is for SchoolList's View
- */
-interface SchoolListView : UstadView {
-    /**
-     * Sets the given provider to the view's provider adapter.
-     *
-     * @param listProvider The provider to set to the view
-     */
-    fun setListProvider(listProvider: DataSource.Factory<Int, School>)
-
-    fun setSortOptions(presets: Array<String>)
+interface SchoolListView: UstadListView<School, SchoolWithMemberCountAndLocation> {
 
     companion object {
-        // This defines the view name that is an argument value in the go() in impl.
-        const val VIEW_NAME = "SchoolList"
+        const val VIEW_NAME = "SchoolListView"
     }
 
 }
-

@@ -14,6 +14,11 @@
         android:label="@string/people"/>
 
     <fragment
+        android:id="@+id/home_schoollist_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolListFragment"
+        android:label="@string/schools"/>
+
+    <fragment
         android:id="@+id/clazz_edit_dest"
         android:name="com.ustadmobile.port.android.view.ClazzEditFragment" />
 

@@ -8,8 +8,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzListView
 import com.ustadmobile.core.view.ClazzStudentListView
 import com.ustadmobile.core.view.SchoolDetailView
-import com.ustadmobile.core.view.SchoolEditView
-import com.ustadmobile.core.view.SchoolEditView.Companion.ARG_SCHOOL_DETAIL_SCHOOL_UID
+import com.ustadmobile.staging.core.view.SchoolEditView
+import com.ustadmobile.staging.core.view.SchoolEditView.Companion.ARG_SCHOOL_DETAIL_SCHOOL_UID
 import com.ustadmobile.lib.db.entities.School
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable

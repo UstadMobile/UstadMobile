@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+
+    <item
+        android:id="@+id/home_schoollist_dest"
+        android:icon="@drawable/ic_school_black_24dp"
+        android:title="@string/schools"
+        />
+
     <item
         android:id="@+id/home_clazzlist_dest"
         android:icon="@drawable/ic_group_black_24dp"
@@ -22,8 +29,5 @@
         android:icon="@drawable/ic_newspaper"
         android:title="@string/feed"/>
     -->
-
-
-
 
 </menu>

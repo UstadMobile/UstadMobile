@@ -23,7 +23,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SettingsView
 
 
-class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavController.OnDestinationChangedListener {
+class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
+        NavController.OnDestinationChangedListener {
 
     private lateinit var appBarConfiguration : AppBarConfiguration
 
@@ -54,8 +55,10 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
         DbPreloadWorker.queuePreloadWorker(applicationContext)
     }
 
-    override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
-        val ustadDestination = UstadMobileSystemImpl.instance.destinationProvider.lookupDestinationById(destination.id)
+    override fun onDestinationChanged(controller: NavController, destination: NavDestination,
+                                      arguments: Bundle?) {
+        val ustadDestination = UstadMobileSystemImpl.instance.destinationProvider
+                .lookupDestinationById(destination.id)
 
         if(ustadDestination?.hasFab != true) {
             activityFloatingActionButton?.visibility = View.GONE
@@ -76,11 +79,7 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
 
         val currentFrag =
                 findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id?:0
-        if(BOTTOM_NAV_DEST.contains(currentFrag)){
-            menu.findItem(R.id.menu_main_settings).setVisible(true)
-        }else{
-            menu.findItem(R.id.menu_main_settings).setVisible(false)
-        }
+        menu.findItem(R.id.menu_main_settings).isVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -97,12 +96,11 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
     /**
      * When settings gear clicked in the menu options - Goes to the settings activity.
      */
-    fun handleClickSettings() {
+    private fun handleClickSettings() {
         UstadMobileSystemImpl.instance.go(SettingsView.VIEW_NAME, mapOf(), this)
-
     }
 
     companion object{
-        val BOTTOM_NAV_DEST = listOf<Int>(R.id.home_clazzlist_dest, R.id.home_personlist_dest)
+        val BOTTOM_NAV_DEST = listOf<Int>(R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest)
     }
 }

@@ -8,6 +8,7 @@ import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 
 @UmDao
 @UmRepository
@@ -23,6 +24,24 @@ abstract class SchoolDao : BaseDao<School> {
     @Query("SELECT * FROM School WHERE CAST(schoolActive AS INTEGER) = 1 " +
             " AND schoolName LIKE :searchBit ORDER BY schoolName ASC")
     abstract fun findAllActiveSchoolsNameAsc(searchBit: String): DataSource.Factory<Int, School>
+
+    @Query("""SELECT School.*, 
+         0 as numStudents,
+         0 as numTeachers, 
+         '' as locationName 
+         FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
+             AND schoolName LIKE :searchBit ORDER BY schoolName ASC""")
+    abstract fun findAllActiveSchoolWithMemberCountAndLocationNameAsc(searchBit: String): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+
+
+    @Query("""SELECT School.*, 
+         0 as numStudents,
+         0 as numTeachers, 
+         '' as locationName 
+         FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
+             AND schoolName LIKE :searchBit ORDER BY schoolName DESC""")
+    abstract fun findAllActiveSchoolWithMemberCountAndLocationNameDesc(searchBit: String): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+
 
     fun findAllSchoolsAndSort(searchBit: String, sortCode: Int): DataSource.Factory<Int, School>{
         //TODO:
