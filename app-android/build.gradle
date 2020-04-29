@@ -21,7 +21,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: "kotlin-multiplatform"
+apply plugin: "kotlin-android"
 apply plugin: 'kotlin-android-extensions'
 //Jacoco on Android is persistently getting stuck - see https://github.com/arturdm/jacoco-android-gradle-plugin/issues/60.
 // Should be disabled until this is fixed or excluded unless we are specifically running tests for coverage.
@@ -36,10 +36,11 @@ configurations.all {
     exclude group: "org.json", module: "json"
 }
 
-kotlin {
-
-    targets {
-        fromPreset(presets.android, 'android')
+kapt {
+    javacOptions {
+        // Increase the max count of errors from annotation processors.
+        // Default is 100.
+        option("-Xmaxerrs", 500)
     }
 }
 
