@@ -30,7 +30,7 @@ open class School() {
 
     var schoolPhoneNumber : Long = 0L
 
-    var schoolGender : Int? = 0
+    var schoolGender : Int = 0
 
     var schoolHolidayCalendarUid: Long = 0L
 
