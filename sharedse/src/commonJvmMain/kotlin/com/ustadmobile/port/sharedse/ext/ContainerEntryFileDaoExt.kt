@@ -11,6 +11,7 @@ import java.security.MessageDigest
 import java.io.ByteArrayInputStream
 import com.github.aakira.napier.Napier
 import kotlinx.serialization.toUtf8Bytes
+import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 
 data class ConcatenatedHttpResponse(val status: Int, val contentLength: Long, val etag: String?,
                                     val lastModifiedTime: Long,
@@ -18,7 +19,7 @@ data class ConcatenatedHttpResponse(val status: Int, val contentLength: Long, va
 
 val ERROR_PART_NOT_FOUND = 503
 
-fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String): ConcatenatedHttpResponse {
+fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String, requestHeaders: Map<String, List<String>> = mapOf()): ConcatenatedHttpResponse {
     val containerEntryFileUids = fileList.split(";").map { it.toLong() }
     val containerEntryFiles = findEntriesByUids(containerEntryFileUids)
 
@@ -51,9 +52,21 @@ fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String): C
         concatenatedMd5s.forEach { messageDigest.update(it) }
         val etag = messageDigest.digest().encodeBase64()
         val lastModifiedTime = containerEntryFiles.maxBy { it.lastModified }?.lastModified ?: 0
-        return ConcatenatedHttpResponse(200,
-                ConcatenatingInputStream.calculateLength(concatenatedParts), etag, lastModifiedTime,
-                ConcatenatingInputStream(concatenatedParts))
+
+        val rangeRequestHeader = requestHeaders.entries.firstOrNull { it.key.toLowerCase()  == "content-range"}
+        val totalLength = ConcatenatingInputStream.calculateLength(concatenatedParts)
+        val concatenatingInputStream = ConcatenatingInputStream(concatenatedParts)
+        if(rangeRequestHeader != null) {
+            val rangeResponse = parseRangeResponse(rangeRequestHeader, totalLength)
+            return ConcatenatedHttpResponse(206, rangeResponse.actualContentLength, etag,
+                lastModifiedTime, RangeInputStream(concatenatingInputStream, rangeResponse.fromByte,
+                    rangeResponse.toByte))
+        }else {
+            return ConcatenatedHttpResponse(200, totalLength, etag, lastModifiedTime,
+                    concatenatingInputStream)
+        }
+
+
     }
 
 
