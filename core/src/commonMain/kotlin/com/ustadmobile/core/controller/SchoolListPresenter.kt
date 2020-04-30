@@ -10,6 +10,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.UmAccount
+import io.ktor.http.parseAndSortContentTypeHeader
 
 class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: SchoolListView,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
@@ -59,11 +60,7 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     }
 
     override fun handleClickCreateNewFab() {
-        /* TODO: Add code to go to the edit view when the user clicks the new item FAB. This is only
-         * called when the fab is clicked, not if the first item is create new item (e.g. picker mode).
-         * That has to be handled at a platform level to use prepareCall etc.
         systemImpl.go(SchoolEditView.VIEW_NAME, mapOf(), context)
-         */
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {

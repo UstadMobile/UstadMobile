@@ -89,7 +89,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
                         rootView = it.root
                     }
 
-        //clazzRecyclerView = rootView.findViewById(R.id.)
+        clazzRecyclerView = rootView.findViewById(R.id.fragment_school_edit_class_rv)
         clazzRecyclerAdapter = ClazzRecyclerAdapter(this, null)
         clazzRecyclerView?.adapter = clazzRecyclerAdapter
         clazzRecyclerView?.layoutManager = LinearLayoutManager(requireContext())

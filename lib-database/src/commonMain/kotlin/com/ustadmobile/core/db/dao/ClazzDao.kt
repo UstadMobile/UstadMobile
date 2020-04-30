@@ -23,7 +23,7 @@ import com.ustadmobile.lib.db.entities.*
         TABLE_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 @Dao
-abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Schedule> {
+abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
     @QueryLiveTables(["Clazz", "ClazzMember"])
     @Query("SELECT " +
@@ -70,6 +70,15 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Schedule> {
     @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
             "AND CAST(isClazzActive AS INTEGER) = 1 ")
     abstract suspend fun findAllClazzesBySchool(schoolUid: Long): List<Clazz>
+
+    @Query("UPDATE Clazz SET isClazzActive = :active WHERE clazzUid = :clazzUid ")
+    abstract suspend fun updateActiveByClazzUid(clazzUid: Long, active : Boolean)
+
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+            updateActiveByClazzUid(it, false)
+        }
+    }
 
 
     fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
@@ -377,13 +386,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Schedule> {
         private const val CLAZZ_WHERE_CLAZZMEMBER =
                 " FROM Clazz " +
                 " LEFT JOIN Person ON Person.personUid = :personUid "
-//                " WHERE (Person.admin OR :personUid in " +
-//                " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
-//                "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND " +
-//                " CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1 ) AND CAST(Person.active AS INTEGER) = 1 ) "
-
-
-
 
         private const val SELECT_CLAZZ_WHERE_PERMISSION = " SELECT " +
                 "   Clazz.*, " +
