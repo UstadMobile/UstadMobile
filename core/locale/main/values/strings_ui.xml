@@ -43,6 +43,7 @@
     <string name='register'>Register</string>
     <string name='phone_number'>Phone number</string>
     <string name='name'>Name</string>
+    <string name="description">Description</string>
     <string name='male'>Male</string>
     <string name='female'>Female</string>
     <string name="other">Other</string>
@@ -384,6 +385,7 @@
     <string name="first_names">First names</string>
     <string name="basic_details">Basic details</string>
     <string name="home_address">Home address</string>
+    <string name="address">Address</string>
     <string name="add_person_to_class">Add person to class</string>
     <string name="fathers_name">Fathers name</string>
     <string name="fathers_number">Fathers number</string>
@@ -734,6 +736,7 @@
     <string name="add">Add</string>
     <string name="refresh">Refresh</string>
 
+    <string name="school">School</string>
     <string name="schools">Schools</string>
     <string name="add_school">Add school</string>
 

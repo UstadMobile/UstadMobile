@@ -23,7 +23,7 @@ import com.ustadmobile.lib.db.entities.*
         TABLE_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 @Dao
-abstract class ClazzDao : BaseDao<Clazz> {
+abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Schedule> {
 
     @QueryLiveTables(["Clazz", "ClazzMember"])
     @Query("SELECT " +
@@ -65,6 +65,12 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
+
+
+    @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
+            "AND CAST(isClazzActive AS INTEGER) = 1 ")
+    abstract suspend fun findAllClazzesBySchool(schoolUid: Long): List<Clazz>
+
 
     fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
         val auditLog = AuditLog(fromPersonUid, Clazz.TABLE_ID, toPersonUid)

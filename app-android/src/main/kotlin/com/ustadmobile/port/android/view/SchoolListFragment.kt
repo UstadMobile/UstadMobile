@@ -84,8 +84,7 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout) {
-            //TODO: this
-            //navigateToEditEntity(null, R.id.school_edit_dest, School::class.java)
+            navigateToEditEntity(null, R.id.school_edit_dest, School::class.java)
         }
     }
 

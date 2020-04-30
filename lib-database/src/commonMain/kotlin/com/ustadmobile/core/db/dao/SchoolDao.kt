@@ -8,6 +8,7 @@ import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 
 @UmDao
@@ -24,6 +25,13 @@ abstract class SchoolDao : BaseDao<School> {
     @Query("SELECT * FROM School WHERE CAST(schoolActive AS INTEGER) = 1 " +
             " AND schoolName LIKE :searchBit ORDER BY schoolName ASC")
     abstract fun findAllActiveSchoolsNameAsc(searchBit: String): DataSource.Factory<Int, School>
+
+
+    @Query("""SELECT School.*, HolidayCalendar.* FROM School 
+            LEFT JOIN HolidayCalendar ON School.schoolHolidayCalendarUid = HolidayCalendar.umCalendarUid
+            WHERE School.schoolUid = :uid""")
+    abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): SchoolWithHolidayCalendar?
+
 
     @Query("""SELECT School.*, 
          0 as numStudents,
