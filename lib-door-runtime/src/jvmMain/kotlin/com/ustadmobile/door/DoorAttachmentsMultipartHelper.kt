@@ -4,10 +4,8 @@ import io.ktor.http.content.MultiPartData
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.http.content.streamProvider
-import io.ktor.util.cio.use
-import io.ktor.util.cio.writeChannel
-import kotlinx.coroutines.io.jvm.javaio.copyTo
 import java.io.File
+import java.io.FileOutputStream
 
 
 /**
@@ -37,8 +35,12 @@ class DoorAttachmentsMultipartHelper {
                 is PartData.FileItem -> {
                     part.streamProvider().use { input ->
                         val tmpOutFile = File.createTempFile("multipart", "fout")
-                        val writeChannel = tmpOutFile.writeChannel()
-                        writeChannel.use { input.copyTo(writeChannel) }
+                        val fileOutputStream = FileOutputStream(tmpOutFile)
+                        fileOutputStream.use {
+                            input.copyTo(fileOutputStream)
+                        }
+                        fileOutputStream.flush()
+                        fileOutputStream.close()
                         attachmentTmpFiles[part.originalFileName!!] = tmpOutFile
                     }
                 }

@@ -152,6 +152,13 @@ kotlin {
 
 
     sourceSets {
+
+        all {
+            languageSettings {
+                useExperimentalAnnotation('kotlinx.serialization.InternalSerializationApi')
+            }
+        }
+
         commonMain {
             kotlin.srcDirs += "build/generated/source/umlocale/"
             dependencies {
@@ -161,6 +168,7 @@ kotlin {
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
@@ -182,6 +190,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation project(':lib-door-runtime')
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
@@ -312,6 +321,7 @@ kotlin {
                 implementation "com.github.aakira:napier-js:$version_napier"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+                implementation "io.ktor:ktor-io-js:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
             }
         }

@@ -4,7 +4,6 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
 import com.github.aakira.napier.Napier
@@ -178,7 +177,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
                     if(!isConnected && mirrorToUse == null) {
                         //it's hopeless - there is no mirror and we have no connection - give up
-                        throw IOException("$PREFIX_NOCONNECTION_NO_MIRRORS_MESSAGE $logPrefix: " +
+                        throw Exception("$PREFIX_NOCONNECTION_NO_MIRRORS_MESSAGE $logPrefix: " +
                                 "Repository status indicates no connectivity and there are no active " +
                                 "mirrors")
                     }
@@ -279,7 +278,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                 }
 
 
-                throw IOException("$logPrefix ==ERROR== NOT completed")
+                throw Exception("$logPrefix ==ERROR== NOT completed")
             }
         }
     }

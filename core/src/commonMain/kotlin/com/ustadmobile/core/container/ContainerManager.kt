@@ -4,7 +4,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
-import kotlinx.io.IOException
 import kotlinx.io.InputStream
 
 expect class ContainerManager : ContainerManagerCommon {

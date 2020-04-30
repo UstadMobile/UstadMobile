@@ -81,18 +81,6 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
     override fun getSystemLocale(context: Any): String
 
     /**
-     * Get an asset (from files that are in core/src/flavorName/assets)
-     *
-     */
-    fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>)
-
-
-    /**
-     * Get asset as an input stream asynchronously
-     */
-    suspend fun getAssetInputStreamAsync(context: Any, path: String) : InputStream
-
-    /**
      * Get a preference for the app
      *
      * @param key preference key as a string
@@ -164,14 +152,6 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
 
 
     fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?)
-
-    /**
-     * Get an asset Synchronously
-     * @param context
-     * @param path
-     * @return
-     */
-    fun getAssetSync(context: Any, path: String): InputStream
 
     suspend fun getAssetAsync(context: Any, path: String): ByteArray
 

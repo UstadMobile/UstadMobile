@@ -85,7 +85,7 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
         byteBuffer.putInt(concatenatedParts.size)
         concatenatedParts.forEach {
             if(it.partId.size != 16) {
-                throw IOException("ConcatenatingInputStream partId MUST be 16 bytes")
+                throw IllegalArgumentException("ConcatenatingInputStream partId MUST be 16 bytes")
             }
 
             byteBuffer.put(it.partId)

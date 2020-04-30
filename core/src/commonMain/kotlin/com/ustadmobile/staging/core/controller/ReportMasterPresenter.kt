@@ -17,7 +17,6 @@ import com.ustadmobile.lib.db.entities.ReportMasterItem
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlinx.io.IOException
 
 class ReportMasterPresenter(context: Any, arguments: Map<String, String>?, view:
 ReportMasterView) : UstadBaseController<ReportMasterView>(context, arguments!!, view) {
@@ -129,7 +128,7 @@ ReportMasterView) : UstadBaseController<ReportMasterView>(context, arguments!!, 
             umXLSX.createXLSX()
             view.generateXLSXReport(xlsxReportPath)
 
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             print(e.message)
         }
 
