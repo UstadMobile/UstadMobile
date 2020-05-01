@@ -152,9 +152,9 @@ class ContainerEntryFileDaoExtTest {
             val entryList = containerManager.allEntries.distinctBy { it.containerEntryFile!!.cefMd5 }
             val entryListStr = entryList.joinToString(separator = ";") { it.ceCefUid.toString() }
             val response1 = db.containerEntryFileDao.generateConcatenatedFilesResponse(entryListStr,
-                mapOf("Content-Range" to listOf("bytes 0-${splitFromByte-1}")))
+                "GET", mapOf("Content-Range" to listOf("bytes 0-${splitFromByte-1}")))
             val response2 = db.containerEntryFileDao.generateConcatenatedFilesResponse(entryListStr,
-                mapOf("Content-Range" to listOf("bytes $splitFromByte-")))
+                "GET", mapOf("Content-Range" to listOf("bytes $splitFromByte-")))
 
             val combinedResponseStream = ByteArrayInputStream(
                     response1.dataSrc!!.readBytes() + response2.dataSrc!!.readBytes())
