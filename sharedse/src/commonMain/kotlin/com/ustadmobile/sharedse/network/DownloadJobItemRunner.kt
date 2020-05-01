@@ -75,7 +75,8 @@ class DownloadJobItemRunner
  private val connectivityStatusLiveData: DoorLiveData<ConnectivityStatus?>,
  private val retryDelay: Long = 3000,
  private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
- private val localAvailabilityManager: LocalAvailabilityManager): ContainerDownloadRunner {
+ private val localAvailabilityManager: LocalAvailabilityManager,
+ val maxAttempts: Int = 15): ContainerDownloadRunner {
 
     private var connectivityStatusObserver: DoorObserver<ConnectivityStatus?>? = null
 
@@ -268,7 +269,7 @@ class DownloadJobItemRunner
         val containerEntriesToDownloadList = mutableListOf<ContainerEntryWithMd5>()
 
         var attemptNum = 0
-        while(attemptNum++ < 3 && coroutineContext.isActive) {
+        while(attemptNum++ < maxAttempts && coroutineContext.isActive) {
             try {
                 currentNetworkNode = localAvailabilityManager.findBestLocalNodeForContentEntryDownload(
                         downloadItem.djiContainerUid)

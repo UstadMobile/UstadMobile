@@ -412,7 +412,8 @@ class DownloadJobItemRunnerTest {
                     mockedNetworkManager, clientDb,
                     cloudEndPoint, connectivityStatus,
                     localAvailabilityManager = mock<LocalAvailabilityManager>(),
-                    connectivityStatusLiveData = connectivityStatusLiveData)
+                    connectivityStatusLiveData = connectivityStatusLiveData,
+                    maxAttempts = 3)
 
             jobItemRunner.download().await()
 
