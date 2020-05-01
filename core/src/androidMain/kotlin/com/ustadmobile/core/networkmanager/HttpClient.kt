@@ -15,9 +15,9 @@ import okhttp3.OkHttpClient
 import java.lang.RuntimeException
 import java.util.concurrent.TimeUnit
 
-private val OK_HTTP_MIN_SDKVERSION = 21
+private val OK_HTTP_MIN_SDKVERSION = 50
 
-private val okHttpClient = if(Build.VERSION.SDK_INT > OK_HTTP_MIN_SDKVERSION) {
+private val okHttpClient = if(Build.VERSION.SDK_INT >=   21) {
     OkHttpClient.Builder()
             .dispatcher(Dispatcher().also {
                 it.maxRequests = 30
@@ -32,7 +32,7 @@ private val okHttpClient = if(Build.VERSION.SDK_INT > OK_HTTP_MIN_SDKVERSION) {
 
 private val defaultGsonSerializer = GsonSerializer()
 
-private val httpClient = if(Build.VERSION.SDK_INT < 21) {
+private val httpClient = if(Build.VERSION.SDK_INT < OK_HTTP_MIN_SDKVERSION) {
     HttpClient(Android) {
         install(JsonFeature)
     }
@@ -55,7 +55,7 @@ private val httpClient = if(Build.VERSION.SDK_INT < 21) {
 
 actual fun defaultHttpClient() = httpClient
 
-fun defaultOkHttpClient() = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
+fun defaultOkHttpClient() = if(Build.VERSION.SDK_INT >= 21) {
     okHttpClient!!
 } else {
     throw RuntimeException("OKHttp Min SDK Version is $OK_HTTP_MIN_SDKVERSION")
@@ -67,7 +67,7 @@ fun initPicasso(context: Context) {
     /**
      * OKHttp does not work on any version of Android less than 5.0 .
      */
-    val downloader = if(Build.VERSION.SDK_INT >= 21) {
+    val downloader = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
         OkHttp3Downloader(okHttpClient)
     }else {
         PicassoUrlConnectionDownloader()
