@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.core.util.ext.toHexString
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -19,6 +20,23 @@ import org.junit.Assert
 import java.io.ByteArrayInputStream
 import java.nio.file.Files
 import java.security.MessageDigest
+
+
+fun assertConcatenatedPartsEqualEntryListContent(expectedEntryList: List<ContainerEntryWithContainerEntryFile>,
+                                                 actualConcatenatedInputStream: ConcatenatedInputStream) {
+    var nextPart: ConcatenatedPart? = null
+    var partIndex = 0
+    while(actualConcatenatedInputStream.nextPart().also { nextPart = it } != null) {
+        val entryMd5Str =  nextPart!!.id.encodeBase64()
+        val partBytes = actualConcatenatedInputStream.readBytes()
+        val fileBytes = File(expectedEntryList[partIndex].containerEntryFile!!.cefPath!!).readBytes()
+        Assert.assertArrayEquals("Content bytes are the same for ${expectedEntryList[partIndex].cePath}",
+                fileBytes, partBytes)
+        Assert.assertEquals("Md5sum matches part id",
+                expectedEntryList[partIndex].containerEntryFile!!.cefMd5, entryMd5Str)
+        partIndex++
+    }
+}
 
 class ContainerEntryFileDaoExtTest {
 
@@ -112,20 +130,37 @@ class ContainerEntryFileDaoExtTest {
             val concatenatedData = response.dataSrc!!.readBytes()
             val concatenatedInputStream = ConcatenatedInputStream(ByteArrayInputStream(concatenatedData))
 
-            var nextPart: ConcatenatedPart? = null
-            var partIndex = 0
-            while(concatenatedInputStream.nextPart().also { nextPart = it } != null) {
-                val entryMd5Str =  nextPart!!.id.encodeBase64()
-                val partBytes = concatenatedInputStream.readBytes()
-                val fileBytes = File(entryList[partIndex].containerEntryFile!!.cefPath!!).readBytes()
-                Assert.assertArrayEquals("Content bytes are the same for ${entryList[partIndex].cePath}",
-                        fileBytes, partBytes)
-                Assert.assertEquals("Md5sum matches part id",
-                        entryList[partIndex].containerEntryFile!!.cefMd5, entryMd5Str)
-                partIndex++
-            }
+            assertConcatenatedPartsEqualEntryListContent(entryList, concatenatedInputStream)
         }
+    }
 
+
+    @Test
+    fun givenEpubContainer_whenRequestedInTwoPartialRequests_thenShouldbeTheSame() {
+        val context = Any()
+        val appDb = UmAppDatabase.getInstance(context)
+        val epubContainer = Container()
+        epubContainer.containerUid = appDb.containerDao.insert(epubContainer)
+        val tmpEpubFile = File.createTempFile("ConcatenatingInputStreamTest", "testepub")
+        val tmpDir = Files.createTempDirectory("ConcatenatingInputStreamTest").toFile()
+        extractTestResourceToFile("/com/ustadmobile/core/contentformats/epub/test.epub",
+                tmpEpubFile)
+        val splitFromByte = tmpEpubFile.length() / 2
+        val containerManager = ContainerManager(epubContainer, appDb, appDb, tmpDir.absolutePath)
+        runBlocking {
+            addEntriesFromZipToContainer(tmpEpubFile.absolutePath, containerManager)
+            val entryList = containerManager.allEntries.distinctBy { it.containerEntryFile!!.cefMd5 }
+            val entryListStr = entryList.joinToString(separator = ";") { it.ceCefUid.toString() }
+            val response1 = db.containerEntryFileDao.generateConcatenatedFilesResponse(entryListStr,
+                mapOf("Content-Range" to listOf("bytes 0-${splitFromByte-1}")))
+            val response2 = db.containerEntryFileDao.generateConcatenatedFilesResponse(entryListStr,
+                mapOf("Content-Range" to listOf("bytes $splitFromByte-")))
+
+            val combinedResponseStream = ByteArrayInputStream(
+                    response1.dataSrc!!.readBytes() + response2.dataSrc!!.readBytes())
+            val concatenatedInputStream = ConcatenatedInputStream(combinedResponseStream)
+            assertConcatenatedPartsEqualEntryListContent(entryList, concatenatedInputStream)
+        }
     }
 
 

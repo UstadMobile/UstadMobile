@@ -2,6 +2,8 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.lib.util.RANGE_CONTENT_ACCEPT_RANGE_HEADER
+import com.ustadmobile.lib.util.RANGE_CONTENT_RANGE_HEADER
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import io.ktor.application.call
 import io.ktor.http.*
@@ -12,14 +14,9 @@ import io.ktor.response.respondFile
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.route
-import kotlinx.coroutines.io.ByteReadChannel
 import kotlinx.coroutines.io.ByteWriteChannel
 import kotlinx.coroutines.io.close
-import kotlinx.coroutines.io.writeFully
-import kotlinx.io.core.IoBuffer
-import java.io.ByteArrayInputStream
 import java.io.File
-
 
 fun Route.ContainerDownload(db: UmAppDatabase) {
     route("ContainerEntryList") {
@@ -67,6 +64,12 @@ fun Route.ContainerDownload(db: UmAppDatabase) {
             if(eTagVal != null) {
                 etag(eTagVal)
             }
+
+            set(RANGE_CONTENT_ACCEPT_RANGE_HEADER, "bytes")
+
+            val rangeHeader = concatenatedResponse.responseHeaders[RANGE_CONTENT_RANGE_HEADER]
+            if(rangeHeader != null)
+                set(RANGE_CONTENT_RANGE_HEADER, rangeHeader)
         }
 
         call.respond(object : OutgoingContent.WriteChannelContent() {
@@ -79,11 +82,8 @@ fun Route.ContainerDownload(db: UmAppDatabase) {
             override val contentLength: Long?
                 get() = concatenatedResponse.contentLength
 
-            override val status: HttpStatusCode = if(concatenatedResponse.status == 200) {
-                HttpStatusCode.OK
-            }else {
-                HttpStatusCode(concatenatedResponse.status, "ConcatenatedResponseError")
-            }
+            override val status: HttpStatusCode = HttpStatusCode.allStatusCodes
+                    .find { it.value == concatenatedResponse.status } ?: HttpStatusCode.InternalServerError
 
             override suspend fun writeTo(channel: ByteWriteChannel) {
                 var bytesRead = 0

@@ -12,14 +12,17 @@ import java.io.ByteArrayInputStream
 import com.github.aakira.napier.Napier
 import kotlinx.serialization.toUtf8Bytes
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
+import com.ustadmobile.lib.util.parseRangeRequestHeader
 
 data class ConcatenatedHttpResponse(val status: Int, val contentLength: Long, val etag: String?,
                                     val lastModifiedTime: Long,
-                                    val dataSrc: InputStream?)
+                                    val dataSrc: InputStream?,
+                                    val responseHeaders: Map<String, String> = mapOf())
 
 val ERROR_PART_NOT_FOUND = 503
 
-fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String, requestHeaders: Map<String, List<String>> = mapOf()): ConcatenatedHttpResponse {
+fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String,
+                                                            requestHeaders: Map<String, List<String>> = mapOf()): ConcatenatedHttpResponse {
     val containerEntryFileUids = fileList.split(";").map { it.toLong() }
     val containerEntryFiles = findEntriesByUids(containerEntryFileUids)
 
@@ -53,11 +56,12 @@ fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String, re
         val etag = messageDigest.digest().encodeBase64()
         val lastModifiedTime = containerEntryFiles.maxBy { it.lastModified }?.lastModified ?: 0
 
-        val rangeRequestHeader = requestHeaders.entries.firstOrNull { it.key.toLowerCase()  == "content-range"}
+        val rangeRequestHeader = requestHeaders.entries
+                .firstOrNull { it.key.toLowerCase()  == "content-range"}?.value?.firstOrNull()
         val totalLength = ConcatenatingInputStream.calculateLength(concatenatedParts)
         val concatenatingInputStream = ConcatenatingInputStream(concatenatedParts)
         if(rangeRequestHeader != null) {
-            val rangeResponse = parseRangeResponse(rangeRequestHeader, totalLength)
+            val rangeResponse = parseRangeRequestHeader(rangeRequestHeader, totalLength)
             return ConcatenatedHttpResponse(206, rangeResponse.actualContentLength, etag,
                 lastModifiedTime, RangeInputStream(concatenatingInputStream, rangeResponse.fromByte,
                     rangeResponse.toByte))
