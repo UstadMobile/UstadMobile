@@ -22,6 +22,7 @@ data class ConcatenatedHttpResponse(val status: Int, val contentLength: Long, va
 val ERROR_PART_NOT_FOUND = 503
 
 fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String,
+                                                            method: String = "GET",
                                                             requestHeaders: Map<String, List<String>> = mapOf()): ConcatenatedHttpResponse {
     val containerEntryFileUids = fileList.split(";").map { it.toLong() }
     val containerEntryFiles = findEntriesByUids(containerEntryFileUids)
@@ -59,12 +60,23 @@ fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String,
         val rangeRequestHeader = requestHeaders.entries
                 .firstOrNull { it.key.toLowerCase()  == "content-range"}?.value?.firstOrNull()
         val totalLength = ConcatenatingInputStream.calculateLength(concatenatedParts)
-        val concatenatingInputStream = ConcatenatingInputStream(concatenatedParts)
+        val concatenatingInputStream = if(method.equals("HEAD", true)) {
+            null
+        }else {
+            ConcatenatingInputStream(concatenatedParts)
+        }
+
         if(rangeRequestHeader != null) {
             val rangeResponse = parseRangeRequestHeader(rangeRequestHeader, totalLength)
+            val rangeInputStream = if(concatenatingInputStream != null) {
+                RangeInputStream(concatenatingInputStream, rangeResponse.fromByte,
+                        rangeResponse.toByte)
+            }else {
+                null
+            }
+
             return ConcatenatedHttpResponse(206, rangeResponse.actualContentLength, etag,
-                lastModifiedTime, RangeInputStream(concatenatingInputStream, rangeResponse.fromByte,
-                    rangeResponse.toByte))
+                lastModifiedTime, rangeInputStream)
         }else {
             return ConcatenatedHttpResponse(200, totalLength, etag, lastModifiedTime,
                     concatenatingInputStream)

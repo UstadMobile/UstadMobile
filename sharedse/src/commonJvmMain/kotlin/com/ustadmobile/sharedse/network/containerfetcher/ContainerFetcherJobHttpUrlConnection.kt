@@ -105,7 +105,7 @@ class ContainerDownloaderJobHttpUrlConnection(val request: ContainerFetcherReque
 
                 urlConnection = connectionOpener(URL(request.url))
                 if(startFrom > 0L) {
-                    urlConnection.setRequestProperty("Range", "bytes=$startFrom-")
+                    urlConnection.setRequestProperty("Content-Range", "bytes=$startFrom-")
                 }
 
                 inStream = urlConnection.inputStream
@@ -125,7 +125,7 @@ class ContainerDownloaderJobHttpUrlConnection(val request: ContainerFetcherReque
                 val isPartialResponse: Boolean = urlConnection.responseCode == 206
                 fileOut = FileOutputStream(dlPartFile, isPartialResponse)
 
-                val contentLengthField = urlConnection.getHeaderField("Content-Length")
+            val contentLengthField = urlConnection.getHeaderField("Content-Length")
                 if(responseCode == 200 && contentLengthField != null) {
                     totalDownloadSize.set(contentLengthField.toLong())
                 }
@@ -143,7 +143,6 @@ class ContainerDownloaderJobHttpUrlConnection(val request: ContainerFetcherReque
 
                 downloadStatus = if(isActive && totalBytesRead == totalDownloadSize.get()) {
                     dlPartFile.renameTo(destinationFile)
-                    dlInfoFile.delete()
                     JobStatus.COMPLETE
                 } else {
                     JobStatus.PAUSED
