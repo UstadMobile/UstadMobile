@@ -65,7 +65,7 @@ class TestAttachments {
         serverTmpAttachmentsDir.deleteRecursively()
         clientTmpAtttachmentsDir.deleteRecursively()
         testTmpDataFile.delete()
-        server.stop(0, 20, TimeUnit.SECONDS)
+        server.stop(0, 20000)
         httpClient.close()
     }
 

@@ -1572,11 +1572,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         val entityPkEl = processingEnv.elementUtils.getTypeElement(className.canonicalName)
                                 .enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null}
 
-                        val attRespVarName = "_attResp_${className.simpleName}"
                         attEntityCodeBlock
-                                .add("var $attRespVarName : %T = null\n", HttpStatement::class.asClassName().copy(nullable = true))
                                 .beginControlFlow("try")
-                                .beginControlFlow("$attRespVarName = _httpClient.%M<%T>",
+                                .beginControlFlow("_httpClient.%M<%T>",
                                     CLIENT_GET_MEMBER_NAME, HttpStatement::class)
                                 .add("%M(_db)\n",
                                         MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
@@ -1587,15 +1585,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                 .endControlFlow()
                                 .add("%M(%S, $entityVarName.%L)\n", CLIENT_PARAMETER_MEMBER_NAME,
                                         "_pk", entityPkEl.simpleName)
-                                .endControlFlow()
-
-                        //TODO: throw an exception whne the status code != 200
-                        attEntityCodeBlock.beginControlFlow("if($attRespVarName.status == %T.OK)",
-                                HttpStatusCode::class)
+                                .nextControlFlow(".execute")
+                                .add("response ->\n")
+                                //TODO: throw an exception whne the status code != 200
+                                .beginControlFlow("if(response.status == %T.OK)",
+                                        HttpStatusCode::class)
                                 .add("val _attFileDest = File($attDirVarName, $entityVarName.${entityPkEl.simpleName}.toString())\n")
-                                .add("$attRespVarName.content.%M(_attFileDest.%M())\n",
-                                        MemberName("kotlinx.coroutines.io", "copyAndClose"),
+                                .add("response.content.%M(_attFileDest.%M())\n",
+                                        MemberName("io.ktor.utils.io", "copyAndClose"),
                                         MemberName("io.ktor.util.cio", "writeChannel"))
+                                .endControlFlow()
                                 .endControlFlow()
 
                         attEntityCodeBlock.nextControlFlow("catch(e: %T)", Exception::class)
@@ -1603,7 +1602,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                         "\"Could·not·download·attachment·for·${className.simpleName}·PK·\${$entityVarName.${entityPkEl.simpleName}}\",e)\n",
                                         IOException::class)
                                 .nextControlFlow("finally")
-                                .add("$attRespVarName?.close()\n")
                                 .endControlFlow()
 
                         if(isList) {

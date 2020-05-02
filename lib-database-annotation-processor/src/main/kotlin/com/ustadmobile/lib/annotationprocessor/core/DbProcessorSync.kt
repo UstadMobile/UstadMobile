@@ -405,7 +405,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .endControlFlow()
                         .add("append(_attachFile.name,·%T(_attachFile.length()){%T(_attachFile).%M()}, _mpHeaders)\n",
                                 InputProvider::class, FileInputStream::class,
-                                MemberName("kotlinx.io.streams", "asInput"))
+                                MemberName("io.ktor.utils.io.streams", "asInput"))
 
                         .endControlFlow()
                         .endControlFlow()
