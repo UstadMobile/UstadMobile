@@ -27,6 +27,7 @@ import io.ktor.server.netty.Netty
 import org.junit.After
 import java.util.concurrent.TimeUnit
 import io.ktor.application.call
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -35,6 +36,7 @@ import io.ktor.http.HttpStatusCode
  import io.ktor.request.receiveOrNull
 import io.ktor.response.respond
 import io.ktor.routing.post
+import io.ktor.server.engine.stop
 import io.netty.handler.codec.http.HttpResponse
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -89,14 +91,14 @@ class TestDbRepo {
 
     @Before
     fun createHttpClient(){
-        httpClient = HttpClient() {
+        httpClient = HttpClient(OkHttp) {
             install(JsonFeature)
         }
     }
 
     @After
     fun tearDown() {
-        server?.stop(0, 10, TimeUnit.SECONDS)
+        server?.stop(0, 10000)
         httpClient.close()
         tmpAttachmentsDir?.deleteRecursively()
         tmpAttachmentsDir = null

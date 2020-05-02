@@ -22,11 +22,13 @@ import db2.ExampleSyncableDao_KtorRoute
 import db2.ExampleDatabase2_KtorRoute
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.*
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.statement.HttpStatement
 import io.ktor.gson.GsonConverter
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 import io.ktor.server.engine.ApplicationEngine
@@ -44,13 +46,15 @@ class TestDbRoute  {
 
     var tmpAttachmentsDir: File? = null
 
+    private lateinit var httpClient: HttpClient
+
     @Before
     fun setup() {
         exampleDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         exampleDb.clearAllTables()
 
         val gson = Gson()
-        server = embeddedServer(Netty, 8089) {
+        server = embeddedServer(Netty, port = 8089) {
             install(ContentNegotiation) {
                 register(ContentType.Application.Json, GsonConverter())
                 register(ContentType.Any, GsonConverter())
@@ -65,17 +69,27 @@ class TestDbRoute  {
         server.start()
     }
 
+    @Before
+    fun createHttpClient() {
+        httpClient = HttpClient(OkHttp) {
+            install(JsonFeature)
+
+            engine {
+                config {
+                    retryOnConnectionFailure(true)
+                }
+            }
+        }
+    }
+
     @After
     fun tearDown() {
-        server.stop(0, 10, TimeUnit.SECONDS)
+        server.stop(0, 10000)
+        httpClient.close()
     }
 
     @Test
     fun givenDataInsertedOnPost_whenGetByUidCalled_thenShouldReturnSameObject() = runBlocking {
-        val httpClient = HttpClient() {
-            install(JsonFeature)
-        }
-
         val exampleEntity2 = ExampleEntity2(name = "bob", someNumber =  5L)
 
         val requestBuilder = HttpRequestBuilder()
@@ -97,18 +111,19 @@ class TestDbRoute  {
 
     @Test
     fun givenSyncableEntityInsertedOnServer_whenReceiptAcknowledged_thenNextRequestShouldReturnEmptyList() = runBlocking {
-        val httpClient = HttpClient() {
-            install(JsonFeature)
-        }
         val exampleSyncableEntity = ExampleSyncableEntity(esMcsn = 1, esNumber =  42)
         exampleSyncableEntity.esUid = exampleDb.exampleSyncableDao().insert(exampleSyncableEntity)
 
-        val firstGetListResponse =  httpClient.get<HttpResponse>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAll") {
+        var headers: Headers? = null
+        val firstGetList = httpClient.get<HttpStatement>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAll") {
             header("X-nid", 1)
             dbVersionHeader(exampleDb)
+        }.execute { response ->
+            headers = response.headers
+            response.receive<List<ExampleSyncableEntity>>()
         }
-        val reqId = firstGetListResponse.headers.get("X-reqid")!!.toInt()
-        val firstGetList = firstGetListResponse.receive<List<ExampleSyncableEntity>>()
+
+        val reqId = headers?.get("X-reqid")!!.toInt()
         httpClient.get<Unit>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/_updateExampleSyncableEntity_trkReceived?reqId=$reqId") {
             header("X-nid", 1)
             dbVersionHeader(exampleDb)
@@ -134,7 +149,7 @@ class TestDbRoute  {
         val exampleSyncableEntity = ExampleSyncableEntity(esMcsn = 1, esNumber =  42)
         exampleSyncableEntity.esUid = exampleDb.exampleSyncableDao().insert(exampleSyncableEntity)
 
-        val firstGetListResponse = httpClient.get<HttpResponse> {
+        val firstGetList = httpClient.get<List<ExampleSyncableEntity>> {
             url{
                 takeFrom("http://localhost:8089/")
                 path("ExampleDatabase2", "ExampleSyncableDao", "findAll")
@@ -143,8 +158,6 @@ class TestDbRoute  {
             }
             header("X-nid", 1)
         }
-
-        val firstGetList = firstGetListResponse.receive<List<ExampleSyncableEntity>>()
 
         val secondGetList = httpClient.get<List<ExampleSyncableEntity>>("http://localhost:8089/ExampleDatabase2/ExampleSyncableDao/findAll") {
             header("X-nid", 1)

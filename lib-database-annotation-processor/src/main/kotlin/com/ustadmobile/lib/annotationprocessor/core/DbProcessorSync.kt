@@ -417,7 +417,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             entitySyncCodeBlock.add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
                             dbPathVarName = "_dbPath",
                             daoName = syncDaoSimpleName, methodName = replaceEntitiesFn.name,
-                            httpResultVarName = "_sendResult", httpResponseVarName = "_sendHttpResponse",
+                            httpResultVarName = "_sendResult", httpStatementVarName = "_sendHttpResponse",
                             httpResultType = UNIT, params = replaceEntitiesFn.parameters,
                             useMultipartPartsVarName = multipartPartsVarName))
                     .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",

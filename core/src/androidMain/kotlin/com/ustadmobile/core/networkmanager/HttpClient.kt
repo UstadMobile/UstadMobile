@@ -16,6 +16,12 @@ import okhttp3.OkHttpClient
 import java.lang.RuntimeException
 import java.util.concurrent.TimeUnit
 
+/**
+ * Note: OKHttp Ktor default configuration since 1.3.1 could cause a problem:
+ * See "Sporadic OkHttp errors after upgrading to ktor 1.3.1"
+ *  https://github.com/ktorio/ktor/issues/1708
+ */
+
 private val OK_HTTP_MIN_SDKVERSION = 21
 
 private val okHttpClient = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
