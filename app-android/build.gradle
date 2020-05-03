@@ -60,6 +60,12 @@ android {
         enabled = true
     }
 
+    kotlinOptions {
+        // Setup the Kotlin compiler options for the 'main' compilation:
+        jvmTarget = "$version_kotlin_jvmTarget"
+        freeCompilerArgs += "-Xopt-in=kotlinx.serialization.InternalSerializationApi"
+    }
+
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
         main.res.srcDirs += "../core/locale/main/"
