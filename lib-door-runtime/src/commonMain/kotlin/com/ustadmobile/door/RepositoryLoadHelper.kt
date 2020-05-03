@@ -1,13 +1,12 @@
 package com.ustadmobile.door
 
+import com.github.aakira.napier.Napier
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
-import com.github.aakira.napier.Napier
-import kotlinx.io.IOException
 
 typealias LifeCycleHelperFactory = (DoorLifecycleOwner) -> RepositoryLoadHelperLifecycleHelper
 

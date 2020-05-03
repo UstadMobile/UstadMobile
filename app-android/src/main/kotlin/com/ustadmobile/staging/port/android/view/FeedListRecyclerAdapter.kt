@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.FeedListPresenter
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.staging.core.view.ClazzDetailView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.FeedEntry
 import java.util.*

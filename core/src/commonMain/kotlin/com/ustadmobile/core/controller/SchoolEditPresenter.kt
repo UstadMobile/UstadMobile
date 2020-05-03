@@ -19,11 +19,11 @@ import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import kotlinx.serialization.builtins.list
 
 
 class SchoolEditPresenter(context: Any,

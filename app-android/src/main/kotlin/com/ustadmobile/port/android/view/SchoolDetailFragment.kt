@@ -15,11 +15,7 @@ import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.core.view.EditButtonMode
 
 
-interface SchoolDetailFragmentEventHandler {
-
-}
-
-class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView, SchoolDetailFragmentEventHandler {
+class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
     private var mBinding: FragmentSchoolDetailBinding? = null
 
@@ -41,33 +37,38 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView, Sch
         return rootView
     }
 
-    /**
-     * Separated out view pager setup for clarity.
-     */
-    private fun setupViewPager(tabs:List<String>) {
-
-        val viewNameToTitle = mapOf(
-//                ClazzAssignmentDetailAssignmentView.VIEW_NAME to getText(R.string.assignments).toString(),
-//                ClazzAssignmentDetailProgressView.VIEW_NAME to getText(R.string.student_progress).toString()
-        )
-        runOnUiThread {
-            mPager = rootView?.clazzAssignmentDetailViewPagerContainer
-            mPagerAdapter = ViewNameListFragmentPagerAdapter(supportFragmentManager,
-                    FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
-                    VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle,bundleMakerFn
-            )
-
-            mPager?.adapter = mPagerAdapter
-            mTabLayout = rootView?.activityClazzAssignmentDetailTablayout
-            mTabLayout?.tabGravity = TabLayout.GRAVITY_FILL
-            mTabLayout?.setupWithViewPager(mPager)
-        }
-    }
+//    /**
+//     * Separated out view pager setup for clarity.
+//     */
+//    private fun setupViewPager(tabs:List<String>) {
+//
+//        val viewNameToTitle = mapOf(PersoListView.VIEW_NAME to getText(R.string.students).toString()
+//        )
+//
+////                ClazzAssignmentDetailAssignmentView.VIEW_NAME to getText(R.string.assignments).toString(),
+////                ClazzAssignmentDetailProgressView.VIEW_NAME to getText(R.string.student_progress).toString()
+//
+//        runOnUiThread {
+//            mPager = rootView?.clazzAssignmentDetailViewPagerContainer
+//            mPagerAdapter = ViewNameListFragmentPagerAdapter(supportFragmentManager,
+//                    FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
+//                    VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle,bundleMakerFn
+//            )
+//
+//            mPager?.adapter = mPagerAdapter
+//            mTabLayout = rootView?.activityClazzAssignmentDetailTablayout
+//            mTabLayout?.tabGravity = TabLayout.GRAVITY_FILL
+//            mTabLayout?.setupWithViewPager(mPager)
+//        }
+//    }
 
     override fun setUpTabs(tabs: List<String>){
         //TODO: this
     }
 
+    override fun setSettingsVisible(visible: Boolean){
+        //TODO: this
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -98,11 +99,13 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView, Sch
 
 
     companion object{
-        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
-//                ClazzAssignmentDetailAssignmentView.VIEW_NAME to
-//                        ClazzAssignmentDetailAssignmentFragment::class.java,
-//                ClazzAssignmentDetailProgressView.VIEW_NAME to
-//                        ClazzAssignmentDetailProgressFragment::class.java)
+//        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
+//
+////                ClazzAssignmentDetailAssignmentView.VIEW_NAME to
+////                        ClazzAssignmentDetailAssignmentFragment::class.java,
+////                ClazzAssignmentDetailProgressView.VIEW_NAME to
+////                        ClazzAssignmentDetailProgressFragment::class.java)
+//        )
     }
 
 }
