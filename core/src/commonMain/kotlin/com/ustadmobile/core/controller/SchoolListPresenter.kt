@@ -54,8 +54,9 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     override fun handleClickEntry(entry: School) {
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(SchoolDetailView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to entry.schoolUid.toString()), context)
+            //TODO: This
+//            ListViewMode.BROWSER -> systemImpl.go(SchoolDetailView.VIEW_NAME,
+//                    mapOf(UstadView.ARG_ENTITY_UID to entry.schoolUid.toString()), context)
         }
     }
 

@@ -1,5 +1,6 @@
-package com.ustadmobile.core.view
+package com.ustadmobile.staging.core.view
 
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 
 /**
