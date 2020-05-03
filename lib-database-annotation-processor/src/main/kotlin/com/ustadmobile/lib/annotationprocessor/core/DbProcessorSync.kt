@@ -405,7 +405,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .endControlFlow()
                         .add("append(_attachFile.name,·%T(_attachFile.length()){%T(_attachFile).%M()}, _mpHeaders)\n",
                                 InputProvider::class, FileInputStream::class,
-                                MemberName("kotlinx.io.streams", "asInput"))
+                                MemberName("io.ktor.utils.io.streams", "asInput"))
 
                         .endControlFlow()
                         .endControlFlow()
@@ -417,7 +417,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             entitySyncCodeBlock.add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
                             dbPathVarName = "_dbPath",
                             daoName = syncDaoSimpleName, methodName = replaceEntitiesFn.name,
-                            httpResultVarName = "_sendResult", httpResponseVarName = "_sendHttpResponse",
+                            httpResultVarName = "_sendResult", httpStatementVarName = "_sendHttpResponse",
                             httpResultType = UNIT, params = replaceEntitiesFn.parameters,
                             useMultipartPartsVarName = multipartPartsVarName))
                     .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",

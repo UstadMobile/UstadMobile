@@ -15,7 +15,6 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlinx.io.IOException
 
 class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: ReportSELView) :
         UstadBaseController<ReportSELView>(context, arguments!!, view) {
@@ -286,7 +285,7 @@ class ReportSELPresenter(context: Any, arguments: Map<String, String>?, view: Re
             umXLSX.createXLSX()
             view.generateXLSReport(xlsxReportPath)
 
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             print(e.message)
         }
 

@@ -3,12 +3,12 @@ package com.ustadmobile.sharedse.network
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.lib.db.entities.NetworkNode
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.get
-import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.discardRemaining
+import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.IOException
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -37,7 +37,14 @@ class BleHttpProxyTest {
                 return newFixedLengthResponse("OK")
             }
         }
-        httpClient = HttpClient()
+
+        httpClient = HttpClient(OkHttp) {
+            engine {
+                config {
+                    retryOnConnectionFailure(true)
+                }
+            }
+        }
 
         networkManager = mock<NetworkManagerBle> {
             on { sendMessage(any(), any(), any(), any()) }.thenAnswer {invocation ->
@@ -68,7 +75,7 @@ class BleHttpProxyTest {
                             responseMessage, null)
                 }else {
                     responseListener.onResponseReceived(destNode.bluetoothMacAddress!!,
-                            null, IOException("Mock network manager sendMessage exception"))
+                            null, Exception("Mock network manager sendMessage exception"))
                 }
 
                 Unit
@@ -104,10 +111,12 @@ class BleHttpProxyTest {
         nearbyDevices = listOf(MockBleDevice(TEST_NEARBY_MAC1, true, true))
 
         runBlocking {
-            val response = httpClient.get<HttpResponse>("http://localhost:8090/${BleHttpProxy.PREFIX}/$TEST_NEARBY_MAC1/ContentEntryList")
+            val responseStatus = httpClient.get<HttpStatement>("http://localhost:8090/${BleHttpProxy.PREFIX}/$TEST_NEARBY_MAC1/ContentEntryList")
+                    .execute {
+                        it.status
+                    }
             Assert.assertEquals("When send BLE message calls back with an error, then http response status is 502",
-                    response.status, HttpStatusCode.BadGateway)
-            response.discardRemaining()
+                    responseStatus, HttpStatusCode.BadGateway)
         }
         proxy.stop()
     }

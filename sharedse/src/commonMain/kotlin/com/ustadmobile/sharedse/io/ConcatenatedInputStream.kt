@@ -1,12 +1,12 @@
-package com.ustadmobile.core.io
+package com.ustadmobile.sharedse.io
 
-import com.ustadmobile.core.io.ConcatenatingInputStream.Companion.LEN_CHUNK_ID
-import com.ustadmobile.core.io.ConcatenatingInputStream.Companion.LEN_CHUNK_LENGTH
-import com.ustadmobile.core.io.ConcatenatingInputStream.Companion.LEN_NUM_CHUNKS
-import kotlinx.io.ByteBuffer
-import kotlinx.io.ByteOrder
-import kotlinx.io.InputStream
+import com.ustadmobile.sharedse.io.ConcatenatingInputStream.Companion.LEN_CHUNK_ID
+import com.ustadmobile.sharedse.io.ConcatenatingInputStream.Companion.LEN_CHUNK_LENGTH
+import com.ustadmobile.sharedse.io.ConcatenatingInputStream.Companion.LEN_NUM_CHUNKS
+import io.ktor.utils.io.core.ByteOrder
 import kotlin.math.min
+import kotlinx.io.InputStream
+
 
 data class ConcatenatedPart(val id: ByteArray, val length: Long, val uncompressedLength: Long) {
     override fun equals(other: Any?): Boolean {
@@ -41,7 +41,7 @@ class ConcatenatedInputStream(val src: InputStream) : KioInputStream(){
     val partHeaders: List<ConcatenatedPart>
 
     init {
-        val lenByteBuffer = ByteBuffer.allocate(LEN_NUM_CHUNKS).order(ByteOrder.LITTLE_ENDIAN)
+        val lenByteBuffer : ByteBufferSe = ByteBufferSe.allocate(LEN_NUM_CHUNKS).order(ByteOrder.LITTLE_ENDIAN)
         val lenBytes = ByteArray(LEN_NUM_CHUNKS)
         src.read(lenBytes, 0, LEN_NUM_CHUNKS)
         lenByteBuffer.put(lenBytes, 0, LEN_NUM_CHUNKS)
@@ -49,7 +49,7 @@ class ConcatenatedInputStream(val src: InputStream) : KioInputStream(){
         numFiles = lenByteBuffer.getInt()
 
         val headerBufferSize = (numFiles * (LEN_CHUNK_ID + (LEN_CHUNK_LENGTH * 2)))
-        val headerByteBuffer = ByteBuffer.allocate(headerBufferSize).order(ByteOrder.LITTLE_ENDIAN)
+        val headerByteBuffer = ByteBufferSe.allocate(headerBufferSize).order(ByteOrder.LITTLE_ENDIAN)
         var headerBytesTotalRead = 0
         val headerReadByteArrayBuf = ByteArray(8 * 1024)
 

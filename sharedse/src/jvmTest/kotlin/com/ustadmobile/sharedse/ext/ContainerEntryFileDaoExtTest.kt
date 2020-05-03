@@ -3,8 +3,6 @@ package com.ustadmobile.sharedse.ext
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ConcatenatedInputStream
-import com.ustadmobile.core.io.ConcatenatedPart
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.core.util.ext.toHexString
 import com.ustadmobile.lib.db.entities.Container
@@ -15,6 +13,8 @@ import org.junit.Before
 import org.junit.Test
 import java.io.File
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
+import com.ustadmobile.sharedse.io.ConcatenatedInputStream
+import com.ustadmobile.sharedse.io.ConcatenatedPart
 import org.junit.Assert
 import java.io.ByteArrayInputStream
 import java.nio.file.Files

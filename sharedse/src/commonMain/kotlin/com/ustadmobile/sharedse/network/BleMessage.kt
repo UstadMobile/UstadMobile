@@ -9,8 +9,6 @@ import com.ustadmobile.sharedse.io.GzipOutputStreamSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
 import kotlinx.io.ByteArrayInputStream
 import kotlinx.io.ByteArrayOutputStream
-import kotlinx.io.ByteBuffer
-import kotlinx.io.IOException
 import kotlin.jvm.Synchronized
 import kotlin.math.ceil
 import kotlin.math.min
@@ -180,18 +178,12 @@ class BleMessage {
      * @return Compressed payload in byte array, null if something goes wrong
      */
     private fun compressPayload(payload: ByteArray?): ByteArray? {
-        try {
-            val bos = ByteArrayOutputStream()
-            val gzip = GzipOutputStreamSe(bos)
-            gzip.write(payload!!)
-            gzip.flush()
-            gzip.close()
-            return bos.toByteArray()
-        } catch (e: IOException) {
-            //Very unlikely as we are reading from memory into memory
-            UMLog.l(UMLog.DEBUG, 0, e.message)
-        }
-        return null
+        val bos = ByteArrayOutputStream()
+        val gzip = GzipOutputStreamSe(bos)
+        gzip.write(payload!!)
+        gzip.flush()
+        gzip.close()
+        return bos.toByteArray()
     }
 
     /**
@@ -203,19 +195,15 @@ class BleMessage {
         val BUFFER_SIZE = min(32, receivedPayload.size)
         val `is` = ByteArrayInputStream(receivedPayload)
         val bout = ByteArrayOutputStream()
-        try {
-            val gis = GzipInputStreamSe(`is`, BUFFER_SIZE)
-            val data = ByteArray(BUFFER_SIZE)
-            var bytesRead: Int
-            while (gis.read(data).also { bytesRead = it } != -1) {
-                bout.write(data, 0, bytesRead)
-            }
-            bout.flush()
-        } catch (e: IOException) {
-            UMLog.l(UMLog.DEBUG, 0, e.message)
-        } finally {
-            UMIOUtils.closeOutputStream(bout)
+        val gis = GzipInputStreamSe(`is`, BUFFER_SIZE)
+        val data = ByteArray(BUFFER_SIZE)
+        var bytesRead: Int
+        while (gis.read(data).also { bytesRead = it } != -1) {
+            bout.write(data, 0, bytesRead)
         }
+        bout.flush()
+        bout.close()
+
         return bout.toByteArray()
     }
 
@@ -234,7 +222,7 @@ class BleMessage {
             throw IllegalArgumentException()
         } else {
             val numPackets = calculateNumPackets(payload.size, mtu)
-            val headerBuffer = ByteBuffer.allocate(HEADER_SIZE)
+            val headerBuffer = ByteBufferSe.allocate(HEADER_SIZE)
             val header = headerBuffer
                     .put(requestType)
                     .putShort(mtu.toShort())
@@ -243,7 +231,7 @@ class BleMessage {
             try {
                 outputStream.write(header)
                 outputStream.write(payload)
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 UMLog.l(UMLog.ERROR, 100, "IOException", e)
                 return arrayOf()
             } finally {

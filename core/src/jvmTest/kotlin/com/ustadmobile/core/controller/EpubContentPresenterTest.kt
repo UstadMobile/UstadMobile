@@ -18,7 +18,7 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
@@ -136,9 +136,11 @@ class EpubContentPresenterTest {
                 Assert.assertTrue("Spine itemk $i ends with expected url",
                         linearSpineUrls[i].endsWith(opf!!.linearSpineHREFs[i]))
 
-                val response = client.get<HttpResponse>(linearSpineUrls[i])
+                val responseStatusCode = client.get<HttpStatement>(linearSpineUrls[i]).execute {
+                    it.status.value
+                }
                 Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
-                        response.status.value)
+                        responseStatusCode)
             }
         }
 

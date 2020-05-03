@@ -13,8 +13,8 @@ import com.ustadmobile.lib.db.entities.H5PImportData
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.discardRemaining
+import io.ktor.client.statement.HttpStatement
 import io.ktor.http.URLParserException
 import io.ktor.http.Url
 import io.ktor.util.toMap
@@ -111,11 +111,16 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
                 if (headResponse.status == 302 && isGoogleDrive) {
                     url = headResponse.headers["location"]?.get(0)!!
-                    var response = defaultHttpClient().get<HttpResponse>(url)
-                    headResponse = HeadResponse(response.status.value, response.headers.toMap())
 
-                    response.discardRemaining()
-                    response.close()
+                    defaultHttpClient().get<HttpStatement>(url).execute { response ->
+                        headResponse = HeadResponse(response.status.value, response.headers.toMap())
+                    }
+
+//                    var response = defaultHttpClient().get<HttpResponse>(url)
+//                    headResponse = HeadResponse(response.status.value, response.headers.toMap())
+//
+//                    response.discardRemaining()
+//                    response.close()
                 }
 
             } catch (e: Exception) {
@@ -125,21 +130,23 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 return@launch
             }
 
+            val headResponseVal = headResponse ?: return@launch
+
             contentType = -1
 
-            if (headResponse.status != 200) {
+            if (headResponseVal.status != 200) {
                 view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
                 jobCount--
                 checkProgressBar()
                 return@launch
             }
 
-            var contentTypeHeader = headResponse.headers["content-type"]?.get(0) ?: ""
+            var contentTypeHeader = headResponseVal.headers["content-type"]?.get(0) ?: ""
             if (contentTypeHeader.contains(";")) {
                 contentTypeHeader = contentTypeHeader.split(";")[0]
             }
 
-            val length = headResponse.headers["content-length"]?.get(0)?.toInt() ?: 0
+            val length = headResponseVal.headers["content-length"]?.get(0)?.toInt() ?: 0
 
             if (contentTypeHeader.startsWith("video/")) {
 
@@ -199,22 +206,21 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
         checkProgressBar()
         return GlobalScope.launch {
             val client = defaultHttpClient()
-            var response: HttpResponse? = null
             view.enableDisableEditText(false)
             view.showHideErrorMessage(false)
+            var requestedOk = false
             try {
                 when (contentType) {
                     HTML -> {
-
-                        response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importUrl") {
+                        client.get<Unit>("$endpointUrl/ImportH5P/importUrl") {
                             parameter("hp5Url", hp5Url)
                             parameter("parentUid", parentContentEntryUid)
                             if (contentEntryUid != 0L) parameter("contentEntryUid", contentEntryUid)
                         }
+                        requestedOk = true
 
                     }
                     VIDEO -> {
-
                         if (videoTitle.isNullOrEmpty()) {
                             view.showNoTitleEntered(UstadMobileSystemImpl.instance.getString(MessageID.import_title_not_entered, context))
                             jobCount--
@@ -222,30 +228,24 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                             return@launch
                         }
 
-                        response = client.get<HttpResponse>("$endpointUrl/ImportH5P/importVideo") {
+                        client.get<Unit>("$endpointUrl/ImportH5P/importVideo") {
                             parameter("hp5Url", hp5Url)
                             parameter("parentUid", parentContentEntryUid)
                             parameter("title", videoTitle)
                             if (contentEntryUid != 0L) parameter("contentEntryUid", contentEntryUid)
                         }
+                        requestedOk = true
                     }
                 }
             } catch (e: Exception) {
-                response = null
+                //Do nothing - to be reviewed
             }
 
 
 
-            if (response?.status?.value == 200) {
-
-                val content = response.receive<H5PImportData>()
+            if (requestedOk) {
                 view.enableDisableEditText(true)
 
-                db.contentEntryDao.insertWithReplace(content.contentEntry)
-                if (contentEntryUid == 0L) {
-                    db.contentEntryParentChildJoinDao.insertWithReplace(content.parentChildJoin)
-                }
-                db.containerDao.insertWithReplace(content.container)
 
                 view.runOnUiThread(Runnable {
                     jobCount--
@@ -254,7 +254,6 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 })
 
             } else {
-
                 view.enableDisableEditText(true)
                 view.showHideErrorMessage(true)
                 jobCount--

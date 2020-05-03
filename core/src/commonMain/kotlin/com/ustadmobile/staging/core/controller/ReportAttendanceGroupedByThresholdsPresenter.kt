@@ -20,7 +20,6 @@ import com.ustadmobile.staging.core.xlsx.ZipUtil
 import com.ustadmobile.lib.db.entities.AttendanceResultGroupedByAgeAndThreshold
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.IOException
 
 
 /**
@@ -74,7 +73,7 @@ class ReportAttendanceGroupedByThresholdsPresenter(context: Any, arguments: Map<
             umXLSX.createXLSX()
             view.generateXLSXReport(xlsxReportPath)
 
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             print(e.message)
         }
 

@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
+//import io.ktor.client.response.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.GlobalScope
@@ -89,60 +89,60 @@ class ChangePasswordPresenter(context: Any,
             val serverUrl = UmAccountManager.getActiveEndpoint(context)
 
 
-            GlobalScope.launch {
-
-
-                //Authenticate with current password first to see if current password matches.
-                try {
-                    val loginResponse = defaultHttpClient().get<HttpResponse>() {
-                        url {
-                            takeFrom(serverUrl!!)
-                            encodedPath = "${encodedPath}Login/login"
-                        }
-                        parameter("username", currentPerson!!.username)
-                        parameter("password", currentPassword)
-                    }
-
-                    if(loginResponse.status == HttpStatusCode.OK) {
-                        try {
-
-                            val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
-                            {
-                                url {
-                                    takeFrom(serverUrl!!)
-                                    encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
-                                }
-                                parameter("p0", currentPerson!!.personUid)
-                                parameter("p1", updatePassword!!)
-                                parameter("p2", currentPerson!!.personUid)
-                            }
-
-                            if(resetPasswordResponse.status == HttpStatusCode.OK) {
-                                try {
-                                    currentPersonAuth!!.passwordHash = PersonAuthDao.encryptThisPassword(updatePassword!!)
-                                    personAuthDao.updateAsync(currentPersonAuth!!)
-                                    view.finish()
-                                } catch (e: Exception) {
-                                    println(e!!.message)
-                                    view.sendMessage(MessageID.unable_to_update_password)
-                                }
-                            }else {
-                                println("nope")
-                                view.sendMessage(MessageID.unable_to_update_password)
-                            }
-                        } catch (e: Exception) {
-                            print("oops")
-                            view.sendMessage(MessageID.unable_to_update_password)
-                        }
-                    }else{
-                        view.sendMessage(MessageID.current_password_not_correct)
-                    }
-                } catch (e: Exception) {
-                    view.runOnUiThread(Runnable {
-                        view.sendMessage(MessageID.current_password_not_correct)
-                    })
-                }
-            }
+//            GlobalScope.launch {
+//
+//
+//                //Authenticate with current password first to see if current password matches.
+//                try {
+//                    val loginResponse = defaultHttpClient().get<HttpResponse>() {
+//                        url {
+//                            takeFrom(serverUrl!!)
+//                            encodedPath = "${encodedPath}Login/login"
+//                        }
+//                        parameter("username", currentPerson!!.username)
+//                        parameter("password", currentPassword)
+//                    }
+//
+//                    if(loginResponse.status == HttpStatusCode.OK) {
+//                        try {
+//
+//                            val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
+//                            {
+//                                url {
+//                                    takeFrom(serverUrl!!)
+//                                    encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
+//                                }
+//                                parameter("p0", currentPerson!!.personUid)
+//                                parameter("p1", updatePassword!!)
+//                                parameter("p2", currentPerson!!.personUid)
+//                            }
+//
+//                            if(resetPasswordResponse.status == HttpStatusCode.OK) {
+//                                try {
+//                                    currentPersonAuth!!.passwordHash = PersonAuthDao.encryptThisPassword(updatePassword!!)
+//                                    personAuthDao.updateAsync(currentPersonAuth!!)
+//                                    view.finish()
+//                                } catch (e: Exception) {
+//                                    println(e!!.message)
+//                                    view.sendMessage(MessageID.unable_to_update_password)
+//                                }
+//                            }else {
+//                                println("nope")
+//                                view.sendMessage(MessageID.unable_to_update_password)
+//                            }
+//                        } catch (e: Exception) {
+//                            print("oops")
+//                            view.sendMessage(MessageID.unable_to_update_password)
+//                        }
+//                    }else{
+//                        view.sendMessage(MessageID.current_password_not_correct)
+//                    }
+//                } catch (e: Exception) {
+//                    view.runOnUiThread(Runnable {
+//                        view.sendMessage(MessageID.current_password_not_correct)
+//                    })
+//                }
+//            }
         }
     }
 

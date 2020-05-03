@@ -106,7 +106,7 @@ class DownloadJobPreparerTest {
         @AfterClass
         @JvmStatic
         fun tearDownClass() {
-            server.stop(0, 2000, TimeUnit.MILLISECONDS)
+            server.stop(0, 2000)
         }
     }
 

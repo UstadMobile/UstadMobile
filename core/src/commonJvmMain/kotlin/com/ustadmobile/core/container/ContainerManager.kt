@@ -12,9 +12,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.io.IOException
-import kotlinx.io.InputStream
-import kotlinx.io.OutputStream
+import java.io.*
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
