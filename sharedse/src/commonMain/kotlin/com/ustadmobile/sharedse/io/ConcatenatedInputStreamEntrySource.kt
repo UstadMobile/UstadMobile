@@ -1,4 +1,4 @@
-package com.ustadmobile.core.io
+package com.ustadmobile.sharedse.io
 
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.lib.db.entities.ContainerEntryFile

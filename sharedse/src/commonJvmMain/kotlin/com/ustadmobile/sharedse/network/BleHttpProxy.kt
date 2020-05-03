@@ -5,7 +5,7 @@ import fi.iki.elonen.NanoHTTPD
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
-import kotlinx.io.IOException
+import java.io.IOException
 import kotlinx.io.InputStream
 import kotlinx.serialization.toUtf8Bytes
 import java.io.*

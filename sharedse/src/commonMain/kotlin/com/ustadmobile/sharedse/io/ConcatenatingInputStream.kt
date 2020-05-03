@@ -1,6 +1,7 @@
-package com.ustadmobile.core.io
+package com.ustadmobile.sharedse.io
 
 import com.ustadmobile.lib.util.sumByLong
+import io.ktor.utils.io.core.ByteOrder
 import kotlinx.io.*
 import kotlin.math.min
 
@@ -68,7 +69,7 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
         val headerBuffer = generateHeader(concatenatedParts)
 
         val headerByteArr = generateHeader(concatenatedParts)
-        val headerPart = ConcatenatedPartSource({ByteArrayInputStream(headerByteArr)},
+        val headerPart = ConcatenatedPartSource({ ByteArrayInputStream(headerByteArr) },
                 headerByteArr.size.toLong(), 0L, ByteArray(0))
 
         parts = listOf(headerPart, *concatenatedParts.toTypedArray())
@@ -80,7 +81,7 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
 
     private fun generateHeader(concatenatedParts: List<ConcatenatedPartSource>): ByteArray {
         val headerSize = LEN_NUM_CHUNKS + (concatenatedParts.size * (LEN_CHUNK_ID + (LEN_CHUNK_LENGTH * 2)))
-        val byteBuffer = ByteBuffer.allocate(headerSize).order(ByteOrder.LITTLE_ENDIAN)
+        val byteBuffer = ByteBufferSe.allocate(headerSize).order(ByteOrder.LITTLE_ENDIAN)
 
         byteBuffer.putInt(concatenatedParts.size)
         concatenatedParts.forEach {
@@ -196,7 +197,7 @@ class ConcatenatingInputStream(concatenatedParts: List<ConcatenatedPartSource>):
 
         //Given a list of concatenated parts calculate the length
         fun calculateLength(concatenatedParts: List<ConcatenatedPartSource>): Long {
-            return concatenatedParts.fold(LEN_NUM_CHUNKS.toLong(), {runningTotal, part ->
+            return concatenatedParts.fold(LEN_NUM_CHUNKS.toLong(), { runningTotal, part ->
                 runningTotal + LEN_CHUNK_ID + (LEN_CHUNK_LENGTH * 2) + part.length
             })
         }

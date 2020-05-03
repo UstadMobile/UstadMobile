@@ -15,8 +15,8 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kmp.io.KMPXmlParser
 import com.ustadmobile.core.util.ext.toQueryString
+import io.ktor.utils.io.core.toByteArray
 import kotlinx.io.ByteArrayInputStream
-import kotlinx.io.core.toByteArray
 import kotlinx.serialization.json.Json
 
 /**

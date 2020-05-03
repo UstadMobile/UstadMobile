@@ -1,4 +1,4 @@
-package com.ustadmobile.core.io
+package com.ustadmobile.sharedse.io
 
 import org.junit.Assert
 import org.junit.Test
@@ -22,8 +22,8 @@ class ConcatenatingInputStreamTest {
 
     @Test
     fun givenConcatenatingInputStreamBytes_whenReadWithConcatenatedOutput_thenContentsShouldBeTheSame() {
-        val concatenatingInput = ConcatenatingInputStream(testByteArrs.mapIndexed {index, it ->
-            ConcatenatedPartSource({ByteArrayInputStream(it)}, it.size.toLong(), it.size.toLong(),
+        val concatenatingInput = ConcatenatingInputStream(testByteArrs.mapIndexed { index, it ->
+            ConcatenatedPartSource({ ByteArrayInputStream(it) }, it.size.toLong(), it.size.toLong(),
                     testMd5Sums[index])
         })
 
@@ -69,7 +69,7 @@ class ConcatenatingInputStreamTest {
 
     private fun makeConcatenatingInputStreamWithSplit(splitPoint: Long) : ByteArray{
         val concatenatingInput1 = ConcatenatingInputStream(testByteArrs.mapIndexed { index, it ->
-            ConcatenatedPartSource({ByteArrayInputStream(it)}, it.size.toLong(), it.size.toLong(),
+            ConcatenatedPartSource({ ByteArrayInputStream(it) }, it.size.toLong(), it.size.toLong(),
                     testMd5Sums[index])
         })
 
@@ -86,7 +86,7 @@ class ConcatenatingInputStreamTest {
         concatenatingInput1.close()
 
         val concatenatingInput2 = ConcatenatingInputStream(testByteArrs.mapIndexed { index, it ->
-            ConcatenatedPartSource({ByteArrayInputStream(it)}, it.size.toLong(), it.size.toLong(),
+            ConcatenatedPartSource({ ByteArrayInputStream(it) }, it.size.toLong(), it.size.toLong(),
                     testMd5Sums[index])
         })
 

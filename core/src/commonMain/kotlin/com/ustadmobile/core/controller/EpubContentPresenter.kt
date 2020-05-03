@@ -73,11 +73,11 @@ import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
 import io.ktor.client.request.get
+import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.ByteArrayInputStream
-import kotlinx.io.core.toByteArray
 import org.kmp.io.KMPXmlParser
 import kotlin.js.JsName
 

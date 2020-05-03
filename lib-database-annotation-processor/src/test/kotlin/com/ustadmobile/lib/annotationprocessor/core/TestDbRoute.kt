@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import com.google.gson.Gson
-import db2.ExampleDatabase2
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.routing.Routing
@@ -13,13 +12,8 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.dbVersionHeader
-import db2.ExampleDao2_KtorRoute
+import db2.*
 import db2.ExampleDatabase2.Companion.DB_VERSION
-import db2.ExampleEntity2
-import db2.ExampleSyncableEntity
-import db2.ExampleDatabase2SyncDao_JdbcKt
-import db2.ExampleSyncableDao_KtorRoute
-import db2.ExampleDatabase2_KtorRoute
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.engine.okhttp.OkHttp
@@ -32,6 +26,7 @@ import io.ktor.http.Headers
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 import io.ktor.server.engine.ApplicationEngine
+import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert
 import java.util.concurrent.TimeUnit

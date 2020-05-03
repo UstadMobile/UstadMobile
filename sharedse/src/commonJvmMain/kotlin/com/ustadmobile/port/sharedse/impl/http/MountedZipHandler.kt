@@ -2,7 +2,7 @@ package com.ustadmobile.port.sharedse.impl.http
 
 
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.URLTextUtil
+import com.ustadmobile.core.util.UMURLEncoder
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import net.lingala.zip4j.core.ZipFile
@@ -157,7 +157,7 @@ class MountedZipHandler : FileResponder(), RouterNanoHTTPD.UriResponder {
 
     private fun appendEntryLinksToBuffer(entries: List<String>, buffer: StringBuffer) {
         for (entry in entries) {
-            buffer.append("<li><a href=\"").append(URLTextUtil.urlEncodeUTF8(entry))
+            buffer.append("<li><a href=\"").append(UMURLEncoder.encodeUTF8(entry))
                     .append("</a></li>\n")
         }
     }

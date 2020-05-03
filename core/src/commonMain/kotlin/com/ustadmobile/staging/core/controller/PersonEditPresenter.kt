@@ -52,7 +52,7 @@ import com.ustadmobile.lib.db.entities.PersonField.Companion.FIELD_TYPE_HEADER
 import com.ustadmobile.lib.util.encryptPassword
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
+//import io.ktor.client.response.HttpResponse
 import io.ktor.client.response.readText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
@@ -789,57 +789,57 @@ class PersonEditPresenter
             view.setInProgress(true)
         })
 
-        GlobalScope.launch {
-
-            //Check username
-            if((usernameSet!= null && currentPerson!!.username == null) || (currentPerson != null && currentPerson!!.username != null &&
-                    !currentPerson!!.username.equals(usernameSet))) {
-                //Update on server
-                try {
-                    val serverUrl = UmAccountManager.getActiveEndpoint(context)
-                    val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
-                    {
-                        url {
-                            takeFrom(serverUrl!!)
-                            encodedPath = "${encodedPath}UmAppDatabase/PersonDao/isUsernameAvailable"
-                        }
-                        parameter("p0", usernameSet)
-                    }
-
-                    if (resetPasswordResponse.status == HttpStatusCode.OK) {
-
-                        val result = resetPasswordResponse.readText()
-                        if (!result.toBoolean()) {
-                            view.sendMessage(MessageID.username_not_available)
-                            view.runOnUiThread(Runnable {
-                                view.setInProgress(false)
-                            })
-                            false
-                        } else {
-                            updatedPerson!!.username = usernameSet
-                            currentPerson!!.username = usernameSet
-                            personDaoDB.updateAsync(updatedPerson!!)
-                            updatePassword()
-                        }
-                    } else {
-                        view.sendMessage(MessageID.unable_to_update_username)
-                        view.runOnUiThread(Runnable {
-                            view.setInProgress(false)
-                        })
-                        false
-                    }
-                } catch (e: Exception) {
-                    view.sendMessage(MessageID.unable_to_update_username_error)
-                    view.runOnUiThread(Runnable {
-                        view.setInProgress(false)
-                    })
-                    false
-                }
-            }else{
-                updatePassword()
-            }
-            false
-        }
+//        GlobalScope.launch {
+//
+//            //Check username
+//            if((usernameSet!= null && currentPerson!!.username == null) || (currentPerson != null && currentPerson!!.username != null &&
+//                    !currentPerson!!.username.equals(usernameSet))) {
+//                //Update on server
+//                try {
+//                    val serverUrl = UmAccountManager.getActiveEndpoint(context)
+////                    val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
+////                    {
+////                        url {
+////                            takeFrom(serverUrl!!)
+////                            encodedPath = "${encodedPath}UmAppDatabase/PersonDao/isUsernameAvailable"
+////                        }
+////                        parameter("p0", usernameSet)
+////                    }
+//
+//                    if (resetPasswordResponse.status == HttpStatusCode.OK) {
+//
+//                        val result = resetPasswordResponse.readText()
+//                        if (!result.toBoolean()) {
+//                            view.sendMessage(MessageID.username_not_available)
+//                            view.runOnUiThread(Runnable {
+//                                view.setInProgress(false)
+//                            })
+//                            false
+//                        } else {
+//                            updatedPerson!!.username = usernameSet
+//                            currentPerson!!.username = usernameSet
+//                            personDaoDB.updateAsync(updatedPerson!!)
+//                            updatePassword()
+//                        }
+//                    } else {
+//                        view.sendMessage(MessageID.unable_to_update_username)
+//                        view.runOnUiThread(Runnable {
+//                            view.setInProgress(false)
+//                        })
+//                        false
+//                    }
+//                } catch (e: Exception) {
+//                    view.sendMessage(MessageID.unable_to_update_username_error)
+//                    view.runOnUiThread(Runnable {
+//                        view.setInProgress(false)
+//                    })
+//                    false
+//                }
+//            }else{
+//                updatePassword()
+//            }
+//            false
+//        }
         return false
     }
 
@@ -873,30 +873,30 @@ class PersonEditPresenter
                     //Update on server
                     try {
                         val serverUrl = UmAccountManager.getActiveEndpoint(context)
-                        val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
-                        {
-                            url {
-                                takeFrom(serverUrl!!)
-                                encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
-                            }
-                            parameter("p0", personUid)
-                            parameter("p1", passwordSet)
-                            parameter("p2", loggedInPersonUid)
-                        }
+//                        val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
+//                        {
+//                            url {
+//                                takeFrom(serverUrl!!)
+//                                encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
+//                            }
+//                            parameter("p0", personUid)
+//                            parameter("p1", passwordSet)
+//                            parameter("p2", loggedInPersonUid)
+//                        }
 
-                        if (resetPasswordResponse.status == HttpStatusCode.OK) {
-                            //Update locally
-                            personAuthDao.updateAsync(currentPersonAuth!!)
-                            view.runOnUiThread(Runnable {
-                                view.finish()
-                            })
-                        } else {
-                            view.sendMessage(MessageID.unable_to_update_password)
-                            view.runOnUiThread(Runnable {
-                                view.setInProgress(false)
-                            })
-                            false
-                        }
+//                        if (resetPasswordResponse.status == HttpStatusCode.OK) {
+//                            //Update locally
+//                            personAuthDao.updateAsync(currentPersonAuth!!)
+//                            view.runOnUiThread(Runnable {
+//                                view.finish()
+//                            })
+//                        } else {
+//                            view.sendMessage(MessageID.unable_to_update_password)
+//                            view.runOnUiThread(Runnable {
+//                                view.setInProgress(false)
+//                            })
+//                            false
+//                        }
                     } catch (e: Exception) {
                         view.sendMessage(MessageID.unable_to_update_password)
                         view.runOnUiThread(Runnable {
