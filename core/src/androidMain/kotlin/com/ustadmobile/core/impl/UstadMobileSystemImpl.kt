@@ -160,7 +160,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             LocationDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}LocationDetailActivity"),
             AuditLogSelectionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogSelectionActivity"),
             AuditLogListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogListActivity"),
-            SelectClazzFeaturesView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectClazzFeaturesDialogFragment"),
             PersonAuthDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonAuthDetailActivity"),
             SelectPeopleDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectPeopleDialogFragment"),
             CustomFieldListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CustomFieldListActivity"),

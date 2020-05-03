@@ -15,7 +15,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.RecordDropoutDialogView
 import com.ustadmobile.port.android.view.UstadDialogFragment
-import io.reactivex.annotations.NonNull
 
 class RecordDropoutDialogFragment : UstadDialogFragment(), RecordDropoutDialogView,
         AdapterView.OnItemSelectedListener, DialogInterface.OnClickListener,
@@ -37,7 +36,6 @@ class RecordDropoutDialogFragment : UstadDialogFragment(), RecordDropoutDialogVi
     internal lateinit var personal: CheckBox
     internal lateinit var other: CheckBox
 
-    @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         val inflater = context!!.getSystemService(

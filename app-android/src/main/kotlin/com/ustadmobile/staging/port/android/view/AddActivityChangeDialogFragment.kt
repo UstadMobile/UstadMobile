@@ -26,7 +26,6 @@ import com.ustadmobile.port.android.view.UstadDialogFragment
 
 import java.util.Objects
 
-import io.reactivex.annotations.NonNull
 
 /**
  * AddActivityChangeDialogFragment Android fragment
@@ -46,7 +45,6 @@ class AddActivityChangeDialogFragment : UstadDialogFragment(), AddActivityChange
     internal lateinit var titleText: TextInputLayout
 
     @SuppressLint("InflateParams")
-    @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         //Inflate

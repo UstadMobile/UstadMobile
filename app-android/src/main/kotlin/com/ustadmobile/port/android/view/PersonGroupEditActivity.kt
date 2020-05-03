@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
-import com.ustadmobile.port.android.view.util.CrudEditActivityResultContract
 import com.ustadmobile.core.controller.UstadSingleEntityPresenter
 import android.content.Intent
 import android.os.Bundle
@@ -26,18 +25,6 @@ import com.ustadmobile.port.android.util.ext.putExtraResultAsJson
 import com.ustadmobile.port.android.view.util.AbstractCrudActivityResultContract.Companion.EXTRA_RESULT_KEY
 import com.ustadmobile.port.android.view.ext.setEditActivityTitle
 
-
-
-fun ComponentActivity.preparePersonGroupEditCall(callback: (List<PersonGroup>?) -> Unit) = prepareCall(CrudEditActivityResultContract(this, PersonGroup::class.java,
-        PersonGroupEditActivity::class.java, PersonGroup::groupUid)) {
-    callback.invoke(it)
-}
-
-fun ActivityResultLauncher<CrudEditActivityResultContract.CrudEditInput<PersonGroup>>.launchPersonGroupEdit(schedule: PersonGroup?, extraArgs: Map<String, String> = mapOf()) {
-    //TODO: Set PersistenceMode to JSON or DB here
-    launch(CrudEditActivityResultContract.CrudEditInput(schedule,
-            UstadSingleEntityPresenter.PersistenceMode.JSON, extraArgs))
-}
 
 
 
@@ -96,10 +83,11 @@ class PersonGroupEditActivity : UstadBaseActivity(), PersonGroupEditView,
         }
 
     override fun finishWithResult(result: List<PersonGroup>) {
-        setResult(RESULT_OK, Intent().apply {
-            putExtraResultAsJson(EXTRA_RESULT_KEY, result)
-        })
-        finish()
+//TODO: this is going to removed when we move to using fragments
+//        setResult(RESULT_OK, Intent().apply {
+//            putExtraResultAsJson(EXTRA_RESULT_KEY, result)
+//        })
+//        finish()
     }
 
     override var loading: Boolean = false

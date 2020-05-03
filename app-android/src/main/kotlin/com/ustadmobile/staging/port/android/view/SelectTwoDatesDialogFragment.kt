@@ -18,7 +18,6 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.SelectTwoDatesDialogView
 import com.ustadmobile.port.android.view.UstadDialogFragment
-import io.reactivex.annotations.NonNull
 import java.util.*
 
 /**
@@ -46,7 +45,6 @@ class SelectTwoDatesDialogFragment : UstadDialogFragment(), SelectTwoDatesDialog
         fun onCustomTimesResult(from: Long, to: Long)
     }
 
-    @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
 

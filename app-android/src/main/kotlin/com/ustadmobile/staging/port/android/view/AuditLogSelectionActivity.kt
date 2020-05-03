@@ -15,7 +15,7 @@ import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.util.*
 
 class AuditLogSelectionActivity : UstadBaseActivity(), AuditLogSelectionView,
-        SelectClazzesDialogFragment.ClazzSelectDialogListener,
+        //SelectClazzesDialogFragment.ClazzSelectDialogListener,
         SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener,
         SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener,
         SelectPeopleDialogFragment.PersonSelectDialogListener {
@@ -103,20 +103,20 @@ class AuditLogSelectionActivity : UstadBaseActivity(), AuditLogSelectionView,
 
     }
 
-    override fun onSelectClazzesResult(selectedClazzes: HashMap<String, Long>?) {
-        val classesSelectedString = StringBuilder()
-        val selectedClazzesNameIterator = selectedClazzes!!.keys.iterator()
-        while (selectedClazzesNameIterator.hasNext()) {
-            classesSelectedString.append(selectedClazzesNameIterator.next())
-            if (selectedClazzesNameIterator.hasNext()) {
-                classesSelectedString.append(", ")
-            }
-        }
-        val selectedClassesList = ArrayList(selectedClazzes.values)
-        mPresenter!!.selectedClasses = selectedClassesList
-
-        updateClazzesSelected(classesSelectedString.toString())
-    }
+//    override fun onSelectClazzesResult(selectedClazzes: HashMap<String, Long>?) {
+//        val classesSelectedString = StringBuilder()
+//        val selectedClazzesNameIterator = selectedClazzes!!.keys.iterator()
+//        while (selectedClazzesNameIterator.hasNext()) {
+//            classesSelectedString.append(selectedClazzesNameIterator.next())
+//            if (selectedClazzesNameIterator.hasNext()) {
+//                classesSelectedString.append(", ")
+//            }
+//        }
+//        val selectedClassesList = ArrayList(selectedClazzes.values)
+//        mPresenter!!.selectedClasses = selectedClassesList
+//
+//        updateClazzesSelected(classesSelectedString.toString())
+//    }
 
     override fun onLocationResult(selectedLocations: HashMap<String, Long>) {
         val selectedLocationsNameIterator = selectedLocations.keys.iterator()

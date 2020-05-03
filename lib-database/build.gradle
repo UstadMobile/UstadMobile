@@ -104,7 +104,7 @@ dependencies {
     kapt files("../lib-database-annotation-processor/build/libs/lib-database-annotation-processor.jar",
             "../lib-door-runtime/build/libs/lib-door-runtime-jvm-${rootProject.version}.jar")
     kapt "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    kapt "com.squareup:kotlinpoet:1.2.0"
+    kapt "com.squareup:kotlinpoet:$version_kotlinpoet"
     kapt "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
     kapt "io.ktor:ktor-server-netty:$version_ktor"
     kapt "org.apache.commons:commons-text:$version_apache_commons_text"

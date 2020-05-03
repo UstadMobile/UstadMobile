@@ -29,7 +29,6 @@ import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.SelectMultipleTreeDialogView
 import com.ustadmobile.lib.db.entities.Location
 import com.ustadmobile.port.android.view.UstadDialogFragment
-import io.reactivex.annotations.NonNull
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tellh.com.recyclertreeview_lib.TreeNode
@@ -124,7 +123,6 @@ class SelectMultipleTreeDialogFragment : UstadDialogFragment(), SelectMultipleTr
 
     }
 
-    @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inflater = context!!.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater

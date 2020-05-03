@@ -296,20 +296,21 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
     fun compressImage() {
         val imageFile = File(imagePathFromCamera)
         try {
-            val c = Compressor(this)
-                    .setMaxWidth(IMAGE_MAX_WIDTH)
-                    .setMaxHeight(IMAGE_MAX_HEIGHT)
-                    .setQuality(IMAGE_QUALITY)
-                    .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                    .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
-
-            if (imageFile.exists()) {
-                val compressedImageFile = c.compressToFile(imageFile)
-                if (!imageFile.delete()) {
-                    print("Could not delete " + imagePathFromCamera!!)
-                }
-                imagePathFromCamera = compressedImageFile.getAbsolutePath()
-            }
+//            TODO: This will be removed as it will be replaced with the image view binding
+//            val c = Compressor(this)
+//                    .setMaxWidth(IMAGE_MAX_WIDTH)
+//                    .setMaxHeight(IMAGE_MAX_HEIGHT)
+//                    .setQuality(IMAGE_QUALITY)
+//                    .setCompressFormat(Bitmap.CompressFormat.JPEG)
+//                    .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
+//
+//            if (imageFile.exists()) {
+//                val compressedImageFile = c.compressToFile(imageFile)
+//                if (!imageFile.delete()) {
+//                    print("Could not delete " + imagePathFromCamera!!)
+//                }
+//                imagePathFromCamera = compressedImageFile.getAbsolutePath()
+//            }
 
 
         } catch (e: IOException) {

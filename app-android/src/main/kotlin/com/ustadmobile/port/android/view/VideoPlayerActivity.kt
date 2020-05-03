@@ -150,13 +150,13 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
 
     private fun initializePlayer() {
-        player = ExoPlayerFactory.newSimpleInstance(
-                DefaultRenderersFactory(this),
-                DefaultTrackSelector(), DefaultLoadControl())
-
-        playerView.player = player
-        player!!.playWhenReady = playWhenReady
-        player!!.seekTo(currentWindow, playbackPosition)
+//        player = ExoPlayerFactory.newSimpleInstance(
+//                DefaultRenderersFactory(this),
+//                DefaultTrackSelector(), DefaultLoadControl())
+//
+//        playerView.player = player
+//        player!!.playWhenReady = playWhenReady
+//        player!!.seekTo(currentWindow, playbackPosition)
     }
 
     override fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
@@ -203,11 +203,11 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
     fun setSubtitle(subtitleData: String?, mediaSource: MediaSource) {
 
         if (subtitleData == null) {
-            playerView.subtitleView.visibility = GONE
+            playerView?.subtitleView?.visibility = GONE
             return
         }
 
-        playerView.subtitleView.visibility = VISIBLE
+        playerView?.subtitleView?.visibility = VISIBLE
 
         val subtitleFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
                 C.SELECTION_FLAG_DEFAULT, null)

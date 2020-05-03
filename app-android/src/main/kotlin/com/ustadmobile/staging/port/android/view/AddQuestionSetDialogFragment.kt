@@ -20,8 +20,6 @@ import com.ustadmobile.port.android.view.UstadDialogFragment
 
 import java.util.Objects
 
-import io.reactivex.annotations.NonNull
-
 class AddQuestionSetDialogFragment : UstadDialogFragment(), AddQuestionSetDialogView,
         AdapterView.OnItemSelectedListener, DialogInterface.OnClickListener,
         DialogInterface.OnShowListener, View.OnClickListener, DismissableDialog {
@@ -34,9 +32,8 @@ class AddQuestionSetDialogFragment : UstadDialogFragment(), AddQuestionSetDialog
     internal lateinit var rootView: View
 
 
-    @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = Objects.requireNonNull<Context>(context).getSystemService(
+        val inflater = requireContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         rootView = inflater.inflate(R.layout.fragment_add_question_set_dialog, null)
         questionSetTitle = rootView.findViewById(R.id.fragment_add_question_set_dialog_name_edittext)
@@ -49,7 +46,7 @@ class AddQuestionSetDialogFragment : UstadDialogFragment(), AddQuestionSetDialog
 
         val negativeOCL = { _:DialogInterface, _:Int -> mPresenter.handleCancelSchedule() }
 
-        val builder = AlertDialog.Builder(Objects.requireNonNull<Context>(context))
+        val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.new_question_set)
         builder.setView(rootView)
         builder.setPositiveButton(R.string.add, positiveOCL)
