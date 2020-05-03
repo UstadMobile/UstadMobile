@@ -45,9 +45,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.findNavController
+import androidx.navigation.navOptions
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -127,11 +130,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SELSelectConsentView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELSelectConsentActivity"),
             SELEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELEditActivity"),
             SELQuestionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionActivity"),
-            SELQuestionEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionEditActivity"),
             SELRecognitionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELRecognitionActivity"),
-            ClazzEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzEditActivity"),
-            ClazzEdit2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzEdit2Activity"),
-            AddScheduleDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddScheduleDialogFragment"),
             ClazzActivityEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzActivityEditActivity"),
             AddActivityChangeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddActivityChangeDialogFragment"),
             ReportEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportEditActivity"),
@@ -144,12 +143,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ReportNumberOfDaysClassesOpenView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportNumberOfDaysClassesOpenActivity"),
             ReportAttendanceGroupedByThresholdsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportAttendanceGroupedByThresholdsActivity"),
             BulkUploadMasterView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}BulkUploadMasterActivity"),
-            SettingsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SettingsActivity"),
-            SELQuestionSetsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetsActivity"),
             AddQuestionSetDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddQuestionSetDialogFragment"),
-            SELQuestionSetDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetDetailActivity"),
             PersonPictureDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonPictureDialogFragment"),
-            SELQuestionDetail2View.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionDetail2Activity"),
             AddQuestionOptionDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddQuestionOptionDialogFragment"),
             ReportAtRiskStudentsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportAtRiskStudentsActivity"),
             CallPersonRelatedDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CallPersonRelatedDialogFragment"),
@@ -157,10 +152,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ReportSELView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSELActivity"),
             PersonListSearchView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonListSearchActivity"),
             BaseReportView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSelectionFragment"),
-            HolidayCalendarListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}HolidayCalendarListActivity"),
-            HolidayCalendarDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}HolidayCalendarDetailActivity"),
-            RoleListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleListActivity"),
-            RoleDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleDetailActivity"),
             GroupListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupListActivity"),
             GroupDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupDetailActivity"),
             RoleAssignmentDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleAssignmentDetailActivity"),
@@ -169,7 +160,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             LocationDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}LocationDetailActivity"),
             AuditLogSelectionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogSelectionActivity"),
             AuditLogListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogListActivity"),
-            AddDateRangeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddDateRangeDialogFragment"),
             SelectClazzFeaturesView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectClazzFeaturesDialogFragment"),
             PersonAuthDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonAuthDetailActivity"),
             SelectPeopleDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectPeopleDialogFragment"),
@@ -184,8 +174,15 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
             ClazzAssignmentEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentEditActivity"),
             ClazzAssignmentDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentDetailActivity"),
-            SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"))
+            SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"),
+            PersonGroupListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupListActivity"),
+            PersonGroupEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}PersonGroupEditActivity")
+    )
 
+
+    val destinationProvider: DestinationProvider by lazy {
+        Class.forName("com.ustadmobile.port.android.impl.ViewNameToDestMap").newInstance() as DestinationProvider
+    }
 
 
     private abstract class UmCallbackAsyncTask<A, P, R>
@@ -279,6 +276,26 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
+        val ustadDestination = destinationProvider.lookupDestinationName(viewName)
+        if(ustadDestination != null) {
+            val navController = (context as Activity).findNavController(destinationProvider.navControllerViewId)
+
+            //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
+            val options = navOptions {
+                anim {
+                    enter = androidx.navigation.ui.R.anim.fragment_open_enter
+                    exit = androidx.navigation.ui.R.anim.fragment_close_exit
+                    popEnter = androidx.navigation.ui.R.anim.fragment_open_enter
+                    popExit = androidx.navigation.ui.R.anim.fragment_close_exit
+                }
+            }
+            navController.navigate(ustadDestination.destinationId, args.toBundleWithNullableValues(),
+                options)
+
+            return
+        }
+
+
         val androidImplClass = viewNameToAndroidImplMap[viewName]
         val ctx = context as Context
         val argsBundle = UMAndroidUtil.mapToBundle(args)

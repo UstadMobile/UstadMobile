@@ -93,9 +93,10 @@ class ClazzDetailPresenter(context: Any, arguments: Map<String, String>, view: C
      * Handles what happens when Class Edit is clicked. This takes the class to the edit page.
      */
     fun handleClickClazzEdit() {
-        val args = HashMap<String, String>()
-        args[ARG_CLAZZ_UID] = currentClazzUid.toString()
-        impl.go(ClazzEditView.VIEW_NAME, args, view.viewContext)
+        //Disabled until this is put into the new fragment system
+//        val args = HashMap<String, String>()
+//        args[ARG_CLAZZ_UID] = currentClazzUid.toString()
+//        impl.go(ClazzEditView.VIEW_NAME, args, view.viewContext)
     }
 
     /**

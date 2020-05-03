@@ -19,7 +19,7 @@ import java.util.*
  */
 fun updateTimeOnEditText(et: EditText, millisSinceMidnight: Int) {
     if (millisSinceMidnight == 0) {
-        et.setText("-")
+        et.setText("")
     }else{
         val dateFormatter = DateFormat.getTimeFormat(et.context)
         val cal = Calendar.getInstance().also {

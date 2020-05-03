@@ -57,7 +57,7 @@ class HolidayEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: Holiday) {
-        view.finishWithResult(entity)
+        view.finishWithResult(listOf(entity))
     }
 
     companion object {

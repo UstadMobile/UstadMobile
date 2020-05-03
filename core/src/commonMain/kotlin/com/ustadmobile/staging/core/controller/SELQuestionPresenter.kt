@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.SELEditView
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_CLAZZMEMBER_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_QUESTION_INDEX_ID

@@ -39,6 +39,22 @@ abstract class SelQuestionSetDao : BaseDao<SelQuestionSet> {
             "FROM SelQuestionSet ")
     abstract fun findAllQuestionSetsWithNumQuestions(): DataSource.Factory<Int, SELQuestionSetWithNumQuestions>
 
+    @Query("SELECT " +
+            " (SELECT COUNT(*) FROM SelQuestion " +
+            "       WHERE selQuestionSelQuestionSetUid = " +
+            "       SelQuestionSet.selQuestionSetUid) AS numQuestions, " +
+            " SelQuestionSet.* " +
+            "FROM SelQuestionSet ORDER BY SelQuestionSet.title ASC")
+    abstract fun findAllQuestionSetsWithNumQuestionsNameAsc(): DataSource.Factory<Int, SELQuestionSetWithNumQuestions>
+
+    @Query("SELECT " +
+            " (SELECT COUNT(*) FROM SelQuestion " +
+            "       WHERE selQuestionSelQuestionSetUid = " +
+            "       SelQuestionSet.selQuestionSetUid) AS numQuestions, " +
+            " SelQuestionSet.* " +
+            "FROM SelQuestionSet ORDER BY SelQuestionSet.title DESC")
+    abstract fun findAllQuestionSetsWithNumQuestionsNameDesc(): DataSource.Factory<Int, SELQuestionSetWithNumQuestions>
+
     @Query("SELECT * FROM SelQuestionSet")
     abstract fun findAllQuestionSetsLiveData(): DoorLiveData<List<SelQuestionSet>>
 

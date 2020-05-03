@@ -1,20 +1,12 @@
 package com.ustadmobile.core.view
 
-import androidx.paging.DataSource
-import com.ustadmobile.core.db.UmProvider
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 
-/**
- * Created by mike on 3/8/18.
- */
-
-interface PersonListView : UstadView {
-
-    fun setProvider(provider: DataSource.Factory<Int, Person>)
+interface PersonListView: UstadListView<Person, PersonWithDisplayDetails> {
 
     companion object {
-
-        const val VIEW_NAME = "PersonList"
+        const val VIEW_NAME = "PersonListView"
     }
 
 }

@@ -20,7 +20,7 @@
     <item android:id="@+id/menu_home_activity_settings"
         android:icon="@drawable/ic_settings_white_24dp"
         android:title="@string/done"
-        android:visible="false"
+        android:visible="true"
         android:iconTint="@color/icons"
         app:showAsAction="always"/>
 

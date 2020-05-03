@@ -99,7 +99,7 @@ class HolidayCalendarEditPresenter(context: Any,
                 it.holHolidayCalendarUid = entity.umCalendarUid
             }
 
-            view.finishWithResult(entity)
+            view.finishWithResult(listOf(entity))
         }
     }
 

@@ -142,7 +142,7 @@ ext {
     version_androidx_legacy = "1.0.0"
     version_android_room = "2.2.3"
     version_androidx_arch = "2.1.0"
-    version_androidx_recyclerview = "1.1.0"
+    version_androidx_recyclerview = "1.2.0-alpha02"
     version_android_multidex = "2.0.0"
     version_android_workmanager = "2.2.0"
     version_androidx_paging = "2.1.1"
@@ -162,6 +162,7 @@ ext {
     version_android_fab_extended = "0.0.4"
     version_android_rotatelayout = "3.0.0"
     version_android_bottom_nav = "2.3.4"
+    version_android_navigation = "2.3.0-alpha04"
     version_play_core = "1.6.4"
     version_android_leakcanary = "2.1"
     version_android_play_services_safetynet = "17.0.0"
@@ -217,10 +218,11 @@ task newFromTemplate(type: Copy) {
     def templateName = project.hasProperty("Template") ? project.property("Template") : "editscreen"
 
     replacementTokens["Entity"] = project.hasProperty("Entity") ? project.property("Entity") : "Entity"
-    replacementTokens["Entity_SnakeCase"] = replacementTokens["Entity"].replaceAll("([^_A-Z])([A-Z])", '$1_$2')
-    replacementTokens["DisplayEntity"] = project.hasProperty("DisplayEntity") ? project.properties["DisplayEntity"] : replacementTokens["Entity"]
+    replacementTokens["Entity_SnakeCase"] = replacementTokens["Entity"].replaceAll("([^_A-Z])([A-Z])", '$1_$2').toLowerCase()
+    replacementTokens["DisplayEntity"] = project.hasProperty("DisplayEntity") ? project.property("DisplayEntity") : replacementTokens["Entity"]
+    replacementTokens["DisplayEntity_Import"] = replacementTokens["DisplayEntity"] != replacementTokens["Entity"] ? "import com.ustadmobile.lib.db.entities." + replacementTokens['DisplayEntity'] : ""
     replacementTokens["EditEntity"] = project.hasProperty("EditEntity") ? project.properties["EditEntity"] : replacementTokens["Entity"]
-    replacementTokens["EditEntity_Import"] = replacementTokens["EditEntity"] != replacementTokens["Entity"] ? "import ${replacementTokens['EditEntity']}" : ""
+    replacementTokens["EditEntity_Import"] = replacementTokens["EditEntity"] != replacementTokens["Entity"] ? "import com.ustadmobile.lib.db.entities." + replacementTokens['EditEntity'] : ""
     replacementTokens["Entity_VariableName"] = replacementTokens["Entity"].substring(0, 1).toLowerCase() + replacementTokens["Entity"].substring(1)
     replacementTokens["DisplayEntity_VariableName"] = replacementTokens["DisplayEntity"].substring(0, 1).toLowerCase() + replacementTokens["DisplayEntity"].substring(1)
     replacementTokens["Entity_LowerCase"] = replacementTokens["Entity"].toLowerCase()
@@ -232,6 +234,7 @@ task newFromTemplate(type: Copy) {
     into project.rootDir
     rename('@Entity@', replacementTokens["Entity"])
     rename('@Entity_LowerCase@', replacementTokens["Entity_LowerCase"])
+    rename('@Entity_SnakeCase@', replacementTokens["Entity_SnakeCase"])
 
     eachFile {
         if(it.relativePath.getFile(project.rootDir).exists()) {

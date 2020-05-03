@@ -43,7 +43,8 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
+        //return repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
+        return true
     }
 
     private fun getAndSetList(sortOrder: SortOrder) {

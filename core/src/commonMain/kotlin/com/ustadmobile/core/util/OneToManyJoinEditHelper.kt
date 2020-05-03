@@ -84,7 +84,7 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
         val listJsonStr = savedState?.get(serializationKey) ?: return
         val deserializer = deserializationStrategy ?: return
         val listVal = Json.parse(deserializer, listJsonStr)
-        liveList.sendValue(listVal)
+        liveList.setVal(listVal)
     }
 
     /**

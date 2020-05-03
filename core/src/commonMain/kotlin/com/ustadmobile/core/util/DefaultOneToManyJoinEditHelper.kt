@@ -17,6 +17,13 @@ class DefaultOneToManyJoinEditHelper<T>(pkGetter: (T) -> Long,
 
     private val atomicLong = atomic(0L)
 
+    override fun onLoadFromJsonSavedState(savedState: Map<String, String>?) {
+        super.onLoadFromJsonSavedState(savedState)
+
+        val fakePkStartVal = (liveList.getValue()?.map { pkGetter(it) }?.min() ?: 0L) -1
+        atomicLong.value = fakePkStartVal
+    }
+
     override val fakePkGenerator: () -> Long
         get() = { atomicLong.decrementAndGet() }
 

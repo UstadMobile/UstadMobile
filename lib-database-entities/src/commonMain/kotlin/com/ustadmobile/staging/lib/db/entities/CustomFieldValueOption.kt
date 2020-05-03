@@ -40,4 +40,8 @@ class CustomFieldValueOption {
 
     @LastChangedBy
     var customFieldValueOptionLCB: Int = 0
+
+    override fun toString(): String {
+        return customFieldValueOptionName ?: "unnamed option"
+    }
 }

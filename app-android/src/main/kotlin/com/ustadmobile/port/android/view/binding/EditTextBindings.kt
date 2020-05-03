@@ -10,6 +10,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.TimeZoneEntity
 import java.text.MessageFormat
 import java.util.*
 
@@ -42,14 +43,25 @@ fun TextView.setScheduleText(schedule: Schedule) {
     ))
 }
 
+private fun mkGmtOffsetString(rawOffset: Int): String {
+    val gmtOffset =  "${(rawOffset / MS_PER_HOUR)}:" +
+            (rawOffset.rem(MS_PER_HOUR) / MS_PER_MIN).toString().padStart(2, '0')
+    val plusMinSymbol = if(rawOffset >= 0) "+" else ""
+    return "(GMT$plusMinSymbol$gmtOffset)"
+}
+
 @SuppressLint("SetTextI18n")
 @BindingAdapter("timeZoneText")
 fun TextView.setTimeZoneText(timeZone: TimeZone) {
-    val gmtOffset =  "${(timeZone.rawOffset / MS_PER_HOUR)}:" +
-            (timeZone.rawOffset.rem(MS_PER_HOUR) / MS_PER_MIN).toString().padStart(2, '0')
-    val plusMinSymbol = if(timeZone.rawOffset >= 0) "+" else ""
-    text = "(GMT$plusMinSymbol$gmtOffset) ${timeZone.id}"
+    text = "${mkGmtOffsetString(timeZone.rawOffset)} ${timeZone.id}"
 }
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter("timeZoneText")
+fun TextView.setTimeZoneTextEntity(timeZoneEntity: TimeZoneEntity) {
+    text = "${mkGmtOffsetString(timeZoneEntity.rawOffset)} ${timeZoneEntity.id}"
+}
+
 
 @BindingAdapter(value = ["createNewFormatText", "createNewFormatArg"], requireAll = true)
 fun TextView.setCreateNewItemText(formatTextId: Int, formatArg: String) {

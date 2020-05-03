@@ -11,7 +11,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.AddScheduleDialogView
 import com.ustadmobile.core.view.AddScheduleDialogView.Companion.EVERY_DAY_SCHEDULE_POSITION
-import com.ustadmobile.core.view.ClazzEditView.Companion.ARG_SCHEDULE_UID
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Schedule
@@ -20,7 +19,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-
+/**
+ * Note: this is being kept for the time being as it contains logic on running scheduled check
+ */
 class AddScheduleDialogPresenter
 /**
  * Initialises all Daos, gets all needed arguments and creates a schedule if argument not given.
@@ -53,9 +54,9 @@ class AddScheduleDialogPresenter
             currentClazzUid = arguments!!.get(ARG_CLAZZ_UID)!!.toLong()
         }
 
-        if (arguments!!.containsKey(ARG_SCHEDULE_UID)) {
-            currentScheduleUid = arguments!!.get(ARG_SCHEDULE_UID)!!.toLong()
-        }
+//        if (arguments!!.containsKey(ARG_SCHEDULE_UID)) {
+//            currentScheduleUid = arguments!!.get(ARG_SCHEDULE_UID)!!.toLong()
+//        }
 
         if (currentScheduleUid > 0) {
             GlobalScope.launch {

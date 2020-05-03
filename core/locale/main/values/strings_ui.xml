@@ -543,7 +543,8 @@
     <string name="at_risk_report_desc">At risk students report: shows all students deemed at risk (due to low attendance)</string>
     <string name="holiday_calendars">Holiday calendars</string>
     <string name="holiday_calendars_desc">Add, remove and modify holiday calendars</string>
-    <string name="sel_question_set">SEL Question sets</string>
+    <string name="sel_question_set">SEL Question set</string>
+    <string name="sel_question_sets">SEL Question sets</string>
     <string name="sel_question_set_desc">Manage SEL questions</string>
     <string name="users">Users</string>
     <string name="question_set">Question set</string>
@@ -830,5 +831,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="edit_entity">Edit %1$s</string>
 
     <string name="items_selected">%1$d selected</string>
+
+    <string name="permission_clazz_assignment_view">View class assignments</string>
+    <string name="permission_clazz_asignment_edit">Create and edit class assignments</string>
 
 </resources>

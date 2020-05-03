@@ -1,11 +1,11 @@
 package com.ustadmobile.core.view
 
-enum class EditButtonVisibility {
+enum class EditButtonMode {
     GONE, FAB
 }
 
 interface UstadDetailView<RT>: UstadSingleEntityView<RT> {
 
-    var editButtonVisibility: EditButtonVisibility
+    var editButtonMode: EditButtonMode
 
 }

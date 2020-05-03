@@ -11,47 +11,37 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemClazzlist2ClazzBinding
 import com.ustadmobile.core.controller.ClazzList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
-import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
-import com.ustadmobile.port.android.view.util.getDataItemViewHolder
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
-        ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener{
+        ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     private var mPresenter: ClazzList2Presenter? = null
-
-    private var dbRepo: UmAppDatabase? = null
 
     override val listPresenter: UstadListPresenter<*, in ClazzWithNumStudents>?
         get() = mPresenter
 
-    class ClazzList2RecyclerAdapter(var presenter: ClazzList2Presenter?): PagedListAdapterWithNewItem<ClazzWithNumStudents>(DIFF_CALLBACK) {
+    class ClazzList2RecyclerAdapter(var presenter: ClazzList2Presenter?): SelectablePagedListAdapter<ClazzWithNumStudents, ClazzList2RecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
 
         class ClazzList2ViewHolder(val itemBinding: ItemClazzlist2ClazzBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            if(viewType == ITEMVIEWTYPE_NEW) {
-                return super.onCreateViewHolder(parent, viewType)
-            }else {
-                val itemBinding = ItemClazzlist2ClazzBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                return ClazzList2ViewHolder(itemBinding)
-            }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzList2ViewHolder {
+            val itemBinding = ItemClazzlist2ClazzBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            return ClazzList2ViewHolder(itemBinding)
         }
 
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val itemHolder = holder.getDataItemViewHolder()
-            if(itemHolder is ClazzList2ViewHolder) {
-                itemHolder.itemBinding.clazz = getItem(position)
-                itemHolder.itemBinding.presenter = presenter
-            }
+        override fun onBindViewHolder(holder: ClazzList2ViewHolder, position: Int) {
+            holder.itemBinding.clazz = getItem(position)
+            holder.itemBinding.presenter = presenter
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -68,10 +58,10 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
-        mDataBinding?.presenter = mPresenter
-        mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = ClazzList2RecyclerAdapter(mPresenter)
-        mPresenter?.onCreate(savedInstanceState.toStringMap())
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+            requireContext().getString(R.string.create_new, R.string.clazz))
+        mDataRecyclerViewAdapter = ClazzList2RecyclerAdapter(mPresenter)
+
         return view
     }
 
@@ -81,6 +71,11 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
         dbRepo = null
     }
 
+
+    override fun onClick(v: View?) {
+        if(view?.id == R.id.item_createnew_layout)
+            navigateToEditEntity(null, R.id.clazz_edit_dest, Clazz::class.java)
+    }
 
     override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
         mPresenter?.handleClickSortOrder(messageIdOption)

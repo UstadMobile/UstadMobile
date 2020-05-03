@@ -5,12 +5,11 @@ import android.content.Context
 import android.text.format.DateFormat
 import android.widget.DatePicker
 import android.widget.EditText
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -21,7 +20,7 @@ import java.util.*
 fun updateDateOnEditText(et: EditText, date: Long) {
     val dateFormatter = DateFormat.getDateFormat(et.context)
     if (date == 0L) {
-        et.setText("-")
+        et.setText("")
     }else{
         et.setText(dateFormatter.format(date))
     }
@@ -44,16 +43,30 @@ fun openDatePicker2(et: EditText, context: Context, inverseBindingListener: Inve
         inverseBindingListener.onChange()
     }
 
-    val datePicker = DatePickerDialog(
-            context, dateListener, c.get(Calendar.YEAR),
-            c.get(Calendar.MONTH),
-            c.get(Calendar.DAY_OF_MONTH))
+    //see https://stackoverflow.com/questions/44418149/cant-get-android-datepickerdialog-to-switch-to-spinner-mode
+    val datePicker = if(et.getTag(R.id.tag_dateusespinner) == true) {
+        DatePickerDialog(
+                ContextThemeWrapper(context, R.style.CustomDatePickerDialogTheme), R.style.CustomDatePickerDialogTheme, dateListener, c.get(Calendar.YEAR),
+                c.get(Calendar.MONTH),
+                c.get(Calendar.DAY_OF_MONTH))
+    }else {
+        DatePickerDialog(
+                context, dateListener, c.get(Calendar.YEAR),
+                c.get(Calendar.MONTH),
+                c.get(Calendar.DAY_OF_MONTH))
+    }
     datePicker.show()
 }
 
 
 @BindingAdapter("dateLongAttrChanged")
 fun getDate(et: EditText, inverseBindingListener: InverseBindingListener){
+    et.setOnClickListener {
+        openDatePicker2(et, et.context,  inverseBindingListener)
+    }
+}
+@BindingAdapter("dateLongStringAttrChanged")
+fun getDateString(et: EditText, inverseBindingListener: InverseBindingListener) {
     et.setOnClickListener {
         openDatePicker2(et, et.context,  inverseBindingListener)
     }
@@ -65,7 +78,28 @@ fun setDate(et: EditText, date: Long){
     et.setTag(R.id.tag_datelong, date)
 }
 
+/**
+ * Wrapper to handle when the result of the picker is stored on a string (e.g. CustomFieldValue)
+ */
+@BindingAdapter("dateLongString")
+fun setDateString(et: EditText, dateLongString: String?){
+    val date = dateLongString?.toLong() ?: 0L
+    updateDateOnEditText(et, date)
+    et.setTag(R.id.tag_datelong, date)
+}
+
 @InverseBindingAdapter(attribute = "dateLong")
 fun getRealValue(et: EditText): Long {
     return et.getTag(R.id.tag_datelong) as? Long ?: 0L
 }
+
+@InverseBindingAdapter(attribute = "dateLongString")
+fun getRealStringValue(et: EditText): String {
+    return getRealValue(et).toString()
+}
+
+@BindingAdapter("dateUseSpinners")
+fun EditText.setDateUseSpinners(dateUseSpinners: Boolean) {
+    setTag(R.id.tag_dateusespinner, dateUseSpinners)
+}
+

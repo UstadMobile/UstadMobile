@@ -69,6 +69,8 @@ class ClazzEdit2Presenter(context: Any,
             clazz = ClazzWithHolidayCalendar()
         }
 
+        scheduleOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
+
         return clazz
     }
 
@@ -91,7 +93,7 @@ class ClazzEdit2Presenter(context: Any,
                 it.scheduleClazzUid = entity.clazzUid
             }
 
-            view.finishWithResult(entity)
+            view.finishWithResult(listOf(entity))
         }
     }
 

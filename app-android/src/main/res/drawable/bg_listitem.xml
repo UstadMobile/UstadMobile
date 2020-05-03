@@ -3,8 +3,13 @@
     <item>
         <selector>
             <item android:state_selected="true">
-                <color android:color="?attr/colorControlHighlight"/>
+                <color android:color="@color/background_light"/>
             </item>
+
+            <item android:state_pressed="true">
+                <color android:color="@color/background_light"/>
+            </item>
+
             <item>
                 <color android:color="@android:color/transparent"/>
             </item>
@@ -12,5 +17,4 @@
         </selector>
     </item>
 
-    <item android:drawable="?attr/selectableItemBackground"/>
 </layer-list>

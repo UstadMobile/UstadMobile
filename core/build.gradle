@@ -268,12 +268,16 @@ kotlin {
                 implementation "com.soywiz:klock-android:$version_klock"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
+                implementation "androidx.work:work-runtime:$version_android_workmanager"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation project(":lib-database-android")
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 //Image loading library
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"
                 implementation "io.ktor:ktor-client-android:$version_ktor"
+
+                implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
+                implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
             }
             dependsOn commonJvmMain
         }

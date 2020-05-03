@@ -28,8 +28,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UstadTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.ClazzEdit2Activity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+        <activity android:name="com.ustadmobile.port.android.view.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="com.ustadmobile.port.android.view.RepoLoadingStatusTestActivity" />
         <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity" />
         <activity
@@ -98,9 +104,6 @@
             android:name="com.ustadmobile.port.android.view.XapiReportDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" />
 
-        <activity android:name="com.ustadmobile.port.android.view.ScheduleEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"/>
-
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true" />
@@ -142,16 +145,7 @@
             android:name="com.ustadmobile.staging.port.android.view.SELQuestionActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.SELQuestionEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.SELRecognitionActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.ClazzEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.AddScheduleDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.ClazzActivityEditActivity"
@@ -190,16 +184,7 @@
             android:name="com.ustadmobile.staging.port.android.view.BulkUploadMasterActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.SettingsActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.SELQuestionSetsActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.AddQuestionSetDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.SELQuestionSetDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.PersonPictureDialogFragment"
@@ -229,28 +214,6 @@
             android:name="com.ustadmobile.staging.port.android.view.ReportSelectionFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.HolidayCalendarListActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity android:name="com.ustadmobile.port.android.view.HolidayCalendarEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
-        <activity android:name="com.ustadmobile.port.android.view.HolidayEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
-        <activity
-            android:name="com.ustadmobile.port.android.view.HolidayCalendarListActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"/>
-
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.HolidayCalendarDetailActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.RoleListActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.RoleDetailActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.GroupListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
@@ -273,9 +236,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.AuditLogListActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.AddDateRangeDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.SelectClazzFeaturesDialogFragment"
@@ -323,16 +283,31 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/assignment"
             android:theme="@style/Theme.UstadTheme" />
+
+
+        <activity
+            android:name="com.ustadmobile.port.android.view.PersonGroupListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/groups"
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
+            android:name="com.ustadmobile.port.android.view.PersonGroupEditActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label="@string/groups"
+            android:theme="@style/Theme.UstadTheme" />
+
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/app_name"
             android:noHistory="true">
+            <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            -->
         </activity>
     </application>
 

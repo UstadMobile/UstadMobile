@@ -20,44 +20,37 @@ import com.ustadmobile.core.view.@Entity@ListView
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.@DisplayEntity@
 import com.ustadmobile.core.view.GetResultMode
-import com.ustadmobile.port.android.view.util.getDataItemViewHolder
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
-
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import com.toughra.ustadmobile.R
+import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
 class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),
         @Entity@ListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     private var mPresenter: @Entity@ListPresenter? = null
 
-    private var dbRepo: UmAppDatabase? = null
+    override val listPresenter: UstadListPresenter<*, in @DisplayEntity@>?
+        get() = mPresenter
 
-    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?,
-                                        newItemVisible: Boolean,
-                                        onClickNewItem: View.OnClickListener,
-                                        createNewText: String)
-        : PagedListAdapterWithNewItem<@DisplayEntity@>(DIFF_CALLBACK, newItemVisible, onClickNewItem, createNewText) {
+    class @Entity@ListViewHolder(val itemBinding: Item@Entity_ViewBinding_VariableName@ListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-        class @Entity@ListViewHolder(val itemBinding: Item@Entity_ViewBinding_VariableName@ListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?)
+        : SelectablePagedListAdapter<@DisplayEntity@, @Entity@ListViewHolder>(DIFF_CALLBACK) {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            if(viewType == ITEMVIEWTYPE_NEW) {
-                return super.onCreateViewHolder(parent, viewType)
-            }else {
-                val itemBinding = Item@Entity_ViewBinding_VariableName@ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                itemBinding.presenter = presenter
-                itemBinding.pagedListAdapter = this
-                return @Entity@ListViewHolder(itemBinding)
-            }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): @Entity@ListViewHolder {
+            val itemBinding = Item@Entity_ViewBinding_VariableName@ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            itemBinding.presenter = presenter
+            itemBinding.selectablePagedListAdapter = this
+            return @Entity@ListViewHolder(itemBinding)
         }
 
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val itemHolder = holder.getDataItemViewHolder()
-            if(itemHolder is @Entity@ListViewHolder) {
-                val item = getItem(position)
-                itemHolder.itemBinding.@Entity_VariableName@ = item
-                itemHolder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
-            }
+        override fun onBindViewHolder(holder: @Entity@ListViewHolder, position: Int) {
+            val item = getItem(position)
+            holder.itemBinding.@Entity_VariableName@ = item
+            holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -68,19 +61,16 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         mPresenter = @Entity@ListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
-        mDataBinding?.presenter = mPresenter
-        mDataBinding?.onSortSelected = this
+
+        mDataRecyclerViewAdapter = @Entity@ListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.@Entity_LowerCase@))
-        mRecyclerViewAdapter = @Entity@ListRecyclerAdapter(mPresenter, false, this,
-            createNewText)
-        mPresenter?.onCreate(savedInstanceState.toStringMap())
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view
     }
 
@@ -90,27 +80,18 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
                 requireContext().getString(R.string.@Entity_LowerCase@)
     }
 
+    /**
+     * OnClick function that will handle when the user clicks to create a new item
+     */
     override fun onClick(view: View?) {
-        activity?.prepare@Entity@EditCall {
-            if(it != null) {
-                finishWithResult(it)
-            }
-        }?.launch@Entity@Edit(null)
+        if(view?.id == R.id.item_createnew_layout)
+            navigateToEditEntity(null, R.id.@Entity_LowerCase@_edit_dest, @Entity@::class.java)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
-    }
-
-
-    override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
-        mPresenter?.handleClickSortOrder(messageIdOption)
-    }
-
-    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
-        //do nothing
     }
 
     override val displayTypeRepo: Any?
@@ -127,12 +108,6 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
             override fun areContentsTheSame(oldItem: @DisplayEntity@,
                                             newItem: @DisplayEntity@): Boolean {
                 return oldItem == newItem
-            }
-        }
-
-        fun newInstance(bundle: Bundle?) : @Entity@ListFragment {
-            return @Entity@ListFragment().apply {
-                arguments = bundle
             }
         }
     }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="presenterField"
+            type="com.ustadmobile.lib.db.entities.PersonDetailPresenterField" />
+    </data>
+
+    <TextView
+        app:presenterFieldHeader="@{presenterField}"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableBottom="@drawable/divider_bottom"
+        tools:text="Heading"
+        android:layout_marginHorizontal="@dimen/form_margin_horizontal_heading"
+        android:layout_marginVertical="@dimen/form_margin_vertical_itemspace"/>
+</layout>

@@ -5,7 +5,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ClazzListView.Companion.ARG_CLAZZ_UID
-import com.ustadmobile.core.view.PersonDetailView.Companion.ARG_PERSON_UID
+import com.ustadmobile.staging.core.view.PersonDetailView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.SELEditView.Companion.ARG_CLAZZMEMBER_UID
 import com.ustadmobile.core.view.SELSelectConsentView
 import com.ustadmobile.core.view.SELSelectStudentView

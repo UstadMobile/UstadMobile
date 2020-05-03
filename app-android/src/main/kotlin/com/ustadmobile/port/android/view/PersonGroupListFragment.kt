@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -21,9 +20,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonGroupListView
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
-import com.ustadmobile.core.view.GetResultMode
-import com.ustadmobile.port.android.view.util.PagedListAdapterWithNewItem
-import com.ustadmobile.port.android.view.util.getDataItemViewHolder
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
 class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupWithMemberCount>(),
@@ -31,34 +28,23 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
 
     private var mPresenter: PersonGroupListPresenter? = null
 
-    private var dbRepo: UmAppDatabase? = null
-
     override val listPresenter: UstadListPresenter<*, in PersonGroupWithMemberCount>?
         get() = mPresenter
 
-    class PersonGroupListRecyclerAdapter(var presenter: PersonGroupListPresenter?, newItemVisible: Boolean,
-                                      onClickNewItem: View.OnClickListener,
-                                        createNewText: String)
-        : PagedListAdapterWithNewItem<PersonGroupWithMemberCount>(DIFF_CALLBACK, newItemVisible,
-            onClickNewItem, createNewText) {
+    class PersonGroupListViewHolder(val itemBinding: ItemPersongroupListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-        class PersonGroupListViewHolder(val itemBinding: ItemPersongroupListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class PersonGroupListRecyclerAdapter(var presenter: PersonGroupListPresenter?)
+        : SelectablePagedListAdapter<PersonGroupWithMemberCount, PersonGroupListViewHolder>(DIFF_CALLBACK) {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            if(viewType == ITEMVIEWTYPE_NEW) {
-                return super.onCreateViewHolder(parent, viewType)
-            }else {
-                val itemBinding = ItemPersongroupListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                return PersonGroupListViewHolder(itemBinding)
-            }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersonGroupListViewHolder {
+            val itemBinding = ItemPersongroupListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            return PersonGroupListViewHolder(itemBinding)
+
         }
 
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val itemHolder = holder.getDataItemViewHolder()
-            if(itemHolder is PersonGroupListViewHolder) {
-                itemHolder.itemBinding.personGroup = getItem(position)
-                itemHolder.itemBinding.presenter = presenter
-            }
+        override fun onBindViewHolder(holder: PersonGroupListViewHolder, position: Int) {
+            holder.itemBinding.personGroup = getItem(position)
+            holder.itemBinding.presenter = presenter
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -77,8 +63,7 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
                 UmAccountManager.activeAccountLiveData)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
-        mRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter, false, this,
-            requireContext().getString(R.string.create_new, requireContext().getString(R.string.s_person_group)))
+        mDataRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }

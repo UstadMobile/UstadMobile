@@ -370,11 +370,11 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
         private const val CLAZZ_WHERE_CLAZZMEMBER =
                 " FROM Clazz " +
-                " LEFT JOIN Person ON Person.personUid = :personUid " +
-                " WHERE (Person.admin OR :personUid in " +
-                " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
-                "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND " +
-                " CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1 ) AND CAST(Person.active AS INTEGER) = 1 ) "
+                " LEFT JOIN Person ON Person.personUid = :personUid "
+//                " WHERE (Person.admin OR :personUid in " +
+//                " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
+//                "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND " +
+//                " CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1 ) AND CAST(Person.active AS INTEGER) = 1 ) "
 
 
 

@@ -9,7 +9,6 @@ import com.ustadmobile.core.impl.http.UmHttpRequest
 import com.ustadmobile.core.impl.http.UmHttpResponse
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.AddScheduleDialogView
 import com.ustadmobile.core.view.LoginView
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
