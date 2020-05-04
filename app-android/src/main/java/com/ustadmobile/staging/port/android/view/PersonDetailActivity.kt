@@ -263,18 +263,19 @@ class PersonDetailActivity : UstadBaseActivity(), PersonDetailView {
     fun compressImage() {
         val imageFile = File(imagePathFromCamera)
 
-        val c = Compressor(this)
-                .setMaxWidth(IMAGE_MAX_WIDTH)
-                .setMaxHeight(IMAGE_MAX_HEIGHT)
-                .setQuality(IMAGE_QUALITY)
-                .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
-
-        val compressedImageFile = c.compressToFile(imageFile)
-        if (!imageFile.delete()) {
-            print("Could not delete " + imagePathFromCamera!!)
-        }
-        imagePathFromCamera = compressedImageFile.absolutePath
+        //This has been replaced with the template based version
+//        val c = Compressor(this)
+//                .setMaxWidth(IMAGE_MAX_WIDTH)
+//                .setMaxHeight(IMAGE_MAX_HEIGHT)
+//                .setQuality(IMAGE_QUALITY)
+//                .setCompressFormat(Bitmap.CompressFormat.JPEG)
+//                .setDestinationDirectoryPath(imageFile.path + "_" + imageFile.name)
+//
+//        val compressedImageFile = c.compressToFile(imageFile)
+//        if (!imageFile.delete()) {
+//            print("Could not delete " + imagePathFromCamera!!)
+//        }
+//        imagePathFromCamera = compressedImageFile.absolutePath
 
 
 

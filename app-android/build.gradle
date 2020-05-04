@@ -361,7 +361,7 @@ dependencies {
     // shake detector
     implementation "com.squareup:seismic:$version_android_seismic"
 
-    implementation 'de.hdodenhof:circleimageview:2.1.0'
+    implementation "de.hdodenhof:circleimageview:$version_android_circleimageview"
 
     implementation "com.google.android.exoplayer:exoplayer:$version_exo_player"
 

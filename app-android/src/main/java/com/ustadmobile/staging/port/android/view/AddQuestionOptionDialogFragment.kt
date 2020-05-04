@@ -20,7 +20,6 @@ import com.ustadmobile.port.android.view.UstadDialogFragment
 
 import java.util.Objects
 
-import io.reactivex.annotations.NonNull
 
 class AddQuestionOptionDialogFragment : UstadDialogFragment(), AddQuestionOptionDialogView, AdapterView.OnItemSelectedListener, DialogInterface.OnClickListener, DialogInterface.OnShowListener, View.OnClickListener, DismissableDialog {
     override val viewContext: Any
@@ -32,10 +31,9 @@ class AddQuestionOptionDialogFragment : UstadDialogFragment(), AddQuestionOption
     internal lateinit var optionText: EditText
 
 
-    @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val inflater = Objects.requireNonNull<Context>(context).getSystemService(
+        val inflater = requireContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         rootView = inflater.inflate(R.layout.fragment_add_question_option_dialog, null)
 
@@ -47,7 +45,7 @@ class AddQuestionOptionDialogFragment : UstadDialogFragment(), AddQuestionOption
         val negativeOCL = { _:DialogInterface, _:Int -> mPresenter
                 .handleCancelQuestionOption() }
 
-        val builder = AlertDialog.Builder(Objects.requireNonNull<Context>(context))
+        val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.add_option)
         builder.setView(rootView)
         builder.setPositiveButton(R.string.add, positiveOCL)

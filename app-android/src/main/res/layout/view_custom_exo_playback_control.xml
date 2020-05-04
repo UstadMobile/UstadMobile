@@ -21,8 +21,10 @@
         <ImageButton android:id="@id/exo_rew"
             style="@style/ExoMediaButton.Rewind"/>
 
+
         <ImageButton android:id="@id/exo_shuffle"
-            style="@style/ExoMediaButton.Shuffle"/>
+            style="@style/ExoMediaButton"/>
+
 
         <ImageButton android:id="@id/exo_repeat_toggle"
             style="@style/ExoMediaButton"/>

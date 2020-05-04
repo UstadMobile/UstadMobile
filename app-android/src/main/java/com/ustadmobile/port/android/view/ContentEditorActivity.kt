@@ -68,7 +68,6 @@ import com.ustadmobile.port.android.umeditor.UmWebContentEditorClient.Companion.
 import com.ustadmobile.port.android.view.ContentEditorActivity.UmFormatHelper.Companion.isTobeHighlighted
 import com.ustadmobile.sharedse.network.AndroidAssetsHandler
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import id.zelory.compressor.Compressor
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ImplicitReflectionSerializer
@@ -80,6 +79,9 @@ import java.net.URLDecoder
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
+import id.zelory.compressor.Compressor
+import id.zelory.compressor.constraint.quality
+import id.zelory.compressor.constraint.format
 
 open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback,
@@ -1208,19 +1210,22 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
      */
     @Throws(IOException::class)
     private fun insertMedia(rawFile: File?) {
-        progressDialog!!.isIndeterminate = true
-        progressDialog!!.visibility = View.VISIBLE
+        progressDialog?.isIndeterminate = true
+        progressDialog?.visibility = View.VISIBLE
 
-        val mFile = if (mimeType.contains("image"))
-            Compressor(this)
-                    .setQuality(75)
-                    .setCompressFormat(Bitmap.CompressFormat.WEBP)
-                    .compressToFile(rawFile)
-        else
-            rawFile
+        val mFile: java.io.File = rawFile ?: return
 
         GlobalScope.launch {
-            val inserted = presenter.handleAddMediaContent(mFile!!.absolutePath, mimeType)
+            val fileToInsert = if (mimeType.contains("image")) {
+                    Compressor.compress(this@ContentEditorActivity, mFile) {
+                        format(Bitmap.CompressFormat.WEBP)
+                        quality(75)
+                    }
+                }else {
+                        mFile
+            }
+
+            val inserted = presenter.handleAddMediaContent(fileToInsert!!.absolutePath, mimeType)
             if(inserted){
                 isOpeningFilePickerOrCamera = false
                 runOnUiThread {

@@ -21,7 +21,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.CallPersonRelatedDialogView
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.port.android.view.UstadDialogFragment
-import io.reactivex.annotations.NonNull
+
 import java.util.*
 
 class CallPersonRelatedDialogFragment : UstadDialogFragment(), CallPersonRelatedDialogView,
@@ -39,10 +39,9 @@ class CallPersonRelatedDialogFragment : UstadDialogFragment(), CallPersonRelated
     internal lateinit var officerEntry: TextView
     internal lateinit var mPresenter: CallPersonRelatedDialogPresenter
 
-    @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val inflater = Objects.requireNonNull<Context>(context).getSystemService(
+        val inflater = requireContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
 
@@ -58,7 +57,7 @@ class CallPersonRelatedDialogFragment : UstadDialogFragment(), CallPersonRelated
                 UMAndroidUtil.bundleToMap(arguments), this)
         mPresenter.onCreate(UMAndroidUtil.bundleToMap(arguments))
 
-        val builder = AlertDialog.Builder(Objects.requireNonNull<Context>(context))
+        val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("")
         builder.setView(rootView)
         dialog = builder.create()

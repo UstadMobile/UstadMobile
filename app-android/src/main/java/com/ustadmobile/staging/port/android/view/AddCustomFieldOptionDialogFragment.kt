@@ -17,7 +17,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.AddCustomFieldOptionDialogView
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.port.android.view.UstadDialogFragment
-import io.reactivex.annotations.NonNull
 import java.util.*
 
 class AddCustomFieldOptionDialogFragment : UstadDialogFragment(),
@@ -35,10 +34,9 @@ class AddCustomFieldOptionDialogFragment : UstadDialogFragment(),
     internal var optionText: EditText? = null
 
 
-    @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val inflater = context!!.getSystemService(
+        val inflater = requireContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         rootView = inflater.inflate(R.layout.fragment_add_custom_field_option_dialog, null)
 
@@ -48,7 +46,7 @@ class AddCustomFieldOptionDialogFragment : UstadDialogFragment(),
 
         val negativeOCL = { _ : DialogInterface, _: Int -> finish() }
 
-        val builder = AlertDialog.Builder(Objects.requireNonNull(context!!))
+        val builder = AlertDialog.Builder(context!!)
         builder.setTitle(R.string.add_modify_option)
         builder.setView(rootView)
         builder.setPositiveButton(R.string.ok, positiveOCL)

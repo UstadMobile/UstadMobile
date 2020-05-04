@@ -21,7 +21,6 @@ import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.PersonPictureDialogView
 import com.ustadmobile.core.view.PersonPictureDialogView.Companion.ARG_PERSON_IMAGE_PATH
 import com.ustadmobile.port.android.view.UstadDialogFragment
-import io.reactivex.annotations.NonNull
 import java.io.File
 import java.util.*
 
@@ -43,7 +42,7 @@ class PersonPictureDialogFragment : UstadDialogFragment(), PersonPictureDialogVi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val inflater = Objects.requireNonNull<Context>(context).getSystemService(
+        val inflater = requireContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         rootView = inflater.inflate(R.layout.fragment_person_picture_dialog, null)
@@ -66,7 +65,6 @@ class PersonPictureDialogFragment : UstadDialogFragment(), PersonPictureDialogVi
         }
     }
 
-    @NonNull
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         val builder = AlertDialog.Builder(context!!)
@@ -75,8 +73,9 @@ class PersonPictureDialogFragment : UstadDialogFragment(), PersonPictureDialogVi
         dialog = builder.create()
         dialog.setOnShowListener(this)
 
-        Objects.requireNonNull<Window>(dialog.window).setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        //This is being replaced with the fragment based version
+//        dialog!!.window!!.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
         return dialog
     }

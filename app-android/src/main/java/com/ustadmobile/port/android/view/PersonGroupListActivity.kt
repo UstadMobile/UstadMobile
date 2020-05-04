@@ -6,14 +6,8 @@ import androidx.activity.ComponentActivity
 import com.github.clans.fab.FloatingActionButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.ustadmobile.lib.db.entities.PersonGroup
-import com.ustadmobile.port.android.view.util.CrudListActivityResultContract
 
 
-fun ComponentActivity.preparePersonGroupPickFromListCall(callback: (List<PersonGroup>?) -> Unit)
-        = prepareCall(CrudListActivityResultContract(this, PersonGroup::class.java,
-            PersonGroupListActivity::class.java)) {
-    callback.invoke(it)
-}
 
 class PersonGroupListActivity: UstadBaseActivity(){
 
