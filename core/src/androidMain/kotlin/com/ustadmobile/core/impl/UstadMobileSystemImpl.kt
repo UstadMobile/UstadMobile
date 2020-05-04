@@ -136,7 +136,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ReportEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportEditActivity"),
             SelectMultipleTreeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectMultipleTreeDialogFragment"),
             ReportSelectionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSelectionActivity"),
-            SelectClazzesDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectClazzesDialogFragment"),
             SelectAttendanceThresholdsDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectAttendanceThresholdsDialogFragment"),
             SelectTwoDatesDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectTwoDatesDialogFragment"),
             ReportOverallAttendanceView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportOverallAttendanceActivity"),

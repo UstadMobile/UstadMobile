@@ -142,8 +142,8 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
 
         //TODO: this is effectively causing a memory leak because the callback is stored with the activity
         //This should be moved to using a two-way binder which can work as per https://developer.android.com/training/basics/intents/result
-        activity?.prepareCall(ActivityResultContracts.TakePicture()) {
-            val presenterFieldRowsVal = presenterFieldRows?.value?.toMutableList() ?: return@prepareCall
+        registerForActivityResult(ActivityResultContracts.TakePicture()) {
+            val presenterFieldRowsVal = presenterFieldRows?.value?.toMutableList() ?: return@registerForActivityResult
             val fieldRowIndex = presenterFieldRowsVal
                     .indexOfFirst { it.presenterField?.fieldUid == PERSON_FIELD_UID_PICTURE.toLong() }
             presenterFieldRowsVal[fieldRowIndex] = presenterFieldRowsVal[fieldRowIndex].copy().also {
@@ -151,7 +151,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
                         findNavController().currentBackStackEntry?.savedStateHandle?.get(KEY_PICTURE_FILE_DEST)
             }
             presenterFieldRows?.setVal(presenterFieldRowsVal)
-        }?.launch(fileUri)
+        }.launch(fileUri)
     }
 
     override fun onClickSelectPictureFromGallery(presenterFieldRow: PresenterFieldRow) {
