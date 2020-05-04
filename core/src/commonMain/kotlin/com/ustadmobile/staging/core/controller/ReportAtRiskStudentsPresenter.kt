@@ -22,7 +22,6 @@ import com.ustadmobile.lib.db.entities.PersonWithEnrollment
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlinx.io.IOException
 
 class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>?,
                                 view: ReportAtRiskStudentsView,
@@ -221,7 +220,7 @@ class ReportAtRiskStudentsPresenter(context: Any, arguments: Map<String, String>
 
             }
 
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             print(e.message)
         }
 

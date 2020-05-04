@@ -20,7 +20,6 @@ import com.ustadmobile.staging.core.xlsx.ZipUtil
 import com.ustadmobile.lib.db.entities.DailyAttendanceNumbers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.IOException
 
 
 /**
@@ -186,7 +185,7 @@ class ReportOverallAttendancePresenter(context: Any, arguments: Map<String, Stri
             umXLSX.createXLSX()
             view.generateXLSXReport(xlsxReportPath)
 
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             print(e.message)
         }
 

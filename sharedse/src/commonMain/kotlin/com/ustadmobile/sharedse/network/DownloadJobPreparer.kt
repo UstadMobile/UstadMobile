@@ -18,7 +18,7 @@ import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.statement.HttpStatement
 import io.ktor.http.takeFrom
 
 
@@ -52,7 +52,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
 
         val repoLoadHelper =
                 RepositoryLoadHelper(dbRepo) {endpointUrl ->
-                    val _httpResponse = _httpClient.get<HttpResponse> {
+                    val _httpStatement = _httpClient.get<HttpStatement> {
                         url {
                             takeFrom(endpointUrl)
                             encodedPath =
@@ -65,9 +65,12 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
                         parameter("limit", fetchEntitiesLimit)
 
                     }
-                    val _httpResult =
-                            _httpResponse.receive<List<ContentEntryWithParentChildJoinAndMostRecentContainer>>()
-                    val _requestId = _httpResponse.headers.get("X-reqid")?.toInt() ?: -1
+                    var _requestId = -1
+                    val _httpResult = _httpStatement.execute {
+                        _requestId = it.headers.get("X-reqid")?.toInt() ?: -1
+                        it.receive<List<ContentEntryWithParentChildJoinAndMostRecentContainer>>()
+                    }
+
                     db.containerDao.replaceList(_httpResult
                             .filter { it.mostRecentContainer != null }
                             .map { it.mostRecentContainer as Container }

@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.GlobalScope
@@ -58,38 +58,38 @@ class LoginPresenter(context: Any, arguments: Map<String, String>, view: LoginVi
         view.setErrorMessage("")
         GlobalScope.launch {
             try {
-                val loginResponse = defaultHttpClient().get<HttpResponse>() {
+                defaultHttpClient().get<HttpStatement> {
                     url {
                         takeFrom(serverUrl)
                         encodedPath = "${encodedPath}Login/login"
                     }
                     parameter("username", username)
                     parameter("password", password)
-                }
+                }.execute { loginResponse ->
+                    if (loginResponse.status == HttpStatusCode.OK) {
+                        val account = loginResponse.receive<UmAccount>()
+                        account.endpointUrl = serverUrl
 
-                if (loginResponse.status == HttpStatusCode.OK) {
-                    val account = loginResponse.receive<UmAccount>()
-                    account.endpointUrl = serverUrl
+                        //make sure that the person is loaded into the database
+                        personRepo.findByUid(account.personUid)
+                        view.runOnUiThread(Runnable { view.setInProgress(false) })
+                        UmAccountManager.setActiveAccount(account, context)
 
-                    //make sure that the person is loaded into the database
-                    personRepo.findByUid(account.personUid)
-                    view.runOnUiThread(Runnable { view.setInProgress(false) })
-                    UmAccountManager.setActiveAccount(account, context)
+                        //make sure the repository knows that it is online
+                        val activeRepository = UmAccountManager.getRepositoryForActiveAccount(context)
+                        if(activeRepository is DoorDatabaseRepository) {
+                            activeRepository.connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+                        }
 
-                    //make sure the repository knows that it is online
-                    val activeRepository = UmAccountManager.getRepositoryForActiveAccount(context)
-                    if(activeRepository is DoorDatabaseRepository) {
-                        activeRepository.connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+                        impl.go(mNextDest, context)
+                    } else {
+                        view.runOnUiThread(Runnable {
+                            view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
+                                    context))
+                            view.setPassword("")
+                            view.setInProgress(false)
+                        })
                     }
-
-                    impl.go(mNextDest, context)
-                } else {
-                    view.runOnUiThread(Runnable {
-                        view.setErrorMessage(impl.getString(MessageID.wrong_user_pass_combo,
-                                context))
-                        view.setPassword("")
-                        view.setInProgress(false)
-                    })
                 }
             } catch (e: Exception) {
                 view.runOnUiThread(Runnable {

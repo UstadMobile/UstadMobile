@@ -573,7 +573,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
         const val DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME = "_dataSourceFactoryToBoundaryCallbackMap"
 
-        val BOUNDARY_CALLBACK_CLASSNAME = ClassName("com.ustadmobile.door", "" +
+        val BOUNDARY_CALLBACK_CLASSNAME = ClassName("com.ustadmobile.door",
                 "RepositoryBoundaryCallback")
 
         val BOUNDARY_CALLBACK_MAP_CLASSNAME = WeakHashMap::class.asClassName().parameterizedBy(

@@ -12,7 +12,7 @@ import kotlinx.io.InputStream
 /**
  * Created by mike on 12/27/16.
  */
-
+@kotlinx.serialization.InternalSerializationApi
 class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
                      val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
     : UstadBaseController<AboutView>(context, args!!, view) {
@@ -23,11 +23,11 @@ class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
         GlobalScope.launch {
             var aboutInputStream : InputStream? = null
             try {
-                aboutInputStream = impl.getAssetInputStreamAsync(context, "com/ustadmobile/core/about.html")
-                val aboutText = UMIOUtils.readStreamToString(aboutInputStream)
-                view.runOnUiThread(Runnable {
-                    view.setAboutHTML(aboutText)
-                })
+//                aboutInputStream = impl.getAssetInputStreamAsync(context, "com/ustadmobile/core/about.html")
+//                val aboutText = UMIOUtils.readStreamToString(aboutInputStream)
+//                view.runOnUiThread(Runnable {
+//                    view.setAboutHTML(aboutText)
+//                })
             }finally {
                 aboutInputStream?.close()
             }

@@ -41,9 +41,6 @@ class SyncableEntityInfo {
         entityPkField = PropertySpec.builder("${entityPkFieldEl.simpleName}",
                 entityPkFieldEl.asType().asTypeName()).build()
 
-        println("hello")
-        println("Class name: " + syncableEntityParam.canonicalName)
-
         val entityMasterCsnFieldEl = syncableEntityEl.enclosedElements
                 .first { it.getAnnotation(MasterChangeSeqNum::class.java) != null}
         entityMasterCsnField = PropertySpec.builder("${entityMasterCsnFieldEl.simpleName}",

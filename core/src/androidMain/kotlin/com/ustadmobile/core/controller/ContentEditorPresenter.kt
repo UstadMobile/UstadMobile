@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import android.content.Context
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManager.FileEntrySource
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
@@ -24,7 +25,6 @@ import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.text.Charsets.UTF_8
-
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String>,
                                                        view: ContentEditorView, private val storage: String?,
@@ -60,7 +60,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
         creators = mutableListOf(OpfCreator(author, UUID.randomUUID().toString()))
 
-        val emptyDocInputStream : InputStream = impl.getAssetInputStreamAsync(context,filePath)
+        val emptyDocInputStream : InputStream = (context as Context).assets.open(filePath)
 
         val container = Container()
         container.containerContentEntryUid = contentEntryUid

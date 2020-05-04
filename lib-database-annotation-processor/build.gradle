@@ -7,6 +7,7 @@ plugins {
     id 'maven-publish'
     id 'com.github.psxpaul.execfork' version '0.1.13'
     id 'com.github.johnrengelman.shadow'
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 task fatJar(type: Jar) {
@@ -95,11 +96,12 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$version_kotlin"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
     implementation project(':lib-util')
 
 
-    implementation "com.squareup:kotlinpoet:1.2.0"
+    implementation "com.squareup:kotlinpoet:$version_kotlinpoet"
 
     implementation "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
     implementation "org.apache.commons:commons-text:$version_apache_commons_text"

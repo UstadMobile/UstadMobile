@@ -1,7 +1,6 @@
 package com.ustadmobile.sharedse.io
 
 import com.ustadmobile.core.util.UMIOUtils
-import kotlinx.io.IOException
 import kotlinx.io.InputStream
 import kotlinx.io.OutputStream
 import kotlinx.serialization.stringFromUtf8Bytes
@@ -13,7 +12,7 @@ fun FileSe.readText(): String {
     try {
         streamIn = FileInputStreamSe(this)
         return stringFromUtf8Bytes(UMIOUtils.readStreamToByteArray(streamIn))
-    }catch(e: IOException) {
+    }catch(e: Exception) {
         throw e
     }finally {
         streamIn?.close()
@@ -25,7 +24,7 @@ fun FileSe.writeText(text: String) {
     try {
         streamOut = FileOutputStreamSe(this)
         streamOut.write(text.toUtf8Bytes())
-    }catch(e: IOException) {
+    }catch(e: Exception) {
         throw e
     }finally {
         streamOut?.close()

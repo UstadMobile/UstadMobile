@@ -12,7 +12,6 @@ import com.ustadmobile.staging.core.xlsx.UmXLSX
 import com.ustadmobile.staging.core.xlsx.ZipUtil
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.IOException
 
 
 /**
@@ -123,7 +122,7 @@ class ReportNumberOfDaysClassesOpenPresenter(context: Any, arguments: Map<String
             umXLSX.createXLSX()
             view.generateXLSXReport(xlsxReportPath)
 
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             print(e.message)
         }
 

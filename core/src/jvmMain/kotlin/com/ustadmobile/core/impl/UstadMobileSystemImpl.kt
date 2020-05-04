@@ -145,61 +145,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
     }
 
 
-    /**
-     * Get an asset (from files that are in core/src/flavorName/assets)
-     *
-     */
-    actual fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>){
-        GlobalScope.launch {
-            var inStream = null as InputStream?
-            try {
-                try {
-                    inStream = this::class.java.getResourceAsStream(path)
-                }catch(e: Exception) {
-                    //ignore and try again
-                }
 
-                if(inStream == null) {
-                    for(searchPath in listOf("src/commonMain/resources", "src/jvmMain/resources")) {
-                        val resDir = File(System.getProperty("user.dir"), searchPath)
-                        val resFile = File(resDir, path)
-                        if(resFile.exists()) {
-                            inStream = FileInputStream(resFile)
-                            break
-                        }
-                    }
-                }
-            }finally {
-
-            }
-
-            callback.onSuccess(inStream)
-        }
-    }
-
-
-    actual fun getAssetSync(context: Any, path: String): InputStream {
-        val latch = CountDownLatch(1)
-        val ref = AtomicReference<InputStream?>()
-        getAsset(context, path, object: UmCallback<InputStream> {
-            override fun onSuccess(result: InputStream?) {
-                ref.set(result)
-                latch.countDown()
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                latch.countDown()
-            }
-        })
-
-        latch.await()
-        val result = ref.get()
-        if(result != null) {
-            return result
-        }else {
-            throw IOException("Could not lookup $path")
-        }
-    }
 
 
     /**
@@ -278,7 +224,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
             var prefIn: InputStream? = null
 
             try {
-                prefIn = getAssetSync(context, appPrefResource)
+                prefIn =  this::class.java.getResourceAsStream(appPrefResource)
                 appConfig!!.load(prefIn)
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
@@ -373,12 +319,4 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         }
     }
 
-
-
-    /**
-     * Get asset as an input stream asynchronously
-     */
-    actual suspend fun getAssetInputStreamAsync(context: Any, path: String): InputStream {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 }

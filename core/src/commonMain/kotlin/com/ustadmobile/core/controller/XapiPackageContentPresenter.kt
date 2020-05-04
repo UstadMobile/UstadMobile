@@ -13,9 +13,10 @@ import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlinx.io.StringReader
 import org.kmp.io.KMPXmlParser
 import com.ustadmobile.core.util.ext.toQueryString
+import io.ktor.utils.io.core.toByteArray
+import kotlinx.io.ByteArrayInputStream
 import kotlinx.serialization.json.Json
 
 /**
@@ -52,7 +53,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
 
             val xpp = KMPXmlParser()
-            xpp.setInput(StringReader(tincanContent))
+            xpp.setInput(ByteArrayInputStream(tincanContent.toByteArray()), "UTF-8")
             tinCanXml = TinCanXML.loadFromXML(xpp)
             val launchHref = tinCanXml?.launchActivity?.launchUrl
             val actorJsonStr = Json.stringify(UmAccountActor.serializer(),

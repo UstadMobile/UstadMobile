@@ -1,8 +1,8 @@
 package com.ustadmobile.port.sharedse.ext
 
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
-import com.ustadmobile.core.io.ConcatenatedPartSource
-import com.ustadmobile.core.io.ConcatenatingInputStream
+import com.ustadmobile.sharedse.io.ConcatenatedPartSource
+import com.ustadmobile.sharedse.io.ConcatenatingInputStream
 import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.util.ext.encodeBase64
 import java.io.FileInputStream

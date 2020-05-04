@@ -54,7 +54,6 @@ import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.io.InputStream
 import java.io.*
 import java.util.*
 import java.util.concurrent.Executors
@@ -161,7 +160,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             LocationDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}LocationDetailActivity"),
             AuditLogSelectionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogSelectionActivity"),
             AuditLogListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogListActivity"),
-            SelectClazzFeaturesView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectClazzFeaturesDialogFragment"),
             PersonAuthDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonAuthDetailActivity"),
             SelectPeopleDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectPeopleDialogFragment"),
             CustomFieldListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CustomFieldListActivity"),
@@ -434,25 +432,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     /**
-     * Get an asset (from files that are in core/src/flavorName/assets)
-     *
-     */
-    actual fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>) {
-        var mPath = path
-        if (path.startsWith("/")) {
-            mPath = path.substring(1)
-        }
-
-        bgExecutorService.execute {
-            try {
-                callback.onSuccess((context as Context).assets.open(mPath))
-            } catch (e: IOException) {
-                callback.onFailure(e)
-            }
-        }
-    }
-
-    /**
      * Get a preference for the app
      *
      * @param key preference key as a string
@@ -575,7 +554,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             var prefIn: InputStream? = null
 
             try {
-                prefIn = getAssetSync(context, appPrefResource)
+                prefIn =  (context as Context).assets.open(appPrefResource)
                 appConfig!!.load(prefIn)
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
@@ -640,15 +619,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         return appPreferences!!
     }
 
-    @Throws(IOException::class)
-    actual fun getAssetSync(context: Any, path: String): InputStream {
-        var mPath = path
-        if (path.startsWith("/")) {
-            mPath = path.substring(1)
-        }
-        return (context as Context).assets.open(mPath)
-    }
-
     /**
      * Returns the system base directory to work from
      *
@@ -687,6 +657,16 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         return canWriteFiles
     }
 
+    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
+        var path = path
+        if (path.startsWith("/")) {
+            path = path.substring(1)
+        }
+
+        return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
+    }
+
+
 
     actual companion object {
 
@@ -710,25 +690,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     }
 
-    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        var path = path
-        if (path.startsWith("/")) {
-            path = path.substring(1)
-        }
-
-        return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
-    }
-
-    /**
-     * Get asset as an input stream asynchronously
-     */
-    actual suspend fun getAssetInputStreamAsync(context: Any, path: String): InputStream {
-        var mPath = path
-        if (path.startsWith("/")) {
-            mPath = path.substring(1)
-        }
-        return (context as Context).assets.open(mPath);
-    }
 
 
 }

@@ -73,10 +73,11 @@ import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
 import io.ktor.client.request.get
+import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlinx.io.StringReader
+import kotlinx.io.ByteArrayInputStream
 import org.kmp.io.KMPXmlParser
 import kotlin.js.JsName
 
@@ -114,7 +115,8 @@ class EpubContentPresenter(context: Any,
 
                     ocf = OcfDocument()
                     val ocfParser = KMPXmlParser()
-                    ocfParser.setInput(StringReader(ocfContent))
+
+                    ocfParser.setInput(ByteArrayInputStream(ocfContent.toByteArray()), "UTF-8")
                     ocf!!.loadFromParser(ocfParser)
 
                     //get and parse the first publication
@@ -124,7 +126,7 @@ class EpubContentPresenter(context: Any,
 
                     val opf = OpfDocument()
                     val opfParser = KMPXmlParser()
-                    opfParser.setInput(StringReader(opfContent))
+                    opfParser.setInput(ByteArrayInputStream(opfContent.toByteArray()), "UTF-8")
                     opf.loadFromOPF(opfParser)
                     val linearSpineHrefsRelative = opf.linearSpineHREFs
 
@@ -170,7 +172,7 @@ class EpubContentPresenter(context: Any,
 
                     val navDocument = EpubNavDocument()
                     val navParser = KMPXmlParser()
-                    navParser.setInput(StringReader(navContent))
+                    navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
                     navDocument.load(navParser)
                     epubContentView.runOnUiThread(Runnable { epubContentView.setTableOfContents(navDocument.toc!!) })
                     view.runOnUiThread(Runnable { view.setProgressBarVisible(false) })

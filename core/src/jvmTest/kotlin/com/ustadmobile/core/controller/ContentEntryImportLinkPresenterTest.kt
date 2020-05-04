@@ -81,7 +81,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     @After
     fun after() {
         mockWebServer.shutdown()
-        server.stop(1, 5, TimeUnit.SECONDS)
+        server.stop(1, 5000)
     }
 
     @Test

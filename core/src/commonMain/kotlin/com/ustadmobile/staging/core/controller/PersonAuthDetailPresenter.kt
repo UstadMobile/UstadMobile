@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.util.encryptPassword
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
+//import io.ktor.client.response.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.GlobalScope
@@ -91,29 +91,29 @@ PersonAuthDetailView) : UstadBaseController<PersonAuthDetailView>(context, argum
                 personDao.updatePersonAsync(currentPerson!!, loggedInPersonUid)
 
                 //Update on server
-                try {
-                    val serverUrl = UmAccountManager.getActiveEndpoint(context)
-                    val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
-                    {
-                        url {
-                            takeFrom(serverUrl!!)
-                            encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
-                        }
-                        parameter("p0", currentPersonUid)
-                        parameter("p1", passwordSet)
-                        parameter("p2", loggedInPersonUid)
-                    }
-
-                    if(resetPasswordResponse.status == HttpStatusCode.OK) {
-                        //Update locally
-                        personAuthDao.updateAsync(currentPersonAuth!!)
-                        view.finish()
-                    }else {
-                        println("nope")
-                    }
-                } catch (e: Exception) {
-                    print("oops")
-                }
+//                try {
+//                    val serverUrl = UmAccountManager.getActiveEndpoint(context)
+//                    val resetPasswordResponse = defaultHttpClient().get<HttpResponse>()
+//                    {
+//                        url {
+//                            takeFrom(serverUrl!!)
+//                            encodedPath = "${encodedPath}UmAppDatabase/PersonAuthDao/resetPassword"
+//                        }
+//                        parameter("p0", currentPersonUid)
+//                        parameter("p1", passwordSet)
+//                        parameter("p2", loggedInPersonUid)
+//                    }
+//
+//                    if(resetPasswordResponse.status == HttpStatusCode.OK) {
+//                        //Update locally
+//                        personAuthDao.updateAsync(currentPersonAuth!!)
+//                        view.finish()
+//                    }else {
+//                        println("nope")
+//                    }
+//                } catch (e: Exception) {
+//                    print("oops")
+//                }
 
 
 
