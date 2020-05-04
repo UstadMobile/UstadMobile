@@ -32,8 +32,7 @@ interface PersonEditFragmentEventHandler {
 
 }
 
-class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEditFragmentEventHandler,
-    PresenterFieldImageHelper{
+class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEditFragmentEventHandler {
 
     private var mBinding: FragmentPersonEditBinding? = null
 
@@ -63,7 +62,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mPresenterFieldRowRecyclerAdapter = PresenterFieldRowEditRecyclerViewAdapter(this).also {
+        mPresenterFieldRowRecyclerAdapter = PresenterFieldRowEditRecyclerViewAdapter().also {
             mPresenterFieldRowObserver = ListSubmitObserver(it)
         }
 
@@ -111,52 +110,6 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             field = value
             mBinding?.fieldsEnabled = value
         }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when(requestCode) {
-            REQUEST_CODE_TAKE_PICTURE -> {
-                if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    takePicture()
-                }
-            }
-        }
-    }
-
-    override fun onClickTakePicture(presenterFieldRow: PresenterFieldRow) {
-        //Must upgrade fragment lib version permission as per note here: https://developer.android.com/jetpack/androidx/releases/activity
-        if(ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.CAMERA) !=
-                PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(android.Manifest.permission.CAMERA), REQUEST_CODE_TAKE_PICTURE)
-        }else {
-            takePicture()
-        }
-    }
-
-    protected fun takePicture() {
-        val fileDest = File(requireContext().cacheDir, "image.jpg")
-        findNavController().currentBackStackEntry?.savedStateHandle?.set(KEY_PICTURE_FILE_DEST,
-            fileDest.absolutePath)
-        val fileUri = FileProvider.getUriForFile(requireContext(),
-            "${requireContext().packageName}.provider", fileDest)
-
-        //TODO: this is effectively causing a memory leak because the callback is stored with the activity
-        //This should be moved to using a two-way binder which can work as per https://developer.android.com/training/basics/intents/result
-        registerForActivityResult(ActivityResultContracts.TakePicture()) {
-            val presenterFieldRowsVal = presenterFieldRows?.value?.toMutableList() ?: return@registerForActivityResult
-            val fieldRowIndex = presenterFieldRowsVal
-                    .indexOfFirst { it.presenterField?.fieldUid == PERSON_FIELD_UID_PICTURE.toLong() }
-            presenterFieldRowsVal[fieldRowIndex] = presenterFieldRowsVal[fieldRowIndex].copy().also {
-                it.customFieldValue?.customFieldValueValue =
-                        findNavController().currentBackStackEntry?.savedStateHandle?.get(KEY_PICTURE_FILE_DEST)
-            }
-            presenterFieldRows?.setVal(presenterFieldRowsVal)
-        }.launch(fileUri)
-    }
-
-    override fun onClickSelectPictureFromGallery(presenterFieldRow: PresenterFieldRow) {
-        TODO("Not yet implemented")
-    }
 
     companion object {
         const val REQUEST_CODE_TAKE_PICTURE = 40

@@ -1,30 +1,21 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
 import com.ustadmobile.lib.db.entities.PresenterFieldRow
-import java.io.File
 
-interface PresenterFieldImageHelper {
-
-    fun onClickTakePicture(presenterFieldRow: PresenterFieldRow)
-
-    fun onClickSelectPictureFromGallery(presenterFieldRow: PresenterFieldRow)
-
-}
 
 //There will be multiple types of viewholder here: Text, DropDown, Date, Header
-class PresenterFieldRowEditRecyclerViewAdapter(var imageHelper: PresenterFieldImageHelper?) : ListAdapter<PresenterFieldRow, PresenterFieldRowEditRecyclerViewAdapter.PresenterFieldRowViewHolder>(DIFF_UTIL) {
+class PresenterFieldRowEditRecyclerViewAdapter() : ListAdapter<PresenterFieldRow, PresenterFieldRowEditRecyclerViewAdapter.PresenterFieldRowViewHolder>(DIFF_UTIL) {
 
     abstract class PresenterFieldRowViewHolder(view: View, open var presenterFieldRow: PresenterFieldRow? = null)
         : RecyclerView.ViewHolder(view)
@@ -69,8 +60,7 @@ class PresenterFieldRowEditRecyclerViewAdapter(var imageHelper: PresenterFieldIm
             }
     }
 
-    class PictureFieldRowViewHolder(var binding: ItemPresenterFieldRowPictureBinding,
-                                    var imageHelper: PresenterFieldImageHelper?) : PresenterFieldRowViewHolder(binding.root) {
+    class PictureFieldRowViewHolder(var binding: ItemPresenterFieldRowPictureBinding) : PresenterFieldRowViewHolder(binding.root) {
 
         override var presenterFieldRow: PresenterFieldRow?
             get() = super.presenterFieldRow
@@ -101,7 +91,7 @@ class PresenterFieldRowEditRecyclerViewAdapter(var imageHelper: PresenterFieldIm
             CustomField.FIELD_TYPE_DROPDOWN -> DropdownFieldRowViewHolder(
                     ItemPresenterFieldRowDropDownBinding.inflate(inflater, parent, false))
             CustomField.FIELD_TYPE_PICTURE -> PictureFieldRowViewHolder(
-                    ItemPresenterFieldRowPictureBinding.inflate(inflater, parent, false), imageHelper)
+                    ItemPresenterFieldRowPictureBinding.inflate(inflater, parent, false))
             else -> UnsupportedFieldRowViewHolder(
                     inflater.inflate(R.layout.item_presenter_field_row_unsupported,parent, false))
         }
@@ -114,7 +104,6 @@ class PresenterFieldRowEditRecyclerViewAdapter(var imageHelper: PresenterFieldIm
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        imageHelper = null
     }
 
     companion object {
@@ -123,8 +112,9 @@ class PresenterFieldRowEditRecyclerViewAdapter(var imageHelper: PresenterFieldIm
                 return oldItem.presenterField?.fieldUid == newItem.presenterField?.fieldUid
             }
 
+            @SuppressLint("DiffUtilEquals")
             override fun areContentsTheSame(oldItem: PresenterFieldRow, newItem: PresenterFieldRow): Boolean {
-                //Because we are using two way data binding...
+                //Because we are using two way data binding, we want to make sure that we save data to the same instance!
                 return oldItem === newItem
             }
         }
