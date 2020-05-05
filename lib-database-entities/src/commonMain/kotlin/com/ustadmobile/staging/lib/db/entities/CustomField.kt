@@ -28,6 +28,8 @@ data class CustomField(
         //Icon string
         var customFieldIcon: String? = null,
 
+        var customFieldIconId: Int = 0,
+
         //Type: dropdown or text. Flags defined here
         var customFieldType: Int = 0,
 
@@ -73,6 +75,16 @@ data class CustomField(
         val INPUT_TYPE_EMAIL = 0x00000020
 
         val INPUT_TYPE_PHONENUM = 0x00000003
+
+        val ICON_ACCOUNT = 1
+
+        val ICON_PHONE = 2
+
+        val ICON_CALENDAR = 3
+
+        val ICON_EMAIL = 4
+
+        val ICON_ADDRESS = 5
 
     }
 }

@@ -29,20 +29,12 @@
 
     </data>
 
-
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/activity_person_edit_scroll"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fragment_person_detail_recyclerview"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="match_parent"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fragment_person_detail_recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    </androidx.core.widget.NestedScrollView>
 
 
 </layout>

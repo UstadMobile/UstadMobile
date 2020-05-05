@@ -205,7 +205,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             mDataBinding?.addMode = value
             mNewItemRecyclerViewAdapter?.newItemVisible = (value == ListViewAddMode.FIRST_ITEM)
             val fab = mActivityWithFab?.activityFloatingActionButton
-            fab?.visibility = if(value == ListViewAddMode.FAB) View.VISIBLE else View.GONE
+            fab?.visibility = if(value == ListViewAddMode.FAB) View.VISIBLE else View.INVISIBLE
 
             field = value
         }

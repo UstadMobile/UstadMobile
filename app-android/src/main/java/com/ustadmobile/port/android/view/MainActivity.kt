@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab, NavContr
         val ustadDestination = UstadMobileSystemImpl.instance.destinationProvider.lookupDestinationById(destination.id)
 
         if(ustadDestination?.hasFab != true) {
-            activityFloatingActionButton?.visibility = View.GONE
+            activityFloatingActionButton?.visibility = View.INVISIBLE
             activityFloatingActionButton?.setOnClickListener(null)
         }
 
