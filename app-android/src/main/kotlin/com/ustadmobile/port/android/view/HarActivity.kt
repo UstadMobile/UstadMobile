@@ -14,14 +14,16 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.HarAndroidView
 import com.ustadmobile.core.view.UstadViewWithSnackBar
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-class HarActivity : UstadBaseActivity(), UstadViewWithSnackBar, HarAndroidView {
+class HarActivity : ContainerContentActivity(), UstadViewWithSnackBar, HarAndroidView {
 
+    private var savedState: Bundle? = null
     private val clientDeferred = CompletableDeferred<HarWebViewClient>()
 
     private lateinit var mWebView: WebView
@@ -46,9 +48,13 @@ class HarActivity : UstadBaseActivity(), UstadViewWithSnackBar, HarAndroidView {
         mWebView.settings.mediaPlaybackRequiresUserGesture = false
         mWebView.addJavascriptInterface(recorder, "recorder")
 
+        savedState = savedInstanceState
+    }
+
+    override fun onHttpdConnected(httpd: EmbeddedHTTPD) {
         val repository = UmAccountManager.getRepositoryForActiveAccount(this)
-        mPresenter = HarPresenter(this, UMAndroidUtil.bundleToMap(intent.extras), this, true, repository)
-        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+        mPresenter = HarPresenter(this, UMAndroidUtil.bundleToMap(intent.extras), this, true, repository, httpd.localHttpUrl)
+        mPresenter.onCreate(UMAndroidUtil.bundleToMap(savedState))
     }
 
     override fun loadUrl(url: String) {

@@ -72,7 +72,8 @@ class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
             throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "Does not have the article data id which we need to scrape the page for url $sourceUrl")
         }
 
-        val content = contentList.find { sourceUrl.contains(it.relativeUrl!!) }
+        val slugArticle = sourceUrl.substringAfterLast("/")
+        val content = contentList.find { sourceUrl.contains(it.relativeUrl!!) || it.slug == slugArticle  }
 
         if (content == null) {
             close()

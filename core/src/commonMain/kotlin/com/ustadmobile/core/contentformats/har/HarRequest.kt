@@ -9,6 +9,8 @@ class HarRequest {
 
     var url: String? = null
 
+    var regexedUrl: String? = null
+
     var headers: List<HarNameValuePair> = listOf()
 
     var queryString: List<HarNameValuePair> = listOf()

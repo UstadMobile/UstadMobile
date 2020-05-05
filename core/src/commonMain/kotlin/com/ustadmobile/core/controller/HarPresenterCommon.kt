@@ -14,13 +14,14 @@ import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.HarView
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
-abstract class HarPresenterCommon(context: Any, arguments: Map<String, String?>, view: HarView, var isDownloadEnabled: Boolean, var appRepo: UmAppDatabase) :
+abstract class HarPresenterCommon(context: Any, arguments: Map<String, String?>, view: HarView, var isDownloadEnabled: Boolean, val appRepo: UmAppDatabase, val localHttp: String) :
         UstadBaseController<HarView>(context, arguments, view) {
 
     private lateinit var navigation: String
@@ -41,28 +42,23 @@ abstract class HarPresenterCommon(context: Any, arguments: Map<String, String?>,
         GlobalScope.launch {
             try {
                 val result = appRepo.contentEntryDao.getContentByUuidAsync(entryUuid)
+                        ?: ContentEntry()
                 view.runOnUiThread(Runnable {
-                    val resultTitle = result?.title
+                    val resultTitle = result.title
                     if (resultTitle != null)
                         view.setToolbarTitle(resultTitle)
                 })
-            } catch (e: Exception) {
-                view.runOnUiThread(Runnable {
-                    view.showError(UstadMobileSystemImpl.instance
-                            .getString(MessageID.error_opening_file, context))
-                })
-            }
 
-            try {
-                val result = appRepo.containerDao.findByUidAsync(containerUid)!!
-                val containerManager = ContainerManager(result, UmAccountManager.getRepositoryForActiveAccount(context), appRepo)
-                harContainer = HarContainer(containerManager) {
+                val containerResult = appRepo.containerDao.findByUidAsync(containerUid)!!
+                val containerManager = ContainerManager(containerResult, UmAccountManager.getRepositoryForActiveAccount(context), appRepo)
+                val account = UmAccountManager.getActiveAccount(context)
+                harContainer = HarContainer(containerManager, result, account, context, localHttp) {
                     handleUrlLinkToContentEntry(it)
                 }
                 containerDeferred.complete(harContainer)
                 view.loadUrl(harContainer.startingUrl)
 
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 view.runOnUiThread(Runnable {
                     view.showError(UstadMobileSystemImpl.instance
                             .getString(MessageID.error_opening_file, context))
@@ -87,7 +83,8 @@ abstract class HarPresenterCommon(context: Any, arguments: Map<String, String?>,
                             ?: throw IllegalArgumentException("No File found")
                     goToContentEntry(entry.contentEntryUid, appRepo, context, impl, true,
                             true,
-                            arguments[ContentEntryListPresenter.ARG_NO_IFRAMES]?.toBoolean()?: false)
+                            arguments[ContentEntryListPresenter.ARG_NO_IFRAMES]?.toBoolean()
+                                    ?: false)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
                         view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),

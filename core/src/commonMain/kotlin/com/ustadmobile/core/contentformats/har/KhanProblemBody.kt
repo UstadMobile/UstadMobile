@@ -21,7 +21,7 @@ class KhanProblemBody {
 
             var exerciseId: String? = null
 
-            var timeTaken: Int = 0
+            var timeTaken: Long = 0L
 
             var countHints: Int = 0
 

@@ -6,13 +6,13 @@ class KhanProblemInterceptor : HarInterceptor() {
 
     override fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
 
-        if (request.url?.contains("getAssessmentItem") == false){
+        if (request.regexedUrl?.contains("getAssessmentItem") == false){
             return response
         }
 
         val harList = harContainer.requestMap[(Pair(request.method, "https://www.khanacademy.org/getAssessmentItem"))]
 
-        val harEntry = if(request.url?.contains("https://www.khanacademy.org/getAssessmentItem") == true){
+        val harEntry = if(request.regexedUrl?.contains("https://www.khanacademy.org/getAssessmentItem") == true){
             harList?.removeAt(0) ?: return response
         }else{
             harList?.get(0) ?: return response

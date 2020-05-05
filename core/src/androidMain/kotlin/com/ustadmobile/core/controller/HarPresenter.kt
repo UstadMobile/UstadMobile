@@ -7,8 +7,8 @@ import com.ustadmobile.core.view.HarView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-actual class HarPresenter actual constructor(context: Any, arguments: Map<String, String?>, view: HarView, isDownloadEnabled: Boolean, repository: UmAppDatabase)
-    : HarPresenterCommon(context, arguments, view, isDownloadEnabled, repository) {
+actual class HarPresenter actual constructor(context: Any, arguments: Map<String, String?>, view: HarView, isDownloadEnabled: Boolean, repository: UmAppDatabase, localHttp: String)
+    : HarPresenterCommon(context, arguments, view, isDownloadEnabled, repository, localHttp) {
 
     lateinit var harWebViewClient: HarWebViewClient
 

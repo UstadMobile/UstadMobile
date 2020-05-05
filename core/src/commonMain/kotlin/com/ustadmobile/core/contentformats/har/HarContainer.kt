@@ -3,16 +3,18 @@ package com.ustadmobile.core.contentformats.har
 
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.interceptorMap
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.RangeInputStream
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
-import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
 
-class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl: String) -> Unit) {
+class HarContainer(val containerManager: ContainerManager, val entry: ContentEntry, val umAccount: UmAccount?, val context: Any, val localHttp: String, var block: (sourceUrl: String) -> Unit) {
 
     var startingUrl: String
     private val linkPatterns = mutableMapOf<Regex, String>()
@@ -50,6 +52,7 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
         }
 
         interceptors[RecorderInterceptor()] = null
+        interceptors[KhanProgressTracker()] = null
         harExtra.interceptors?.forEach {
             val key = interceptorMap[it.name] ?: return@forEach
             interceptors[key] = it.jsonArgs
@@ -85,7 +88,7 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
             regexedUrl = regexedUrl.replace(Regex(itRegex.regex), itRegex.replacement)
         }
 
-        request.url = regexedUrl
+        request.regexedUrl = regexedUrl
 
         checkWithPattern(regexedUrl)
 
@@ -98,7 +101,7 @@ class HarContainer(val containerManager: ContainerManager, var block: (sourceUrl
     }
 
     private fun getInitialResponse(request: HarRequest): HarResponse {
-        val harList = requestMap[(Pair(request.method, request.url))]
+        val harList = requestMap[(Pair(request.method, request.regexedUrl))]
 
         val defaultResponse = HarResponse()
         val defaultHarContent = HarContent()

@@ -213,12 +213,12 @@ class TestPrathamContentScraper {
 
 
         val entry = ContentEntry()
-        entry.sourceUrl = "a new  problem"
+        entry.sourceUrl = "khan-id://x2785ecf7a12bc287"
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
         runBlocking {
             val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0)
-            khan.scrapeUrl("https://www.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/one-more--one-less")
+            khan.scrapeUrl("https://www.khanacademy.org/math/cc-fourth-grade-math/imp-place-value-and-rounding-2/imp-intro-to-place-value/e/place-value-tables")
         }
 
 
