@@ -48,13 +48,14 @@ class KhanProgressTracker : HarInterceptor() {
     val langPath = "/assessment_item?lang="
 
     var counter = 1
+    var progress = 0;
     val client =  defaultHttpClient()
 
     override fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
 
-        if(harContainer.umAccount == null){
+        /*if(harContainer.umAccount == null){
             return response
-        }
+        }*/
 
         if (request.regexedUrl?.contains("khanacademy.org") == false || request.regexedUrl?.contains("attempt") == false) {
             return response
@@ -76,6 +77,7 @@ class KhanProgressTracker : HarInterceptor() {
         val sourceUrl = harContainer.entry.sourceUrl ?: ""
         val exerciseId = sourceUrl.substringAfter("khan-id://").substringBefore(".")
         val finalUrl = URLBuilder(protocol = URLProtocol.HTTPS, host = requestUrl.host, encodedPath = "$exercisePath$exerciseId$itemPath${bodyInput.assessmentItemId}$langPath$lang").buildString()
+        val urlToFindTotalQuestions = URLBuilder(protocol = URLProtocol.HTTPS, host = requestUrl.host, encodedPath = "$exercisePath$exerciseId").buildString()
 
         val harList = harContainer.requestMap[(Pair("GET", finalUrl))]
 
@@ -94,10 +96,16 @@ class KhanProgressTracker : HarInterceptor() {
 
         val skipped = bodyInput.skipped
         val completed = if(skipped) false else bodyInput.completed
-        val timeTaken = UMTinCanUtil.format8601Duration(bodyInput.timeTaken)
+        val timeTaken = UMTinCanUtil.format8601Duration(bodyInput.timeTaken * 1000)
         val actor = harContainer.json.stringify(UmAccountActor.serializer(), harContainer.umAccount.toXapiActorJsonObject(harContainer.context))
         val verbUrl = if(skipped) "http://id.tincanapi.com/verb/skipped" else "http://adlnet.gov/expapi/verbs/answered"
         val verbDisplay = if(skipped) "skipped" else "answered"
+        val totalQuestions = harContainer.requestMap.filterKeys { it.second.startsWith(urlToFindTotalQuestions) }.size
+
+        if(completed){
+            progress++
+        }
+
 
         val statement = """
 
@@ -111,7 +119,10 @@ class KhanProgressTracker : HarInterceptor() {
             },
             "result": {
                 "success" : $completed,
-                "duration" : "$timeTaken"
+                "duration" : "$timeTaken",
+                 "extensions": {
+                      "https://w3id.org/xapi/cmi5/result/extensions/progress": ${((progress.toFloat())/(totalQuestions) * 100).toInt()}
+                    }
             },
             "object": {
                 "id" : "$finalUrl",
