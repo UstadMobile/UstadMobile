@@ -75,9 +75,10 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
     }
 
     override fun onResume() {
-        super.onResume()
+        //Set text first so that it will expand to the correct size as required
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(R.string.person)
+        super.onResume()
     }
 
     /**
