@@ -1,21 +1,19 @@
 package com.ustadmobile.port.android.view
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ListAdapter
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
 import com.ustadmobile.lib.db.entities.PresenterFieldRow
 
+class PresenterFieldRowViewRecyclerViewAdapter: AbstractPresenterFieldRowRecyclerViewAdapter(DIFF_UTIL) {
 
-//There will be multiple types of viewholder here: Text, DropDown, Date, Header
-class PresenterFieldRowEditRecyclerViewAdapter() : AbstractPresenterFieldRowRecyclerViewAdapter(DIFF_UTIL) {
-
-    class TextFieldRowViewHolder(var binding: ItemPresenterFieldRowEditTextBinding) : PresenterFieldRowViewHolder(binding.root) {
+    class TextRowViewHolder(var binding: ItemPresenterFieldRowViewTextBinding): PresenterFieldRowViewHolder(binding.root) {
         override var presenterFieldRow: PresenterFieldRow?
             get() = super.presenterFieldRow
             set(value) {
@@ -25,30 +23,29 @@ class PresenterFieldRowEditRecyclerViewAdapter() : AbstractPresenterFieldRowRecy
             }
     }
 
-    class DateFieldRowViewHolder(var binding: ItemPresenterFieldRowEditDateBinding) : PresenterFieldRowViewHolder(binding.root) {
+    class DropDownRowViewHolder(var binding: ItemPresenterFieldRowViewDropdownBinding) : PresenterFieldRowViewHolder(binding.root) {
         override var presenterFieldRow: PresenterFieldRow?
             get() = super.presenterFieldRow
             set(value) {
                 super.presenterFieldRow = value
-                binding.customField = presenterFieldRow?.customField
-                binding.customFieldValue = presenterFieldRow?.customFieldValue
+                binding.customFieldValue = value?.customFieldValue
+                binding.customFieldOptions = value?.customFieldOptions
+                binding.customField = value?.customField
             }
     }
 
-
-    class DropdownFieldRowViewHolder(var binding: ItemPresenterFieldRowEditDropDownBinding) : PresenterFieldRowViewHolder(binding.root) {
+    class DateRowViewHolder(var binding: ItemPresenterFieldRowViewDateBinding) : PresenterFieldRowViewHolder(binding.root) {
         override var presenterFieldRow: PresenterFieldRow?
             get() = super.presenterFieldRow
             set(value) {
                 super.presenterFieldRow = value
-                binding.customFieldValue = presenterFieldRow?.customFieldValue
-                binding.customFieldValueOptions = presenterFieldRow?.customFieldOptions
-                binding.customField = presenterFieldRow?.customField
+                binding.customField = value?.customField
+                binding.customFieldValue = value?.customFieldValue
             }
     }
 
-    class PictureFieldRowViewHolder(var binding: ItemPresenterFieldRowEditPictureBinding) : PresenterFieldRowViewHolder(binding.root) {
 
+    class ImageRowViewHolder(var binding: ItemPresenterFieldRowViewImageBinding) : PresenterFieldRowViewHolder(binding.root) {
         override var presenterFieldRow: PresenterFieldRow?
             get() = super.presenterFieldRow
             set(value) {
@@ -57,19 +54,21 @@ class PresenterFieldRowEditRecyclerViewAdapter() : AbstractPresenterFieldRowRecy
             }
     }
 
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresenterFieldRowViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when(viewType) {
-            CustomField.FIELD_TYPE_TEXT -> TextFieldRowViewHolder(
-                    ItemPresenterFieldRowEditTextBinding.inflate(inflater, parent, false))
+            CustomField.FIELD_TYPE_TEXT -> TextRowViewHolder(
+                    ItemPresenterFieldRowViewTextBinding.inflate(inflater, parent, false))
             PersonDetailPresenterField.TYPE_HEADER -> HeaderFieldRowViewHolder(
                     ItemPresenterFieldRowHeaderBinding.inflate(inflater, parent, false))
-            CustomField.FIELD_TYPE_DATE_SPINNER -> DateFieldRowViewHolder(
-                    ItemPresenterFieldRowEditDateBinding.inflate(inflater, parent, false))
-            CustomField.FIELD_TYPE_DROPDOWN -> DropdownFieldRowViewHolder(
-                    ItemPresenterFieldRowEditDropDownBinding.inflate(inflater, parent, false))
-            CustomField.FIELD_TYPE_PICTURE -> PictureFieldRowViewHolder(
-                    ItemPresenterFieldRowEditPictureBinding.inflate(inflater, parent, false))
+            CustomField.FIELD_TYPE_DROPDOWN -> DropDownRowViewHolder(
+                    ItemPresenterFieldRowViewDropdownBinding.inflate(inflater, parent, false))
+            CustomField.FIELD_TYPE_DATE_SPINNER -> DateRowViewHolder(
+                    ItemPresenterFieldRowViewDateBinding.inflate(inflater, parent, false))
+            CustomField.FIELD_TYPE_PICTURE -> ImageRowViewHolder(
+                    ItemPresenterFieldRowViewImageBinding.inflate(inflater, parent, false))
             else -> UnsupportedFieldRowViewHolder(
                     inflater.inflate(R.layout.item_presenter_field_row_unsupported, parent, false))
         }
@@ -80,22 +79,18 @@ class PresenterFieldRowEditRecyclerViewAdapter() : AbstractPresenterFieldRowRecy
         holder.presenterFieldRow = presenterFieldRow
     }
 
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView)
-    }
-
     companion object {
+
         val DIFF_UTIL = object: DiffUtil.ItemCallback<PresenterFieldRow>() {
             override fun areItemsTheSame(oldItem: PresenterFieldRow, newItem: PresenterFieldRow): Boolean {
                 return oldItem.presenterField?.fieldUid == newItem.presenterField?.fieldUid
             }
 
-            @SuppressLint("DiffUtilEquals")
             override fun areContentsTheSame(oldItem: PresenterFieldRow, newItem: PresenterFieldRow): Boolean {
-                //Because we are using two way data binding, we want to make sure that we save data to the same instance!
-                return oldItem === newItem
+                return oldItem == newItem
             }
         }
+
     }
 
 }

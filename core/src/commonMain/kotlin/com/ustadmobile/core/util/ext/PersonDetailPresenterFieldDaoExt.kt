@@ -10,11 +10,13 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_GENDER
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_LAST_NAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PHONE_NUMBER
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PICTURE
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_USERNAME
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.TYPE_FIELD
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.TYPE_HEADER
 
 private val PERSON_CORE_FIELDS_BASIC = listOf(
+        PERSON_FIELD_UID_PICTURE,
         PERSON_FIELD_UID_FIRST_NAMES,
         PERSON_FIELD_UID_LAST_NAME,
         PERSON_FIELD_UID_GENDER,

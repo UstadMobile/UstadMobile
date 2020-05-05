@@ -46,9 +46,6 @@
         app:navGraph="@navigation/mobile_navigation" />
 
 
-    <!-- auto shrink - see https://github.com/material-components/material-components-android/issues/888
-    app:layout_behavior="com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton$ExtendedFloatingActionButtonBehavior"
-    -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/activity_listfragmelayout_behaviornt_fab"
         android:text="@string/add_class"
@@ -58,8 +55,10 @@
         app:iconTint="@color/primary_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
+        android:layout_gravity="bottom|end"
         android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_behavior="com.ustadmobile.port.android.view.util.ScrollAwareExtendedFab$ScrollAwareExtendedFabBehavior"
         />
 
 

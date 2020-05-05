@@ -307,6 +307,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation "androidx.activity:activity:$version_androidx_activity"
+    implementation "androidx.activity:activity-ktx:$version_androidx_activity"
     implementation "androidx.fragment:fragment:$version_androidx_fragment"
     vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
@@ -319,6 +320,9 @@ dependencies {
 
     //Provides ProcessLifecycleOwner
     implementation "androidx.lifecycle:lifecycle-process:$version_androidx_lifecycle"
+
+    //Provides findViewTreeLifecycleOwner useful for two-way data binding that uses prepareCall (e.g. images/files)
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$version_androidx_lifecycle"
 
     // Room (annotation processing takes place only on lib-database-android to improve build times)
     implementation "androidx.room:room-runtime:$version_android_room"

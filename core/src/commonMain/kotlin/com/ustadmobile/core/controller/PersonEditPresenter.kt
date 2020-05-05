@@ -8,15 +8,12 @@ import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.PresenterFieldRow
+import com.ustadmobile.lib.db.entities.*
 
 
 class PersonEditPresenter(context: Any,
@@ -53,7 +50,16 @@ class PersonEditPresenter(context: Any,
 
         val dbPresenterFieldRows = db.personDetailPresenterFieldDao
                 .findByPersonUidWithFieldAndValueAsList(entityUid).toPresenterFieldRows()
-        presenterFieldRows.sendValue(person.populatePresenterFields(dbPresenterFieldRows))
+        person.populatePresenterFields(dbPresenterFieldRows)
+        val personPicture = withTimeoutOrNull(2000) {
+            db.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
+        }
+
+        if(db == repo) {
+            personPicture.populatePresenterFields(dbPresenterFieldRows, db.personPictureDao)
+        }
+
+        presenterFieldRows.sendValue(dbPresenterFieldRows)
 
         return person
     }
@@ -82,7 +88,7 @@ class PersonEditPresenter(context: Any,
         val fieldList = presenterFieldRows.getValue() ?: return
         entity.updateFromFieldList(fieldList)
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        GlobalScope.launch {
             if(entity.personUid == 0L) {
                 entity.personUid = repo.personDao.insertAsync(entity)
             }else {
@@ -95,7 +101,33 @@ class PersonEditPresenter(context: Any,
             repo.customFieldValueDao.insertListAsync(customFieldValuesParted.first)
             repo.customFieldValueDao.updateListAsync(customFieldValuesParted.second)
 
-            view.finishWithResult(listOf(entity))
+            val pictureRow = fieldList.firstOrNull {
+                it.presenterField?.fieldUid == PersonDetailPresenterField.PERSON_FIELD_UID_PICTURE.toLong()
+            }
+
+            var personPicture = db.personPictureDao.findByPersonUidAsync(entity.personUid)
+            val pictureRowUri = pictureRow?.customFieldValue?.customFieldValueValue
+            val currentUri = if(personPicture != null) repo.personPictureDao.getAttachmentUri(personPicture) else null
+
+            if(personPicture != null && pictureRowUri != null && currentUri != pictureRowUri) {
+                repo.personPictureDao.setAttachmentDataFromUri(personPicture, pictureRowUri, context)
+                repo.personPictureDao.update(personPicture)
+            }else if(pictureRowUri != null && currentUri != pictureRowUri) {
+                personPicture = PersonPicture().apply {
+                    personPicturePersonUid = entity.personUid
+                }
+                personPicture.personPictureUid = repo.personPictureDao.insert(personPicture)
+                repo.personPictureDao.setAttachmentDataFromUri(personPicture, pictureRowUri, context)
+            }else if(personPicture != null && currentUri != null && pictureRowUri == null) {
+                //picture has been removed
+                personPicture.personPictureActive = false
+                repo.personPictureDao.setAttachmentDataFromUri(personPicture, null, context)
+                repo.personPictureDao.update(personPicture)
+            }
+
+            withContext(doorMainDispatcher()) {
+                view.finishWithResult(listOf(entity))
+            }
         }
     }
 

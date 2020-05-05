@@ -28,7 +28,10 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
         return ""
     }
 
-    @Query("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid ORDER BY " + " picTimestamp DESC LIMIT 1")
+    @Query("""SELECT * FROM PersonPicture 
+        WHERE personPicturePersonUid = :personUid
+        AND CAST(personPictureActive AS INTEGER) = 1
+        ORDER BY picTimestamp DESC LIMIT 1""")
     abstract suspend fun findByPersonUidAsync(personUid: Long): PersonPicture?
 
     @Query("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid ORDER BY " + " picTimestamp DESC LIMIT 1")

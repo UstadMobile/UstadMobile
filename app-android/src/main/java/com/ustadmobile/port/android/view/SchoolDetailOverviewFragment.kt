@@ -16,6 +16,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolOverviewBinding
 import com.toughra.ustadmobile.databinding.ItemClazzSimpleBinding
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
+import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -149,5 +150,8 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
     override fun onChanged(t: PagedList<Clazz>?) {
         clazzRecyclerAdapter?.submitList(t)
     }
+
+    override val detailPresenter: UstadDetailPresenter<*, *>?
+        get() = mPresenter
 
 }

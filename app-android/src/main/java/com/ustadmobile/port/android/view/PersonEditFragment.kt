@@ -1,8 +1,14 @@
 package com.ustadmobile.port.android.view
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import com.toughra.ustadmobile.R
@@ -16,9 +22,12 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PICTURE
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.lib.db.entities.PresenterFieldRow
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
+import com.ustadmobile.port.android.view.util.ListSubmitObserver
+import java.io.File
 
 interface PersonEditFragmentEventHandler {
 
@@ -37,11 +46,6 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
 
     private var mPresenterFieldRowObserver: ListSubmitObserver<PresenterFieldRow>? = null
 
-    class ListSubmitObserver<T>(val listAdapter: ListAdapter<T, *>) : Observer<List<T>> {
-        override fun onChanged(t: List<T>?) {
-            listAdapter.submitList(t)
-        }
-    }
 
     override var presenterFieldRows: DoorMutableLiveData<List<PresenterFieldRow>>? = null
         get() = field
@@ -76,6 +80,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mPresenter?.onDestroy()
         mBinding?.fragmentPersonEditRecyclerview?.adapter = null
         mPresenterFieldRowRecyclerAdapter = null
         mBinding = null
@@ -102,4 +107,11 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             field = value
             mBinding?.fieldsEnabled = value
         }
+
+    companion object {
+        const val REQUEST_CODE_TAKE_PICTURE = 40
+
+        const val KEY_PICTURE_FILE_DEST = "picUri"
+    }
+
 }

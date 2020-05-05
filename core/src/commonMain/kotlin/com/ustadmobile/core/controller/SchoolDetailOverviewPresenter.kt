@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SchoolDetailOverviewView
+import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
@@ -38,15 +39,21 @@ class SchoolDetailOverviewPresenter(context: Any,
              db.schoolDao.findByUidWithHolidayCalendarAsync(entityUid)
          } ?: SchoolWithHolidayCalendar()
 
-        val clazzes = withTimeoutOrNull(2000){
-            db.clazzDao.findAllClazzesBySchoolLive(entityUid)
+        if(entityUid != 0L) {
+            val clazzes = withTimeoutOrNull(2000) {
+                db.clazzDao.findAllClazzesBySchoolLive(entityUid)
+            }
+            view.schoolClazzes = clazzes
         }
-        view.schoolClazzes = clazzes
-
         return schoolWithHolidayCalendar
 
     }
 
+
+    override fun handleClickEdit() {
+        val impl = UstadMobileSystemImpl.instance
+        impl.go(SchoolEditView.VIEW_NAME, arguments, context)
+    }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         //TODO: this

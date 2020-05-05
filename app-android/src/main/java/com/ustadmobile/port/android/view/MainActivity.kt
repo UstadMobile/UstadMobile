@@ -20,6 +20,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.core.view.SettingsView
 
 
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
         val navController = host.navController
         navController.addOnDestinationChangedListener(this)
+        navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
 
         appBarConfiguration = AppBarConfiguration(navController.graph)
 
@@ -61,7 +63,7 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
                 .lookupDestinationById(destination.id)
 
         if(ustadDestination?.hasFab != true) {
-            activityFloatingActionButton?.visibility = View.GONE
+            activityFloatingActionButton?.visibility = View.INVISIBLE
             activityFloatingActionButton?.setOnClickListener(null)
         }
 

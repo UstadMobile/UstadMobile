@@ -13,6 +13,7 @@ import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolDetailBinding
 import com.ustadmobile.core.controller.SchoolDetailPresenter
+import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMURLEncoder
@@ -121,5 +122,8 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
                         PersonListFragment::class.java
         )
     }
+
+    override val detailPresenter: UstadDetailPresenter<*, *>?
+        get() = mPresenter
 
 }

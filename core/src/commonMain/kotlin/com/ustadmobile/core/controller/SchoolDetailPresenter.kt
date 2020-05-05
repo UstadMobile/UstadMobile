@@ -3,16 +3,13 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.PersonListView
-import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.core.view.SchoolDetailView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.School
-
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import kotlinx.coroutines.withTimeoutOrNull
 
 
 class SchoolDetailPresenter(context: Any,

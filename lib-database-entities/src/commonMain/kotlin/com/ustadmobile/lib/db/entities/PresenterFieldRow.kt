@@ -1,10 +1,9 @@
 package com.ustadmobile.lib.db.entities
 
-import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class PresenterFieldRow(
+data class PresenterFieldRow(
 
     var presenterField: PersonDetailPresenterField? = null,
 
