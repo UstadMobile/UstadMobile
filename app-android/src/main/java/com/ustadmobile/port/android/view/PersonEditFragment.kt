@@ -26,6 +26,7 @@ import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERS
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.lib.db.entities.PresenterFieldRow
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
+import com.ustadmobile.port.android.view.util.ListSubmitObserver
 import java.io.File
 
 interface PersonEditFragmentEventHandler {
@@ -45,11 +46,6 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
 
     private var mPresenterFieldRowObserver: ListSubmitObserver<PresenterFieldRow>? = null
 
-    class ListSubmitObserver<T>(val listAdapter: ListAdapter<T, *>) : Observer<List<T>> {
-        override fun onChanged(t: List<T>?) {
-            listAdapter.submitList(t)
-        }
-    }
 
     override var presenterFieldRows: DoorMutableLiveData<List<PresenterFieldRow>>? = null
         get() = field
@@ -84,6 +80,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mPresenter?.onDestroy()
         mBinding?.fragmentPersonEditRecyclerview?.adapter = null
         mPresenterFieldRowRecyclerAdapter = null
         mBinding = null

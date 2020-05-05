@@ -22,6 +22,10 @@
         android:name="com.ustadmobile.port.android.view.PersonEditFragment"/>
 
     <fragment
+        android:id="@+id/person_detail_dest"
+        android:name="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+
+    <fragment
         android:id="@+id/schedule_edit_dest"
         android:name="com.ustadmobile.port.android.view.ScheduleEditFragment" />
 

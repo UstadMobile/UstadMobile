@@ -47,7 +47,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
     override fun handleClickEntry(entry: Person) {
-        systemImpl.go(PersonEditView.VIEW_NAME,
+        systemImpl.go(PersonDetailView.VIEW_NAME,
             mapOf(UstadView.ARG_ENTITY_UID to entry.personUid.toString()), context)
 
         /* TODO: Add code to go to the appropriate detail view or make a selection

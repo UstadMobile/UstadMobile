@@ -6,6 +6,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.CustomFieldValue
+import com.ustadmobile.lib.db.entities.CustomFieldValueOption
 import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
 
 @BindingAdapter("textMessageId")
@@ -48,4 +50,20 @@ fun TextView.setPresenterFieldHeader(presenterField: PersonDetailPresenterField)
 fun TextView.setTextFromMessageIdList(textMessageIdOptionSelected: Int, textMessageIdOptions: List<MessageIdOption>) {
     text = UstadMobileSystemImpl.instance.getString(textMessageIdOptions
             ?.firstOrNull { it.code == textMessageIdOptionSelected }?.messageId ?: 0, context)
+}
+
+@BindingAdapter(value = ["textCustomFieldValue", "textCustomFieldValueOptions"])
+fun TextView.setTextFromCustomFieldDropDownOption(customFieldValue: CustomFieldValue?,
+                                                  customFieldValueOptions: List<CustomFieldValueOption>?) {
+    val selectedOption = customFieldValueOptions
+            ?.firstOrNull { it.customFieldValueOptionUid == customFieldValue?.customFieldValueCustomFieldValueOptionUid }
+    if(selectedOption != null) {
+        text = if(selectedOption.customFieldValueOptionMessageId != 0) {
+            UstadMobileSystemImpl.instance.getString(selectedOption.customFieldValueOptionMessageId, context)
+        }else {
+            selectedOption.customFieldValueOptionName ?: ""
+        }
+    }else {
+        text = ""
+    }
 }

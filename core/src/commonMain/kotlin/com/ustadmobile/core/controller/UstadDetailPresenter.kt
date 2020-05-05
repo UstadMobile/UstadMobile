@@ -42,4 +42,8 @@ abstract class UstadDetailPresenter<V: UstadSingleEntityView<RT>, RT>(context: A
 
     abstract suspend fun onCheckEditPermission(account: UmAccount?): Boolean
 
+    open fun handleClickEdit() {
+
+    }
+
 }

@@ -5,6 +5,7 @@ import android.content.Context
 import android.text.format.DateFormat
 import android.widget.DatePicker
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
@@ -17,7 +18,7 @@ import java.util.*
  * Contains the logic for linking editText dates with Datepicker
  */
 
-fun updateDateOnEditText(et: EditText, date: Long) {
+fun updateDateOnEditText(et: TextView, date: Long) {
     val dateFormatter = DateFormat.getDateFormat(et.context)
     if (date == 0L) {
         et.setText("")
@@ -26,7 +27,7 @@ fun updateDateOnEditText(et: EditText, date: Long) {
     }
 }
 
-fun openDatePicker2(et: EditText, context: Context, inverseBindingListener: InverseBindingListener) {
+fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
     val currentDate = et.getTag(R.id.tag_datelong) as? Long ?: 0L
     if(currentDate > 0) {
@@ -60,20 +61,20 @@ fun openDatePicker2(et: EditText, context: Context, inverseBindingListener: Inve
 
 
 @BindingAdapter("dateLongAttrChanged")
-fun getDate(et: EditText, inverseBindingListener: InverseBindingListener){
+fun getDate(et: TextView, inverseBindingListener: InverseBindingListener){
     et.setOnClickListener {
         openDatePicker2(et, et.context,  inverseBindingListener)
     }
 }
 @BindingAdapter("dateLongStringAttrChanged")
-fun getDateString(et: EditText, inverseBindingListener: InverseBindingListener) {
+fun getDateString(et: TextView, inverseBindingListener: InverseBindingListener) {
     et.setOnClickListener {
         openDatePicker2(et, et.context,  inverseBindingListener)
     }
 }
 
 @BindingAdapter("dateLong")
-fun setDate(et: EditText, date: Long){
+fun setDate(et: TextView, date: Long){
     updateDateOnEditText(et, date)
     et.setTag(R.id.tag_datelong, date)
 }
@@ -82,24 +83,24 @@ fun setDate(et: EditText, date: Long){
  * Wrapper to handle when the result of the picker is stored on a string (e.g. CustomFieldValue)
  */
 @BindingAdapter("dateLongString")
-fun setDateString(et: EditText, dateLongString: String?){
+fun setDateString(et: TextView, dateLongString: String?){
     val date = dateLongString?.toLong() ?: 0L
     updateDateOnEditText(et, date)
     et.setTag(R.id.tag_datelong, date)
 }
 
 @InverseBindingAdapter(attribute = "dateLong")
-fun getRealValue(et: EditText): Long {
+fun getRealValue(et: TextView): Long {
     return et.getTag(R.id.tag_datelong) as? Long ?: 0L
 }
 
 @InverseBindingAdapter(attribute = "dateLongString")
-fun getRealStringValue(et: EditText): String {
+fun getRealStringValue(et: TextView): String {
     return getRealValue(et).toString()
 }
 
 @BindingAdapter("dateUseSpinners")
-fun EditText.setDateUseSpinners(dateUseSpinners: Boolean) {
+fun TextView.setDateUseSpinners(dateUseSpinners: Boolean) {
     setTag(R.id.tag_dateusespinner, dateUseSpinners)
 }
 

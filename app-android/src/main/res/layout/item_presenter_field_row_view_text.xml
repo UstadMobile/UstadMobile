@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="customFieldValue"
+            type="com.ustadmobile.lib.db.entities.CustomFieldValue" />
+
+        <variable
+            name="customField"
+            type="com.ustadmobile.lib.db.entities.CustomField" />
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/formitem_margin_vertical"
+        android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+        >
+
+        <TextView
+            android:id="@+id/item_presenter_field_row_view_text_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            android:textColor="@color/text_primary"
+            android:text="@{customFieldValue.customFieldValueValue}"
+            tools:text="Field value"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:textMessageId="@{customField.customFieldLabelMessageID}"
+            app:layout_constraintTop_toBottomOf="@+id/item_presenter_field_row_view_text_value"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Field name"
+            />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

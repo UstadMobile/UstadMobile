@@ -57,6 +57,7 @@
     <dimen name="dimen_70dp">70dp</dimen>
     <dimen name="text_hint">16sp</dimen>
     <dimen name="dimen_24dp">24dp</dimen>
+    <dimen name="dimen_256dp">256dp</dimen>
 
     <dimen name="dimen_fab_clearance">54dp</dimen>
 
