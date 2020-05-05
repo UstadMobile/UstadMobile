@@ -29,13 +29,16 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
     override val listPresenter: UstadListPresenter<*, in SchoolWithMemberCountAndLocation>?
         get() = mPresenter
 
-    class SchoolListViewHolder(val itemBinding: ItemSchoolListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class SchoolListViewHolder(val itemBinding: ItemSchoolListItemBinding)
+        : RecyclerView.ViewHolder(itemBinding.root)
 
     class SchoolListRecyclerAdapter(var presenter: SchoolListPresenter?)
-        : SelectablePagedListAdapter<SchoolWithMemberCountAndLocation, SchoolListViewHolder>(DIFF_CALLBACK) {
+        : SelectablePagedListAdapter<SchoolWithMemberCountAndLocation,
+            SchoolListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SchoolListViewHolder {
-            val itemBinding = ItemSchoolListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val itemBinding = ItemSchoolListItemBinding.inflate(LayoutInflater.from(parent.context),
+                    parent, false)
             itemBinding.presenter = presenter
             return SchoolListViewHolder(itemBinding)
         }
@@ -52,7 +55,8 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = SchoolListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, this, UstadMobileSystemImpl.instance,

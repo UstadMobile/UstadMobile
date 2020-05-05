@@ -42,7 +42,6 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     }
 
     private fun updateListOnView() {
-        /* TODO: Update the list on the view from the appropriate DAO query, e.g.*/
         view.list = when(currentSortOrder) {
             SortOrder.ORDER_NAME_ASC -> repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameAsc(
                     searchQuery)
@@ -54,9 +53,8 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     override fun handleClickEntry(entry: School) {
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            //TODO: This
-//            ListViewMode.BROWSER -> systemImpl.go(SchoolDetailView.VIEW_NAME,
-//                    mapOf(UstadView.ARG_ENTITY_UID to entry.schoolUid.toString()), context)
+            ListViewMode.BROWSER -> systemImpl.go(SchoolDetailView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.schoolUid.toString()), context)
         }
     }
 

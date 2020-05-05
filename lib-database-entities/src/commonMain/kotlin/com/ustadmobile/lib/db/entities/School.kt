@@ -43,6 +43,8 @@ open class School() {
     //Location (precise) - latitude
     var schoolLocationLatt : Double = 0.0
 
+    var schoolEmailAddress : String?= null
+
     @MasterChangeSeqNum
     var schoolMasterChangeSeqNum: Long = 0
 

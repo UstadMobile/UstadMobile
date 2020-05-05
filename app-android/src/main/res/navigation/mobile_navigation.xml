@@ -71,10 +71,19 @@
     <fragment
         android:id="@+id/role_edit_dest"
         android:name="com.ustadmobile.port.android.view.RoleEditFragment" />
+
     <fragment
         android:id="@+id/school_edit_dest"
         android:name="com.ustadmobile.port.android.view.SchoolEditFragment"
         android:label="SchoolEditFragment" />
+    <fragment
+        android:id="@+id/school_detail_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolDetailFragment"
+        android:label="SchoolDetailFragment" />
+    <fragment
+        android:id="@+id/school_detail_overview_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolDetailOverviewFragment"
+        android:label="SchoolDetailOverviewFragment" />
 
 
 </navigation>

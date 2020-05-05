@@ -29,21 +29,45 @@
     <androidx.core.widget.NestedScrollView
         android:id="@+id/activity_school_edit_scroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/activity_school_edit_edit_clx"
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:id="@+id/coordinationLayout"
+            android:layout_height="match_parent">
 
 
-            <!-- TODO: Put the actual view for editing School here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appbar"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="4dp">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.tabs.TabLayout
+                    android:layout_width="match_parent"
+                    style="@style/TabLayoutStyleHome"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/fragment_school_detail_tablayout"
+                    app:tabTextColor="@color/primary_light"
+                    android:background="?attr/colorPrimary"
+                    />
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/fragment_school_detail_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/fragment_school_detail_tablayout"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            </androidx.viewpager.widget.ViewPager>
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>>
 
     </androidx.core.widget.NestedScrollView>
 

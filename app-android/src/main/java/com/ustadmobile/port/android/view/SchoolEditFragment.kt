@@ -1,7 +1,10 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -17,18 +20,15 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface SchoolEditFragmentEventHandler {
@@ -39,7 +39,8 @@ interface SchoolEditFragmentEventHandler {
 }
 
 class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), SchoolEditView,
-        SchoolEditFragmentEventHandler {
+        SchoolEditFragmentEventHandler,
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption> {
 
     private var mBinding: FragmentSchoolEditBinding? = null
 
@@ -63,20 +64,20 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
             val activityEventHandler: SchoolEditFragmentEventHandler,
             var presenter: SchoolEditPresenter?)
         : ListAdapter<Clazz,
-            ClazzRecyclerAdapter.SelQuestionViewHolder>(DIFF_CALLBACK_CLAZZ) {
+            ClazzRecyclerAdapter.ClazzViewHolder>(DIFF_CALLBACK_CLAZZ) {
 
-        class SelQuestionViewHolder(val binding: ItemClazzSimpleBinding)
+        class ClazzViewHolder(val binding: ItemClazzSimpleBinding)
             : RecyclerView.ViewHolder(binding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelQuestionViewHolder {
-            val viewHolder = SelQuestionViewHolder(ItemClazzSimpleBinding.inflate(
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzViewHolder {
+            val viewHolder = ClazzViewHolder(ItemClazzSimpleBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
             viewHolder.binding.mActivity = activityEventHandler
             return viewHolder
         }
 
-        override fun onBindViewHolder(holder: SelQuestionViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: ClazzViewHolder, position: Int) {
             holder.binding.clazz = getItem(position)
         }
     }
@@ -87,6 +88,8 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         val rootView: View
         mBinding = FragmentSchoolEditBinding.inflate(inflater, container,false).also {
                         rootView = it.root
+                        it.activityEventHandler = this
+                        it.genderSelectionListener = this
                     }
 
         clazzRecyclerView = rootView.findViewById(R.id.fragment_school_edit_class_rv)
@@ -121,6 +124,14 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
             val clazz = it.firstOrNull()?: return@observeResult
             mPresenter?.handleAddOrEditClazz(clazz)
         }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                HolidayCalendar::class.java) {
+            val holidayCalendar = it.firstOrNull() ?: return@observeResult
+            entity?.holidayCalendar = holidayCalendar
+            entity?.schoolHolidayCalendarUid = holidayCalendar.umCalendarUid
+            mBinding?.school = entity
+        }
     }
 
     override fun onDestroyView() {
@@ -128,6 +139,8 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         mBinding = null
         mPresenter = null
         entity = null
+        clazzRecyclerAdapter = null
+        clazzRecyclerView = null
     }
 
     override fun onResume() {
@@ -193,5 +206,13 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
     override fun showHolidayCalendarPicker() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(HolidayCalendar::class.java, R.id.holidaycalendar_list_dest)
+    }
+
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
+
+    }
+
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
+
     }
 }

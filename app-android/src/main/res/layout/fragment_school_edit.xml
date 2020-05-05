@@ -28,6 +28,10 @@
             type="java.util.List&lt;MessageIdOption&gt;"/>
 
         <variable
+            name="genderSelectionListener"
+            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+
+        <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.SchoolEditFragmentEventHandler" />
 
@@ -113,7 +117,6 @@
                     android:text="@{school.holidayCalendar.umCalendarName}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    tools:text="Nairobi holidays"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
@@ -156,11 +159,56 @@
                     android:inputType="none"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
+                    app:onMessageIdOptionSelected="@{genderSelectionListener}"
                     app:selectedMessageIdOption="@={school.schoolGender}"
                     app:messageIdOptions="@{genderOptions}"
                     tools:text="Mixed"/>
 
             </com.google.android.material.textfield.TextInputLayout>
+
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_school_edit_school_phonenumber_tip"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_gender_til">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/phone_number"
+                    android:text="@={`` + school.schoolPhoneNumber}"
+                    tools:text="+90012345678" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_school_edit_school_email_tip"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_phonenumber_tip">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/email"
+                    android:text="@={school.schoolEmailAddress}"
+                    tools:text="info@schoola.com" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+
 
             <TextView
                 android:id="@+id/fragment_school_edit_classes_heading"
@@ -171,7 +219,7 @@
                 android:layout_marginBottom="@dimen/formitem_margin_vertical"
                 android:text="@string/classes"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_gender_til" />
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_email_tip" />
 
 
             <include layout="@layout/item_createnew"

@@ -62,11 +62,10 @@
                 android:layout_marginStart="8dp"
                 android:textColor="@color/text_secondary"
                 android:layout_marginTop="8dp"
-                android:text="@{school.locationName}"
+                android:text="@{school.schoolAddress}"
                 tools:text="Nairobi, Kenya"
                 app:layout_constraintStart_toEndOf="@+id/item_school_list_item_location_iv"
-                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_school_name"
-                android:layout_marginLeft="8dp" />
+                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_school_name" />
 
             <ImageView
                 android:id="@+id/item_school_list_item_members_iv"
@@ -86,11 +85,10 @@
                 android:textColor="@color/text_secondary"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="4dp"
-                android:text="@{school.numStudents}"
+                android:text="@{@string/num_items_with_name(school.numStudents, @string/students_literal)}"
                 tools:text="460 students, 30 teachers"
                 app:layout_constraintStart_toEndOf="@+id/item_school_list_item_members_iv"
-                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_location_name"
-                android:layout_marginLeft="8dp" />
+                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_location_name" />
 
             <View
                 android:id="@+id/item_school_list_item_horizontal_divider"
@@ -114,7 +112,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_school_black_24dp" />
+                app:srcCompat="@drawable/ic_school_black_24dp"
+                android:contentDescription="@string/school" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

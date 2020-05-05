@@ -8,22 +8,20 @@ import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.SchoolEditView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.School
-
-import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.http.content.TextContent
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
 
 
 class SchoolEditPresenter(context: Any,
@@ -66,6 +64,8 @@ class SchoolEditPresenter(context: Any,
         super.onCreate(savedState)
 
         view.schoolClazzes = clazzOneToManyJoinEditHelper.liveList
+        view.genderOptions = GenderOptions.values().map { GenderTypeMessageIdOption(it, context) }
+
 
     }
 
@@ -111,6 +111,7 @@ class SchoolEditPresenter(context: Any,
 
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.schoolUid == 0L) {
+                entity.schoolActive = true
                 entity.schoolUid = repo.schoolDao.insertAsync(entity)
             }else {
                 repo.schoolDao.updateAsync(entity)

@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.ClazzDao.Companion.ENTITY_LEVEL_PERMISSION_CO
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -70,6 +71,11 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
             "AND CAST(isClazzActive AS INTEGER) = 1 ")
     abstract suspend fun findAllClazzesBySchool(schoolUid: Long): List<Clazz>
+
+    @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
+            "AND CAST(isClazzActive AS INTEGER) = 1 ")
+    abstract fun findAllClazzesBySchoolLive(schoolUid: Long)
+            : DataSource.Factory<Int,Clazz>
 
     @Query("UPDATE Clazz SET isClazzActive = :active WHERE clazzUid = :clazzUid ")
     abstract suspend fun updateActiveByClazzUid(clazzUid: Long, active : Boolean)
