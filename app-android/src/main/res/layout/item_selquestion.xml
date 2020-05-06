@@ -25,7 +25,6 @@
         android:onClick="@{() -> mActivity.onClickEditSelQuestion(selQuestion)}"
         android:layout_height="wrap_content">
 
-        <!-- TODO: Change or remove this icon -->
         <androidx.appcompat.widget.AppCompatImageView android:id="@+id/item_selquestion_newitemicon"
             app:srcCompat="@drawable/ic_add_black_24dp"
             android:layout_width="@dimen/list_twoline1_imagesize"

@@ -5,6 +5,7 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import androidx.navigation.fragment.findNavController
@@ -16,7 +17,6 @@ import com.ustadmobile.core.controller.SchoolDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.School
@@ -51,8 +51,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
 
-        //TODO: Set title
-
         return rootView
     }
 
@@ -84,7 +82,16 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
 
     override fun setSettingsVisible(visible: Boolean){
-        //TODO this
+
+        if(!visible){
+            editButtonMode = EditButtonMode.GONE
+        }else{
+            editButtonMode = EditButtonMode.FAB
+        }
+    }
+
+    override fun setTitle(title: String) {
+        (activity as? AppCompatActivity)?.supportActionBar?.title = title
     }
 
     override fun onDestroyView() {

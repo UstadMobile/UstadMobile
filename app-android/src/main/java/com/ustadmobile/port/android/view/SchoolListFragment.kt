@@ -90,6 +90,8 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        mDataRecyclerViewAdapter = null
+        mDataBinding = null
     }
 
     override val displayTypeRepo: Any?

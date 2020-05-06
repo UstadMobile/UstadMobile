@@ -51,15 +51,6 @@ abstract class SchoolDao : BaseDao<School> {
     abstract fun findAllActiveSchoolWithMemberCountAndLocationNameDesc(searchBit: String): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
 
 
-    fun findAllSchoolsAndSort(searchBit: String, sortCode: Int): DataSource.Factory<Int, School>{
-        //TODO:
-        return findAllActiveSchoolsNameAsc(searchBit)
-    }
-
-    //TODO:
-//    @Query("""""")
-//    abstract fun checkPermission(permission: Long, personUid: Long): Boolean
-
     @Update
     abstract suspend fun updateAsync(entity: School): Int
 

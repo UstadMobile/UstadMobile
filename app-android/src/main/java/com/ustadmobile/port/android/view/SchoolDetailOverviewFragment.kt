@@ -23,12 +23,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.SchoolDetailOverviewView
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 
 interface SchoolWithHolidayCalendarDetailFragmentEventHandler {
@@ -60,14 +58,6 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
             currentLiveData = value?.asRepositoryLiveData(ClazzDao)
             currentLiveData?.observe(this, this)
         }
-
-//    override var schoolClazzes: DoorMutableLiveData<List<Clazz>>? = null
-//        get() = field
-//        set(value) {
-//            field?.removeObserver(clazzObserver)
-//            field = value
-//            value?.observe(this, clazzObserver)
-//        }
 
     class ClazzRecyclerAdapter()
         : ListAdapter<Clazz,
@@ -106,8 +96,6 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
-        //mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-        //TODO: Set title
 
         return rootView
     }
@@ -126,11 +114,6 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
         entity = null
         clazzRecyclerView = null
         clazzRecyclerAdapter = null
-    }
-
-    override fun onResume() {
-        super.onResume()
-        //TODO: Set title
     }
 
     override var entity: SchoolWithHolidayCalendar? = null

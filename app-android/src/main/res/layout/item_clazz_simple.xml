@@ -26,7 +26,6 @@
         android:onClick="@{() -> mActivity.onClickEditClazz(clazz)}"
         android:layout_height="wrap_content">
 
-        <!-- TODO: Change or remove this icon -->
         <androidx.appcompat.widget.AppCompatImageView android:id="@+id/item_clazz_simple_newitemicon"
             app:srcCompat="@drawable/ic_add_black_24dp"
             android:layout_width="@dimen/list_twoline1_imagesize"
@@ -51,7 +50,6 @@
             tools:text="Class A"
             android:text="@{clazz.clazzName}"
             android:textColor="@color/text_primary" />
-
 
 
         <androidx.appcompat.widget.AppCompatImageView

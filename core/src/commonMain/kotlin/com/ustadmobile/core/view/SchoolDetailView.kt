@@ -7,6 +7,8 @@ interface SchoolDetailView: UstadDetailView<School> {
 
     fun setSettingsVisible(visible: Boolean)
 
+    fun setTitle(title: String)
+
     companion object {
 
         const val VIEW_NAME = "SchoolDetailView"

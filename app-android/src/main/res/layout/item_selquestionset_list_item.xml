@@ -19,7 +19,6 @@
         android:background="?attr/selectableItemBackground"
         >
 
-        <!-- TODO: Change or remove this icon -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_selquestionset_newitemicon"
             app:srcCompat="@drawable/ic_add_black_24dp"

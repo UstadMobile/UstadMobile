@@ -33,9 +33,12 @@ class SchoolDetailPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): School? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        return withTimeoutOrNull(2000) {
+        val school =  withTimeoutOrNull(2000) {
             db.schoolDao.findByUidAsync(entityUid)
         } ?: School()
+
+        view.setTitle(school.schoolName?:"")
+        return school
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
