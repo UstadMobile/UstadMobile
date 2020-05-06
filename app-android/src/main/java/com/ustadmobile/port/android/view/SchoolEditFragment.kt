@@ -200,7 +200,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override fun onClickAddClazz() {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Clazz::class.java,  R.id.home_clazzlist_dest)
+        navigateToPickEntityFromList(Clazz::class.java,  R.id.clazz_list_dest_list)
     }
 
     override fun showHolidayCalendarPicker() {

@@ -23,6 +23,10 @@
         android:name="com.ustadmobile.port.android.view.ClazzEditFragment" />
 
     <fragment
+        android:id="@+id/clazz_list_dest_list"
+        android:name="com.ustadmobile.port.android.view.ClazzList2Fragment" />
+
+    <fragment
         android:id="@+id/person_edit_dest"
         android:name="com.ustadmobile.port.android.view.PersonEditFragment"/>
 

@@ -35,7 +35,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
     private var mTabLayout: TabLayout? = null
 
-    private lateinit var mPagerAdapter: ViewNameListFragmentPagerAdapter
+    private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -102,6 +102,9 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         mBinding = null
         mPresenter = null
         entity = null
+        mPager = null
+        mPagerAdapter = null
+        mTabLayout = null
     }
 
     override fun onResume() {
