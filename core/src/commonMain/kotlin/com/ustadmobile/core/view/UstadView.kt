@@ -83,6 +83,8 @@ interface UstadView {
 
         const val ARG_LISTADDMODE = "listAddMode"
 
+        const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
+
     }
 
 }

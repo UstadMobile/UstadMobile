@@ -117,10 +117,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             UserProfileView.VIEW_NAME to "${PACKAGE_NAME}UserProfileActivity",
             ContentEntryListView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryListActivity",
             ContentEntryDetailView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryDetailActivity",
-
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
 
-            ClazzDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ClazzDetailActivity",
             ClassLogDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ClazzLogDetailActivity",
             PersonDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonDetailActivity",
             PersonEditView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonEditActivity",

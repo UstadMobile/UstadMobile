@@ -115,9 +115,6 @@
             android:name="com.ustadmobile.port.android.view.DownloadDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.ClazzDetailActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.ClazzLogDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity

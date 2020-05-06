@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -30,6 +31,9 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
 
     abstract val persistenceMode: PersistenceMode
 
+    var entityLiveData: DoorLiveData<RT?>? = null
+
+    var entityLiveDataObserver: DoorObserver<RT?>? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -53,6 +57,17 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
         }else if(persistenceMode == PersistenceMode.JSON){
             entity = onLoadFromJson(arguments)
             view.entity = entity
+        }else if(persistenceMode == PersistenceMode.LIVEDATA) {
+            entityLiveData = onLoadLiveData(repo)
+            if(entityLiveData != null) {
+                entityLiveDataObserver = object : DoorObserver<RT?> {
+                    override fun onChanged(t: RT?) {
+                        view.entity = t
+                    }
+                }.also {
+                    entityLiveData?.observe(lifecycleOwner, it)
+                }
+            }
         }
     }
 
@@ -60,7 +75,7 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
         return null
     }
 
-    open fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<RT>?{
+    open fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<RT?>?{
         return null
     }
 
@@ -68,5 +83,14 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
         return null
     }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        val entityLiveDataObserverVal = entityLiveDataObserver
+        val entityLiveDataVal = entityLiveData
+        if(entityLiveDataObserverVal != null && entityLiveDataVal != null) {
+            entityLiveDataVal.removeObserver(entityLiveDataObserverVal)
+        }
+        entityLiveData = null
+        entityLiveDataObserver = null
+    }
 }

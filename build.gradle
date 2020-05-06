@@ -223,8 +223,21 @@ subprojects { project -> afterEvaluate {
 task newFromTemplate(type: Copy) {
     def replacementTokens = new Properties()
     def templateName = project.hasProperty("Template") ? project.property("Template") : "editscreen"
-
     replacementTokens["Entity"] = project.hasProperty("Entity") ? project.property("Entity") : "Entity"
+
+    def baseFileName = ""
+    if(project.hasProperty("BaseFileName")) {
+        baseFileName = project.property("BaseFileName")
+    }else if(templateName == "detailscreen") {
+        baseFileName = replacementTokens["Entity"] + "Detail"
+    }else if(templateName == "listscreen") {
+        baseFileName = replacementTokens["Entity"] + "List"
+    }else if(templateName == "editscreen") {
+        baseFileName = replacementTokens["Entity"] + "Edit"
+    }
+
+    replacementTokens["BaseFileName"] = baseFileName
+    replacementTokens["BaseFileName_SnakeCase"] = baseFileName.replaceAll("([^_A-Z])([A-Z])", '$1_$2').toLowerCase()
     replacementTokens["Entity_SnakeCase"] = replacementTokens["Entity"].replaceAll("([^_A-Z])([A-Z])", '$1_$2').toLowerCase()
     replacementTokens["DisplayEntity"] = project.hasProperty("DisplayEntity") ? project.property("DisplayEntity") : replacementTokens["Entity"]
     replacementTokens["DisplayEntity_Import"] = replacementTokens["DisplayEntity"] != replacementTokens["Entity"] ? "import com.ustadmobile.lib.db.entities." + replacementTokens['DisplayEntity'] : ""
@@ -242,6 +255,8 @@ task newFromTemplate(type: Copy) {
     rename('@Entity@', replacementTokens["Entity"])
     rename('@Entity_LowerCase@', replacementTokens["Entity_LowerCase"])
     rename('@Entity_SnakeCase@', replacementTokens["Entity_SnakeCase"])
+    rename('@BaseFileName@', replacementTokens["BaseFileName"])
+    rename('@BaseFileName_SnakeCase', replacementTokens["BaseFileName_SnakeCase"])
 
     eachFile {
         if(it.relativePath.getFile(project.rootDir).exists()) {
