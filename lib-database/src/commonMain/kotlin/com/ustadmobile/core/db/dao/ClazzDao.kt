@@ -78,7 +78,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             : DataSource.Factory<Int,Clazz>
 
 
-    @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid WHERE clazzUid = :clazzUid ")
+    @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid, " +
+            " clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode) WHERE clazzUid = :clazzUid ")
     abstract suspend fun updateSchoolOnClazzUid(clazzUid: Long, schoolUid: Long)
 
     /**
@@ -86,7 +87,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
      */
     override suspend fun deactivateByUids(uidList: List<Long>) {
         uidList.forEach {
-            //TODO: Update LCB LCSN
+
             updateSchoolOnClazzUid(it, 0)
         }
     }
