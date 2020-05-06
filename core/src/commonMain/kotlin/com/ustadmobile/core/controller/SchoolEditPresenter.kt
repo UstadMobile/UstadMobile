@@ -65,8 +65,6 @@ class SchoolEditPresenter(context: Any,
 
         view.schoolClazzes = clazzOneToManyJoinEditHelper.liveList
         view.genderOptions = GenderOptions.values().map { GenderTypeMessageIdOption(it, context) }
-
-
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SchoolWithHolidayCalendar? {
