@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "3cd6b34210bbf644931a6eaa12ddaddd",
+    "identityHash": "e1521b74c7236f3b861dd8baf6a7a4a9",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1561,7 +1561,7 @@
       },
       {
         "tableName": "CustomField",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldName` TEXT, `customFieldNameAlt` TEXT, `customFieldLabelMessageID` INTEGER NOT NULL, `customFieldIcon` TEXT, `customFieldType` INTEGER NOT NULL, `customFieldEntityType` INTEGER NOT NULL, `customFieldActive` INTEGER NOT NULL, `customFieldDefaultValue` TEXT, `customFieldMCSN` INTEGER NOT NULL, `customFieldLCSN` INTEGER NOT NULL, `customFieldLCB` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldName` TEXT, `customFieldNameAlt` TEXT, `customFieldLabelMessageID` INTEGER NOT NULL, `customFieldIcon` TEXT, `customFieldIconId` INTEGER NOT NULL, `customFieldType` INTEGER NOT NULL, `customFieldEntityType` INTEGER NOT NULL, `customFieldActive` INTEGER NOT NULL, `customFieldDefaultValue` TEXT, `customFieldMCSN` INTEGER NOT NULL, `customFieldLCSN` INTEGER NOT NULL, `customFieldLCB` INTEGER NOT NULL, `customFieldInputType` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "customFieldUid",
@@ -1592,6 +1592,12 @@
             "columnName": "customFieldIcon",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "customFieldIconId",
+            "columnName": "customFieldIconId",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "customFieldType",
@@ -1632,6 +1638,12 @@
           {
             "fieldPath": "customFieldLCB",
             "columnName": "customFieldLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customFieldInputType",
+            "columnName": "customFieldInputType",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -3507,7 +3519,7 @@
       },
       {
         "tableName": "PersonPicture",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPictureUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personPicturePersonUid` INTEGER NOT NULL, `personPictureMasterCsn` INTEGER NOT NULL, `personPictureLocalCsn` INTEGER NOT NULL, `personPictureLastChangedBy` INTEGER NOT NULL, `fileSize` INTEGER NOT NULL, `picTimestamp` INTEGER NOT NULL, `mimeType` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPictureUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personPicturePersonUid` INTEGER NOT NULL, `personPictureMasterCsn` INTEGER NOT NULL, `personPictureLocalCsn` INTEGER NOT NULL, `personPictureLastChangedBy` INTEGER NOT NULL, `fileSize` INTEGER NOT NULL, `picTimestamp` INTEGER NOT NULL, `mimeType` TEXT, `personPictureActive` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personPictureUid",
@@ -3556,6 +3568,12 @@
             "columnName": "mimeType",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "personPictureActive",
+            "columnName": "personPictureActive",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -4783,7 +4801,7 @@
       },
       {
         "tableName": "School",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` INTEGER NOT NULL, `schoolGender` INTEGER, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolEmailAddress` TEXT, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "schoolUid",
@@ -4818,14 +4836,14 @@
           {
             "fieldPath": "schoolPhoneNumber",
             "columnName": "schoolPhoneNumber",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "schoolGender",
             "columnName": "schoolGender",
             "affinity": "INTEGER",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "schoolHolidayCalendarUid",
@@ -4850,6 +4868,12 @@
             "columnName": "schoolLocationLatt",
             "affinity": "REAL",
             "notNull": true
+          },
+          {
+            "fieldPath": "schoolEmailAddress",
+            "columnName": "schoolEmailAddress",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "schoolMasterChangeSeqNum",
@@ -8741,7 +8765,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3cd6b34210bbf644931a6eaa12ddaddd')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e1521b74c7236f3b861dd8baf6a7a4a9')"
     ]
   }
 }

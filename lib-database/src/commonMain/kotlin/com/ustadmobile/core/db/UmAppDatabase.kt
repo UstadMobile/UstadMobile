@@ -38,12 +38,12 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 37)
+], version = 36)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     /*
-        Changes in 37:
+        Changes from 36:
         1. Added school uid to Clazz
         2. Added school Phone number to School
         3. Added schoolGender to School

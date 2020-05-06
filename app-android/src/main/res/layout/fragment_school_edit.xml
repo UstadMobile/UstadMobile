@@ -183,7 +183,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/phone_number"
-                    android:text="@={`` + school.schoolPhoneNumber}"
+                    android:text="@={school.schoolPhoneNumber}"
                     tools:text="+90012345678" />
             </com.google.android.material.textfield.TextInputLayout>
 

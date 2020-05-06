@@ -103,7 +103,6 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
-        //mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         clazzRecyclerAdapter?.presenter = mPresenter
 

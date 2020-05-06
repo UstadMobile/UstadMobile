@@ -77,12 +77,17 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract fun findAllClazzesBySchoolLive(schoolUid: Long)
             : DataSource.Factory<Int,Clazz>
 
-    @Query("UPDATE Clazz SET isClazzActive = :active WHERE clazzUid = :clazzUid ")
-    abstract suspend fun updateActiveByClazzUid(clazzUid: Long, active : Boolean)
 
+    @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid WHERE clazzUid = :clazzUid ")
+    abstract suspend fun updateSchoolOnClazzUid(clazzUid: Long, schoolUid: Long)
+
+    /**
+     * Does not deactivate the clazz, dissassociates a school from the class.
+     */
     override suspend fun deactivateByUids(uidList: List<Long>) {
         uidList.forEach {
-            updateActiveByClazzUid(it, false)
+            //TODO: Update LCB LCSN
+            updateSchoolOnClazzUid(it, 0)
         }
     }
 

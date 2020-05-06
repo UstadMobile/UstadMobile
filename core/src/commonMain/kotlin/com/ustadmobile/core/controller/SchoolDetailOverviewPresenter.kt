@@ -39,12 +39,11 @@ class SchoolDetailOverviewPresenter(context: Any,
              db.schoolDao.findByUidWithHolidayCalendarAsync(entityUid)
          } ?: SchoolWithHolidayCalendar()
 
-        if(entityUid != 0L) {
-            val clazzes = withTimeoutOrNull(2000) {
-                db.clazzDao.findAllClazzesBySchoolLive(entityUid)
-            }
-            view.schoolClazzes = clazzes
+        val clazzes = withTimeoutOrNull(2000) {
+            db.clazzDao.findAllClazzesBySchoolLive(entityUid)
         }
+        view.schoolClazzes = clazzes
+
         return schoolWithHolidayCalendar
 
     }

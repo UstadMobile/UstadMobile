@@ -7,7 +7,7 @@ interface SchoolDetailView: UstadDetailView<School> {
 
     fun setSettingsVisible(visible: Boolean)
 
-    fun setTitle(title: String)
+    var title : String?
 
     companion object {
 

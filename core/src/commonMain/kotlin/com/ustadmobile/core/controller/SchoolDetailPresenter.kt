@@ -37,7 +37,7 @@ class SchoolDetailPresenter(context: Any,
             db.schoolDao.findByUidAsync(entityUid)
         } ?: School()
 
-        view.setTitle(school.schoolName?:"")
+        view.title = school.schoolName?:""
         return school
     }
 

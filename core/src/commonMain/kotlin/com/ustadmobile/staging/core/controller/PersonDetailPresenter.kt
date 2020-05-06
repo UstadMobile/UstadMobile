@@ -361,7 +361,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 PersonField.FIELD_HEADING_FIRST_NAMES -> { labelMessageId = MessageID.first_names }
                 PersonField.FIELD_HEADING_LAST_NAME -> { labelMessageId = MessageID.last_name }
                 PersonField.FIELD_HEADING_BIRTHDAY -> { labelMessageId = MessageID.birthday }
-                PersonField.FIELD_HEADING_HOME_ADDRESS -> { labelMessageId = MessageID.home_address }
+                PersonField.FIELD_HEADING_HOME_ADDRESS -> { labelMessageId = MessageID.address }
                 PersonField.FIELD_HEADING_ATTENDANCE -> { labelMessageId = MessageID. attendance}
                 PersonField.FIELD_HEADING_FATHER -> { labelMessageId = MessageID.father }
                 PersonField.FIELD_HEADING_FATHERS_NAME -> { labelMessageId = MessageID.fathers_name }
@@ -384,7 +384,7 @@ class PersonDetailPresenter(context: Any, arguments: Map<String, String>?, view:
                 PersonField.FIELD_HEADING_FIRST_NAMES -> { headerMessageId = MessageID.first_names }
                 PersonField.FIELD_HEADING_LAST_NAME -> { headerMessageId = MessageID.last_name }
                 PersonField.FIELD_HEADING_BIRTHDAY -> { headerMessageId = MessageID.birthday }
-                PersonField.FIELD_HEADING_HOME_ADDRESS -> { headerMessageId = MessageID.home_address }
+                PersonField.FIELD_HEADING_HOME_ADDRESS -> { headerMessageId = MessageID.address }
                 PersonField.FIELD_HEADING_ATTENDANCE -> { headerMessageId = MessageID. attendance}
                 PersonField.FIELD_HEADING_FATHER -> { headerMessageId = MessageID.father }
                 PersonField.FIELD_HEADING_FATHERS_NAME -> { headerMessageId = MessageID.fathers_name }

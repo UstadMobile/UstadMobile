@@ -28,7 +28,7 @@ open class School() {
     //Active
     var schoolActive: Boolean = false
 
-    var schoolPhoneNumber : Long = 0L
+    var schoolPhoneNumber : String? = null
 
     var schoolGender : Int = 0
 

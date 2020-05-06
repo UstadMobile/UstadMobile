@@ -90,9 +90,12 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         }
     }
 
-    override fun setTitle(title: String) {
-        (activity as? AppCompatActivity)?.supportActionBar?.title = title
-    }
+    override var title: String? = null
+        get() = field
+        set(value) {
+            field = value
+            (activity as? AppCompatActivity)?.supportActionBar?.title = title
+        }
 
     override fun onDestroyView() {
         super.onDestroyView()
