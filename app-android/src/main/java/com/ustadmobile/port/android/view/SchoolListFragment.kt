@@ -74,7 +74,7 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.schools)
+                requireContext().getString(R.string.school)
     }
 
     /**

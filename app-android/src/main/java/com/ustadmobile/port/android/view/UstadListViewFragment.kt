@@ -266,6 +266,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
         theFab?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_add_white_24dp)
         theFab?.visibility = if(addMode == ListViewAddMode.FAB) {
+            theFab?.extend()
             View.VISIBLE
         } else {
             View.GONE

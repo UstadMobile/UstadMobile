@@ -336,6 +336,14 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             "AND Role.roleUid = :roleUid AND Person.personUid != null")
     abstract fun findPeopleWithRoleAssignedToClazz(clazzUid: Long, roleUid: Long): List<Person>
 
+
+    @Query("""SELECT Clazz.*, HolidayCalendar.*
+        FROM Clazz 
+        LEFT JOIN HolidayCalendar ON Clazz.clazzScheuleUMCalendarUid = HolidayCalendar.umCalendarUid
+        WHERE Clazz.clazzUid = :clazzUid""")
+    abstract fun getClazzWithDisplayDetails(clazzUid: Long): DoorLiveData<ClazzWithDisplayDetails?>
+
+
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 =
