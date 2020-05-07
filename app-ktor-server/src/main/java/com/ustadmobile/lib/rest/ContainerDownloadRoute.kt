@@ -21,6 +21,7 @@ import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.toMap
 import kotlinx.coroutines.io.ByteWriteChannel
 import kotlinx.coroutines.io.close
+import kotlinx.coroutines.io.jvm.javaio.toOutputStream
 import java.io.File
 
 
@@ -65,11 +66,9 @@ suspend fun PipelineContext<*, ApplicationCall>.serveConcatenatedResponse(db: Um
                 .find { it.value == concatenatedResponse.status } ?: HttpStatusCode.InternalServerError
 
         override suspend fun writeTo(channel: ByteWriteChannel) {
-            var bytesRead = 0
             if(inStream != null) {
-                val buf = ByteArray(8 * 1024)
-                while(inStream.read(buf).also { bytesRead = it } != -1) {
-                    channel.writeFully(buf, 0, bytesRead)
+                channel.toOutputStream().use {
+                    inStream.copyTo(it)
                 }
                 inStream.close()
             }
