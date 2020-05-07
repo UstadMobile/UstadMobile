@@ -28,6 +28,12 @@ open class School() {
     //Active
     var schoolActive: Boolean = false
 
+    var schoolPhoneNumber : String? = null
+
+    var schoolGender : Int = 0
+
+    var schoolHolidayCalendarUid: Long = 0L
+
     // Features - bit mask
     var schoolFeatures: Long = 0
 
@@ -36,6 +42,8 @@ open class School() {
 
     //Location (precise) - latitude
     var schoolLocationLatt : Double = 0.0
+
+    var schoolEmailAddress : String?= null
 
     @MasterChangeSeqNum
     var schoolMasterChangeSeqNum: Long = 0

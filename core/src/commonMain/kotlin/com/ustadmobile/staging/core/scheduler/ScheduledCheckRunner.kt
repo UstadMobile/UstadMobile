@@ -8,7 +8,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.FeedEntryDao
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.staging.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClassLogDetailView
 import com.ustadmobile.core.view.ClassLogDetailView.Companion.ARG_MOST_RECENT_BY_CLAZZ_UID
 import com.ustadmobile.core.view.ClazzListView

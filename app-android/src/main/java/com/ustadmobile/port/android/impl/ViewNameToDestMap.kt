@@ -24,6 +24,10 @@ class ViewNameToDestMap: DestinationProvider {
             RoleListView.VIEW_NAME to UstadDestination(R.id.role_list_dest, false),
             RoleEditView.VIEW_NAME to UstadDestination(R.id.role_edit_dest, false),
             PersonEditView.VIEW_NAME to UstadDestination(R.id.person_edit_dest, false),
+            SchoolListView.VIEW_NAME to UstadDestination(R.id.home_schoollist_dest, true),
+            SchoolEditView.VIEW_NAME to UstadDestination(R.id.school_edit_dest, false),
+            SchoolDetailView.VIEW_NAME to UstadDestination(R.id.school_detail_dest, true),
+            SchoolDetailOverviewView.VIEW_NAME to UstadDestination(R.id.school_detail_overview_dest, true),
             PersonDetailView.VIEW_NAME to UstadDestination(R.id.person_detail_dest, true)
     )
 

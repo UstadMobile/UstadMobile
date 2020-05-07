@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="fieldsEnabled"
+            type="boolean" />
+
+        <variable
+            name="schoolWithHolidayCalendar"
+            type="com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar" />
+
+        <variable
+            name="loading"
+            type="boolean" />
+
+        <variable
+            name="editButtonMode"
+            type="com.ustadmobile.core.view.EditButtonMode"/>
+
+
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/fragment_school_detail_overview_nestedscrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fragment_school_detail_overview_clx"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/school_detail_overview_iv"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:contentDescription="@string/school"
+                android:src="@drawable/ic_photo_camera_black_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/fragment_school_detail_overview_locataion_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:src="@drawable/ic_location_pin_24dp"
+                android:contentDescription="@string/school"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/school_detail_overview_iv" />
+
+            <TextView
+                android:id="@+id/fragment_school_detail_overview_locataion_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/activity_vertical_margin"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:text="@{schoolWithHolidayCalendar.schoolAddress}"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:contentDescription="@string/school"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
+                app:layout_constraintTop_toBottomOf="@+id/school_detail_overview_iv"
+                tools:text="Nairobi, Kenya" />
+
+
+            <TextView
+                android:id="@+id/school_overview_desc_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/school"
+                android:layout_marginStart="20dp"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginEnd="@dimen/form_margin_horizontal"
+                android:text="@{schoolWithHolidayCalendar.schoolDesc}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_locataion_iv"
+                tools:text="School description over here." />
+
+            <ImageView
+                android:id="@+id/fragment_school_detail_overview_phone_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:src="@drawable/ic_call_bcd4_24dp"
+                android:contentDescription="@string/school"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/school_overview_desc_tv" />
+
+            <TextView
+                android:id="@+id/fragment_school_detail_overview_detail_school_phonenumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:text="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_phone_iv"
+                app:layout_constraintTop_toBottomOf="@+id/school_overview_desc_tv"
+                tools:text="+971 44311111" />
+
+            <ImageView
+                android:id="@+id/fragment_school_detail_overview_email_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/school"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:src="@drawable/ic_email_black_24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_phone_iv" />
+
+            <TextView
+                android:id="@+id/fragment_school_detail_overview_detail_school_holiday_calendar_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:text="@{schoolWithHolidayCalendar.holidayCalendar.umCalendarName}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_phone_iv"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_email_iv"
+                tools:text="Kenya calendar A" />
+
+
+            <ImageView
+                android:id="@+id/school_overview_hc_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:contentDescription="@string/school"
+                android:src="@drawable/ic_perm_contact_calendar_black_24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_email_iv" />
+
+            <TextView
+                android:id="@+id/fragment_school_detail_overview_detail_school_email"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:text="@{schoolWithHolidayCalendar.schoolEmailAddress}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_phone_iv"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_phone_iv"
+                tools:text="info@schoola.com" />
+
+            <TextView
+                android:id="@+id/fragment_school_overview_classes_heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:text="@string/classes"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/school_overview_hc_iv" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_school_detail_overview_detail_clazz_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_clazz_simple"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_overview_classes_heading"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</layout>

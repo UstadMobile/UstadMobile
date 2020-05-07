@@ -35,7 +35,8 @@ interface QuestionAndOptionsEditEventHandler {
 }
 
 class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOptions>(),
-        SelQuestionAndOptionsEditView, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>,
+        SelQuestionAndOptionsEditView,
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>,
         QuestionAndOptionsEditEventHandler{
 
     private var mBinding: FragmentSelquestionandoptionsEditBinding? = null

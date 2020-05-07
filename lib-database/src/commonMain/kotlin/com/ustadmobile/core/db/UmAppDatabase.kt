@@ -43,6 +43,12 @@ import kotlin.jvm.Volatile
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     /*
+        Changes from 36:
+        1. Added school uid to Clazz
+        2. Added school Phone number to School
+        3. Added schoolGender to School
+        4.Added schoolHolidayCalendar to School
+
         Changes in 34:
         Added School and Assignment based entities
         Updated Clazz : added clazzFeatures and removed individual feature bits

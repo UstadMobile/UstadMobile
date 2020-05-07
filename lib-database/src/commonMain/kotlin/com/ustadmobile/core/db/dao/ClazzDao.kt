@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.ClazzDao.Companion.ENTITY_LEVEL_PERMISSION_CO
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION1
 import com.ustadmobile.core.db.dao.ClazzDao.Companion.TABLE_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -23,7 +24,7 @@ import com.ustadmobile.lib.db.entities.*
         TABLE_LEVEL_PERMISSION_CONDITION2)
 @UmRepository
 @Dao
-abstract class ClazzDao : BaseDao<Clazz> {
+abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
     @QueryLiveTables(["Clazz", "ClazzMember"])
     @Query("SELECT " +
@@ -65,6 +66,32 @@ abstract class ClazzDao : BaseDao<Clazz> {
 
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
+
+
+    @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
+            "AND CAST(isClazzActive AS INTEGER) = 1 ")
+    abstract suspend fun findAllClazzesBySchool(schoolUid: Long): List<Clazz>
+
+    @Query("SELECT * FROM Clazz WHERE clazzSchoolUid = :schoolUid " +
+            "AND CAST(isClazzActive AS INTEGER) = 1 ")
+    abstract fun findAllClazzesBySchoolLive(schoolUid: Long)
+            : DataSource.Factory<Int,Clazz>
+
+
+    @Query("UPDATE Clazz SET clazzSchoolUid = :schoolUid, " +
+            " clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode) WHERE clazzUid = :clazzUid ")
+    abstract suspend fun updateSchoolOnClazzUid(clazzUid: Long, schoolUid: Long)
+
+    /**
+     * Does not deactivate the clazz, dissassociates a school from the class.
+     */
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+
+            updateSchoolOnClazzUid(it, 0)
+        }
+    }
+
 
     fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
         val auditLog = AuditLog(fromPersonUid, Clazz.TABLE_ID, toPersonUid)
@@ -379,13 +406,6 @@ abstract class ClazzDao : BaseDao<Clazz> {
         private const val CLAZZ_WHERE_CLAZZMEMBER =
                 " FROM Clazz " +
                 " LEFT JOIN Person ON Person.personUid = :personUid "
-//                " WHERE (Person.admin OR :personUid in " +
-//                " (SELECT ClazzMember.clazzMemberPersonUid FROM ClazzMember " +
-//                "  WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND " +
-//                " CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1 ) AND CAST(Person.active AS INTEGER) = 1 ) "
-
-
-
 
         private const val SELECT_CLAZZ_WHERE_PERMISSION = " SELECT " +
                 "   Clazz.*, " +

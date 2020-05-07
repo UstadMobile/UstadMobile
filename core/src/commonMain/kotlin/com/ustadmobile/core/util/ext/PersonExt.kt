@@ -128,7 +128,7 @@ val ADAPTER_MAP = mapOf(
                 {person, row -> row.populateAsDateField(MessageID.birthday, person.dateOfBirth)},
                 {person, row -> person.updateDateFieldFromRow(person::dateOfBirth, row)}),
         PERSON_FIELD_UID_ADDRESS to PersonPresenterFieldRowAdapter(
-                {person, row -> row.populateAsStringField(MessageID.home_address, person.personAddress)},
+                {person, row -> row.populateAsStringField(MessageID.address, person.personAddress)},
                 {person, row -> person.updateStringFieldFromRow(person::personAddress, row)}),
         PERSON_FIELD_UID_USERNAME to PersonPresenterFieldRowAdapter(
                 {person, row -> row.populateAsStringField(MessageID.username, person.username)},

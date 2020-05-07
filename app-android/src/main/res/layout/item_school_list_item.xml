@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="school"
+            type="com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation" />
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.SchoolListPresenter" />
+
+    </data>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_school_list_item_cl"
+            android:background="?android:selectableItemBackground"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> presenter.handleClickEntry(school)}"
+            >
+
+
+            <TextView
+                android:id="@+id/item_school_list_item_school_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:text="@{school.schoolName}"
+                android:textAppearance="@android:style/TextAppearance.Material.Headline"
+                android:textSize="20sp"
+                app:layout_constraintStart_toEndOf="@+id/imageView10"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="School A" />
+
+            <ImageView
+                android:id="@+id/item_school_list_item_location_iv"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:contentDescription="@string/people"
+                android:tint="@color/text_secondary"
+                app:layout_constraintStart_toEndOf="@+id/imageView10"
+                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_school_name"
+                app:srcCompat="@drawable/ic_location_pin_24dp" />
+
+            <TextView
+                android:id="@+id/item_school_list_item_location_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="8dp"
+                android:text="@{school.schoolAddress}"
+                tools:text="Nairobi, Kenya"
+                app:layout_constraintStart_toEndOf="@+id/item_school_list_item_location_iv"
+                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_school_name" />
+
+            <ImageView
+                android:id="@+id/item_school_list_item_members_iv"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/members"
+                app:layout_constraintStart_toEndOf="@+id/imageView10"
+                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_location_iv"
+                app:srcCompat="@drawable/ic_people_black_24dp" />
+
+            <TextView
+                android:id="@+id/item_school_list_item_members_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="4dp"
+                android:text="@{@string/num_items_with_name(school.numStudents, @string/students_literal)}"
+                tools:text="460 students, 30 teachers"
+                app:layout_constraintStart_toEndOf="@+id/item_school_list_item_members_iv"
+                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_location_name" />
+
+            <View
+                android:id="@+id/item_school_list_item_horizontal_divider"
+                android:layout_width="368dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_members_tv"
+                />
+
+            <ImageView
+                android:id="@+id/imageView10"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/school"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_school_black_24dp" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

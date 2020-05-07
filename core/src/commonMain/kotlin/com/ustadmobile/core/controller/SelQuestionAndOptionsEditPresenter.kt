@@ -65,11 +65,7 @@ class SelQuestionAndOptionsEditPresenter(context: Any,
                     listOf(), listOf())
         }
 
-        //Construct it
-
         view.selQuestionOptionList = DoorMutableLiveData(editEntity.options)
-        //selQuestionOptionOneToManyJoinEditHelper.onLoadFromJsonSavedState(bundle)
-        //TODO check if works, then remove comments
 
         return editEntity
     }
