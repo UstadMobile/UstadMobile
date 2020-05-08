@@ -337,9 +337,12 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract fun findPeopleWithRoleAssignedToClazz(clazzUid: Long, roleUid: Long): List<Person>
 
 
-    @Query("""SELECT Clazz.*, HolidayCalendar.*
+    @Query("""SELECT Clazz.*, HolidayCalendar.*, School.*,
+        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 1) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 2) AS numTeachers
         FROM Clazz 
-        LEFT JOIN HolidayCalendar ON Clazz.clazzScheuleUMCalendarUid = HolidayCalendar.umCalendarUid
+        LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
+        LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
         WHERE Clazz.clazzUid = :clazzUid""")
     abstract fun getClazzWithDisplayDetails(clazzUid: Long): DoorLiveData<ClazzWithDisplayDetails?>
 

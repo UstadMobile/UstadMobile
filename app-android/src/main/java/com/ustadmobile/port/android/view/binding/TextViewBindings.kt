@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.view.binding
 
+import android.annotation.SuppressLint
+import android.text.format.DateFormat
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -67,3 +69,11 @@ fun TextView.setTextFromCustomFieldDropDownOption(customFieldValue: CustomFieldV
         text = ""
     }
 }
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter(value = ["textFromDateLong", "textToDateLong"])
+fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
+    val dateFormat = DateFormat.getDateFormat(context)
+    text = "${if(textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} - ${if(textToDateLong > 0) dateFormat.format(textToDateLong) else ""}"
+}
+

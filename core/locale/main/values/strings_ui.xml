@@ -847,4 +847,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="overview">Overview</string>
 
+    <string name="x_teachers_y_students">%1$d teachers, %2$d students</string>
+
 </resources>
