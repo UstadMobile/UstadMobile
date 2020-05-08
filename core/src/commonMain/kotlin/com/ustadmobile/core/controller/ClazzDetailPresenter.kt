@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Clazz
@@ -52,7 +53,8 @@ class ClazzDetailPresenter(context: Any,
 
         val activePersonUid = activeAccount.getValue()?.personUid ?: 0L
 
-        view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid") +
+        view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
+                "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid") +
                 CLAZZ_FEATURES.filter {
                 PERMISSION_CHECKER_MAP[it]?.invoke(db, activePersonUid, entityUid) ?: false
         }.map { (VIEWNAME_MAP[it] ?: "INVALID}") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"}

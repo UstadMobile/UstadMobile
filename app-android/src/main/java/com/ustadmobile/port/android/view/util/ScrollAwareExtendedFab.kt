@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
@@ -22,6 +23,10 @@ class ScrollAwareExtendedFab(context: Context, attributeSet: AttributeSet) : Ext
 
         override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: ExtendedFloatingActionButton, target: View, dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int, type: Int, consumed: IntArray) {
             super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type, consumed)
+
+            //Don't change the fab when it is not visible
+            if(!child.isVisible)
+                return
 
             val verticalOffset = (target as? RecyclerView)?.computeVerticalScrollOffset()
 

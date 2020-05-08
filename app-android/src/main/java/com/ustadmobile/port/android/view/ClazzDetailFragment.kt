@@ -17,6 +17,7 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
@@ -115,10 +116,12 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
     companion object {
         val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
-                ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java)
+                ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
+                ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java)
 
         val viewNameToTitleMap = mapOf(
-                ClazzDetailOverviewView.VIEW_NAME to R.string.overview
+                ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
+                ClazzMemberListView.VIEW_NAME to R.string.members
         )
 
     }

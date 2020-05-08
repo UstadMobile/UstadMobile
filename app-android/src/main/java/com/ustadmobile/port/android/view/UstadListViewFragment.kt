@@ -50,6 +50,16 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     protected var dbRepo: UmAppDatabase? = null
 
+    /**
+     * Whether or not UstadListViewFragment should attempt to manage the MergeAdapter. The MergeAdapter
+     * is normally used to add a create new item at the start of the list when the addmode is FIRST_ITEM
+     * and the user has permission to do so.
+     *
+     * This can be set to false to stop this e.g. where there are multiple different types of item
+     * in a list.
+     */
+    protected open var autoMergeRecyclerViewAdapter = true
+
     protected var mActivityWithFab: UstadListViewActivityWithFab? = null
         get() {
             /*
@@ -165,10 +175,10 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         mDataBinding = FragmentListBinding.inflate(inflater, container, false).also {
             rootView = it.root
             mRecyclerView = it.fragmentListRecyclerview
+            it.fragmentListRecyclerview.layoutManager = LinearLayoutManager(requireContext())
         }
 
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
-        mRecyclerView?.layoutManager = LinearLayoutManager(context)
 
         return rootView
     }
@@ -178,10 +188,14 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
         mDataBinding?.presenter = listPresenter
         mDataBinding?.onSortSelected = this
-        mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter, mDataRecyclerViewAdapter)
-        mRecyclerView?.adapter = mMergeRecyclerViewAdapter
-        mDataRecyclerViewAdapter?.selectedItemsLiveData?.observe(this.viewLifecycleOwner,
-                selectionObserver)
+
+        if(autoMergeRecyclerViewAdapter) {
+            mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter, mDataRecyclerViewAdapter)
+            mRecyclerView?.adapter = mMergeRecyclerViewAdapter
+            mDataRecyclerViewAdapter?.selectedItemsLiveData?.observe(this.viewLifecycleOwner,
+                    selectionObserver)
+        }
+
         listPresenter?.onCreate(savedInstanceState.toStringMap())
     }
 
@@ -203,7 +217,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         get() = field
         set(value) {
             mDataBinding?.addMode = value
-            mNewItemRecyclerViewAdapter?.newItemVisible = (value == ListViewAddMode.FIRST_ITEM)
+            mNewItemRecyclerViewAdapter.takeIf { autoMergeRecyclerViewAdapter }?.newItemVisible =
+                    (value == ListViewAddMode.FIRST_ITEM)
             val fab = mActivityWithFab?.activityFloatingActionButton
             fab?.visibility = if(value == ListViewAddMode.FAB) View.VISIBLE else View.INVISIBLE
 

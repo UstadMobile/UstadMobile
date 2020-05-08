@@ -52,6 +52,15 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberUid = :uid")
     abstract fun findByUid(uid: Long): ClazzMember?
 
+    @Query("""SELECT ClazzMember.*, Person.* FROM 
+        ClazzMember
+        LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
+        WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberRole = :roleId
+        ORDER BY Person.firstNames
+    """)
+    abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int): DataSource.Factory<Int, ClazzMemberWithPerson>
+
+
     @Query("SELECT ClazzMember.*, Person.* FROM ClazzMember" +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
             " WHERE ClazzMember.clazzMemberClazzUid = :uid " +
