@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav_view)
         bottomNav?.setupWithNavController(navController)
-        setupActionBarWithNavController(navController)
+        setupActionBarWithNavController(navController, AppBarConfiguration(bottomNav.menu))
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
     }

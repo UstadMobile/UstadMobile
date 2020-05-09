@@ -35,6 +35,13 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
+    /**
+     * The fab is managed by the underlying activity, therefor this will always return null
+     */
+    override var mActivityWithFab: UstadListViewActivityWithFab?
+        get() = null
+        set(value) {}
+
     override var tabs: List<String>? = null
         get() = field
         set(value) {
@@ -60,14 +67,6 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                 }
             }
         }
-
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            //do nothing
-            field = value
-        }
-
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter

@@ -36,7 +36,7 @@ abstract class UstadDetailFragment<T>: UstadBaseFragment(), UstadDetailView<T> {
             }
         }
 
-    protected var mActivityWithFab: UstadListViewActivityWithFab? = null
+    protected open var mActivityWithFab: UstadListViewActivityWithFab? = null
         get() {
             /*
              The getter will return null so that if the current fragment is not actually visible
@@ -70,6 +70,7 @@ abstract class UstadDetailFragment<T>: UstadBaseFragment(), UstadDetailView<T> {
         val theFab = mActivityWithFab?.activityFloatingActionButton
         theFab?.text = requireContext().getText(R.string.edit)
         theFab?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_edit_white_24dp)
+        theFab?.visibility = View.VISIBLE
 
         theFab?.setOnClickListener {
             detailPresenter?.handleClickEdit()

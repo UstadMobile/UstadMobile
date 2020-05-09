@@ -10,7 +10,10 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
@@ -53,22 +56,21 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     }
 
     override fun handleClickEntry(entry: ClazzMember) {
-        /* TODO: Add code to go to the appropriate detail view or make a selection
-        when(mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(ClazzMemberDetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to uid, context)
-        }
-        */
+        //Just go to PersonDetail - this view is not used as a picker
+        systemImpl.go(PersonDetailView.VIEW_NAME,
+                mapOf(UstadView.ARG_ENTITY_UID to entry.clazzMemberPersonUid.toString()), context)
     }
 
     override fun handleClickCreateNewFab() {
-        /* TODO: Add code to go to the edit view when the user clicks the new item FAB. This is only
-         * called when the fab is clicked, not if the first item is create new item (e.g. picker mode).
-         * That has to be handled at a platform level to use prepareCall etc.
-        systemImpl.go(ClazzMemberEditView.VIEW_NAME, mapOf(), context)
-         */
+        //there really isn't a fab here. There are buttons for add teacher and add student in the list itself
     }
+
+    fun handleEnrolMember(person: Person, role: Int) {
+        GlobalScope.launch {
+            repo.clazzMemberDao.enrolPersonIntoClazz(person, filterByClazzUid, role)
+        }
+    }
+
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
         val sortOrder = (sortOption as? ClazzMemberListSortOption)?.sortOrder ?: return

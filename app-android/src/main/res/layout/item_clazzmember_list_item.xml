@@ -28,10 +28,9 @@
         android:background="@drawable/bg_listitem"
         >
 
-        <!-- TODO: Change or remove this icon -->
-        <androidx.appcompat.widget.AppCompatImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_clazzmember_newitemicon"
-            app:srcCompat="@drawable/ic_add_black_24dp"
+            app:personPicture="@{clazzMember.clazzMemberPersonUid}"
             android:layout_width="@dimen/list_twoline1_imagesize"
             android:layout_height="@dimen/list_twoline1_imagesize"
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
@@ -45,6 +44,7 @@
         <!-- Line 1-->
         <TextView
             android:id="@+id/item_clazzmember_text"
+            android:text='@{clazzMember.person.firstNames + " " + clazzMember.person.lastName}'
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
@@ -63,10 +63,11 @@
             android:id="@+id/item_clazzmember_line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@+id/item_clazzmember_line1_text"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazzmember_line1_text"
+            app:layout_constraintStart_toStartOf="@+id/item_clazzmember_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzmember_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

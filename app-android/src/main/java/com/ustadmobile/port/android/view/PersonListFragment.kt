@@ -85,8 +85,8 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-//        if(view?.id == R.id.item_createnew_layout)
-//            navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java)
+        if(view?.id == R.id.item_createnew_layout)
+            navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java)
     }
 
     override fun onDestroyView() {

@@ -10,6 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 @UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzMemberClazzUid",
         inheritPermissionJoinedPrimaryKey = "clazzUid")
@@ -43,6 +44,23 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     fun updateClazzMember(entity: ClazzMember, loggedInPersonUid: Long) {
         update(entity)
         createAuditLog(entity.clazzMemberUid, loggedInPersonUid)
+    }
+
+
+    /**
+     * Enrol the given person into the given class.
+     */
+    suspend fun enrolPersonIntoClazz(personToEnrol: Person, clazzUid: Long, role: Int): ClazzMemberWithPerson {
+        val clazzMember = ClazzMemberWithPerson().apply {
+            clazzMemberPersonUid = personToEnrol.personUid
+            clazzMemberClazzUid = clazzUid
+            clazzMemberRole = role
+            clazzMemberActive = true
+            clazzMemberDateJoined = getSystemTimeInMillis()
+            person = personToEnrol
+        }
+        clazzMember.clazzMemberUid = insertAsync(clazzMember)
+        return clazzMember
     }
 
 

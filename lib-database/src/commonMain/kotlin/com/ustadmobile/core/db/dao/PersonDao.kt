@@ -277,11 +277,15 @@ abstract class PersonDao : BaseDao<Person> {
     @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
     abstract fun findAllPeopleWithEnrollmentSortNameAsc(): DataSource.Factory<Int, PersonWithEnrollment>
 
-    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_DESC)
-    abstract fun findAllPeopleWithDisplayDetailsSortNameDesc(): DataSource.Factory<Int, PersonWithDisplayDetails>
+    @Query("""SELECT Person.* FROM Person 
+        WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN(SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
+        ORDER BY Person.firstNames DESC""")
+    abstract fun findAllPeopleWithDisplayDetailsSortNameDesc(excludeClazz: Long): DataSource.Factory<Int, PersonWithDisplayDetails>
 
-    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
-    abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(): DataSource.Factory<Int, PersonWithDisplayDetails>
+    @Query("""SELECT Person.* FROM Person 
+        WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN(SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
+        ORDER BY Person.firstNames ASC""")
+    abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(excludeClazz: Long): DataSource.Factory<Int, PersonWithDisplayDetails>
 
 
     @Query("SELECT * FROM Person where CAST(active AS INTEGER) = 1")
