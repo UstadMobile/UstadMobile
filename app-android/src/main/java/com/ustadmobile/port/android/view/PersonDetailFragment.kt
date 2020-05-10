@@ -112,6 +112,9 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mBinding?.classesRecyclerview?.adapter = null
+        clazzMemberWithClazzRecyclerAdapter = null
+        dbRepo = null
         mBinding = null
         mPresenter = null
         entity = null
