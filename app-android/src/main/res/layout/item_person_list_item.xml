@@ -30,7 +30,7 @@
         <!-- TODO: Change or remove this icon -->
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_person_newitemicon"
-            app:personPicture="@{person.personUid}"
+            app:personPicturePersonUid="@{person.personUid}"
             android:layout_width="@dimen/list_twoline1_imagesize"
             android:layout_height="@dimen/list_twoline1_imagesize"
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"

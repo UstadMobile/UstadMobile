@@ -288,6 +288,9 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(excludeClazz: Long): DataSource.Factory<Int, PersonWithDisplayDetails>
 
 
+    @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
+    abstract fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?>
+
     @Query("SELECT * FROM Person where CAST(active AS INTEGER) = 1")
     abstract fun findAllActiveLive(): DoorLiveData<List<Person>>
 

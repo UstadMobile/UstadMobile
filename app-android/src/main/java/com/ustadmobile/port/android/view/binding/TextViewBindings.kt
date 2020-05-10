@@ -7,10 +7,8 @@ import androidx.databinding.BindingAdapter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.lib.db.entities.CustomField
-import com.ustadmobile.lib.db.entities.CustomFieldValue
-import com.ustadmobile.lib.db.entities.CustomFieldValueOption
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField
+import com.ustadmobile.lib.db.entities.*
+import com.toughra.ustadmobile.R
 
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
@@ -77,3 +75,18 @@ fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long)
     text = "${if(textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} - ${if(textToDateLong > 0) dateFormat.format(textToDateLong) else ""}"
 }
 
+
+private val textViewGenderStringIds: Map<Int, Int> = mapOf(
+        Person.GENDER_MALE to R.string.male,
+        Person.GENDER_FEMALE to R.string.female,
+        Person.GENDER_OTHER to R.string.other)
+
+@BindingAdapter("textPersonGender")
+fun TextView.setGenderText(gender: Int) {
+    val genderStringId = textViewGenderStringIds[gender]
+    text = if(genderStringId != null) {
+        context.getString(genderStringId)
+    }else {
+        ""
+    }
+}

@@ -6,7 +6,6 @@ import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 /**
@@ -28,11 +27,10 @@ class ScrollAwareExtendedFab(context: Context, attributeSet: AttributeSet) : Ext
             if(!child.isVisible)
                 return
 
-            val verticalOffset = (target as? RecyclerView)?.computeVerticalScrollOffset()
-
+            val isAtTop = target.canScrollVertically(-1)
             if(dyConsumed > 0 && child.isExtended) {
                 child.shrink()
-            }else if(dyConsumed < 0 && !child.isExtended && verticalOffset == 0){
+            }else if(dyConsumed < 0 && !child.isExtended && isAtTop){
                 child.extend()
             }
         }
