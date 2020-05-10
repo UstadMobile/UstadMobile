@@ -63,6 +63,17 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         return clazzMember
     }
 
+    /**
+     * Provide a list of the classes a given person is in with the class information itself (e.g.
+     * for person detail).
+     */
+    @Query("""SELECT ClazzMember.*, Clazz.* 
+        FROM ClazzMember
+        LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid
+        WHERE ClazzMember.clazzMemberPersonUid = :personUid
+    """)
+    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzMemberWithClazz>
+
 
     @Query("SELECT * FROM ClazzMember")
     abstract fun findAllAsList(): List<ClazzMember>

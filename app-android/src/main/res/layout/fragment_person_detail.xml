@@ -287,7 +287,7 @@
 
             <ImageView
                 android:id="@+id/fragment_person_detail_username_imageview"
-                android:visibility="@{person.username != null ? View.VISIBLE : View.GONE}"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.username)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -298,7 +298,7 @@
 
             <TextView
                 android:id="@+id/fragment_person_detail_username_valuetext"
-                android:visibility="@{person.username != null ? View.VISIBLE : View.GONE}"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.username)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -504,7 +504,39 @@
                     app:layout_constraintTop_toBottomOf="@+id/address_value_textview" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/address_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="email_barrier,address_constraintlayout"
+                />
+
+            <TextView
+                android:id="@+id/classes_heading_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/classes"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/address_barrier" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/classes_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/classes_heading_textview"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_clazz_member_with_clazz_detail"
+                tools:visibility="visible" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
     </androidx.core.widget.NestedScrollView>
 

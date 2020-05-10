@@ -90,3 +90,18 @@ fun TextView.setGenderText(gender: Int) {
         ""
     }
 }
+
+private val textViewClazzRoleStringIds: Map<Int, Int> = mapOf(
+        ClazzMember.ROLE_STUDENT to R.string.student,
+        ClazzMember.ROLE_TEACHER to R.string.teacher
+)
+
+@BindingAdapter("textClazzRole")
+fun TextView.setClazzMemberRole(clazzRole: Int) {
+    val clazzRoleStringId = textViewClazzRoleStringIds[clazzRole]
+    text = if(clazzRoleStringId != null) {
+        context.getString(clazzRoleStringId)
+    }else {
+        ""
+    }
+}

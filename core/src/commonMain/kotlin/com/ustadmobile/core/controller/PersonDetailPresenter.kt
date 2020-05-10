@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -40,7 +41,13 @@ class PersonDetailPresenter(context: Any,
 
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<PersonWithDisplayDetails?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        view.clazzes = repo.clazzMemberDao.findAllClazzesByPersonWithClazz(entityUid)
         return repo.personDao.findByUidWithDisplayDetailsLive(entityUid)
+    }
+
+    fun handleClickClazz(clazz: ClazzMemberWithClazz) {
+        systemImpl.go(ClazzDetailView.VIEW_NAME,
+                mapOf(ARG_ENTITY_UID to clazz.clazzMemberClazzUid.toString()), context)
     }
 
     override fun onDestroy() {
