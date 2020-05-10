@@ -1,32 +1,27 @@
 package com.ustadmobile.port.android.view
 
-import android.content.pm.PackageManager
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
-import android.view.*
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.FileProvider
-import androidx.lifecycle.Observer
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.net.toFile
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonDetailPresenterField.Companion.PERSON_FIELD_UID_PICTURE
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.lib.db.entities.PresenterFieldRow
+import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
-import com.ustadmobile.port.android.view.util.ListSubmitObserver
 import java.io.File
 
 interface PersonEditFragmentEventHandler {
@@ -39,35 +34,24 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
 
     private var mPresenter: PersonEditPresenter? = null
 
-    private var mPresenterFieldRowRecyclerAdapter: PresenterFieldRowEditRecyclerViewAdapter? = null
-
     override val mEditPresenter: UstadEditPresenter<*, Person>?
         get() = mPresenter
 
-    private var mPresenterFieldRowObserver: ListSubmitObserver<PresenterFieldRow>? = null
-
-
-    override var presenterFieldRows: DoorMutableLiveData<List<PresenterFieldRow>>? = null
+    override var genderOptions: List<MessageIdOption>? = null
         get() = field
         set(value) {
-            val observer = mPresenterFieldRowObserver ?: return
-            field?.removeObserver(observer)
             field = value
-            field?.observe(this, observer)
         }
+
+    private var dbRepo: UmAppDatabase? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mPresenterFieldRowRecyclerAdapter = PresenterFieldRowEditRecyclerViewAdapter().also {
-            mPresenterFieldRowObserver = ListSubmitObserver(it)
-        }
-
         mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.fragmentPersonEditRecyclerview.adapter = mPresenterFieldRowRecyclerAdapter
-            it.fragmentPersonEditRecyclerview.layoutManager = LinearLayoutManager(requireContext())
         }
 
+        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
@@ -81,8 +65,6 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter?.onDestroy()
-        mBinding?.fragmentPersonEditRecyclerview?.adapter = null
-        mPresenterFieldRowRecyclerAdapter = null
         mBinding = null
         mPresenter = null
         entity = null
@@ -99,7 +81,53 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
         set(value) {
             field = value
             mBinding?.person = value
+
+            //for some reason setting the options before (and indepently from) the value causes
+            // a databinding problem
+            mBinding?.genderOptions = genderOptions
         }
+
+
+    /**
+     * This may lead to I/O activity - do not call from the main thread!
+     */
+    override var personPicturePath: String?
+        get() {
+            val boundPicUri = mBinding?.personPictureUri
+            if(boundPicUri == null) {
+                return null
+            }else{
+                val uriObj = Uri.parse(boundPicUri)
+                if(uriObj.scheme == "file") {
+                    return uriObj.toFile().absolutePath
+                }else {
+                    val tmpFile = findNavController().createTempFileForDestination(requireContext(),
+                            "personPicture-${System.currentTimeMillis()}")
+                    try {
+                        val input = (context as Context).contentResolver.openInputStream(uriObj) ?: return null
+                        val output = tmpFile.outputStream()
+                        input.copyTo(tmpFile.outputStream())
+                        output.flush()
+                        output.close()
+                        input.close()
+                        return tmpFile.absolutePath
+                    }catch(e: Exception) {
+                        e.printStackTrace()
+                    }
+
+                    return null
+                }
+            }
+        }
+
+        set(value) {
+            if(value != null) {
+                mBinding?.personPictureUri = Uri.fromFile(File(value)).toString()
+            }else {
+                mBinding?.personPictureUri = null
+            }
+        }
+
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -107,11 +135,5 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             field = value
             mBinding?.fieldsEnabled = value
         }
-
-    companion object {
-        const val REQUEST_CODE_TAKE_PICTURE = 40
-
-        const val KEY_PICTURE_FILE_DEST = "picUri"
-    }
 
 }

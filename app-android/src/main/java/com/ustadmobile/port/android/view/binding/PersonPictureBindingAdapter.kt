@@ -1,9 +1,9 @@
 package com.ustadmobile.port.android.view.binding
 
-import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
+import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UmAccountManager
@@ -36,11 +36,14 @@ fun ImageView.setPersonPicture(personPicturePersonUid: Long?, personPictureVisib
                 if(personPictureVisibilityGoneIfNoPicture == true)
                     visibility = View.VISIBLE
 
+                //NO_CACHE is required as the path returned by the attachment DAO remains the same
+                // after data is updated
                 Picasso.get()
-                        .load(Uri.fromFile(File(imgPath)))
+                        .load(File(imgPath))
                         .noFade()
                         .fit()
                         .centerCrop()
+                        .memoryPolicy(MemoryPolicy.NO_CACHE)
                         .into(this@setPersonPicture)
             }
             personPictureVisibilityGoneIfNoPicture == true -> visibility = View.GONE
