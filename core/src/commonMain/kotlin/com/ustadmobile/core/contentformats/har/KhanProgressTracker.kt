@@ -1,13 +1,11 @@
 package com.ustadmobile.core.contentformats.har
 
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.UmAccountActor
+import com.ustadmobile.core.util.MimeType
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
-import io.ktor.client.call.receive
-import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.URLBuilder
@@ -16,9 +14,9 @@ import io.ktor.http.Url
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.io.ByteArrayInputStream
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.parse
-import kotlinx.serialization.stringify
+import kotlinx.serialization.toUtf8Bytes
 
 @Serializable
 class ItemResponse {
@@ -48,7 +46,7 @@ class KhanProgressTracker : HarInterceptor() {
     val langPath = "/assessment_item?lang="
 
     var counter = 1
-    var progress = 0;
+    var exerciseAttempted = 0;
     val client =  defaultHttpClient()
 
     override fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
@@ -57,7 +55,7 @@ class KhanProgressTracker : HarInterceptor() {
             return response
         }*/
 
-        if (request.regexedUrl?.contains("khanacademy.org") == false || request.regexedUrl?.contains("attempt") == false) {
+        if (request.regexedUrl?.contains("khanacademy.org") == false || request.regexedUrl?.contains("attempt") == false || request.regexedUrl?.contains("getEotCardDetails") == false) {
             return response
         }
 
@@ -68,16 +66,63 @@ class KhanProgressTracker : HarInterceptor() {
 
         val json = harContainer.json
 
+        val requestUrl = Url(request.url ?: "")
+        val sourceUrl = harContainer.entry.sourceUrl ?: ""
+        val exerciseId = sourceUrl.substringAfter("khan-id://").substringBefore(".")
+        val urlToFindTotalQuestions = URLBuilder(protocol = URLProtocol.HTTPS, host = requestUrl.host, encodedPath = "$exercisePath$exerciseId").buildString()
+
+        val totalQuestions = harContainer.requestMap.filterKeys { it.second.startsWith(urlToFindTotalQuestions) }.size
+
+        if(request.regexedUrl?.contains("getEotCardDetails") == true){
+
+            val completeResponse = """
+                
+               {
+                 "errors": null,
+                 "data": {
+                   "user": {
+                     "id": "kaid_346437629923241310559242",
+                     "exerciseData": {
+                       "practiceAttempt": {
+                         "id": "ag5zfmtoYW4tYWNhZGVteXIZCxIMTGVhcm5pbmdUYXNrGICAuf7P0P8JDA",
+                         "numAttempted": $counter,
+                         "numCorrect": $exerciseAttempted,
+                         "startingFpmLevel": "unfamiliar",
+                         "endingFpmLevel": "familiar",
+                         "masteryLevelChange": "UP",
+                         "pointsEarned": 480,
+                         "__typename": "PracticeAttempt"
+                       },
+                       "__typename": "UserExerciseData"
+                     },
+                     "__typename": "User"
+                   }
+                 }
+               }
+
+            """.trimIndent()
+
+            val cardDetailsContent = HarContent()
+            cardDetailsContent.data = ByteArrayInputStream(completeResponse.toUtf8Bytes())
+            cardDetailsContent.text = completeResponse
+            cardDetailsContent.mimeType = "application/json"
+            cardDetailsContent.size = completeResponse.length.toLong()
+            cardDetailsContent.encoding = "UTF-8"
+
+            val cardDetailsResponse = HarResponse()
+            cardDetailsResponse.content = cardDetailsContent
+            cardDetailsResponse.status = 200
+            cardDetailsResponse.statusText = "OK"
+
+            return cardDetailsResponse
+        }
+
         val attemptBody = request.body ?: return response
         val body = json.parse(KhanProblemBody.serializer(), attemptBody)
         val bodyInput = body.variables?.input ?: return response
 
         // build url to get question content
-        val requestUrl = Url(request.url ?: "")
-        val sourceUrl = harContainer.entry.sourceUrl ?: ""
-        val exerciseId = sourceUrl.substringAfter("khan-id://").substringBefore(".")
         val finalUrl = URLBuilder(protocol = URLProtocol.HTTPS, host = requestUrl.host, encodedPath = "$exercisePath$exerciseId$itemPath${bodyInput.assessmentItemId}$langPath$lang").buildString()
-        val urlToFindTotalQuestions = URLBuilder(protocol = URLProtocol.HTTPS, host = requestUrl.host, encodedPath = "$exercisePath$exerciseId").buildString()
 
         val harList = harContainer.requestMap[(Pair("GET", finalUrl))]
 
@@ -100,10 +145,9 @@ class KhanProgressTracker : HarInterceptor() {
         val actor = harContainer.json.stringify(UmAccountActor.serializer(), harContainer.umAccount.toXapiActorJsonObject(harContainer.context))
         val verbUrl = if(skipped) "http://id.tincanapi.com/verb/skipped" else "http://adlnet.gov/expapi/verbs/answered"
         val verbDisplay = if(skipped) "skipped" else "answered"
-        val totalQuestions = harContainer.requestMap.filterKeys { it.second.startsWith(urlToFindTotalQuestions) }.size
 
         if(completed){
-            progress++
+            exerciseAttempted++
         }
 
 
@@ -121,7 +165,7 @@ class KhanProgressTracker : HarInterceptor() {
                 "success" : $completed,
                 "duration" : "$timeTaken",
                  "extensions": {
-                      "https://w3id.org/xapi/cmi5/result/extensions/progress": ${((progress.toFloat())/(totalQuestions) * 100).toInt()}
+                      "https://w3id.org/xapi/cmi5/result/extensions/progress": ${((exerciseAttempted.toFloat())/(totalQuestions) * 100).toInt()}
                     }
             },
             "object": {
