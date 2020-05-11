@@ -5,3 +5,8 @@
 -keepclassmembernames class fi.iki.elonen.NanoHTTPD$HTTPSession {
 java.util.Map headers; 
 }
+
+-keep class com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl$MutableLiveDataWithRef {
+    ** reference;
+}
+
