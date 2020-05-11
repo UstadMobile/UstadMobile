@@ -28,7 +28,9 @@ class ViewNameToDestMap: DestinationProvider {
             SchoolEditView.VIEW_NAME to UstadDestination(R.id.school_edit_dest, false),
             SchoolDetailView.VIEW_NAME to UstadDestination(R.id.school_detail_dest, true),
             SchoolDetailOverviewView.VIEW_NAME to UstadDestination(R.id.school_detail_overview_dest, true),
-            PersonDetailView.VIEW_NAME to UstadDestination(R.id.person_detail_dest, true)
+            PersonDetailView.VIEW_NAME to UstadDestination(R.id.person_detail_dest, true),
+            PersonListView.VIEW_NAME to UstadDestination(R.id.person_list_dest, false),
+            SchoolMemberListView.VIEW_NAME to UstadDestination(R.id.schoolmember_list_dest, true)
     )
 
     override val navControllerViewId: Int

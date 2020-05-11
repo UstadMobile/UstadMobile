@@ -63,10 +63,15 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         val tabs = listOf(
                 SchoolDetailOverviewView.VIEW_NAME +
                         "?${UstadView.ARG_ENTITY_UID}=${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}",
-                PersonListView.VIEW_NAME)
+                SchoolMemberListView.VIEW_NAME  +
+                "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF}=${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}",
+                SchoolMemberListView.VIEW_NAME  +
+                        "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS}=${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}")
         val viewNameToTitle = mapOf(
                 SchoolDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
-                PersonListView.VIEW_NAME to getText(R.string.people).toString()
+                PersonListView.VIEW_NAME to getText(R.string.people).toString(),
+                SchoolMemberListView.VIEW_NAME to getText(R.string.students).toString(),
+                SchoolMemberListView.VIEW_NAME to getText(R.string.staff).toString()
         )
 
         mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
@@ -132,7 +137,9 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
                 SchoolDetailOverviewView.VIEW_NAME to
                         SchoolDetailOverviewFragment::class.java,
                 PersonListView.VIEW_NAME to
-                        PersonListFragment::class.java
+                        PersonListFragment::class.java,
+                SchoolMemberListView.VIEW_NAME to
+                        SchoolMemberListFragment::class.java
         )
     }
 

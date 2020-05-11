@@ -13,6 +13,12 @@
         android:name="com.ustadmobile.port.android.view.PersonListFragment"
         android:label="@string/people"/>
 
+
+    <fragment
+        android:id="@+id/person_list_dest"
+        android:name="com.ustadmobile.port.android.view.PersonListFragment"
+        android:label="@string/people"/>
+
     <fragment
         android:id="@+id/home_schoollist_dest"
         android:name="com.ustadmobile.port.android.view.SchoolListFragment"
@@ -97,6 +103,10 @@
         android:id="@+id/school_detail_overview_dest"
         android:name="com.ustadmobile.port.android.view.SchoolDetailOverviewFragment"
         android:label="SchoolDetailOverviewFragment" />
+    <fragment
+        android:id="@+id/schoolmember_list_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment"
+        android:label="SchoolMemberListFragment" />
 
 
 </navigation>
