@@ -10,6 +10,7 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 @UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzMemberClazzUid",
         inheritPermissionJoinedPrimaryKey = "clazzUid")
@@ -46,11 +47,48 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     }
 
 
+    /**
+     * Enrol the given person into the given class.
+     */
+    suspend fun enrolPersonIntoClazz(personToEnrol: Person, clazzUid: Long, role: Int): ClazzMemberWithPerson {
+        val clazzMember = ClazzMemberWithPerson().apply {
+            clazzMemberPersonUid = personToEnrol.personUid
+            clazzMemberClazzUid = clazzUid
+            clazzMemberRole = role
+            clazzMemberActive = true
+            clazzMemberDateJoined = getSystemTimeInMillis()
+            person = personToEnrol
+        }
+        clazzMember.clazzMemberUid = insertAsync(clazzMember)
+        return clazzMember
+    }
+
+    /**
+     * Provide a list of the classes a given person is in with the class information itself (e.g.
+     * for person detail).
+     */
+    @Query("""SELECT ClazzMember.*, Clazz.* 
+        FROM ClazzMember
+        LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid
+        WHERE ClazzMember.clazzMemberPersonUid = :personUid
+    """)
+    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzMemberWithClazz>
+
+
     @Query("SELECT * FROM ClazzMember")
     abstract fun findAllAsList(): List<ClazzMember>
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberUid = :uid")
     abstract fun findByUid(uid: Long): ClazzMember?
+
+    @Query("""SELECT ClazzMember.*, Person.* FROM 
+        ClazzMember
+        LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
+        WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberRole = :roleId
+        ORDER BY Person.firstNames
+    """)
+    abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int): DataSource.Factory<Int, ClazzMemberWithPerson>
+
 
     @Query("SELECT ClazzMember.*, Person.* FROM ClazzMember" +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +

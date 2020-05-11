@@ -64,9 +64,11 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
                 SchoolDetailOverviewView.VIEW_NAME +
                         "?${UstadView.ARG_ENTITY_UID}=${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}",
                 SchoolMemberListView.VIEW_NAME  +
-                "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF}=${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}",
+                "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF}=${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}"
+                ,
                 SchoolMemberListView.VIEW_NAME  +
-                        "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS}=${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}")
+                        "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS}=${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}"
+        )
         val viewNameToTitle = mapOf(
                 SchoolDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
                 PersonListView.VIEW_NAME to getText(R.string.people).toString(),

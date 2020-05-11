@@ -51,6 +51,11 @@ open class Person() {
 
     var personAddress: String? = null
 
+    /**
+     * The ID given to the person by their organization
+     */
+    var personOrgId: String? = null
+
 
     @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0

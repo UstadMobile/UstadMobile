@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <import type="com.ustadmobile.lib.db.entities.SchoolMemberWithPerson"/>
@@ -39,6 +40,7 @@
             android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
             app:layout_constraintTop_toTopOf="parent"
+            android:visibility="invisible"
             app:layout_constraintStart_toStartOf="parent"
             />
 
@@ -55,6 +57,8 @@
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
             android:textSize="@dimen/list_twoline1_textsize_line1"
+            android:text="@{schoolMember.person.fullName()}"
+            tools:text="Bob Dylan"
             android:textColor="@color/text_primary"
             />
 
@@ -63,8 +67,8 @@
             android:id="@+id/item_schoolmember_line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@+id/item_schoolmember_line1_text"
-            app:layout_constraintTop_toBottomOf="@+id/item_schoolmember_line1_text"
+            app:layout_constraintStart_toStartOf="@+id/item_schoolmember_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_schoolmember_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />

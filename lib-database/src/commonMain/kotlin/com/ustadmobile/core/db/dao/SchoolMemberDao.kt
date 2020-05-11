@@ -44,4 +44,28 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
                                                               searchQuery: String)
             : DataSource.Factory<Int, SchoolMemberWithPerson>
 
+    @Query("""SELECT SchoolMember.*, Person.* FROM SchoolMember
+        LEFT JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid
+        WHERE CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
+        AND SchoolMember.schoolMemberSchoolUid = :schoolUid 
+        AND SchoolMember.schoolMemberRole = :role
+        AND CAST(Person.active AS INTEGER) = 1
+        AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery
+        ORDER BY Person.firstNames DESC""")
+    abstract suspend fun findAllTest(schoolUid: Long, role: Int, searchQuery: String): List<SchoolMemberWithPerson>
+
+
+    fun enrollPersonToSchool(schoolUid: Long, personUid:Long, role: Int): SchoolMember{
+
+        val schoolMember = SchoolMember()
+        schoolMember.schoolMemberActive = true
+        schoolMember.schoolMemberPersonUid = personUid
+        schoolMember.schoolMemberSchoolUid = schoolUid
+        schoolMember.schoolMemberRole = role
+
+        //TODO: Add dates
+        schoolMember.schoolMemberUid = insert(schoolMember)
+        return schoolMember
+    }
+
 }

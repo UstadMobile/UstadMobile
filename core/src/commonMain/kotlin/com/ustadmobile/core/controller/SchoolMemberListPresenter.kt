@@ -11,6 +11,8 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, view: SchoolMemberListView,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
@@ -42,11 +44,23 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
     }
 
     private fun updateListOnView() {
-        val schoolUid: Long = arguments.get(UstadView.ARG_SCHOOL_UID)?.toLong()?:0L
+
         val schoolRole = if (arguments.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF)) {
             SchoolMember.SCHOOL_ROLE_TEACHER
         } else {
             SchoolMember.SCHOOL_ROLE_STUDENT
+        }
+
+        val schoolUid: Long = if (arguments.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF)) {
+            arguments.get(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF)?.toLong()?:0L
+        } else {
+            arguments.get(UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS)?.toLong()?:0L
+        }
+
+        GlobalScope.launch {
+            val a = repo.schoolMemberDao.findAllTest(schoolUid, schoolRole, mSearchQuery)
+            print(a.size)
+
         }
 
         view.list = when(currentSortOrder) {
@@ -57,6 +71,11 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
                     schoolUid, schoolRole, mSearchQuery
                     )
         }
+    }
+
+    fun handleEnrolMember(schoolUid: Long, personUid: Long, role:Int){
+
+        db.schoolMemberDao.enrollPersonToSchool(schoolUid, personUid, role)
     }
 
     override fun handleClickEntry(entry: SchoolMember) {

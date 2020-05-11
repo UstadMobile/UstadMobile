@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable name="clazzMemberWithClazz"
+            type="com.ustadmobile.lib.db.entities.ClazzMemberWithClazz" />
+
+        <variable name="mPresenter" type="com.ustadmobile.core.controller.PersonDetailPresenter" />
+
+
+    </data>
+
+    <!--  -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> mPresenter.handleClickClazz(clazzMemberWithClazz)}"
+        android:background="?attr/selectableItemBackground">
+
+        <!-- TODO: Make this show the class picture when it is available -->
+        <androidx.appcompat.widget.AppCompatImageView
+            app:srcCompat="@drawable/ic_group_black_24dp"
+            android:id="@+id/item_clazzmemberwithclazz_newitemicon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Line 1-->
+        <TextView
+            android:id="@+id/item_clazzmemberwithclazz_line1_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{clazzMemberWithClazz.clazz.clazzName}"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            android:textColor="@color/text_primary" />
+
+        <!-- Line 2-->
+        <TextView android:id="@+id/item_clazzmemberwithclazz_line2_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:textClazzRole="@{clazzMemberWithClazz.clazzMemberRole}"
+            app:layout_constraintStart_toStartOf="@+id/item_clazzmemberwithclazz_line1_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzmemberwithclazz_line1_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

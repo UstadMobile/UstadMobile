@@ -21,23 +21,37 @@
         android:layout_marginHorizontal="@dimen/form_margin_horizontal"
         >
 
-        <TextView
-            android:id="@+id/item_presenter_field_row_view_text_value"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_presenter_field_row_view_date_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            tools:src="@drawable/ic_event_black_24dp"
+            app:customFieldIcon="@{customField}"
+            />
+
+
+        <TextView
+            android:id="@+id/item_presenter_field_row_view_text_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_presenter_field_row_view_date_icon"
             android:textSize="@dimen/list_twoline1_textsize_line1"
             android:textColor="@color/text_primary"
             app:dateLong="@{customFieldValue.customFieldValueCustomFieldValueOptionUid}"
             tools:text="Field value"/>
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
             app:textMessageId="@{customField.customFieldLabelMessageID}"
             app:layout_constraintTop_toBottomOf="@+id/item_presenter_field_row_view_text_value"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_presenter_field_row_view_date_icon"
             tools:text="Field name"
             />
 

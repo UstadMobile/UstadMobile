@@ -31,7 +31,7 @@ class ClazzDetailOverviewPresenter(context: Any,
         db, repo, activeAccount) {
 
     override val persistenceMode: PersistenceMode
-        get() = PersistenceMode.DB
+        get() = PersistenceMode.LIVEDATA
 
     /*
      * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
@@ -49,6 +49,7 @@ class ClazzDetailOverviewPresenter(context: Any,
 
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<ClazzWithDisplayDetails?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        view.scheduleList = repo.scheduleDao.findAllSchedulesByClazzUid(entityUid)
         return repo.clazzDao.getClazzWithDisplayDetails(entityUid)
     }
 

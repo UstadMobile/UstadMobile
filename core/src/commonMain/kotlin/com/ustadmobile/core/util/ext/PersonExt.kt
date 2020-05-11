@@ -19,22 +19,25 @@ class PersonPresenterFieldRowAdapter(val populateFn: (Person, PresenterFieldRow)
     val updateFn: (Person, PresenterFieldRow) -> Unit)
 
 fun PresenterFieldRow.populateAsStringField(nameMessageId: Int, strValue: String?,
-                                            inputType: Int = CustomField.INPUT_TYPE_TEXT) {
+                                            inputType: Int = CustomField.INPUT_TYPE_TEXT,
+                                            iconId: Int = 0, actionOnClick: String? = null) {
     customField = CustomField(customFieldLabelMessageID = nameMessageId,
-        customFieldType = FIELD_TYPE_TEXT, customFieldInputType = inputType)
+        customFieldType = FIELD_TYPE_TEXT, customFieldInputType = inputType,
+        customFieldIconId =  iconId, actionOnClick = actionOnClick)
     customFieldValue = CustomFieldValue(customFieldValueValue = strValue)
 }
 
-fun PresenterFieldRow.populateAsDateField(nameMessageId: Int, dateValue: Long) {
+fun PresenterFieldRow.populateAsDateField(nameMessageId: Int, dateValue: Long,
+        iconId: Int = CustomField.ICON_CALENDAR) {
     customField = CustomField(customFieldLabelMessageID = nameMessageId,
-        customFieldType = FIELD_TYPE_DATE_SPINNER)
+        customFieldType = FIELD_TYPE_DATE_SPINNER, customFieldIconId = iconId)
     customFieldValue = CustomFieldValue(customFieldValueCustomFieldValueOptionUid = dateValue)
 }
 
 fun PresenterFieldRow.populateAsDropdown(nameMessageId: Int, currentValue: Int,
-                                         optionsList: List<Pair<Int, Int>>) {
+                                         optionsList: List<Pair<Int, Int>>, iconId: Int = 0) {
     customField = CustomField(customFieldLabelMessageID = nameMessageId,
-        customFieldType = FIELD_TYPE_DROPDOWN)
+        customFieldType = FIELD_TYPE_DROPDOWN, customFieldIconId = iconId)
     customFieldOptions = optionsList.map { CustomFieldValueOption().apply {
         customFieldValueOptionMessageId =it.first
         customFieldValueOptionUid = it.second.toLong()
@@ -119,7 +122,8 @@ private val personGenderCustomFieldValueOptions = listOf(
 
 val ADAPTER_MAP = mapOf(
         PERSON_FIELD_UID_FIRST_NAMES to PersonPresenterFieldRowAdapter(
-                {person, row -> row.populateAsStringField(MessageID.first_names, person.firstNames)},
+                {person, row -> row.populateAsStringField(MessageID.first_names, person.firstNames,
+                    iconId = CustomField.ICON_PERSON)},
                 {person, row -> person.updateStringFieldFromRow(person::firstNames, row)}),
         PERSON_FIELD_UID_LAST_NAME to PersonPresenterFieldRowAdapter(
                 {person, row -> row.populateAsStringField(MessageID.last_name, person.lastName)},
@@ -128,14 +132,16 @@ val ADAPTER_MAP = mapOf(
                 {person, row -> row.populateAsDateField(MessageID.birthday, person.dateOfBirth)},
                 {person, row -> person.updateDateFieldFromRow(person::dateOfBirth, row)}),
         PERSON_FIELD_UID_ADDRESS to PersonPresenterFieldRowAdapter(
-                {person, row -> row.populateAsStringField(MessageID.address, person.personAddress)},
+                {person, row -> row.populateAsStringField(MessageID.address, person.personAddress,
+                    iconId = CustomField.ICON_ADDRESS)},
                 {person, row -> person.updateStringFieldFromRow(person::personAddress, row)}),
         PERSON_FIELD_UID_USERNAME to PersonPresenterFieldRowAdapter(
                 {person, row -> row.populateAsStringField(MessageID.username, person.username)},
                 {person, row -> person.updateStringFieldFromRow(person::username, row)}),
         PERSON_FIELD_UID_PHONE_NUMBER to PersonPresenterFieldRowAdapter(
                 {person, row -> row.populateAsStringField(MessageID.phone_number, person.phoneNum,
-                    inputType = CustomField.INPUT_TYPE_PHONENUM)},
+                    inputType = CustomField.INPUT_TYPE_PHONENUM, iconId = CustomField.ICON_PHONE,
+                    actionOnClick = CustomField.ACTION_CALL)},
                 {person, row -> person.updateStringFieldFromRow(person::phoneNum, row)}),
         PERSON_FIELD_UID_GENDER to PersonPresenterFieldRowAdapter(
                 {person, row -> row.populateAsDropdown(MessageID.gender_literal, person.gender,
@@ -144,7 +150,8 @@ val ADAPTER_MAP = mapOf(
                 {person, row -> person.updateIntFromDropDown(person::gender, row) }),
         PERSON_FIELD_UID_EMAIL to PersonPresenterFieldRowAdapter(
                 {person, row -> row.populateAsStringField(MessageID.email, person.emailAddr,
-                    inputType = CustomField.INPUT_TYPE_EMAIL)},
+                    inputType = CustomField.INPUT_TYPE_EMAIL, iconId = CustomField.ICON_EMAIL,
+                    actionOnClick = CustomField.ACTION_EMAIL)},
                 {person, row -> person.updateStringFieldFromRow(person::emailAddr, row)})
 )
 

@@ -8,7 +8,7 @@
 
         <variable
             name="clazz"
-            type="com.ustadmobile.lib.db.entities.Clazz" />
+            type="com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails" />
 
         <variable
             name="loading"
@@ -33,23 +33,164 @@
     <androidx.core.widget.NestedScrollView
         android:id="@+id/activity_clazz_edit_scroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_clazz_edit_edit_clx"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="500dp">
+
             <TextView
+                android:id="@+id/fragment_clazz_detail_overview_description_text"
+                android:textColor="@color/text_primary"
+                android:text="@{clazz.clazzDesc}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 app:layout_constraintTop_toTopOf="parent"
-                android:text="Overview"/>
+                tools:layout_editor_absoluteX="16dp"
+                tools:text="Description" />
 
-            <!-- TODO: Put the actual view for editing Clazz here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+            <TextView
+                android:id="@+id/fragment_clazz_detail_overview_num_members"
+                android:textColor="@color/text_primary"
+                android:text="@{@string/x_teachers_y_students(clazz.numTeachers, clazz.numStudents)}"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fragment_clazz_detail_overview_membersicon"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_description_text"
+                tools:text="X teacher, 1 students" />
+
+            <ImageView
+                android:id="@+id/fragment_clazz_detail_overview_membersicon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_description_text"
+                app:srcCompat="@drawable/ic_group_black_24dp" />
+
+            <LinearLayout
+                android:id="@+id/fragment_clazz_detail_overview_school_linlayout"
+                android:visibility="@{clazz.clazzSchoolUid != 0 ? View.VISIBLE : View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_membersicon">
+
+                <ImageView
+                    android:id="@+id/fragment_clazz_detail_overview_school_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_school_black_24dp" />
+
+                <TextView
+                    android:id="@+id/fragment_clazz_detail_overview_school_name_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:textColor="@color/text_primary"
+                    android:text="@{clazz.clazzSchool.schoolName}"
+                    tools:text="School Name" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fragment_clazz_start_end_date_linearlayout"
+                android:visibility="@{(clazz.clazzEndTime != 0 || clazz.clazzStartTime != 0) ? View.VISIBLE : View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_school_linlayout">
+
+                <ImageView
+                    android:id="@+id/fragment_clazz_detail_overview_daterange_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_event_black_24dp" />
+
+                <TextView
+                    android:id="@+id/fragment_clazz_detail_overview_daterange_text"
+                    android:layout_width="wrap_content"
+                    android:textColor="@color/text_primary"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_weight="1"
+                    app:textFromDateLong="@{clazz.clazzStartTime}"
+                    app:textToDateLong="@{clazz.clazzEndTime}"
+                    tools:text="Start Date - End Date" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fragment_clazz_start_holidaycalendar_linearlayout"
+                android:visibility="@{clazz.clazzHolidayCalendar != null ? View.VISIBLE : View.GONE}"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_start_end_date_linearlayout">
+
+                <ImageView
+                    android:id="@+id/fragment_clazz_detail_overview_holidaycalendar_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    app:srcCompat="@drawable/ic_event_black_24dp" />
+
+                <TextView
+                    android:id="@+id/fragment_clazz_detail_overview_holidaycalendar_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_weight="1"
+                    android:textColor="@color/text_primary"
+                    android:text="@{clazz.clazzHolidayCalendar.umCalendarName}"
+                    tools:text="Holiday Calendar" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView37"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/schedule"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_start_holidaycalendar_linearlayout" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_clazz_detail_overview_schedule_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView37" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

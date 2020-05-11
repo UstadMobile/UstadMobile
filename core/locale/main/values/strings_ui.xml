@@ -848,7 +848,13 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="overview">Overview</string>
 
     <string name="add_new">Add new</string>
-    <string name="student">Student</string>
     <string name="staff">Staff</string>
+    <string name="x_teachers_y_students">%1$d teachers, %2$d students</string>
+
+    <string name="call">Call</string>
+
+    <string name="organization_id">Organization ID</string>
+
+    <string name="student">Student</string>
 
 </resources>

@@ -1,14 +1,12 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.Person
+import androidx.paging.DataSource
+import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.lib.db.entities.PresenterFieldRow
 
 interface PersonDetailView: UstadDetailView<PersonWithDisplayDetails> {
 
-    var presenterFieldRows: DoorMutableLiveData<List<PresenterFieldRow>>?
+    var clazzes: DataSource.Factory<Int, ClazzMemberWithClazz>?
 
     companion object {
 

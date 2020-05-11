@@ -15,7 +15,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
 
 @Entity
 @SyncableEntity(tableId = 200)
-open class SchoolMember()  {
+open class SchoolMember {
 
     @PrimaryKey(autoGenerate = true)
     var schoolMemberUid: Long = 0
@@ -45,6 +45,10 @@ open class SchoolMember()  {
     @LastChangedBy
     var schoolMemberLastChangedBy: Int = 0
 
+
+    constructor(){
+        schoolMemberActive = true
+    }
 
     companion object {
 

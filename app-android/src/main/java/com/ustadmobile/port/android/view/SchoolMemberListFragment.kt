@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -13,11 +15,14 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.SchoolMemberWithPerson
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -60,6 +65,8 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
+        addMode = ListViewAddMode.FAB
+
         addNewStringId = if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
             R.string.teacher
         }else{
@@ -76,8 +83,39 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         mDataRecyclerViewAdapter = SchoolMemberListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_new,
                 requireContext().getString(addNewStringId))
+
+        //mDataBinding?.presenter = mPresenter
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+
         return view
+    }
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val navController = findNavController()
+
+        val memberRole =
+            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
+                SchoolMember.SCHOOL_ROLE_TEACHER
+            }else{
+                SchoolMember.SCHOOL_ROLE_STUDENT
+            }
+
+        val schoolUid: Long =
+                if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
+            arguments?.get(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF).toString().toLong()
+        }else{
+            arguments?.get(UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS).toString().toLong()
+        }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Person::class.java, KEY_MEMBER_SELECTED) {
+            val memberAdded = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleEnrolMember(schoolUid, memberAdded.personUid, memberRole)
+        }
+
     }
 
     override fun onResume() {
@@ -88,6 +126,7 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         }else{
             R.string.student
         }
+        addMode = ListViewAddMode.FAB
 
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(addNewStringId)
@@ -105,12 +144,16 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        mDataBinding = null
+        mDataRecyclerViewAdapter = null
     }
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.schoolMemberDao
 
     companion object {
+
+        const val KEY_MEMBER_SELECTED = "member_list"
         val DIFF_CALLBACK: DiffUtil.ItemCallback<SchoolMemberWithPerson> = object
             : DiffUtil.ItemCallback<SchoolMemberWithPerson>() {
             override fun areItemsTheSame(oldItem: SchoolMemberWithPerson,
@@ -126,7 +169,8 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     }
 
     override fun addMember() {
-        //onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Person::class.java,  R.id.person_list_dest)
+        navigateToPickEntityFromList(Person::class.java,  R.id.person_list_dest,
+                bundleOf(),
+                KEY_MEMBER_SELECTED,true)
     }
 }

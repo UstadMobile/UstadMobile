@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "4dca53b038816f9ba0f25cfc907b86db",
+    "identityHash": "9a3a9eeb12c67eda93bd8311d9d5e7d2",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1561,7 +1561,7 @@
       },
       {
         "tableName": "CustomField",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldName` TEXT, `customFieldNameAlt` TEXT, `customFieldLabelMessageID` INTEGER NOT NULL, `customFieldIcon` TEXT, `customFieldIconId` INTEGER NOT NULL, `customFieldType` INTEGER NOT NULL, `customFieldEntityType` INTEGER NOT NULL, `customFieldActive` INTEGER NOT NULL, `customFieldDefaultValue` TEXT, `customFieldMCSN` INTEGER NOT NULL, `customFieldLCSN` INTEGER NOT NULL, `customFieldLCB` INTEGER NOT NULL, `customFieldInputType` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldName` TEXT, `customFieldNameAlt` TEXT, `customFieldLabelMessageID` INTEGER NOT NULL, `customFieldIcon` TEXT, `customFieldIconId` INTEGER NOT NULL, `actionOnClick` TEXT, `customFieldType` INTEGER NOT NULL, `customFieldEntityType` INTEGER NOT NULL, `customFieldActive` INTEGER NOT NULL, `customFieldDefaultValue` TEXT, `customFieldMCSN` INTEGER NOT NULL, `customFieldLCSN` INTEGER NOT NULL, `customFieldLCB` INTEGER NOT NULL, `customFieldInputType` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "customFieldUid",
@@ -1598,6 +1598,12 @@
             "columnName": "customFieldIconId",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "actionOnClick",
+            "columnName": "actionOnClick",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "customFieldType",
@@ -1789,7 +1795,7 @@
       },
       {
         "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personUid",
@@ -1884,6 +1890,12 @@
           {
             "fieldPath": "personAddress",
             "columnName": "personAddress",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "personOrgId",
+            "columnName": "personOrgId",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -8930,7 +8942,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4dca53b038816f9ba0f25cfc907b86db')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9a3a9eeb12c67eda93bd8311d9d5e7d2')"
     ]
   }
 }

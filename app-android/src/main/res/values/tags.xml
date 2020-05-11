@@ -5,4 +5,5 @@
     <item name="tag_timelong" type="id"/>
     <item name="tag_messageidoptions" type="id"/>
     <item name="tag_imagefilepath" type="id"/>
+    <item name="tag_imageloadjob" type="id"/>
 </resources>
