@@ -52,10 +52,6 @@ class KhanProgressTracker : HarInterceptor() {
 
     override fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
 
-        /*if(harContainer.umAccount == null){
-            return response
-        }*/
-
         if (request.regexedUrl?.contains("khanacademy.org") == false || (request.regexedUrl?.contains("attempt") == false && request.regexedUrl?.contains("getEotCardDetails") == false)) {
             return response
         }
@@ -119,7 +115,16 @@ class KhanProgressTracker : HarInterceptor() {
                     },
                     "result": {
                         "completion": true,
-                        "duration": "$totalTimeFormat"
+                        "score": {
+                            "scaled": $${(numCorrect.toFloat()) / (totalQuestions)},
+                            "raw": $numCorrect,
+                            "min": 0,
+                            "max": $totalQuestions
+                        },
+                        "duration": "$totalTimeFormat",
+                         "extensions": {
+                              "https://w3id.org/xapi/cmi5/result/extensions/progress": 100
+                         }y
                     },
                     "object": {
                         "id": "$sourceUrl",
@@ -187,6 +192,11 @@ class KhanProgressTracker : HarInterceptor() {
 
         if (bodyInput.countHints == 0 && completed) {
             numCorrect++
+        }
+
+        // i don't send a statement if the user is not logged in but still need to everything i did before to show user his final score
+        if(harContainer.umAccount == null){
+            return response
         }
 
         val statement = """
