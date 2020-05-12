@@ -143,7 +143,10 @@ class KhanProgressTracker : HarInterceptor() {
                 
             """.trimIndent()
 
-            sendStatement(statement, harContainer)
+            // don't send statement if user not logged in
+            if (harContainer.umAccount != null) {
+                sendStatement(statement, harContainer)
+            }
 
             val cardDetailsContent = HarContent()
             cardDetailsContent.data = ByteArrayInputStream(completeResponse.toUtf8Bytes())
