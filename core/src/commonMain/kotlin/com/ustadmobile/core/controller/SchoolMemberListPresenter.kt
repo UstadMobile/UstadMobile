@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -69,7 +70,10 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
 
     fun handleEnrolMember(schoolUid: Long, personUid: Long, role:Int){
 
-        db.schoolMemberDao.enrollPersonToSchool(schoolUid, personUid, role)
+        GlobalScope.launch {
+            db.schoolMemberDao.enrollPersonToSchool(UMCalendarUtil.getDateInMilliPlusDays(0),
+                    0, schoolUid, personUid, role)
+        }
     }
 
     override fun handleClickEntry(entry: SchoolMember) {

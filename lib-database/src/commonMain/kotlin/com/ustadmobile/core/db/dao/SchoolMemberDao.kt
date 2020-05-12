@@ -20,6 +20,13 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
     abstract fun findByUidAsync(schoolMemberUid: Long): SchoolMember?
 
 
+    @Query("""
+        SELECT * FROM SchoolMember WHERE schoolMemberSchoolUid = :schoolUid
+        AND schoolMemberRole = :role
+    """)
+    abstract suspend fun findBySchoolAndRole(schoolUid: Long, role: Int): List<SchoolMember>
+
+
     @Query("""SELECT SchoolMember.*, Person.* FROM SchoolMember
         LEFT JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid
         WHERE CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
@@ -55,17 +62,26 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
     abstract suspend fun findAllTest(schoolUid: Long, role: Int, searchQuery: String): List<SchoolMemberWithPerson>
 
 
-    fun enrollPersonToSchool(schoolUid: Long, personUid:Long, role: Int): SchoolMember{
+    suspend fun enrollPersonToSchool(dateNow: Long, enrollDate: Long, schoolUid: Long, personUid:Long, role: Int): SchoolMember{
 
-        val schoolMember = SchoolMember()
-        schoolMember.schoolMemberActive = true
-        schoolMember.schoolMemberPersonUid = personUid
-        schoolMember.schoolMemberSchoolUid = schoolUid
-        schoolMember.schoolMemberRole = role
+        //Check if relationship already exists
+        val matches = findBySchoolAndRole(schoolUid, role)
+        if(matches.isEmpty()) {
 
-        //TODO: Add dates
-        schoolMember.schoolMemberUid = insert(schoolMember)
-        return schoolMember
+
+            val schoolMember = SchoolMember()
+            schoolMember.schoolMemberActive = true
+            schoolMember.schoolMemberPersonUid = personUid
+            schoolMember.schoolMemberSchoolUid = schoolUid
+            schoolMember.schoolMemberRole = role
+            schoolMember.schoolMemberCreateDate = dateNow
+            schoolMember.schoolMemberJoinDate = enrollDate
+
+            schoolMember.schoolMemberUid = insert(schoolMember)
+            return schoolMember
+        }else{
+            return matches[0]
+        }
     }
 
 }
