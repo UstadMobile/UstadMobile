@@ -74,6 +74,9 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
     val entitiesToDeactivate: List<T>
         get() = liveList.getValue()?.filter { pkGetter(it) in pksToDeactivate } ?: listOf()
 
+    val primaryKeysToDeactivate: List<K>
+        get() = pksToDeactivate.toList()
+
     override fun onSaveState(outState: MutableMap<String, String>) {
         val listVal = liveList.getValue() ?: return
         val serializer = serializationStrategy ?: return

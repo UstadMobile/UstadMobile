@@ -61,8 +61,11 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
     }
 
     override fun handleClickEntry(entry: Clazz) {
-        val args = mapOf(UstadView.ARG_ENTITY_UID to entry.clazzUid.toString())
-        systemImpl.go(ClazzDetailView.VIEW_NAME, args, context)
+        when(mListMode) {
+            ListViewMode.BROWSER -> systemImpl.go(ClazzDetailView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.clazzUid.toString()), context)
+            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+        }
     }
 
     override fun handleClickCreateNewFab() {

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable name="clazzMemberWithClazz"
+            type="com.ustadmobile.lib.db.entities.ClazzMemberWithClazz" />
+
+        <variable name="mPresenter"
+            type="com.ustadmobile.core.controller.PersonEditPresenter" />
+
+        <variable name="mFragment"
+            type="com.ustadmobile.port.android.view.PersonEditFragmentEventHandler" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- TODO: Change or remove this icon -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_clazzmemberwithclazz_newitemicon"
+            app:srcCompat="@drawable/ic_group_black_24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Line 1-->
+        <TextView android:id="@+id/item_clazzmemberwithclazz_line1_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="@{clazzMemberWithClazz.clazz.clazzName}"
+            android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            android:textColor="@color/text_primary" />
+
+        <!-- Line 2-->
+        <TextView android:id="@+id/item_clazzmemberwithclazz_line2_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:textClazzRole="@{clazzMemberWithClazz.clazzMemberRole}"
+            app:layout_constraintStart_toStartOf="@+id/item_clazzmemberwithclazz_line1_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzmemberwithclazz_line1_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_clazzmemberwithclazz_secondary_menu_imageview"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:padding="@dimen/list_twoline1_padding_secondactionimagebutton"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_delete_black_24dp" app:tint="@color/secondary_text"
+            android:contentDescription="@string/delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="@{() -> mPresenter.handleClickRemovePersonFromClazz(clazzMemberWithClazz)}"
+             />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
