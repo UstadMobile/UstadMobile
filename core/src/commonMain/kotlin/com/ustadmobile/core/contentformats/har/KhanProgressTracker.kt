@@ -116,7 +116,7 @@ class KhanProgressTracker : HarInterceptor() {
                     "result": {
                         "completion": true,
                         "score": {
-                            "scaled": $${(numCorrect.toFloat()) / (totalQuestions)},
+                            "scaled": ${(numCorrect.toFloat()) / (totalQuestions)},
                             "raw": $numCorrect,
                             "min": 0,
                             "max": $totalQuestions
@@ -124,7 +124,7 @@ class KhanProgressTracker : HarInterceptor() {
                         "duration": "$totalTimeFormat",
                          "extensions": {
                               "https://w3id.org/xapi/cmi5/result/extensions/progress": 100
-                         }y
+                         }
                     },
                     "object": {
                         "id": "$sourceUrl",
