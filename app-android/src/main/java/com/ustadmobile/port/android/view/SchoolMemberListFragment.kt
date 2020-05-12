@@ -113,7 +113,7 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 Person::class.java, KEY_MEMBER_SELECTED_STAFF) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleEnrolMember(schoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
+           mPresenter?.handleEnrolMember(schoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
