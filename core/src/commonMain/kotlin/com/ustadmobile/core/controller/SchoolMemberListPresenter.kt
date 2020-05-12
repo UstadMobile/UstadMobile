@@ -57,12 +57,6 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
             arguments.get(UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS)?.toLong()?:0L
         }
 
-        GlobalScope.launch {
-            val a = repo.schoolMemberDao.findAllTest(schoolUid, schoolRole, mSearchQuery)
-            print(a.size)
-
-        }
-
         view.list = when(currentSortOrder) {
             SortOrder.ORDER_NAME_ASC -> repo.schoolMemberDao.findAllActiveMembersAscBySchoolAndRoleUidAsc(
                     schoolUid, schoolRole, mSearchQuery

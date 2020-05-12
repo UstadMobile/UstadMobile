@@ -111,9 +111,15 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Person::class.java, KEY_MEMBER_SELECTED) {
+                Person::class.java, KEY_MEMBER_SELECTED_STAFF) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleEnrolMember(schoolUid, memberAdded.personUid, memberRole)
+            mPresenter?.handleEnrolMember(schoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
+        }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Person::class.java, KEY_MEMBER_SELECTED_STUDENT) {
+            val memberAdded = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleEnrolMember(schoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_STUDENT)
         }
 
     }
@@ -135,8 +141,7 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
-    override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
+    override fun onClick(view: View?) {       if(view?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.person_detail_dest, Person::class.java)
     }
 
@@ -153,7 +158,9 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
 
     companion object {
 
-        const val KEY_MEMBER_SELECTED = "member_list"
+        const val KEY_MEMBER_SELECTED_STAFF = "member_list_staff"
+        const val KEY_MEMBER_SELECTED_STUDENT = "member_list_student"
+
         val DIFF_CALLBACK: DiffUtil.ItemCallback<SchoolMemberWithPerson> = object
             : DiffUtil.ItemCallback<SchoolMemberWithPerson>() {
             override fun areItemsTheSame(oldItem: SchoolMemberWithPerson,
@@ -169,8 +176,13 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     }
 
     override fun addMember() {
+        val memberSelected = if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF)?:false){
+            KEY_MEMBER_SELECTED_STAFF
+        }else{
+            KEY_MEMBER_SELECTED_STUDENT
+        }
         navigateToPickEntityFromList(Person::class.java,  R.id.person_list_dest,
                 bundleOf(),
-                KEY_MEMBER_SELECTED,true)
+                memberSelected,true)
     }
 }
