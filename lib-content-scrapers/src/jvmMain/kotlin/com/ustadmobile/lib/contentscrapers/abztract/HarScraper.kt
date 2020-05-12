@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
@@ -14,7 +13,6 @@ import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
 import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.Container
 import io.github.bonigarcia.wdm.WebDriverManager
-import io.ktor.client.request.request
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
@@ -66,9 +64,13 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
         val seleniumProxy = ClientUtil.createSeleniumProxy(proxy)
         seleniumProxy.noProxy = "<-loopback>"
 
+        val mobileEmulation: MutableMap<String, String> = HashMap()
+        mobileEmulation["deviceName"] = "Nexus 5"
+
         val options = ChromeOptions()
         options.setCapability(CapabilityType.PROXY, seleniumProxy)
         options.setCapability(CapabilityType.ACCEPT_INSECURE_CERTS, true)
+        options.setExperimentalOption("mobileEmulation", mobileEmulation);
         chromeDriver = ChromeDriver(options)
 
         gson = GsonBuilder().disableHtmlEscaping().create()

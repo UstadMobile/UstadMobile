@@ -46,8 +46,9 @@ class KhanProgressTracker : HarInterceptor() {
     val langPath = "/assessment_item?lang="
 
     var counter = 1
-    var exerciseAttempted = 0;
-    val client =  defaultHttpClient()
+    var numCorrect = 0;
+    val client = defaultHttpClient()
+    var totalTime = 0L
 
     override fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
 
@@ -55,7 +56,7 @@ class KhanProgressTracker : HarInterceptor() {
             return response
         }*/
 
-        if (request.regexedUrl?.contains("khanacademy.org") == false || request.regexedUrl?.contains("attempt") == false || request.regexedUrl?.contains("getEotCardDetails") == false) {
+        if (request.regexedUrl?.contains("khanacademy.org") == false || (request.regexedUrl?.contains("attempt") == false && request.regexedUrl?.contains("getEotCardDetails") == false)) {
             return response
         }
 
@@ -73,7 +74,11 @@ class KhanProgressTracker : HarInterceptor() {
 
         val totalQuestions = harContainer.requestMap.filterKeys { it.second.startsWith(urlToFindTotalQuestions) }.size
 
-        if(request.regexedUrl?.contains("getEotCardDetails") == true){
+        val actor = harContainer.json.stringify(UmAccountActor.serializer(), harContainer.umAccount.toXapiActorJsonObject(harContainer.context))
+
+        if (request.regexedUrl?.contains("getEotCardDetails") == true) {
+
+            val totalTimeFormat = UMTinCanUtil.format8601Duration(totalTime * 1000)
 
             val completeResponse = """
                 
@@ -85,12 +90,12 @@ class KhanProgressTracker : HarInterceptor() {
                      "exerciseData": {
                        "practiceAttempt": {
                          "id": "ag5zfmtoYW4tYWNhZGVteXIZCxIMTGVhcm5pbmdUYXNrGICAuf7P0P8JDA",
-                         "numAttempted": $counter,
-                         "numCorrect": $exerciseAttempted,
+                         "numAttempted": $totalQuestions,
+                         "numCorrect": $numCorrect,
                          "startingFpmLevel": "unfamiliar",
                          "endingFpmLevel": "familiar",
                          "masteryLevelChange": "UP",
-                         "pointsEarned": 480,
+                         "pointsEarned": ${numCorrect * 100},
                          "__typename": "PracticeAttempt"
                        },
                        "__typename": "UserExerciseData"
@@ -101,6 +106,39 @@ class KhanProgressTracker : HarInterceptor() {
                }
 
             """.trimIndent()
+
+            val statement = """
+                
+                {
+                    "actor": $actor,
+                    "verb": {
+                        "id": "http://adlnet.gov/expapi/verbs/completed",
+                        "display": {
+                            "en-US": "completed"
+                        }
+                    },
+                    "result": {
+                        "completion": true,
+                        "duration": "$totalTimeFormat"
+                    },
+                    "object": {
+                        "id": "$sourceUrl",
+                        "objectType": "Activity",
+                        "definition": {
+                            "name": {
+                                "en-US": "${harContainer.entry.title}"
+                            },
+                            "description": {
+                                "en-US": "${harContainer.entry.description}"
+                            }
+                        }
+                    }
+                }
+                
+                
+            """.trimIndent()
+
+            sendStatement(statement, harContainer)
 
             val cardDetailsContent = HarContent()
             cardDetailsContent.data = ByteArrayInputStream(completeResponse.toUtf8Bytes())
@@ -135,21 +173,21 @@ class KhanProgressTracker : HarInterceptor() {
         val data = harContainer.containerManager.getInputStream(containerEntry)
         val result = UMIOUtils.readToString(data)
         val itemResp = json.parse(ItemResponse.serializer(), result).itemData ?: return response
-        var question = json.parse(ItemData.serializer(), itemResp).question?.content ?: return response
+        var question = json.parse(ItemData.serializer(), itemResp).question?.content
+                ?: return response
 
-        question = question.replace(Regex("(\\[\\[(.*)]])|\\*|\\n|:-: \\||\\{|\\}|\\\$large"),"")
+        question = question.replace(Regex("(\\[\\[(.*)]])|\\*|\\n|:-: \\||\\{|\\}|\\\$large"), "")
 
         val skipped = bodyInput.skipped
-        val completed = if(skipped) false else bodyInput.completed
+        val completed = if (skipped) false else bodyInput.completed
+        totalTime += bodyInput.timeTaken
         val timeTaken = UMTinCanUtil.format8601Duration(bodyInput.timeTaken * 1000)
-        val actor = harContainer.json.stringify(UmAccountActor.serializer(), harContainer.umAccount.toXapiActorJsonObject(harContainer.context))
-        val verbUrl = if(skipped) "http://id.tincanapi.com/verb/skipped" else "http://adlnet.gov/expapi/verbs/answered"
-        val verbDisplay = if(skipped) "skipped" else "answered"
+        val verbUrl = if (skipped) "http://id.tincanapi.com/verb/skipped" else "http://adlnet.gov/expapi/verbs/answered"
+        val verbDisplay = if (skipped) "skipped" else "answered"
 
-        if(completed){
-            exerciseAttempted++
+        if (bodyInput.countHints == 0 && completed) {
+            numCorrect++
         }
-
 
         val statement = """
 
@@ -165,7 +203,7 @@ class KhanProgressTracker : HarInterceptor() {
                 "success" : $completed,
                 "duration" : "$timeTaken",
                  "extensions": {
-                      "https://w3id.org/xapi/cmi5/result/extensions/progress": ${((exerciseAttempted.toFloat())/(totalQuestions) * 100).toInt()}
+                      "https://w3id.org/xapi/cmi5/result/extensions/progress": ${((counter.toFloat()) / (totalQuestions) * 100).toInt()}
                     }
             },
             "object": {
@@ -180,26 +218,30 @@ class KhanProgressTracker : HarInterceptor() {
             
         """.trimIndent()
 
-        if(bodyInput.completed){
+        if (bodyInput.completed) {
             counter++
         }
 
+        sendStatement(statement, harContainer)
+
+
+        return response
+    }
+
+    private fun sendStatement(statement: String, harContainer: HarContainer) {
+
         GlobalScope.launch {
 
-            val httpResponse = client.put<HttpResponse>{
+            client.put<HttpResponse> {
                 url {
                     takeFrom(harContainer.localHttp)
                     encodedPath = "${encodedPath}xapi/${harContainer.entry.contentEntryUid}/statements"
                 }
                 this.body = statement
             }
-            val status = httpResponse.status
-            print(status)
 
         }
 
-
-        return response
     }
 
 

@@ -12,6 +12,7 @@ class KhanProblemInterceptor : HarInterceptor() {
 
         val harList = harContainer.requestMap[(Pair(request.method, "https://www.khanacademy.org/getAssessmentItem"))]
 
+
         val harEntry = if(request.regexedUrl?.contains("https://www.khanacademy.org/getAssessmentItem") == true){
             harList?.removeAt(0) ?: return response
         }else{

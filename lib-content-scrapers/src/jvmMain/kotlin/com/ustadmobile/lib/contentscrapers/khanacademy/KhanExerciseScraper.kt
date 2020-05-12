@@ -32,6 +32,7 @@ import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
+import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
@@ -129,7 +130,7 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 HarRegexPair("last_seen_problem_sha=(.*)&", ""),
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attempt\\?)(.*)",
                         "https://www.khanacademy.org/attempt"),
-                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/api\\/internal\\/_mt\\/graphql\\/getAssessmentItem\\?)(.*)",
+                HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/getAssessmentItem\\?)(.*)",
                         "https://www.khanacademy.org/getAssessmentItem"),
                 HarRegexPair("^https:\\/\\/([a-z\\-]+?)(.khanacademy.org\\/.*\\/attemptProblem\\?)(.*)",
                         "https://www.khanacademy.org/attemptProblem"),
@@ -146,6 +147,124 @@ class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
                 it.until<WebElement>(ExpectedConditions.visibilityOfElementLocated(
                         By.cssSelector("div.perseus-renderer div")))
+
+                try {
+                    chromeDriver.findElementByCssSelector("div[class*=checkbox-and-option]").click()
+                } catch (e: Exception) {
+                    // ignore
+                }
+
+                try {
+                    chromeDriver.findElementsByCssSelector("input")?.forEach { web ->
+                        web.sendKeys("1")
+                    }
+                } catch (e: Exception) {
+                    // ignore
+                }
+
+
+                try {
+                    chromeDriver.findElementsByCssSelector("div.widget-inline-block span.mq-root-block").forEach { web ->
+                        web.click()
+                        web.sendKeys("1")
+                    }
+                } catch (e: Exception) {
+                    // ignore
+                }
+
+                try {
+                    chromeDriver.findElementsByCssSelector("div.keypad-input").forEach { web ->
+                        web.click()
+                        chromeDriver.findElementByCssSelector("div[role=button] span").click()
+                    }
+                } catch (e: Exception) {
+                    // ignore
+                }
+
+                try {
+                    val rect = chromeDriver.findElementsByCssSelector("div.perseus-widget-plotter span")
+                    rect.forEach { web ->
+                        try {
+                            web.click()
+                        } catch (e: Exception) {
+
+                        }
+
+                    }
+                } catch (e: Exception) {
+                    // ignore
+                    print(e)
+                }
+
+                try {
+                    chromeDriver.findElementByCssSelector("div.graphie svg").click()
+                } catch (e: Exception) {
+                    // ignore
+                    print(e)
+                }
+
+                try {
+                    val dropdownList = chromeDriver.findElementsByCssSelector("button[aria-haspopup=listbox]")
+                    dropdownList.forEach { web ->
+                        web.click()
+                        chromeDriver.findElementByCssSelector("div[role=option][aria-selected=false]").click()
+                    }
+                } catch (e: Exception) {
+                    // ignore
+                }
+
+
+
+                try {
+                    val graphie = chromeDriver.findElementByCssSelector("div.graphie div div ellipse")
+                    val actions = Actions(chromeDriver)
+                    actions.dragAndDropBy(graphie, 10, 10).build().perform()
+                } catch (e: Exception) {
+                    // ignore
+                }
+
+
+                try {
+                    val dragElements = chromeDriver.findElementsByCssSelector("li[class*=perseus-sortable-draggable]")
+                    val actions = Actions(chromeDriver)
+                    if (dragElements.size > 1) {
+                        actions.dragAndDrop(dragElements[0], dragElements[1]).build().perform()
+                    } else {
+                        if (dragElements.isNotEmpty()) UMLogUtil.logError("did not find more than 1 element to drag for $sourceUrl")
+                    }
+                } catch (e: Exception) {
+                    // ignore
+                }
+
+                try {
+                    val dragElement = chromeDriver.findElementByCssSelector("div[class*=perseus-interactive] div[class*=perseus-interactive]")
+                    val dragBox = chromeDriver.findElementByCssSelector("div[class*=drag-hint]")
+                    val actions = Actions(chromeDriver)
+                    actions.dragAndDrop(dragElement, dragBox).build().perform()
+                } catch (e: Exception) {
+                    // ignore
+                }
+
+
+                val checkAnswer = chromeDriver.findElementByCssSelector("button[data-test-id=exercise-check-answer]")
+                if (checkAnswer.isEnabled) {
+                    checkAnswer.click()
+                } else {
+                    throw ScraperException(ERROR_TYPE_KHAN_QUESTION_SOLVER, "Cannot attempt this question")
+                }
+
+                try {
+                    WebDriverWait(chromeDriver, 5).until<WebElement>(ExpectedConditions.elementToBeClickable(By.cssSelector("a[data-test-id=exercise-feedback-popover-skip-link]"))).click()
+                } catch (e: Exception) {
+                    // ignore
+                }
+
+                try {
+                    WebDriverWait(chromeDriver, 5).until<WebElement>(ExpectedConditions.elementToBeClickable(By.cssSelector("button[data-test-id=exercise-next-question]"))).click()
+                } catch (e: Exception) {
+                    // ignore
+                }
+
 
             }, filters = listOf { entry ->
 
