@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.ListViewAddMode
+import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
@@ -35,6 +36,8 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     private var mPresenter: SchoolMemberListPresenter? = null
 
     private var addNewStringId : Int = 0
+
+    private var filterBySchoolUid : Long = 0
 
     override val listPresenter: UstadListPresenter<*, in SchoolMemberWithPerson>?
         get() = mPresenter
@@ -73,6 +76,8 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
             R.string.student
         }
 
+        filterBySchoolUid = arguments?.getString(UstadView.ARG_SCHOOL_UID)?.toLong()?:0
+
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = SchoolMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, this, UstadMobileSystemImpl.instance,
@@ -96,30 +101,16 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
 
         val navController = findNavController()
 
-        val memberRole =
-            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
-                SchoolMember.SCHOOL_ROLE_TEACHER
-            }else{
-                SchoolMember.SCHOOL_ROLE_STUDENT
-            }
-
-        val schoolUid: Long =
-                if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
-            arguments?.get(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF).toString().toLong()
-        }else{
-            arguments?.get(UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS).toString().toLong()
-        }
-
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 Person::class.java, KEY_MEMBER_SELECTED_STAFF) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
-           mPresenter?.handleEnrolMember(schoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
+           mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 Person::class.java, KEY_MEMBER_SELECTED_STUDENT) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleEnrolMember(schoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_STUDENT)
+            mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_STUDENT)
         }
 
     }
@@ -182,7 +173,7 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
             KEY_MEMBER_SELECTED_STUDENT
         }
         navigateToPickEntityFromList(Person::class.java,  R.id.person_list_dest,
-                bundleOf(),
+                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString()),
                 memberSelected,true)
     }
 }

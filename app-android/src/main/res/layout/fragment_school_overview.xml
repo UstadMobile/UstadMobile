@@ -115,6 +115,14 @@
                 app:constraint_referenced_ids="school_overview_desc_tv"
                 />
 
+            <LinearLayout
+                android:id="@+id/fragment_school_overview_phone_ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:onClickDial="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
+                app:layout_constraintStart_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier3">
 
             <ImageView
                 android:id="@+id/fragment_school_detail_overview_phone_iv"
@@ -125,28 +133,29 @@
                 android:src="@drawable/ic_call_bcd4_24dp"
                 android:contentDescription="@string/school"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolPhoneNumber)}"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/barrier3" />
+                 />
 
-            <TextView
-                android:id="@+id/fragment_school_detail_overview_detail_school_phonenumber"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:text="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolPhoneNumber)}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_phone_iv"
-                app:layout_constraintTop_toBottomOf="@+id/barrier3"
-                tools:text="+971 44311111" />
+                <TextView
+                    android:id="@+id/fragment_school_detail_overview_detail_school_phonenumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                    android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                    android:layout_marginStart="0dp"
+
+                    android:text="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
+                    android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolPhoneNumber)}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="+971 44311111" />
+
+            </LinearLayout>
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/barrier4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="fragment_school_detail_overview_phone_iv"
+                app:constraint_referenced_ids="fragment_school_overview_phone_ll"
                 />
 
             <ImageView
@@ -170,7 +179,7 @@
                 android:text="@{schoolWithHolidayCalendar.holidayCalendar.umCalendarName}"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.holidayCalendar.umCalendarName)}"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_phone_iv"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_email_iv"
                 app:layout_constraintTop_toBottomOf="@+id/barrier4"
                 tools:text="Kenya calendar A" />
 
@@ -203,7 +212,7 @@
                 android:text="@{schoolWithHolidayCalendar.schoolEmailAddress}"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolEmailAddress)}"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_phone_iv"
+                app:layout_constraintStart_toEndOf="@+id/school_overview_hc_iv"
                 app:layout_constraintTop_toBottomOf="@+id/barrier5"
                 tools:text="info@schoola.com" />
 

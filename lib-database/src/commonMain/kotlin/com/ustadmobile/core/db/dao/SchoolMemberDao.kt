@@ -22,9 +22,10 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
 
     @Query("""
         SELECT * FROM SchoolMember WHERE schoolMemberSchoolUid = :schoolUid
+        AND schoolMemberPersonUid = :personUid
         AND schoolMemberRole = :role
     """)
-    abstract suspend fun findBySchoolAndRole(schoolUid: Long, role: Int): List<SchoolMember>
+    abstract suspend fun findBySchoolAndPersonAndRole(schoolUid: Long, personUid: Long, role: Int): List<SchoolMember>
 
 
     @Query("""SELECT SchoolMember.*, Person.* FROM SchoolMember
@@ -65,7 +66,7 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
     suspend fun enrollPersonToSchool(dateNow: Long, enrollDate: Long, schoolUid: Long, personUid:Long, role: Int): SchoolMember{
 
         //Check if relationship already exists
-        val matches = findBySchoolAndRole(schoolUid, role)
+        val matches = findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
         if(matches.isEmpty()) {
 
 
@@ -75,7 +76,7 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
             schoolMember.schoolMemberSchoolUid = schoolUid
             schoolMember.schoolMemberRole = role
             schoolMember.schoolMemberCreateDate = dateNow
-            schoolMember.schoolMemberJoinDate = enrollDate
+            schoolMember.schoolMemberJoinDate = dateNow
 
             schoolMember.schoolMemberUid = insert(schoolMember)
             return schoolMember

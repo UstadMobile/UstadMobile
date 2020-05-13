@@ -277,11 +277,15 @@ abstract class PersonDao : BaseDao<Person> {
     @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
     abstract fun findAllPeopleWithEnrollmentSortNameAsc(): DataSource.Factory<Int, PersonWithEnrollment>
 
-    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS)
-    abstract fun findAllPeopleWithDisplayDetailsSortNameDesc(timestamp: Long, excludeClazz: Long): DataSource.Factory<Int, PersonWithDisplayDetails>
+    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_DESC)
+    abstract fun findAllPeopleWithDisplayDetailsSortNameDesc(timestamp: Long, excludeClazz: Long,
+                                                                excludeSchool: Long)
+            : DataSource.Factory<Int, PersonWithDisplayDetails>
 
-    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS)
-    abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(timestamp: Long, excludeClazz: Long): DataSource.Factory<Int, PersonWithDisplayDetails>
+    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_ASC)
+    abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(timestamp: Long, excludeClazz: Long,
+                                                                excludeSchool: Long)
+            : DataSource.Factory<Int, PersonWithDisplayDetails>
 
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
     abstract fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?>
@@ -367,11 +371,26 @@ abstract class PersonDao : BaseDao<Person> {
 
     companion object {
 
-        const val QUERY_FIND_ALL_WITH_DISPLAY_DETAILS = """SELECT Person.* FROM Person 
-        WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN
+        const val QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_DESC =
+            """SELECT Person.* FROM Person 
+            WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN
             (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
             AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
-        ORDER BY Person.firstNames DESC"""
+            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
+            (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate ))
+            ORDER BY Person.firstNames DESC"""
+
+
+        const val QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_ASC =
+                """SELECT Person.* FROM Person 
+            WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN
+            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
+            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
+            (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate ))
+            ORDER BY Person.firstNames ASC"""
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR " +
                 " CAST((SELECT admin FROM Person WHERE personUid = :accountPersonUid) AS INTEGER) = 1 OR " +

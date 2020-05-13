@@ -78,7 +78,7 @@
                 android:textColor="@color/text_secondary"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="4dp"
-                android:text="@{@string/num_items_with_name(school.numStudents, @string/students_literal)}"
+                android:text="@{@string/num_items_with_name_with_comma(school.numStudents, @string/students_literal, school.numTeachers, @string/teachers_literal)}"
                 tools:text="460 students, 30 teachers"
                 app:layout_constraintStart_toEndOf="@+id/item_school_list_item_members_iv"
                 app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_location_name" />

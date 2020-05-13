@@ -48,6 +48,7 @@ open class SchoolMember {
 
     constructor(){
         schoolMemberActive = true
+        schoolMemberLeftDate = Long.MAX_VALUE
     }
 
     companion object {
