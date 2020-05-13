@@ -28,9 +28,7 @@ class AnnotationProcessorWrapper: AbstractProcessor() {
 
     override fun process(p0: MutableSet<out TypeElement>?, p1: RoundEnvironment?): Boolean {
         processors.forEach {
-            messager.printMessage(Diagnostic.Kind.NOTE, "Running processor: ${it.javaClass.simpleName}")
             it.process(p0, p1)
-            messager.printMessage(Diagnostic.Kind.NOTE, "Finished running processor: ${it.javaClass.simpleName}")
         }
 
         return true

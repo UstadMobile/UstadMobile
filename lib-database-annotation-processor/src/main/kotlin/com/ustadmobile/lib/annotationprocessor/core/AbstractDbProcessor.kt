@@ -143,7 +143,6 @@ fun jdbcDaoTypeSpecBuilder(simpleName: String, superTypeName: TypeName) = TypeSp
 
 fun daosOnDb(dbType: ClassName, processingEnv: ProcessingEnvironment, excludeDbSyncDao: Boolean = false): List<ClassName> {
     val dbTypeEl = processingEnv.elementUtils.getTypeElement(dbType.canonicalName) as TypeElement
-    processingEnv.messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: daosOnDb: ${dbType.simpleName}")
     val daoList = dbTypeEl.enclosedElements
             .filter { it.kind == ElementKind.METHOD && Modifier.ABSTRACT in it.modifiers}
             .map { it as ExecutableElement }
@@ -785,7 +784,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
         println("Db tmp file: ${dbTmpFile.absolutePath}")
         dataSource.url = "jdbc:sqlite:${dbTmpFile.absolutePath}"
-        messager!!.printMessage(Diagnostic.Kind.NOTE, "Annotation processor db tmp file: ${dbTmpFile.absolutePath}")
 
         dbConnection = dataSource.connection
         dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {entity ->
@@ -873,7 +871,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
     protected fun generateSyncTriggersCodeBlock(entityClass: ClassName, execSqlFn: String, dbType: Int): CodeBlock {
         val codeBlock = CodeBlock.builder()
-        messager.printMessage(Diagnostic.Kind.NOTE, "AbstractDbProcessor: generateSyncTriggersCodeBlock: ${entityClass.canonicalName}")
         val syncableEntityInfo = SyncableEntityInfo(entityClass, processingEnv)
         when(dbType){
             DoorDbType.SQLITE -> {
@@ -952,8 +949,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             }
         }
 
-        messager.printMessage(Diagnostic.Kind.NOTE, "AbstractDbProcessor: finish generateSyncTriggersCodeBlock: ${entityClass.canonicalName}")
-
         return codeBlock.build()
     }
 
@@ -1007,8 +1002,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             namedParams.forEach { preparedStatementSql = preparedStatementSql!!.replace(":$it", "?") }
             namedParams.forEach {
                 val queryVarTypeName = queryVars[it]
-                execStmtSql = execStmtSql!!.replace(":$it",
-                    defaultSqlQueryVal(queryVarTypeName!!))
+                if(queryVarTypeName != null) {
+                    execStmtSql = execStmtSql!!.replace(":$it",
+                            defaultSqlQueryVal(queryVarTypeName))
+                }else {
+                    messager.printMessage(Diagnostic.Kind.ERROR,
+                            "On ${enclosing?.qualifiedName}.${method?.simpleName} Variable $it in query name but not in function parameters: " +
+                                    "SQL = '$preparedStatementSql' function params = ${queryVars.keys.joinToString()}\n",
+                            enclosing)
+                }
+
             }
         }
 
