@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 
 class PersonDetailPresenter(context: Any,
@@ -41,7 +42,7 @@ class PersonDetailPresenter(context: Any,
 
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<PersonWithDisplayDetails?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        view.clazzes = repo.clazzMemberDao.findAllClazzesByPersonWithClazz(entityUid)
+        view.clazzes = repo.clazzMemberDao.findAllClazzesByPersonWithClazz(entityUid, getSystemTimeInMillis())
         return repo.personDao.findByUidWithDisplayDetailsLive(entityUid)
     }
 

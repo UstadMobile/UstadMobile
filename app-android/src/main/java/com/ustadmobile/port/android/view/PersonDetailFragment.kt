@@ -1,7 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,11 +29,7 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 
 interface PersonDetailFragmentEventHandler {
-    fun handleClickDialNumber(number: String)
 
-    fun handleClickEmail(emailAddr: String)
-
-    fun handleClickSms(number: String)
 }
 
 class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), PersonDetailView, PersonDetailFragmentEventHandler {
@@ -125,34 +119,6 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
 
         if(mBinding?.person != null) {
             (activity as? AppCompatActivity)?.supportActionBar?.title = mBinding?.person?.firstNames + " " + mBinding?.person?.lastName
-        }
-    }
-
-    override fun handleClickDialNumber(number: String) {
-        val callIntent = Intent(Intent.ACTION_DIAL).apply {
-            setData(Uri.parse("tel:$number"))
-        }
-
-        if(callIntent.resolveActivity(requireContext().packageManager) != null)
-            requireContext().startActivity(callIntent)
-    }
-
-    override fun handleClickEmail(emailAddr: String) {
-        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddr))
-            data = Uri.parse("mailto:$emailAddr")
-        }
-        if(emailIntent.resolveActivity(requireContext().packageManager) != null) {
-            requireContext().startActivity(emailIntent)
-        }
-    }
-
-    override fun handleClickSms(number: String) {
-        val smsIntent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("smsto:$number")
-        }
-        if(smsIntent.resolveActivity(requireContext().packageManager) != null) {
-            requireContext().startActivity(smsIntent)
         }
     }
 

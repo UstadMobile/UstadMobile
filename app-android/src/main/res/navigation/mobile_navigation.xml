@@ -34,7 +34,7 @@
 
     <fragment
 
-        android:id="@+id/clazz_list_dest_list"
+        android:id="@+id/clazz_list_dest"
         android:name="com.ustadmobile.port.android.view.ClazzList2Fragment" />
 
     <fragment

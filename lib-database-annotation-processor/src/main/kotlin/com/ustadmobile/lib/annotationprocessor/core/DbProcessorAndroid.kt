@@ -113,8 +113,6 @@ class DbProcessorAndroid: AbstractDbProcessor() {
             it.close()
         }
 
-        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorAndroid: wrote adjusted version of" +
-                " ${dbTypeEl.simpleName} to ${outDirs.joinToString()}")
     }
 
     override fun process(elements: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
@@ -138,9 +136,7 @@ class DbProcessorAndroid: AbstractDbProcessor() {
         val outPaths = outDirs.map { Paths.get(File(it).toURI()) }
 
         srcPaths.map { Paths.get(File(it).toURI()) }.forEach{srcPath ->
-            messager.printMessage(Diagnostic.Kind.NOTE, "Walk src path: $srcPath")
             Files.walk(srcPath).forEach {srcFilePath ->
-                messager.printMessage(Diagnostic.Kind.NOTE, "Check: $srcFilePath")
                 if(srcFilePath.extension == "kt"){
                     val srcRelativePath = srcPath.relativize(srcFilePath)
                     val outFilePaths = outPaths.map { it.resolve(srcRelativePath)}
@@ -176,8 +172,6 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                                     fileOut?.flush()
                                     fileOut?.close()
                                 }
-
-                                messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorAndroid: Copy: $srcFilePath -> $it")
                             }
                         }
                     }

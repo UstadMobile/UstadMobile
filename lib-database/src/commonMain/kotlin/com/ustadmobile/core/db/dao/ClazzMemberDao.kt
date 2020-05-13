@@ -1,10 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -20,6 +17,18 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
     @Insert
     abstract override fun insert(entity: ClazzMember): Long
+
+    @Insert
+    abstract fun insertListAsync(entityList: List<ClazzMember>)
+
+    open fun updateDateLeft(clazzMemberUidList: List<Long>, endDate: Long) {
+        clazzMemberUidList.forEach {
+            updateDateLeftByUid(it, endDate)
+        }
+    }
+
+    @Query("UPDATE ClazzMember SET clazzMemberDateLeft = :endDate WHERE clazzMemberUid = :clazzMemberUid")
+    abstract fun updateDateLeftByUid(clazzMemberUid: Long, endDate: Long)
 
     @Update
     abstract override fun update(entity: ClazzMember)
@@ -66,14 +75,26 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     /**
      * Provide a list of the classes a given person is in with the class information itself (e.g.
      * for person detail).
+     *
+     * @param personUid
+     * @param date If this is not 0, then the query will ensure that the registration is current at
+     * the given
      */
     @Query("""SELECT ClazzMember.*, Clazz.* 
         FROM ClazzMember
         LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid
         WHERE ClazzMember.clazzMemberPersonUid = :personUid
+        AND (:date = 0 OR :date BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft)
     """)
-    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzMemberWithClazz>
+    abstract fun findAllClazzesByPersonWithClazz(personUid: Long, date: Long): DataSource.Factory<Int, ClazzMemberWithClazz>
 
+    @Query("""SELECT ClazzMember.*, Clazz.* 
+        FROM ClazzMember
+        LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid
+        WHERE ClazzMember.clazzMemberPersonUid = :personUid
+        AND (:date = 0 OR :date BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft)
+    """)
+    abstract fun findAllClazzesByPersonWithClazzAsList(personUid: Long, date: Long): List<ClazzMemberWithClazz>
 
     @Query("SELECT * FROM ClazzMember")
     abstract fun findAllAsList(): List<ClazzMember>

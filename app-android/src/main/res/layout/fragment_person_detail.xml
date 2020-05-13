@@ -69,7 +69,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="8dp"
                 android:background="@drawable/bg_listitem"
-                android:onClick="@{() -> fragmentEventHandler.handleClickDialNumber(person.phoneNum)}"
+                app:onClickDial="@{person.phoneNum}"
                 android:orientation="vertical"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_image_barrier"
@@ -92,7 +92,7 @@
             <LinearLayout
                 android:id="@+id/fragment_person_detail_text_linlayout"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.phoneNum)}"
-                android:onClick="@{() -> fragmentEventHandler.handleClickSms(person.phoneNum)}"
+                app:onClickSms="@{person.phoneNum}"
                 android:background="@drawable/bg_listitem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -119,7 +119,7 @@
             <LinearLayout
                 android:id="@+id/fragment_person_detail_email_linlayout"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.emailAddr)}"
-                android:onClick="@{() -> fragmentEventHandler.handleClickEmail(person.emailAddr)}"
+                app:onClickEmail="@{person.emailAddr}"
                 android:background="@drawable/bg_listitem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -334,7 +334,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="Contact details"
+                android:text="@string/contact_details"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_username_barrier" />
 
@@ -342,7 +342,7 @@
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.phoneNum)}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_contact_details_header_textview"
-                android:onClick="@{() -> fragmentEventHandler.handleClickDialNumber(person.phoneNum)}"
+                app:onClickDial="@{person.phoneNum}"
                 android:background="@drawable/bg_listitem"
                 android:id="@+id/phonenum_constraintlayout"
                 android:layout_width="match_parent"
@@ -382,7 +382,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phone_num_message_imageview"
-                    android:onClick="@{() -> fragmentEventHandler.handleClickSms(person.phoneNum)}"
+                    app:onClickSms="@{person.phoneNum}"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginTop="8dp"
@@ -417,7 +417,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_phonenum_barrier"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.emailAddr)}"
-                android:onClick="@{() -> fragmentEventHandler.handleClickEmail(person.emailAddr)}"
+                app:onClickEmail="@{person.emailAddr}"
                 android:background="@drawable/bg_listitem"
                 >
 

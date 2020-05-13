@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.PersonEditView
@@ -15,6 +16,8 @@ import kotlinx.serialization.json.Json
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.serialization.builtins.list
 
 
 class PersonEditPresenter(context: Any,
@@ -29,6 +32,18 @@ class PersonEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
+    val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper<ClazzMemberWithClazz>(ClazzMemberWithClazz::clazzMemberUid,
+            "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
+            ClazzMemberWithClazz.serializer().list, this) { clazzMemberUid = it }
+
+    fun handleAddOrEditClazzMemberWithClazz(clazzMemberWithClazz: ClazzMemberWithClazz) {
+        clazzMemberJoinEditHelper.onEditResult(clazzMemberWithClazz)
+    }
+
+    fun handleClickRemovePersonFromClazz(clazzMemberWithClazz: ClazzMemberWithClazz) {
+        clazzMemberJoinEditHelper.onDeactivateEntity(clazzMemberWithClazz)
+    }
+
     /*
      * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
      * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
@@ -38,6 +53,7 @@ class PersonEditPresenter(context: Any,
         view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
                 MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
+        view.clazzList = clazzMemberJoinEditHelper.liveList
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Person? {
@@ -54,6 +70,12 @@ class PersonEditPresenter(context: Any,
         if(personPicture != null){
             view.personPicturePath = repo.personPictureDao.getAttachmentPath(personPicture)
         }
+
+        val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
+            db.takeIf { entityUid != 0L }?.clazzMemberDao?.findAllClazzesByPersonWithClazzAsList(entityUid, getSystemTimeInMillis())
+        } ?: listOf()
+        clazzMemberJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
+
 
         return person
     }
@@ -86,8 +108,13 @@ class PersonEditPresenter(context: Any,
                 repo.personDao.updateAsync(entity)
             }
 
+            clazzMemberJoinEditHelper.entitiesToInsert.forEach {
+                repo.clazzMemberDao.enrolPersonIntoClazz(entity, it.clazzMemberClazzUid,
+                    it.clazzMemberRole)
+            }
+            repo.clazzMemberDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
+                getSystemTimeInMillis())
 
-            //TODO: Bring this back to save the picture
             var personPicture = db.personPictureDao.findByPersonUidAsync(entity.personUid)
             val viewPicturePath = view.personPicturePath
             val currentPath = if(personPicture != null) repo.personPictureDao.getAttachmentPath(personPicture) else null

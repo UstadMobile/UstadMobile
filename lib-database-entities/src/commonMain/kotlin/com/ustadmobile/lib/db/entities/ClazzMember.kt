@@ -35,7 +35,11 @@ open class ClazzMember()  {
 
     var clazzMemberDateJoined: Long = 0
 
-    var clazzMemberDateLeft: Long = 0
+    /**
+     * The date the student left this class (e.g. graduated or un-enrolled).
+     * Long.MAX_VALUE = no leaving date (e.g. ongoing registration)
+     */
+    var clazzMemberDateLeft: Long = Long.MAX_VALUE
 
     var clazzMemberRole: Int = 0
 

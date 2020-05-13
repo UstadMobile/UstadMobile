@@ -89,7 +89,6 @@ class DbProcessorSync: AbstractDbProcessor() {
                           val ktorRouteOutputArg: String?)
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
-        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: Process")
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
         //For all databases that are being compiled now, find those entities that require tracker entities
@@ -108,7 +107,6 @@ class DbProcessorSync: AbstractDbProcessor() {
                 }
 
         for(dbTypeEl in dbs) {
-            messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: db: ${dbTypeEl.simpleName}")
             val (abstractFileSpec, implFileSpec, repoImplSpec) = generateSyncDaoInterfaceAndImpls(dbTypeEl as TypeElement)
 
             writeFileSpecToOutputDirs(abstractFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
@@ -129,7 +127,6 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
         daos.filter { !it.simpleName.endsWith(SUFFIX_SYNCDAO_ABSTRACT) }.forEach {daoElement ->
-            messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: DAO: ${daoElement.simpleName}")
             val daoTypeEl = daoElement as TypeElement
             val daoFileSpec = generateDaoSyncHelperInterface(daoTypeEl)
             writeFileSpecToOutputDirs(daoFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
@@ -138,7 +135,6 @@ class DbProcessorSync: AbstractDbProcessor() {
         }
 
 
-        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: process Finished")
         return true
     }
 
@@ -485,7 +481,6 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addModifiers(KModifier.ABSTRACT)
                 .addSuperinterface(ClassName(pkgNameOfElement(dbType, processingEnv), "I$abstractDaoSimpleName"))
 
-        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: generateSyncDaoInterfaceAndImpl: ${dbType.simpleName}")
         daosOnDb(dbType.asClassName(), processingEnv, excludeDbSyncDao = true)
                 .filter { syncableEntitiesOnDao(it, processingEnv).isNotEmpty()}
                 .forEach {
@@ -494,8 +489,6 @@ class DbProcessorSync: AbstractDbProcessor() {
                 }
 
         val abstractDaoInterfaceTypeSpec = TypeSpec.interfaceBuilder("I$abstractDaoSimpleName")
-        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: generateSyncDaoInterfaceAndImpl " +
-                "- make DAO interface ${dbType.simpleName}")
 
         val abstractFileSpec = FileSpec.builder(pkgNameOfElement(dbType, processingEnv),
                 abstractDaoSimpleName)
@@ -598,8 +591,6 @@ class DbProcessorSync: AbstractDbProcessor() {
         abstractFileSpec.addType(abstractDaoTypeSpec.build())
 
         implFileSpec.addType(implDaoTypeSpec.build())
-        messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: generateSyncDaoInterfaceAndImpl " +
-                "- finished making sync DAO interface for ${dbType.simpleName}")
         return SyncFileSpecs(abstractFileSpec.build(), implFileSpec.build(), repoImplSpec.build())
     }
 

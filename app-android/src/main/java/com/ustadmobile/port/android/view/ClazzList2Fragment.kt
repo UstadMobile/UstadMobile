@@ -59,7 +59,8 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
-            requireContext().getString(R.string.create_new, R.string.clazz))
+            requireContext().getString(R.string.create_new,
+                    requireContext().getString(R.string.clazz)))
         mDataRecyclerViewAdapter = ClazzList2RecyclerAdapter(mPresenter)
 
         return view
