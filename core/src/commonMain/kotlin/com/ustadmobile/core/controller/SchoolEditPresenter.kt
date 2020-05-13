@@ -75,7 +75,7 @@ class SchoolEditPresenter(context: Any,
         } ?: SchoolWithHolidayCalendar()
 
         val clazzes = withTimeoutOrNull(2000){
-            db.clazzDao.findAllClazzesBySchool(entityUid)
+            db.takeIf { entityUid != 0L }?.clazzDao?.findAllClazzesBySchool(entityUid)
         }?: listOf()
 
         clazzOneToManyJoinEditHelper.liveList.sendValue(clazzes)

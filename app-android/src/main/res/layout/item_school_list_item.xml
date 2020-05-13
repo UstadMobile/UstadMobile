@@ -104,7 +104,7 @@
                 android:contentDescription="@string/school"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_school_black_24dp" />
+                app:srcCompat="@drawable/ic_account_balance_black_24dp" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

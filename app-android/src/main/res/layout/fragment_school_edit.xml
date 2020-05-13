@@ -50,8 +50,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
-
             <ImageView
                 android:id="@+id/fragment_school_edit_school_picture"
                 android:layout_width="match_parent"
@@ -60,6 +58,7 @@
                 android:src="@drawable/ic_photo_camera_black_24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                android:visibility="gone"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_appbar" />
 
 
