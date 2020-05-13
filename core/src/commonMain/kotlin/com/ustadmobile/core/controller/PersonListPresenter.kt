@@ -11,6 +11,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
@@ -44,11 +45,14 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
     private fun updateListOnView() {
+        val timestamp = getSystemTimeInMillis()
         view.list = when(currentSortOrder) {
             SortOrder.ORDER_NAME_ASC -> repo.personDao
-                    .findAllPeopleWithDisplayDetailsSortNameAsc(filterExcludeMembersOfClazz)
+                    .findAllPeopleWithDisplayDetailsSortNameAsc(timestamp,
+                            filterExcludeMembersOfClazz)
             SortOrder.ORDER_NAME_DSC -> repo.personDao
-                    .findAllPeopleWithDisplayDetailsSortNameDesc(filterExcludeMembersOfClazz)
+                    .findAllPeopleWithDisplayDetailsSortNameDesc(timestamp,
+                            filterExcludeMembersOfClazz)
         }
     }
 

@@ -34,6 +34,59 @@ fun View.setOnLongPress(onLongClick: View.OnClickListener) {
     }
 }
 
+/**
+ * Binder Adapter that will trigger dialing a number when clicked. Can be useful for binding on
+ * detail views.
+ */
+@BindingAdapter("onClickDial")
+fun View.setOnClickDial(numberToDial: String?) {
+    if(numberToDial == null)
+        return //can't do anything
+
+    setOnClickListener {
+        val callIntent = Intent(Intent.ACTION_DIAL).apply {
+            setData(Uri.parse("tel:$numberToDial"))
+        }
+
+        if(callIntent.resolveActivity(it.context.packageManager) != null)
+            it.context.startActivity(callIntent)
+    }
+}
+
+@BindingAdapter("onClickSms")
+fun View.setOnClickSms(numberToSms: String?) {
+    if(numberToSms == null)
+        return
+
+    setOnClickListener {
+        val smsIntent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("smsto:$numberToSms")
+        }
+
+        if(smsIntent.resolveActivity(it.context.packageManager) != null) {
+            it.context.startActivity(smsIntent)
+        }
+    }
+}
+
+@BindingAdapter("onClickEmail")
+fun View.setOnClickEmail(emailAddr: String?) {
+    if(emailAddr == null)
+        return
+
+    setOnClickListener {
+        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddr))
+            data = Uri.parse("mailto:$emailAddr")
+        }
+
+        if(emailIntent.resolveActivity(it.context.packageManager) != null) {
+            it.context.startActivity(emailIntent)
+        }
+    }
+
+}
+
 
 internal class CustomFieldOnClickListener(val customField: CustomField, val customFieldValue: CustomFieldValue?): View.OnClickListener {
     override fun onClick(v: View) {

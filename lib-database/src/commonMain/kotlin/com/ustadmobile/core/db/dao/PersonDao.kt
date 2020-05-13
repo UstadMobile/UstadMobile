@@ -277,16 +277,11 @@ abstract class PersonDao : BaseDao<Person> {
     @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
     abstract fun findAllPeopleWithEnrollmentSortNameAsc(): DataSource.Factory<Int, PersonWithEnrollment>
 
-    @Query("""SELECT Person.* FROM Person 
-        WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN(SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
-        ORDER BY Person.firstNames DESC""")
-    abstract fun findAllPeopleWithDisplayDetailsSortNameDesc(excludeClazz: Long): DataSource.Factory<Int, PersonWithDisplayDetails>
+    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS)
+    abstract fun findAllPeopleWithDisplayDetailsSortNameDesc(timestamp: Long, excludeClazz: Long): DataSource.Factory<Int, PersonWithDisplayDetails>
 
-    @Query("""SELECT Person.* FROM Person 
-        WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN(SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
-        ORDER BY Person.firstNames ASC""")
-    abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(excludeClazz: Long): DataSource.Factory<Int, PersonWithDisplayDetails>
-
+    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS)
+    abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(timestamp: Long, excludeClazz: Long): DataSource.Factory<Int, PersonWithDisplayDetails>
 
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
     abstract fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?>
@@ -372,6 +367,11 @@ abstract class PersonDao : BaseDao<Person> {
 
     companion object {
 
+        const val QUERY_FIND_ALL_WITH_DISPLAY_DETAILS = """SELECT Person.* FROM Person 
+        WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN
+            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
+        ORDER BY Person.firstNames DESC"""
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR " +
                 " CAST((SELECT admin FROM Person WHERE personUid = :accountPersonUid) AS INTEGER) = 1 OR " +
