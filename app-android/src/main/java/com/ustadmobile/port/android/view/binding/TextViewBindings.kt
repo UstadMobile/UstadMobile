@@ -81,9 +81,26 @@ private val textViewGenderStringIds: Map<Int, Int> = mapOf(
         Person.GENDER_FEMALE to R.string.female,
         Person.GENDER_OTHER to R.string.other)
 
+private val textViewSchoolGenderStringIds: Map<Int, Int> = mapOf(
+        School.SCHOOL_GENDER_MIXED  to R.string.mixed,
+        School.SCHOOL_GENDER_FEMALE to R.string.female,
+        School.SCHOOL_GENDER_MALE to R.string.male
+)
+
 @BindingAdapter("textPersonGender")
 fun TextView.setGenderText(gender: Int) {
     val genderStringId = textViewGenderStringIds[gender]
+    text = if(genderStringId != null) {
+        context.getString(genderStringId)
+    }else {
+        ""
+    }
+}
+
+
+@BindingAdapter("textSchoolGender")
+fun TextView.setSchoolGenderText(gender: Int) {
+    val genderStringId = textViewSchoolGenderStringIds[gender]
     text = if(genderStringId != null) {
         context.getString(genderStringId)
     }else {

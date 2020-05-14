@@ -5,6 +5,7 @@
 
     <data>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="android.view.View"/>
 
         <variable
             name="fieldsEnabled"
@@ -56,6 +57,47 @@
                 app:constraint_referenced_ids="school_detail_overview_iv"
                 />
 
+            <TextView
+                android:id="@+id/school_overview_desc_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/school"
+                android:layout_marginStart="20dp"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginEnd="@dimen/form_margin_horizontal"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolDesc)}"
+                android:text="@{schoolWithHolidayCalendar.schoolDesc}"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/list_twoline1_textsize_line1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier1"
+                tools:text="School description over here." />
+
+            <TextView
+                android:id="@+id/fragment_school_overview_gender"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                tools:text="Mixed gender"
+                android:visibility="@{schoolWithHolidayCalendar.schoolGender != 0 ? View.VISIBLE : View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                app:layout_constraintTop_toBottomOf="@+id/school_overview_desc_tv"
+                app:textSchoolGender="@{schoolWithHolidayCalendar.schoolGender}" />
+
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+
+                app:constraint_referenced_ids="fragment_school_overview_gender"
+                />
+
             <ImageView
                 android:id="@+id/fragment_school_detail_overview_locataion_iv"
                 android:layout_width="wrap_content"
@@ -67,7 +109,7 @@
                 android:contentDescription="@string/school"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/barrier1" />
+                app:layout_constraintTop_toBottomOf="@+id/barrier2" />
 
             <TextView
                 android:id="@+id/fragment_school_detail_overview_locataion_tv"
@@ -81,59 +123,50 @@
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                 android:contentDescription="@string/school"
                 app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
-                app:layout_constraintTop_toBottomOf="@+id/barrier1"
+                app:layout_constraintTop_toBottomOf="@+id/barrier2"
                 tools:text="Nairobi, Kenya" />
 
-            <androidx.constraintlayout.widget.Barrier
-                android:id="@+id/barrier2"
+            <TextView
+                android:id="@+id/location_title"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:barrierDirection="bottom"
-                app:constraint_referenced_ids="fragment_school_detail_overview_locataion_iv"
-                />
+                android:layout_marginStart="16dp"
+                android:text="@string/address"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_locataion_tv" />
 
-            <TextView
-                android:id="@+id/school_overview_desc_tv"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/school"
-                android:layout_marginStart="20dp"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginEnd="@dimen/form_margin_horizontal"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolDesc)}"
-                android:text="@{schoolWithHolidayCalendar.schoolDesc}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/barrier2"
-                tools:text="School description over here." />
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/barrier3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="school_overview_desc_tv"
+                app:constraint_referenced_ids="location_title"
                 />
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/fragment_school_overview_phone_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:background="@drawable/bg_listitem"
                 app:onClickDial="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
                 app:layout_constraintStart_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier3">
 
-            <ImageView
-                android:id="@+id/fragment_school_detail_overview_phone_iv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:src="@drawable/ic_call_bcd4_24dp"
-                android:contentDescription="@string/school"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolPhoneNumber)}"
-                 />
+                <ImageView
+                    android:id="@+id/fragment_school_detail_overview_phone_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                    android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                    android:layout_marginStart="16dp"
+                    android:contentDescription="@string/school"
+                    android:src="@drawable/ic_call_bcd4_24dp"
+                    android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolPhoneNumber)}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/fragment_school_detail_overview_detail_school_phonenumber"
@@ -141,14 +174,44 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                     android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                    android:layout_marginStart="0dp"
 
+                    android:layout_marginStart="20dp"
+                    android:layout_marginBottom="8dp"
                     android:text="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
                     android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolPhoneNumber)}"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_phone_iv"
+                    app:layout_constraintTop_toTopOf="parent"
                     tools:text="+971 44311111" />
 
-            </LinearLayout>
+                <TextView
+                    android:id="@+id/phone_title"
+                    android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/phone_number"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_phone_iv"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_detail_school_phonenumber" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/phone_num_message_imageview"
+                    app:onClickSms="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+                    app:iconGravity="textStart"
+                    app:icon="@drawable/ic_message_bcd4_24dp"
+                    app:iconTint="@color/text_primary"
+                    app:iconPadding="0dp"
+                    />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/barrier4"
@@ -166,7 +229,7 @@
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.holidayCalendar.umCalendarName)}"
-                android:src="@drawable/ic_email_black_24dp"
+                android:src="@drawable/ic_perm_contact_calendar_black_24dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier4" />
 
@@ -183,12 +246,23 @@
                 app:layout_constraintTop_toBottomOf="@+id/barrier4"
                 tools:text="Kenya calendar A" />
 
+            <TextView
+                android:id="@+id/calendar_title"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/holiday_calendar_name"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_email_iv"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_detail_school_holiday_calendar_name" />
+
+
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/barrier5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="fragment_school_detail_overview_email_iv"
+                app:constraint_referenced_ids="calendar_title"
                 />
 
             <ImageView
@@ -199,7 +273,7 @@
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:contentDescription="@string/school"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolEmailAddress)}"
-                android:src="@drawable/ic_perm_contact_calendar_black_24dp"
+                android:src="@drawable/ic_email_black_24dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier5" />
 
@@ -217,6 +291,18 @@
                 tools:text="info@schoola.com" />
 
             <TextView
+                android:id="@+id/email_title"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/email"
+                app:layout_constraintStart_toEndOf="@+id/school_overview_hc_iv"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_detail_school_email" />
+
+
+
+            <TextView
                 android:id="@+id/fragment_school_overview_classes_heading"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -225,7 +311,7 @@
                 android:text="@string/classes"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/school_overview_hc_iv" />
+                app:layout_constraintTop_toBottomOf="@+id/email_title" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fragment_school_detail_overview_detail_clazz_rv"

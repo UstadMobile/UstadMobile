@@ -149,19 +149,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_address_tip"
-                android:hint="@string/gender_literal">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_address_tip">
 
                 <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:onMessageIdOptionSelected="@{genderSelectionListener}"
                     app:selectedMessageIdOption="@={school.schoolGender}"
                     app:messageIdOptions="@{genderOptions}"
-                    tools:text="Mixed"/>
+                    android:hint="@string/gender_literal"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
