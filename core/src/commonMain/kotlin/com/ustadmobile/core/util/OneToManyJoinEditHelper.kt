@@ -37,7 +37,9 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
 
     fun onEditResult(entity: T) {
         val pk = pkGetter(entity)
-        if(pk as? Long == 0L || pk as? Int == 0){
+        val currentList = liveList.getValue() ?: return
+        val entityIndex = currentList.indexOfFirst { pkGetter(it) == pk }
+        if(entityIndex == -1){
             val newFakePk = fakePkGenerator()
             pkSetter(entity, newFakePk)
             pksToInsert += newFakePk
@@ -46,9 +48,7 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
             val newList = listVal + entity
             liveList.sendValue(newList)
         }else {
-            val newList = liveList.getValue()?.toMutableList() ?: return
-            val editedPk = pkGetter(entity)
-            val entityIndex = newList.indexOfFirst { pkGetter(it) == editedPk }
+            val newList = currentList.toMutableList() ?: return
             newList[entityIndex] = entity
             liveList.sendValue(newList)
         }
