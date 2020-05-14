@@ -84,7 +84,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
-                implementation "com.soywiz:klock-js:$version_klock"
+                implementation "com.soywiz.korlibs.klock:klock-js:$version_klock"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
 

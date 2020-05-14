@@ -347,6 +347,19 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract fun getClazzWithDisplayDetails(clazzUid: Long): DoorLiveData<ClazzWithDisplayDetails?>
 
 
+    /**
+     * Used for scheduling purposes - get a list of classes with the applicable holiday calendar.
+     */
+    @Query("""
+        SELECT Clazz.*, HolidayCalendar.*
+        FROM Clazz 
+        LEFT JOIN HolidayCalendar ON ((clazz.clazzHolidayUMCalendarUid != 0 AND HolidayCalendar.umCalendarUid = clazz.clazzHolidayUMCalendarUid)
+         OR clazz.clazzHolidayUMCalendarUid = 0 AND clazz.clazzSchoolUid = 0 AND HolidayCalendar.umCalendarUid = 
+            (SELECT schoolHolidayCalendarUid FROM School WHERE schoolUid = clazz.clazzSchoolUid))
+        WHERE :filterUid = 0 OR Clazz.clazzUid = :filterUid
+    """)
+    abstract fun findClazzesWithHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendar>
+
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 =

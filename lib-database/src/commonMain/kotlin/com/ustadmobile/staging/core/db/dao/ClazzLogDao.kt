@@ -157,6 +157,14 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract suspend fun getListOfClazzLogUidsAndDatesForClazz(clazzUid: Long)
             :List<ClazzLogUidAndDate>
 
+
+    @Query("""SELECT ClazzLog.* FROM ClazzLog 
+        WHERE 
+        ClazzLog.clazzLogClazzUid = :clazzUid 
+        AND ClazzLog.logDate BETWEEN :fromTime AND :toTime
+    """)
+    abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long): List<ClazzLog>
+
     companion object {
 
 

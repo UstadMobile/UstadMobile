@@ -110,6 +110,8 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     """)
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int): DataSource.Factory<Int, ClazzMemberWithPerson>
 
+    @Query("SELECT ClazzMember.* FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberRole = :roleId")
+    abstract fun findMemberOnlyByClazzUidAndRoleAsList(clazzUid: Long, roleId: Int): List<ClazzMember>
 
     @Query("SELECT ClazzMember.*, Person.* FROM ClazzMember" +
             " LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid" +
