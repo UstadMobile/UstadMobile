@@ -23,7 +23,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.SchoolMemberWithPerson
-import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -31,7 +30,8 @@ import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
-        SchoolMemberListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+        SchoolMemberListView, MessageIdSpinner.OnMessageIdOptionSelectedListener,
+        View.OnClickListener{
 
     private var mPresenter: SchoolMemberListPresenter? = null
 
@@ -42,13 +42,17 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     override val listPresenter: UstadListPresenter<*, in SchoolMemberWithPerson>?
         get() = mPresenter
 
-    class SchoolMemberListViewHolder(val itemBinding: ItemSchoolmemberListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class SchoolMemberListViewHolder(val itemBinding: ItemSchoolmemberListItemBinding)
+        : RecyclerView.ViewHolder(itemBinding.root)
 
     class SchoolMemberListRecyclerAdapter(var presenter: SchoolMemberListPresenter?)
-        : SelectablePagedListAdapter<SchoolMemberWithPerson, SchoolMemberListViewHolder>(DIFF_CALLBACK) {
+        : SelectablePagedListAdapter<SchoolMemberWithPerson,
+            SchoolMemberListViewHolder>(DIFF_CALLBACK) {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SchoolMemberListViewHolder {
-            val itemBinding = ItemSchoolmemberListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
+                : SchoolMemberListViewHolder {
+            val itemBinding = ItemSchoolmemberListItemBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
             return SchoolMemberListViewHolder(itemBinding)
@@ -66,15 +70,17 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
 
         addMode = ListViewAddMode.FAB
 
-        addNewStringId = if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
-            R.string.teacher
-        }else{
-            R.string.student
-        }
+        addNewStringId =
+            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
+                R.string.teacher
+            }else{
+                R.string.student
+            }
 
         filterBySchoolUid = arguments?.getString(UstadView.ARG_SCHOOL_UID)?.toLong()?:0
 
@@ -95,7 +101,6 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         return view
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -104,25 +109,28 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 Person::class.java, KEY_MEMBER_SELECTED_STAFF) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
-           mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
+           mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid,
+                   SchoolMember.SCHOOL_ROLE_TEACHER)
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 Person::class.java, KEY_MEMBER_SELECTED_STUDENT) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid, SchoolMember.SCHOOL_ROLE_STUDENT)
+            mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid,
+                    SchoolMember.SCHOOL_ROLE_STUDENT)
         }
-
     }
 
     override fun onResume() {
         super.onResume()
 
-        addNewStringId = if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
-            R.string.teacher
-        }else{
-            R.string.student
-        }
+        addNewStringId =
+            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF)
+                == true){
+                R.string.teacher
+            }else{
+                R.string.student
+            }
         addMode = ListViewAddMode.FAB
 
         mActivityWithFab?.activityFloatingActionButton?.text =
@@ -167,11 +175,12 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     }
 
     override fun addMember() {
-        val memberSelected = if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF)?:false){
-            KEY_MEMBER_SELECTED_STAFF
-        }else{
-            KEY_MEMBER_SELECTED_STUDENT
-        }
+        val memberSelected =
+            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
+                KEY_MEMBER_SELECTED_STAFF
+            }else{
+                KEY_MEMBER_SELECTED_STUDENT
+            }
         navigateToPickEntityFromList(Person::class.java,  R.id.person_list_dest,
                 bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString()),
                 memberSelected,true)

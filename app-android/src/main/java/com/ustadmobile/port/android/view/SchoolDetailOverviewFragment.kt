@@ -28,10 +28,7 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
-
-interface SchoolWithHolidayCalendarDetailFragmentEventHandler {
-
-}
+interface SchoolWithHolidayCalendarDetailFragmentEventHandler {}
 
 class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalendar>(),
         SchoolDetailOverviewView, SchoolWithHolidayCalendarDetailFragmentEventHandler,
@@ -67,9 +64,8 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
             : RecyclerView.ViewHolder(binding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzViewHolder {
-            val viewHolder = ClazzViewHolder(ItemClazzSimpleBinding.inflate(
+            return ClazzViewHolder(ItemClazzSimpleBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
-            return viewHolder
         }
 
         override fun onBindViewHolder(holder: ClazzViewHolder, position: Int) {

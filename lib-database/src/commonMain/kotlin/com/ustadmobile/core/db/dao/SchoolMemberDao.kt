@@ -69,7 +69,6 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
         val matches = findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
         if(matches.isEmpty()) {
 
-
             val schoolMember = SchoolMember()
             schoolMember.schoolMemberActive = true
             schoolMember.schoolMemberPersonUid = personUid

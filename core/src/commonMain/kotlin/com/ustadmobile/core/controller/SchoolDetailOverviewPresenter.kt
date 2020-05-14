@@ -15,14 +15,12 @@ import com.ustadmobile.lib.db.entities.School
 import kotlinx.coroutines.withTimeoutOrNull
 
 
-class SchoolDetailOverviewPresenter(context: Any,
-                                    arguments: Map<String, String>, view: SchoolDetailOverviewView,
-                                    lifecycleOwner: DoorLifecycleOwner,
-                                    systemImpl: UstadMobileSystemImpl,
-                                    db: UmAppDatabase, repo: UmAppDatabase,
-                                    activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<SchoolDetailOverviewView, SchoolWithHolidayCalendar>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>,
+                view: SchoolDetailOverviewView, lifecycleOwner: DoorLifecycleOwner,
+                systemImpl: UstadMobileSystemImpl, db: UmAppDatabase, repo: UmAppDatabase,
+                activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
+    : UstadDetailPresenter<SchoolDetailOverviewView, SchoolWithHolidayCalendar>(context, arguments,
+        view, lifecycleOwner, systemImpl,db, repo, activeAccount) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -45,9 +43,7 @@ class SchoolDetailOverviewPresenter(context: Any,
         view.schoolClazzes = clazzes
 
         return schoolWithHolidayCalendar
-
     }
-
 
     override fun handleClickEdit() {
         val impl = UstadMobileSystemImpl.instance
@@ -58,11 +54,5 @@ class SchoolDetailOverviewPresenter(context: Any,
         //TODO: this
         return true
     }
-
-    companion object {
-
-
-    }
-
 
 }

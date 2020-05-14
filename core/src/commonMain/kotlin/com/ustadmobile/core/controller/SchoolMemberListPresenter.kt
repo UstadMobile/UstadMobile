@@ -2,14 +2,15 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.core.view.SchoolMemberListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -22,7 +23,6 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
     : UstadListPresenter<SchoolMemberListView, SchoolMember>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
-
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
     enum class SortOrder(val messageId: Int) {
@@ -30,7 +30,8 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    class SchoolMemberListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    class SchoolMemberListSortOption(val sortOrder: SortOrder, context: Any)
+        : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -59,12 +60,12 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
         }
 
         view.list = when(currentSortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.schoolMemberDao.findAllActiveMembersAscBySchoolAndRoleUidAsc(
-                    schoolUid, schoolRole, mSearchQuery
-                    )
-            SortOrder.ORDER_NAME_DSC -> repo.schoolMemberDao.findAllActiveMembersDescBySchoolAndRoleUidAsc(
-                    schoolUid, schoolRole, mSearchQuery
-                    )
+            SortOrder.ORDER_NAME_ASC ->
+                repo.schoolMemberDao.findAllActiveMembersAscBySchoolAndRoleUidAsc(
+                    schoolUid, schoolRole, mSearchQuery)
+            SortOrder.ORDER_NAME_DSC ->
+                repo.schoolMemberDao.findAllActiveMembersDescBySchoolAndRoleUidAsc(
+                    schoolUid, schoolRole, mSearchQuery)
         }
     }
 
@@ -87,7 +88,6 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
     }
 
     override fun handleClickCreateNewFab() {
-
         view.addMember()
     }
 

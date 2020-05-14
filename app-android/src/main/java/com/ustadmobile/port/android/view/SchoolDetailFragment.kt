@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager.widget.ViewPager
@@ -25,7 +24,6 @@ import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import java.lang.IllegalArgumentException
 
 
 class CustomViewNameListFragmentPageAdapter(fm: FragmentManager, behavior: Int,
@@ -87,19 +85,17 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         val navController = findNavController()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
+        val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
+
         val tabs = listOf(
                 SchoolDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
-                        "${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}"
+                        entityUidValue
                 ,
                 SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF}=" +
-                        "${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}" +
-                        "&${UstadView.ARG_SCHOOL_UID}=" +
-                        "${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}"
+                        entityUidValue + "&${UstadView.ARG_SCHOOL_UID}=" + entityUidValue
                 ,
                 SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS}=" +
-                        "${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}" +
-                        "&${UstadView.ARG_SCHOOL_UID}=" +
-                        "${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}"
+                        entityUidValue + "&${UstadView.ARG_SCHOOL_UID}=" + entityUidValue
         )
         val viewNameToTitle = mapOf(
                 SchoolDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
@@ -117,7 +113,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
             mTabLayout?.setupWithViewPager(mPager)
         }
     }
-
 
     override fun setSettingsVisible(visible: Boolean){
 
