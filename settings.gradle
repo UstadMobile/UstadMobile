@@ -22,4 +22,5 @@ include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':lib-
 //include ':app-rest-server'
 
 rootProject.name = "UstadMobile"
+enableFeaturePreview("GRADLE_METADATA")
 

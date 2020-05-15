@@ -336,7 +336,7 @@ dependencies {
     implementation "androidx.work:work-runtime:$version_android_workmanager"
 
     //Klock
-    implementation "com.soywiz:klock-android:$version_klock"
+    implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"

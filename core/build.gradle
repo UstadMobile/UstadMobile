@@ -164,7 +164,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
-                implementation "com.soywiz:klock-metadata:$version_klock"
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
@@ -202,7 +202,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
-                implementation "com.soywiz:klock-jvm:$version_klock"
+                implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
             }
             dependsOn commonJvmMain
         }
@@ -265,7 +265,7 @@ kotlin {
                 //Seems to fix things when we put a specific dependency here
                 implementation "androidx.coordinatorlayout:coordinatorlayout:$version_androidx_coordinatorlayout"
                 implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
-                implementation "com.soywiz:klock-android:$version_klock"
+                implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
@@ -321,7 +321,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
-                implementation "com.soywiz:klock-js:$version_klock"
+                implementation "com.soywiz.korlibs.klock:klock-js:$version_klock"
                 implementation "com.github.aakira:napier-js:$version_napier"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
@@ -341,37 +341,38 @@ jacoco {
  * Create a Jacocco task for reporting test coverage - as per:
  * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
  */
-project.afterEvaluate {
-    def testTaskName = "jvmTest"
-
-    // Create gradle task
-    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
-        group = "Reporting"
-        description = "Generate Jacoco coverage reports on the common module build."
-
-        def excludes = [
-                '**/*Test*.*'
-        ]
-
-        classDirectories = fileTree(
-                dir: "${project.buildDir}/classes/kotlin/jvm/",
-                excludes: excludes
-        )
-
-        def coverageSourceDirs = [
-                "src/commonMain/kotlin"
-        ]
-
-        additionalSourceDirs = files(coverageSourceDirs)
-        sourceDirectories = files(coverageSourceDirs)
-        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
-
-        reports {
-            xml.enabled = true
-            html.enabled = true
-        }
-    }
-}
+//TODO: this needs to be fixed for creating a coverage report of jvmTest
+//project.afterEvaluate {
+//    def testTaskName = "jvmTest"
+//
+//    // Create gradle task
+//    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
+//        group = "Reporting"
+//        description = "Generate Jacoco coverage reports on the common module build."
+//
+//        def excludes = [
+//                '**/*Test*.*'
+//        ]
+//
+//        classDirectories = fileTree(
+//                dir: "${project.buildDir}/classes/kotlin/jvm/",
+//                excludes: excludes
+//        )
+//
+//        def coverageSourceDirs = [
+//                "src/commonMain/kotlin"
+//        ]
+//
+//        additionalSourceDirs = files(coverageSourceDirs)
+//        sourceDirectories = files(coverageSourceDirs)
+//        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
+//
+//        reports {
+//            xml.enabled = true
+//            html.enabled = true
+//        }
+//    }
+//}
 
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
 configurations {

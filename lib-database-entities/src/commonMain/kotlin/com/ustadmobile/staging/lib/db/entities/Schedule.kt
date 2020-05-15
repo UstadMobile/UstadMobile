@@ -76,13 +76,14 @@ class Schedule {
         val SCHEDULE_FREQUENCY_MONTHLY = 4
         val SCHEDULE_FREQUENCY_YEARLY = 5
 
-        val DAY_SUNDAY = 1
-        val DAY_MONDAY = 2
-        val DAY_TUESDAY = 3
-        val DAY_WEDNESDAY = 4
-        val DAY_THURSDAY = 5
-        val DAY_FRIDAY = 6
-        val DAY_SATURDAY = 7
+        // Constants as per Klock
+        val DAY_SUNDAY = 0
+        val DAY_MONDAY = 1
+        val DAY_TUESDAY = 2
+        val DAY_WEDNESDAY = 3
+        val DAY_THURSDAY = 4
+        val DAY_FRIDAY = 5
+        val DAY_SATURDAY = 6
 
 
         val MONTH_JANUARY = 1
