@@ -47,6 +47,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_school_edit_edit_clx"
+            android:paddingBottom="50dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
