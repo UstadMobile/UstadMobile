@@ -17,7 +17,6 @@ import com.ustadmobile.core.view.ReportEditView.Companion.ARG_ACTOR_SET
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLASSES_SET
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATIONS_SET
 import com.ustadmobile.core.view.ReportEditView.Companion.ARG_PEOPLE_SET
-import com.ustadmobile.core.view.SelectPeopleDialogView.Companion.ARG_SELECT_ACTOR
 
 
 /**
@@ -176,7 +175,7 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
             val selectedClassesCSV = ArgumentUtil.convertLongListToStringCSV(selectedClasses!!)
             args.put(ARG_CLASSES_SET, selectedClassesCSV)
         }
-        impl.go(SelectClazzesDialogView.VIEW_NAME, args, context)
+        //impl.go(SelectClazzesDialogView.VIEW_NAME, args, context)
     }
 
     fun goToLocationDialog() {
@@ -203,7 +202,7 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
             args.put(ARG_PEOPLE_SET, selectedPeopleCSV)
         }
 
-        impl.go(SelectPeopleDialogView.VIEW_NAME, args, context)
+        //impl.go(SelectPeopleDialogView.VIEW_NAME, args, context)
     }
 
     fun goToActorDialog() {
@@ -216,8 +215,8 @@ AuditLogSelectionView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.
             val selectedActorCSV = ArgumentUtil.convertLongListToStringCSV(selectedActors!!)
             args.put(ARG_ACTOR_SET, selectedActorCSV)
         }
-        args.put(ARG_SELECT_ACTOR, "yes")
-        impl.go(SelectPeopleDialogView.VIEW_NAME, args, context)
+        //args.put(ARG_SELECT_ACTOR, "yes")
+        //impl.go(SelectPeopleDialogView.VIEW_NAME, args, context)
     }
 
     companion object {

@@ -8,7 +8,6 @@ import com.ustadmobile.core.db.dao.PersonGroupMemberDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithPresenter
-import com.ustadmobile.core.view.ClazzDetailEnrollStudentView
 import com.ustadmobile.core.view.GroupDetailView
 import com.ustadmobile.core.view.GroupDetailView.Companion.GROUP_UID
 import com.ustadmobile.lib.db.entities.PersonGroup
@@ -120,7 +119,7 @@ class GroupDetailPresenter(context: Any, arguments: Map<String, String>?, view: 
     fun handleClickAddMember() {
         val args = HashMap<String, String>()
         args.put(GROUP_UID, currentGroupUid.toString())
-        impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, context)
+        //impl.go(ClazzDetailEnrollStudentView.VIEW_NAME, args, context)
 
     }
 

@@ -5,7 +5,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.view.ClazzDetailEnrollStudentView.Companion.ARG_NEW_PERSON
 import com.ustadmobile.core.view.PeopleListView
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_ATTENDANCE_ASC
 import com.ustadmobile.core.view.PeopleListView.Companion.SORT_ORDER_ATTENDANCE_DESC
@@ -188,7 +187,7 @@ class PeopleListPresenter(context: Any, arguments: Map<String, String>?, view: P
 
             val args = HashMap<String, String>()
             args.put(ARG_PERSON_UID, result.toString())
-            args.put(ARG_NEW_PERSON, "true")
+            //args.put(ARG_NEW_PERSON, "true")
             impl.go(PersonEditView.VIEW_NAME, args, view.viewContext)
 
         }

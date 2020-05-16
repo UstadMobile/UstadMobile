@@ -118,18 +118,6 @@
             android:name="com.ustadmobile.staging.port.android.view.ClazzLogDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.PersonDetailActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.PersonEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.PersonDetailEnrollClazzActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.ClazzDetailEnrollStudentActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.SELSelectStudentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
@@ -235,13 +223,7 @@
             android:name="com.ustadmobile.staging.port.android.view.AuditLogListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.SelectClazzFeaturesDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.PersonAuthDetailActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.SelectPeopleDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.CustomFieldListActivity"
@@ -264,11 +246,6 @@
             android:name="com.ustadmobile.staging.port.android.view.PeopleListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/people"
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.SchoolEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/add_school"
             android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditActivity"

@@ -28,7 +28,6 @@ import com.ustadmobile.core.db.dao.PersonPictureDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.PersonWithEnrollment
-import com.ustadmobile.staging.port.android.view.PersonEditActivity.Companion.DEFAULT_PADDING
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -192,19 +191,20 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
      * @return  The resource id
      */
     private fun getAddPersonIconResourceId(pPackageName: String): Int {
-        try {
-            return if (theActivity != null) {
-                theActivity!!.resources.getIdentifier(PersonEditActivity.ADD_PERSON_ICON,
-                        "drawable", pPackageName)
-            } else {
-                theFragment!!.resources.getIdentifier(PersonEditActivity.ADD_PERSON_ICON,
-                        "drawable", pPackageName)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return -1
-        }
+//        try {
+//            return if (theActivity != null) {
+//                theActivity!!.resources.getIdentifier(PersonEditActivity.ADD_PERSON_ICON,
+//                        "drawable", pPackageName)
+//            } else {
+//                theFragment!!.resources.getIdentifier(PersonEditActivity.ADD_PERSON_ICON,
+//                        "drawable", pPackageName)
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            return -1
+//        }
 
+        return 0
     }
 
     /**
@@ -630,7 +630,7 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
         }
 
         val headingCL = ConstraintLayout(context)
-        val defaultPaddingBy2 = getDp(context,DEFAULT_PADDING / 2)
+        val defaultPaddingBy2 = getDp(context,16 / 2)
 
         //The Heading TextView
         val headingTV = TextView(context)
@@ -703,8 +703,8 @@ class PersonWithEnrollmentRecyclerAdapter : PagedListAdapter<PersonWithEnrollmen
 
         //Create the Constraint layout wrapper, the heading, icon and button
         val addCL = ConstraintLayout(holder.itemView.context)
-        val defaultPadding = getDp(holder.itemView.context, DEFAULT_PADDING)
-        val defaultPaddingBy2 = getDp(holder.itemView.context, DEFAULT_PADDING / 2)
+        val defaultPadding = getDp(holder.itemView.context, 16)
+        val defaultPaddingBy2 = getDp(holder.itemView.context, 16 / 2)
 
         //"Teachers/Students" heading
         val headingTV = TextView(holder.itemView.context)

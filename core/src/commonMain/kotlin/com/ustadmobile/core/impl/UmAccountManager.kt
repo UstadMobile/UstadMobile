@@ -117,6 +117,10 @@ object UmAccountManager {
         }
     }
 
+    fun getActiveDatabaseName(context: Any): String {
+        return sanitizeDbNameFromUrl(getActiveEndpoint(context))
+    }
+
     /**
      * Get the main database for the currently active endpoint
      */

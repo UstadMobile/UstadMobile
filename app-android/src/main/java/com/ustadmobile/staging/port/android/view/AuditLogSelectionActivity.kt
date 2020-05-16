@@ -17,8 +17,7 @@ import java.util.*
 class AuditLogSelectionActivity : UstadBaseActivity(), AuditLogSelectionView,
         //SelectClazzesDialogFragment.ClazzSelectDialogListener,
         SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener,
-        SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener,
-        SelectPeopleDialogFragment.PersonSelectDialogListener {
+        SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener {
 
     private var toolbar: Toolbar? = null
     private var mPresenter: AuditLogSelectionPresenter? = null
@@ -133,27 +132,7 @@ class AuditLogSelectionActivity : UstadBaseActivity(), AuditLogSelectionView,
         updateLocationsSelected(locationsSelectedString.toString())
     }
 
-    override fun onSelectPeopleListener(selected: HashMap<String, Long>?, actor: Boolean) {
 
-        val selectedPeopleNamesIterator = selected!!.keys.iterator()
-        val peopleSelectedString = StringBuilder()
-        while (selectedPeopleNamesIterator.hasNext()) {
-            peopleSelectedString.append(selectedPeopleNamesIterator.next())
-            if (selectedPeopleNamesIterator.hasNext()) {
-                peopleSelectedString.append(", ")
-            }
-        }
-        val selectedPeopleList = ArrayList(selected.values)
-
-        if (actor) {
-            //Find out if its actors or people
-            mPresenter!!.selectedActors = selectedPeopleList
-            updateActorsSelected(peopleSelectedString.toString())
-        } else {
-            mPresenter!!.selectedPeople = selectedPeopleList
-            updatePeopleSelected(peopleSelectedString.toString())
-        }
-    }
 
     override fun onCustomTimesResult(from: Long, to: Long) {
         mPresenter!!.fromTime = from
