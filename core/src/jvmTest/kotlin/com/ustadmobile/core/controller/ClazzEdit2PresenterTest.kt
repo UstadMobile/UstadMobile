@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
 import kotlinx.serialization.json.Json
@@ -11,10 +11,10 @@ class ClazzEdit2PresenterTest {
 
     @Test
     fun testSerializer() {
-        val clazzWithHolidays = ClazzWithHolidayCalendar()
+        val clazzWithHolidays = ClazzWithHolidayCalendarAndSchool()
         val outgoing = defaultSerializer().write(clazzWithHolidays)
         val str = (outgoing as TextContent).text
-        val json = Json.stringify(ClazzWithHolidayCalendar.serializer(), clazzWithHolidays)
+        val json = Json.stringify(ClazzWithHolidayCalendarAndSchool.serializer(), clazzWithHolidays)
         Assert.assertNotNull(json)
     }
 

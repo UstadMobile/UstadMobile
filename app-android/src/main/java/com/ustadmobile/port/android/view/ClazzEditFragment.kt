@@ -43,13 +43,13 @@ interface ClazzEdit2ActivityEventHandler {
 }
 
 
-class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), ClazzEdit2View, ClazzEdit2ActivityEventHandler {
+class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View, ClazzEdit2ActivityEventHandler {
 
     private var mDataBinding: FragmentClazzEditBinding? = null
 
     private var mPresenter: ClazzEdit2Presenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendar>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzWithHolidayCalendarAndSchool>?
         get() = mPresenter
 
     private var scheduleRecyclerAdapter: ScheduleRecyclerAdapter? = null
@@ -89,7 +89,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendar>(), Clazz
         }
     }
 
-    override var entity: ClazzWithHolidayCalendar? = null
+    override var entity: ClazzWithHolidayCalendarAndSchool? = null
         get() = field
         set(value) {
             mDataBinding?.clazz = value

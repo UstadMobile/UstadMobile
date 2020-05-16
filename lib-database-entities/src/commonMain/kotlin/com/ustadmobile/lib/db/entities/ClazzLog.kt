@@ -29,6 +29,8 @@ open class ClazzLog()  {
 
     var clazzLogDone: Boolean = false
 
+    var cancellationNote: String? = null
+
     var clazzLogCancelled: Boolean = false
 
     var clazzLogNumPresent: Int = 0
