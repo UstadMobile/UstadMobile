@@ -1,9 +1,9 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.@Entity@
-import com.ustadmobile.lib.db.entities.@DisplayEntity@
+@DisplayEntity_Import@
 
-interface @Entity@ListView: UstadListView<@Entity@, @DisplayEntity@> {
+interface @BaseFileName@View: UstadListView<@Entity@, @DisplayEntity@> {
 
     companion object {
         const val VIEW_NAME = "@Entity@ListView"

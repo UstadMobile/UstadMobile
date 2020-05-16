@@ -8,17 +8,17 @@ import android.widget.AdapterView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.Item@Entity_ViewBinding_VariableName@ListItemBinding
-import com.ustadmobile.core.controller.@Entity@ListPresenter
+import com.toughra.ustadmobile.databinding.Item@ListItemName@ListBinding
+import com.ustadmobile.core.controller.@BaseFileName@Presenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.@Entity@ListView
+import com.ustadmobile.core.view.@BaseFileName@View
 import com.ustadmobile.lib.db.entities.@Entity@
-import com.ustadmobile.lib.db.entities.@DisplayEntity@
+@DisplayEntity_Import@
 import com.ustadmobile.core.view.GetResultMode
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -27,21 +27,21 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
-class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),
-        @Entity@ListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class @BaseFileName@Fragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),
+        @BaseFileName@View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
-    private var mPresenter: @Entity@ListPresenter? = null
+    private var mPresenter: @BaseFileName@Presenter? = null
 
     override val listPresenter: UstadListPresenter<*, in @DisplayEntity@>?
         get() = mPresenter
 
-    class @Entity@ListViewHolder(val itemBinding: Item@Entity_ViewBinding_VariableName@ListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class @Entity@ListViewHolder(val itemBinding: Item@ListItemName@ListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-    class @Entity@ListRecyclerAdapter(var presenter: @Entity@ListPresenter?)
+    class @Entity@ListRecyclerAdapter(var presenter: @BaseFileName@Presenter?)
         : SelectablePagedListAdapter<@DisplayEntity@, @Entity@ListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): @Entity@ListViewHolder {
-            val itemBinding = Item@Entity_ViewBinding_VariableName@ListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val itemBinding = Item@ListItemName@ListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
             return @Entity@ListViewHolder(itemBinding)
@@ -61,7 +61,7 @@ class @Entity@ListFragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        mPresenter = @Entity@ListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
+        mPresenter = @BaseFileName@Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),

@@ -11,11 +11,11 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.UmAccount
 
-class @Entity@ListPresenter(context: Any, arguments: Map<String, String>, view: @Entity@ListView,
+class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view: @BaseFileName@View,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
                           db: UmAppDatabase, repo: UmAppDatabase,
                           activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<@Entity@ListView, @Entity@>(context, arguments, view, lifecycleOwner, systemImpl,
+    : UstadListPresenter<@BaseFileName@View, @Entity@>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
 

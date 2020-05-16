@@ -4,15 +4,15 @@
 
     <data>
         <import type="com.ustadmobile.lib.db.entities.@DisplayEntity@"/>
-        <import type="com.ustadmobile.port.android.view.@Entity@ListFragment"/>
-        <import type="com.ustadmobile.port.android.view.@Entity@ListFragment.@Entity@ListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.@BaseFileName@Fragment"/>
+        <import type="com.ustadmobile.port.android.view.@BaseFileName@Fragment.@Entity@ListRecyclerAdapter"/>
 
         <variable
             name="@Entity_VariableName@"
             type="@DisplayEntity@" />
         <variable
             name="presenter"
-            type="com.ustadmobile.core.controller.@Entity@ListPresenter" />
+            type="com.ustadmobile.core.controller.@BaseFileName@Presenter" />
 
         <variable
             name="selectablePagedListAdapter"
@@ -44,7 +44,7 @@
 
         <!-- Line 1-->
         <TextView
-            android:id="@+id/item_@Entity_LowerCase@_text"
+            android:id="@+id/line1_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
@@ -60,11 +60,11 @@
 
         <!-- Line 2-->
         <TextView
-            android:id="@+id/item_@Entity_LowerCase@_line2_text"
+            android:id="@+id/line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@+id/item_@Entity_LowerCase@_line1_text"
-            app:layout_constraintTop_toBottomOf="@+id/item_@Entity_LowerCase@_line1_text"
+            app:layout_constraintStart_toStartOf="@+id/line1_text"
+            app:layout_constraintTop_toBottomOf="@+id/line1_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
