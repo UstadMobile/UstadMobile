@@ -363,6 +363,9 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     """)
     abstract fun findClazzesWithEffectiveHolidayCalendarAndFilter(filterUid: Long): List<ClazzWithHolidayCalendarAndSchool>
 
+    @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
+    abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
+
     companion object {
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 =

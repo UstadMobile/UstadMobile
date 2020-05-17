@@ -38,8 +38,16 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        if(savedState != null && savedState[ARG_ENTITY_JSON] != null) {
-            entity = onLoadFromJson(savedState)
+        val mapWithEntityJson = if(savedState?.containsKey(ARG_ENTITY_JSON) == true) {
+            savedState
+        }else if(arguments.containsKey(ARG_ENTITY_JSON)){
+            arguments
+        }else {
+            null
+        }
+
+        if(mapWithEntityJson != null && mapWithEntityJson[ARG_ENTITY_JSON] != null) {
+            entity = onLoadFromJson(mapWithEntityJson)
             view.entity = entity
             (view as? UstadEditView<*>)?.fieldsEnabled = true
         }else if(persistenceMode == PersistenceMode.DB) {

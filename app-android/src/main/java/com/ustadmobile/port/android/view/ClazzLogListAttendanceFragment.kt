@@ -7,17 +7,20 @@ import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.databinding.ItemClazzLogAttendanceListBinding
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import java.util.*
 
 class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog>(),
         ClazzLogListAttendanceView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -27,9 +30,15 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
     override val listPresenter: UstadListPresenter<*, in ClazzLog>?
         get() = mPresenter
 
+    override var clazzTimeZone: String?
+        get() = (mDataRecyclerViewAdapter as? ClazzLogListRecyclerAdapter)?.clazzTimeZone
+        set(value) {
+            (mDataRecyclerViewAdapter as? ClazzLogListRecyclerAdapter)?.clazzTimeZone = value
+        }
+
     class ClazzLogListViewHolder(val itemBinding: ItemClazzLogAttendanceListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-    class ClazzLogListRecyclerAdapter(var presenter: ClazzLogListAttendancePresenter?)
+    class ClazzLogListRecyclerAdapter(var presenter: ClazzLogListAttendancePresenter?, var clazzTimeZone: String?)
         : SelectablePagedListAdapter<ClazzLog, ClazzLogListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzLogListViewHolder {
@@ -42,6 +51,13 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         override fun onBindViewHolder(holder: ClazzLogListViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.clazzLog = item
+            val timezoneVal = clazzTimeZone
+            if(timezoneVal != null){
+                holder.itemBinding.clazzLogLocalTime = DateTime.fromUnix(item?.logDate ?: 0L)
+                        .toOffsetByTimezone(timezoneVal)
+                holder.itemBinding.clazzLocalTimeZone = TimeZone.getTimeZone(timezoneVal)
+            }
+
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
@@ -59,7 +75,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
 
-        mDataRecyclerViewAdapter = ClazzLogListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ClazzLogListRecyclerAdapter(mPresenter, clazzTimeZone ?: "UTC")
         val createNewText = ""
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view

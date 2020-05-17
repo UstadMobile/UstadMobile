@@ -4,11 +4,14 @@ import android.annotation.SuppressLint
 import android.text.format.DateFormat
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
+import com.soywiz.klock.DateTimeTz
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.lib.db.entities.*
 import com.toughra.ustadmobile.R
+import java.util.*
+import com.soywiz.klock.DateFormat as KlockDateFormat
 
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
@@ -104,4 +107,32 @@ fun TextView.setClazzMemberRole(clazzRole: Int) {
     }else {
         ""
     }
+}
+
+@BindingAdapter("textClazzLogStatus")
+fun TextView.setTextClazzLogStatus(clazzLog: ClazzLog) {
+    text = when(clazzLog.clazzLogStatusFlag) {
+        ClazzLog.STATUS_CREATED -> context.getString(R.string.not_recorded)
+        ClazzLog.STATUS_HOLIDAY -> "${context.getString(R.string.holiday)} - ${clazzLog.cancellationNote}"
+        ClazzLog.STATUS_RECORDED -> context.getString(R.string.present_late_absent,
+                clazzLog.clazzLogNumPresent, clazzLog.clazzLogNumPartial, clazzLog.clazzLogNumAbsent)
+        else -> ""
+    }
+}
+
+private val klockDateFormat :KlockDateFormat by lazy { KlockDateFormat("EEE") }
+
+@BindingAdapter("textShortDayOfWeek")
+fun TextView.setTextShortDayOfWeek(localTime: DateTimeTz) {
+    text = klockDateFormat.format(localTime)
+}
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter(value=["textLocalDateTime", "textLocalDateTimeZone"])
+fun TextView.setTextLocalDayAndTime(time: Long, timeZone: TimeZone){
+    val dateFormat = DateFormat.getMediumDateFormat(context)
+    val timeFormat = DateFormat.getTimeFormat(context)
+    timeFormat.timeZone = timeZone
+    dateFormat.timeZone = timeZone
+    text = dateFormat.format(time) + " - " + timeFormat.format(time)
 }

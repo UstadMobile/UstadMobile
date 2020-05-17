@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.junit.Test
 
@@ -59,12 +60,20 @@ class ClazzLogListAttendancePresenterTest {
 
     @Test
     fun givenClazzUidFilter_whenOnCreateCalled_thenShouldFindByClazzUidAndSetList() {
+        val testClazz = Clazz("Test Clazz").apply {
+            clazzUid = 42L
+            clazzTimeZone = "Asia/Dubai"
+        }
+        db.clazzDao.insert(testClazz)
+
+
         val presenter = ClazzLogListAttendancePresenter(context,
                 mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to "42"), mockView, mockLifecycleOwner,
                 systemImpl, db, repo, activeAccount)
         presenter.onCreate(null)
 
         verify(repoClazzLogDao, timeout(5000)).findByClazzUidAsFactory(42L)
+        verify(mockView, timeout(5000)).clazzTimeZone = "Asia/Dubai"
     }
 
 }

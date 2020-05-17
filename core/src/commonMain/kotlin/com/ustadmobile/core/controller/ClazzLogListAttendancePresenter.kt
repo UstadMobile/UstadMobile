@@ -8,8 +8,12 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.lib.db.entities.ClazzWithSchool
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, String>, view: ClazzLogListAttendanceView,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
@@ -22,6 +26,8 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
     var clazzUidFilter: Long = 0
+
+    private var clazzWithSchool: ClazzWithSchool? = null
 
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
@@ -43,7 +49,12 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     }
 
     private fun updateListOnView() {
-        view.list = repo.clazzLogDao.findByClazzUidAsFactory(clazzUidFilter)
+        GlobalScope.launch(doorMainDispatcher()) {
+            clazzWithSchool = repo.clazzDao.getClazzWithSchool(clazzUidFilter)
+            view.clazzTimeZone = clazzWithSchool?.clazzTimeZone ?: clazzWithSchool?.school?.schoolTimeZone ?: "UTC"
+            view.list = repo.clazzLogDao.findByClazzUidAsFactory(clazzUidFilter)
+        }
+
     }
 
     override fun handleClickEntry(entry: ClazzLog) {

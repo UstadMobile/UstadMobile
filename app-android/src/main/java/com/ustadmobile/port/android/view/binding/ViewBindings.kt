@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.databinding.BindingAdapter
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.CustomFieldValue
@@ -145,5 +146,13 @@ fun <T> View.setSelectableViewHelper(selectableViewHelper: SelectableViewHelper?
         it.isSelected = !it.isSelected
         onSelectedStateChanged?.onSelectionStateChanged(it)
         true
+    }
+}
+
+@BindingAdapter("linearLayoutWeight")
+fun View.setLinearLayoutWeight(weight: Float) {
+    val layoutParamsVal = this.layoutParams
+    if(layoutParamsVal is LinearLayout.LayoutParams) {
+        layoutParams = layoutParamsVal.also { it.weight = weight }
     }
 }

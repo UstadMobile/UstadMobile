@@ -41,6 +41,8 @@ open class ClazzLog()  {
 
     var clazzLogScheduleUid: Long = 0
 
+    var clazzLogStatusFlag: Int = 0
+
     @MasterChangeSeqNum
     var clazzLogMSQN: Long = 0
 
@@ -55,6 +57,17 @@ open class ClazzLog()  {
         this.clazzLogClazzUid = clazzUid
         this.logDate = logDate
         this.clazzLogScheduleUid = scheduleUid
+    }
+
+    companion object {
+
+        const val STATUS_CREATED = 0
+
+        const val STATUS_HOLIDAY = 1
+
+        const val STATUS_MANUALLYCANCELED = 2
+
+        const val STATUS_RECORDED = 4
     }
 
 
