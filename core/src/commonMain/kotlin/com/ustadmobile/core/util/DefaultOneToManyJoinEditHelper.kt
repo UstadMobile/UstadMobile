@@ -29,6 +29,9 @@ class DefaultOneToManyJoinEditHelper<T>(pkGetter: (T) -> Long,
 
     override suspend fun commitToDatabase(dao: OneToManyJoinDao<T>, fkSetter: (T) -> Unit) {
         super.commitToDatabase(dao, fkSetter)
-        dao.deactivateByUids(entitiesToDeactivate.map { pkGetter(it) })
+        dao.deactivateByUids(primaryKeysToDeactivate)
     }
+
+    override open fun doesNewEntityRequireFakePk(pk: Long) = (pk == 0L)
+
 }

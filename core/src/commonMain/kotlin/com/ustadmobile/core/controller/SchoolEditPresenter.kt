@@ -62,9 +62,9 @@ class SchoolEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
-        view.schoolClazzes = clazzOneToManyJoinEditHelper.liveList
         view.genderOptions = GenderOptions.values().map { GenderTypeMessageIdOption(it, context) }
+        view.schoolClazzes = clazzOneToManyJoinEditHelper.liveList
+
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SchoolWithHolidayCalendar? {
@@ -115,9 +115,12 @@ class SchoolEditPresenter(context: Any,
                 repo.schoolDao.updateAsync(entity)
             }
 
-            clazzOneToManyJoinEditHelper.commitToDatabase(repo.clazzDao){
-                it.clazzSchoolUid = entity.schoolUid
-            }
+            val allClazzes = clazzOneToManyJoinEditHelper.liveList.getValue() ?: listOf()
+            val clazzesToAssign = allClazzes.filter { it.clazzSchoolUid != entity.schoolUid}
+            repo.clazzDao.assignClassesToSchool(clazzesToAssign.map { it.clazzUid }, entity.schoolUid)
+            repo.clazzDao.assignClassesToSchool(
+                    clazzOneToManyJoinEditHelper.primaryKeysToDeactivate, 0L)
+
             view.finishWithResult(listOf(entity))
         }
     }

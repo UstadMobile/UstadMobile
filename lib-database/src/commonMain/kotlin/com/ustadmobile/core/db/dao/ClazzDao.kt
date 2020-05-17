@@ -85,10 +85,11 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     /**
      * Does not deactivate the clazz, dissassociates a school from the class.
      */
-    override suspend fun deactivateByUids(uidList: List<Long>) {
-        uidList.forEach {
+    override suspend fun deactivateByUids(uidList: List<Long>) = assignClassesToSchool(uidList, 0L)
 
-            updateSchoolOnClazzUid(it, 0)
+    suspend fun assignClassesToSchool(uidList: List<Long>, schoolUid: Long) {
+        uidList.forEach {
+            updateSchoolOnClazzUid(it, schoolUid)
         }
     }
 
