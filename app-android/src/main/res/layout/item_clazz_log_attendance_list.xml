@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.ClazzLog"/>
+        <import type="com.ustadmobile.port.android.view.ClazzLogListAttendanceFragment"/>
+        <import type="com.ustadmobile.port.android.view.ClazzLogListAttendanceFragment.ClazzLogListRecyclerAdapter"/>
+
+        <variable
+            name="clazzLog"
+            type="ClazzLog" />
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzLogListAttendancePresenter" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="ClazzLogListRecyclerAdapter" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzLog)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(clazzLog)}"
+        android:background="@drawable/bg_listitem"
+        >
+
+        <!-- TODO: Change or remove this icon -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_clazzlog_newitemicon"
+            app:srcCompat="@drawable/ic_add_black_24dp"
+            android:layout_width="@dimen/list_twoline1_imagesize"
+            android:layout_height="@dimen/list_twoline1_imagesize"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <!-- Line 1-->
+        <TextView
+            android:id="@+id/line1_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:dateLong="@{clazzLog.logDate}"
+            tools:text="Thursday, April 20 12:00pm"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            android:textColor="@color/text_primary"
+            />
+
+        <!-- Line 2-->
+        <TextView
+            android:id="@+id/line2_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/line1_text"
+            app:layout_constraintTop_toBottomOf="@+id/line1_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
