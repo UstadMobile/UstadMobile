@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+
         <variable
             name="school"
             type="com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation" />
@@ -36,16 +38,25 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="School A" />
 
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrierLoc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="item_school_list_item_school_name"
+           />
+
             <ImageView
                 android:id="@+id/item_school_list_item_location_iv"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(school.schoolAddress)}"
                 android:contentDescription="@string/people"
                 android:tint="@color/text_secondary"
                 app:layout_constraintStart_toEndOf="@+id/imageView10"
-                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_school_name"
+                app:layout_constraintTop_toBottomOf="@+id/barrierLoc"
                 app:srcCompat="@drawable/ic_location_pin_24dp" />
 
             <TextView
@@ -56,9 +67,18 @@
                 android:textColor="@color/text_secondary"
                 android:layout_marginTop="8dp"
                 android:text="@{school.schoolAddress}"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(school.schoolAddress)}"
                 tools:text="Nairobi, Kenya"
                 app:layout_constraintStart_toEndOf="@+id/item_school_list_item_location_iv"
-                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_school_name" />
+                app:layout_constraintTop_toBottomOf="@+id/barrierLoc" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrierMemberDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="item_school_list_item_location_name"
+                />
 
             <ImageView
                 android:id="@+id/item_school_list_item_members_iv"
@@ -68,7 +88,7 @@
                 android:layout_marginTop="8dp"
                 android:contentDescription="@string/members"
                 app:layout_constraintStart_toEndOf="@+id/imageView10"
-                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_location_iv"
+                app:layout_constraintTop_toBottomOf="@+id/barrierMemberDetails"
                 app:srcCompat="@drawable/ic_people_black_24dp" />
 
             <TextView
@@ -81,19 +101,18 @@
                 android:text="@{@string/num_items_with_name_with_comma(school.numStudents, @string/students_literal, school.numTeachers, @string/teachers_literal)}"
                 tools:text="460 students, 30 teachers"
                 app:layout_constraintStart_toEndOf="@+id/item_school_list_item_members_iv"
-                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_location_name" />
+                app:layout_constraintTop_toBottomOf="@+id/barrierMemberDetails" />
 
             <View
                 android:id="@+id/item_school_list_item_horizontal_divider"
                 android:layout_width="368dp"
                 android:layout_height="1dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:background="?android:attr/listDivider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/item_school_list_item_members_tv"
-                />
+                app:layout_constraintTop_toBottomOf="@+id/imageView10" />
 
             <ImageView
                 android:id="@+id/imageView10"

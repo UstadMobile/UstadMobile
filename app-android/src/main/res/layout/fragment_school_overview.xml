@@ -197,6 +197,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phone_num_message_imageview"
                     app:onClickSms="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
+                    android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolPhoneNumber)}"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginTop="8dp"

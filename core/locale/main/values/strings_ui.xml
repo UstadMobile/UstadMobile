@@ -863,4 +863,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="contact_details">Contact details</string>
 
+    <string name="untitled">Untitled</string>
+    <string name="required_field">Required field</string>
+
 </resources>
