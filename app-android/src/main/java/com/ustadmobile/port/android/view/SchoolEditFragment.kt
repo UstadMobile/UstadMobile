@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -21,6 +22,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
@@ -191,7 +194,9 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override fun onClickEditClazz(clazz: Clazz?) {
         onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(clazz, R.id.clazz_edit_dest, Clazz::class.java)
+
+        navigateToEditEntity(clazz, R.id.clazz_detail_dest, Clazz::class.java)
+
     }
 
     override fun onClickDeleteClazz(clazz: Clazz) {
@@ -200,7 +205,9 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override fun onClickAddClazz() {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Clazz::class.java,  R.id.clazz_list_dest)
+        navigateToPickEntityFromList(Clazz::class.java,
+                R.id.clazz_list_dest,
+                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to entity?.schoolUid.toString()))
     }
 
     override fun showHolidayCalendarPicker() {

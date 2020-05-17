@@ -199,6 +199,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/email"
+                    android:inputType="textEmailAddress"
                     android:text="@={school.schoolEmailAddress}"
                     tools:text="info@schoola.com" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -221,7 +222,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:onClickNew="@{() -> activityEventHandler.onClickAddClazz()}"
-                app:createNewText="@{@string/clazz}"
+                app:createNewText="@{@string/add_a(@string/clazz)}"
                 app:layout_constraintTop_toBottomOf=
                     "@+id/fragment_school_edit_classes_heading"
                 app:layout_constraintStart_toStartOf="parent"

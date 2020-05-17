@@ -6,6 +6,8 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
+import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Clazz
@@ -25,6 +27,8 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
+    private var filterExcludeMembersOfSchool : Long = 0
+
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
         ORDER_NAME_DSC(MessageID.sort_by_name_desc),
@@ -36,6 +40,8 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+
+        filterExcludeMembersOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
 
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
         getAndSetList(SortOrder.ORDER_NAME_ASC)
@@ -50,13 +56,13 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
     private fun getAndSetList(sortOrder: SortOrder) {
         view.list = when(sortOrder) {
             SortOrder.ORDER_ATTENDANCE_ASC -> repo.clazzDao.findAllActiveClazzesSortByNameAsc(
-                    searchQuery, loggedInPersonUid)
+                    searchQuery, loggedInPersonUid, filterExcludeMembersOfSchool)
             SortOrder.ORDER_ATTENDANCE_DESC -> repo.clazzDao.findAllActiveClazzesSortByNameDesc(
-                    searchQuery, loggedInPersonUid)
+                    searchQuery, loggedInPersonUid, filterExcludeMembersOfSchool)
             SortOrder.ORDER_NAME_ASC -> repo.clazzDao.findAllActiveClazzesSortByNameAsc(
-                    searchQuery, loggedInPersonUid)
+                    searchQuery, loggedInPersonUid, filterExcludeMembersOfSchool)
             SortOrder.ORDER_NAME_DSC -> repo.clazzDao.findAllActiveClazzesSortByNameDesc(
-                    searchQuery, loggedInPersonUid)
+                    searchQuery, loggedInPersonUid, filterExcludeMembersOfSchool)
         }
     }
 

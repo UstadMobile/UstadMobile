@@ -181,18 +181,22 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract fun findAllActiveClazzes(): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +
-            " AND CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
+            " WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
+            " AND ( :schoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :schoolUid) ) " +
+            " AND ( :schoolUid = 0 OR Clazz.clazzSchoolUid = 0 )" +
             " ORDER BY Clazz.clazzName ASC")
     abstract fun findAllActiveClazzesSortByNameAsc(
-            searchQuery: String, personUid: Long): DataSource.Factory<Int, ClazzWithNumStudents>
+            searchQuery: String, personUid: Long, schoolUid: Long): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query(CLAZZ_SELECT +  CLAZZ_WHERE_CLAZZMEMBER +
-            " AND CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
+            " WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
+            " AND ( :schoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :schoolUid) ) " +
+            " AND ( :schoolUid = 0 OR Clazz.clazzSchoolUid = 0 )" +
             " ORDER BY Clazz.clazzName DESC")
     abstract fun findAllActiveClazzesSortByNameDesc(
-            searchQuery: String, personUid: Long
+            searchQuery: String, personUid: Long, schoolUid: Long
     ): DataSource.Factory<Int, ClazzWithNumStudents>
 
     @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +

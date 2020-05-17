@@ -30,9 +30,9 @@
         >
 
         <!-- TODO: Change or remove this icon -->
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/item_schoolmember_newitemicon"
-            app:srcCompat="@drawable/ic_add_black_24dp"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/item_schoolmember_list_item_picture"
+            app:personPicturePersonUid="@{schoolMember.person.personUid}"
             android:layout_width="@dimen/list_twoline1_imagesize"
             android:layout_height="@dimen/list_twoline1_imagesize"
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
@@ -40,10 +40,10 @@
             android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
             app:layout_constraintTop_toTopOf="parent"
-            android:visibility="invisible"
             app:layout_constraintStart_toStartOf="parent"
             />
 
+        <!-- Line 1-->
         <!-- Line 1-->
         <TextView
             android:id="@+id/item_schoolmember_text"
