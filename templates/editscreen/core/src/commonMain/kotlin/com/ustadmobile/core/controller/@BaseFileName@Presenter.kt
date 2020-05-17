@@ -5,7 +5,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.@Entity@EditView
+import com.ustadmobile.core.view.@BaseFileName@View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -22,13 +22,13 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 
 
-class @Entity@EditPresenter(context: Any,
-                          arguments: Map<String, String>, view: @Entity@EditView,
+class @BaseFileName@Presenter(context: Any,
+                          arguments: Map<String, String>, view: @BaseFileName@View,
                           lifecycleOwner: DoorLifecycleOwner,
                           systemImpl: UstadMobileSystemImpl,
                           db: UmAppDatabase, repo: UmAppDatabase,
                           activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<@Entity@EditView, @EditEntity@>(context, arguments, view, lifecycleOwner, systemImpl,
+    : UstadEditPresenter<@BaseFileName@View, @EditEntity@>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
     override val persistenceMode: PersistenceMode
@@ -89,7 +89,7 @@ class @Entity@EditPresenter(context: Any,
             }
 
             //TODO: Call commitToDatabase on any onetomany join helpers
-            view.finishWithResult(entity)
+            view.finishWithResult(listOf(entity))
         }
     }
 

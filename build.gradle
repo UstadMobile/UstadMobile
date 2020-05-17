@@ -258,7 +258,7 @@ task newFromTemplate(type: Copy) {
     rename('@Entity_LowerCase@', replacementTokens["Entity_LowerCase"])
     rename('@Entity_SnakeCase@', replacementTokens["Entity_SnakeCase"])
     rename('@BaseFileName@', replacementTokens["BaseFileName"])
-    rename('@BaseFileName_SnakeCase', replacementTokens["BaseFileName_SnakeCase"])
+    rename('@BaseFileName_SnakeCase@', replacementTokens["BaseFileName_SnakeCase"])
     rename('@ListItemName_SnakeCase@', replacementTokens["ListItemName_SnakeCase"])
 
     eachFile {

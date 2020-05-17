@@ -4,11 +4,11 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.@Entity@
 @EditEntity_Import@
 
-interface @Entity@EditView: UstadEditView<@EditEntity@> {
+interface @BaseFileName@View: UstadEditView<@EditEntity@> {
 
     companion object {
 
-        const val VIEW_NAME = "@Entity@EditView"
+        const val VIEW_NAME = "@BaseFileName@EditView"
 
     }
 

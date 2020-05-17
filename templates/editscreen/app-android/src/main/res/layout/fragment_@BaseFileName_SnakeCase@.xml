@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
 
         <variable
-            name="@Entity_LowerCase@"
+            name="@Entity_VariableName@"
             type="com.ustadmobile.lib.db.entities.@EditEntity@" />
 
         <variable
@@ -20,20 +20,20 @@
 
         <variable
             name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.@Entity@EditFragmentEventHandler" />
+            type="com.ustadmobile.port.android.view.@BaseFileName@FragmentEventHandler" />
 
     </data>
 
 
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/activity_@Entity_LowerCase@_edit_scroll"
+        android:id="@+id/fragment_@BaseFileName_SnakeCase@_edit_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/activity_@Entity_LowerCase@_edit_edit_clx"
+            android:id="@+id/fragment_@BaseFileName_SnakeCase@_edit_clx"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
