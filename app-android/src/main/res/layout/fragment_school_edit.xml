@@ -231,7 +231,7 @@
                 android:id="@+id/fragment_school_edit_class_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/item_clazz_simple"
+                tools:listitem="@layout/item_clazz_simple_edit"
                 tools:itemCount="2"
                 app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
                 app:layout_constraintStart_toStartOf="parent" />

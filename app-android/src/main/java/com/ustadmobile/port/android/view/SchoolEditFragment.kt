@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolEditBinding
-import com.toughra.ustadmobile.databinding.ItemClazzSimpleBinding
+import com.toughra.ustadmobile.databinding.ItemClazzSimpleEditBinding
 import com.ustadmobile.core.controller.SchoolEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
@@ -66,11 +66,11 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         : ListAdapter<Clazz,
             ClazzRecyclerAdapter.ClazzViewHolder>(DIFF_CALLBACK_CLAZZ) {
 
-        class ClazzViewHolder(val binding: ItemClazzSimpleBinding)
+        class ClazzViewHolder(val binding: ItemClazzSimpleEditBinding)
             : RecyclerView.ViewHolder(binding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzViewHolder {
-            val viewHolder = ClazzViewHolder(ItemClazzSimpleBinding.inflate(
+            val viewHolder = ClazzViewHolder(ItemClazzSimpleEditBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
             viewHolder.binding.mActivity = activityEventHandler
@@ -152,6 +152,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         set(value) {
             field = value
             mBinding?.school = value
+            mBinding?.genderOptions = this.genderOptions
         }
 
     override var schoolClazzes: DoorMutableLiveData<List<Clazz>>? = null
@@ -165,7 +166,6 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
     override var genderOptions: List<SchoolEditPresenter.GenderTypeMessageIdOption>? = null
         get() = field
         set(value) {
-            mBinding?.genderOptions = value
             field = value
         }
 
