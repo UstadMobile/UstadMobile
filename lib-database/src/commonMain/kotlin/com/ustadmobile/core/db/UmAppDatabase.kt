@@ -39,8 +39,8 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 35)
-@MinSyncVersion(35)
+], version = 36)
+@MinSyncVersion(36)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
 
@@ -305,6 +305,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         |  timestamp  BIGINT , sent  INTEGER , received  INTEGER , 
                         |  srUid  SERIAL  PRIMARY KEY  NOT NULL )""".trimMargin())
                 }
+            }
+        }
+
+        val MIGRATION_35_36 = object : DoorMigration(35, 36) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE StatementEntity ALTER COLUMN resultScoreScaled TYPE FLOAT")
             }
         }
 
@@ -6003,7 +6009,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
             })
 
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35)
+            builder.addMigrations(MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36)
             return builder
         }
     }

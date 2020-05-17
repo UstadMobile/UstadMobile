@@ -43,7 +43,7 @@ class StatementEntity {
 
     var resultSuccess: Byte = RESULT_UNSET
 
-    var resultScoreScaled: Long = 0
+    var resultScoreScaled: Float = 0f
 
     var resultScoreRaw: Long = 0
 
