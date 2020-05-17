@@ -32,9 +32,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzLog)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(clazzLog)}"
+        android:onClick="@{() -> presenter.handleClickEntry(clazzLog)}"
         android:background="@drawable/bg_listitem"
         >
 

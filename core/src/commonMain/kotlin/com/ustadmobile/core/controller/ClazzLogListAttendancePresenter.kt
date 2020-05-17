@@ -58,13 +58,8 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     }
 
     override fun handleClickEntry(entry: ClazzLog) {
-        /* TODO: Add code to go to the appropriate detail view or make a selection
-        when(mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(ClazzLogDetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to uid, context)
-        }
-        */
+        systemImpl.go(ClazzLogEditAttendanceView.VIEW_NAME,
+            mapOf(UstadView.ARG_ENTITY_UID to entry.clazzLogUid.toString()), context)
     }
 
     override fun handleClickCreateNewFab() {

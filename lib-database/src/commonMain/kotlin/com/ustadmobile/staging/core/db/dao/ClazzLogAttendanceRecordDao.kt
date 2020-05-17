@@ -29,6 +29,13 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
     @Query("SELECT * from ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordUid = :uid")
     abstract fun findByUid(uid: Long): ClazzLogAttendanceRecord?
 
+    @Query("""SELECT ClazzLogAttendanceRecord.*, Person.*
+         FROM ClazzLogAttendanceRecord 
+         LEFT JOIN ClazzMember ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid
+         LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
+         WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid""")
+    abstract fun findByClazzLogUid(clazzLogUid: Long): List<ClazzLogAttendanceRecordWithPerson>
+
     class AttendanceByThresholdRow {
 
         var age: Int = 0
