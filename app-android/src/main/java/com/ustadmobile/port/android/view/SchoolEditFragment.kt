@@ -29,6 +29,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.TimeZoneEntity
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
@@ -38,6 +39,7 @@ interface SchoolEditFragmentEventHandler {
     fun onClickEditClazz(clazz: Clazz?)
     fun onClickDeleteClazz(clazz: Clazz)
     fun onClickAddClazz()
+    fun handleClickTimeZone()
     fun showHolidayCalendarPicker()
 }
 
@@ -134,6 +136,13 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
             entity?.schoolHolidayCalendarUid = holidayCalendar.umCalendarUid
             mBinding?.school = entity
         }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                TimeZoneEntity::class.java) {
+            val timeZone = it.firstOrNull() ?: return@observeResult
+            entity?.schoolTimeZone = timeZone.id
+            mBinding?.school= entity
+        }
     }
 
     override fun onDestroyView() {
@@ -208,6 +217,11 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         navigateToPickEntityFromList(Clazz::class.java,
                 R.id.clazz_list_dest,
                 bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to entity?.schoolUid.toString()))
+    }
+
+    override fun handleClickTimeZone() {
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(TimeZoneEntity::class.java, R.id.timezoneentity_list_dest)
     }
 
     override fun showHolidayCalendarPicker() {

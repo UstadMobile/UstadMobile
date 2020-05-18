@@ -333,6 +333,54 @@
                 app:constraint_referenced_ids="school_overview_emailaddr_cl,barrier5"
                 />
 
+
+            <ImageView
+                android:id="@+id/fragment_school_detail_overview_timezone_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/school"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolTimeZone)}"
+                android:src="@drawable/ic_language_blue_grey_600_24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier6" />
+
+            <TextView
+                android:id="@+id/fragment_school_detail_overview_timezone_value"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/list_twoline1_textsize_line1"
+                android:text="@{schoolWithHolidayCalendar.schoolTimeZone}"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolTimeZone)}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_timezone_iv"
+                app:layout_constraintTop_toBottomOf="@+id/barrier6"
+                tools:text="Asia/Dubai" />
+
+            <TextView
+                android:id="@+id/fragment_school_detail_overview_timezone_title"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolTimeZone)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/timezone"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_timezone_iv"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_timezone_value" />
+
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fragment_school_detail_overview_timezone_title,barrier6"
+                />
+
             <TextView
                 android:id="@+id/fragment_school_overview_classes_heading"
                 android:layout_width="0dp"
@@ -342,7 +390,7 @@
                 android:text="@string/classes"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/school_overview_emailaddr_cl" />
+                app:layout_constraintTop_toBottomOf="@+id/barrier7" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fragment_school_detail_overview_detail_clazz_rv"
