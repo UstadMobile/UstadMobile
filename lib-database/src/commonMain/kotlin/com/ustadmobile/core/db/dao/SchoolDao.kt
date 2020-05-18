@@ -8,6 +8,7 @@ import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 
@@ -34,18 +35,28 @@ abstract class SchoolDao : BaseDao<School> {
 
 
     @Query("""SELECT School.*, 
-         0 as numStudents,
-         0 as numTeachers, 
-         '' as locationName 
+         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
+         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
+         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_STUDENT}) as numStudents,
+         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
+         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
+         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_TEACHER}) as numTeachers, 
+         '' as locationName,
+          (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
          FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
              AND schoolName LIKE :searchBit ORDER BY schoolName ASC""")
     abstract fun findAllActiveSchoolWithMemberCountAndLocationNameAsc(searchBit: String): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
 
 
     @Query("""SELECT School.*, 
-         0 as numStudents,
-         0 as numTeachers, 
-         '' as locationName 
+         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
+         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
+         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_STUDENT}) as numStudents,
+         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
+         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
+         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_TEACHER}) as numTeachers, 
+         '' as locationName,
+          (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount 
          FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
              AND schoolName LIKE :searchBit ORDER BY schoolName DESC""")
     abstract fun findAllActiveSchoolWithMemberCountAndLocationNameDesc(searchBit: String): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>

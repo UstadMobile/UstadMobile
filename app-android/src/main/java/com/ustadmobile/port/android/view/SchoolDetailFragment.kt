@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager.widget.ViewPager
@@ -25,6 +26,28 @@ import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 
+class CustomViewNameListFragmentPageAdapter(fm: FragmentManager, behavior: Int,
+                                            val vl: List<String>,
+                                            val vntfcm: Map<String, Class<out Fragment>>,
+                                            val vntptm: Map<String, String>,val f: Fragment)
+    : ViewNameListFragmentPagerAdapter(fm, behavior, vl, vntfcm, vntptm ) {
+
+    override fun getPageTitle(position: Int): CharSequence? {
+        when (position) {
+            0 -> {
+                return f.getText(R.string.overview).toString()
+            }
+            1 -> {
+                return f.getText(R.string.staff).toString()
+            }
+            2 -> {
+                return f.getText(R.string.students_literal).toString()
+            }
+        }
+        return ""
+    }
+}
+
 class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
     private var mBinding: FragmentSchoolDetailBinding? = null
@@ -35,11 +58,13 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
     private var mTabLayout: TabLayout? = null
 
-    private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
+    private var mPagerAdapter: CustomViewNameListFragmentPageAdapter? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentSchoolDetailBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentSchoolDetailBinding.inflate(inflater, container,
+                false).also {
             rootView = it.root
         }
         mPager = mBinding?.fragmentSchoolDetailViewpager
@@ -60,18 +85,27 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         val navController = findNavController()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
+        val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
+
         val tabs = listOf(
-                SchoolDetailOverviewView.VIEW_NAME +
-                        "?${UstadView.ARG_ENTITY_UID}=${arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"}",
-                PersonListView.VIEW_NAME)
+                SchoolDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
+                        entityUidValue
+                ,
+                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF}=" +
+                        entityUidValue + "&${UstadView.ARG_SCHOOL_UID}=" + entityUidValue
+                ,
+                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS}=" +
+                        entityUidValue + "&${UstadView.ARG_SCHOOL_UID}=" + entityUidValue
+        )
         val viewNameToTitle = mapOf(
                 SchoolDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
-                PersonListView.VIEW_NAME to getText(R.string.people).toString()
+                SchoolMemberListView.VIEW_NAME to getText(R.string.students).toString(),
+                SchoolMemberListView.VIEW_NAME to getText(R.string.staff).toString()
         )
 
-        mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
+        mPagerAdapter = CustomViewNameListFragmentPageAdapter(childFragmentManager,
                 BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
-                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle
+                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle, this
         )
 
         Handler().post {
@@ -79,7 +113,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
             mTabLayout?.setupWithViewPager(mPager)
         }
     }
-
 
     override fun setSettingsVisible(visible: Boolean){
 
@@ -132,7 +165,9 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
                 SchoolDetailOverviewView.VIEW_NAME to
                         SchoolDetailOverviewFragment::class.java,
                 PersonListView.VIEW_NAME to
-                        PersonListFragment::class.java
+                        PersonListFragment::class.java,
+                SchoolMemberListView.VIEW_NAME to
+                        SchoolMemberListFragment::class.java
         )
     }
 

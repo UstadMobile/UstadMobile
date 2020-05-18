@@ -33,7 +33,8 @@ import kotlin.jvm.Volatile
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
     SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class,
-    TimeZoneEntity::class
+    TimeZoneEntity::class,
+    SchoolMember::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -47,8 +48,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         1. Added school uid to Clazz
         2. Added school Phone number to School
         3. Added schoolGender to School
-        4.Added schoolHolidayCalendar to School
-
+        4. Added schoolHolidayCalendar to School
+        5. Added SchoolMember and SchoolMemberDao
         Changes in 34:
         Added School and Assignment based entities
         Updated Clazz : added clazzFeatures and removed individual feature bits
@@ -230,6 +231,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("timeZoneEntityDao")
     abstract val timeZoneEntityDao: TimeZoneEntityDao
+
+    @JsName("schoolMemberDao")
+    abstract val schoolMemberDao: SchoolMemberDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

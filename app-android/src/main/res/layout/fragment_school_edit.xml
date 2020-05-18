@@ -47,10 +47,9 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_school_edit_edit_clx"
+            android:paddingBottom="50dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-
 
             <ImageView
                 android:id="@+id/fragment_school_edit_school_picture"
@@ -60,6 +59,7 @@
                 android:src="@drawable/ic_photo_camera_black_24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                android:visibility="gone"
                 app:layout_constraintTop_toBottomOf="@+id/activity_person_detail_appbar" />
 
 
@@ -102,13 +102,36 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_school_edit_timezone_tip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:hint="@string/timezone"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_desc_tip">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> activityEventHandler.handleClickTimeZone()}"
+                android:text="@{school.schoolTimeZone}"
+                tools:text="Asia/Dubai"
+                android:focusable="false"
+                />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fragment_school_edit_holiday_calendar_selected"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_desc_tip"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_timezone_tip"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/holiday_calendar">
 
@@ -150,19 +173,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_address_tip"
-                android:hint="@string/gender_literal">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_address_tip">
 
                 <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:onMessageIdOptionSelected="@{genderSelectionListener}"
                     app:selectedMessageIdOption="@={school.schoolGender}"
                     app:messageIdOptions="@{genderOptions}"
-                    tools:text="Mixed"/>
+                    android:hint="@string/gender_literal"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -204,6 +222,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/email"
+                    android:inputType="textEmailAddress"
                     android:text="@={school.schoolEmailAddress}"
                     tools:text="info@schoola.com" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -226,7 +245,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:onClickNew="@{() -> activityEventHandler.onClickAddClazz()}"
-                app:createNewText="@{@string/clazz}"
+                app:createNewText="@{@string/add_a(@string/clazz)}"
                 app:layout_constraintTop_toBottomOf=
                     "@+id/fragment_school_edit_classes_heading"
                 app:layout_constraintStart_toStartOf="parent"
@@ -236,7 +255,7 @@
                 android:id="@+id/fragment_school_edit_class_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/item_clazz_simple"
+                tools:listitem="@layout/item_clazz_simple_edit"
                 tools:itemCount="2"
                 app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
                 app:layout_constraintStart_toStartOf="parent" />

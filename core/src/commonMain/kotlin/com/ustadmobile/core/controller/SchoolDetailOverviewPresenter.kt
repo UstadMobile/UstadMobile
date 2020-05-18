@@ -3,26 +3,27 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.core.view.SchoolEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
 import kotlinx.coroutines.withTimeoutOrNull
 
 
-class SchoolDetailOverviewPresenter(context: Any,
-                                    arguments: Map<String, String>, view: SchoolDetailOverviewView,
-                                    lifecycleOwner: DoorLifecycleOwner,
-                                    systemImpl: UstadMobileSystemImpl,
-                                    db: UmAppDatabase, repo: UmAppDatabase,
-                                    activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<SchoolDetailOverviewView, SchoolWithHolidayCalendar>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>,
+                view: SchoolDetailOverviewView, lifecycleOwner: DoorLifecycleOwner,
+                systemImpl: UstadMobileSystemImpl, db: UmAppDatabase, repo: UmAppDatabase,
+                activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
+    : UstadDetailPresenter<SchoolDetailOverviewView, SchoolWithHolidayCalendar>(context, arguments,
+        view, lifecycleOwner, systemImpl,db, repo, activeAccount) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -45,24 +46,20 @@ class SchoolDetailOverviewPresenter(context: Any,
         view.schoolClazzes = clazzes
 
         return schoolWithHolidayCalendar
-
     }
 
-
     override fun handleClickEdit() {
-        val impl = UstadMobileSystemImpl.instance
-        impl.go(SchoolEditView.VIEW_NAME, arguments, context)
+        systemImpl.go(SchoolEditView.VIEW_NAME, arguments, context)
+    }
+
+    fun handleClickClazz(clazz: Clazz) {
+        systemImpl.go(ClazzDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to clazz.clazzUid.toString()),
+            context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         //TODO: this
         return true
     }
-
-    companion object {
-
-
-    }
-
 
 }

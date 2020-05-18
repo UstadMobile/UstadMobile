@@ -820,6 +820,10 @@ Content is provided under license by external content providers. Ustad Mobile, u
     and %2$s will be replaced with the name of the item-->
     <string name="num_items_with_name">%1$d %2$s</string>
 
+    <!-- Used to show a quantity and name e.g. "5 oranges". %1$d will be replaced with the number
+    and %2$s will be replaced with the name of the item-->
+    <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
+
     <!-- Used to create a prompt to the user to add something e.g. "Add Holiday". %1$s will be
     replaced with the name of the item (e.g. Holiday)-->
     <string name="add_a">Add a %1$s</string>
@@ -847,6 +851,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="overview">Overview</string>
 
+    <string name="add_new">Add new</string>
+    <string name="staff">Staff</string>
     <string name="x_teachers_y_students">%1$d teachers, %2$d students</string>
 
     <string name="call">Call</string>
@@ -857,6 +863,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="contact_details">Contact details</string>
 
+
+    <string name="untitled">Untitled</string>
+    <string name="required_field">Required field</string>
     <string name="present_late_absent">%1$d present, %2$d late, %3$d absent</string>
 
 </resources>

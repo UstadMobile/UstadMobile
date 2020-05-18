@@ -11,6 +11,8 @@ class SchoolWithMemberCountAndLocation() : School() {
 
     var locationName: String? = null
 
+    var clazzCount: Int = 0
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

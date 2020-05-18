@@ -145,9 +145,7 @@ class SelQuestionSetEditPresenter(context: Any,
             val deactivateOptions = allQuestions.flatMap { it.optionsToDeactivate }
             db.selQuestionOptionDao.deactivateByUids(deactivateOptions)
 
-            val etd : List<SelQuestionAndOptions> =
-                    selQuestionOneToManyJoinEditHelper.entitiesToDeactivate
-            repo.selQuestionDao.deactivateByUids(etd.map {it.selQuestion.selQuestionUid })
+            repo.selQuestionDao.deactivateByUids(selQuestionOneToManyJoinEditHelper.primaryKeysToDeactivate)
 
             view.finishWithResult(listOf(entity))
         }

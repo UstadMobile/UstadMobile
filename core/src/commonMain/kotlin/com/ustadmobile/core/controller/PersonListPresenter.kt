@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
+import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
@@ -25,6 +26,8 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     private var filterExcludeMembersOfClazz: Long = 0
 
+    private var filterExcludeMemberOfSchool: Long = 0
+
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
@@ -35,6 +38,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         filterExcludeMembersOfClazz = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
+        filterExcludeMemberOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { PersonListSortOption(it, context) }
     }
@@ -49,10 +53,10 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         view.list = when(currentSortOrder) {
             SortOrder.ORDER_NAME_ASC -> repo.personDao
                     .findAllPeopleWithDisplayDetailsSortNameAsc(timestamp,
-                            filterExcludeMembersOfClazz)
+                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool)
             SortOrder.ORDER_NAME_DSC -> repo.personDao
                     .findAllPeopleWithDisplayDetailsSortNameDesc(timestamp,
-                            filterExcludeMembersOfClazz)
+                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool)
         }
     }
 

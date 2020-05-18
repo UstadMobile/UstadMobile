@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolOverviewBinding
-import com.toughra.ustadmobile.databinding.ItemClazzSimpleBinding
+import com.toughra.ustadmobile.databinding.ItemClazzSimpleDetailBinding
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.dao.ClazzDao
@@ -28,10 +28,7 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
-
-interface SchoolWithHolidayCalendarDetailFragmentEventHandler {
-
-}
+interface SchoolWithHolidayCalendarDetailFragmentEventHandler {}
 
 class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalendar>(),
         SchoolDetailOverviewView, SchoolWithHolidayCalendarDetailFragmentEventHandler,
@@ -59,21 +56,26 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
             currentLiveData?.observe(this, this)
         }
 
-    class ClazzRecyclerAdapter()
+    class ClazzRecyclerAdapter(var presenter: SchoolDetailOverviewPresenter?)
         : ListAdapter<Clazz,
             ClazzRecyclerAdapter.ClazzViewHolder>(SchoolEditFragment.DIFF_CALLBACK_CLAZZ) {
 
-        class ClazzViewHolder(val binding: ItemClazzSimpleBinding)
+        class ClazzViewHolder(val binding: ItemClazzSimpleDetailBinding)
             : RecyclerView.ViewHolder(binding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzViewHolder {
-            val viewHolder = ClazzViewHolder(ItemClazzSimpleBinding.inflate(
+            return ClazzViewHolder(ItemClazzSimpleDetailBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
-            return viewHolder
         }
 
         override fun onBindViewHolder(holder: ClazzViewHolder, position: Int) {
             holder.binding.clazz = getItem(position)
+            holder.binding.mPresenter = presenter
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            presenter = null
         }
     }
 
@@ -87,15 +89,16 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
         }
 
         clazzRecyclerView = rootView.findViewById(R.id.fragment_school_detail_overview_detail_clazz_rv)
-        clazzRecyclerAdapter = ClazzRecyclerAdapter()
-        clazzRecyclerView?.adapter = clazzRecyclerAdapter
-        clazzRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = SchoolDetailOverviewPresenter(requireContext(), arguments.toStringMap(),
                 this, this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
+
+        clazzRecyclerAdapter = ClazzRecyclerAdapter(mPresenter)
+        clazzRecyclerView?.adapter = clazzRecyclerAdapter
+        clazzRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         return rootView
     }
