@@ -14,12 +14,18 @@ fun DateTimeTz.nextDayOfWeek(dayOfWeek: DayOfWeek): DateTimeTz {
     return dateTimeTmp
 }
 
-fun Schedule.nextOccurence(tzOffset: Int, after: Long = getSystemTimeInMillis()): DateTimeRange {
-    val dateTimeStart = DateTime.fromUnix(after).toOffset(TimezoneOffset(tzOffset.toDouble()))
-    val nextOccurenceDay = dateTimeStart.nextDayOfWeek(DayOfWeek.get(scheduleDay))
-    val occurenceDayLocalMidnight = nextOccurenceDay - with(nextOccurenceDay) {
-        hours.hours + minutes.minutes + + seconds.seconds + milliseconds.milliseconds
-    }
+fun Schedule.nextOccurence(timezoneName: String, after: Long = getSystemTimeInMillis()): DateTimeRange {
+    //Set the time to 2am: this will ensure that it remains the same day - even if daylight savings
+    // time is taking effect in between
+    val rawTzOffset = getRawTimezoneOffset(timezoneName)
+    val dateTimeStart = DateTime.fromUnix(after).toOffset(TimezoneOffset(rawTzOffset.toDouble())).localMidnight +
+            2.hours
 
-    return (occurenceDayLocalMidnight.utc + sceduleStartTime.milliseconds) until (occurenceDayLocalMidnight.utc + scheduleEndTime.milliseconds)
+    val nextOccurenceDay = dateTimeStart.nextDayOfWeek(DayOfWeek.get(scheduleDay))
+
+    val daylightSavingsDelta = rawTzOffset - getTimezoneOffset(timezoneName, nextOccurenceDay.utc.unixMillisLong)
+    val occurenceDayLocalMidnight = nextOccurenceDay.localMidnight
+
+    return (occurenceDayLocalMidnight.utc + sceduleStartTime.milliseconds + daylightSavingsDelta.milliseconds) until
+            (occurenceDayLocalMidnight.utc + scheduleEndTime.milliseconds + daylightSavingsDelta.milliseconds)
 }

@@ -10,7 +10,7 @@
 
         <variable
             name="clazz"
-            type="com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendar" />
+            type="com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool" />
 
         <variable
             name="loading"

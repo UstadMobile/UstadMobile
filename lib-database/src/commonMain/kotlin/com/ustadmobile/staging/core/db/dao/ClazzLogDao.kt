@@ -88,6 +88,11 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract fun findByClazzUidNotCancelledWithSchedule(clazzUid: Long): DataSource.Factory<Int,
             ClazzLogWithScheduleStartEndTimes>
 
+    @Query("""SELECT ClazzLog.* FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid
+        ORDER BY ClazzLog.logDate DESC""")
+    abstract fun findByClazzUidAsFactory(clazzUid: Long): DataSource.Factory<Int, ClazzLog>
+
+
     @Query("UPDATE ClazzLog SET clazzLogNumPresent = :clazzLogNumPresent,  " +
             "clazzLogNumAbsent = :numAbsent, " + "clazzLogNumPartial = :numPartial " +
             "WHERE clazzLogUid = :clazzLogUid")

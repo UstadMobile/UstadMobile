@@ -38,7 +38,6 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-
         val mapWithEntityJson = if(savedState?.containsKey(ARG_ENTITY_JSON) == true) {
             savedState
         }else if(arguments.containsKey(ARG_ENTITY_JSON)){

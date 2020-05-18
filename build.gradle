@@ -235,6 +235,9 @@ task newFromTemplate(type: Copy) {
         baseFileName = replacementTokens["Entity"] + "Edit"
     }
 
+    replacementTokens["ListItemName"] = project.hasProperty("ListItemName") ? project.property("ListItemName") : replacementTokens["Entity"]
+    replacementTokens["ListItemName_SnakeCase"] = replacementTokens["ListItemName"].replaceAll("([^_A-Z])([A-Z])", '$1_$2').toLowerCase()
+
     replacementTokens["BaseFileName"] = baseFileName
     replacementTokens["BaseFileName_SnakeCase"] = baseFileName.replaceAll("([^_A-Z])([A-Z])", '$1_$2').toLowerCase()
     replacementTokens["Entity_SnakeCase"] = replacementTokens["Entity"].replaceAll("([^_A-Z])([A-Z])", '$1_$2').toLowerCase()
@@ -255,7 +258,8 @@ task newFromTemplate(type: Copy) {
     rename('@Entity_LowerCase@', replacementTokens["Entity_LowerCase"])
     rename('@Entity_SnakeCase@', replacementTokens["Entity_SnakeCase"])
     rename('@BaseFileName@', replacementTokens["BaseFileName"])
-    rename('@BaseFileName_SnakeCase', replacementTokens["BaseFileName_SnakeCase"])
+    rename('@BaseFileName_SnakeCase@', replacementTokens["BaseFileName_SnakeCase"])
+    rename('@ListItemName_SnakeCase@', replacementTokens["ListItemName_SnakeCase"])
 
     eachFile {
         if(it.relativePath.getFile(project.rootDir).exists()) {

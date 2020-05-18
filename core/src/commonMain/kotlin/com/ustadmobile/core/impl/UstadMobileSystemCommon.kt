@@ -1,7 +1,5 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.controller.AddScheduleDialogPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.impl.http.UmHttpCall
@@ -452,8 +450,7 @@ open abstract class UstadMobileSystemCommon {
     }
 
     fun scheduleChecks(context: Any) {
-        AddScheduleDialogPresenter.createPendingScheduledChecks(
-                UmAccountManager.getActiveDatabase(context).scheduledCheckDao)
+
     }
 
 

@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -97,13 +98,12 @@ class ClazzDetailPresenter(context: Any,
 
         val PERMISSION_CHECKER_MAP = mapOf<Long, ClazzPermissionChecker>(
                 Clazz.CLAZZ_FEATURE_ATTENDANCE to {db, personUid, clazzUid ->
-                    db.clazzDao.personHasPermissionWithClazz(personUid, clazzUid,
-                    Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)
+                    true /*db.clazzDao.personHasPermissionWithClazz(personUid, clazzUid, Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)*/
                 }
         )
 
         val VIEWNAME_MAP = mapOf<Long, String>(
-                Clazz.CLAZZ_FEATURE_ATTENDANCE to ""
+                Clazz.CLAZZ_FEATURE_ATTENDANCE to ClazzLogListAttendanceView.VIEW_NAME
         )
     }
 

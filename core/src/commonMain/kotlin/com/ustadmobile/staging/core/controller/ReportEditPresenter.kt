@@ -208,7 +208,7 @@ class ReportEditPresenter(context: Any, arguments: Map<String, String>?, view: R
             val selectedClassesCSV = ArgumentUtil.convertLongListToStringCSV(selectedClasses!!)
             args.put(ARG_CLASSES_SET, selectedClassesCSV)
         }
-        impl.go(SelectClazzesDialogView.VIEW_NAME, args, context)
+        //impl.go(SelectClazzesDialogView.VIEW_NAME, args, context)
     }
 
     fun goToSelectAttendanceThresholdsDialog() {
