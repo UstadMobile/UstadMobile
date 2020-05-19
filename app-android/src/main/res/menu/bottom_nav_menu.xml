@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item
+        android:id="@+id/home_content_dest"
+        android:icon="@drawable/ic_local_library_black_24dp"
+        android:title="@string/content"/>
+    
 
     <item
         android:id="@+id/home_schoollist_dest"
@@ -19,10 +24,7 @@
         android:title="@string/people"/>
 
     <!--
-    <item
-        android:id="@+id/home_content_dest"
-        android:icon="@drawable/ic_local_library_black_24dp"
-        android:title="@string/content"/>
+
 
     <item
         android:id="@+id/home_feed_dest"

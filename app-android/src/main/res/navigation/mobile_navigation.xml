@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/mobile_navigation"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
     app:startDestination="@id/home_clazzlist_dest">
 
     <fragment
@@ -39,7 +41,7 @@
 
     <fragment
         android:id="@+id/clazz_detail_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzDetailFragment"/>
+        android:name="com.ustadmobile.port.android.view.ClazzDetailFragment" />
 
     <fragment
         android:id="@+id/person_edit_dest"
@@ -111,6 +113,10 @@
         android:id="@+id/schoolmember_list_dest"
         android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment"
         android:label="SchoolMemberListFragment" />
+    <fragment
+        android:id="@+id/home_content_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryTabsFragment"
+        android:label="@string/content" />
 
 
 </navigation>
