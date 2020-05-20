@@ -119,10 +119,15 @@
         android:label="@string/content" />
 
     <dialog
-        android:id="@+id/content_entry_add_options"
+        android:id="@+id/content_entry_add_options_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryAddOptionsFragment"
         tools:layout="@layout/fragment_content_entry_add_options"
         />
+
+    <fragment
+        android:id="@+id/content_entry_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryEdit2Fragment"
+        android:label="@string/content" />
 
 
 </navigation>

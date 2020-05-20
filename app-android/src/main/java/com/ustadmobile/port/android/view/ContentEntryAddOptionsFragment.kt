@@ -4,8 +4,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.NavArgument
+import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryAddOptionsView
+import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_FOLDER
+import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_IMPORT_FILE
+import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_IMPORT_LINK
+import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_TYPE
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
 
 /**
@@ -29,14 +42,19 @@ class ContentEntryAddOptionsFragment : UstadBottomSheetFragment(), ContentEntryA
     }
 
     override fun onClick(view: View?) {
-        when(view?.id){
-            R.id.content_create_folder -> {}
-            R.id.content_import_file -> {}
-            R.id.content_import_link -> {}
-        }
+       val contentType =  when(view?.id){
+            R.id.content_create_folder -> CONTENT_CREATE_FOLDER
+            R.id.content_import_file -> CONTENT_IMPORT_FILE
+            R.id.content_import_link -> CONTENT_IMPORT_LINK
+           else -> -1
+       }
+        findNavController().navigate(R.id.content_entry_edit_dest, UMAndroidUtil.mapToBundle(mapOf(
+                ARG_ENTITY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                CONTENT_TYPE to contentType.toString())))
+        dismiss()
     }
 
     override val viewContext: Any
-        get() = requireActivity()
+        get() = requireContext()
 
 }

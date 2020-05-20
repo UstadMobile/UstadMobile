@@ -79,7 +79,7 @@ class ContentEntryList2Fragment(): UstadListViewFragment<ContentEntry, ContentEn
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.content_entry_add_options, ContentEntry::class.java)
+            navigateToEditEntity(null, R.id.content_entry_add_options_dest, ContentEntry::class.java)
     }
 
     override fun onDestroyView() {

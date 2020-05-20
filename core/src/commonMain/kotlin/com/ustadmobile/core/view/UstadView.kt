@@ -91,6 +91,9 @@ interface UstadView {
 
         const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
 
+        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
+        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+
     }
 
 }
