@@ -13,7 +13,7 @@ class ViewNameToDestMap: DestinationProvider {
     val destinationMap = mapOf(
             ClazzEdit2View.VIEW_NAME to UstadDestination(R.id.clazz_edit_dest, false),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest, true),
-            ContentEntryListView.VIEW_NAME to UstadDestination(R.id.home_content_dest, true),
+            ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.home_content_dest, true),
             ClazzDetailView.VIEW_NAME to UstadDestination(R.id.clazz_detail_dest, false),
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest, true),
             HolidayCalendarEditView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_edit_dest, false),

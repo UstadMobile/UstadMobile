@@ -118,5 +118,11 @@
         android:name="com.ustadmobile.port.android.view.ContentEntryTabsFragment"
         android:label="@string/content" />
 
+    <dialog
+        android:id="@+id/content_entry_add_options"
+        android:name="com.ustadmobile.port.android.view.ContentEntryAddOptionsFragment"
+        tools:layout="@layout/fragment_content_entry_add_options"
+        />
+
 
 </navigation>
