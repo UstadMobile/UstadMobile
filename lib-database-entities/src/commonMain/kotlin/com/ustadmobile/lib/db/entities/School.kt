@@ -45,11 +45,6 @@ open class School() {
 
     var schoolEmailAddress : String?= null
 
-    /**
-     * The timezone for this school
-     */
-    var schoolTimeZone : String? = null
-
     @MasterChangeSeqNum
     var schoolMasterChangeSeqNum: Long = 0
 

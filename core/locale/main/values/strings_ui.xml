@@ -868,4 +868,23 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="required_field">Required field</string>
     <string name="present_late_absent">%1$d present, %2$d late, %3$d absent</string>
 
+    <string name="clazz_work">Class work</string>
+    <string name="marked">marked</string>
+    <string name="submitted">submitted</string>
+    <string name="not_submitted">not submitted</string>
+    <string name="visible_from_date">Visible from date</string>
+    <string name="submission_type">Submission type</string>
+    <string name="no_submission_required">No submission required</string>
+    <string name="short_text">short text</string>
+    <string name="attachment">attachment</string>
+    <string name="quiz">quiz</string>
+    <string name="allow_private_comments_from_students">Allow private comments from students</string>
+    <string name="deadline">Deadline</string>
+    <string name="class_timezone">Class timezone</string>
+    <string name="maximum_score">Maximum score</string>
+    <string name="quiz_questions">Quiz questions</string>
+    <string name="time">Time</string>
+
+
+
 </resources>

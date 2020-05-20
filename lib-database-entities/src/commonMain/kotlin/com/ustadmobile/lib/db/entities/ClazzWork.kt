@@ -6,9 +6,11 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = 201)
+@Serializable
 open class ClazzWork {
 
     @PrimaryKey(autoGenerate = true)
@@ -16,13 +18,15 @@ open class ClazzWork {
 
     var clazzWorkCreatorPersonUid: Long = 0
 
+    var clazzWorkClazzUid : Long = 0
+
     var clazzWorkTitle : String? = null
 
-    var clazzWorkCreatedDate: Long? = null
+    var clazzWorkCreatedDate: Long = 0
 
-    var clazzWorkStartDateTime: Long? = null
+    var clazzWorkStartDateTime: Long = 0
 
-    var clazzWorkDueDateTime: Long? = null
+    var clazzWorkDueDateTime: Long = 0
 
     var clazzWorkSubmissionType: Int = 0
 
@@ -51,7 +55,7 @@ open class ClazzWork {
     companion object{
         const val CLAZZ_WORK_SUBMISSION_TYPE_NONE = 0
         const val CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT = 1
-        const val CLAZZ_WORK_SUBMISSION_TYPE_ATTACHMENt = 2
+        const val CLAZZ_WORK_SUBMISSION_TYPE_ATTACHMENT = 2
         const val CLAZZ_WORK_SUBMISSION_TYPE_QUIZ = 3
     }
 

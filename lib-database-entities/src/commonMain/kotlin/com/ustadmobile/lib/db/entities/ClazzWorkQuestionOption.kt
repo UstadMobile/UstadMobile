@@ -32,5 +32,4 @@ open class ClazzWorkQuestionOption {
     var clazzWorkQuestionOptionActive: Boolean = false
 
 
-
 }

@@ -3,11 +3,9 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClazzDetailOverviewView
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzLogListAttendanceView
-import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Clazz
@@ -84,7 +82,8 @@ class ClazzDetailPresenter(context: Any,
         val activePersonUid = activeAccount.getValue()?.personUid ?: 0L
 
         view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid") +
+                "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid",
+                "${ClazzWorkListView.VIEW_NAME}?$ARG_CLAZZ_UID=$entityUid") +
                 CLAZZ_FEATURES.filter {
                 PERMISSION_CHECKER_MAP[it]?.invoke(db, activePersonUid, entityUid) ?: false
         }.map { (VIEWNAME_MAP[it] ?: "INVALID}") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"}

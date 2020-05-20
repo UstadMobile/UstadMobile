@@ -34,7 +34,8 @@ import kotlin.jvm.Volatile
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
     SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class,
     TimeZoneEntity::class,
-    SchoolMember::class
+    SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
+    ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -50,6 +51,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         3. Added schoolGender to School
         4. Added schoolHolidayCalendar to School
         5. Added SchoolMember and SchoolMemberDao
+        6. Added ClazzWork, ClazzWorkContentJoin, Comments,ClazzWorkQuestion,ClazzWorkQuestionOption
         Changes in 34:
         Added School and Assignment based entities
         Updated Clazz : added clazzFeatures and removed individual feature bits
@@ -234,6 +236,22 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("schoolMemberDao")
     abstract val schoolMemberDao: SchoolMemberDao
+
+    @JsName("clazzWorkDao")
+    abstract val clazzWorkDao: ClazzWorkDao
+
+    @JsName("clazzWorkSubmissionDao")
+    abstract val clazzWorkSubmissionDao: ClazzWorkSubmissionDao
+
+    @JsName("clazzWorkContentJoinDao")
+    abstract val clazzWorkContentJoinDao: ClazzWorkContentJoinDao
+
+    @JsName("clazzWorkQuestionDao")
+    abstract val clazzWorkQuestionDao: ClazzWorkQuestionDao
+
+    @JsName("clazzWorkQuestionOptionDao")
+    abstract val clazzWorkQuestionOptionDao: ClazzWorkQuestionOptionDao
+
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

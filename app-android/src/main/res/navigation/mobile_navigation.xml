@@ -111,6 +111,18 @@
         android:id="@+id/schoolmember_list_dest"
         android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment"
         android:label="SchoolMemberListFragment" />
+    <fragment
+        android:id="@+id/clazzwork_list_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkListFragment"
+        android:label="ClazzWorkListFragment" />
+    <fragment
+        android:id="@+id/clazzwork_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkEditFragment"
+        android:label="ClazzWorkEditFragment" />
+    <fragment
+        android:id="@+id/clazzworkquestionandoptions_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkQuestionAndOptionsEditFragment"
+        android:label="ClazzWorkQuestionAndOptionsEditFragment" />
 
 
 </navigation>

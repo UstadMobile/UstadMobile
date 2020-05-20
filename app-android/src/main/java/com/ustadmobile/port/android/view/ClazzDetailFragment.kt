@@ -114,12 +114,16 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
                 ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
-                ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java)
+                ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java,
+                ClazzWorkListView.VIEW_NAME to ClazzWorkListFragment::class.java
+
+        )
 
         val viewNameToTitleMap = mapOf(
                 ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
                 ClazzMemberListView.VIEW_NAME to R.string.members,
-                ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance
+                ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance,
+                ClazzWorkListView.VIEW_NAME to R.string.clazz_work
         )
 
     }
