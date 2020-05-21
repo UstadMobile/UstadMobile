@@ -13,25 +13,24 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzworkquestionBinding
 import com.ustadmobile.core.controller.ClazzWorkEditPresenter
+import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkEditView
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
-import kotlinx.android.synthetic.main.xapi_header_report.*
 
 interface ClazzWorkEditFragmentEventHandler {
     fun onClickClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions?)
@@ -85,7 +84,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             viewHolder.binding.mPresenter = presenter
             viewHolder.binding.mActivity = activityEventHandler
             viewHolder.binding.questionTypeList =
-                    ClazzWorkEditPresenter.SubmissionOptions.values()
+                    ClazzWorkQuestionAndOptionsEditPresenter.ClazzWorkQuestionOptions.values()
                             .map { MessageIdOption(it.messageId, parent.context, it.optionVal) }
             return viewHolder
         }
@@ -103,7 +102,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             it.typeSelectionListener = this
         }
 
-        questionRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_question_and_options_edit_rv)
+        questionRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_edit_questions_rv)
         questionRecyclerAdapter = ClazzWorkQuestionRecyclerAdapter(this, null)
         questionRecyclerView?.adapter = questionRecyclerAdapter
         questionRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
@@ -158,11 +157,13 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         set(value) {
             field = value
             mBinding?.clazzWork = value
+            mBinding?.typeOptions = this.submissionTypeOptions
             mBinding?.questionsVisibility = if(value?.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
                 View.VISIBLE
             }else{
                 View.GONE
             }
+
         }
 
     //TOOD: Content side
@@ -182,7 +183,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
     override var submissionTypeOptions: List<ClazzWorkEditPresenter.SubmissionOptionsMessageIdOption>? = null
         get() = field
         set(value) {
-            mBinding?.typeOptions = value
             field = value
         }
 
@@ -206,11 +206,15 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
     }
 
     override fun onClickNewQuestion() {
-        onClickClazzWorkQuestion(null)
+//        val clazzWorkUid = mPresenter?.handleClickSaveOnly(entity?:ClazzWork(), false)
+//        arguments?.putString(ARG_ENTITY_UID, clazzWorkUid.toString())
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(null, R.id.clazzworkquestionandoptions_edit_dest,
+                ClazzWorkQuestionAndOptions::class.java)
     }
 
     override fun onClickNewContent() {
-        TODO("Not yet implemented")
+        //TODO: this
     }
 
     override fun handleRemoveClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions) {

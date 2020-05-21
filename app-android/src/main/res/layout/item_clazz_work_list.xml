@@ -32,36 +32,36 @@
         <!-- TODO: Change or remove this icon -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_clazzwork_newitemicon"
-            app:srcCompat="@drawable/ic_assignment_24px"
-            android:layout_width="@dimen/list_twoline1_imagesize"
-            android:layout_height="@dimen/list_twoline1_imagesize"
-            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
-            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
             android:visibility="visible"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_assignment_24px" />
 
         <!-- Line 1-->
+
+        <!-- Line 2-->
         <TextView
             android:id="@+id/line1_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
+            android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
-            android:textSize="@dimen/list_twoline1_textsize_line1"
             android:text="@{clazzWork.clazzWorkTitle}"
-            tools:text="Read assignment"
             android:textColor="@color/text_primary"
-            />
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/item_clazzwork_newitemicon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Read assignment" />
 
-        <!-- Line 2-->
         <TextView
             android:id="@+id/line2_text"
             android:layout_width="0dp"
@@ -69,6 +69,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/line1_text"
             app:layout_constraintTop_toBottomOf="@+id/line1_text"
+            android:text="@{@string/three_num_items_with_name_with_comma(clazzWork.markedStudents, @string/marked, clazzWork.submittedStudents, @string/submitted, clazzWork.notSubmittedStudents, @string/not_submitted)}"
             tools:text="1 marked, 2 submitted, 2 not submitted" />
 
         <!-- Line 3-->
@@ -76,14 +77,13 @@
             android:id="@+id/line3_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:dateAppend="@{clazzWork.clazzTimeZone}"
+            app:dateLongWithExtra="@{clazzWork.clazzWorkDueDateTime}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imageView11"
             app:layout_constraintTop_toBottomOf="@+id/line2_text"
-            android:text="@{clazzWork.clazzTimeZone}"
             tools:text="28/Feb/2020 - 09:00 (Asia/Dubai)" />
 
         <ImageView
@@ -94,7 +94,7 @@
             android:layout_marginTop="6dp"
             app:layout_constraintStart_toStartOf="@+id/line2_text"
             app:layout_constraintTop_toBottomOf="@+id/line2_text"
-            app:srcCompat="@drawable/ic_calendar_today_24px_" />
+            app:srcCompat="@drawable/ic_event_available_black_24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

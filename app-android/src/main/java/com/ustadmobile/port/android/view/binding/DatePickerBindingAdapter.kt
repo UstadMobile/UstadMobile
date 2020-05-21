@@ -27,6 +27,20 @@ fun updateDateOnEditText(et: TextView, date: Long) {
     }
 }
 
+/**
+ * Data binding Adapter for Date picker types.
+ * Contains the logic for linking editText dates with Datepicker
+ */
+
+fun updateDateOnEditTextWithExtraText(prepent: String, append: String, et: TextView, date: Long) {
+    val dateFormatter = DateFormat.getDateFormat(et.context)
+    if (date == 0L) {
+        et.setText(prepent + " " + append)
+    }else{
+        et.setText(prepent + " " + dateFormatter.format(date) + " - " + append)
+    }
+}
+
 fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
     val currentDate = et.getTag(R.id.tag_datelong) as? Long ?: 0L
@@ -79,6 +93,12 @@ fun setDate(et: TextView, date: Long){
     et.setTag(R.id.tag_datelong, date)
 }
 
+@BindingAdapter("dateLongWithExtra", "dateAppend")
+fun setDateWithExtras(et: TextView, date:Long, append: String?){
+    val appendString = append ?: ""
+    updateDateOnEditTextWithExtraText("", appendString, et, date)
+    et.setTag(R.id.tag_datelong, date)
+}
 /**
  * Wrapper to handle when the result of the picker is stored on a string (e.g. CustomFieldValue)
  */

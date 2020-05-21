@@ -86,3 +86,12 @@ fun TextInputEditText.setRunOnClickWhenFocused(runOnClickWhenFocused: Boolean) {
         setOnFocusChangeListener(null)
     }
 }
+
+@BindingAdapter("dontShowZeroInt")
+fun TextInputEditText.setValueIfZero(value: Int){
+    if(value == 0){
+        setText("")
+    }else{
+        setText(Integer.toString(value))
+    }
+}

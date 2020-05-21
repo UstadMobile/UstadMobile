@@ -26,6 +26,10 @@ open class ClazzWork {
 
     var clazzWorkStartDateTime: Long = 0
 
+    var clazzWorkStartTime: Long = 0
+
+    var clazzWorkDueTime: Long = 0
+
     var clazzWorkDueDateTime: Long = 0
 
     var clazzWorkSubmissionType: Int = 0

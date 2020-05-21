@@ -117,7 +117,7 @@
                     android:cursorVisible="false"
                     android:hint="@string/time"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={clazzWork.clazzWorkStartDateTime}"
+                    app:timeValue="@={clazzWork.clazzWorkStartTime}"
                     app:runOnClickWhenFocused="@{true}"
                     tools:text="23:00" />
 
@@ -160,7 +160,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:checked="@{clazzWork.clazzWorkCommentsEnabled}"
+                android:checked="@={clazzWork.clazzWorkCommentsEnabled}"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 app:layout_constraintBottom_toBottomOf="@+id/fragment_clazz_work_edit_allow_tv"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -210,7 +210,7 @@
                     android:hint="@string/time"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={clazzWork.clazzWorkDueDateTime}"
+                    app:timeValue="@={clazzWork.clazzWorkDueTime}"
                     app:runOnClickWhenFocused="@{true}"
                     tools:text="23:59" />
 
@@ -243,7 +243,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/maximum_score"
                     android:inputType="number"
-                    android:text="@={`` + clazzWork.clazzWorkMaximumScore}"
+                    app:dontShowZeroInt="@{clazzWork.clazzWorkMaximumScore}"
                     app:layout_constraintStart_toStartOf="parent"
                     tools:layout_editor_absoluteY="393dp"
                     tools:text="100" />
@@ -328,6 +328,7 @@
            />
 
            <androidx.recyclerview.widget.RecyclerView
+               android:id="@+id/fragment_clazz_work_edit_questions_rv"
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                tools:listitem="@layout/item_clazzworkquestion"

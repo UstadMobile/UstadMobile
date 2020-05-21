@@ -875,15 +875,20 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="visible_from_date">Visible from date</string>
     <string name="submission_type">Submission type</string>
     <string name="no_submission_required">No submission required</string>
-    <string name="short_text">short text</string>
-    <string name="attachment">attachment</string>
-    <string name="quiz">quiz</string>
+    <string name="short_text">Short text</string>
+    <string name="attachment">Attachment</string>
+    <string name="quiz">Quiz</string>
     <string name="allow_private_comments_from_students">Allow private comments from students</string>
     <string name="deadline">Deadline</string>
     <string name="class_timezone">Class timezone</string>
     <string name="maximum_score">Maximum score</string>
     <string name="quiz_questions">Quiz questions</string>
     <string name="time">Time</string>
+
+
+    <!-- Used to show a quantity and name e.g. "5 oranges". %1$d will be replaced with the number
+    and %2$s will be replaced with the name of the item-->
+    <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
 
 
 

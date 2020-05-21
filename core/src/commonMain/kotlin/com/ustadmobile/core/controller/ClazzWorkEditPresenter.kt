@@ -40,8 +40,8 @@ class ClazzWorkEditPresenter(context: Any,
                 MessageID.attachment),
         QUIZ(ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ,
                 MessageID.quiz),
-
     }
+
     class SubmissionOptionsMessageIdOption(day: SubmissionOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
@@ -78,8 +78,6 @@ class ClazzWorkEditPresenter(context: Any,
     fun handleRemoveQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {
         questionAndOptionsEditHelper.onDeactivateEntity(entityClass)
     }
-
-
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -133,6 +131,10 @@ class ClazzWorkEditPresenter(context: Any,
             editEntity = ClazzWork()
         }
 
+        questionAndOptionsEditHelper.onLoadFromJsonSavedState(bundle)
+
+        //TODO: the same for contentedithelper
+
         return editEntity
     }
 
@@ -141,6 +143,65 @@ class ClazzWorkEditPresenter(context: Any,
         val entityVal = entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
+    }
+
+    var finishFragment : Boolean= true
+
+    fun handleClickSaveOnly(entity: ClazzWork, finish: Boolean): Long{
+        finishFragment = finish
+        //handleClickSave(entity)
+
+
+        val clazzUid = arguments[ARG_CLAZZ_UID]?.toLong() ?: 0L
+        GlobalScope.launch(doorMainDispatcher()) {
+            if (entity.clazzWorkUid == 0L) {
+                entity.clazzWorkClazzUid = clazzUid
+                entity.clazzWorkUid = repo.clazzWorkDao.insertAsync(entity)
+            } else {
+                repo.clazzWorkDao.updateAsync(entity)
+            }
+
+            //TODO: Replace with right thingi.
+            // Not committing as this will change anyway
+            //contentJoinEditHelper.commitToDatabase(repo.contentEntryDao)
+
+
+            val eti: List<ClazzWorkQuestionAndOptions> =
+                    questionAndOptionsEditHelper.entitiesToInsert
+            val etu: List<ClazzWorkQuestionAndOptions> =
+                    questionAndOptionsEditHelper.entitiesToUpdate
+            etu.forEach {
+                val questionUid = it.clazzWorkQuestion.clazzWorkQuestionUid
+                it.options.forEach {
+                    it.clazzWorkQuestionOptionUid = questionUid
+                }
+            }
+            eti.forEach {
+                it.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid = entity.clazzWorkUid
+                it.clazzWorkQuestion.clazzWorkQuestionUid = 0L
+                val questionUid = repo.clazzWorkQuestionDao.insertAsync(it.clazzWorkQuestion)
+                it.clazzWorkQuestion.clazzWorkQuestionUid = questionUid
+                it.options.forEach {
+                    it.clazzWorkQuestionOptionQuestionUid = questionUid
+                }
+            }
+
+            repo.clazzWorkQuestionDao.updateListAsync(etu.map { it.clazzWorkQuestion })
+
+            val allQuestions: List<ClazzWorkQuestionAndOptions> = (eti + etu)
+            val allOptions = allQuestions.flatMap { it.options }
+            val splitList = allOptions.partition { it.clazzWorkQuestionOptionUid == 0L }
+            repo.clazzWorkQuestionOptionDao.insertList(splitList.first)
+            repo.clazzWorkQuestionOptionDao.updateList(splitList.second)
+
+            val deactivateOptions = allQuestions.flatMap { it.optionsToDeactivate }
+            db.clazzWorkQuestionOptionDao.deactivateByUids(deactivateOptions)
+
+            repo.clazzWorkQuestionDao.deactivateByUids(questionAndOptionsEditHelper.primaryKeysToDeactivate)
+
+        }
+
+        return entity.clazzWorkUid
     }
 
     override fun handleClickSave(entity: ClazzWork) {
@@ -190,10 +251,12 @@ class ClazzWorkEditPresenter(context: Any,
             val deactivateOptions = allQuestions.flatMap { it.optionsToDeactivate }
             db.clazzWorkQuestionOptionDao.deactivateByUids(deactivateOptions)
 
-            repo.selQuestionDao.deactivateByUids(questionAndOptionsEditHelper.primaryKeysToDeactivate)
+            repo.clazzWorkQuestionDao.deactivateByUids(questionAndOptionsEditHelper.primaryKeysToDeactivate)
 
 
-            view.finishWithResult(listOf(entity))
+            if(finishFragment) {
+                view.finishWithResult(listOf(entity))
+            }
         }
     }
 

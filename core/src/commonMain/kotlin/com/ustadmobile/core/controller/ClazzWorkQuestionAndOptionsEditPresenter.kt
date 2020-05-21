@@ -29,14 +29,14 @@ class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
     : UstadEditPresenter<ClazzWorkQuestionAndOptionsEditView, ClazzWorkQuestionAndOptions>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
-    enum class QuestionOptions(val optionVal: Int, val messageId: Int){
-        NOMINATION(CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT,
+    enum class ClazzWorkQuestionOptions(val optionVal: Int, val messageId: Int){
+        FREE_TEXT(CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT,
                 MessageID.sel_question_type_free_text),
         MULTI_CHOICE(CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE,
                 MessageID.sel_question_type_multiple_choise)
     }
 
-    class ClazzWorkQuestionOptionTypeMessageIdOption(day: QuestionOptions, context: Any)
+    class ClazzWorkQuestionOptionTypeMessageIdOption(day: ClazzWorkQuestionOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
     override val persistenceMode: PersistenceMode
@@ -46,7 +46,7 @@ class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.typeOptions = QuestionOptions.values().map {
+        view.typeOptions = ClazzWorkQuestionOptions.values().map {
             ClazzWorkQuestionOptionTypeMessageIdOption(it, context)}
     }
 
