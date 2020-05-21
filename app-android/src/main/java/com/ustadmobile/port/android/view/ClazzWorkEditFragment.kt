@@ -37,7 +37,7 @@ interface ClazzWorkEditFragmentEventHandler {
     fun onClickClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions?)
     fun onClickNewQuestion()
     fun onClickNewContent()
-    fun handleRemoveClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions?)
+    fun handleRemoveClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions)
 }
 
 class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
@@ -213,8 +213,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         TODO("Not yet implemented")
     }
 
-    override fun handleRemoveClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions?) {
-        mPresenter?.handleRemoveClazzWorkQuestionAndOptions(clazzWorkQuestion)
+    override fun handleRemoveClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions) {
+        mPresenter?.handleRemoveQuestionAndOptions(clazzWorkQuestion)
     }
 
     companion object {

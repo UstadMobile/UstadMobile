@@ -61,11 +61,11 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_picture">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -139,7 +139,8 @@
                     app:onMessageIdOptionSelected="@{typeSelectionListener}"
                     app:selectedMessageIdOption="@={clazzWork.clazzWorkSubmissionType}"
                     app:messageIdOptions="@{typeOptions}"
-                    android:hint="@string/submission_type"/>
+                    android:hint="@string/submission_type"
+                    tools:text="Quiz"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -159,8 +160,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:checked="@{clazzWork.clazzWorkCommentsEnabled}"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:checked="@={clazzWork.clazzWorkCommentsEnabled}"
                 app:layout_constraintBottom_toBottomOf="@+id/fragment_clazz_work_edit_allow_tv"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/fragment_clazz_work_edit_allow_tv" />
@@ -240,8 +241,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/maximum_score"
-                    android:inputType="phone"
-                    android:text="@={clazzWork.clazzWorkMaximumScore}"
+                    android:inputType="number"
+                    android:text="@={`` + clazzWork.clazzWorkMaximumScore}"
                     app:layout_constraintStart_toStartOf="parent"
                     tools:layout_editor_absoluteY="393dp"
                     tools:text="100" />
