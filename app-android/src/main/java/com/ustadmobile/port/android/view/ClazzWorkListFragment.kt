@@ -84,9 +84,8 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        //TODO
-//        if(view?.id == R.id.item_createnew_layout)
-//            navigateToEditEntity(null, R.id.clazzwork_edit_dest, ClazzWork::class.java)
+        if(view?.id == R.id.item_createnew_layout)
+            navigateToEditEntity(null, R.id.clazzwork_edit_dest, ClazzWork::class.java)
     }
 
     override fun onDestroyView() {

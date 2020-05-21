@@ -4,7 +4,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.ClazzWorkListView
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -49,21 +51,15 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     override fun handleClickEntry(entry: ClazzWork) {
-        /* TODO: Add code to go to the appropriate detail view or make a selection
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(ClazzWorkDetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to uid, context)
+//            ListViewMode.BROWSER -> systemImpl.go(ClazzWorkDetailView.VIEW_NAME,
+//                    mapOf(UstadView.ARG_ENTITY_UID to entry.clazzWorkUid.toString()), context)
         }
-        */
     }
 
     override fun handleClickCreateNewFab() {
-        /* TODO: Add code to go to the edit view when the user clicks the new item FAB. This is only
-         * called when the fab is clicked, not if the first item is create new item (e.g. picker mode).
-         * That has to be handled at a platform level to use prepareCall etc.
         systemImpl.go(ClazzWorkEditView.VIEW_NAME, mapOf(), context)
-         */
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
