@@ -8,7 +8,6 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
     enum class ContentEntryListViewMode(val viewMode: Int) {
         NORMAL(1),
         PICKER(2)
-
     }
 
     companion object {

@@ -14,7 +14,10 @@ import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CR
 import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_IMPORT_FILE
 import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_IMPORT_LINK
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_ENTRY_LEAF
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_ENTRY_PARENT_UID
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_TYPE
+import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -37,7 +40,6 @@ class ContentEntryAddOptionsFragment : UstadBottomSheetFragment(), ContentEntryA
         val rootView = inflater.inflate(R.layout.fragment_content_entry_add_options, container, false)
         rootView.content_create_folder.setOnClickListener(this)
         rootView.content_import_file.setOnClickListener(this)
-        rootView.content_import_link.setOnClickListener(this)
         return rootView;
     }
 
@@ -49,8 +51,9 @@ class ContentEntryAddOptionsFragment : UstadBottomSheetFragment(), ContentEntryA
            else -> -1
        }
         findNavController().navigate(R.id.content_entry_edit_dest, UMAndroidUtil.mapToBundle(mapOf(
-                ARG_ENTITY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
-                CONTENT_TYPE to contentType.toString())))
+                CONTENT_ENTRY_PARENT_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                CONTENT_TYPE to contentType.toString(),
+                CONTENT_ENTRY_LEAF to (CONTENT_CREATE_FOLDER != contentType).toString())))
         dismiss()
     }
 

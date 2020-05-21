@@ -274,7 +274,7 @@
     <string name="repo_loading_status_loaded_empty">هیج محتوا دریافت نگردید</string>
     <string name="repo_loading_status_failed_noconnection">ارتباط و یا همتا وجود ندارد</string>
     <string name="repo_loading_status_failed_connection_error">اشتباه در اتصال</string>
-    <string name="content_entry_label_visibility">محتوا را عمومی سازید</string>
+    <string name="content_entry_label_public">محتوا را عمومی سازید</string>
     <string name="error_message_load_page">بارسازی صفحه نامؤفق بود</string>
     <string name="xapi_options_when">چه وقت</string>
     <string name="content_source_camera">از کامره</string>

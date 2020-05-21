@@ -29,6 +29,8 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/colorPrimary"
                 app:elevation="0dp"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 android:minHeight="?attr/actionBarSize"
                 android:titleTextColor="@color/toolbar"/>
 

@@ -197,7 +197,7 @@
     <string name="content_entry_label_update_file">دوتنه اوسمهالول</string>
     <string name="content_entry_label_update_content">د محتویاتو اوسمهالول</string>
     <string name="content_entry_label_licence">منښتلیک</string>
-    <string name="content_entry_label_visibility">محتویات علنی کول</string>
+    <string name="content_entry_label_public">محتویات علنی کول</string>
     <string name="content_entry_label_active">محتویات فعالول</string>
     <string name="content_import_success_message">تاسو وکولای شو په بریا سره دوتنه وارد کړئ</string>
     <string name="download_cloud_availability">په کلاوډ کې موجود دی</string>

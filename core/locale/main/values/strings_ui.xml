@@ -148,6 +148,7 @@
     <string name="get_app">Get app</string>
     <string name="no_app_found">"No app found to open file"</string>
     <string name="entry_details_author">Author</string>
+    <string name="entry_details_publisher">Publisher</string>
     <string name="entry_details_license">License</string>
     <string name="entry_details_description">Description</string>
     <string name="library_reading_level">Reading Level</string>
@@ -232,12 +233,14 @@
     <string name="content_entry_label_save">Save</string>
     <string name="content_entry_label_update">Update document</string>
     <string name="content_entry_label_select_file">Select file</string>
-    <string name="content_entry_label_update_file">Update file</string>
+    <string name="content_entry_label_update_file">Update from file</string>
+    <string name="content_entry_label_import_link">Import Link</string>
+    <string name="content_entry_label_update_link">Update from Link</string>
     <string name="content_entry_label_update_content">Update Content</string>
     <string name="content_from_file">From file</string>
     <string name="content_from_link">From link</string>
-    <string name="content_entry_label_licence">License</string>
-    <string name="content_entry_label_visibility">Make content public</string>
+    <string name="content_entry_label_licence">Licence</string>
+    <string name="content_entry_label_public">Publicly accessible</string>
     <string name="content_entry_label_active">Make content active</string>
     <string name="content_import_success_message">You have successfully imported a file</string>
     <string name="content_import_failure_message">Selected file is not supported, try another file</string>
@@ -253,7 +256,7 @@
     <string name="error_message_update_document">Failed to update document</string>
     <string name="content_update_massage">Updated successfully</string>
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
-    <string name="content_supported_files">Supported files: <![CDATA[<b>Epub, TinCan (XAPI) Zip</b>]]></string>
+    <string name="content_supported_files">Supported files: <![CDATA[<b>Video, Audio, EPUB, Xapi Zip,H5P</b>]]></string>
     <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
     <string name="content_entry_export">Export</string>
@@ -304,6 +307,8 @@
     <string name="xapi_options_when">When</string>
     <string name="xapi_options_where">Where</string>
 
+
+
     <string name="activity_preview_xapi">Preview</string>
     <string name="add_to_dashboard">Add to Dashboard</string>
     <string name="activity_import_link">Import Link</string>
@@ -332,7 +337,6 @@
     <string name="error_not_found_status">404 !</string>
     <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
 
-
     <string name="offline_sharing_enable_bluetooth_prompt">Offline sharing requires Bluetooth</string>
     <string name="offline_sharing_enable_wifi_promot">Offline sharing requires WiFi to be switched on</string>
     <string name="enable">Enable</string>
@@ -345,7 +349,14 @@
     <string name="repo_loading_status_failed_noconnection">No connection or peer</string>
     <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
-
+    <string name="licence_type_cc_by">CC BY</string>
+    <string name="licence_type_cc_by_sa">CC BY SA</string>
+    <string name="licence_type_cc_by_sa_nc">CC BY SA NC</string>
+    <string name="licence_type_cc_by_nc">CC BY NC</string>
+    <string name="licence_type_cc_by_nc_sa">CC BY NC SA</string>
+    <string name="licence_type_public_domain">Public Domain</string>
+    <string name="licence_type_all_rights">All Rights Reserved</string>
+    <string name="licence_type_other">Other</string>
 
     <string name="syncing">Syncing..</string>
     <string name="node_title_list">Node List</string>
