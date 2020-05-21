@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -144,8 +145,10 @@ class ClazzWorkEditPresenter(context: Any,
 
     override fun handleClickSave(entity: ClazzWork) {
 
+        val clazzUid = arguments[ARG_CLAZZ_UID]?.toLong() ?: 0L
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.clazzWorkUid == 0L) {
+                entity.clazzWorkClazzUid = clazzUid
                 entity.clazzWorkUid = repo.clazzWorkDao.insertAsync(entity)
             }else {
                 repo.clazzWorkDao.updateAsync(entity)

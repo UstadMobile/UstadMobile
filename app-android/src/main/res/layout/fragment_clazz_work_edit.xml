@@ -77,24 +77,24 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fragment_clazz_work_edit_startdate_tip"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_edit_title_tip"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:hint="@string/visible_from_date"
-                >
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_edit_title_tip"
+                app:layout_constraintEnd_toStartOf="@+id/fragment_clazz_work_edit_starttime_tip">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:runOnClickWhenFocused="@{true}"
                     android:cursorVisible="false"
-                    tools:text="dd/mm/yy"
-                    app:dateLong="@={clazzWork.clazzWorkStartDateTime}" />
+                    android:hint="@string/visible_from_date"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:dateLong="@={clazzWork.clazzWorkStartDateTime}"
+                    app:runOnClickWhenFocused="@{true}"
+                    tools:text="dd/mm/yy" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -106,7 +106,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:hint="@string/time"
                 app:layout_constraintBottom_toBottomOf="@+id/fragment_clazz_work_edit_startdate_tip"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/fragment_clazz_work_edit_startdate_tip"
@@ -116,6 +115,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
+                    android:hint="@string/time"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:dateLong="@={clazzWork.clazzWorkStartDateTime}"
                     app:runOnClickWhenFocused="@{true}"
@@ -174,14 +174,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:hint="@string/deadline"
                 app:layout_constraintBottom_toTopOf="@+id/fragment_clazz_work_edit_timezone_tv"
+                app:layout_constraintEnd_toStartOf="@+id/fragment_clazz_work_edit_deadline_time_tip"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_edit_allow_tv">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/deadline"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:dateLong="@={clazzWork.clazzWorkDueDateTime}"
@@ -198,7 +199,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:hint="@string/time"
                 app:layout_constraintBottom_toBottomOf="@+id/fragment_clazz_work_edit_deadline_tip"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/fragment_clazz_work_edit_deadline_tip"
@@ -207,6 +207,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/time"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:dateLong="@={clazzWork.clazzWorkDueDateTime}"

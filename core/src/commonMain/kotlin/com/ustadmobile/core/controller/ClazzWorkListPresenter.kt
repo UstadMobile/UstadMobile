@@ -53,13 +53,14 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     override fun handleClickEntry(entry: ClazzWork) {
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-//            ListViewMode.BROWSER -> systemImpl.go(ClazzWorkDetailView.VIEW_NAME,
-//                    mapOf(UstadView.ARG_ENTITY_UID to entry.clazzWorkUid.toString()), context)
+            ListViewMode.BROWSER -> systemImpl.go(ClazzWorkEditView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.clazzWorkUid.toString()), context)
         }
     }
 
     override fun handleClickCreateNewFab() {
-        systemImpl.go(ClazzWorkEditView.VIEW_NAME, mapOf(), context)
+        val clazzUid = arguments.get(UstadView.ARG_CLAZZ_UID)?.toLong()?:0L
+        systemImpl.go(ClazzWorkEditView.VIEW_NAME, mapOf(UstadView.ARG_CLAZZ_UID to clazzUid.toString()), context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
