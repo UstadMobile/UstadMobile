@@ -18,11 +18,6 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     @Query("SELECT * FROM ClazzWorkQuestion WHERE clazzWorkQuestionUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : ClazzWorkQuestion?
 
-    @Query("SELECT coalesce(MAX(clazzWorkQuestionIndex), 0) FROM ClazzWorkQuestion WHERE " +
-            "selQuestionSelQuestionSetUid = :questionSetUid " +
-            " AND clazzWorkQuestionActive = 0")
-    abstract suspend fun getMaxIndexByClazzWorkAsync(clazzWorkUid: Long): Int
-
     @Query("SELECT * FROM ClazzWorkQuestion WHERE " +
             "clazzWorkQuestionClazzWorkUid = :clazzWorkUid AND " +
             " CAST(clazzWorkQuestionActive AS INTEGER) = 0")
@@ -33,12 +28,12 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     abstract suspend fun updateActiveByClazzWorkQuestionUid(clazzWorkQuestionUid: Long, active : Boolean)
 
     @Query("""
-        SELECT SelQuestion.* , SelQuestionOption.* FROM SelQuestion 
-        LEFT JOIN SelQuestionOption ON 
-            SelQuestionOption.selQuestionOptionQuestionUid = SelQuestion.selQuestionUid 
+        SELECT ClazzWorkQuestion.* , ClazzWorkQuestionOption.* FROM ClazzWorkQuestion 
+        LEFT JOIN ClazzWorkQuestionOption ON 
+            ClazzWorkQuestionOption.clazzWorkQuestionOptionQuestionUid = ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid 
         WHERE 
-        selQuestionSelQuestionSetUid = :questionSetUid AND 
-        CAST(questionActive AS INTEGER) = 1
+        ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid = :clazzWorkUid AND 
+        CAST(ClazzWorkQuestion.clazzWorkQuestionActive AS INTEGER) = 1
     """)
     abstract fun findAllActiveQuestionsWithOptionsInClazzWorkAsList(clazzWorkUid: Long)
                     : List<ClazzWorkQuestionAndOptionRow>
