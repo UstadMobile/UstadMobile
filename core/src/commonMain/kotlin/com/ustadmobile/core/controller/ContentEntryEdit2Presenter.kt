@@ -67,6 +67,7 @@ class ContentEntryEdit2Presenter(context: Any,
      * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
      * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
      */
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
@@ -106,13 +107,17 @@ class ContentEntryEdit2Presenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
 
     override fun handleClickSave(entity: ContentEntryWithLanguage) {
         GlobalScope.launch(doorMainDispatcher()) {
+            val language = entity.language?.langUid
+            if(language != null){
+                entity.primaryLanguageUid = language
+            }
+
             if(entity.contentEntryUid == 0L) {
                 entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
                 val contentEntryJoin = ContentEntryParentChildJoin()

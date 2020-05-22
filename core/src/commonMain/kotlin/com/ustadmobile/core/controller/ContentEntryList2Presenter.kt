@@ -58,8 +58,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     private fun updateListOnView() {
         view.list  = when(contentFilter){
             ARG_LIBRARIES_CONTENT -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0, loggedPersonUid)
-            ARG_DOWNLOADED_CONTENT ->repo.contentEntryDao.downloadedRootItems()
-            ARG_RECYCLED_CONTENT ->repo.contentEntryDao.recycledItems()
+            ARG_DOWNLOADED_CONTENT -> repo.contentEntryDao.downloadedRootItems()
+            ARG_RECYCLED_CONTENT -> repo.contentEntryDao.recycledItems()
             else -> null
         }
     }
