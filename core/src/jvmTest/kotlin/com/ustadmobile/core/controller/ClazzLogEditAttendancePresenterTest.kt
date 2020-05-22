@@ -72,6 +72,7 @@ class ClazzLogEditAttendancePresenterTest {
         val mockClazzLog = ClazzLog().apply {
             logDate = getSystemTimeInMillis()
             this.clazzLogClazzUid = mockClazz.clazzUid
+            this.clazzLogUid = repo.clazzLogDao.insert(this)
         }
 
         return MockLogAndClazzSet(mockClazz, mockPeople, mockClazzMembers, mockClazzLog)
@@ -80,7 +81,7 @@ class ClazzLogEditAttendancePresenterTest {
 
 
     @Test
-    fun givenExistingClazzWithStudentsAndNoAttendanceLogsYet_whenLoadedFromDb_thenShouldSetListWithAllMembers() {
+    fun givenExistingClazzWithStudentsAndNoAttendanceLogsYet_whenLoadedFromDbAndAttendanceSet_thenShouldSetListWithAllMembersAndSaveToDatabase() {
         val mockLogAndClazzSet = createMockLogAndClazzSet()
 
         val presenter = ClazzLogEditAttendancePresenter(context,
@@ -88,8 +89,18 @@ class ClazzLogEditAttendancePresenterTest {
                 mockLifecycleOwner, systemImpl, db, repo, activeAccount)
         presenter.onCreate(null)
 
+        //wait for the view to finish loading
+        val entityVal = nullableArgumentCaptor<ClazzLog>().run {
+            verify(mockView, timeout(5000 * 1000).atLeastOnce()).entity = capture()
+            firstValue
+        }
+
+        presenter.handleClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+
+        presenter.handleClickSave(entityVal!!)
+
         nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
-            verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = capture()
+            verify(mockView, timeout(5000).atLeastOnce()).clazzLogAttendanceRecordList = capture()
             assertEquals("Got expected number of class members", 5,
                     mockLogAndClazzSet.clazzMemberList.size)
         }
@@ -120,6 +131,5 @@ class ClazzLogEditAttendancePresenterTest {
                     mockLogAndClazzSet.clazzMemberList.size)
         }
     }
-
 
 }

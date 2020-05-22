@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
@@ -28,6 +29,10 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
     @Query("SELECT * from ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordUid = :uid")
     abstract fun findByUid(uid: Long): ClazzLogAttendanceRecord?
+
+    @Update
+    abstract suspend fun updateListAsync(entities: List<ClazzLogAttendanceRecord>)
+
 
     @Query("""SELECT ClazzLogAttendanceRecord.*, Person.*
          FROM ClazzLogAttendanceRecord 

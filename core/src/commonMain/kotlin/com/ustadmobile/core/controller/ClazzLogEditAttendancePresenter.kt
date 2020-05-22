@@ -33,7 +33,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    val attendanceRecordOneToManyJoinHelperFactory = DefaultOneToManyJoinEditHelper(ClazzLogAttendanceRecord::clazzLogAttendanceRecordUid,
+    private val attendanceRecordOneToManyJoinHelper = DefaultOneToManyJoinEditHelper(ClazzLogAttendanceRecord::clazzLogAttendanceRecordUid,
             "state_ClazzLogAttendanceRecord_list", ClazzLogAttendanceRecordWithPerson.serializer().list,
             ClazzLogAttendanceRecordWithPerson.serializer().list, this) { clazzLogAttendanceRecordUid = it }
 
@@ -62,7 +62,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
         super.onCreate(savedState)
 
         //TODO: Set any additional fields (e.g. joinlist) on the view
-        view.clazzLogAttendanceRecordList = attendanceRecordOneToManyJoinHelperFactory.liveList
+        view.clazzLogAttendanceRecordList = attendanceRecordOneToManyJoinHelper.liveList
     }
 
 
@@ -86,9 +86,17 @@ class ClazzLogEditAttendancePresenter(context: Any,
             clazzLogAttendanceRecordClazzMemberUid = it.clazzMemberUid
         } }.sortedBy { "${it.person?.firstNames} ${it.person?.lastName}" }
 
-        attendanceRecordOneToManyJoinHelperFactory.liveList.sendValue(allMembers)
+        attendanceRecordOneToManyJoinHelper.liveList.sendValue(allMembers)
 
         return clazzLog
+    }
+
+    fun handleClickMarkAll(attendanceStatus: Int) {
+        val newList = attendanceRecordOneToManyJoinHelper.liveList.getValue()?.map {
+            it.copy().apply { it.attendanceStatus = attendanceStatus }
+        } ?: return
+
+        attendanceRecordOneToManyJoinHelper.liveList.setVal(newList)
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ClazzLog? {
@@ -113,19 +121,16 @@ class ClazzLogEditAttendancePresenter(context: Any,
     }
 
     override fun handleClickSave(entity: ClazzLog) {
-        //TODO: Any validation that is needed before accepting / saving this entity
-        //TODO: Only save to the database when the persistence mode is PERSISTENCE_MODE.DB
         GlobalScope.launch(doorMainDispatcher()) {
             entity.clazzLogStatusFlag = ClazzLog.STATUS_RECORDED
+            repo.clazzLogDao.update(entity)
 
-//            if(entity.clazzLogUid == 0L) {
-//                entity.clazzLogUid = repo.clazzLogDao.insertAsync(entity)
-//            }else {
-//                repo.clazzLogDao.updateAsync(entity)
-//            }
-//
-//            //TODO: Call commitToDatabase on any onetomany join helpers
-//            view.finishWithResult(entity)
+            val clazzLogAttendanceRecords = attendanceRecordOneToManyJoinHelper.liveList.getValue() ?: return@launch
+            val insertUpdatePartition = clazzLogAttendanceRecords.partition { it.clazzLogAttendanceRecordUid == 0L }
+            repo.clazzLogAttendanceRecordDao.insertListAsync(insertUpdatePartition.first)
+            repo.clazzLogAttendanceRecordDao.updateListAsync(insertUpdatePartition.second)
+
+            view.finishWithResult(listOf(entity))
         }
     }
 
