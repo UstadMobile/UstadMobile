@@ -39,4 +39,38 @@ open class ClazzWorkQuestion {
         const val CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT = 1
         const val CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE = 2
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ClazzWorkQuestion
+
+        if (clazzWorkQuestionUid != other.clazzWorkQuestionUid) return false
+        if (clazzWorkQuestionText != other.clazzWorkQuestionText) return false
+        if (clazzWorkQuestionClazzWorkUid != other.clazzWorkQuestionClazzWorkUid) return false
+        if (clazzWorkQuestionIndex != other.clazzWorkQuestionIndex) return false
+        if (clazzWorkQuestionType != other.clazzWorkQuestionType) return false
+        if (clazzWorkQuestionActive != other.clazzWorkQuestionActive) return false
+        if (selQuestionMasterChangeSeqNum != other.selQuestionMasterChangeSeqNum) return false
+        if (selQuestionLocalChangeSeqNum != other.selQuestionLocalChangeSeqNum) return false
+        if (selQuestionLastChangedBy != other.selQuestionLastChangedBy) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = clazzWorkQuestionUid.hashCode()
+        result = 31 * result + (clazzWorkQuestionText?.hashCode() ?: 0)
+        result = 31 * result + clazzWorkQuestionClazzWorkUid.hashCode()
+        result = 31 * result + clazzWorkQuestionIndex
+        result = 31 * result + clazzWorkQuestionType
+        result = 31 * result + clazzWorkQuestionActive.hashCode()
+        result = 31 * result + selQuestionMasterChangeSeqNum.hashCode()
+        result = 31 * result + selQuestionLocalChangeSeqNum.hashCode()
+        result = 31 * result + selQuestionLastChangedBy
+        return result
+    }
+
+
 }

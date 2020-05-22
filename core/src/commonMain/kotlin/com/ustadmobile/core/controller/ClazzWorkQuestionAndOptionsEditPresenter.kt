@@ -79,13 +79,14 @@ class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
     }
 
     fun addNewBlankQuestionOption(){
-        val selQuestionOption = ClazzWorkQuestionOption().apply {
+        val clazzWorkQuestionOption = ClazzWorkQuestionOption().apply {
             clazzWorkQuestionOptionText= ""
             clazzWorkQuestionOptionActive = true
+//            clazzWorkQuestionOptionQuestionUid = entity?.clazzWorkQuestion?.clazzWorkQuestionUid?:0L
         }
         val currentList =
                 view.clazzWorkQuestionOptionList?.getValue()?.toMutableList()?:mutableListOf<ClazzWorkQuestionOption>()
-        val newList = currentList + mutableListOf(selQuestionOption)
+        val newList = currentList + mutableListOf(clazzWorkQuestionOption)
         view.clazzWorkQuestionOptionList?.setVal(newList)
     }
 

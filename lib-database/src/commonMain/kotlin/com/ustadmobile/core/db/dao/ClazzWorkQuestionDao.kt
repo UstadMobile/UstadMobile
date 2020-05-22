@@ -30,10 +30,10 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     @Query("""
         SELECT ClazzWorkQuestion.* , ClazzWorkQuestionOption.* FROM ClazzWorkQuestion 
         LEFT JOIN ClazzWorkQuestionOption ON 
-            ClazzWorkQuestionOption.clazzWorkQuestionOptionQuestionUid = ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid 
+            ClazzWorkQuestionOption.clazzWorkQuestionOptionQuestionUid = ClazzWorkQuestion.clazzWorkQuestionUid AND CAST(ClazzWorkQuestionOption.clazzWorkQuestionOptionActive AS INTEGER) = 1
         WHERE 
-        ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid = :clazzWorkUid AND 
-        CAST(ClazzWorkQuestion.clazzWorkQuestionActive AS INTEGER) = 1
+        ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid = :clazzWorkUid 
+        AND CAST(ClazzWorkQuestion.clazzWorkQuestionActive AS INTEGER) = 1	
     """)
     abstract fun findAllActiveQuestionsWithOptionsInClazzWorkAsList(clazzWorkUid: Long)
                     : List<ClazzWorkQuestionAndOptionRow>
