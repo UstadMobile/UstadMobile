@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment"/>
+        <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment.ContentEntryListRecyclerAdapter"/>
 
         <variable
@@ -93,7 +94,7 @@
             tools:text="Content Description" />
 
         <ImageView
-            android:visibility="gone"
+            android:visibility="@{contentEntry.leaf ? View.GONE:View.VISIBLE}"
             android:id="@+id/content_entry_locally_available"
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
@@ -103,10 +104,12 @@
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:src="@drawable/ic_location_pin_24dp"
             android:tint="@color/text_secondary"
+            tools:visibility="gone"
             app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />
 
         <ImageView
+            android:visibility="@{contentEntry.leaf ? View.GONE:View.VISIBLE}"
             android:id="@+id/content_entry_mimetype_icon"
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
@@ -121,6 +124,7 @@
 
 
         <TextView
+            android:visibility="@{contentEntry.leaf ? View.GONE:View.VISIBLE}"
             android:id="@+id/content_entry_item_mimetype_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -130,7 +134,7 @@
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:gravity="start"
             android:textSize="@dimen/text_body_mid"
-            android:text="@{presenter.formatContent(contentEntry.mostRecentContainer.mimeType)}"
+            android:text="@{presenter.checkAndGetContentType(contentEntry.mostRecentContainer.mimeType)}"
             android:tint="@color/text_secondary"
             app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
             app:layout_constraintStart_toEndOf="@id/content_entry_mimetype_icon"

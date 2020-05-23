@@ -87,11 +87,11 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     }
 
-    fun formatContent(type: String): String{
+    fun checkAndGetContentType(type: String?): String{
         return view.checkAndGetContentType(type)
     }
 
-    fun checkAndGetContentDrawable(type: String): Int{
+    fun checkAndGetContentDrawable(type: String?): Int{
         return  view.checkAndGetContentDrawable(type)
     }
 

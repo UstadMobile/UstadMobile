@@ -106,12 +106,12 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         }
     }
 
-    override fun checkAndGetContentType(type: String): String {
-        return "${getString(R.string.content_type, context)} (${type.split("/")[1]})"
+    override fun checkAndGetContentType(type: String?): String {
+        return if(type == null) "" else "${getString(R.string.content_type, context)} (${type.split("/")[1]})"
     }
 
-    override fun checkAndGetContentDrawable(type: String): Int {
-        return when {
+    override fun checkAndGetContentDrawable(type: String?): Int {
+        return if(type == null) 0 else when {
             type.contains("video") -> {
                 R.drawable.ic_video_library_24px
             }

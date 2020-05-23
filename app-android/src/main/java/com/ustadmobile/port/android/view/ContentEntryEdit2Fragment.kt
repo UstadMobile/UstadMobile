@@ -124,7 +124,7 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
                         mBinding?.isFileNotSupported = entryMetaData == null
                         val entry = entryMetaData?.contentEntry
                         if(entry != null){
-                            entity = ContentEntryWithLanguage(entry)
+                            entity = entry
                             mBinding?.contentEntry = entity
                         }
                         if(entryMetaData?.contentEntry != null

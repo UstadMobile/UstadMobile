@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.net.Uri
+import android.view.View
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistry
@@ -62,7 +63,9 @@ fun ImageView.setCustomFieldIcon(customField: CustomField?) {
 
 @BindingAdapter("umResource")
 fun ImageView.setUmResource(resourceId: Int){
-    setImageDrawable(ContextCompat.getDrawable(context, resourceId))
+    if(resourceId != 0){
+        setImageDrawable(ContextCompat.getDrawable(context, resourceId))
+    }
 }
 
 private val ICON_ID_MAP : Map<Int, Int> by lazy {

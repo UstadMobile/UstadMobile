@@ -116,7 +116,13 @@
     <fragment
         android:id="@+id/home_content_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryTabsFragment"
-        android:label="@string/content" />
+        android:label="@string/content">
+        <argument
+            android:name="parentUid"
+            app:argType="long"
+            android:defaultValue="-4103245208651563007L"
+            />
+    </fragment>
 
     <dialog
         android:id="@+id/content_entry_add_options_dest"

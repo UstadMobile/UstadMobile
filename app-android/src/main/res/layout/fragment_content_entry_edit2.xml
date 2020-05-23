@@ -252,6 +252,7 @@
 
 
             <Spinner
+                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
