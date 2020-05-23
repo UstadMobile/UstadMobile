@@ -24,14 +24,6 @@
             type="boolean" />
 
         <variable
-            name="showFileImport"
-            type="boolean" />
-
-        <variable
-            name="showLinkImport"
-            type="boolean" />
-
-        <variable
             name="isNewFolder"
             type="boolean" />
 
@@ -48,6 +40,10 @@
             name="selectedFileUri"
             type="String" />
 
+        <variable
+            name="selectedStorageIndex"
+            type="Integer" />
+
 
         <variable
             name="activityEventHandler"
@@ -58,8 +54,13 @@
             type="java.util.List&lt;MessageIdOption&gt;"/>
 
         <variable
+            name="storageOptions"
+            type="java.util.List&lt;String&gt;"/>
+
+        <variable
             name="licenceSelectionListener"
             type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+
 
     </data>
 
@@ -86,33 +87,20 @@
                 android:backgroundTint="@color/accent"
                 android:onClick="@{()-> activityEventHandler.onClickFileSelection()}"
                 android:padding="@dimen/dimen_16dp"
-                android:text="@{contentEntry.contentEntryUid == 0 ? @string/content_entry_label_select_file: @string/content_entry_label_update_file}"
-                android:visibility="@{showFileImport ? View.VISIBLE: View.GONE}"
+                android:text="@{contentEntry.contentEntryUid == 0 ? @string/content_import_from_sources: @string/content_update_from_sources}"
+                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="@string/content_entry_label_select_file" />
+                tools:text="@string/content_import_from_sources" />
 
-            <Button
-                android:visibility="@{showLinkImport ? View.VISIBLE: View.GONE}"
-                android:backgroundTint="@color/accent"
-                android:id="@+id/content_entry_update_link"
-                android:layout_margin="@dimen/dimen_16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/content_entry_select_file"
-                android:layout_width="match_parent"
-                android:padding="@dimen/dimen_16dp"
-                tools:text="@string/content_entry_label_import_link"
-                android:text="@{contentEntry.contentEntryUid == 0 ? @string/content_entry_label_import_link: @string/content_entry_label_update_link}"
-                android:layout_height="wrap_content"/>
 
             <TextView
                 android:visibility="@{isFileNotSupported ? View.VISIBLE: View.GONE}"
                 android:layout_margin="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/content_entry_update_link"
+                app:layout_constraintTop_toBottomOf="@+id/content_entry_select_file"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:textSize="@dimen/text_body_small"
                 android:id="@+id/selected_file_not_supported"
@@ -263,24 +251,17 @@
             </com.google.android.material.textfield.TextInputLayout>
 
 
-            <com.google.android.material.textfield.TextInputLayout
+            <Spinner
+                android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
-                android:id="@+id/container_base_dir"
                 app:layout_constraintStart_toStartOf="parent"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:id="@+id/container_storage_option"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                app:layout_constraintTop_toBottomOf="@+id/entry_licence">
-
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/container_storage_option"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/content_creation_storage_option_title"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
+                android:entries="@{storageOptions}"
+                android:selectedItemPosition="@{selectedStorageIndex}"
+                app:layout_constraintTop_toBottomOf="@+id/entry_licence"
+                android:hint="@string/content_creation_storage_option_title"/>
 
 
             <RelativeLayout
@@ -291,7 +272,7 @@
                 android:layout_width="match_parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/container_base_dir"
+                app:layout_constraintTop_toBottomOf="@+id/container_storage_option"
                 android:layout_height="wrap_content">
                 <TextView
                     android:layout_centerVertical="true"

@@ -7,6 +7,8 @@ interface ContentEntryAddOptionsView: UstadView {
 
         const val CONTENT_CREATE_FOLDER = 1
 
+        const val CONTENT_IMPORT_CONTENT = 2
+
         const val CONTENT_IMPORT_FILE = 2
 
         const val CONTENT_CREATE_CONTENT = 3

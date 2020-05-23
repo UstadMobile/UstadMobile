@@ -21,7 +21,7 @@ import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class ContentEntryList2Fragment(): UstadListViewFragment<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(),
+class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(),
         ContentEntryList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     private var mPresenter: ContentEntryList2Presenter? = null
@@ -102,6 +102,24 @@ class ContentEntryList2Fragment(): UstadListViewFragment<ContentEntry, ContentEn
             override fun areContentsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
                                             newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer): Boolean {
                 return oldItem == newItem
+            }
+        }
+    }
+
+    override fun checkAndGetContentType(type: String): String {
+        return "${getString(R.string.content_type, context)} (${type.split("/")[1]})"
+    }
+
+    override fun checkAndGetContentDrawable(type: String): Int {
+        return when {
+            type.contains("video") -> {
+                R.drawable.ic_video_library_24px
+            }
+            type.contains("epub") -> {
+                R.drawable.ic_book_black_24dp
+            }
+            else -> {
+                R.drawable.ic_audiotrack_24px
             }
         }
     }

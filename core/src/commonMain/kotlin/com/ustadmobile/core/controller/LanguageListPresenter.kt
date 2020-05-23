@@ -37,14 +37,14 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
         view.sortOptions = SortOrder.values().toList().map { LanguageListSortOption(it, context) }
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
         insertTempData()
-        getAndSetList(SortOrder.ORDER_NAME_ASC)
+        getAndSetList()
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return true
     }
 
-    private fun getAndSetList(sortOrder: SortOrder) {
+    private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {
         view.list = when(sortOrder) {
             SortOrder.ORDER_NAME_ASC -> repo.languageDao.publicLanguagesOrderByNameAsc()
             SortOrder.ORDER_NAME_DSC -> repo.languageDao.publicLanguagesOrderByNameDesc()
@@ -58,6 +58,7 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
                 val language = Language()
                 language.langUid = i.toLong()
                 language.name = "Language $i"
+                language.iso_639_1_standard = if(i == 1) "en" else if(i == 2) "es" else "fr$i"
                 repo.languageDao.insertAsync(language)
             }
         }

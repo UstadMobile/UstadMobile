@@ -15,6 +15,7 @@
     <dimen name="text_title_medium">18sp</dimen>
     <dimen name="text_body">16sp</dimen>
     <dimen name="text_body_small">14sp</dimen>
+    <dimen name="text_body_mid">13sp</dimen>
     <dimen name="text_caption">12sp</dimen>
     <dimen name="text_caption_small">10sp</dimen>
     <!--layout dimension-->
@@ -82,6 +83,8 @@
     <dimen name="list_oneline1_margin_horizontal">16dp</dimen>
     <dimen name="list_oneline1_imagesize">40dp</dimen>
     <dimen name="list_oneline1_textsize_line1">16sp</dimen>
+    <dimen name="dimen_52dp">52dp</dimen>
+    <dimen name="dimen_60dp">60dp</dimen>
 
 
 </resources>

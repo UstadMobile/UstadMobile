@@ -3,7 +3,7 @@ package com.ustadmobile.core.view
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 
 
@@ -11,7 +11,9 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage> {
 
     var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>?
 
-    suspend fun saveContainerOnExit(entryUid: Long,db: UmAppDatabase, repo: UmAppDatabase)
+    var selectedStorageIndex: Int
+
+    suspend fun saveContainerOnExit(entryUid: Long,selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container?
 
     fun setUpStorageOptions(storageOptions:List<UMStorageDir>)
 
@@ -24,8 +26,6 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage> {
         const val CONTENT_ENTRY_LEAF = "content_entry_leaf"
 
         const val CONTENT_TYPE = "content_type"
-
-        const val CONTENT_ENTRY_PARENT_UID = "parent_uid"
 
     }
 

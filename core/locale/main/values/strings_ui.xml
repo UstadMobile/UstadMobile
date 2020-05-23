@@ -157,6 +157,7 @@
 
     <!--Content editor -->
     <string name="content_type_multimedia">Multimedia</string>
+    <string name="content_type">Content type </string>
     <string name="content_type_multiple_choice">Multiple choice</string>
     <string name="content_type_fill_the_blanks">Fill in the blanks</string>
     <string name="content_type_link">Link</string>
@@ -233,13 +234,19 @@
     <string name="content_entry_label_desc">Description</string>
     <string name="content_entry_label_save">Save</string>
     <string name="content_entry_label_update">Update document</string>
-    <string name="content_entry_label_select_file">Select file</string>
+    <string name="content_entry_label_select_file">Select file / Import Link</string>
     <string name="content_entry_label_update_file">Update from file</string>
     <string name="content_entry_label_import_link">Import Link</string>
     <string name="content_entry_label_update_link">Update from Link</string>
     <string name="content_entry_label_update_content">Update Content</string>
     <string name="content_from_file">From file</string>
     <string name="content_from_link">From link</string>
+    <string-array name="content_source_option">
+        <item>@string/content_from_file</item>
+        <item>@string/content_from_link</item>
+    </string-array>
+    <string name="content_import_from_sources">Import Content</string>
+    <string name="content_update_from_sources">Update Content</string>
     <string name="content_entry_label_licence">Licence</string>
     <string name="content_entry_label_public">Publicly accessible</string>
     <string name="content_entry_label_active">Make content active</string>

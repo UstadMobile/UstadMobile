@@ -9,9 +9,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_ENTRY_PARENT_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
@@ -48,6 +48,10 @@ class ContentEntryEdit2Presenter(context: Any,
 
     data class UmStorageOptions(var messageId: Int,var label: String)
 
+    private var parentEntryUid:Long = 0
+
+    private var entityUid: Long = 0
+
 
     open class StorageOptions(context: Any, val storage: UmStorageOptions): MessageIdOption(storage.messageId,context){
         override fun toString(): String {
@@ -62,18 +66,16 @@ class ContentEntryEdit2Presenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-
-    /*
-     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
-     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
-     */
+    private var storageOptions: List<UMStorageDir>? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
-
+        parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong()?:0
+        entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         systemImpl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
             override fun onDone(result: List<UMStorageDir>?) {
+                storageOptions = result
                 if(result != null){
                    view.runOnUiThread(Runnable {
                        view.setUpStorageOptions(result)
@@ -84,7 +86,6 @@ class ContentEntryEdit2Presenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithLanguage? {
-        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         return withTimeoutOrNull(2000) {
             db.contentEntryDao.findByEntryId(entityUid)
         } ?: ContentEntryWithLanguage()
@@ -92,7 +93,6 @@ class ContentEntryEdit2Presenter(context: Any,
 
     override fun onLoadFromJson(bundle: Map<String, String>): ContentEntryWithLanguage? {
         super.onLoadFromJson(bundle)
-
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: ContentEntryWithLanguage? = null
         editEntity = if(entityJsonStr != null) {
@@ -100,7 +100,6 @@ class ContentEntryEdit2Presenter(context: Any,
         }else {
             ContentEntryWithLanguage()
         }
-
         return editEntity
     }
 
@@ -113,29 +112,26 @@ class ContentEntryEdit2Presenter(context: Any,
 
     override fun handleClickSave(entity: ContentEntryWithLanguage) {
         GlobalScope.launch(doorMainDispatcher()) {
-            val language = entity.language?.langUid
-            if(language != null){
-                entity.primaryLanguageUid = language
-            }
-
             if(entity.contentEntryUid == 0L) {
                 entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
                 val contentEntryJoin = ContentEntryParentChildJoin()
                 contentEntryJoin.cepcjChildContentEntryUid = entity.contentEntryUid
-                contentEntryJoin.cepcjParentContentEntryUid =
-                        arguments[CONTENT_ENTRY_PARENT_UID]?.toLong()!!
+                contentEntryJoin.cepcjParentContentEntryUid = parentEntryUid
                 contentEntryJoin.cepcjUid = repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
             }else {
                 repo.contentEntryDao.updateAsync(entity)
             }
-            view.saveContainerOnExit(entity.contentEntryUid,db, repo)
+
+            if(entity.contentEntryUid != 0L){
+               val language = entity.language
+                if(language != null && language.langUid == 0L){
+                    repo.languageDao.insert(language)
+                }
+                view.saveContainerOnExit(entity.contentEntryUid, storageOptions?.get(view.selectedStorageIndex).toString(),db, repo)
+            }
             //TODO: Call commitToDatabase on any onetomany join helpers
             view.finishWithResult(listOf(entity))
         }
-    }
-
-    companion object {
-        const val ARG_SAVEDSTATE_CONTENT_ENTRY = "contentEntry"
     }
 
 }

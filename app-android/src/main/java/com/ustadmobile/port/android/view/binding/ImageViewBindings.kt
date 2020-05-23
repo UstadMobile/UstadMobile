@@ -60,6 +60,11 @@ fun ImageView.setCustomFieldIcon(customField: CustomField?) {
     setImageDrawable(ContextCompat.getDrawable(context, drawableId))
 }
 
+@BindingAdapter("umResource")
+fun ImageView.setUmResource(resourceId: Int){
+    setImageDrawable(ContextCompat.getDrawable(context, resourceId))
+}
+
 private val ICON_ID_MAP : Map<Int, Int> by lazy {
     mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
         CustomField.ICON_PERSON to R.drawable.ic_person_black_24dp,

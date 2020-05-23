@@ -37,6 +37,10 @@ class Language() {
     @LastChangedBy
     var langLastChangedBy: Int = 0
 
+    constructor(iso_639_1_standard: String) : this() {
+        this.iso_639_1_standard = iso_639_1_standard
+    }
+
     override fun toString(): String {
         return name.toString()
     }

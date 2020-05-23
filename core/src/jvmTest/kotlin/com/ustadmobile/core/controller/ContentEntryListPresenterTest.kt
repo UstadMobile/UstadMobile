@@ -90,7 +90,7 @@ class ContentEntryListPresenterTest {
         presenter.onCreate(null)
         presenter.handleClickFilterButton(1)
 
-        verify(contentEntryDaoSpy, timeout(5000)).downloadedRootItems()
+        verify(contentEntryDaoSpy, timeout(5000)).downloadedRootItemsAsc()
         verify(mockView, timeout(5000)).setContentEntryProvider(any())
     }
 
@@ -170,7 +170,7 @@ class ContentEntryListPresenterTest {
             presenter.onCreate(null)
             presenter.handleClickFilterButton(0)
 
-            verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(rootEntry.contentEntryUid), eq(0), eq(0), eq(0))
+            verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(eq(rootEntry.contentEntryUid), eq(0), eq(0), eq(0))
             verify(mockView, timeout(5000)).setContentEntryProvider(any())
             verify(contentEntryLiveData).observe(any(), any())
 
@@ -206,7 +206,7 @@ class ContentEntryListPresenterTest {
         val presenter = ContentEntryListPresenter(context, args, mockView, dbContentEntryDaoSpy, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
         presenter.onCreate(null)
         presenter.handleClickFilterByLanguage(1L)
-        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(any(), eq(1L), eq(0), eq(0))
+        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(any(), eq(1L), eq(0), eq(0))
         verify(mockView, timeout(5000)).setContentEntryProvider(any())
 
     }
@@ -219,7 +219,7 @@ class ContentEntryListPresenterTest {
         val presenter = ContentEntryListPresenter(context, args, mockView, contentEntryDao, repoContentEntryDaoSpy, mockAccount, systemImpl, umAppRepository)
         presenter.onCreate(null)
         presenter.handleClickFilterByCategory(1L)
-        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilter(eq(rootEntry.contentEntryUid), eq(0), eq(1L), eq(0))
+        verify(repoContentEntryDaoSpy, timeout(5000)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(eq(rootEntry.contentEntryUid), eq(0), eq(1L), eq(0))
         verify(mockView, timeout(5000)).setContentEntryProvider(any())
     }
 
@@ -464,7 +464,7 @@ class ContentEntryListPresenterTest {
         })
 
         verify(repoContentEntryDaoSpy, timeout(5000))
-                .getChildrenByParentUidWithCategoryFilter(eq(42L), any(), any(), any())
+                .getChildrenByParentUidWithCategoryFilterOrderByNameAsc(eq(42L), any(), any(), any())
     }
 
     @Test
@@ -505,10 +505,10 @@ class ContentEntryListPresenterTest {
 
         //Should be one query against the
         verify(repoContentEntryDaoSpy, timeout(5000))
-                .getChildrenByParentUidWithCategoryFilter(eq(42L), any(), any(), any())
+                .getChildrenByParentUidWithCategoryFilterOrderByNameAsc(eq(42L), any(), any(), any())
 
         verify(repoContentEntryDaoSpy, timeout(5000).times(2))
-                .getChildrenByParentUidWithCategoryFilter(eq(rootEntry.contentEntryUid), any(), any(), any())
+                .getChildrenByParentUidWithCategoryFilterOrderByNameAsc(eq(rootEntry.contentEntryUid), any(), any(), any())
     }
 
 

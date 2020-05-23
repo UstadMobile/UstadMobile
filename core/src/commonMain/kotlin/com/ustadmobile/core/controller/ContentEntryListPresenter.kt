@@ -111,7 +111,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>,
 
 
     private fun showContentByParent() {
-        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0, activeAccount?.personUid
+        val provider = contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid, 0, 0, activeAccount?.personUid
                 ?: 0)
         viewContract.setContentEntryProvider(provider)
 
@@ -192,7 +192,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     private fun showDownloadedContent() {
-        viewContract.setContentEntryProvider(contentEntryDao.downloadedRootItems())
+        viewContract.setContentEntryProvider(contentEntryDao.downloadedRootItemsAsc())
     }
 
     private fun showRecycledEntries() {
@@ -253,7 +253,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>,
     @JsName("handleClickFilterByLanguage")
     fun handleClickFilterByLanguage(langUid: Long) {
         viewContract.takeIf { filterByLang != langUid }?.setContentEntryProvider(
-                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, langUid,
+                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid, langUid,
                         filterByCategory, activeAccount?.personUid ?: 0))
         this.filterByLang = langUid
     }
@@ -261,7 +261,7 @@ class ContentEntryListPresenter(context: Any, arguments: Map<String, String>,
     @JsName("handleClickFilterByCategory")
     fun handleClickFilterByCategory(contentCategoryUid: Long) {
         viewContract.takeIf{ contentCategoryUid != filterByCategory }?.setContentEntryProvider(
-                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilter(parentUid, filterByLang,
+                contentEntryDaoRepo.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid, filterByLang,
                         contentCategoryUid, activeAccount?.personUid ?: 0))
         this.filterByCategory = contentCategoryUid
     }

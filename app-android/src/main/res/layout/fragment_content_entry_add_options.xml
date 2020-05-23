@@ -45,7 +45,7 @@
         android:clickable="true"
         android:foreground="?android:attr/selectableItemBackground"
         android:focusable="true"
-        android:id="@+id/content_import_file"
+        android:id="@+id/content_import_content"
         android:padding="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -58,7 +58,7 @@
             android:layout_height="@dimen/dimen_22dp" />
 
         <TextView
-            android:text="@string/content_editor_create_new_import"
+            android:text="@string/content_import_from_sources"
             android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_toEndOf="@+id/import_file"
             android:textSize="@dimen/text_body"

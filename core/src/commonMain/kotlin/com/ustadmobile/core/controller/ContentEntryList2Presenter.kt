@@ -5,13 +5,15 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryAddOptionsView
+import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.ContentEntryListViewMode
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -44,21 +46,28 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { ContentEntryListSortOption(it, context) }
         contentFilter = arguments[ARG_CONTENT_FILTER].toString()
-        parentUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
-        loggedPersonUid = UmAccountManager.getActivePersonUid(context);
+        parentUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
+        loggedPersonUid = UmAccountManager.getActivePersonUid(context)
+        getAndSetList()
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return true
     }
 
-    private fun updateListOnView() {
+    private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {
+
         view.list  = when(contentFilter){
-            ARG_LIBRARIES_CONTENT -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilter(parentUid, 0, 0, loggedPersonUid)
-            ARG_DOWNLOADED_CONTENT -> repo.contentEntryDao.downloadedRootItems()
+            ARG_LIBRARIES_CONTENT -> when(sortOrder){
+                SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid, 0, 0, loggedPersonUid)
+                SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid, 0, 0, loggedPersonUid)
+            }
+            ARG_DOWNLOADED_CONTENT -> when(sortOrder){
+                SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.downloadedRootItemsAsc()
+                SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.downloadedRootItemsDesc()
+            }
             ARG_RECYCLED_CONTENT -> repo.contentEntryDao.recycledItems()
             else -> null
         }
@@ -74,15 +83,28 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         */
     }
 
+    fun checkPermissionAndHandleDownloadStatusButtonClicked(entry: ContentEntry){
+
+    }
+
+    fun formatContent(type: String): String{
+        return view.checkAndGetContentType(type)
+    }
+
+    fun checkAndGetContentDrawable(type: String): Int{
+        return  view.checkAndGetContentDrawable(type)
+    }
+
     override fun handleClickCreateNewFab() {
-        systemImpl.go(ContentEntryAddOptionsView.VIEW_NAME, mapOf(), context)
+        systemImpl.go(ContentEntryAddOptionsView.VIEW_NAME,
+                mapOf(ARG_PARENT_ENTRY_UID to parentUid.toString()), context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
         val sortOrder = (sortOption as? ContentEntryListSortOption)?.sortOrder ?: return
         if(sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder
-            updateListOnView()
+            getAndSetList(currentSortOrder)
         }
     }
 }
