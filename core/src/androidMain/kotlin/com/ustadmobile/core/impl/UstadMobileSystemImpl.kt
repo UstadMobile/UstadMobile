@@ -41,10 +41,12 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navOptions
 import com.ustadmobile.core.generated.locale.MessageID
@@ -94,6 +96,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     var rotationEnabled: Boolean? = false
         internal set
+
+    /**
+     * This should be used only for testing. This will use the given navcontroller instead of
+     * finding the navcontroller from the mainactivity. This is used for Espresso testing on Fragments.
+     */
+    @VisibleForTesting
+    var navController: NavController? = null
 
     private val viewNameToAndroidImplMap = mapOf<String, String>(
             "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
@@ -269,7 +278,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val ustadDestination = destinationProvider.lookupDestinationName(viewName)
         if(ustadDestination != null) {
-            val navController = (context as Activity).findNavController(destinationProvider.navControllerViewId)
+            val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
             //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
             val options = navOptions {

@@ -40,11 +40,11 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     protected var mNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
 
-    protected var mDataRecyclerViewAdapter: SelectablePagedListAdapter<DT, *>? = null
+    internal var mDataRecyclerViewAdapter: SelectablePagedListAdapter<DT, *>? = null
 
     protected var mMergeRecyclerViewAdapter: MergeAdapter? = null
 
-    protected var mDataBinding: FragmentListBinding? = null
+    internal var mDataBinding: FragmentListBinding? = null
 
     protected var currentLiveData: LiveData<PagedList<DT>>? = null
 
@@ -232,6 +232,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             val displayTypeRepoVal = displayTypeRepo ?: return
             currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
             currentLiveData?.observe(this, this)
+            field = value
         }
 
     override fun onChanged(t: PagedList<DT>?) {

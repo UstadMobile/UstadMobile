@@ -33,7 +33,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="@{() -> presenter.handleClickEntry(clazzLog)}"
-        android:background="@drawable/bg_listitem"
+        android:id="@+id/item_clazz_log_attendance_list"
+        android:tag="@{clazzLog.clazzLogUid}"
+        app:backgroundIfAnimationEnabled="@{@drawable/bg_listitem}"
         >
 
         <!-- TODO: Change or remove this icon -->

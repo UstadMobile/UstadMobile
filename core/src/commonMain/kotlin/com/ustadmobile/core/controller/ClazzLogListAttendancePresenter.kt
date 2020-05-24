@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ClazzWithSchool
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, String>, view: ClazzLogListAttendanceView,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
@@ -49,10 +50,12 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     }
 
     private fun updateListOnView() {
-        GlobalScope.launch(doorMainDispatcher()) {
+        GlobalScope.launch {
             clazzWithSchool = repo.clazzDao.getClazzWithSchool(clazzUidFilter)
-            view.clazzTimeZone = clazzWithSchool?.clazzTimeZone ?: clazzWithSchool?.school?.schoolTimeZone ?: "UTC"
-            view.list = repo.clazzLogDao.findByClazzUidAsFactory(clazzUidFilter)
+            withContext((doorMainDispatcher())) {
+                view.clazzTimeZone = clazzWithSchool?.clazzTimeZone ?: clazzWithSchool?.school?.schoolTimeZone ?: "UTC"
+                view.list = repo.clazzLogDao.findByClazzUidAsFactory(clazzUidFilter)
+            }
         }
 
     }

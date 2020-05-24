@@ -81,6 +81,7 @@ android {
 
     testOptions {
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
+        animationsDisabled true
         unitTests {
             includeAndroidResources = true
             returnDefaultValues = true
@@ -427,6 +428,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
 
+    testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
     testImplementation "androidx.test:core:$version_android_junit_runner"
     testImplementation "androidx.test:runner:$version_android_junit_runner"
@@ -439,6 +441,8 @@ dependencies {
     testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
     testImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
+    testImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
+    testImplementation "com.azimolabs.conditionwatcher:conditionwatcher:0.2"
 
     //Required for databinding to work using JVM tests
     kaptTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
@@ -456,6 +460,9 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$version_android_espresso"
     androidTestImplementation "androidx.test.espresso:espresso-web:$version_android_espresso"
+    androidTestImplementation "androidx.fragment:fragment-testing:$version_androidx_fragment"
+    androidTestImplementation "androidx.navigation:navigation-testing:$version_android_navigation"
+    androidTestImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
 
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"
 
@@ -471,7 +478,7 @@ dependencies {
     //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
     androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 
-
+    kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 }
 
 task sourceJar(type: Jar) {

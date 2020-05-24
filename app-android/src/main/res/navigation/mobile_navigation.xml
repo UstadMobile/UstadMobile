@@ -42,6 +42,10 @@
         android:name="com.ustadmobile.port.android.view.ClazzDetailFragment"/>
 
     <fragment
+        android:id="@+id/clazz_log_edit_attendance_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzLogEditAttendanceFragment"/>
+
+    <fragment
         android:id="@+id/person_edit_dest"
         android:name="com.ustadmobile.port.android.view.PersonEditFragment"/>
 
