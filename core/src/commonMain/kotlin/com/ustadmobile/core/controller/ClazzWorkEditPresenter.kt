@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.findClazzTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -93,6 +94,12 @@ class ClazzWorkEditPresenter(context: Any,
         val clazzWork = withTimeoutOrNull(2000){
             db.clazzWorkDao.findByUidAsync(entityUid)
         }?:ClazzWork()
+
+        val clazzWithSchool = withTimeoutOrNull(2000){
+            db.clazzDao.getClazzWithSchool(clazzWork.clazzWorkClazzUid)
+        }?: ClazzWithSchool()
+
+        view.timeZone = clazzWithSchool.findClazzTimeZone()
 
         val contentList = withTimeoutOrNull(2000) {
             db.clazzWorkContentJoinDao.findContentByClazzWorkUid(

@@ -136,6 +136,14 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         //TOOD: Content when that is ready
     }
 
+    override var timeZone: String = ""
+        get() = field
+        set(value) {
+            mBinding?.fragmentClazzWorkEditTimezoneTv?.text =
+                    getText(R.string.class_timezone).toString() + " " + value
+            field = value
+        }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null

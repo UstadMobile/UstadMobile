@@ -12,6 +12,7 @@ interface ClazzWorkEditView: UstadEditView<ClazzWork> {
     var clazzWorkContent: DoorMutableLiveData<List<ContentEntryWithMetrics>>?
     var clazzWorkQuizQuestionsAndOptions: DoorMutableLiveData<List<ClazzWorkQuestionAndOptions>>?
     var submissionTypeOptions: List<ClazzWorkEditPresenter.SubmissionOptionsMessageIdOption>?
+    var timeZone: String
 
     companion object {
 
