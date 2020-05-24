@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Clazz
@@ -16,6 +17,7 @@ import kotlinx.coroutines.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.lib.db.entities.Role
+import kotlinx.serialization.json.Json
 
 
 typealias ClazzPermissionChecker = suspend (db: UmAppDatabase, personUid: Long, clazzUid: Long) -> Boolean
@@ -44,6 +46,33 @@ class ClazzDetailPresenter(context: Any,
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         return true
+    }
+
+    override fun onLoadFromJson(bundle: Map<String, String>): Clazz? {
+        super.onLoadFromJson(bundle)
+
+        val entityJsonStr = bundle[ARG_ENTITY_JSON]
+        var editEntity: Clazz? = null
+        if(entityJsonStr != null) {
+            editEntity = Json.parse(Clazz.serializer(), entityJsonStr)
+        }else {
+            editEntity = Clazz()
+        }
+
+        val activePersonUid = activeAccount.getValue()?.personUid ?: 0L
+
+        val entityUid = editEntity.clazzUid
+
+        GlobalScope.launch(Dispatchers.Main) {
+            view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
+                    "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid") +
+                    CLAZZ_FEATURES.filter {
+                        PERMISSION_CHECKER_MAP[it]?.invoke(db, activePersonUid, entityUid) ?: false
+                    }.map {
+                        (VIEWNAME_MAP[it] ?: "INVALID}") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"
+                    }
+        }
+        return editEntity
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Clazz? {

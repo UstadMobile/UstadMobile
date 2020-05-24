@@ -402,6 +402,47 @@ dependencies {
     //Implements app-wide rotation for presentation mode
     implementation "rongi.rotate-layout:rotate-layout:$version_android_rotatelayout"
 
+    //http server
+    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+    //image compressor
+    implementation "id.zelory:compressor:$version_compressor"
+
+    //extended fab
+    implementation "com.github.dimorinny:floating-text-button:$version_android_fab_extended"
+
+    //bottom navigation
+    implementation "com.aurelhubert:ahbottomnavigation:$version_android_bottom_nav"
+
+    //Range seekbar by Crystal
+    implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
+
+    //Bottom Navigation
+    implementation "com.aurelhubert:ahbottomnavigation:$version_android_ahbottomnavigation"
+
+    //Android play core for update support within the application
+    implementation "com.google.android.play:core:$version_play_core"
+    implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
+    implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
+
+
+    testImplementation "org.mockito:mockito-core:$version_android_mockito"
+    testImplementation "androidx.test:core:$version_android_junit_runner"
+    testImplementation "androidx.test:runner:$version_android_junit_runner"
+    testImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
+    testImplementation "androidx.fragment:fragment-testing:$version_androidx_fragment"
+    testImplementation "androidx.navigation:navigation-testing:$version_android_navigation"
+
+    testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
+    testImplementation "junit:junit:$version_junit"
+    testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+    testImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
+
+    //Required for databinding to work using JVM tests
+    kaptTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
+
     androidTestImplementation project(":lib-test-common")
     androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"
     androidTestImplementation "junit:junit:$version_junit"
@@ -420,47 +461,16 @@ dependencies {
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
     androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-
-    testImplementation "org.mockito:mockito-core:$version_android_mockito"
-
-    testImplementation "org.robolectric:robolectric:$version_android_roboelectric"
-
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
-
     androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 
 
-    //http server
-    implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-    implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
-    testImplementation "junit:junit:$version_junit"
-    testImplementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-
-    //image compressor
-    implementation "id.zelory:compressor:$version_compressor"
-
-    //extended fab
-    implementation "com.github.dimorinny:floating-text-button:$version_android_fab_extended"
-
-    //bottom navigation
-    implementation "com.aurelhubert:ahbottomnavigation:$version_android_bottom_nav"
 
     //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants
     androidTestImplementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 
-    //Range seekbar by Crystal
-    implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
-
-    //Bottom Navigation
-    implementation "com.aurelhubert:ahbottomnavigation:$version_android_ahbottomnavigation"
-
-    //Android play core for update support within the application
-    implementation "com.google.android.play:core:$version_play_core"
-    implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
-    implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
 }
 

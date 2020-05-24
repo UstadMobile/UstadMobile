@@ -4,34 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.PersonWithDisplayDetails"/>
-        <import type="com.ustadmobile.port.android.view.PersonListFragment"/>
-        <import type="com.ustadmobile.port.android.view.PersonListFragment.PersonListRecyclerAdapter"/>
+        <import type="com.ustadmobile.lib.db.entities.SchoolMemberWithPerson"/>
+        <import type="com.ustadmobile.port.android.view.SchoolMemberListFragment"/>
+        <import type="com.ustadmobile.port.android.view.SchoolMemberListFragment.SchoolMemberListRecyclerAdapter"/>
+
         <variable
-            name="person"
-            type="PersonWithDisplayDetails" />
+            name="schoolMember"
+            type="SchoolMemberWithPerson" />
         <variable
             name="presenter"
-            type="com.ustadmobile.core.controller.PersonListPresenter" />
+            type="com.ustadmobile.core.controller.SchoolMemberListPresenter" />
 
         <variable
             name="selectablePagedListAdapter"
-            type="PersonListRecyclerAdapter" />
+            type="SchoolMemberListRecyclerAdapter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, person)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(person)}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, schoolMember)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(schoolMember)}"
         android:background="@drawable/bg_listitem"
         >
 
         <!-- TODO: Change or remove this icon -->
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/item_person_newitemicon"
-            app:personPicturePersonUid="@{person.personUid}"
+            android:id="@+id/item_schoolmember_list_item_picture"
+            app:personPicturePersonUid="@{schoolMember.person.personUid}"
             android:layout_width="@dimen/list_twoline1_imagesize"
             android:layout_height="@dimen/list_twoline1_imagesize"
             android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
@@ -43,9 +44,9 @@
             />
 
         <!-- Line 1-->
+        <!-- Line 1-->
         <TextView
-            android:id="@+id/item_person_text"
-            android:text='@{person.firstNames + " " + person.lastName}'
+            android:id="@+id/item_schoolmember_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
@@ -56,17 +57,18 @@
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
             android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
             android:textSize="@dimen/list_twoline1_textsize_line1"
+            android:text="@{schoolMember.person.fullName()}"
             tools:text="Bob Dylan"
             android:textColor="@color/text_primary"
             />
 
         <!-- Line 2-->
         <TextView
-            android:id="@+id/item_person_line2_text"
+            android:id="@+id/item_schoolmember_line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@+id/item_person_text"
-            app:layout_constraintTop_toBottomOf="@+id/item_person_text"
+            app:layout_constraintStart_toStartOf="@+id/item_schoolmember_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_schoolmember_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />

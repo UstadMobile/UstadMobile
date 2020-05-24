@@ -40,10 +40,11 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
         val currentList = liveList.getValue() ?: return
         val entityIndex = currentList.indexOfFirst { pkGetter(it) == pk }
         if(entityIndex == -1){
-            val newFakePk = fakePkGenerator()
-            pkSetter(entity, newFakePk)
-            pksToInsert += newFakePk
+            if(doesNewEntityRequireFakePk(pkGetter(entity))) {
+                pkSetter(entity, fakePkGenerator())
+            }
 
+            pksToInsert += pkGetter(entity)
             val listVal = liveList.getValue() ?: return
             val newList = listVal + entity
             liveList.sendValue(newList)
@@ -71,9 +72,6 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
     val entitiesToUpdate: List<T>
         get() = liveList.getValue()?.filter { pkGetter(it) !in pksToInsert } ?: listOf()
 
-    val entitiesToDeactivate: List<T>
-        get() = liveList.getValue()?.filter { pkGetter(it) in pksToDeactivate } ?: listOf()
-
     val primaryKeysToDeactivate: List<K>
         get() = pksToDeactivate.toList()
 
@@ -99,6 +97,10 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
             pkSetter(it, newPk)
         }  })
         dao.updateListAsync(entitiesToUpdate.also { it.forEach(fkSetter) })
+    }
+
+    open protected fun doesNewEntityRequireFakePk(pk: K): Boolean {
+        return true
     }
 
 }

@@ -45,11 +45,6 @@ open class School() {
 
     var schoolEmailAddress : String?= null
 
-    /**
-     * The timezone for this school
-     */
-    var schoolTimeZone : String? = null
-
     @MasterChangeSeqNum
     var schoolMasterChangeSeqNum: Long = 0
 
@@ -58,6 +53,13 @@ open class School() {
 
     @LastChangedBy
     var schoolLastChangedBy: Int = 0
+
+
+    /**
+     * The timezone ID as per https://www.iana.org/time-zones. If null, this means use the School
+     * timezone
+     */
+    var schoolTimeZone: String? = null
 
     constructor(schoolName: String) : this() {
         this.schoolName = schoolName
