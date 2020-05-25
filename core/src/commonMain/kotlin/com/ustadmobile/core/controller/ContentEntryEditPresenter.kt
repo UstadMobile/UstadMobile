@@ -70,7 +70,7 @@ class ContentEntryEditPresenter(context: Any, arguments: Map<String, String>, vi
         super.onCreate(savedState)
 
         GlobalScope.launch {
-            val entry = contentEntryDao.findByEntryId(arguments.getValue(ARG_CONTENT_ENTRY_UID)?.toLong()?: 0)
+            val entry = contentEntryDao.findEntryWithLanguageByEntryId(arguments.getValue(ARG_CONTENT_ENTRY_UID)?.toLong()?: 0)
             contentEntry = entry ?: ContentEntry()
             importedEntry = (contentEntry.contentFlags and FLAG_IMPORTED) == FLAG_IMPORTED || contentType == CONTENT_IMPORT_FILE
 

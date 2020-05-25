@@ -87,7 +87,7 @@ class ContentEntryEdit2Presenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithLanguage? {
         return withTimeoutOrNull(2000) {
-            db.contentEntryDao.findByEntryId(entityUid)
+            db.contentEntryDao.findEntryWithLanguageByEntryId(entityUid)
         } ?: ContentEntryWithLanguage()
     }
 

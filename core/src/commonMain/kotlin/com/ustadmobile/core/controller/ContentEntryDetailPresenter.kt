@@ -258,7 +258,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
     fun handleStartEditingContent() {
 
         GlobalScope.launch {
-            val entry = appRepo.contentEntryDao.findByEntryId(entryUuid)
+            val entry = appRepo.contentEntryDao.findEntryWithLanguageByEntryId(entryUuid)
             if (entry != null) {
                 args.putAll(arguments)
 

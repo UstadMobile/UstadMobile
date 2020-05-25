@@ -59,8 +59,14 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid AND ContentEntry.contentEntryUid=:entryUuid")
-    @JsName("findByEntryId")
-    abstract suspend fun findByEntryId(entryUuid: Long): ContentEntryWithLanguage?
+    @JsName("findByEntryIdWithLanguage")
+    abstract suspend fun findEntryWithLanguageByEntryId(entryUuid: Long): ContentEntryWithLanguage?
+
+
+    @Query("SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container "+
+            "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1")
+    @JsName("findByEntryIdWithContainer")
+    abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
 
     @Query("SELECT * FROM ContentEntry WHERE title =:title")
     @JsName("findByEntryTitle")

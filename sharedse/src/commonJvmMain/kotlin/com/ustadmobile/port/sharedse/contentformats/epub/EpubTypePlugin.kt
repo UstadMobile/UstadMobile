@@ -42,9 +42,11 @@ class EpubTypePlugin : EPUBType(), ContentTypePlugin {
                         contentEntryVal.author = opfDocument.getCreator(0)?.creator
                         contentEntryVal.description = opfDocument.description
                         contentEntryVal.leaf = true
-                        val language = opfDocument.getLanguage(0)
-                        if(language != null){
-                            contentEntryVal.language = Language(language)
+                        val languageCode = opfDocument.getLanguage(0)
+                        if(languageCode != null){
+                            val language = Language()
+                            language.iso_639_1_standard = languageCode
+                            contentEntryVal.language = language
                         }
                         contentEntry = contentEntryVal
                         break
