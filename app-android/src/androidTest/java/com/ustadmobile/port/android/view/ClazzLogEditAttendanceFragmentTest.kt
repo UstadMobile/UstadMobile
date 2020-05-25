@@ -46,6 +46,7 @@ class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
         }
 
 
+        //See https://github.com/xabaras/recyclerview-child-actions
         onView(withId(R.id.clazz_log_edit_recycler_view)).perform(
                 RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
                     click()))
