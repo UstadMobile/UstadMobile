@@ -344,8 +344,8 @@ class ContentEntryDetailActivity : UstadBaseWithContentOptionsActivity(),
         val flexboxLayoutManager = FlexboxLayoutManager(applicationContext)
         flexboxLayoutManager.flexDirection = FlexDirection.ROW
         flexBox.layoutManager = flexboxLayoutManager
-        val adapter = ContentEntryDetailLanguageAdapter(result, this)
-        flexBox.adapter = adapter
+        //val adapter = ContentEntryDetailLanguageAdapter(result, this)
+        //flexBox.adapter = adapter
     }
 
     override fun onClickStopDownload(view: DownloadProgressView) {

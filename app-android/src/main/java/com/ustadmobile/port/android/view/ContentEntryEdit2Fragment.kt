@@ -34,8 +34,10 @@ import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.sharedse.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
 import com.ustadmobile.port.sharedse.contentformats.importContainerFromZippedFile
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
@@ -81,6 +83,9 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             mBinding?.selectedStorageIndex = value
             field = value
         }
+    override var jobCreatedTime: Long
+        get() = System.currentTimeMillis()
+        set(value) {}
 
     override fun formatLabel(storage: UMStorageDir): String {
         return String.format(UstadMobileSystemImpl.instance.getString(
@@ -175,28 +180,38 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             it.contentEntry?.lastModified = System.currentTimeMillis()
             it.contentEntry?.ceInactive = true
             it.isFileNotSupported = false
-            it.contentEntry?.leaf = arguments?.get(ContentEntryEdit2View.CONTENT_ENTRY_LEAF).toString().toBoolean()
         }
 
-        mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+
+
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Language::class.java) {
-            val language = it.firstOrNull() ?: return@observeResult
-            entity?.language = language
-            entity?.primaryLanguageUid = language.langUid
-            mBinding?.contentEntry = entity
+        GlobalScope.launch {
+            val thisFrag = this@ContentEntryEdit2Fragment
+            val networkManagerBle = (activity as MainActivity).networkManagerBle.await()
+            withContext(Dispatchers.Main){
+                mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), thisFrag,
+                        thisFrag, UstadMobileSystemImpl.instance,
+                        UmAccountManager.getActiveDatabase(requireContext()),
+                        UmAccountManager.getRepositoryForActiveAccount(requireContext()),
+                        networkManagerBle.containerDownloadManager,
+                        UmAccountManager.activeAccountLiveData)
+
+                mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
+                navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                        Language::class.java) {
+                    val language = it.firstOrNull() ?: return@observeResult
+                    entity?.language = language
+                    entity?.primaryLanguageUid = language.langUid
+                    mBinding?.contentEntry = entity
+                }
+            }
         }
     }
 

@@ -150,7 +150,7 @@
     <string name="no_app_found">"No app found to open file"</string>
     <string name="entry_details_author">Author</string>
     <string name="entry_details_publisher">Publisher</string>
-    <string name="entry_details_license">License</string>
+    <string name="entry_details_license">License: </string>
     <string name="entry_details_description">Description</string>
     <string name="library_reading_level">Reading Level</string>
     <string name="file_not_found">File Not Found</string>
@@ -239,6 +239,8 @@
     <string name="content_entry_label_import_link">Import Link</string>
     <string name="content_entry_label_update_link">Update from Link</string>
     <string name="content_entry_label_update_content">Update Content</string>
+    <string name="cotent_entry_btn_label_download">Download</string>
+    <string name="cotent_entry_btn_label_open">Open</string>
     <string name="content_from_file">From file</string>
     <string name="content_from_link">From link</string>
     <string-array name="content_source_option">

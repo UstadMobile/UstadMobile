@@ -13,10 +13,11 @@ import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
+import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
-class ContentEntryTabsFragment : UstadBaseFragment(){
+class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsView {
 
     private inner class ContentEntryTabsPagerAdapter(fm: FragmentManager, viewList: List<String>, val titleList: List<String>): ViewNameListFragmentPagerAdapter(fm,
             BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, viewList, mapOf(ContentEntryList2View.VIEW_NAME to ContentEntryList2Fragment::class.java),
@@ -45,5 +46,8 @@ class ContentEntryTabsFragment : UstadBaseFragment(){
 
         return rootView
     }
+
+    override val viewContext: Any
+        get() = requireContext()
 
 }

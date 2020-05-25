@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.ContentEntryListViewMode
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -46,7 +47,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         super.onCreate(savedState)
         view.sortOptions = SortOrder.values().toList().map { ContentEntryListSortOption(it, context) }
         contentFilter = arguments[ARG_CONTENT_FILTER].toString()
-        parentUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
+        parentUid = arguments[ARG_PARENT_ENTRY_UID]?.replace("L","")?.toLong() ?: 0L
         loggedPersonUid = UmAccountManager.getActivePersonUid(context)
         getAndSetList()
     }
@@ -59,8 +60,10 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
         view.list  = when(contentFilter){
             ARG_LIBRARIES_CONTENT -> when(sortOrder){
-                SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid, 0, 0, loggedPersonUid)
-                SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid, 0, 0, loggedPersonUid)
+                SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
+                        parentUid, 0, 0, loggedPersonUid)
+                SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameDesc(
+                        parentUid, 0, 0, loggedPersonUid)
             }
             ARG_DOWNLOADED_CONTENT -> when(sortOrder){
                 SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.downloadedRootItemsAsc()
@@ -74,8 +77,10 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     override fun handleClickEntry(entry: ContentEntry) {
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(ContentEntry2DetailView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString()), context)
+            ListViewMode.BROWSER -> systemImpl.go(
+                    if(entry.leaf) ContentEntry2DetailView.VIEW_NAME else ContentEntryListTabsView.VIEW_NAME,
+                    mapOf(ARG_ENTITY_UID to entry.contentEntryUid.toString(), ARG_PARENT_ENTRY_UID
+                            to (if(entry.leaf) parentUid else entry.contentEntryUid).toString()), context)
         }
     }
 

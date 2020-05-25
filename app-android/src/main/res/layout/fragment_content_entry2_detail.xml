@@ -15,12 +15,20 @@
             type="boolean" />
 
         <variable
+            name="showTranslation"
+            type="boolean" />
+
+        <variable
             name="fieldsEnabled"
             type="boolean" />
 
         <variable
             name="editButtonMode"
             type="com.ustadmobile.core.view.EditButtonMode"/>
+
+        <variable
+            name="translationAdapter"
+            type="com.ustadmobile.port.android.view.ContentEntryDetailLanguageAdapter"/>
 
         <variable
             name="fragmentEventHandler"
@@ -31,7 +39,6 @@
 
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/activity_contententry_edit_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -41,11 +48,278 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="vertical"
+                android:id="@+id/nested_scroll"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <!-- TODO: Put the actual view for editing ContentEntry here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/entry_detail_thumbnail"
+                        android:layout_width="110dp"
+                        android:layout_height="110dp"
+                        android:layout_margin="@dimen/dimen_8dp"
+                        app:imageUri="@{contentEntry.thumbnailUrl}"
+                        android:background="@color/secondary_text_light"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/entry_detail_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="20sp"
+                        android:text="@{contentEntry.title}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Content Title" />
+
+                    <TextView
+                        android:id="@+id/entry_detail_author"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_body"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_title"
+                        android:text="@{contentEntry.author}"
+                        tools:text="Author" />
+
+                    <TextView
+                        android:id="@+id/entry_detail_publisher"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_body"
+                        android:text="@{contentEntry.publisher}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_author"
+                        tools:text="Publisher" />
+
+                    <TextView
+                        android:id="@+id/entry_detail_license_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_body_small"
+                        android:text="@{@string/entry_details_license + contentEntry.licenseName}"
+                        app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
+                        tools:text="BY_SA" />
+
+
+                    <TextView
+                        android:id="@+id/entry_detail_license"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_body_small"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/entry_detail_license_label"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
+                        tools:text="BY_SA" />
+
+                    <androidx.constraintlayout.widget.Barrier
+                        android:id="@+id/labelBarrier"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:barrierDirection="bottom"
+                        app:constraint_referenced_ids="entry_detail_license,entry_detail_thumbnail" />
+
+                    <LinearLayout
+                        android:id="@+id/entry_detail_anchor_download"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/labelBarrier">
+
+                        <Button
+                            android:textStyle="bold"
+                            android:id="@+id/entry_download_open_button"
+                            android:layout_width="match_parent"
+                            android:padding="@dimen/dimen_16dp"
+                            android:text="@{contentEntry.container == null ? @string/cotent_entry_btn_label_download : @string/cotent_entry_btn_label_open}"
+                            android:layout_height="wrap_content"
+                            app:backgroundTint="@color/primary"
+                            android:onClick="@{()-> fragmentEventHandler.handleOnClickOpenDownloadButton()}"
+                            android:textColor="@android:color/white" />
+
+                        <com.ustadmobile.port.android.view.DownloadProgressView
+                            android:id="@+id/entry_detail_progress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone" />
+
+                    </LinearLayout>
+
+
+                    <View
+                        android:id="@+id/library_size_divider"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_margin="8dp"
+                        android:background="@color/secondary_text"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_anchor_download" />
+
+
+                    <ImageView
+                        android:visibility="@{contentEntry.container == null ? View.GONE: View.VISIBLE}"
+                        android:id="@+id/image_content_size"
+                        android:layout_width="@dimen/dimen_16dp"
+                        android:layout_height="@dimen/dimen_16dp"
+                        android:layout_marginTop="@dimen/dimen_8dp"
+                        app:layout_constraintEnd_toEndOf="@id/entry_detail_content_size"
+                        app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
+                        app:layout_constraintTop_toBottomOf="@id/library_size_divider"
+                        app:srcCompat="@drawable/download_archive_tray" />
+
+
+                    <TextView
+                        android:id="@+id/entry_detail_content_size"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_body_small"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.1"
+                        android:text="@{fragmentEventHandler.handleFileSize(contentEntry.container.fileSize)}"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/image_content_size"
+                        tools:text="50 mb" />
+
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/content_status_icon"
+                        android:layout_width="@dimen/dimen_16dp"
+                        android:layout_height="@dimen/dimen_16dp"
+                        android:layout_marginTop="@dimen/dimen_8dp"
+                        app:layout_constraintEnd_toEndOf="@id/content_status_text"
+                        app:layout_constraintStart_toStartOf="@id/content_status_text"
+                        app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
+
+
+                    <TextView
+                        android:visibility="gone"
+                        android:layout_marginEnd="@dimen/dimen_16dp"
+                        android:id="@+id/content_status_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.973"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/image_content_size"
+                        tools:text="Locally Available" />
+
+                    <View
+                        android:id="@+id/description_divider"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_margin="8dp"
+                        android:background="@color/secondary_text"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_content_size" />
+
+                    <TextView
+                        android:id="@+id/entry_detail_description_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:text='@{fragmentEventHandler.handleDescription(contentEntry.description)}'
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/text_body"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/description_divider" />
+
+                    <TextView
+                        android:id="@+id/entry_detail_description"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_description_label" />
+
+                    <View
+                        android:id="@+id/language_divider"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_margin="8dp"
+                        android:background="@color/secondary_text"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_description" />
+
+                    <TextView
+                        android:visibility="@{showTranslation ? View.VISIBLE: View.GONE}"
+                        android:id="@+id/entry_detail_available_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:text="@string/also_available_in"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/language_divider" />
+
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:visibility="@{showTranslation ? View.VISIBLE: View.GONE}"
+                        android:id="@+id/entry_detail_flex"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:nestedScrollingEnabled="false"
+                        app:languageAdapter="@{translationAdapter}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_available_label" />
+
+                    <TextView
+                        android:id="@+id/entry_detail_see_also_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:text="SEE ALSO"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/entry_detail_flex" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.core.widget.NestedScrollView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

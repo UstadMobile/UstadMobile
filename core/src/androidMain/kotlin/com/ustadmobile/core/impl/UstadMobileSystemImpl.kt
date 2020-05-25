@@ -52,7 +52,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
-import com.ustadmobile.staging.core.view.ClazzDetailView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
@@ -168,10 +167,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupListView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupListActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity",
-            ContentEntryList2View.VIEW_NAME to "${PACKAGE_NAME}ContentEntryList2Fragment",
-            ContentEntryAddOptionsView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryAddOptionsFragment",
-            ContentEntryEdit2View.VIEW_NAME to "${PACKAGE_NAME}ContentEntryEdit2Fragment",
-            ContentEntry2DetailView.VIEW_NAME to "${PACKAGE_NAME}ContentEntry2DetailFragment"
+            ContentEntryAddOptionsView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryAddOptionsFragment"
     )
 
 

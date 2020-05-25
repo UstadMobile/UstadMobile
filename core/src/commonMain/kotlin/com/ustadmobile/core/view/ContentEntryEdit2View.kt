@@ -13,6 +13,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage> {
 
     var selectedStorageIndex: Int
 
+    var jobCreatedTime: Long
+
     suspend fun saveContainerOnExit(entryUid: Long,selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container?
 
     fun setUpStorageOptions(storageOptions:List<UMStorageDir>)

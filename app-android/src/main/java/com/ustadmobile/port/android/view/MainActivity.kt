@@ -24,7 +24,7 @@ import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.core.view.SettingsView
 
 
-class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
+class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         NavController.OnDestinationChangedListener {
 
     private lateinit var appBarConfiguration : AppBarConfiguration

@@ -43,8 +43,7 @@ class ContentEntryAddOptionsFragment : UstadBottomSheetFragment(), ContentEntryA
 
         findNavController().navigate(R.id.content_entry_edit_dest, UMAndroidUtil.mapToBundle(mapOf(
                 ARG_PARENT_ENTRY_UID to arguments?.get(ARG_PARENT_ENTRY_UID).toString(),
-                CONTENT_TYPE to contentType.toString(),
-                CONTENT_ENTRY_LEAF to (CONTENT_CREATE_FOLDER != contentType).toString())))
+                CONTENT_TYPE to contentType.toString())))
         dismiss()
     }
 

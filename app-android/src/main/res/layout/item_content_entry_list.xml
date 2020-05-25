@@ -41,6 +41,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ProgressBar
+            android:visibility="gone"
             android:id="@+id/content_entry_progress"
             android:layout_width="@dimen/dimen_70dp"
             android:layout_marginTop="66dp"
@@ -52,12 +53,13 @@
 
         <ImageView
             android:id="@+id/content_entry_status"
-            android:layout_width="@dimen/dimen_16dp"
-            android:layout_height="@dimen/dimen_16dp"
+            android:layout_width="60dp"
+            android:layout_height="0dp"
             android:layout_marginStart="@dimen/dimen_60dp"
+            android:layout_marginTop="@dimen/dimen_60dp"
             android:background="@color/colorAccent"
             android:scaleType="fitCenter"
-            android:layout_marginTop="@dimen/dimen_60dp"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -94,7 +96,7 @@
             tools:text="Content Description" />
 
         <ImageView
-            android:visibility="@{contentEntry.leaf ? View.GONE:View.VISIBLE}"
+            android:visibility="gone"
             android:id="@+id/content_entry_locally_available"
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
@@ -109,7 +111,7 @@
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />
 
         <ImageView
-            android:visibility="@{contentEntry.leaf ? View.GONE:View.VISIBLE}"
+            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             android:id="@+id/content_entry_mimetype_icon"
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
@@ -124,7 +126,7 @@
 
 
         <TextView
-            android:visibility="@{contentEntry.leaf ? View.GONE:View.VISIBLE}"
+            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             android:id="@+id/content_entry_item_mimetype_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

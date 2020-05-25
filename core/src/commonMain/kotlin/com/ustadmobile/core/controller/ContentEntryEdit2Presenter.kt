@@ -1,24 +1,25 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_TYPE
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -27,11 +28,12 @@ import kotlinx.serialization.json.Json
 
 
 class ContentEntryEdit2Presenter(context: Any,
-                          arguments: Map<String, String>, view: ContentEntryEdit2View,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
+                                 arguments: Map<String, String>, view: ContentEntryEdit2View,
+                                 lifecycleOwner: DoorLifecycleOwner,
+                                 systemImpl: UstadMobileSystemImpl,
+                                 db: UmAppDatabase, repo: UmAppDatabase,
+                                 private val containerDownloadManager: ContainerDownloadManager?,
+                                 activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
     : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
@@ -61,7 +63,6 @@ class ContentEntryEdit2Presenter(context: Any,
 
     class LicenceMessageIdOptions(licence: LicenceOptions,context: Any)
         : MessageIdOption(licence.messageId,context, licence.optionVal)
-
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -111,6 +112,9 @@ class ContentEntryEdit2Presenter(context: Any,
 
 
     override fun handleClickSave(entity: ContentEntryWithLanguage) {
+        entity.leaf = arguments[CONTENT_TYPE]?.toInt() != CONTENT_CREATE_FOLDER
+        entity.licenseName = systemImpl.getString(LicenceOptions.values()
+                .single { it.optionVal == entity.licenseType }.messageId, context)
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.contentEntryUid == 0L) {
                 entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
@@ -127,9 +131,19 @@ class ContentEntryEdit2Presenter(context: Any,
                 if(language != null && language.langUid == 0L){
                     repo.languageDao.insert(language)
                 }
-                view.saveContainerOnExit(entity.contentEntryUid, storageOptions?.get(view.selectedStorageIndex).toString(),db, repo)
+                val container = view.saveContainerOnExit(entity.contentEntryUid,
+                        storageOptions?.get(view.selectedStorageIndex).toString(),db, repo)
+                if(container != null && entity.leaf){
+                    //Mark this entry's job as complete
+                    val downloadJob = DownloadJob(entity.contentEntryUid, view.jobCreatedTime)
+                    downloadJob.djStatus = JobStatus.COMPLETE
+                    containerDownloadManager?.createDownloadJob(downloadJob)
+                    val downloadJobItem = DownloadJobItem(downloadJob,entity.contentEntryUid,
+                            container.containerUid,container.fileSize)
+                    containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
+                }
             }
-            //TODO: Call commitToDatabase on any onetomany join helpers
+
             view.finishWithResult(listOf(entity))
         }
     }

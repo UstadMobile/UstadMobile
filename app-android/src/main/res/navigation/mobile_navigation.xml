@@ -115,13 +115,12 @@
         android:label="SchoolMemberListFragment" />
     <fragment
         android:id="@+id/home_content_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryTabsFragment"
+        android:name="com.ustadmobile.port.android.view.ContentEntryListTabsFragment"
         android:label="@string/content">
         <argument
             android:name="parentUid"
-            app:argType="long"
             android:defaultValue="-4103245208651563007L"
-            />
+            app:argType="string" />
     </fragment>
 
     <dialog

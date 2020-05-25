@@ -13,7 +13,6 @@ class ViewNameToDestMap: DestinationProvider {
     val destinationMap = mapOf(
             ClazzEdit2View.VIEW_NAME to UstadDestination(R.id.clazz_edit_dest, false),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest, true),
-            ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.home_content_dest, true),
             ClazzDetailView.VIEW_NAME to UstadDestination(R.id.clazz_detail_dest, false),
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest, true),
             HolidayCalendarEditView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_edit_dest, false),
@@ -31,7 +30,10 @@ class ViewNameToDestMap: DestinationProvider {
             SchoolDetailOverviewView.VIEW_NAME to UstadDestination(R.id.school_detail_overview_dest, true),
             PersonDetailView.VIEW_NAME to UstadDestination(R.id.person_detail_dest, true),
             PersonListView.VIEW_NAME to UstadDestination(R.id.person_list_dest, false),
-            SchoolMemberListView.VIEW_NAME to UstadDestination(R.id.schoolmember_list_dest, true)
+            SchoolMemberListView.VIEW_NAME to UstadDestination(R.id.schoolmember_list_dest, true),
+            ContentEntryEdit2View.VIEW_NAME to UstadDestination(R.id.content_entry_edit_dest, false),
+            ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest, true),
+            ContentEntry2DetailView.VIEW_NAME to UstadDestination(R.id.content_entry_details_dest, true)
     )
 
     override val navControllerViewId: Int
