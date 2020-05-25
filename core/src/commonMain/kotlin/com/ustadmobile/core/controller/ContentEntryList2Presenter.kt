@@ -5,14 +5,12 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.ContentEntryAddOptionsView
-import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.ContentEntryListViewMode
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -74,13 +72,11 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickEntry(entry: ContentEntry) {
-        /* TODO: Add code to go to the appropriate detail view or make a selection
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(ContentEntryDetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to uid, context)
+            ListViewMode.BROWSER -> systemImpl.go(ContentEntry2DetailView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.contentEntryUid.toString()), context)
         }
-        */
     }
 
     fun checkPermissionAndHandleDownloadStatusButtonClicked(entry: ContentEntry){

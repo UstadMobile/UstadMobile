@@ -170,7 +170,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity",
             ContentEntryList2View.VIEW_NAME to "${PACKAGE_NAME}ContentEntryList2Fragment",
             ContentEntryAddOptionsView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryAddOptionsFragment",
-            ContentEntryEdit2View.VIEW_NAME to "${PACKAGE_NAME}ContentEntryEdit2Fragment"
+            ContentEntryEdit2View.VIEW_NAME to "${PACKAGE_NAME}ContentEntryEdit2Fragment",
+            ContentEntry2DetailView.VIEW_NAME to "${PACKAGE_NAME}ContentEntry2DetailFragment"
     )
 
 

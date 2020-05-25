@@ -280,7 +280,7 @@ class ContentEntryDetailPresenter(context: Any, arguments: Map<String, String>,
     @JsName("handleContentEntryExport")
     fun handleContentEntryExport() {
         val args = HashMap(arguments)
-        args[ContentEntryExportView.ARG_CONTENT_ENTRY_TITLE] = currentContentEntry.title
+        //args[ContentEntryExportView.ARG_CONTENT_ENTRY_TITLE] = currentContentEntry.title
         impl.go(ContentEntryExportView.VIEW_NAME, args, context)
     }
 

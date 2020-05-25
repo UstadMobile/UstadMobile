@@ -38,8 +38,9 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("downloadedRootItems")
     abstract fun downloadedRootItemsAsc(): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
-    @Query("""SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, Container.*, 
-            0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 0 AS cepcjLastChangedBy
+
+    @Query("""SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, Container.*,
+            0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 0 AS cepcjLastChangedBy 
             FROM DownloadJob 
             LEFT JOIN ContentEntry on  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
             LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
@@ -59,12 +60,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
 
     @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid AND ContentEntry.contentEntryUid=:entryUuid")
-    @JsName("findByEntryIdWithLanguage")
+    @JsName("findEntryWithLanguageByEntryId")
     abstract suspend fun findEntryWithLanguageByEntryId(entryUuid: Long): ContentEntryWithLanguage?
 
-
     @Query("SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container "+
-            "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1")
+            "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE ContentEntry.contentEntryUid=:entryUuid")
     @JsName("findByEntryIdWithContainer")
     abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
 

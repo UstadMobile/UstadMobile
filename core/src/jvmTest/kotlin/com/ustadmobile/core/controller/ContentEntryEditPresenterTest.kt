@@ -232,7 +232,7 @@ class ContentEntryEditPresenterTest {
                 assertTrue("New container was created and entry was updated",
                         firstValue.contains("updated successfully"))
 
-                val contentEntry = umAppDatabase.contentEntryDao.findByEntryId(leafContentEntry.contentEntryUid)
+                val contentEntry = umAppDatabase.contentEntryDao.findEntryWithLanguageByEntryId(leafContentEntry.contentEntryUid)
 
                 assertNotNull("Entry was created and inserted in the Db", contentEntry)
 
@@ -261,7 +261,7 @@ class ContentEntryEditPresenterTest {
                 verify(mockView).showMessageAndDismissDialog(capture(), any())
                 assertTrue("Container and entry was created", firstValue.contains("successfully imported a file"))
 
-                val contentEntry = umAppDatabase.contentEntryDao.findByEntryId(leafContentEntry.contentEntryUid)
+                val contentEntry = umAppDatabase.contentEntryDao.findEntryWithLanguageByEntryId(leafContentEntry.contentEntryUid)
 
                 assertNotNull("Entry was created and inserted in the Db", contentEntry)
 
