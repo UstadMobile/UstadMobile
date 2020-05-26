@@ -174,6 +174,14 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     """)
     abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long): List<ClazzLog>
 
+    @Query("""SELECT ClazzLog.* FROM ClazzLog 
+        WHERE 
+        ClazzLog.clazzLogClazzUid = :clazzUid 
+        AND ClazzLog.logDate BETWEEN :fromTime AND :toTime
+        AND (:statusFilter = 0 OR ClazzLog.clazzLogStatusFlag = :statusFilter)
+    """)
+    abstract fun findByClazzUidWithinTimeRangeLive(clazzUid: Long, fromTime: Long, toTime: Long, statusFilter: Int): DoorLiveData<List<ClazzLog>>
+
     companion object {
 
 
