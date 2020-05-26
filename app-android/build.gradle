@@ -464,6 +464,9 @@ dependencies {
     androidTestImplementation "androidx.navigation:navigation-testing:$version_android_navigation"
     androidTestImplementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
 
+    //See https://github.com/xabaras/recyclerview-child-actions - used for Espresso tests to click / check items inside a recycler view
+    androidTestImplementation "it.xabaras.android.espresso:recyclerview-child-actions:$version_android_espresso_recyclerviewchildactions"
+
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$version_android_uiautomator"
 
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"

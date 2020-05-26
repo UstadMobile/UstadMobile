@@ -13,7 +13,7 @@ suspend fun UmAppDatabase.insertClazzAndClazzMembers(numClazzMembers: Int): Pair
     }
 
     val mockPeople = (1 .. numClazzMembers).map {
-        Person("user$it", "Bob", "Jones").apply {
+        Person("user$it", "Test", "User ${it + 1}").apply {
             personUid = personDao.insertAsync(this)
         }
     }

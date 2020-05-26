@@ -12,21 +12,32 @@ fun MaterialButtonToggleGroup.setMessageOptions(messageGroupOptions: Map<Int, In
     if(messageGroupOptions == null || messageGroupSelectedId == null)
         return
 
-    check(messageGroupOptions[messageGroupSelectedId] ?: 0)
+    val viewIdToCheck = messageGroupOptions[messageGroupSelectedId]
+    if(viewIdToCheck != null)
+        check(viewIdToCheck)
+
     setTag(R.id.tag_button_toggle_group_map, messageGroupOptions)
 }
+
+
 
 @InverseBindingAdapter(attribute = "messageGroupSelectedId")
 @SuppressWarnings("UncheckedCast")
 fun MaterialButtonToggleGroup.getSelectedOptionId(): Int {
     val map = getTag(R.id.tag_button_toggle_group_map) as? Map<Int, Int>
-    return map?.entries?.firstOrNull { it.value == this.checkedButtonId }?.key ?: -1
+    val selectedId = map?.entries?.firstOrNull { it.value == this.checkedButtonId }?.key ?: 0
+    return selectedId
 }
 
 @BindingAdapter("messageGroupSelectedIdAttrChanged")
 fun MaterialButtonToggleGroup.setSelectedOptionChangedListener(inverseBindingListener: InverseBindingListener) {
     addOnButtonCheckedListener { group, checkedId, isChecked ->
-        if(isChecked)
-            inverseBindingListener.onChange()
+        if(isChecked) {
+            val map = getTag(R.id.tag_button_toggle_group_map) as? Map<Int, Int>
+            val selectedId = map?.entries?.firstOrNull { it.value == this.checkedButtonId }?.key
+            if(selectedId != null) {
+                inverseBindingListener.onChange()
+            }
+        }
     }
 }

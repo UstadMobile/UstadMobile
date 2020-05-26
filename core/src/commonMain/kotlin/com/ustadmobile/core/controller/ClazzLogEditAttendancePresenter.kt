@@ -4,20 +4,21 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ClazzLog
 
-import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_PARTIAL
 import kotlinx.serialization.builtins.list
 
 
@@ -37,23 +38,6 @@ class ClazzLogEditAttendancePresenter(context: Any,
             "state_ClazzLogAttendanceRecord_list", ClazzLogAttendanceRecordWithPerson.serializer().list,
             ClazzLogAttendanceRecordWithPerson.serializer().list, this) { clazzLogAttendanceRecordUid = it }
 
-    //TODO: add code to onCreate to set the liveList on the view, e.g:
-    //
-
-    //TODO: add code to the onLoadEntityFromDb to set the list if loading from the database, e.g.
-    // var clazzLogAttendanceRecordList = withTimeoutOrNull(2000) {
-    //    db.clazzLogAttendanceRecordDao.findAllByFooFk(entity.fk)
-    // }
-    //
-    // attendanceRecordOneToManyJoinHelperFactory.liveList.sendValue(clazzLogAttendanceRecordList)
-
-    //TODO: Add code to handleClickSave to save the result to the database
-    // clazzLogAttendanceRecord.commitToDatabase(repo.clazzLogAttendanceRecordDao) {
-    //   it.fk = entity.fk
-    // }
-    //
-
-
     /*
      * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
      * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
@@ -70,8 +54,14 @@ class ClazzLogEditAttendancePresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val clazzLog = withTimeoutOrNull(2000) {
-             db.clazzLogDao.findByUid(entityUid)
+             db.takeIf { entityUid != 0L }?.clazzLogDao?.findByUid(entityUid)
         } ?: ClazzLog()
+
+        val clazzWithSchool = withTimeoutOrNull(2000) {
+            db.takeIf { clazzLog.clazzLogClazzUid != 0L }?.clazzDao?.getClazzWithSchool(clazzLog.clazzLogClazzUid)
+        } ?: ClazzWithSchool()
+
+        view.clazzLogTimezone = clazzWithSchool.effectiveTimeZone()
 
         //Find all those who are members of the class at the corresponding class schedule.
         val clazzMembersAtTime = db.clazzMemberDao.getAllClazzMembersAtTime(clazzLog.clazzLogClazzUid,
@@ -92,8 +82,10 @@ class ClazzLogEditAttendancePresenter(context: Any,
     }
 
     fun handleClickMarkAll(attendanceStatus: Int) {
-        val newList = attendanceRecordOneToManyJoinHelper.liveList.getValue()?.map {
-            it.copy().apply { it.attendanceStatus = attendanceStatus }
+        val newList = attendanceRecordOneToManyJoinHelper.liveList.getValue()?.toList()?.map {
+            it.copy().also {
+                it.attendanceStatus = attendanceStatus
+            }
         } ?: return
 
         attendanceRecordOneToManyJoinHelper.liveList.setVal(newList)
@@ -122,22 +114,19 @@ class ClazzLogEditAttendancePresenter(context: Any,
 
     override fun handleClickSave(entity: ClazzLog) {
         GlobalScope.launch(doorMainDispatcher()) {
-            entity.clazzLogStatusFlag = ClazzLog.STATUS_RECORDED
-            repo.clazzLogDao.update(entity)
-
             val clazzLogAttendanceRecords = attendanceRecordOneToManyJoinHelper.liveList.getValue() ?: return@launch
             val insertUpdatePartition = clazzLogAttendanceRecords.partition { it.clazzLogAttendanceRecordUid == 0L }
             repo.clazzLogAttendanceRecordDao.insertListAsync(insertUpdatePartition.first)
             repo.clazzLogAttendanceRecordDao.updateListAsync(insertUpdatePartition.second)
 
+            entity.clazzLogStatusFlag = ClazzLog.STATUS_RECORDED
+            entity.clazzLogNumPresent = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_ATTENDED }
+            entity.clazzLogNumAbsent = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_ABSENT }
+            entity.clazzLogNumPartial = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_PARTIAL }
+            repo.clazzLogDao.update(entity)
+
             view.finishWithResult(listOf(entity))
         }
-    }
-
-    companion object {
-
-        //TODO: Add constants for keys that would be used for any One To Many Join helpers
-
     }
 
 }

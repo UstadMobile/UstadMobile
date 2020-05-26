@@ -2,13 +2,18 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.util.test.ext.insertClazzAndClazzMembers
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -130,6 +135,48 @@ class ClazzLogEditAttendancePresenterTest {
             assertEquals("Got expected number of class members", 5,
                     mockLogAndClazzSet.clazzMemberList.size)
         }
+    }
+
+    @Test
+    fun givenExistingClazzWithStudents_whenClickMarkAllThenSavedCalled_thenShouldSetAllAndSaveToDatabase() {
+        val clazzAndMembers = runBlocking { db.insertClazzAndClazzMembers(5) }
+        val clazzLog = ClazzLog(0L, clazzAndMembers.first.clazzUid, System.currentTimeMillis(), 0L).apply {
+            clazzLogUid = db.clazzLogDao.insert(this)
+        }
+        val presenter = ClazzLogEditAttendancePresenter(context,
+                mapOf(UstadView.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), mockView,
+                mockLifecycleOwner, systemImpl, db, repo, activeAccount)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = any()
+
+        nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
+            verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = capture()
+            runBlocking {
+                waitForLiveData(firstValue as DoorLiveData<List<ClazzLogAttendanceRecordWithPerson>>, 5000) {
+                    it.size == clazzAndMembers.second.size
+                }
+
+                presenter.handleClickMarkAll(ClazzLogAttendanceRecord.STATUS_ATTENDED)
+
+                waitForLiveData(firstValue as DoorLiveData<List<ClazzLogAttendanceRecordWithPerson>>, 5000) {
+                    it.size == clazzAndMembers.second.size &&
+                            it.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED }
+                }
+
+                assertEquals("Received the expected number of attendance records",
+                        clazzAndMembers.second.size, firstValue!!.getValue()!!.size)
+
+                assertTrue("Last value marks all as attended",
+                    firstValue!!.getValue()!!.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED })
+            }
+        }
+
+
+
+
+
+
     }
 
 }

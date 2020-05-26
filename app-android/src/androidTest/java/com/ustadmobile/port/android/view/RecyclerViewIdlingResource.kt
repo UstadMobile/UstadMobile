@@ -3,7 +3,7 @@ package com.ustadmobile.port.android.view
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.IdlingResource
 
-class RecyclerViewIdlingResource(recyclerView: RecyclerView?): IdlingResource {
+class RecyclerViewIdlingResource(recyclerView: RecyclerView?, var minItemCount : Int = 0): IdlingResource {
 
     var recyclerView: RecyclerView? = recyclerView
         set(value) {
@@ -19,7 +19,7 @@ class RecyclerViewIdlingResource(recyclerView: RecyclerView?): IdlingResource {
 
     override fun isIdleNow(): Boolean {
         val recyclerViewVal = recyclerView
-        val isIdle = recyclerViewVal != null && !recyclerViewVal.hasPendingAdapterUpdates() && (recyclerViewVal.adapter?.itemCount ?: 0) > 0
+        val isIdle = recyclerViewVal != null && !recyclerViewVal.hasPendingAdapterUpdates() && (recyclerViewVal.adapter?.itemCount ?: 0) > minItemCount
         println("isIdle: $isIdle")
 
         if(isIdle) {

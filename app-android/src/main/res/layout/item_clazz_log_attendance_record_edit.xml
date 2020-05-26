@@ -23,17 +23,19 @@
         android:layout_height="wrap_content">
 
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_clazzlog_detail_student_person_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
+            app:personPicturePersonUid="@{clazzLogAttendanceRecordWithPerson.person.personUid}"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_person_new_black_24dp" />
+            />
 
         <TextView
             android:id="@+id/item_clazzlog_detail_student_name"
@@ -82,7 +84,7 @@
                 android:id="@+id/late_button"
                 android:contentDescription="@string/partial"
                 style="@style/Widget.App.Button.OutlinedButton.IconOnly"
-                app:icon="@drawable/ic_half_moon_contrast_black_24dp"
+                app:icon="@drawable/ic_delay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 

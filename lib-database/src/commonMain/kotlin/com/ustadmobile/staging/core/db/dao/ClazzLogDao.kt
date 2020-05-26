@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -74,6 +75,9 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): ClazzLog?
+
+    @Query("SELECT * FROM ClazzLog WHERE clazzLogUid = :uid")
+    abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzLog?>
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid ORDER BY logDate DESC LIMIT 1")
     abstract suspend fun findMostRecentByClazzUid(clazzUid: Long) : ClazzLog?

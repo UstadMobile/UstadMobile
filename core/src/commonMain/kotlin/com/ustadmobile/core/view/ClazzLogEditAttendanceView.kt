@@ -10,6 +10,8 @@ interface ClazzLogEditAttendanceView: UstadEditView<ClazzLog> {
 
     var clazzLogAttendanceRecordList: DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>?
 
+    var clazzLogTimezone: String?
+
     companion object {
 
         const val VIEW_NAME = "ClazzLogEditAttendanceEditView"

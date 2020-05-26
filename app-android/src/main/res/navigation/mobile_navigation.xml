@@ -43,7 +43,8 @@
 
     <fragment
         android:id="@+id/clazz_log_edit_attendance_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzLogEditAttendanceFragment"/>
+        android:name="com.ustadmobile.port.android.view.ClazzLogEditAttendanceFragment"
+        android:label="@string/attendance" />
 
     <fragment
         android:id="@+id/person_edit_dest"
