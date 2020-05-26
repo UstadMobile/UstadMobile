@@ -7,7 +7,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 
 
-interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage> {
+interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage> , UstadBaseFeedbackMessageView{
 
     var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>?
 
@@ -24,8 +24,6 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage> {
     companion object {
 
         const val VIEW_NAME = "ContentEntryEdit2EditView"
-
-        const val CONTENT_ENTRY_LEAF = "content_entry_leaf"
 
         const val CONTENT_TYPE = "content_type"
 

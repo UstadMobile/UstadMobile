@@ -80,14 +80,8 @@
             android:name="com.ustadmobile.port.android.view.HomeActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.ContentEntryListActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.ContentEntryDetailActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="" />
+
+
         <activity
             android:name="com.ustadmobile.port.android.view.LoginActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"

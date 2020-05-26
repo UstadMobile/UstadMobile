@@ -135,9 +135,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
     }
 
 
-    override fun updateDocument(title: String, description: String) {
+   /* override fun updateDocument(title: String, description: String) {
         presenter.handleUpdateDocumentMetaInfo(title, description)
-    }
+    }*/
 
     @VisibleForTesting
     fun selectAllTestContent() {
@@ -620,15 +620,14 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             val rootView = inflater.inflate(R.layout.fragment_content_formatting,
                     container, false)
             val mRecyclerView:RecyclerView = rootView.findViewById(R.id.formats_list)
-            umFormats = umFormatHelper!!.getFormatListByType(arguments!!.getInt(FORMAT_TYPE, 0))
+            //umFormats = umFormatHelper!!.getFormatListByType(requireActivity().getInt(FORMAT_TYPE, 0))
             umFormatHelper!!.setStateChangeListener(this)
 
 
             adapter = FormatsAdapter()
             adapter!!.setUmFormats(umFormats)
 
-            val spanCount = getSpanCount(activity!!,
-                    resources.getInteger(R.integer.format_item_width))
+            val spanCount = getSpanCount(requireActivity(), resources.getInteger(R.integer.format_item_width))
             val spacing = convertDpToPixel(resources
                     .getInteger(R.integer.format_item_spacing))
 
@@ -754,7 +753,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         mFromDevice.setOnClickListener {
             isOpeningFilePickerOrCamera = true
             viewSwitcher!!.closeAnimatedView(UmEditorAnimatedViewSwitcher.ANIMATED_MEDIA_TYPE_PANEL)
-            browseFiles(object : UmResultCallback<String>{
+            /*browseFiles(object : UmResultCallback<String>{
                 override fun onDone(result: String?) {
                     try {
                         mimeType = getMimeType(applicationContext, selectedFileUri!!).toString()
@@ -763,7 +762,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                         e.printStackTrace()
                     }
                 }
-            }, "image/*", "video/*", "audio/*")
+            }, "image*", "video*", "audio*")*/
         }
 
         mFromCamera.setOnClickListener {
@@ -810,9 +809,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         if (fragment is ContentEditorPageListFragment) {
             fragment.setUmFileHelper(presenter)
             fragment.setCurrentPage(presenter.currentPage)
-        } else if (fragment is ContentEntryEditFragment) {
+        } /*else if (fragment is ContentEntryEditFragment) {
             fragment.setActionListener(this)
-        }
+        }*/
     }
 
 

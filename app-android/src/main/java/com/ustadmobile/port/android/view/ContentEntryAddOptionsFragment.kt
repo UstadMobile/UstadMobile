@@ -10,9 +10,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ContentEntryAddOptionsView
 import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_IMPORT_CONTENT
-import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_ENTRY_LEAF
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_TYPE
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
 

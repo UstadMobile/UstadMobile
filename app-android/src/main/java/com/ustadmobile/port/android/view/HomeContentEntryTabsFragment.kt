@@ -13,7 +13,6 @@ import com.ustadmobile.core.controller.HomePresenter.Companion.ARG_HOME_CONTENTE
 import com.ustadmobile.core.controller.HomePresenter.Companion.ARG_HOME_CONTENTENTRYLIST_VIEWLIST
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMURLEncoder
-import com.ustadmobile.core.view.ContentEntryListView
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 /**
@@ -26,7 +25,7 @@ import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 class HomeContentEntryTabsFragment : UstadBaseFragment(){
 
     private inner class ContentEntryTabsPagerAdapter(fm: FragmentManager, viewList: List<String>, val titleList: List<String>): ViewNameListFragmentPagerAdapter(fm,
-            BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, viewList, mapOf(ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java),
+            BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, viewList, mapOf(),
             mapOf()) {
 
         override fun getPageTitle(position: Int) = titleList[position]

@@ -52,6 +52,10 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             mBinding?.contentEntry = value
         }
 
+    override fun showFeedbackMessage(message: String, actionMessageId: Int, action: () -> Unit) {
+        (activity as MainActivity).showFeedbackMessage(message, actionMessageId, action)
+    }
+
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
         get() = field
         set(value) {
@@ -81,9 +85,17 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         mBinding?.showTranslation = result!= null && result.isNotEmpty()
     }
 
-    override fun selectContentEntryOfLanguage(contentEntryUid: Long) {
-        arguments?.putString(ARG_ENTITY_UID,contentEntryUid.toString())
+    override fun navigateToTranslation(entryUid: Long) {
+        arguments?.putString(ARG_ENTITY_UID,entryUid.toString())
         findNavController().navigate(R.id.content_entry_details_dest, arguments)
+    }
+
+    override fun showDownloadOptionsDialog(map: Map<String, String>) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun selectContentEntryOfLanguage(contentEntryUid: Long) {
+       mPresenter?.handleOnTranslationClicked(contentEntryUid)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

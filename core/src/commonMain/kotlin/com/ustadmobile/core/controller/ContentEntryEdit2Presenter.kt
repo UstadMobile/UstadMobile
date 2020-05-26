@@ -112,47 +112,50 @@ class ContentEntryEdit2Presenter(context: Any,
 
 
     override fun handleClickSave(entity: ContentEntryWithLanguage) {
-        entity.leaf = arguments[CONTENT_TYPE]?.toInt() != CONTENT_CREATE_FOLDER
-        entity.licenseName = systemImpl.getString(LicenceOptions.values()
-                .single { it.optionVal == entity.licenseType }.messageId, context)
-        GlobalScope.launch(doorMainDispatcher()) {
-            if(entity.contentEntryUid == 0L) {
-                entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
-                val contentEntryJoin = ContentEntryParentChildJoin()
-                contentEntryJoin.cepcjChildContentEntryUid = entity.contentEntryUid
-                contentEntryJoin.cepcjParentContentEntryUid = parentEntryUid
-                contentEntryJoin.cepcjUid = repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
-            }else {
-                repo.contentEntryDao.updateAsync(entity)
-            }
-
-            if(entity.contentEntryUid != 0L){
-               val language = entity.language
-                if(language != null && language.langUid == 0L){
-                    repo.languageDao.insert(language)
+        if(entity.title != null && entity.language != null && entity.licenseType != 0){
+            entity.leaf = arguments[CONTENT_TYPE]?.toInt() != CONTENT_CREATE_FOLDER
+            entity.licenseName = systemImpl.getString(LicenceOptions.values()
+                    .single { it.optionVal == entity.licenseType }.messageId, context)
+            GlobalScope.launch(doorMainDispatcher()) {
+                if(entity.contentEntryUid == 0L) {
+                    entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
+                    val contentEntryJoin = ContentEntryParentChildJoin()
+                    contentEntryJoin.cepcjChildContentEntryUid = entity.contentEntryUid
+                    contentEntryJoin.cepcjParentContentEntryUid = parentEntryUid
+                    contentEntryJoin.cepcjUid = repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
+                }else {
+                    repo.contentEntryDao.updateAsync(entity)
                 }
-                val container = view.saveContainerOnExit(entity.contentEntryUid,
-                        storageOptions?.get(view.selectedStorageIndex).toString(),db, repo)
-                if(container != null && entity.leaf){
 
-                    val downloadJob = DownloadJob(entity.contentEntryUid, view.jobTimeStamp)
-                    downloadJob.djStatus = JobStatus.COMPLETE
-                    downloadJob.timeRequested = view.jobTimeStamp
-                    downloadJob.bytesDownloadedSoFar = container.fileSize
-                    downloadJob.totalBytesToDownload = container.fileSize
-                    downloadJob.djUid = repo.downloadJobDao.insert(downloadJob).toInt()
+                if(entity.contentEntryUid != 0L){
+                    val language = entity.language
+                    if(language != null && language.langUid == 0L){
+                        repo.languageDao.insert(language)
+                    }
+                    val container = view.saveContainerOnExit(entity.contentEntryUid,
+                            storageOptions?.get(view.selectedStorageIndex).toString(),db, repo)
+                    if(container != null && entity.leaf){
 
-                    val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
-                            container.containerUid, container.fileSize)
-                    downloadJobItem.djiUid = repo.downloadJobItemDao.insert(downloadJobItem).toInt()
-                    downloadJobItem.djiStatus = JobStatus.COMPLETE
-                    downloadJobItem.downloadedSoFar = container.fileSize
+                        val downloadJob = DownloadJob(entity.contentEntryUid, view.jobTimeStamp)
+                        downloadJob.djStatus = JobStatus.COMPLETE
+                        downloadJob.timeRequested = view.jobTimeStamp
+                        downloadJob.bytesDownloadedSoFar = container.fileSize
+                        downloadJob.totalBytesToDownload = container.fileSize
+                        downloadJob.djUid = repo.downloadJobDao.insert(downloadJob).toInt()
 
-                    containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
+                        val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
+                                container.containerUid, container.fileSize)
+                        downloadJobItem.djiUid = repo.downloadJobItemDao.insert(downloadJobItem).toInt()
+                        downloadJobItem.djiStatus = JobStatus.COMPLETE
+                        downloadJobItem.downloadedSoFar = container.fileSize
+
+                        containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
+                    }
                 }
+                view.finishWithResult(listOf(entity))
             }
-
-            view.finishWithResult(listOf(entity))
+        }else{
+            view.showFeedbackMessage(systemImpl.getString(MessageID.register_empty_fields, context))
         }
     }
 

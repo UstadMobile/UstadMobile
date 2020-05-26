@@ -1,13 +1,12 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.controller.ContentEntryListPresenter
 import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
-import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import kotlin.js.JsName
 
 private val mimeTypeToViewNameMap = mapOf(
@@ -69,7 +68,7 @@ suspend fun goToContentEntry(contentEntryUid: Long,
             }
 
             val args = HashMap<String, String>()
-            args[ContentEntryListPresenter.ARG_NO_IFRAMES] = noIframe.toString()
+            args[ARG_NO_IFRAMES] = noIframe.toString()
             args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
             args[ARG_CONTAINER_UID] = containerToOpen.containerUid.toString()
             systemImpl.go(viewName, args, context)
@@ -79,7 +78,7 @@ suspend fun goToContentEntry(contentEntryUid: Long,
 
             val args = HashMap<String, String>()
             args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
-            systemImpl.go(ContentEntryDetailView.VIEW_NAME, args, context)
+            systemImpl.go(ContentEntry2DetailView.VIEW_NAME, args, context)
 
         }
         else -> {

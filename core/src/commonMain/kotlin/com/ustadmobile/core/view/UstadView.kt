@@ -75,6 +75,8 @@ interface UstadView {
 
         const val ARG_CONTENT_ENTRY_UID = "entryid"
 
+        const val ARG_NO_IFRAMES = "noiframe"
+
         const val ARG_CLAZZ_UID = "clazzUid"
 
         const val ARG_SCHOOL_UID = "schoolUid"

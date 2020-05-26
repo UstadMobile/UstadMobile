@@ -9,10 +9,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.goToContentEntry
-import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.WebChunkView
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -92,7 +90,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
         val impl = UstadMobileSystemImpl.instance
 
         val dest = sourceUrl.replace("content-detail?",
-                ContentEntryDetailView.VIEW_NAME + "?")
+                ContentEntry2DetailView.VIEW_NAME + "?")
         val params = UMFileUtil.parseURLQueryString(dest)
 
         if (params.containsKey("sourceUrl")) {
@@ -103,7 +101,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                             ?: throw IllegalArgumentException("No File found")
                     goToEntryFn(entry.contentEntryUid, umAppDb, context, impl, true,
                             true,
-                            arguments[ContentEntryListPresenter.ARG_NO_IFRAMES]?.toBoolean()!!)
+                            arguments[ARG_NO_IFRAMES]?.toBoolean()!!)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
                         view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
@@ -121,10 +119,10 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
-        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryDetailView.VIEW_NAME, navigation!!)
+        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntry2DetailView.VIEW_NAME, navigation!!)
         if (lastEntryListArgs !=
                 null) {
-            impl.go(ContentEntryDetailView.VIEW_NAME,
+            impl.go(ContentEntry2DetailView.VIEW_NAME,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), view.viewContext,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         } else {

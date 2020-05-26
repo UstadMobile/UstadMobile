@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -14,33 +12,27 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.core.view.SettingsView
+import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
+import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
+class MainActivity : UstadBase2Activity(), UstadListViewActivityWithFab,
         NavController.OnDestinationChangedListener {
 
     private lateinit var appBarConfiguration : AppBarConfiguration
 
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
-        get() = findViewById(R.id.activity_listfragmelayout_behaviornt_fab)
-
-    private lateinit var mAppBar: AppBarLayout
+        get() = activity_listfragmelayout_behaviornt_fab
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        mAppBar = findViewById(R.id.appBar)
-        val toolbar = findViewById<Toolbar>(R.id.activity_main_toolbar)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(activity_main_toolbar)
 
         val host: NavHostFragment = supportFragmentManager
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
@@ -49,10 +41,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
 
         appBarConfiguration = AppBarConfiguration(navController.graph)
-
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav_view)
-        bottomNav?.setupWithNavController(navController)
-        setupActionBarWithNavController(navController, AppBarConfiguration(bottomNav.menu))
+        bottom_nav_view.setupWithNavController(navController)
+        setupActionBarWithNavController(navController, AppBarConfiguration(bottom_nav_view.menu))
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
     }
@@ -68,7 +58,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         }
 
         invalidateOptionsMenu()
-        mAppBar.setExpanded(true)
+        appBar.setExpanded(true)
 
     }
 
@@ -94,6 +84,9 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         return item.onNavDestinationSelected(findNavController(R.id.activity_main_navhost_fragment))
                 || super.onOptionsItemSelected(item)
     }
+
+    override val viewContext: Any
+        get() = this
 
     /**
      * When settings gear clicked in the menu options - Goes to the settings activity.

@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.Person
-import kotlin.js.JsName
 
 interface UserProfileView : LanguageOptionView, UstadViewWithSnackBar  {
 

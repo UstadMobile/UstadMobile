@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UmAccountManager
@@ -15,6 +16,7 @@ import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CR
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
@@ -85,7 +87,7 @@ class ContentEntry2DetailPresenter(context: Any,
                 goToSelectedContentEntry()
             }
         } else if (isDownloadEnabled) {
-            //show dialog options
+            view.showDownloadOptionsDialog(arguments)
         }
     }
 
@@ -100,16 +102,23 @@ class ContentEntry2DetailPresenter(context: Any,
             try {
                 entity?.contentEntryUid?.let { goToEntryFn(it, db, context, systemImpl, isDownloadEnabled,
                             false,
-                            arguments[ContentEntryListPresenter.ARG_NO_IFRAMES]
+                            arguments[ARG_NO_IFRAMES]
                                     ?.toBoolean() ?: false) }
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
-                    //show no app error snack
+                    view.showFeedbackMessage(systemImpl.getString(MessageID.no_app_found,context))
                 } else {
-                    //Failed to open
+                    val message = e.message
+                    if(message != null){
+                        view.showFeedbackMessage(message)
+                    }
                 }
             }
         }
+    }
+
+    fun handleOnTranslationClicked(entryUid: Long){
+        view.navigateToTranslation(entryUid)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {

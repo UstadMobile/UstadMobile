@@ -22,8 +22,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -35,7 +33,6 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadBaseController
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -51,7 +48,6 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
-import java.lang.ref.WeakReference
 import java.util.*
 
 /**

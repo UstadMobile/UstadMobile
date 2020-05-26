@@ -1,14 +1,12 @@
 package com.ustadmobile.port.android.view
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.text.HtmlCompat
 import androidx.navigation.fragment.findNavController
@@ -49,7 +47,7 @@ interface ContentEntryEdit2FragmentEventHandler {
 
     fun onEntryPublicStatusChanged(isChecked:Boolean)
 
-    fun onClickContentImportSorceSelection()
+    fun onClickContentImportSourceSelection()
 
     fun handleClickLanguage()
 }
@@ -61,8 +59,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
     private var mPresenter: ContentEntryEdit2Presenter? = null
 
     private var entryMetaData: ImportedContentEntryMetaData? = null
-
-    //lateinit var spinnerStorage: Spinner
 
     override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithLanguage>?
         get() = mPresenter
@@ -112,7 +108,12 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         mBinding?.contentEntry?.publik = isChecked
     }
 
-    override fun onClickContentImportSorceSelection() {
+    override fun showFeedbackMessage(message: String, actionMessageId: Int, action: () -> Unit) {
+        (activity as MainActivity).showFeedbackMessage(message, actionMessageId, action)
+    }
+
+
+    override fun onClickContentImportSourceSelection() {
         val builder:AlertDialog.Builder = AlertDialog.Builder(requireContext())
         builder.setItems(R.array.content_source_option) { dialog, which ->
             when (which) {
@@ -124,10 +125,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             dialog.dismiss()
         }
         builder.show()
-
-    }
-
-    private fun handleLinkImport(){
 
     }
 
@@ -148,7 +145,10 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
                         val metaData = extractContentEntryMetadataFromFile(tmpFile.absoluteFile,
                                 UmAccountManager.getActiveDatabase(requireContext()))
                         entryMetaData = metaData
-                        mBinding?.isFileNotSupported = entryMetaData == null
+                        if(entryMetaData == null){
+                            showFeedbackMessage(getString(R.string.import_link_content_not_supported))
+
+                        }
                         val entry = entryMetaData?.contentEntry
                         if(entry != null){
                             entity = entry
@@ -204,10 +204,7 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             it.supportedFiles = HtmlCompat.fromHtml(getString(R.string.content_supported_files),HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
             it.contentEntry?.lastModified = System.currentTimeMillis()
             it.contentEntry?.ceInactive = true
-            it.isFileNotSupported = false
         }
-
-
 
         return rootView
     }

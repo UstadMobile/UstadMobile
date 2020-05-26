@@ -9,10 +9,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.ContentEntryDetailView
-import com.ustadmobile.core.view.HomeView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -84,10 +81,10 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
 
     fun handleUpNavigation() {
         val impl = UstadMobileSystemImpl.instance
-        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntryDetailView.VIEW_NAME, navigation!!)
+        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntry2DetailView.VIEW_NAME, navigation!!)
         if (lastEntryListArgs !=
                 null) {
-            impl.go(ContentEntryDetailView.VIEW_NAME,
+            impl.go(ContentEntry2DetailView.VIEW_NAME,
                     UMFileUtil.parseURLQueryString(lastEntryListArgs), view.viewContext,
                     UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
         } else {

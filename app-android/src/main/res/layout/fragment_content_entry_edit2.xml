@@ -27,10 +27,6 @@
             name="isNewFolder"
             type="boolean" />
 
-        <variable
-            name="isFileNotSupported"
-            type="boolean" />
-
 
         <variable
             name="supportedFiles"
@@ -85,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_16dp"
                 android:backgroundTint="@color/accent"
-                android:onClick="@{()-> activityEventHandler.onClickContentImportSorceSelection()}"
+                android:onClick="@{()-> activityEventHandler.onClickContentImportSourceSelection()}"
                 android:padding="@dimen/dimen_16dp"
                 android:text="@{contentEntry.contentEntryUid == 0 ? @string/content_import_from_sources: @string/content_update_from_sources}"
                 android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
@@ -96,26 +92,11 @@
 
 
             <TextView
-                android:visibility="@{isFileNotSupported ? View.VISIBLE: View.GONE}"
-                android:layout_margin="@dimen/dimen_16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/content_entry_select_file"
-                android:layout_marginTop="@dimen/dimen_16dp"
-                android:textSize="@dimen/text_body_small"
-                android:id="@+id/selected_file_not_supported"
-                android:text="@string/import_link_content_not_supported"
-                android:layout_width="match_parent"
-                tools:visibility="gone"
-                android:textColor="@android:color/holo_red_dark"
-                android:layout_height="wrap_content" />
-
-            <TextView
                 android:visibility="@{selectedFileUri.length() == 0 ? View.GONE: View.VISIBLE}"
                 android:layout_margin="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/selected_file_not_supported"
+                app:layout_constraintTop_toBottomOf="@+id/content_entry_select_file"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:textSize="@dimen/text_body_small"
                 android:id="@+id/selected_file_info"

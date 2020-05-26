@@ -71,7 +71,7 @@ import java.util.concurrent.TimeUnit
 class DownloadDialogAndNotificationEspressoTest {
 
     @get:Rule
-    public var mHomeActivityRule = ActivityTestRule(HomeActivity::class.java, false, false)
+    public var mHomeActivityRule = ActivityTestRule(MainActivity::class.java, false, false)
 
 
     @get:Rule

@@ -8,10 +8,10 @@ import com.ustadmobile.core.view.UstadViewWithSnackBar
  *
  * @param <T> Callback type
 </T> */
-abstract class ShowErrorUmCallback<T>(private val view: UstadViewWithSnackBar, private val errorMessage: Int) : UmCallback<T> {
+abstract class ShowErrorUmCallback<T>(private val viewFeedback: UstadViewWithSnackBar, private val errorMessage: Int) : UmCallback<T> {
 
     override fun onFailure(exception: Throwable?) {
-        view.showSnackBarNotification(UstadMobileSystemImpl.instance.getString(
-                errorMessage, view.viewContext), { }, 0)
+        viewFeedback.showSnackBarNotification(UstadMobileSystemImpl.instance.getString(
+                errorMessage, viewFeedback.viewContext), { }, 0)
     }
 }

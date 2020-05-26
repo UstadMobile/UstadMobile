@@ -1,32 +1,15 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.app.ProgressDialog
-import android.database.Cursor
-import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
-import android.os.Handler
-import android.provider.OpenableColumns
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.UstadViewWithProgressDialog
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.concurrent.TimeUnit
 
 
-open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
-        ContentEntryEditFragment.EntryCreationActionListener, UstadViewWithProgressDialog {
+open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),UstadViewWithProgressDialog {
 
 
     internal var coordinatorLayout: CoordinatorLayout? = null
@@ -34,16 +17,14 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
     /**
      * TODO: the below is a leak
      */
-    private var entryFragment: ContentEntryEditFragment? = null
 
     private var impl: UstadMobileSystemImpl? = null
 
     internal lateinit  var importDialog: ProgressDialog
 
 
-    @SuppressLint("StaticFieldLeak") // this is a short lived task, so any leak would not be very short lived.
+  /*  @SuppressLint("StaticFieldLeak") // this is a short lived task, so any leak would not be very short lived.
     inner class HandleFileSelectionAsyncTask(private val onDone: UmResultCallback<String>?) : AsyncTask<Uri, Void, String>() {
-
         override fun doInBackground(vararg fileUris: Uri): String? {
             var cursor: Cursor? = null
             var fileIn: InputStream? = null
@@ -86,7 +67,7 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
             onDone?.onDone(filePath)
         }
     }
-
+*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +77,7 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
         impl = UstadMobileSystemImpl.instance
     }
 
-    override fun browseFiles(callback: UmResultCallback<String>?, vararg mimeType: String) {
+   /* override fun browseFiles(callback: UmResultCallback<String>?, vararg mimeType: String) {
         runAfterGrantingPermission(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 Runnable{
                     runAfterFileSection(Runnable{
@@ -110,7 +91,7 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
                 },
                 getString(R.string.download_storage_permission_title),
                 getString(R.string.download_storage_permission_message))
-    }
+    }*/
 
 
     fun showBaseMessage(message: String) {
@@ -118,21 +99,21 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),
     }
 
 
-    override fun showSnackMessage(message: String) {
+   /* override fun showSnackMessage(message: String) {
         Handler().postDelayed({
             Snackbar.make(coordinatorLayout!!, message,
                     Snackbar.LENGTH_LONG).show()
         }, TimeUnit.SECONDS.toMillis(1))
-    }
+    }*/
 
-    override fun updateDocument(title: String, description: String) {}
+    /*override fun updateDocument(title: String, description: String) {}
 
     override fun onAttachFragment(fragment: Fragment) {
         if (fragment is ContentEntryEditFragment) {
             entryFragment = fragment
             entryFragment!!.setActionListener(this)
         }
-    }
+    }*/
 
     override fun showProgressDialog(show: Boolean) {
         if(show){
