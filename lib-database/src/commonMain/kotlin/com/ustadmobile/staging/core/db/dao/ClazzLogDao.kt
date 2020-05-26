@@ -80,6 +80,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzLog?>
 
     @Query("SELECT * FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid ORDER BY logDate DESC LIMIT 1")
+    @Deprecated("Used only in staging code")
     abstract suspend fun findMostRecentByClazzUid(clazzUid: Long) : ClazzLog?
 
     @Query("UPDATE ClazzLog SET clazzLogDone = 1 where clazzLogUid = :clazzLogUid ")
@@ -89,6 +90,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
             "Schedule.scheduleFrequency FROM ClazzLog " +
             "LEFT JOIN Schedule ON Schedule.scheduleUid = ClazzLog.clazzLogScheduleUid " +
             "WHERE clazzLogClazzUid = :clazzUid AND NOT clazzLogCancelled ORDER BY logDate ASC")
+    @Deprecated("Used only in staging code")
     abstract fun findByClazzUidNotCancelledWithSchedule(clazzUid: Long): DataSource.Factory<Int,
             ClazzLogWithScheduleStartEndTimes>
 

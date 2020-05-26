@@ -283,6 +283,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
 
     @Query(QUERY_ATTENDANCE_NUMBERS_FOR_CLASS_BY_DATE)
+    @Deprecated("Used only in staging code")
     abstract suspend fun findDailyAttendanceByClazzUidAndDateAsync(clazzUid: Long, fromDate: Long,
                                    toDate: Long):List<DailyAttendanceNumbers>
 

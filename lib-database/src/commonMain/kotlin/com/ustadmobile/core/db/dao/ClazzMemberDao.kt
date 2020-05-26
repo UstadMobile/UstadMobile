@@ -220,6 +220,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " WHERE ClazzLog.clazzLogClazzUid = :clazzUid  " +
             "  AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime  AND ClazzMember.clazzMemberRole = 1 " +
             " GROUP BY ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid ) ")
+    @Deprecated("Used only in older code")
     abstract suspend fun findAttendanceSpreadByThresholdForTimePeriodAndClazzAndType(type: Int,
                     clazzUid: Long, fromTime: Long, toTime: Long): ThresholdResult?
 
