@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -21,15 +23,12 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkEditView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface ClazzWorkEditFragmentEventHandler {
@@ -174,7 +173,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
         }
 
-    //TOOD: Content side
+    //TODO: Content side
 //    private val contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
 //
 //    private val contentObserver = Observer<List<ContentEntryWithMetrics>?>{
@@ -202,7 +201,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         }
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
-        mBinding?.questionsVisibility = if(selectedOption.code == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) View.VISIBLE else View.GONE
+        mBinding?.questionsVisibility = if(selectedOption.code ==
+                ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) View.VISIBLE else View.GONE
     }
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {   }
@@ -214,8 +214,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
     }
 
     override fun onClickNewQuestion() {
-//        val clazzWorkUid = mPresenter?.handleClickSaveOnly(entity?:ClazzWork(), false)
-//        arguments?.putString(ARG_ENTITY_UID, clazzWorkUid.toString())
         onSaveStateToBackStackStateHandle()
         navigateToEditEntity(null, R.id.clazzworkquestionandoptions_edit_dest,
                 ClazzWorkQuestionAndOptions::class.java)

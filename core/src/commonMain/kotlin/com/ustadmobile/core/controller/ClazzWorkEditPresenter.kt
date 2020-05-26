@@ -138,9 +138,22 @@ class ClazzWorkEditPresenter(context: Any,
             editEntity = ClazzWork()
         }
 
-        questionAndOptionsEditHelper.onLoadFromJsonSavedState(bundle)
+        GlobalScope.launch {
+            val clazzWithSchool = withTimeoutOrNull(2000) {
+                db.clazzDao.getClazzWithSchool(editEntity.clazzWorkClazzUid)
+            } ?: ClazzWithSchool()
 
-        //TODO: the same for contentedithelper
+            view.timeZone = clazzWithSchool.findClazzTimeZone()
+        }
+
+        view.clazzWorkQuizQuestionsAndOptions = questionAndOptionsEditHelper.liveList
+        view.clazzWorkContent = contentJoinEditHelper.liveList
+        view.submissionTypeOptions = SubmissionOptions.values().map{SubmissionOptionsMessageIdOption(it, context)}
+
+        contentJoinEditHelper.liveList.sendValue(listOf())
+        questionAndOptionsEditHelper.liveList.sendValue(listOf())
+
+        questionAndOptionsEditHelper.onLoadFromJsonSavedState(bundle)
 
         return editEntity
     }
@@ -157,10 +170,8 @@ class ClazzWorkEditPresenter(context: Any,
 
     override fun handleClickSave(entity: ClazzWork) {
 
-        val clazzUid = arguments[ARG_CLAZZ_UID]?.toLong() ?: 0L
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.clazzWorkUid == 0L) {
-                entity.clazzWorkClazzUid = clazzUid
                 entity.clazzWorkUid = repo.clazzWorkDao.insertAsync(entity)
             }else {
                 repo.clazzWorkDao.updateAsync(entity)

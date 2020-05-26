@@ -4,14 +4,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.ClazzWorkEditView
-import com.ustadmobile.core.view.ClazzWorkListView
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.serialization.json.Json
 
 class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view: ClazzWorkListView,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
@@ -53,14 +51,20 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     override fun handleClickEntry(entry: ClazzWork) {
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(ClazzWorkEditView.VIEW_NAME,
+            ListViewMode.BROWSER -> systemImpl.go(ClazzWorkDetailView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.clazzWorkUid.toString()), context)
         }
     }
 
     override fun handleClickCreateNewFab() {
         val clazzUid = arguments.get(UstadView.ARG_CLAZZ_UID)?.toLong()?:0L
-        systemImpl.go(ClazzWorkEditView.VIEW_NAME, mapOf(UstadView.ARG_CLAZZ_UID to clazzUid.toString()), context)
+
+        val clazzWork: ClazzWork = ClazzWork().apply {
+            clazzWorkClazzUid = clazzUid
+        }
+        val clazzWorkJson = Json.stringify(ClazzWork.serializer(), clazzWork)
+        systemImpl.go(ClazzWorkEditView.VIEW_NAME,
+                mapOf(UstadEditView.ARG_ENTITY_JSON to clazzWorkJson), context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {

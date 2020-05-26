@@ -6,15 +6,12 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.core.view.SchoolEditView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-
-import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.withTimeoutOrNull
 
 

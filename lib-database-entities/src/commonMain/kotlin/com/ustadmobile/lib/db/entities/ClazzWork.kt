@@ -6,10 +6,11 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.lib.db.entities.ClazzWork.Companion.CLAZZ_WORK_TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = 201)
+@SyncableEntity(tableId = CLAZZ_WORK_TABLE_ID)
 @Serializable
 open class ClazzWork {
 
@@ -57,6 +58,7 @@ open class ClazzWork {
     }
 
     companion object{
+        const val CLAZZ_WORK_TABLE_ID = 201
         const val CLAZZ_WORK_SUBMISSION_TYPE_NONE = 0
         const val CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT = 1
         const val CLAZZ_WORK_SUBMISSION_TYPE_ATTACHMENT = 2

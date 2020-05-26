@@ -13,7 +13,8 @@ import com.ustadmobile.lib.db.entities.SelQuestionOption
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
 @Dao
-abstract class ClazzWorkQuestionOptionDao : BaseDao<ClazzWorkQuestionOption> {
+abstract class ClazzWorkQuestionOptionDao : BaseDao<ClazzWorkQuestionOption>,
+        OneToManyJoinDao<ClazzWorkQuestionOption>{
 
     @Insert
     abstract override fun insert(entity: ClazzWorkQuestionOption): Long
@@ -25,7 +26,7 @@ abstract class ClazzWorkQuestionOptionDao : BaseDao<ClazzWorkQuestionOption> {
     abstract suspend fun updateAsync(entity: ClazzWorkQuestionOption) : Int
 
 
-    suspend fun deactivateByUids(uidList: List<Long>) {
+    override suspend fun deactivateByUids(uidList: List<Long>) {
         uidList.forEach {
             updateActiveByQuestionOptionUid(it, false)
         }

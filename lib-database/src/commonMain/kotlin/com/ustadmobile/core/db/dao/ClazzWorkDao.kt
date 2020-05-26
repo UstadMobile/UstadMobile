@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
+import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
 
 @UmDao
 @UmRepository
@@ -24,6 +25,16 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
     @Update
     abstract suspend fun updateAsync(entity: ClazzWork) : Int
+
+    @Query("""
+        SELECT ClazzWork.*, ClazzWorkSubmission.* FROM ClazzWork 
+        LEFT JOIN ClazzMember ON ClazzMember.clazzMemberPersonUid = :personUid
+			AND ClazzMember.clazzMemberClazzUid = ClazzWork.clazzWorkClazzUid 
+			AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1
+        LEFT JOIN ClazzWorkSubmission ON ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid = ClazzMember.clazzMemberUid 
+		WHERE ClazzWork.clazzWorkUid = :uid
+    """)
+    abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission
 
 
     @Query(FIND_BY_CLAZZUID)

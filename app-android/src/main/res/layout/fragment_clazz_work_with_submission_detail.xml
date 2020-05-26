@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View"/>
+
+        <variable
+            name="clazzWorkWithSubmission"
+            type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
+
+        <variable
+            name="loading"
+            type="boolean" />
+
+        <variable
+            name="fieldsEnabled"
+            type="boolean" />
+
+        <variable
+            name="editButtonMode"
+            type="com.ustadmobile.core.view.EditButtonMode"/>
+
+
+    </data>
+
+
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/activity_clazzworkwithsubmission_edit_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/activity_clazzworkwithsubmission_edit_edit_clx"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <ImageView
+                android:id="@+id/school_detail_overview_iv"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:contentDescription="@string/school"
+                android:src="@drawable/ic_photo_camera_black_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="school_detail_overview_iv"
+                />
+
+            <TextView
+                android:id="@+id/instructions_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/school"
+                android:layout_marginStart="20dp"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginEnd="@dimen/form_margin_horizontal"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolDesc)}"
+                android:text="@{schoolWithHolidayCalendar.schoolDesc}"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/list_twoline1_textsize_line1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier1"
+                tools:text="Read the stories and describe the main characters." />
+
+            <TextView
+                android:id="@+id/fragment_school_overview_gender"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                tools:text=""
+                android:visibility="@{schoolWithHolidayCalendar.schoolGender != 0 ? View.VISIBLE : View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                app:layout_constraintTop_toBottomOf="@+id/instructions_title"
+                app:textSchoolGender="@{schoolWithHolidayCalendar.schoolGender}" />
+
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fragment_school_overview_gender,instructions_title"
+                />
+
+
+            <ImageView
+                android:id="@+id/fragment_school_detail_overview_locataion_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/school"
+                android:src="@drawable/ic_event_available_black_24dp"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier2" />
+
+            <TextView
+                android:id="@+id/fragment_school_detail_overview_locataion_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/activity_vertical_margin"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/school"
+                android:text="@{schoolWithHolidayCalendar.schoolAddress}"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/list_twoline1_textsize_line1"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
+                app:layout_constraintTop_toBottomOf="@+id/barrier2"
+                tools:text="28/Feb/2020 - 8:00 am" />
+
+            <TextView
+                android:id="@+id/start_date_timezone"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/activity_vertical_margin"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/school"
+                android:text="@{schoolWithHolidayCalendar.schoolAddress}"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/list_twoline1_textsize_line1"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_tv"
+                app:layout_constraintTop_toBottomOf="@+id/barrier2"
+                tools:text="(Asia, Dubai)" />
+
+            <TextView
+                android:id="@+id/due_date_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/due_date"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_locataion_tv"
+                tools:text="Due date: 02/Mar/2020 - 10:00 pm" />
+
+
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="due_date_title, barrier2"
+                />
+
+            <TextView
+                android:id="@+id/fragment_school_overview_classes_heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:text="@string/content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier7" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_school_detail_overview_detail_clazz_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_content_entry_with_metrics"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_school_overview_classes_heading"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fragment_school_detail_overview_detail_clazz_rv, barrier7"
+                />
+
+            <TextView
+                android:id="@+id/public_comments_heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:text="submission"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier8" />
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="public_comments_heading, barrier8"
+                />
+
+            <TextView
+                android:id="@+id/submission_heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:text="Public comments"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier9" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/public_comments_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_commets_list"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/submission_heading"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Enter Public comments -->
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="public_comments_rv, barrier9"
+                />
+
+            <TextView
+                android:id="@+id/private_comments_heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:text="Private comments"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier10" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/private_comments_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_commets_list"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/private_comments_heading"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Enter Private comments -->
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+</layout>

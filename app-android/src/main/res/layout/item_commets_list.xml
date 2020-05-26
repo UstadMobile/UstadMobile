@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="commentwithperson"
+            type="com.ustadmobile.lib.db.entities.CommentsWithPerson" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_listitem"
+        >
+
+        <!-- TODO: Change or remove this icon -->
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/item_comments_list_newitemicon"
+            app:personPicturePersonUid="@{commentwithperson.commentsPerson.personUid}"
+            android:layout_width="@dimen/list_twoline1_imagesize"
+            android:layout_height="@dimen/list_twoline1_imagesize"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <!-- Line 1-->
+        <TextView
+            android:id="@+id/item_comments_list_text"
+            android:text='@{commentwithperson.commentsPerson.firstNames + " " + commentwithperson.commentsPerson.lastName}'
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            tools:text="Bob Dylan"
+            android:textColor="@color/text_primary"
+            />
+
+        <!-- Line 2-->
+        <TextView
+            android:id="@+id/item_comments_list_line2_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/item_comments_list_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_comments_list_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="@{commentwithperson.commentsText}"
+            tools:text="I like this activity. Shall we discuss this in our next meeting?"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

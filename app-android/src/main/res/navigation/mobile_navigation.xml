@@ -123,6 +123,10 @@
         android:id="@+id/clazzworkquestionandoptions_edit_dest"
         android:name="com.ustadmobile.port.android.view.ClazzWorkQuestionAndOptionsEditFragment"
         android:label="ClazzWorkQuestionAndOptionsEditFragment" />
+    <fragment
+        android:id="@+id/clazzwork_detail_list"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment"
+        android:label="ClazzWorkDetailFragment" />
 
 
 </navigation>

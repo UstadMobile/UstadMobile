@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +26,8 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
 class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMetrics>(),
@@ -84,8 +87,13 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
+        if(view?.id == R.id.item_createnew_layout) {
+            val clazzUid = arguments?.get(UstadView.ARG_CLAZZ_UID).toString().toLong() ?: 0L
+            val newClazzWork: ClazzWork = ClazzWork().apply {
+                clazzWorkClazzUid = clazzUid
+            }
             navigateToEditEntity(null, R.id.clazzwork_edit_dest, ClazzWork::class.java)
+        }
     }
 
     override fun onDestroyView() {
