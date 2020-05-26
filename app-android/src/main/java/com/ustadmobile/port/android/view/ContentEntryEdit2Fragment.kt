@@ -147,7 +147,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
                         entryMetaData = metaData
                         if(entryMetaData == null){
                             showFeedbackMessage(getString(R.string.import_link_content_not_supported))
-
                         }
                         val entry = entryMetaData?.contentEntry
                         if(entry != null){

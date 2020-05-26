@@ -112,7 +112,10 @@ class ContentEntryEdit2Presenter(context: Any,
 
 
     override fun handleClickSave(entity: ContentEntryWithLanguage) {
-        if(entity.title != null && entity.language != null && entity.licenseType != 0){
+        val canCreate = entity.title != null && ((entity.language != null
+                && entity.licenseType != 0 && entity.leaf) || (!entity.leaf && entity.description != null))
+
+        if(canCreate){
             entity.leaf = arguments[CONTENT_TYPE]?.toInt() != CONTENT_CREATE_FOLDER
             entity.licenseName = systemImpl.getString(LicenceOptions.values()
                     .single { it.optionVal == entity.licenseType }.messageId, context)
@@ -130,11 +133,12 @@ class ContentEntryEdit2Presenter(context: Any,
                 if(entity.contentEntryUid != 0L){
                     val language = entity.language
                     if(language != null && language.langUid == 0L){
-                        repo.languageDao.insert(language)
+                        repo.languageDao.insertAsync(language)
                     }
                     val container = view.saveContainerOnExit(entity.contentEntryUid,
-                            storageOptions?.get(view.selectedStorageIndex).toString(),db, repo)
-                    if(container != null && entity.leaf){
+                            storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),db, repo)
+
+                    if(container != null && entity.leaf && containerDownloadManager != null){
 
                         val downloadJob = DownloadJob(entity.contentEntryUid, view.jobTimeStamp)
                         downloadJob.djStatus = JobStatus.COMPLETE
@@ -149,7 +153,7 @@ class ContentEntryEdit2Presenter(context: Any,
                         downloadJobItem.djiStatus = JobStatus.COMPLETE
                         downloadJobItem.downloadedSoFar = container.fileSize
 
-                        containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
+                        containerDownloadManager.handleDownloadJobItemUpdated(downloadJobItem)
                     }
                 }
                 view.finishWithResult(listOf(entity))

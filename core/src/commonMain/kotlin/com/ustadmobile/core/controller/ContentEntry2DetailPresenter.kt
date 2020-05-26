@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -70,9 +71,7 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     override fun handleClickEdit() {
-        val args = HashMap(arguments)
-        args[ContentEntryEdit2View.CONTENT_TYPE] = CONTENT_CREATE_CONTENT.toString()
-        systemImpl.go(ContentEntryEdit2View.VIEW_NAME, args, context)
+        systemImpl.go(ContentEntryEdit2View.VIEW_NAME, mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString()), context)
     }
 
     fun handleOnClickOpenDownloadButton(){

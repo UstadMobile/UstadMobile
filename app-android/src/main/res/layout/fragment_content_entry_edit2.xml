@@ -212,6 +212,7 @@
 
 
             <com.google.android.material.textfield.TextInputLayout
+                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:id="@+id/entry_licence"
                 app:layout_constraintStart_toStartOf="parent"
@@ -247,6 +248,7 @@
 
 
             <RelativeLayout
+                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
                 android:layout_margin="@dimen/dimen_16dp"
                 android:clickable="true"
                 android:focusable="true"
