@@ -29,7 +29,7 @@ suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, p
         }
         if(pluginResult != null) {
             pluginResult.contentFlags = ContentEntry.FLAG_IMPORTED
-            return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0])
+            return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], file)
         }
     }
 
@@ -74,7 +74,7 @@ suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: Um
 /**
  *
  */
-data class ImportedContentEntryMetaData(var contentEntry: ContentEntryWithLanguage, var mimeType: String)
+data class ImportedContentEntryMetaData(var contentEntry: ContentEntryWithLanguage, var mimeType: String, var file: File)
 
 /**
  * Class which handles entries and containers for all imported content

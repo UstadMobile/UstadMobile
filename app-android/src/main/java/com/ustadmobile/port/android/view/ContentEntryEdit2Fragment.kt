@@ -1,11 +1,14 @@
 package com.ustadmobile.port.android.view
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.text.HtmlCompat
 import androidx.navigation.fragment.findNavController
@@ -41,11 +44,12 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
+
 interface ContentEntryEdit2FragmentEventHandler {
 
     fun onEntryPublicStatusChanged(isChecked:Boolean)
 
-    fun onClickFileSelection()
+    fun onClickContentImportSorceSelection()
 
     fun handleClickLanguage()
 }
@@ -83,7 +87,7 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             mBinding?.selectedStorageIndex = value
             field = value
         }
-    override var jobCreatedTime: Long
+    override var jobTimeStamp: Long
         get() = System.currentTimeMillis()
         set(value) {}
 
@@ -108,7 +112,26 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         mBinding?.contentEntry?.publik = isChecked
     }
 
-    override fun onClickFileSelection() {
+    override fun onClickContentImportSorceSelection() {
+        val builder:AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        builder.setItems(R.array.content_source_option) { dialog, which ->
+            when (which) {
+                0 -> handleFileSelection()
+                1 -> {
+                    //Handle link import here
+                }
+            }
+            dialog.dismiss()
+        }
+        builder.show()
+
+    }
+
+    private fun handleLinkImport(){
+
+    }
+
+    private fun handleFileSelection(){
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             mBinding?.selectedFileUri = uri.toString()
             if(uri != null){
@@ -121,7 +144,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
                     output.flush()
                     output.close()
                     input?.close()
-                    mBinding?.selectedFileUri = uri.toString()
                     GlobalScope.launch {
                         val metaData = extractContentEntryMetadataFromFile(tmpFile.absoluteFile,
                                 UmAccountManager.getActiveDatabase(requireContext()))
@@ -164,8 +186,11 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         mBinding?.storageOptions = options
     }
 
-    override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String,db: UmAppDatabase, repo: UmAppDatabase): Container {
-       return importContainerFromZippedFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,File(""),db,repo)
+    override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String,db: UmAppDatabase, repo: UmAppDatabase): Container ?{
+        val file = entryMetaData?.file
+        return if(file != null){
+            importContainerFromZippedFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo)
+        }else null
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

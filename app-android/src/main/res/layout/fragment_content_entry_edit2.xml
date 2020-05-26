@@ -85,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_16dp"
                 android:backgroundTint="@color/accent"
-                android:onClick="@{()-> activityEventHandler.onClickFileSelection()}"
+                android:onClick="@{()-> activityEventHandler.onClickContentImportSorceSelection()}"
                 android:padding="@dimen/dimen_16dp"
                 android:text="@{contentEntry.contentEntryUid == 0 ? @string/content_import_from_sources: @string/content_update_from_sources}"
                 android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"

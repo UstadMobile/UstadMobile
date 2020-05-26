@@ -134,12 +134,20 @@ class ContentEntryEdit2Presenter(context: Any,
                 val container = view.saveContainerOnExit(entity.contentEntryUid,
                         storageOptions?.get(view.selectedStorageIndex).toString(),db, repo)
                 if(container != null && entity.leaf){
-                    //Mark this entry's job as complete
-                    val downloadJob = DownloadJob(entity.contentEntryUid, view.jobCreatedTime)
+
+                    val downloadJob = DownloadJob(entity.contentEntryUid, view.jobTimeStamp)
                     downloadJob.djStatus = JobStatus.COMPLETE
-                    containerDownloadManager?.createDownloadJob(downloadJob)
-                    val downloadJobItem = DownloadJobItem(downloadJob,entity.contentEntryUid,
-                            container.containerUid,container.fileSize)
+                    downloadJob.timeRequested = view.jobTimeStamp
+                    downloadJob.bytesDownloadedSoFar = container.fileSize
+                    downloadJob.totalBytesToDownload = container.fileSize
+                    downloadJob.djUid = repo.downloadJobDao.insert(downloadJob).toInt()
+
+                    val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
+                            container.containerUid, container.fileSize)
+                    downloadJobItem.djiUid = repo.downloadJobItemDao.insert(downloadJobItem).toInt()
+                    downloadJobItem.djiStatus = JobStatus.COMPLETE
+                    downloadJobItem.downloadedSoFar = container.fileSize
+
                     containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
                 }
             }

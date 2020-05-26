@@ -12,14 +12,16 @@ import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_CONTENT
-import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
+import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -88,7 +90,9 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     private fun onDownloadJobItemChanged(downloadJobItem: DownloadJobItem?) {
-
+        if(downloadJobItem != null){
+            systemTimeInMillis()
+        }
     }
 
     private fun goToSelectedContentEntry() {
