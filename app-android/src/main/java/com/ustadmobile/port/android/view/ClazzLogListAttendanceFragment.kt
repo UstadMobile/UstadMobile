@@ -151,7 +151,6 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 chart.axisRight.setDrawAxisLine(false)
                 chart.xAxis.isGranularityEnabled = true
                 chart.xAxis.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
-                chart.xAxis.labelCount = 7
 
                 chart.axisLeft.valueFormatter = PercentFormatter()
                 var lastCheckedId = R.id.chip_last_week

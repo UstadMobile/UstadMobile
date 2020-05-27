@@ -181,6 +181,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         ClazzLog.clazzLogClazzUid = :clazzUid 
         AND ClazzLog.logDate BETWEEN :fromTime AND :toTime
         AND (:statusFilter = 0 OR ClazzLog.clazzLogStatusFlag = :statusFilter)
+        ORDER BY ClazzLog.logDate
     """)
     abstract fun findByClazzUidWithinTimeRangeLive(clazzUid: Long, fromTime: Long, toTime: Long, statusFilter: Int): DoorLiveData<List<ClazzLog>>
 
