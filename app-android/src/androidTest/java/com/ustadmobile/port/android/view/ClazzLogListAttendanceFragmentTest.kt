@@ -22,7 +22,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.util.test.ext.insertClazzAndClazzMembers
+import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions.Companion.childOfViewAtPositionWithMatcher
 import kotlinx.coroutines.runBlocking
@@ -65,13 +65,13 @@ class ClazzLogListAttendanceFragmentTest {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
         navController.setGraph(R.navigation.mobile_navigation)
 
-        val clazzAndMembers = runBlocking { db.insertClazzAndClazzMembers(5) }
-        val clazzLog = ClazzLog(0L, clazzAndMembers.first.clazzUid, System.currentTimeMillis(), 0L).apply {
+        val clazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5) }
+        val clazzLog = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis(), 0L).apply {
             clazzLogUid = db.clazzLogDao.insert(this)
         }
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
-            bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.first.clazzUid.toString()),
+            bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
                 themeResId = R.style.Theme_UstadTheme
         )
 

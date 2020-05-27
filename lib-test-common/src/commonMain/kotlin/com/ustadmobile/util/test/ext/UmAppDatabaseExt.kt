@@ -7,28 +7,51 @@ import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 
-suspend fun UmAppDatabase.insertClazzAndClazzMembers(numClazzMembers: Int): Pair<Clazz, List<ClazzMember>> {
+data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
+
+private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime: Long): ClazzMember {
+    return ClazzMember(clazzUid, this.personUid, clazzMemberRole).apply {
+        clazzMemberDateJoined = joinTime
+    }
+}
+
+suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
+    studentNamer: (Int) -> Pair<String, String> = {"Test" to "Student $it"},
+    teacherNamer: (Int) -> Pair<String, String> = {"Test" to "Teacher $it"}): TestClazzAndMembers {
     val mockClazz = Clazz("Test Clazz").apply {
         clazzTimeZone = "Asia/Dubai"
         clazzUid = clazzDao.insertAsync(this)
     }
 
-    val mockPeople = (1 .. numClazzMembers).map {
-        Person("user$it", "Test", "User ${it + 1}").apply {
+    val testStudents = (1 .. numClazzStudents).map {
+        val (firstName, lastName) = studentNamer(it)
+        Person("studentuser$it", firstName, lastName).apply {
+            personUid = personDao.insertAsync(this)
+        }
+    }
+
+    val testTeachers = (1 .. numClazzTeachers).map {
+        val (firstName, lastName) = teacherNamer(it)
+        Person("studentuser$it", firstName, lastName).apply {
             personUid = personDao.insertAsync(this)
         }
     }
 
     val clazzJoinTime = getSystemTimeInMillis() - 1000
 
-    val mockClazzMembers = mockPeople.map {
-        ClazzMember(mockClazz.clazzUid, it.personUid).apply {
-            clazzMemberDateJoined = clazzJoinTime
+    val testStudentClazzMembers = testStudents.map {
+        it.asClazzMember(mockClazz.clazzUid, ClazzMember.ROLE_STUDENT, clazzJoinTime).apply {
             clazzMemberUid = clazzMemberDao.insertAsync(this)
         }
     }
 
-    return Pair(mockClazz, mockClazzMembers)
+    val testTeacherClazzMembers = testTeachers.map {
+        it.asClazzMember(mockClazz.clazzUid, ClazzMember.ROLE_TEACHER, clazzJoinTime).apply {
+            clazzMemberUid = clazzMemberDao.insertAsync(this)
+        }
+    }
+
+    return TestClazzAndMembers(mockClazz, testTeacherClazzMembers, testStudentClazzMembers)
 }
 
 suspend fun UmAppDatabase.insertClazzLogs(clazzUid: Long, numLogs: Int, logMaker: (Int) -> ClazzLog): List<ClazzLog> {

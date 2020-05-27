@@ -15,7 +15,7 @@ import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
-import com.ustadmobile.util.test.ext.insertClazzAndClazzMembers
+import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -52,9 +52,9 @@ class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
     fun givenExistingClazzWithMembesAndClazzLog_whenMixedStudentAttendanceRecorded_thenShouldBeSavedToDatabase() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
 
-        val clazzAndMembers = runBlocking { db.insertClazzAndClazzMembers(5) }
+        val clazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5) }
 
-        val clazzLog = ClazzLog(0L, clazzAndMembers.first.clazzUid, System.currentTimeMillis(), 0L).apply {
+        val clazzLog = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis(), 0L).apply {
             clazzLogUid = db.clazzLogDao.insert(this)
         }
 
@@ -87,7 +87,7 @@ class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
 
 
         val clazzLogAttendanceRecords = db.clazzLogAttendanceRecordDao.findByClazzLogUid(clazzLog.clazzLogUid)
-        Assert.assertEquals("Found expected number of attendance records", clazzAndMembers.second.size,
+        Assert.assertEquals("Found expected number of attendance records", clazzAndMembers.studentList.size,
                 clazzLogAttendanceRecords.size)
         Assert.assertEquals("Expected number of students are present", 3,
             clazzLogAttendanceRecords.filter {it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED}.size)
@@ -107,9 +107,9 @@ class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
     fun givenExistingClazzLog_whenClickMarkAll_thenShouldBeSavedToDatabase() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
 
-        val clazzAndMembers = runBlocking { db.insertClazzAndClazzMembers(5) }
+        val clazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5) }
 
-        val clazzLog = ClazzLog(0L, clazzAndMembers.first.clazzUid, System.currentTimeMillis(), 0L).apply {
+        val clazzLog = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis(), 0L).apply {
             clazzLogUid = db.clazzLogDao.insert(this)
         }
 

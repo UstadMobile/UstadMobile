@@ -65,7 +65,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
 
         //Find all those who are members of the class at the corresponding class schedule.
         val clazzMembersAtTime = db.clazzMemberDao.getAllClazzMembersAtTime(clazzLog.clazzLogClazzUid,
-            clazzLog.logDate)
+            clazzLog.logDate, ClazzMember.ROLE_STUDENT)
         val clazzAttendanceLogsInDb = db.clazzLogAttendanceRecordDao.findByClazzLogUid(entityUid)
 
         val allMembers = clazzAttendanceLogsInDb + clazzMembersAtTime.filter { clazzMember ->

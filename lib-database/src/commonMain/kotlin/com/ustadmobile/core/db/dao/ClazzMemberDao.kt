@@ -101,8 +101,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
         WHERE ClazzMember.clazzMemberClazzUid = :clazzUid
         AND :date BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft
+        AND (:roleFilter = 0 OR ClazzMember.clazzMemberRole = :roleFilter)
     """)
-    abstract fun getAllClazzMembersAtTime(clazzUid: Long, date: Long) : List<ClazzMemberWithPerson>
+    abstract fun getAllClazzMembersAtTime(clazzUid: Long, date: Long, roleFilter: Int) : List<ClazzMemberWithPerson>
 
     @Query("SELECT * FROM ClazzMember")
     abstract fun findAllAsList(): List<ClazzMember>
