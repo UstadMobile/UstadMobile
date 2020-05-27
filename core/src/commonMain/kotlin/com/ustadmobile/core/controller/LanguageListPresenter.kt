@@ -36,7 +36,6 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
         super.onCreate(savedState)
         view.sortOptions = SortOrder.values().toList().map { LanguageListSortOption(it, context) }
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
-        insertTempData()
         getAndSetList()
     }
 
@@ -51,18 +50,6 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
         }
     }
 
-    private fun insertTempData(){
-        GlobalScope.launch {
-            db.clearAllTables()
-            for(i in 1..20){
-                val language = Language()
-                language.langUid = i.toLong()
-                language.name = "Language $i"
-                language.iso_639_1_standard = if(i == 1) "en" else if(i == 2) "es" else "fr$i"
-                repo.languageDao.insertAsync(language)
-            }
-        }
-    }
 
     override fun handleClickEntry(entry: Language) {
         view.finishWithResult(listOf(entry))
