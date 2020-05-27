@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.lib.db.entities.Person
 
-interface UserProfileView : LanguageOptionView, UstadViewWithSnackBar  {
+interface UserProfileView : LanguageOptionView, UstadBaseFeedbackMessageView  {
 
     fun finish()
 

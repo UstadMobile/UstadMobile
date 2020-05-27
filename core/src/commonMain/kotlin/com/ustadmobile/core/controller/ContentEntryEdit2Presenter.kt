@@ -10,9 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_TYPE
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
@@ -52,8 +50,6 @@ class ContentEntryEdit2Presenter(context: Any,
 
     private var parentEntryUid:Long = 0
 
-    private var entityUid: Long = 0
-
 
     open class StorageOptions(context: Any, val storage: UmStorageOptions): MessageIdOption(storage.messageId,context){
         override fun toString(): String {
@@ -73,7 +69,6 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong()?:0
-        entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         systemImpl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
             override fun onDone(result: List<UMStorageDir>?) {
                 storageOptions = result
@@ -87,6 +82,7 @@ class ContentEntryEdit2Presenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithLanguage? {
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         return withTimeoutOrNull(2000) {
             db.contentEntryDao.findEntryWithLanguageByEntryId(entityUid)
         } ?: ContentEntryWithLanguage()
@@ -106,40 +102,42 @@ class ContentEntryEdit2Presenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
+        val entityVal = view.entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
 
     override fun handleClickSave(entity: ContentEntryWithLanguage) {
-        val canCreate = entity.title != null && ((entity.language != null
-                && entity.licenseType != 0 && entity.leaf) || (!entity.leaf && entity.description != null))
+        GlobalScope.launch(doorMainDispatcher()) {
+            val canCreate = entity.title != null && ((entity.language != null
+                    && entity.licenseType != 0 && entity.leaf) || (!entity.leaf && entity.description != null))
 
-        if(canCreate){
-            entity.leaf = arguments[CONTENT_TYPE]?.toInt() != CONTENT_CREATE_FOLDER
-            entity.licenseName = systemImpl.getString(LicenceOptions.values()
-                    .single { it.optionVal == entity.licenseType }.messageId, context)
-            GlobalScope.launch(doorMainDispatcher()) {
+            if(canCreate){
+                if(entity.leaf){
+                    entity.licenseName = systemImpl.getString(LicenceOptions.values()
+                            .single { it.optionVal == entity.licenseType }.messageId, context)
+                }
+
                 if(entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
                     val contentEntryJoin = ContentEntryParentChildJoin()
                     contentEntryJoin.cepcjChildContentEntryUid = entity.contentEntryUid
                     contentEntryJoin.cepcjParentContentEntryUid = parentEntryUid
-                    contentEntryJoin.cepcjUid = repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
+                    repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
                 }else {
                     repo.contentEntryDao.updateAsync(entity)
                 }
 
-                if(entity.contentEntryUid != 0L){
-                    val language = entity.language
-                    if(language != null && language.langUid == 0L){
-                        repo.languageDao.insertAsync(language)
-                    }
+                val language = entity.language
+                if(language != null && language.langUid == 0L){
+                    repo.languageDao.insertAsync(language)
+                }
+
+                if(entity.leaf){
                     val container = view.saveContainerOnExit(entity.contentEntryUid,
                             storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),db, repo)
 
-                    if(container != null && entity.leaf && containerDownloadManager != null){
-
+                    if(container != null && containerDownloadManager != null){
                         val downloadJob = DownloadJob(entity.contentEntryUid, view.jobTimeStamp)
                         downloadJob.djStatus = JobStatus.COMPLETE
                         downloadJob.timeRequested = view.jobTimeStamp
@@ -155,11 +153,12 @@ class ContentEntryEdit2Presenter(context: Any,
 
                         containerDownloadManager.handleDownloadJobItemUpdated(downloadJobItem)
                     }
+                    view.finishWithResult(listOf(entity))
                 }
+            }else{
+                view.showFeedbackMessage(systemImpl.getString(MessageID.register_empty_fields, context))
                 view.finishWithResult(listOf(entity))
             }
-        }else{
-            view.showFeedbackMessage(systemImpl.getString(MessageID.register_empty_fields, context))
         }
     }
 

@@ -3,9 +3,9 @@
 
     <item
         android:id="@+id/home_content_dest"
-        android:icon="@drawable/ic_local_library_black_24dp"
+        android:icon="@drawable/library_books_24px"
         android:title="@string/content"/>
-    
+
 
     <item
         android:id="@+id/home_schoollist_dest"

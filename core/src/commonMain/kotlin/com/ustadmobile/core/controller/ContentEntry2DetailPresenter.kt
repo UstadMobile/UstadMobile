@@ -12,16 +12,13 @@ import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
-import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_CONTENT
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.LoginView
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -91,9 +88,7 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     private fun onDownloadJobItemChanged(downloadJobItem: DownloadJobItem?) {
-        if(downloadJobItem != null){
-            systemTimeInMillis()
-        }
+        if(downloadJobItem != null){}
     }
 
     private fun goToSelectedContentEntry() {

@@ -59,7 +59,9 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun recycledItems(ceInactive:Boolean = true): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
-    @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid AND ContentEntry.contentEntryUid=:entryUuid")
+    @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid " +
+            "WHERE ContentEntry.contentEntryUid=:entryUuid"
+    )
     @JsName("findEntryWithLanguageByEntryId")
     abstract suspend fun findEntryWithLanguageByEntryId(entryUuid: Long): ContentEntryWithLanguage?
 

@@ -6,7 +6,7 @@ import kotlin.js.JsName
  * Created by mike on 9/13/17.
  */
 
-interface XapiPackageContentView : UstadView, UstadViewWithSnackBar {
+interface XapiPackageContentView : UstadView, UstadBaseFeedbackMessageView {
 
     @JsName("setTitle")
     fun setTitle(title: String)

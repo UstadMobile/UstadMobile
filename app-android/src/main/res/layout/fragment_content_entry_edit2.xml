@@ -100,8 +100,8 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:textSize="@dimen/text_body_small"
                 android:id="@+id/selected_file_info"
-                android:text="@string/content_creation_storage_option_title"
                 android:layout_width="match_parent"
+                tools:text="Selected file info"
                 android:layout_height="wrap_content" />
 
             <TextView

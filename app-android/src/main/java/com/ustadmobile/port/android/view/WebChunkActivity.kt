@@ -11,12 +11,12 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
-import com.ustadmobile.core.view.UstadViewWithSnackBar
+import com.ustadmobile.core.view.UstadBaseFeedbackMessageView
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient
 
-class WebChunkActivity : UstadBaseActivity(), WebChunkView, UstadViewWithSnackBar {
+class WebChunkActivity : UstadBaseActivity(), WebChunkView, UstadBaseFeedbackMessageView {
 
     private var mPresenter: WebChunkPresenter? = null
 
@@ -82,7 +82,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, UstadViewWithSnackBa
     }
 
     override fun showError(message: String) {
-        showSnackBarNotification(message, {}, 0)
+        showFeedbackMessage(message, {}, 0)
     }
 
     override fun setToolbarTitle(title: String) {
@@ -90,7 +90,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView, UstadViewWithSnackBa
     }
 
     override fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String) {
-        showSnackBarNotification(message, {
+        showFeedbackMessage(message, {
             var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
             if (appPackageName == null) {
                 appPackageName = "cn.wps.moffice_eng"

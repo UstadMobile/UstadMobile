@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.Manifest
 import android.os.Bundle
 import android.text.Spanned
 import android.view.LayoutInflater
@@ -52,8 +53,8 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             mBinding?.contentEntry = value
         }
 
-    override fun showFeedbackMessage(message: String, actionMessageId: Int, action: () -> Unit) {
-        (activity as MainActivity).showFeedbackMessage(message, actionMessageId, action)
+    override fun showFeedbackMessage(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as MainActivity).showFeedbackMessage(message, action, actionMessageId)
     }
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
@@ -91,7 +92,11 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
     }
 
     override fun showDownloadOptionsDialog(map: Map<String, String>) {
-        //TODO("Not yet implemented")
+        (activity as MainActivity).runAfterGrantingPermission(
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                Runnable { UstadMobileSystemImpl.instance.go("DownloadDialog", map, requireContext()) }
+                ,getString(R.string.download_storage_permission_title),
+                getString(R.string.download_storage_permission_message))
     }
 
     override fun selectContentEntryOfLanguage(contentEntryUid: Long) {

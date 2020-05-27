@@ -25,6 +25,7 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
@@ -67,21 +68,21 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
     override var entity: ContentEntryWithLanguage? = null
         get() = field
         set(value) {
-            mBinding?.contentEntry = value
             field = value
+            mBinding?.contentEntry = value
         }
 
     override var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>? = null
         set(value) {
-            mBinding?.licenceOptions = value
             field = value
+            mBinding?.licenceOptions = value
         }
 
     override var selectedStorageIndex: Int = 0
         get() = field
         set(value) {
-            mBinding?.selectedStorageIndex = value
             field = value
+            mBinding?.selectedStorageIndex = value
         }
     override var jobTimeStamp: Long
         get() = System.currentTimeMillis()
@@ -108,12 +109,13 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         mBinding?.contentEntry?.publik = isChecked
     }
 
-    override fun showFeedbackMessage(message: String, actionMessageId: Int, action: () -> Unit) {
-        (activity as MainActivity).showFeedbackMessage(message, actionMessageId, action)
+    override fun showFeedbackMessage(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as MainActivity).showFeedbackMessage(message, action, actionMessageId)
     }
 
 
     override fun onClickContentImportSourceSelection() {
+        onSaveStateToBackStackStateHandle()
         val builder:AlertDialog.Builder = AlertDialog.Builder(requireContext())
         builder.setItems(R.array.content_source_option) { dialog, which ->
             when (which) {
@@ -149,14 +151,12 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
                             showFeedbackMessage(getString(R.string.import_link_content_not_supported))
                         }
                         val entry = entryMetaData?.contentEntry
+                        val entryUid = arguments?.get(ARG_ENTITY_UID)
                         if(entry != null){
+                            if(entryUid != null){
+                                entry.contentEntryUid = entryUid.toString().toLong()
+                            }
                             entity = entry
-                            mBinding?.contentEntry = entity
-                        }
-                        if(entryMetaData?.contentEntry != null
-                                && entryMetaData?.contentEntry?.language != null
-                                && entryMetaData?.contentEntry?.language?.name != null){
-                            //Show alert dialog to put language
                         }
                     }
                 }catch(e: Exception) {
@@ -169,7 +169,7 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
 
     override fun handleClickLanguage() {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest, destinationResultKey = LANGUAGE_KEY)
+        navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
     }
 
 
@@ -194,15 +194,16 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
+            val contentType = arguments?.get(ContentEntryEdit2View.CONTENT_TYPE)
             rootView = it.root
             it.licenceSelectionListener = this
             it.activityEventHandler = this
-            it.isNewFolder = arguments?.get(ContentEntryEdit2View.CONTENT_TYPE).toString().toInt() == CONTENT_CREATE_FOLDER
+            it.isNewFolder = if(contentType != null) contentType.toString().toInt() == CONTENT_CREATE_FOLDER else false
             it.supportedFiles = HtmlCompat.fromHtml(getString(R.string.content_supported_files),HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
             it.contentEntry?.lastModified = System.currentTimeMillis()
             it.contentEntry?.ceInactive = true
+            it.contentEntry?.leaf = !it.isNewFolder
         }
 
         return rootView
@@ -230,7 +231,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
                     val language = it.firstOrNull() ?: return@observeResult
                     entity?.language = language
                     entity?.primaryLanguageUid = language.langUid
-                    mBinding?.contentEntry = entity
                 }
             }
         }
@@ -247,11 +247,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
     override fun onResume() {
         super.onResume()
         setEditFragmentTitle( R.string.content)
-    }
-
-
-    companion object{
-        const val LANGUAGE_KEY = "contentEntryLanguage"
     }
 
 }

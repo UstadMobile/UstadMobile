@@ -39,12 +39,13 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.UstadViewWithProgress
-import com.ustadmobile.core.view.UstadViewWithSnackBar
+import com.ustadmobile.core.view.UstadBaseFeedbackMessageView
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.util.RunnableQueue
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
@@ -56,7 +57,7 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadViewWithSnackBar, ShakeDetector.Listener, UstadViewWithProgress {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadBaseFeedbackMessageView, ShakeDetector.Listener, UstadViewWithProgress {
 
     private var baseController: UstadBaseController<*>? = null
 
@@ -290,21 +291,14 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         }
     }
 
-    /**
-     * Display the snackbar at the bottom of the page
-     *
-     * @param errorMessage    message for the snackbar
-     * @param actionMessageId id of action name
-     * @param action          action listener
-     */
-    override fun showSnackBarNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
-        val snackbar = Snackbar.make(findViewById(android.R.id.content), errorMessage, Snackbar.LENGTH_LONG)
-        val impl = instance
+    override fun showFeedbackMessage(message: String, action: () -> Unit, actionMessageId: Int) {
+        val snackBar = Snackbar.make(coordinator_layout, message, Snackbar.LENGTH_LONG)
         if (actionMessageId != 0) {
-            snackbar.setAction(impl.getString(actionMessageId, this)) { action() }
-            snackbar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
+            snackBar.setAction(instance.getString(actionMessageId, this)) { action() }
+            snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
         }
-        snackbar.show()
+        snackBar.anchorView = bottom_nav_view
+        snackBar.show()
     }
 
     /**
@@ -398,12 +392,13 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        //This will cause service memory leak
+        /*when (item.itemId) {
             android.R.id.home -> {
                 finish()
                 return true
             }
-        }
+        }*/
 
         return super.onOptionsItemSelected(item)
     }

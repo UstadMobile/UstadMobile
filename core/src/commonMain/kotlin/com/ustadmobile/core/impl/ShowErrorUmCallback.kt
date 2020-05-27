@@ -1,6 +1,6 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.view.UstadViewWithSnackBar
+import com.ustadmobile.core.view.UstadBaseFeedbackMessageView
 
 /**
  * Utility callback that will automatically call the showSnackBarNotification on a view if the
@@ -8,10 +8,10 @@ import com.ustadmobile.core.view.UstadViewWithSnackBar
  *
  * @param <T> Callback type
 </T> */
-abstract class ShowErrorUmCallback<T>(private val viewFeedback: UstadViewWithSnackBar, private val errorMessage: Int) : UmCallback<T> {
+abstract class ShowErrorUmCallback<T>(private val baseFeedbackMessageViewFeedback: UstadBaseFeedbackMessageView, private val errorMessage: Int) : UmCallback<T> {
 
     override fun onFailure(exception: Throwable?) {
-        viewFeedback.showSnackBarNotification(UstadMobileSystemImpl.instance.getString(
-                errorMessage, viewFeedback.viewContext), { }, 0)
+        baseFeedbackMessageViewFeedback.showFeedbackMessage(UstadMobileSystemImpl.instance.getString(
+                errorMessage, baseFeedbackMessageViewFeedback.viewContext), { }, 0)
     }
 }

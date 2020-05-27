@@ -21,7 +21,7 @@ import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : UstadBase2Activity(), UstadListViewActivityWithFab,
+class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         NavController.OnDestinationChangedListener {
 
     private lateinit var appBarConfiguration : AppBarConfiguration

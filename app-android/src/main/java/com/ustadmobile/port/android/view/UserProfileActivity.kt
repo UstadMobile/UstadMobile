@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.database.Cursor
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -33,7 +32,6 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.UserProfileView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.staging.port.android.view.CircleTransform
-import id.zelory.compressor.Compressor
 import java.io.*
 
 @Suppress("DIFFERENT_NAMES_FOR_THE_SAME_PARAMETER_IN_SUPERTYPES")
@@ -373,7 +371,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     val picPath = doInBackground(selectedImage!!)
                     imagePathFromCamera = picPath
                     if (imagePathFromCamera == null) {
-                        showSnackBarNotification(getString(R.string.unable_open_image), {}, 0)
+                        showFeedbackMessage(getString(R.string.unable_open_image), {}, 0)
                         return
                     }
 
