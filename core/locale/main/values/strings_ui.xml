@@ -884,6 +884,13 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="maximum_score">Maximum score</string>
     <string name="quiz_questions">Quiz questions</string>
     <string name="time">Time</string>
+    <string name="submission">Submission</string>
+    <string name="public_comments">Public comments</string>
+    <string name="private_comments">Private comments</string>
+    <string name="submit_your_answer">Submit your answer</string>
+    <string name="add_class_comment">Add a class comment</string>
+    <string name="add_private_comment">Add a private comment</string>
+
 
 
     <!-- Used to show a quantity and name e.g. "5 oranges". %1$d will be replaced with the number

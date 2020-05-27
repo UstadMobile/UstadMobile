@@ -123,7 +123,8 @@
                 android:layout_marginStart="@dimen/activity_vertical_margin"
                 android:layout_marginTop="8dp"
                 android:contentDescription="@string/school"
-                android:text="@{schoolWithHolidayCalendar.schoolAddress}"
+                app:dateAppend="@{time}"
+                app:dateLongWithExtra="@{date}"
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/list_twoline1_textsize_line1"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
@@ -140,7 +141,6 @@
                 android:layout_marginStart="@dimen/activity_vertical_margin"
                 android:layout_marginTop="8dp"
                 android:contentDescription="@string/school"
-                android:text="@{schoolWithHolidayCalendar.schoolAddress}"
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/list_twoline1_textsize_line1"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
@@ -155,7 +155,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="@string/due_date"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
+                app:datePrepend="@string/due_date"
+                app:dateAppend="time"
+                app:dateLongWithExtra="@{date}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_locataion_tv"
@@ -208,10 +210,50 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:text="submission"
+                android:text="@string/submission"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier8" />
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier11"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="barrier8, public_comments_heading"
+                />
+
+
+            <EditText
+                android:id="@+id/comment_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="24dp"
+                android:hint="@string/submit_your_answer"
+                android:text="@{text}"
+                android:inputType="textCapSentences"
+                android:singleLine="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.625"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier11" />
+
+            <ImageButton
+                android:id="@+id/send_comment"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_send_black_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier11" />
 
 
             <androidx.constraintlayout.widget.Barrier
@@ -219,8 +261,50 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="public_comments_heading, barrier8"
+                app:constraint_referenced_ids="barrier11, send_comment"
                 />
+
+
+            <TextView
+                android:id="@+id/submission_score"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/score"
+                android:layout_marginStart="20dp"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginEnd="@dimen/form_margin_horizontal"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolDesc)}"
+                android:text="@{schoolWithHolidayCalendar.schoolDesc}"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/list_twoline1_textsize_line1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier9"
+                tools:text="42/100" />
+
+            <TextView
+                android:id="@+id/submission_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                tools:text="The characters want to learn about each other and play with each other."
+                android:visibility="@{schoolWithHolidayCalendar.schoolGender != 0 ? View.VISIBLE : View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                app:layout_constraintTop_toBottomOf="@+id/submission_score"
+                />
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier12"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="barrier9, submission_text"
+                />
+
+            <!-- TODO: Add Quiz questions when ready-->
 
             <TextView
                 android:id="@+id/submission_heading"
@@ -228,10 +312,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:text="Public comments"
+                android:text="@string/public_comments"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/barrier9" />
+                app:layout_constraintTop_toBottomOf="@+id/barrier12" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/public_comments_rv"
@@ -242,7 +326,43 @@
                 app:layout_constraintTop_toBottomOf="@+id/submission_heading"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- Enter Public comments -->
+            <androidx.constraintlayout.widget.Barrier
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/barrier14"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="public_comments_rv, barrier12"
+                />
+
+            <EditText
+                android:id="@+id/public_comment_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="24dp"
+                android:hint="@string/add_class_comment"
+                android:inputType="textCapSentences"
+                android:singleLine="true"
+                android:text="@{text}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.625"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier14" />
+
+            <ImageButton
+                android:id="@+id/public_send_comment"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_send_black_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier14" />
 
 
             <androidx.constraintlayout.widget.Barrier
@@ -250,7 +370,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="public_comments_rv, barrier9"
+                app:constraint_referenced_ids="public_send_comment, barrier14"
                 />
 
             <TextView
@@ -259,7 +379,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:text="Private comments"
+                android:text="@string/private_comments"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier10" />
@@ -273,7 +393,45 @@
                 app:layout_constraintTop_toBottomOf="@+id/private_comments_heading"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- Enter Private comments -->
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/barrier15"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="barrier10, private_comments_rv"
+                />
+
+            <EditText
+                android:id="@+id/private_comment_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="24dp"
+                android:hint="@string/add_private_comment"
+                android:inputType="textCapSentences"
+                android:singleLine="true"
+                android:text="@{text}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.625"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier15" />
+
+            <ImageButton
+                android:id="@+id/private_send_comment"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_send_black_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier15" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

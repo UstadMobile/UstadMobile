@@ -93,10 +93,11 @@ fun setDate(et: TextView, date: Long){
     et.setTag(R.id.tag_datelong, date)
 }
 
-@BindingAdapter("dateLongWithExtra", "dateAppend")
-fun setDateWithExtras(et: TextView, date:Long, append: String?){
-    val appendString = append ?: ""
-    updateDateOnEditTextWithExtraText("", appendString, et, date)
+@BindingAdapter("dateLongWithExtra", "dateAppend", "datePrepend")
+fun setDateWithExtras(et: TextView, date:Long, append: String?, prepend: String?){
+    val appendString = append?: ""
+    val prependString = prepend?: ""
+    updateDateOnEditTextWithExtraText(prependString, appendString, et, date)
     et.setTag(R.id.tag_datelong, date)
 }
 /**
