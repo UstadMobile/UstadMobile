@@ -1,11 +1,15 @@
 package com.ustadmobile.core.controller
 
+import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.schedule.localEndOfDay
+import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.attendancePercentage
+import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -38,6 +42,8 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
 
     private var graphDateRange = Pair(0L, 0L)
 
+    private var clazzTimeZone: String? = null
+
     private val graphObserver = object: DoorObserver<List<ClazzLog>> {
         override fun onChanged(t: List<ClazzLog>) {
             graphDisplayData.sendValue(AttendanceGraphData(
@@ -60,7 +66,6 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { ClazzLogListSortOption(it, context) }
         view.graphData = graphDisplayData
-        handleClickGraphDuration(7)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -72,7 +77,12 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         GlobalScope.launch {
             clazzWithSchool = repo.clazzDao.getClazzWithSchool(clazzUidFilter)
             withContext((doorMainDispatcher())) {
-                view.clazzTimeZone = clazzWithSchool?.clazzTimeZone ?: clazzWithSchool?.school?.schoolTimeZone ?: "UTC"
+                clazzTimeZone = clazzWithSchool?.effectiveTimeZone() ?: "UTC"
+                if(view.clazzTimeZone == null) {
+                    handleClickGraphDuration(7)
+                }
+
+                view.clazzTimeZone = clazzTimeZone
                 view.list = repo.clazzLogDao.findByClazzUidAsFactory(clazzUidFilter)
             }
         }
@@ -89,8 +99,9 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     }
 
     fun handleClickGraphDuration(days: Int) {
-        val timeNow = getSystemTimeInMillis()
-        graphDateRange = timeNow - (days.days.millisecondsLong) to timeNow
+        val endOfDay = DateTime.now().toOffsetByTimezone(clazzTimeZone ?: "UTC")
+                .localEndOfDay.utc.unixMillisLong
+        graphDateRange = (endOfDay - days.days.millisecondsLong) to endOfDay
         graphDbData?.removeObserver(graphObserver)
         graphDbData = repo.clazzLogDao.findByClazzUidWithinTimeRangeLive(clazzUidFilter,
                 graphDateRange.first, graphDateRange.second, ClazzLog.STATUS_RECORDED)

@@ -109,7 +109,7 @@ class PersonEditPresenter(context: Any,
             }
 
             clazzMemberJoinEditHelper.entitiesToInsert.forEach {
-                repo.clazzMemberDao.enrolPersonIntoClazz(entity, it.clazzMemberClazzUid,
+                repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzMemberClazzUid,
                     it.clazzMemberRole)
             }
             repo.clazzMemberDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,

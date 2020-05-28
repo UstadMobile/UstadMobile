@@ -18,6 +18,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
@@ -49,15 +50,15 @@ class ClazzEdit2Presenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchool? {
         val clazzUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         val clazz = withTimeoutOrNull(2000) {
-            db.clazzDao.takeIf {clazzUid != 0L }?.findByUidWithHolidayCalendarAsync(clazzUid) ?:
-                ClazzWithHolidayCalendarAndSchool().also {
-                    it.clazzName = ""
-                    it.isClazzActive = true
-                }
-        }  ?: return null
+            db.clazzDao.takeIf {clazzUid != 0L }?.findByUidWithHolidayCalendarAsync(clazzUid)
+        }  ?: ClazzWithHolidayCalendarAndSchool().also {
+            it.clazzName = ""
+            it.isClazzActive = true
+            it.clazzTimeZone = getDefaultTimeZoneId()
+        }
 
         val schedules = withTimeoutOrNull(2000) {
-            db.scheduleDao.findAllSchedulesByClazzUidAsync(clazzUid)
+            db.scheduleDao.takeIf { clazzUid != 0L }?.findAllSchedulesByClazzUidAsync(clazzUid)
         } ?: listOf()
 
         scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)

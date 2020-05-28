@@ -55,23 +55,6 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         createAuditLog(entity.clazzMemberUid, loggedInPersonUid)
     }
 
-
-    /**
-     * Enrol the given person into the given class.
-     */
-    suspend fun enrolPersonIntoClazz(personToEnrol: Person, clazzUid: Long, role: Int): ClazzMemberWithPerson {
-        val clazzMember = ClazzMemberWithPerson().apply {
-            clazzMemberPersonUid = personToEnrol.personUid
-            clazzMemberClazzUid = clazzUid
-            clazzMemberRole = role
-            clazzMemberActive = true
-            clazzMemberDateJoined = getSystemTimeInMillis()
-            person = personToEnrol
-        }
-        clazzMember.clazzMemberUid = insertAsync(clazzMember)
-        return clazzMember
-    }
-
     /**
      * Provide a list of the classes a given person is in with the class information itself (e.g.
      * for person detail).

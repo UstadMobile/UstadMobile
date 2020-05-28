@@ -2,10 +2,12 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -67,7 +69,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
     fun handleEnrolMember(person: Person, role: Int) {
         GlobalScope.launch {
-            repo.clazzMemberDao.enrolPersonIntoClazz(person, filterByClazzUid, role)
+            repo.enrolPersonIntoClazzAtLocalTimezone(person, filterByClazzUid, role)
         }
     }
 

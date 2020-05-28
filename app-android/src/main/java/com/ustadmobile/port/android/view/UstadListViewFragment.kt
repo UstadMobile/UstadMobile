@@ -201,6 +201,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     override fun onDestroyView() {
         mRecyclerView?.adapter = null
+        mDataRecyclerViewAdapter = null
         mRecyclerView = null
         mDataBinding = null
         mRecyclerView = null
