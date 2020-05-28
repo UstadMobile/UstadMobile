@@ -22,7 +22,6 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RoleEditView
 import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 
 class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
@@ -80,6 +79,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView : View
+
         mBinding = FragmentRoleEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             mRecyclerView = it.roleEditPermissionBitmaskEditRv
@@ -102,6 +102,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.role)
 
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
@@ -128,11 +129,6 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
             field = value
             mBinding?.loading = value
         }
-
-    override fun onResume() {
-        super.onResume()
-        setEditFragmentTitle(R.string.role)
-    }
 
 
     companion object {

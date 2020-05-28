@@ -6,6 +6,8 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -59,17 +61,8 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
                                       arguments: Bundle?) {
-        val ustadDestination = UstadMobileSystemImpl.instance.destinationProvider
-                .lookupDestinationById(destination.id)
-
-        if(ustadDestination?.hasFab != true) {
-            activityFloatingActionButton?.visibility = View.INVISIBLE
-            activityFloatingActionButton?.setOnClickListener(null)
-        }
-
         invalidateOptionsMenu()
         mAppBar.setExpanded(true)
-
     }
 
     override fun onSupportNavigateUp(): Boolean {

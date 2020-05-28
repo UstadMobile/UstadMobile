@@ -150,10 +150,7 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
         }
 
         super.onViewCreated(view, savedInstanceState)
-
-        if(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            mActivityWithFab?.activityFloatingActionButton?.visibility = View.GONE
-        }
+        fabManager?.visible = false
     }
 
     fun navigateToPickNewMember(keyName: String){
@@ -165,9 +162,6 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
     override fun onResume() {
         super.onResume()
 
-        //TODO: managing the fab should be tied to the viewlifecycle. We could introduce a standard
-        // class for this e.g. FabControlLifecycleObserver
-        mActivityWithFab?.activityFloatingActionButton?.visibility = View.GONE
     }
 
     /**

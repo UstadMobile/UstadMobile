@@ -44,7 +44,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return true
+        return false
     }
 
     private fun updateListOnView() {

@@ -23,7 +23,6 @@ import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecordWithPerson
 
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import java.util.*
 
 interface ClazzLogEditAttendanceFragmentEventHandler {
@@ -155,11 +154,6 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
         mBinding = null
         mPresenter = null
         entity = null
-    }
-
-    override fun onResume() {
-        super.onResume()
-        //setEditFragmentTitle(R.string.clazzlog)
     }
 
     override var entity: ClazzLog? = null

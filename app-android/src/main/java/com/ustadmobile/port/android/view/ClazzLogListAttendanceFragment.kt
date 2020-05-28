@@ -212,16 +212,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        if(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            mActivityWithFab?.activityFloatingActionButton?.visibility = View.GONE
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        mActivityWithFab?.activityFloatingActionButton?.visibility = View.GONE
+        fabManager?.visible = false
     }
 
     /**

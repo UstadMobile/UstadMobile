@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
+import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -28,31 +29,10 @@ abstract class UstadDetailFragment<T>: UstadBaseFragment(), UstadDetailView<T> {
         get() = field
         set(value) {
             field = value
-            mActivityWithFab?.activityFloatingActionButton?.visibility = if(value == EditButtonMode.FAB) {
-                mActivityWithFab?.activityFloatingActionButton?.text = requireContext().getText(R.string.edit)
-                View.VISIBLE
-            }else {
-                View.GONE
-            }
+            fabManager?.visible = (value == EditButtonMode.FAB)
         }
 
     protected open var mActivityWithFab: UstadListViewActivityWithFab? = null
-        get() {
-            /*
-             The getter will return null so that if the current fragment is not actually visible
-             no changes will be sent through
-             */
-            return if(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                field
-            }else {
-                null
-            }
-        }
-
-        set(value) {
-            field = value
-        }
-
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -64,15 +44,11 @@ abstract class UstadDetailFragment<T>: UstadBaseFragment(), UstadDetailView<T> {
         mActivityWithFab = null
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        val theFab = mActivityWithFab?.activityFloatingActionButton
-        theFab?.text = requireContext().getText(R.string.edit)
-        theFab?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_edit_white_24dp)
-        theFab?.visibility = View.VISIBLE
-
-        theFab?.setOnClickListener {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        fabManager?.text = requireContext().getString(R.string.edit)
+        fabManager?.icon = R.drawable.ic_edit_white_24dp
+        fabManager?.onClickListener = {
             detailPresenter?.handleClickEdit()
         }
     }

@@ -196,6 +196,13 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
                     selectionObserver)
         }
 
+        fabManager?.onClickListener = {
+            mDataBinding?.presenter?.handleClickCreateNewFab()
+        }
+        fabManager?.visible = (addMode == ListViewAddMode.FAB)
+        fabManager?.icon = R.drawable.ic_add_white_24dp
+
+
         listPresenter?.onCreate(savedInstanceState.toStringMap())
     }
 
@@ -220,8 +227,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             mDataBinding?.addMode = value
             mNewItemRecyclerViewAdapter.takeIf { autoMergeRecyclerViewAdapter }?.newItemVisible =
                     (value == ListViewAddMode.FIRST_ITEM)
-            val fab = mActivityWithFab?.activityFloatingActionButton
-            fab?.visibility = if(value == ListViewAddMode.FAB) View.VISIBLE else View.INVISIBLE
+            fabManager?.visible = (value == ListViewAddMode.FAB)
 
             field = value
         }
@@ -275,19 +281,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
     override fun onResume() {
         super.onResume()
 
-        val theFab = mActivityWithFab?.activityFloatingActionButton
 
-        theFab?.setOnClickListener {
-            mDataBinding?.presenter?.handleClickCreateNewFab()
-        }
-
-        theFab?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_add_white_24dp)
-        theFab?.visibility = if(addMode == ListViewAddMode.FAB) {
-            theFab?.extend()
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
     }
 
     companion object {
