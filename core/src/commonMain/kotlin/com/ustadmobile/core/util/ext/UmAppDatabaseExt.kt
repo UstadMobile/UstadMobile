@@ -2,6 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.lib.db.entities.*
 
@@ -20,7 +21,7 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
                                                               role: Int,
                                                               clazzWithSchool: ClazzWithSchool? = null): ClazzMemberWithPerson {
     val clazzTimeZone = (clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid))?.effectiveTimeZone() ?: "UTC"
-    val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).utc.unixMillisLong
+    val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
     return ClazzMemberWithPerson().apply {
         clazzMemberPersonUid = personToEnrol.personUid
         clazzMemberClazzUid = clazzUid

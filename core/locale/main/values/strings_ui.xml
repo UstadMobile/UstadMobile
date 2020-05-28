@@ -868,4 +868,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="required_field">Required field</string>
     <string name="present_late_absent">%1$d present, %2$d late, %3$d absent</string>
 
+    <!-- Used to show the percentage attendance e.g. "50% attendance".
+    Translators note: translate only the word attendance, do not modify %1.0f%%-->
+    <string name="x_percent_attended">%1.0f%% attendance</string>
+
+
 </resources>

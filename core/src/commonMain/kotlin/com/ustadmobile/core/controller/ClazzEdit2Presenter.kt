@@ -1,13 +1,15 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTimeTz
-import com.soywiz.klock.hours
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.requestClazzLogCreation
+import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -19,7 +21,6 @@ import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.builtins.list
@@ -99,11 +100,13 @@ class ClazzEdit2Presenter(context: Any,
                 it.scheduleClazzUid = entity.clazzUid
             }
 
-            val toTime = (DateTimeTz.nowLocal().localMidnight + (24.hours)).utc.unixMillisLong -1L
+
+            val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
 
             requestClazzLogCreation(entity.clazzUid,
                     UmAccountManager.getActiveDatabaseName(context),
-                    getSystemTimeInMillis(), toTime, context)
+                    fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong,
+                    context)
 
             view.finishWithResult(listOf(entity))
         }
