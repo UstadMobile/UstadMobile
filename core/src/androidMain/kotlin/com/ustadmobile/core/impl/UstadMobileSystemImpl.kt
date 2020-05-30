@@ -54,7 +54,6 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
-import com.ustadmobile.staging.core.view.ClazzDetailView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
@@ -128,7 +127,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEntryListView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryListActivity",
             ContentEntryDetailView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryDetailActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            ClassLogDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ClazzLogDetailActivity",
             SELSelectStudentView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELSelectStudentActivity",
             SELSelectConsentView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELSelectConsentActivity",
             SELEditView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELEditActivity",
@@ -136,21 +134,14 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SELRecognitionView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELRecognitionActivity",
             ClazzActivityEditView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ClazzActivityEditActivity",
             AddActivityChangeDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddActivityChangeDialogFragment",
-            ReportEditView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportEditActivity",
             SelectMultipleTreeDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectMultipleTreeDialogFragment",
-            ReportSelectionView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportSelectionActivity",
             SelectAttendanceThresholdsDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectAttendanceThresholdsDialogFragment",
             SelectTwoDatesDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectTwoDatesDialogFragment",
-            ReportOverallAttendanceView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportOverallAttendanceActivity",
-            ReportNumberOfDaysClassesOpenView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportNumberOfDaysClassesOpenActivity",
-            ReportAttendanceGroupedByThresholdsView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportAttendanceGroupedByThresholdsActivity",
             BulkUploadMasterView.VIEW_NAME to "${STAGING_PACKAGE_NAME}BulkUploadMasterActivity",
             AddQuestionSetDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddQuestionSetDialogFragment",
             PersonPictureDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonPictureDialogFragment",
             AddQuestionOptionDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddQuestionOptionDialogFragment",
-            ReportAtRiskStudentsView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportAtRiskStudentsActivity",
             CallPersonRelatedDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CallPersonRelatedDialogFragment",
-            ReportMasterView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportMasterActivity",
             ReportSELView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportSELActivity",
             PersonListSearchView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonListSearchActivity",
             BaseReportView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportSelectionFragment",
@@ -166,7 +157,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             CustomFieldListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CustomFieldListActivity",
             CustomFieldDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CustomFieldDetailActivity",
             AddCustomFieldOptionDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddCustomFieldOptionDialogFragment",
-            RecordDropoutDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}RecordDropoutDialogFragment",
             ChangePasswordView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ChangePasswordActivity",
             PeopleListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PeopleListActivity",
 
