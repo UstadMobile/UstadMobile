@@ -78,8 +78,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private val sdCardStorageIndex = 1
 
-    private val bgExecutorService = Executors.newCachedThreadPool()
-
     private var appPreferences: SharedPreferences? = null
 
     var messageIdMap: Map<Int, Int> = mapOf()
