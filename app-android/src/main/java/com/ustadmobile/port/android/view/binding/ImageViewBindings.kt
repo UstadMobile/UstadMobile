@@ -60,6 +60,16 @@ fun ImageView.setCustomFieldIcon(customField: CustomField?) {
     setImageDrawable(ContextCompat.getDrawable(context, drawableId))
 }
 
+@BindingAdapter("attendanceTint")
+fun ImageView.setAttendanceTint(attendancePercentage: Float) {
+    val color = when {
+        attendancePercentage > 0.8f -> R.color.traffic_green
+        attendancePercentage > 0.6f -> R.color.traffic_orange
+        else -> R.color.traffic_red
+    }
+    setColorFilter(ContextCompat.getColor(context, color))
+}
+
 private val ICON_ID_MAP : Map<Int, Int> by lazy {
     mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
         CustomField.ICON_PERSON to R.drawable.ic_person_black_24dp,

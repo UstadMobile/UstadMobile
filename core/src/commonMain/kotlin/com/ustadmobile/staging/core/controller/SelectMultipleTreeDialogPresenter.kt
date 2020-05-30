@@ -28,7 +28,7 @@ class SelectMultipleTreeDialogPresenter(context: Any, arguments: Map<String, Str
 
         if (arguments!!.containsKey(ARG_LOCATIONS_SET)) {
             val locationsArray = arguments!!.get(ARG_LOCATIONS_SET) as LongArray
-            this.selectedLocationsList = ReportOverallAttendancePresenter.convertLongArray(locationsArray)
+            this.selectedLocationsList = convertLongArray(locationsArray)
         }
 
         selectedOptions = HashMap()
@@ -60,6 +60,15 @@ class SelectMultipleTreeDialogPresenter(context: Any, arguments: Map<String, Str
             if (selectedOptions.containsKey(locationName)) {
                 selectedOptions.remove(locationName)
             }
+        }
+    }
+
+    companion object {
+        fun convertLongArray(array: LongArray): ArrayList<Long> {
+            val result = ArrayList<Long>(array.size)
+            for (item in array)
+                result.add(item)
+            return result
         }
     }
 

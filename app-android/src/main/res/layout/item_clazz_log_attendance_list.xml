@@ -32,10 +32,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzLog)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(clazzLog)}"
-        android:background="@drawable/bg_listitem"
+        android:onClick="@{() -> presenter.handleClickEntry(clazzLog)}"
+        android:id="@+id/item_clazz_log_attendance_list"
+        android:tag="@{clazzLog.clazzLogUid}"
+        app:backgroundIfAnimationEnabled="@{@drawable/bg_listitem}"
         >
 
         <!-- TODO: Change or remove this icon -->

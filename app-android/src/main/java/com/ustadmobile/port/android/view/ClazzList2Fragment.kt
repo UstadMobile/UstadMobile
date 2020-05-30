@@ -66,6 +66,11 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        fabManager?.text = requireContext().getText(R.string.clazz)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
@@ -84,11 +89,6 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
         //do nothing
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mActivityWithFab?.activityFloatingActionButton?.text = requireContext().getText(R.string.clazz)
     }
 
     override val displayTypeRepo: Any?

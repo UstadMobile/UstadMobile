@@ -14,8 +14,6 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.lib.db.entities.Holiday
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
-
 class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
 
     private var mBinding: FragmentHolidayEditBinding? = null
@@ -37,6 +35,8 @@ class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setEditFragmentTitle(R.string.holiday)
+
         mPresenter = HolidayEditPresenter(requireContext(), arguments.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
@@ -53,7 +53,6 @@ class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.holiday)
     }
 
     override var entity: Holiday? = null

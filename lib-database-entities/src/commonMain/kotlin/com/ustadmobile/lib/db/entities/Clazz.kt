@@ -21,7 +21,7 @@ open class Clazz() {
 
     var clazzDesc: String? = null
 
-    var attendanceAverage: Float = 0.toFloat()
+    var attendanceAverage: Float = -1f
 
     //Gives the DateRange calendar Uid
     var clazzHolidayUMCalendarUid: Long = 0

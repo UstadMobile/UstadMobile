@@ -22,10 +22,8 @@ import com.ustadmobile.core.view.HolidayCalendarEditView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Holiday
 import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 
 interface HolidayCalendarEditActivityEventHandler {
@@ -98,13 +96,13 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()))
         holidayRecyclerAdapter?.presenter = mPresenter
 
-        setEditFragmentTitle(R.string.holiday_calendar)
 
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.holiday_calendar)
         val navController = findNavController()
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())

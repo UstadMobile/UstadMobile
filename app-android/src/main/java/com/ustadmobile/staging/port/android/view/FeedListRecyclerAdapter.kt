@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.FeedListPresenter
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.staging.core.view.ClazzDetailView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.lib.db.entities.FeedEntry
 import java.util.*
@@ -78,13 +77,13 @@ internal class FeedListRecyclerAdapter(diffCallback: DiffUtil.ItemCallback<FeedE
             feedText.text = feedEntry.description
         }
 
-        if (feedEntry.link!!.startsWith(ClazzDetailView.VIEW_NAME)) {
-            recordAttendanceButton.setText(R.string.view_class)
-            //Change feedIcon as needed
-        } else if (feedEntry.link!!.startsWith(PersonDetailView.VIEW_NAME)) {
-            recordAttendanceButton.setText(R.string.view_student)
-            //Change feedIcon as needed
-        }
+//        if (feedEntry.link!!.startsWith(ClazzDetailView.VIEW_NAME)) {
+//            recordAttendanceButton.setText(R.string.view_class)
+//            //Change feedIcon as needed
+//        } else if (feedEntry.link!!.startsWith(PersonDetailView.VIEW_NAME)) {
+//            recordAttendanceButton.setText(R.string.view_student)
+//            //Change feedIcon as needed
+//        }
         recordAttendanceButton.setOnClickListener { v -> mPresenter?.handleClickFeedEntry(feedEntry) }
         holder.itemView.setOnClickListener { v -> mPresenter?.handleClickFeedEntry(feedEntry) }
     }

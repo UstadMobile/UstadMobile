@@ -34,7 +34,6 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.staging.port.android.view.FeedListFragment
 import com.ustadmobile.staging.port.android.view.PeopleListFragment
-import com.ustadmobile.staging.port.android.view.ReportSelectionFragment
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_home.*
 import java.lang.IllegalArgumentException
@@ -263,8 +262,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                 MessageID.reports to R.drawable.ic_pie_chart_black_24dp,
                 MessageID.contents to R.drawable.ic_local_library_black_24dp,
                 MessageID.bottomnav_feed_title to FeedListFragment.icon,
-                MessageID.bottomnav_people_title to PeopleListFragment.icon,
-                MessageID.bottomnav_reports_title to ReportSelectionFragment.icon
+                MessageID.bottomnav_people_title to PeopleListFragment.icon
         )
     }
 }

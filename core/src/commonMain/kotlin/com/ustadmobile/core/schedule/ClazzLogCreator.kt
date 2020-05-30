@@ -74,7 +74,20 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Lon
                 }
             }
 
-            if(!alreadyCreatedClazzLogs.any { it.clazzLogUid == clazzLog.clazzLogUid }) {
+            //Check to see if the schedule has been updated. If it has been updated, then mark the
+            // old entry status as STATUS_RESCHEDULED and then update the join for any related
+            // ClazzLogAttendanceRecord entries
+            val logsToReschedule = alreadyCreatedClazzLogs.filter {
+                it.clazzLogScheduleUid == schedule.scheduleUid && it.clazzLogUid != clazzLog.clazzLogUid
+            }
+
+            logsToReschedule.forEach {
+                clazzLogDao.updateStatusByClazzLogUid(it.clazzLogUid, ClazzLog.STATUS_RESCHEDULED)
+                clazzLogAttendanceRecordDao.updateRescheduledClazzLogUids(it.clazzLogUid,
+                        clazzLog.clazzLogUid)
+            }
+
+            if(!alreadyCreatedClazzLogs.any { it.clazzLogUid == clazzLog.clazzLogUid } ) {
                 clazzLogDao.insert(clazzLog)
             }
         }
