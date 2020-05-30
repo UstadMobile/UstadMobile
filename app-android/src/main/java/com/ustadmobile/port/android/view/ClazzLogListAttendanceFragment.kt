@@ -32,6 +32,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import java.text.DecimalFormat
 import java.util.*
 
 class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog>(),
@@ -152,8 +153,10 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 chart.axisRight.setDrawAxisLine(false)
                 chart.xAxis.isGranularityEnabled = true
                 chart.xAxis.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
+                chart.axisLeft.axisMinimum = 0f
+                chart.axisLeft.axisMaximum = 100f
 
-                chart.axisLeft.valueFormatter = PercentFormatter()
+                chart.axisLeft.valueFormatter = PercentFormatter(DecimalFormat("###,###,##0"))
                 var lastCheckedId = R.id.chip_last_week
                 chipGroup.check(lastCheckedId)
                 chipGroup.setOnCheckedChangeListener { group, checkedId ->

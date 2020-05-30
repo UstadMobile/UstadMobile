@@ -45,7 +45,7 @@ class FabManagerLifecycleObserver(var extendedFab: ExtendedFloatingActionButton?
         extendedFab?.also {
             it.takeIf { icon != 0 }?.icon = ContextCompat.getDrawable(it.context, icon)
             it.takeIf { text != null }?.text = text
-            it.takeIf { onClickListener != null }?.setOnClickListener(onClickListener)
+            it.setOnClickListener(onClickListener)
             it.visibility = if(visible) View.VISIBLE else View.GONE
         }
 

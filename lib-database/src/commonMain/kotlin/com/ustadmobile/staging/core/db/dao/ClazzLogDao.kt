@@ -94,9 +94,11 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract fun findByClazzUidNotCancelledWithSchedule(clazzUid: Long): DataSource.Factory<Int,
             ClazzLogWithScheduleStartEndTimes>
 
-    @Query("""SELECT ClazzLog.* FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid
+    @Query("""SELECT ClazzLog.* FROM ClazzLog 
+        WHERE clazzLogClazzUid = :clazzUid
+        AND clazzLog.clazzLogStatusFlag != :excludeStatus
         ORDER BY ClazzLog.logDate DESC""")
-    abstract fun findByClazzUidAsFactory(clazzUid: Long): DataSource.Factory<Int, ClazzLog>
+    abstract fun findByClazzUidAsFactory(clazzUid: Long, excludeStatus: Int): DataSource.Factory<Int, ClazzLog>
 
 
     @Query("UPDATE ClazzLog SET clazzLogNumPresent = :clazzLogNumPresent,  " +
@@ -184,6 +186,13 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         ORDER BY ClazzLog.logDate
     """)
     abstract fun findByClazzUidWithinTimeRangeLive(clazzUid: Long, fromTime: Long, toTime: Long, statusFilter: Int): DoorLiveData<List<ClazzLog>>
+
+
+    @Query("""UPDATE ClazzLog 
+        SET clazzLogStatusFlag = :newStatus,
+        clazzLogLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+        WHERE clazzLogUid = :clazzLogUid""")
+    abstract fun updateStatusByClazzLogUid(clazzLogUid: Long, newStatus: Int)
 
     companion object {
 

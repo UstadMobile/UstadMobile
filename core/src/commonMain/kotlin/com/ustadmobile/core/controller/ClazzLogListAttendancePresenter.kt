@@ -83,7 +83,8 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
                 }
 
                 view.clazzTimeZone = clazzTimeZone
-                view.list = repo.clazzLogDao.findByClazzUidAsFactory(clazzUidFilter)
+                view.list = repo.clazzLogDao.findByClazzUidAsFactory(clazzUidFilter,
+                        ClazzLog.STATUS_RESCHEDULED)
             }
         }
 

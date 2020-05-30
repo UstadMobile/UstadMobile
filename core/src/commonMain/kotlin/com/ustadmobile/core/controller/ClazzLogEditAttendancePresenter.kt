@@ -125,6 +125,9 @@ class ClazzLogEditAttendancePresenter(context: Any,
             entity.clazzLogNumPartial = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_PARTIAL }
             repo.clazzLogDao.update(entity)
 
+            //now update the average attendance for the class
+            repo.clazzDao.updateClazzAttendanceAverage(entity.clazzLogClazzUid)
+
             view.finishWithResult(listOf(entity))
         }
     }

@@ -5,6 +5,9 @@
 
     <data>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="com.ustadmobile.core.util.ext.ClazzExtKt"/>
+        <import type="android.view.View"/>
+
         <variable
             name="clazz"
             type="com.ustadmobile.lib.db.entities.ClazzWithNumStudents" />
@@ -54,10 +57,37 @@
             app:constraint_referenced_ids="clazz_description_txt,item_clazzlist_clazz_title"/>
 
         <ImageView
+            android:visibility="@{ClazzExtKt.isAttendanceEnabledAndRecorded(clazz) ? View.VISIBLE : View.GONE}"
+            android:id="@+id/item_clazzlist_attendance_trafficlight"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginStart="16dp"
+            android:contentDescription="@string/attendance"
+            app:attendanceTint="@{clazz.attendanceAverage}"
+            app:layout_constraintBottom_toBottomOf="@+id/item_clazzlist_attendance_percentage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/item_clazzlist_attendance_percentage"
+            app:srcCompat="@drawable/ic_lens_black_24dp" />
+
+        <TextView
+            android:visibility="@{ClazzExtKt.isAttendanceEnabledAndRecorded(clazz) ? View.VISIBLE : View.GONE}"
+            android:id="@+id/item_clazzlist_attendance_percentage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:text="@{@string/x_percent_attended(clazz.attendanceAverage * 100)}"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_clazzlist_attendance_trafficlight"
+            app:layout_constraintTop_toBottomOf="@+id/clazz_description_txt"
+            tools:text="X% attendance" />
+
+        <ImageView
             android:id="@+id/item_clazzlist_people_icon"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             android:contentDescription="@string/people"
             android:tint="@color/text_secondary"
             app:layout_constraintBottom_toBottomOf="@+id/item_clazzlist_attendance_percentage"
@@ -76,30 +106,7 @@
             app:layout_constraintTop_toBottomOf="@+id/barrier_desc"
             tools:text="X students, Y teachers" />
 
-        <ImageView
-            android:id="@+id/item_clazzlist_attendance_trafficlight"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_marginStart="16dp"
-            android:contentDescription="@string/attendance"
-            app:attendanceTint="@{clazz.attendanceAverage}"
-            app:layout_constraintBottom_toBottomOf="@+id/item_clazzlist_attendance_percentage"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/item_clazzlist_attendance_percentage"
-            app:srcCompat="@drawable/ic_lens_black_24dp" />
 
-        <TextView
-            android:id="@+id/item_clazzlist_attendance_percentage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="@dimen/dimen_16dp"
-            android:text="@{@string/x_percent_attended(clazz.attendanceAverage * 100)}"
-            android:textColor="@color/text_secondary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/item_clazzlist_attendance_trafficlight"
-            app:layout_constraintTop_toBottomOf="@+id/clazz_description_txt"
-            tools:text="X% attendance" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

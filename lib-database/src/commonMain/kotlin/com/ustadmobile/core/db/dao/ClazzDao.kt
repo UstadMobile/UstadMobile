@@ -14,6 +14,7 @@ import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 
 @UmDao(selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_CLAZZ_SELECT +
         ENTITY_LEVEL_PERMISSION_CONDITION2,
@@ -262,6 +263,17 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             ")) * 1.0 " +
             "Where Clazz.clazzUid = :clazzUid")
     abstract fun updateAttendancePercentage(clazzUid: Long)
+
+    @Query("""
+        UPDATE Clazz SET attendanceAverage = 
+        CAST((SELECT SUM(clazzLogNumPresent) FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND clazzLogStatusFlag = 4) AS REAL) /
+        CAST(MAX(1.0, (SELECT SUM(clazzLogNumPresent) + SUM(clazzLogNumPartial) + SUM(clazzLogNumAbsent)
+        FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid AND clazzLogStatusFlag = $STATUS_RECORDED)) AS REAL),
+        clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+        WHERE clazzUid = :clazzUid
+    """)
+    abstract fun updateClazzAttendanceAverage(clazzUid: Long)
+
 
     @Query("SELECT " +
             "   (" +

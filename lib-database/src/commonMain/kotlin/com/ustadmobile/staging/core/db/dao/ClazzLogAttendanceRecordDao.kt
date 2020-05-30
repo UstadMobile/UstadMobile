@@ -41,6 +41,13 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
          WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid""")
     abstract fun findByClazzLogUid(clazzLogUid: Long): List<ClazzLogAttendanceRecordWithPerson>
 
+    @Query("""UPDATE ClazzLogAttendanceRecord
+        SET clazzLogAttendanceRecordClazzLogUid = :newClazzLogUid,
+        clazzLogAttendanceRecordLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
+        WHERE clazzLogAttendanceRecordClazzLogUid = :oldClazzLogUid
+    """)
+    abstract fun updateRescheduledClazzLogUids(oldClazzLogUid: Long, newClazzLogUid: Long)
+
     class AttendanceByThresholdRow {
 
         var age: Int = 0

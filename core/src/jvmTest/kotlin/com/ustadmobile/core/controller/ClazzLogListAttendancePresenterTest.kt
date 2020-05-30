@@ -79,7 +79,8 @@ class ClazzLogListAttendancePresenterTest {
                 systemImpl, db, repo, activeAccount)
         presenter.onCreate(null)
 
-        verify(repoClazzLogDao, timeout(5000)).findByClazzUidAsFactory(42L)
+        verify(repoClazzLogDao, timeout(5000)).findByClazzUidAsFactory(42L,
+                ClazzLog.STATUS_RESCHEDULED)
         verify(mockView, timeout(5000)).clazzTimeZone = "Asia/Dubai"
     }
 

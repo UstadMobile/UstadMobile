@@ -5,12 +5,10 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.soywiz.klock.parse
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Holiday
-import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.checkJndiSetup
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -184,6 +182,41 @@ class TestClazzLogCreator {
             0, clazzLogsCreated.size)
     }
 
+    @Test
+    fun givenClazzScheduleUpdatedForSameDay_whenCreateClazzLogsCalled_thenExistingRecordShouldBeUpdated() {
+        val (testClazz, testClazzSchedule) = createClazzAndSchedule("Test Clazz",
+                timezone = "Asia/Dubai") {
+            scheduleDay = Schedule.DAY_FRIDAY
+            sceduleStartTime = 10 * 60 * 60 * 1000 //10am
+            scheduleEndTime = 12 * 60 * 60 * 1000
+            scheduleActive = true
+        }
+
+        val fromTime = dateFormat.parse("Thu, 14 May 2020 20:00:00 UTC").utc.unixMillisLong
+        val toTime = fromTime + (1.days.millisecondsLong)
+
+        db.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
+
+        testClazzSchedule.apply {
+            sceduleStartTime = 12 * 60 * 60 * 1000 //12pm
+            scheduleEndTime = 13 * 60 * 60 * 1000
+        }
+        db.scheduleDao.update(testClazzSchedule)
+
+        db.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
+
+        val clazzLogsCreated = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
+                fromTime, toTime).partition { it.clazzLogStatusFlag != ClazzLog.STATUS_RESCHEDULED }
+
+        assertEquals("One clazz log is active", 1,
+                clazzLogsCreated.first.size)
+
+        assertEquals("The new log time is updated to match the new schedule",
+                "Fri, 15 May 2020 08:00:00 UTC",
+                DateTime.fromUnix(clazzLogsCreated.first[0].logDate).format(dateFormat))
+
+        assertEquals("One clazz log is marked as rescheduled", 1, clazzLogsCreated.second.size)
+    }
 
 
 }
