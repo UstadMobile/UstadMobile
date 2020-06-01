@@ -26,7 +26,6 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface ClazzEdit2ActivityEventHandler {
 
@@ -161,6 +160,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.clazz)
+
         val navController = findNavController()
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -192,11 +193,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             mDataBinding?.clazz = entity
         }
 
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setEditFragmentTitle(R.string.clazz)
     }
 
     override fun onDestroyView() {

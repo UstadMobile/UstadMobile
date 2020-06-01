@@ -12,7 +12,6 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
 
@@ -39,6 +38,12 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
         return rootView
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setEditFragmentTitle(R.string.schedule)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null
@@ -48,7 +53,7 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.schedule)
+
     }
 
     override var loading: Boolean = false

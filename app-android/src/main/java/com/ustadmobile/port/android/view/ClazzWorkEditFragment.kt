@@ -29,7 +29,6 @@ import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface ClazzWorkEditFragmentEventHandler {
     fun onClickClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions?)

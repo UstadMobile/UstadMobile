@@ -12,6 +12,8 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
+import com.toughra.ustadmobile.databinding.ItemClazzworkDetailDescriptionBinding
+import com.toughra.ustadmobile.databinding.ItemCommentNewBinding
 import com.toughra.ustadmobile.databinding.ItemCommetsListBinding
 import com.ustadmobile.core.controller.ClazzWorkWithSubmissionDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
@@ -27,11 +29,15 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import kotlinx.android.synthetic.main.fragment_clazz_work_with_submission_detail.view.*
 import kotlinx.android.synthetic.main.item_comment_new.view.*
 
+interface NewCommentHandler{
+    fun addComment(view: View, comment: String?, public:Boolean?)
+}
 
 class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSubmission>(),
-        ClazzWorkWithSubmissionDetailView {
+        ClazzWorkWithSubmissionDetailView, NewCommentHandler{
 
     private var mBinding: FragmentClazzWorkWithSubmissionDetailBinding? = null
 
@@ -57,15 +63,18 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
     private var newPublicCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
     private var publicCommentsMergerRecyclerAdapter: MergeAdapter? = null
 
-
     private var privateCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
     private var privateCommentsRecyclerView: RecyclerView? = null
     private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
-    private var privateCommentsObserver = Observer<PagedList<CommentsWithPerson>> { t ->
-        privateCommentsRecyclerAdapter?.submitList(t)
-    }
+    private var privateCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
-    protected var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
+    private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
+
+
+    private var detailMergerRecyclerAdapter: MergeAdapter? = null
+    private var detailMergerRecyclerView: RecyclerView? = null
+
+    private var detailRecyclerAdapter: ClazzWorkDetailRecyclerAdapter? = null
 
 
     class CommentsRecyclerAdapter(var presenter: ClazzWorkWithSubmissionDetailPresenter?)
@@ -91,14 +100,52 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
         }
     }
 
-    private val onNewPublicComment: View.OnClickListener = View.OnClickListener {
-        //TODO: check
-        mPresenter?.addComment(it.comment_text.text.toString(), true)
 
+    class ClazzWorkDetailRecyclerAdapter(clazzWork: ClazzWorkWithSubmission)
+        : RecyclerView.Adapter<ClazzWorkDetailRecyclerAdapter.ClazzWorkDetailViewHolder>() {
+
+        var clazzWorkWithSubmission: ClazzWorkWithSubmission? = clazzWork
+            set(value) {
+                field = value
+                viewHolder?.itemBinding?.clazzWorkWithSubmission = value
+                notifyItemInserted(0)
+            }
+
+        class ClazzWorkDetailViewHolder(var itemBinding: ItemClazzworkDetailDescriptionBinding)
+            : RecyclerView.ViewHolder(itemBinding.root)
+
+        private var viewHolder: ClazzWorkDetailViewHolder? = null
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkDetailViewHolder {
+            return ClazzWorkDetailViewHolder(
+                    ItemClazzworkDetailDescriptionBinding.inflate(LayoutInflater.from(parent.context),
+                            parent, false).also {
+                        it.clazzWorkWithSubmission = clazzWorkWithSubmission
+                    })
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            viewHolder = null
+        }
+
+        override fun getItemCount(): Int {
+            return 1
+        }
+
+        override fun onBindViewHolder(holder: ClazzWorkDetailViewHolder, position: Int) {}
     }
-    private val onNewPrivateComment: View.OnClickListener = View.OnClickListener {
-        //TODO: check
-        mPresenter?.addComment(it.comment_text.text.toString(), false)
+
+
+
+
+
+    override fun addComment(view: View, comment: String?, public: Boolean?) {
+        //TODO: Fix this : Disable comment Text
+        if(view.comment_text != null) {
+            view.comment_text.setText("")
+        }
+        mPresenter?.addComment(comment?:"", public?:false)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -113,6 +160,7 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
 
         publicCommentsRecyclerView = rootView.findViewById(R.id.public_comments_rv)
         privateCommentsRecyclerView = rootView.findViewById(R.id.private_comments_rv)
+        detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
 
         mPresenter = ClazzWorkWithSubmissionDetailPresenter(requireContext(),
                 arguments.toStringMap(), this,
@@ -121,10 +169,15 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
 
+        //Main Merger:
+        detailRecyclerAdapter = ClazzWorkDetailRecyclerAdapter(entity?: ClazzWorkWithSubmission())
+        detailMergerRecyclerAdapter = MergeAdapter(detailRecyclerAdapter)
+        detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
+        detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         //Public comments:
-        newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(onNewPublicComment,
-                requireContext().getString(R.string.add_class_comment)
+        newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
+                requireContext().getString(R.string.add_class_comment), true
         )
         publicCommentsRecyclerAdapter = CommentsRecyclerAdapter(mPresenter).also {
             publicCommentsObserver = PagedListSubmitObserver(it)
@@ -136,8 +189,8 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
         publicCommentsRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         //Private comments section:
-        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(onNewPrivateComment,
-                requireContext().getString(R.string.add_private_comment)
+        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
+                requireContext().getString(R.string.add_private_comment), false
         )
         privateCommentsRecyclerAdapter = CommentsRecyclerAdapter(mPresenter).also{
             privateCommentsObserver = PagedListSubmitObserver(it)
@@ -198,6 +251,8 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
             field = value
             mBinding?.clazzWorkWithSubmission = value
 
+            detailRecyclerAdapter?.clazzWorkWithSubmission = entity
+
             if(entity?.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT){
                 mBinding?.quizVisibility = View.GONE
                 mBinding?.attachmentVisibility = View.GONE
@@ -243,17 +298,17 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
             val publicCommentsObserverVal = publicCommentsObserver?:return
             publicCommentsLiveData?.removeObserver(publicCommentsObserverVal)
             publicCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            publicCommentsLiveData?.observe(this, publicCommentsObserverVal)
+            publicCommentsLiveData?.observe(viewLifecycleOwner, publicCommentsObserverVal)
 
         }
 
     override var clazzWorkPrivateComments: DataSource.Factory<Int, CommentsWithPerson>? = null
         get() = field
         set(value) {
-            privateCommentsLiveData?.removeObserver(privateCommentsObserver)
-            field = value
+            val privateCommentsObserverVal = privateCommentsObserver?:return
+            privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            privateCommentsLiveData?.observe(this, privateCommentsObserver)
+            privateCommentsLiveData?.observe(viewLifecycleOwner, privateCommentsObserverVal)
         }
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
@@ -279,5 +334,7 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
         }
 
     }
+
+
 
 }

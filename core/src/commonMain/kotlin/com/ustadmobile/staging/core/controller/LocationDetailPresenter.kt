@@ -38,7 +38,7 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
 
         if (arguments!!.containsKey(LOCATIONS_SET)) {
             val locationsArray = arguments!!.get(LOCATIONS_SET) as LongArray
-            selectedLocationsList = ReportOverallAttendancePresenter.convertLongArray(locationsArray)
+            selectedLocationsList = convertLongArray(locationsArray)
         }
 
         if (arguments!!.containsKey(LOCATION_UID)) {
@@ -153,6 +153,15 @@ class LocationDetailPresenter(context: Any, arguments: Map<String, String>?, vie
 
     fun updateLocationTitle(toString: String) {
         updatedLocation!!.title = toString
+    }
+
+    companion object {
+        fun convertLongArray(array: LongArray): ArrayList<Long> {
+            val result = ArrayList<Long>(array.size)
+            for (item in array)
+                result.add(item)
+            return result
+        }
     }
 }
 

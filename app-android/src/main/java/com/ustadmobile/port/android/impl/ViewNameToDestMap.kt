@@ -34,7 +34,8 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzWorkListView.VIEW_NAME to UstadDestination(R.id.clazzwork_list_dest, true),
             ClazzWorkEditView.VIEW_NAME to UstadDestination(R.id.clazzwork_edit_dest, false),
             ClazzWorkQuestionAndOptionsEditView.VIEW_NAME to UstadDestination(R.id.clazzworkquestionandoptions_edit_dest, false),
-            ClazzWorkDetailView.VIEW_NAME to UstadDestination(R.id.clazzwork_detail_list, true)
+            ClazzWorkDetailView.VIEW_NAME to UstadDestination(R.id.clazzwork_detail_list, true),
+            ClazzLogEditAttendanceView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest, false)
     )
 
     override val navControllerViewId: Int

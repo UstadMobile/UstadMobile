@@ -20,7 +20,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 
@@ -96,7 +95,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.clazz_work)
+        title = getString(R.string.clazz_work)
     }
 
     override var entity: ClazzWork? = null
@@ -123,12 +122,12 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         }
     }
 
-    override var title: String? = null
-        get() = field
-        set(value) {
-            field = value
-            (activity as? AppCompatActivity)?.supportActionBar?.title = title
-        }
+//    override var title: String? = null
+//        get() = field
+//        set(value) {
+//            field = value
+//            (activity as? AppCompatActivity)?.supportActionBar?.title = title
+//        }
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
         get() = field

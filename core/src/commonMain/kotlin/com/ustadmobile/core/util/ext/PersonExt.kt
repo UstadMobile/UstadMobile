@@ -156,3 +156,6 @@ val ADAPTER_MAP = mapOf(
 )
 
 
+
+fun Person.personFullName(): String = firstNames + " " + lastName
+

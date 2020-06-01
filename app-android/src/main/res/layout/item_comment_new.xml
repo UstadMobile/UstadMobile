@@ -5,11 +5,16 @@
 
     <data>
 
-        <import type="android.view.View.OnClickListener"/>
+        <variable
+            name="commentText"
+            type="String" />
 
         <variable
-            name="onClickNewComment"
-            type="OnClickListener" />
+            name="publicComment"
+            type="Boolean" />
+
+        <variable name="mActivity"
+            type="com.ustadmobile.port.android.view.NewCommentHandler" />
 
         <variable name="hintText" type="java.lang.String"/>
 
@@ -35,7 +40,7 @@
             />
 
         <EditText
-            android:id="@+id/comment_text"
+            android:id="@+id/item_comment_new_comment_et"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/form_margin_horizontal"
@@ -44,13 +49,13 @@
             android:inputType="textCapSentences"
             android:singleLine="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/send_comment"
+            app:layout_constraintEnd_toEndOf="@+id/item_comment_new_send_ib"
             app:layout_constraintStart_toEndOf="@+id/item_comment_new_person_icon"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Add a new comment" />
+            android:text="@={commentText}" />
 
         <ImageButton
-            android:id="@+id/send_comment"
+            android:id="@+id/item_comment_new_send_ib"
             style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,7 +63,7 @@
             android:layout_marginVertical="@dimen/formitem_margin_vertical"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:onClick="@{(view) -> onClickNewComment.onClick(view)}"
+            android:onClick="@{(view) -> mActivity.addComment(view, commentText, publicComment)}"
             android:src="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

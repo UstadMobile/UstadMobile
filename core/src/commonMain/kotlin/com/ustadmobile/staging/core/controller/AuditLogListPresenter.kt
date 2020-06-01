@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.controller.ReportOverallAttendancePresenter.Companion.convertLongArray
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.AuditLogDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -126,6 +125,15 @@ AuditLogListView, val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.insta
         }
 
 
+    }
+
+    companion object {
+        fun convertLongArray(array: LongArray): ArrayList<Long> {
+            val result = ArrayList<Long>(array.size)
+            for (item in array)
+                result.add(item)
+            return result
+        }
     }
 
 }

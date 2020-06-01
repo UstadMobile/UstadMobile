@@ -27,7 +27,6 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.SelQuestionAndOptions
 import com.ustadmobile.lib.db.entities.SelQuestionOption
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 
 interface QuestionAndOptionsEditEventHandler {
@@ -164,7 +163,6 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
         entityClassRecyclerAdapter?.presenter = mPresenter
         mBinding?.presenter = mPresenter
 
-        setEditFragmentTitle(R.string.question)
 
         return rootView
     }
@@ -180,6 +178,8 @@ class SelQuestionAndOptionsEditFragment : UstadEditFragment<SelQuestionAndOption
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.question)
+
         val navController = findNavController()
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())

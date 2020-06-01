@@ -103,14 +103,13 @@ class ClazzWorkWithSubmissionDetailPresenter(context: Any,
     }
 
     fun handleClickSave(entity: ClazzWorkWithSubmission){
-        print("hi")
         print(entity.clazzWorkSubmission?.clazzWorkSubmissionText)
     }
 
-    fun addComment(comment: String, public: Boolean){
+    fun addComment(comment: String, commentPublic: Boolean){
         val comment = Comments(ClazzWork.CLAZZ_WORK_TABLE_ID, entity?.clazzWorkUid?:0L,
             UmAccountManager.getActivePersonUid(context), UMCalendarUtil.getDateInMilliPlusDays(0),
-        comment, public)
+        comment, commentPublic)
         GlobalScope.launch {
             db.commentsDao.insertAsync(comment)
         }

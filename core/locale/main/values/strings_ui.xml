@@ -463,7 +463,7 @@
     <string name="attended_green">Attended over 80% of lessons</string>
     <string name="attended_orange">Attended 60-79% of lessons</string>
     <string name="attended_red">Attended less than 60% of lessons</string>
-    <string name="last_month">Last Month</string>
+    <string name="last_month">Last month</string>
     <string name="record_activity">Record activity</string>
     <string name="activity_change">Activity change</string>
     <string name="change_implemented_if_any">Change implemented (if any)</string>
@@ -900,6 +900,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="not_submitted_cap">Not submitted</string>
     <string name="marking">Marking</string>
 
+    <!-- Used to show the percentage attendance e.g. "50% attendance".
+    Translators note: translate only the word attendance, do not modify %1.0f%%-->
+    <string name="x_percent_attended">%1.0f%% attendance</string>
 
 
 </resources>

@@ -1,7 +1,12 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Context
+import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
+import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
 import java.util.*
 
 /**
@@ -10,6 +15,37 @@ import java.util.*
 open class UstadBaseFragment : Fragment() {
 
     private val runOnAttach = Vector<Runnable>()
+
+    protected var titleLifecycleObserver: TitleLifecycleObserver? = null
+
+    protected var fabManager: FabManagerLifecycleObserver? = null
+
+    /**
+     * If enabled, the fab will be managed by this fragment when its view is active.
+     */
+    protected var fabManagementEnabled: Boolean = true
+
+    var title: String?
+        get() = titleLifecycleObserver?.title
+        set(value) {
+            titleLifecycleObserver?.title = value
+        }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        titleLifecycleObserver = TitleLifecycleObserver(null, (activity as? AppCompatActivity)?.supportActionBar).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+
+        if(fabManagementEnabled) {
+            fabManager = FabManagerLifecycleObserver(
+                    (activity as? UstadListViewActivityWithFab)?.activityFloatingActionButton,
+                false, 0, null).also {
+                viewLifecycleOwner.lifecycle.addObserver(it)
+            }
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()

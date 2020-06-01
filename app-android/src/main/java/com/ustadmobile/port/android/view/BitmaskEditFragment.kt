@@ -20,7 +20,6 @@ import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.BitmaskEditView
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface BitmaskEditFragmentEventHandler {
 
@@ -94,18 +93,17 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
         return rootView
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.features_enabled)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null
         mPresenter = null
         entity = null
     }
-
-    override fun onResume() {
-        super.onResume()
-        setEditFragmentTitle(R.string.features_enabled)
-    }
-
 
 
     override var fieldsEnabled: Boolean = false

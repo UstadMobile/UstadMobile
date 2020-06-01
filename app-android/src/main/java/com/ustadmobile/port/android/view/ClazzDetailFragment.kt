@@ -2,8 +2,9 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.os.Handler
-import android.view.*
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import com.google.android.material.tabs.TabLayout
@@ -31,13 +32,6 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     private var mPresenter: ClazzDetailPresenter? = null
 
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
-
-    /**
-     * The fab is managed by the underlying activity, therefor this will always return null
-     */
-    override var mActivityWithFab: UstadListViewActivityWithFab?
-        get() = null
-        set(value) {}
 
     override var tabs: List<String>? = null
         get() = field
@@ -71,6 +65,9 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
 
+        //The fab will be managed by the underlying tabs
+        fabManagementEnabled = false
+
         mBinding = FragmentClazzDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.fragmentClazzDetailTabs.tabGravity = TabLayout.GRAVITY_FILL
@@ -81,9 +78,14 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 
     override fun onDestroyView() {
@@ -106,7 +108,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         get() = field
         set(value) {
             field = value
-            (activity as? AppCompatActivity)?.supportActionBar?.title = value?.clazzName
+            title = value?.clazzName
             mBinding?.clazz = value
         }
 

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+
+        <variable
+            name="clazzWorkWithSubmission"
+            type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:id="@+id/item_comment_new_layout"
+        >
+
+        <TextView
+            android:id="@+id/instructions_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/school"
+            android:layout_marginStart="20dp"
+            android:layout_marginVertical="@dimen/formitem_margin_vertical"
+            android:layout_marginEnd="@dimen/form_margin_horizontal"
+            android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(clazzWorkWithSubmission.clazzWorkTitle)}"
+            android:text="@{clazzWorkWithSubmission.clazzWorkTitle}"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Read the stories and describe the main characters." />
+
+        <TextView
+            android:id="@+id/fragment_school_overview_gender"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            tools:text=""
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/instructions_title" />
+
+
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="fragment_school_overview_gender,instructions_title"
+            />
+
+
+        <ImageView
+            android:id="@+id/fragment_school_detail_overview_locataion_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+            android:layout_marginVertical="@dimen/formitem_margin_vertical"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/school"
+            android:src="@drawable/ic_event_available_black_24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/barrier2" />
+
+        <TextView
+            android:id="@+id/fragment_school_detail_overview_locataion_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+            android:layout_marginVertical="@dimen/formitem_margin_vertical"
+            android:layout_marginStart="@dimen/activity_vertical_margin"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/school"
+            app:dateTimePrepend="@{``}"
+            app:dateTimeTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkStartTime}"
+            app:dateTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkStartDateTime}"
+            app:dateTimeAppend="@{``}"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
+            app:layout_constraintTop_toBottomOf="@+id/barrier2"
+            tools:text="28/Feb/2020 - 8:00 am" />
+
+        <TextView
+            android:id="@+id/start_date_timezone"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+            android:layout_marginVertical="@dimen/formitem_margin_vertical"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/school"
+            android:text=""
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/fragment_school_detail_overview_locataion_tv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_tv"
+            app:layout_constraintTop_toTopOf="@+id/fragment_school_detail_overview_locataion_tv"
+            tools:text="(Asia, Dubai)" />
+
+        <TextView
+            android:id="@+id/due_date_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            app:dateTimePrepend="@{@string/due_date}"
+            app:dateTimeTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkDueTime}"
+            app:dateTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkDueDateTime}"
+            app:dateTimeAppend="@{``}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_locataion_tv"
+            tools:text="Due date: 02/Mar/2020 - 10:00 pm" />
+
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="due_date_title, barrier2"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -28,7 +28,6 @@ import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionOption
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface ClazzWorkQuestionAndOptionsEditFragmentEventHandler {
     fun handleRemoveOption(option: ClazzWorkQuestionOption, view: View)

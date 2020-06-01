@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkSubmissionEditBinding
 import com.ustadmobile.core.controller.ClazzWorkSubmissionEditPresenter
@@ -11,10 +13,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkSubmissionEditView
-import com.ustadmobile.lib.db.entities.ClazzWorkSubmission
 import com.ustadmobile.lib.db.entities.ClazzWorkSubmissionWithClazzWork
 
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface ClazzWorkSubmissionEditFragmentEventHandler {
 

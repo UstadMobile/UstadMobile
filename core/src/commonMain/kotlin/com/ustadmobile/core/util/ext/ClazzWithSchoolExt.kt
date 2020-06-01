@@ -13,3 +13,5 @@ fun ClazzWithSchool.findClazzTimeZone(): String{
         return clazzTimeZone?:"UTC"
     }
 }
+
+fun ClazzWithSchool.effectiveTimeZone() = clazzTimeZone ?: school?.schoolTimeZone ?: "UTC"

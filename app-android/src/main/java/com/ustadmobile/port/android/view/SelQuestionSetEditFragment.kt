@@ -27,7 +27,6 @@ import com.ustadmobile.lib.db.entities.SelQuestionAndOptions
 import com.ustadmobile.lib.db.entities.SelQuestionSet
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface SelQuestionSetEditActivityEventHandler {
     fun onClickEditSelQuestion(selQuestion: SelQuestionAndOptions?)
@@ -151,8 +150,6 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
         //After the presenter is created
         selQuestionRecyclerAdapter?.presenter = mPresenter
 
-        setEditFragmentTitle(R.string.sel_question_set)
-
         return rootView
 
     }
@@ -161,6 +158,7 @@ class SelQuestionSetEditFragment : UstadEditFragment<SelQuestionSet>(), SelQuest
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
 
+        setEditFragmentTitle(R.string.sel_question_set)
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
