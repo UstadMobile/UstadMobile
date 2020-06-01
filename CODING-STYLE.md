@@ -96,5 +96,25 @@ It is the job of the presenter to call runOnUiThread when needed. *DO NOT* put r
 
 The presenter should build a list of subviews as a String list. This can be a list containing only the VIEW_NAME of each tab to be displayed, or it can contain arguments as a query string. The name of the tab might be fixed (e.g. an instance of VIEW_NAME always has the same tab name, in which case a constant map can be used) or it might be needed to build this into the string. e.g. ["Tab1?arg1=value1", "Tab12arg1=value1"] or ["TabTitleMessageID;Tab1?arg1=value1", "TabTitleMessageID;Tab2?arg1=value1"]
 
+#### Localization strings
 
+The name for the string should be just the string itself. Only add extra text if the translation would be different due to a different context.
+
+use:
+```
+<string name="download">Download</string>
+```
+
+Do not use this:
+```
+<string name="myscreen_download">Download</string>
+```
+
+Where some context might be needed to translate this make sure to put a comment before:
+e.g.
+```
+<!-- Used to set the title on an edit screen where the user is creating a new entity e.g.
+new class, new assignment, etc. %1$s will be replaced with the name of the item.-->
+<string name="new_entity">New %1$s</string>
+```
 
