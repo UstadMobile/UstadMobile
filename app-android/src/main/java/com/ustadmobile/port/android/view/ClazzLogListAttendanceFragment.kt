@@ -32,6 +32,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import java.text.DecimalFormat
 import java.util.*
 
@@ -97,13 +98,13 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
     class ClazzLogListGraphRecyclerAdapter(var presenter: ClazzLogListAttendancePresenter?,
                                            var clazzTimeZone: String?,
                                            var context: Context?)
-        : RecyclerView.Adapter<RecyclerView.ViewHolder>(), Observer<ClazzLogListAttendancePresenter.AttendanceGraphData>{
+        : SingleItemRecyclerViewAdapter<ClazzLogListGraphRecyclerAdapter.GraphViewHolder>(true), Observer<ClazzLogListAttendancePresenter.AttendanceGraphData>{
 
-        class GraphViewHolder(view: View): RecyclerView.ViewHolder(view)
+        class GraphViewHolder(val binding: FragmentClazzLogListAttendanceChartheaderBinding): RecyclerView.ViewHolder(binding.root)
 
-        var boundChartViewHolder: FragmentClazzLogListAttendanceChartheaderBinding? = null
+        private var data: LineData? = null
 
-        override fun getItemCount() = 1
+        private var graphDateRange: Pair<Float, Float>? = null
 
         override fun onChanged(t: ClazzLogListAttendancePresenter.AttendanceGraphData?) {
             val graphData = t ?: return
@@ -125,17 +126,33 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
             }
 
-            boundChartViewHolder?.chart?.apply {
-                data = lineData
-                invalidate()
-                xAxis.axisMinimum = graphData.graphDateRange.first.toFloat()
-                xAxis.axisMaximum = graphData.graphDateRange.second.toFloat()
-            }
-            boundChartViewHolder?.chart?.data = lineData
-            boundChartViewHolder?.chart?.invalidate()
+            data = lineData
+            graphDateRange = graphData.graphDateRange.first.toFloat() to graphData.graphDateRange.second.toFloat()
+
+            updateChart()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        private fun updateChart() {
+            val dataVal = data
+            val chart = currentViewHolder?.binding?.chart
+            val dateRangeVal = graphDateRange
+            if(chart != null && dataVal != null) {
+                chart.data = dataVal
+                chart.invalidate()
+            }
+
+            if(chart != null && dateRangeVal != null) {
+                chart.xAxis.axisMinimum = dateRangeVal.first
+                chart.xAxis.axisMaximum = dateRangeVal.second
+            }
+        }
+
+        override fun onBindViewHolder(holder: GraphViewHolder, position: Int) {
+            super.onBindViewHolder(holder, position)
+            updateChart()
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzLogListGraphRecyclerAdapter.GraphViewHolder {
             val mBinding = FragmentClazzLogListAttendanceChartheaderBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false).apply {
                 chart.legend.isEnabled = false
@@ -170,19 +187,14 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 }
             }
 
-            boundChartViewHolder = mBinding
-            return GraphViewHolder(mBinding.root)
+            return GraphViewHolder(mBinding)
         }
 
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            //do nothing here
-        }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             super.onDetachedFromRecyclerView(recyclerView)
             presenter = null
             context = null
-            boundChartViewHolder = null
         }
 
         companion object {
