@@ -3,7 +3,9 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
+
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -12,8 +14,11 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SettingsView
@@ -29,10 +34,16 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
         get() = activity_listfragmelayout_behaviornt_fab
 
+    private lateinit var mBinding: ActivityMainBinding
+
+    private lateinit var mAppBar: AppBarLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(activity_main_toolbar)
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        mAppBar = mBinding.appBar
+        setSupportActionBar(mBinding.activityMainToolbar)
 
         val host: NavHostFragment = supportFragmentManager
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
@@ -41,25 +52,20 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
 
         appBarConfiguration = AppBarConfiguration(navController.graph)
-        bottom_nav_view.setupWithNavController(navController)
-        setupActionBarWithNavController(navController, AppBarConfiguration(bottom_nav_view.menu))
+        mBinding.bottomNavView.setupWithNavController(navController)
+        setupActionBarWithNavController(navController, AppBarConfiguration(mBinding.bottomNavView.menu))
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
                                       arguments: Bundle?) {
-        val ustadDestination = UstadMobileSystemImpl.instance.destinationProvider
-                .lookupDestinationById(destination.id)
-
-        if(ustadDestination?.hasFab != true) {
-            activityFloatingActionButton?.visibility = View.INVISIBLE
-            activityFloatingActionButton?.setOnClickListener(null)
-        }
-
         invalidateOptionsMenu()
         appBar.setExpanded(true)
 
+        val layoutParams = (mBinding.bottomNavView.layoutParams as? CoordinatorLayout.LayoutParams)
+        val bottomNavBehavior = layoutParams?.behavior as? HideBottomViewOnScrollBehavior
+        bottomNavBehavior?.slideUp(mBinding.bottomNavView)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -77,7 +83,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         when (item.itemId) {
             R.id.menu_main_settings -> handleClickSettings()
         }

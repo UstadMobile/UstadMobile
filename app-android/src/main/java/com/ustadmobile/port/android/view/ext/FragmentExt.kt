@@ -17,22 +17,6 @@ import com.ustadmobile.port.android.view.UstadBaseFragment
 import com.ustadmobile.port.android.view.UstadEditFragment
 
 /**
- * Set the title of an edit fragment to "New Widget" or "Edit Widget" based on whether or not a new
- * entity is being created.
- *
- * @param entityTitleId the string id for the entity type (e.g. Widget)
- */
-fun Fragment.setEditFragmentTitle(entityTitleId: Int) {
-    val entityUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
-    val entityJsonStr = arguments?.getString(UstadEditView.ARG_ENTITY_JSON)
-    (activity as? AppCompatActivity)?.supportActionBar?.title = if(entityUid != 0L || entityJsonStr != null){
-         getString(R.string.edit_entity, getString(entityTitleId))
-    }else {
-        getString(R.string.new_entity, getString(entityTitleId))
-    }
-}
-
-/**
  * Save the result of a fragment (e.g. a selection from a list or newly created entity) to the
  * BackStack SavedStateHandle as specified by ARG_RESULT_DEST_ID and ARG_RESULT_DEST_KEY
  */

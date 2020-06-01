@@ -109,9 +109,6 @@
             android:name="com.ustadmobile.port.android.view.DownloadDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.ClazzLogDetailActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.SELSelectStudentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
@@ -133,31 +130,10 @@
             android:name="com.ustadmobile.staging.port.android.view.AddActivityChangeDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.ReportEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.SelectMultipleTreeDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.ReportSelectionActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.SelectClazzesDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.SelectAttendanceThresholdsDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.SelectTwoDatesDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.ReportOverallAttendanceActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.ReportNumberOfDaysClassesOpenActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.ReportAttendanceGroupedByThresholdsActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.BulkUploadMasterActivity"
@@ -175,22 +151,13 @@
             android:name="com.ustadmobile.staging.port.android.view.AddQuestionOptionDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.ReportAtRiskStudentsActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.CallPersonRelatedDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.ReportMasterActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.ReportSELActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.PersonListSearchActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.ReportSelectionFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.GroupListActivity"
@@ -227,9 +194,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.AddCustomFieldOptionDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.RecordDropoutDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.ChangePasswordActivity"

@@ -55,23 +55,6 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         createAuditLog(entity.clazzMemberUid, loggedInPersonUid)
     }
 
-
-    /**
-     * Enrol the given person into the given class.
-     */
-    suspend fun enrolPersonIntoClazz(personToEnrol: Person, clazzUid: Long, role: Int): ClazzMemberWithPerson {
-        val clazzMember = ClazzMemberWithPerson().apply {
-            clazzMemberPersonUid = personToEnrol.personUid
-            clazzMemberClazzUid = clazzUid
-            clazzMemberRole = role
-            clazzMemberActive = true
-            clazzMemberDateJoined = getSystemTimeInMillis()
-            person = personToEnrol
-        }
-        clazzMember.clazzMemberUid = insertAsync(clazzMember)
-        return clazzMember
-    }
-
     /**
      * Provide a list of the classes a given person is in with the class information itself (e.g.
      * for person detail).
@@ -95,6 +78,15 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         AND (:date = 0 OR :date BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft)
     """)
     abstract fun findAllClazzesByPersonWithClazzAsList(personUid: Long, date: Long): List<ClazzMemberWithClazz>
+
+    @Query("""SELECT ClazzMember.*, Person.*
+        FROM ClazzMember
+        LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
+        WHERE ClazzMember.clazzMemberClazzUid = :clazzUid
+        AND :date BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft
+        AND (:roleFilter = 0 OR ClazzMember.clazzMemberRole = :roleFilter)
+    """)
+    abstract fun getAllClazzMembersAtTime(clazzUid: Long, date: Long, roleFilter: Int) : List<ClazzMemberWithPerson>
 
     @Query("SELECT * FROM ClazzMember")
     abstract fun findAllAsList(): List<ClazzMember>
@@ -212,6 +204,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             " WHERE ClazzLog.clazzLogClazzUid = :clazzUid  " +
             "  AND ClazzLog.logDate > :fromTime AND ClazzLog.logDate < :toTime  AND ClazzMember.clazzMemberRole = 1 " +
             " GROUP BY ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid ) ")
+    @Deprecated("Used only in older code")
     abstract suspend fun findAttendanceSpreadByThresholdForTimePeriodAndClazzAndType(type: Int,
                     clazzUid: Long, fromTime: Long, toTime: Long): ThresholdResult?
 

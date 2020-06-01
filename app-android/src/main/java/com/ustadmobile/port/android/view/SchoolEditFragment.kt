@@ -22,7 +22,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.door.DoorMutableLiveData
@@ -33,7 +32,6 @@ import com.ustadmobile.lib.db.entities.TimeZoneEntity
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface SchoolEditFragmentEventHandler {
     fun onClickEditClazz(clazz: Clazz?)
@@ -111,14 +109,12 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
         clazzRecyclerAdapter?.presenter = mPresenter
 
-        setEditFragmentTitle(R.string.school)
-
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        setEditFragmentTitle(R.string.school)
         val navController = findNavController()
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())

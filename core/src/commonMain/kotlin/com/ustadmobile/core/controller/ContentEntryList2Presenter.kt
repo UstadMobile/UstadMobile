@@ -92,8 +92,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         return view.checkAndGetContentType(type)
     }
 
-    fun checkAndGetContentDrawable(type: String?): Int{
-        return  view.checkAndGetContentDrawable(type)
+    fun checkAndGetContentResource(type: String?): Int{
+        return  view.checkAndGetContentResource(type)
     }
 
     override fun handleClickCreateNewFab() {

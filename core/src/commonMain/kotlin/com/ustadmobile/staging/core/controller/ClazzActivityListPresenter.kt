@@ -5,9 +5,6 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_MONTH
-import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_WEEK
-import com.ustadmobile.core.view.ClassLogListView.Companion.CHART_DURATION_LAST_YEAR
 import com.ustadmobile.core.view.ClazzActivityEditView
 import com.ustadmobile.core.view.ClazzActivityEditView.Companion.ARG_CLAZZACTIVITY_LOGDATE
 import com.ustadmobile.core.view.ClazzActivityEditView.Companion.ARG_CLAZZACTIVITY_UID
@@ -252,4 +249,10 @@ class ClazzActivityListPresenter(context: Any, arguments: Map<String, String>?,
         }
     }
 
+    companion object {
+        //Attendance chart time duration flags.
+        val CHART_DURATION_LAST_WEEK = 1
+        val CHART_DURATION_LAST_MONTH = 2
+        val CHART_DURATION_LAST_YEAR = 3
+    }
 }

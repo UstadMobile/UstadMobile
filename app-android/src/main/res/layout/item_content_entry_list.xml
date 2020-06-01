@@ -119,7 +119,7 @@
             android:layout_marginStart="@dimen/dimen_8dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            app:umResource="@{presenter.checkAndGetContentDrawable(contentEntry.mostRecentContainer.mimeType)}"
+            app:imageResourceId="@{presenter.checkAndGetContentResource(contentEntry.mostRecentContainer.mimeType)}"
             android:tint="@color/text_secondary"
             app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />

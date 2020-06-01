@@ -41,10 +41,12 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.navOptions
 import com.ustadmobile.core.generated.locale.MessageID
@@ -77,8 +79,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private val sdCardStorageIndex = 1
 
-    private val bgExecutorService = Executors.newCachedThreadPool()
-
     private var appPreferences: SharedPreferences? = null
 
     var messageIdMap: Map<Int, Int> = mapOf()
@@ -93,6 +93,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     var rotationEnabled: Boolean? = false
         internal set
+
+    /**
+     * This should be used only for testing. This will use the given navcontroller instead of
+     * finding the navcontroller from the mainactivity. This is used for Espresso testing on Fragments.
+     */
+    @VisibleForTesting
+    var navController: NavController? = null
 
     private val viewNameToAndroidImplMap = mapOf<String, String>(
             "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
@@ -114,7 +121,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             XapiPackageContentView.VIEW_NAME to "${PACKAGE_NAME}XapiPackageContentActivity",
             ScormPackageView.VIEW_NAME to "${PACKAGE_NAME}ScormPackageActivity",
             UserProfileView.VIEW_NAME to "${PACKAGE_NAME}UserProfileActivity",
-            ClassLogDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ClazzLogDetailActivity",
+            ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             SELSelectStudentView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELSelectStudentActivity",
             SELSelectConsentView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELSelectConsentActivity",
             SELEditView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELEditActivity",
@@ -122,21 +129,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SELRecognitionView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELRecognitionActivity",
             ClazzActivityEditView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ClazzActivityEditActivity",
             AddActivityChangeDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddActivityChangeDialogFragment",
-            ReportEditView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportEditActivity",
             SelectMultipleTreeDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectMultipleTreeDialogFragment",
-            ReportSelectionView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportSelectionActivity",
-            SelectAttendanceThresholdsDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectAttendanceThresholdsDialogFragment",
             SelectTwoDatesDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectTwoDatesDialogFragment",
-            ReportOverallAttendanceView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportOverallAttendanceActivity",
-            ReportNumberOfDaysClassesOpenView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportNumberOfDaysClassesOpenActivity",
-            ReportAttendanceGroupedByThresholdsView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportAttendanceGroupedByThresholdsActivity",
             BulkUploadMasterView.VIEW_NAME to "${STAGING_PACKAGE_NAME}BulkUploadMasterActivity",
             AddQuestionSetDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddQuestionSetDialogFragment",
             PersonPictureDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonPictureDialogFragment",
             AddQuestionOptionDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddQuestionOptionDialogFragment",
-            ReportAtRiskStudentsView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportAtRiskStudentsActivity",
             CallPersonRelatedDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CallPersonRelatedDialogFragment",
-            ReportMasterView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportMasterActivity",
             ReportSELView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportSELActivity",
             PersonListSearchView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonListSearchActivity",
             BaseReportView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportSelectionFragment",
@@ -152,7 +151,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             CustomFieldListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CustomFieldListActivity",
             CustomFieldDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CustomFieldDetailActivity",
             AddCustomFieldOptionDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddCustomFieldOptionDialogFragment",
-            RecordDropoutDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}RecordDropoutDialogFragment",
             ChangePasswordView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ChangePasswordActivity",
             PeopleListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PeopleListActivity",
 
@@ -265,7 +263,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val ustadDestination = destinationProvider.lookupDestinationName(viewName)
         if(ustadDestination != null) {
-            val navController = (context as Activity).findNavController(destinationProvider.navControllerViewId)
+            val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
             //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
             val options = navOptions {

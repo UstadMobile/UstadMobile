@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -155,4 +157,22 @@ fun View.setLinearLayoutWeight(weight: Float) {
     if(layoutParamsVal is LinearLayout.LayoutParams) {
         layoutParams = layoutParamsVal.also { it.weight = weight }
     }
+}
+
+private var viewAnimationEnabled: Boolean? = null
+
+/**
+ * Unfortunately using selectableItemBackground on Espresso tests seems to cause a nullpointerexception
+ * See:
+ * https://stackoverflow.com/questions/56817825/android-graphics-drawable-drawable-isprojected-on-a-null-object-reference
+ */
+@BindingAdapter("backgroundIfAnimationEnabled")
+fun View.backgroundIfAnimated(drawable: Drawable) {
+    if(viewAnimationEnabled == null) {
+        viewAnimationEnabled = Settings.Global.getFloat(context.contentResolver,
+                Settings.Global.WINDOW_ANIMATION_SCALE) != 0f
+    }
+
+    if(viewAnimationEnabled == true)
+        background = drawable
 }

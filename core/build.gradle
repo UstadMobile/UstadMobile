@@ -61,7 +61,7 @@ task copyTestResources(type: Copy) {
  */
 task prepareLocale {
     inputs.files(fileTree(dir: project.file("locale")).matching { include '*.xml' })
-
+    outputs.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
 
     doFirst {
         File outFile = project.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")

@@ -1,13 +1,25 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.PercentFormatter
 import com.soywiz.klock.DateTime
+import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.FragmentClazzLogListAttendanceChartheaderBinding
 import com.toughra.ustadmobile.databinding.ItemClazzLogAttendanceListBinding
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
@@ -16,10 +28,12 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
+import java.text.DecimalFormat
 import java.util.*
 
 class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog>(),
@@ -30,11 +44,24 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
     override val listPresenter: UstadListPresenter<*, in ClazzLog>?
         get() = mPresenter
 
+    override var autoMergeRecyclerViewAdapter: Boolean = false
+
     override var clazzTimeZone: String?
         get() = (mDataRecyclerViewAdapter as? ClazzLogListRecyclerAdapter)?.clazzTimeZone
         set(value) {
             (mDataRecyclerViewAdapter as? ClazzLogListRecyclerAdapter)?.clazzTimeZone = value
         }
+
+    override var graphData: DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>? = null
+        set(value) {
+            val observer = graphRecyclerViewAdapter ?: return
+            field?.removeObserver(observer)
+            field = value
+            field?.observe(viewLifecycleOwner, observer)
+        }
+
+
+    private var graphRecyclerViewAdapter: ClazzLogListGraphRecyclerAdapter? = null
 
     class ClazzLogListViewHolder(val itemBinding: ItemClazzLogAttendanceListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -64,6 +91,118 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             super.onDetachedFromRecyclerView(recyclerView)
             presenter = null
+            clazzTimeZone = null
+        }
+    }
+
+    class ClazzLogListGraphRecyclerAdapter(var presenter: ClazzLogListAttendancePresenter?,
+                                           var clazzTimeZone: String?,
+                                           var context: Context?)
+        : SingleItemRecyclerViewAdapter<ClazzLogListGraphRecyclerAdapter.GraphViewHolder>(true), Observer<ClazzLogListAttendancePresenter.AttendanceGraphData>{
+
+        class GraphViewHolder(val binding: FragmentClazzLogListAttendanceChartheaderBinding): RecyclerView.ViewHolder(binding.root)
+
+        private var data: LineData? = null
+
+        private var graphDateRange: Pair<Float, Float>? = null
+
+        override fun onChanged(t: ClazzLogListAttendancePresenter.AttendanceGraphData?) {
+            val graphData = t ?: return
+            val contextVal = context ?: return
+            if(graphData.graphData.size < 2) {
+                return
+            }
+
+            val lineData = LineData().apply {
+                addDataSet(LineDataSet(graphData.graphData.map { Entry(it.first.toFloat(), it.second * 100) },
+                        contextVal.getString(R.string.attendance)).apply {
+                    color = Color.BLACK
+                    valueTextColor = Color.BLACK
+                    lineWidth = 1f
+                    setDrawValues(false)
+                    setDrawCircles(false)
+                    mode = LineDataSet.Mode.LINEAR
+                })
+
+            }
+
+            data = lineData
+            graphDateRange = graphData.graphDateRange.first.toFloat() to graphData.graphDateRange.second.toFloat()
+
+            updateChart()
+        }
+
+        private fun updateChart() {
+            val dataVal = data
+            val chart = currentViewHolder?.binding?.chart
+            val dateRangeVal = graphDateRange
+            if(chart != null && dataVal != null) {
+                chart.data = dataVal
+                chart.invalidate()
+            }
+
+            if(chart != null && dateRangeVal != null) {
+                chart.xAxis.axisMinimum = dateRangeVal.first
+                chart.xAxis.axisMaximum = dateRangeVal.second
+            }
+        }
+
+        override fun onBindViewHolder(holder: GraphViewHolder, position: Int) {
+            super.onBindViewHolder(holder, position)
+            updateChart()
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzLogListGraphRecyclerAdapter.GraphViewHolder {
+            val mBinding = FragmentClazzLogListAttendanceChartheaderBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false).apply {
+                chart.legend.isEnabled = false
+                chart.description.isEnabled = false
+                chart.axisRight.setDrawLabels(false)
+                val dateFormatter = DateFormat.getDateFormat(parent.context)
+                chart.xAxis.setValueFormatter { value, axis ->
+                    dateFormatter.format(value)
+                }
+                chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+                chart.xAxis.labelRotationAngle = 45f
+                chart.setTouchEnabled(false)
+                chart.xAxis.setDrawGridLines(false)
+                chart.axisRight.setDrawGridLines(false)
+                chart.axisRight.setDrawAxisLine(false)
+                chart.xAxis.isGranularityEnabled = true
+                chart.xAxis.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
+                chart.axisLeft.axisMinimum = 0f
+                chart.axisLeft.axisMaximum = 100f
+
+                chart.axisLeft.valueFormatter = PercentFormatter(DecimalFormat("###,###,##0"))
+                var lastCheckedId = R.id.chip_last_week
+                chipGroup.check(lastCheckedId)
+                chipGroup.setOnCheckedChangeListener { group, checkedId ->
+                    if(checkedId != View.NO_ID) {
+                        lastCheckedId = checkedId
+                        presenter?.handleClickGraphDuration(VIEW_ID_TO_NUMDAYS_MAP[checkedId] ?: 7)
+                    }else {
+                        chipGroup.check(lastCheckedId)
+                    }
+
+                }
+            }
+
+            return GraphViewHolder(mBinding)
+        }
+
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            presenter = null
+            context = null
+        }
+
+        companion object {
+
+            val VIEW_ID_TO_NUMDAYS_MAP = mapOf(R.id.chip_last_week to 7,
+                R.id.chip_last_month to 30,
+                R.id.chip_last_three_months to 90)
+
         }
     }
 
@@ -73,26 +212,22 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 this, this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                UmAccountManager.activeAccountLiveData).also {
+            mDataRecyclerViewAdapter = ClazzLogListRecyclerAdapter(it, clazzTimeZone)
+        }
 
-        mDataRecyclerViewAdapter = ClazzLogListRecyclerAdapter(mPresenter, clazzTimeZone ?: "UTC")
-        val createNewText = ""
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+
+        graphRecyclerViewAdapter = ClazzLogListGraphRecyclerAdapter(mPresenter,
+                clazzTimeZone ?: "UTC", requireContext())
+        mMergeRecyclerViewAdapter = MergeAdapter(graphRecyclerViewAdapter, mDataRecyclerViewAdapter)
+        mRecyclerView?.adapter = mMergeRecyclerViewAdapter
+
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        if(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            mActivityWithFab?.activityFloatingActionButton?.visibility = View.GONE
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        mActivityWithFab?.activityFloatingActionButton?.visibility = View.GONE
+        fabManager?.visible = false
     }
 
     /**

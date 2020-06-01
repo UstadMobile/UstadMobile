@@ -22,7 +22,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 
 
@@ -123,13 +122,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         }
     }
 
-    override var title: String? = null
-        get() = field
-        set(value) {
-            field = value
-            (activity as? AppCompatActivity)?.supportActionBar?.title = title
-        }
-
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null
@@ -140,16 +132,12 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         mTabLayout = null
     }
 
-    override fun onResume() {
-        super.onResume()
-        setEditFragmentTitle(R.string.school)
-    }
-
     override var entity: School? = null
         get() = field
         set(value) {
             field = value
             mBinding?.school = value
+            title = value?.schoolName
         }
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE

@@ -32,7 +32,6 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.sharedse.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
 import com.ustadmobile.port.sharedse.contentformats.importContainerFromZippedFile

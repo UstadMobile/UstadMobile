@@ -12,7 +12,7 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
     fun checkAndGetContentType(type: String?): String
 
-    fun checkAndGetContentDrawable(type: String?): Int
+    fun checkAndGetContentResource(type: String?): Int
 
     companion object {
 

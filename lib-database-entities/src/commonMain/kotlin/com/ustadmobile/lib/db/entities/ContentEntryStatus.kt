@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
+@Deprecated("This is now tracked via ContainerDownloadManager")
 class ContentEntryStatus() {
 
     //Always equals contentEntryUid

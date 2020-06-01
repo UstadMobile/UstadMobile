@@ -40,24 +40,33 @@ open class ClazzLogAttendanceRecord() {
         const val STATUS_PARTIAL = 4
     }
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
 
-        if (o == null ) return false
+        other as ClazzLogAttendanceRecord
 
-        val that = o as ClazzLogAttendanceRecord?
+        if (clazzLogAttendanceRecordUid != other.clazzLogAttendanceRecordUid) return false
+        if (clazzLogAttendanceRecordClazzLogUid != other.clazzLogAttendanceRecordClazzLogUid) return false
+        if (clazzLogAttendanceRecordClazzMemberUid != other.clazzLogAttendanceRecordClazzMemberUid) return false
+        if (attendanceStatus != other.attendanceStatus) return false
+        if (clazzLogAttendanceRecordMasterChangeSeqNum != other.clazzLogAttendanceRecordMasterChangeSeqNum) return false
+        if (clazzLogAttendanceRecordLocalChangeSeqNum != other.clazzLogAttendanceRecordLocalChangeSeqNum) return false
+        if (clazzLogAttendanceRecordLastChangedBy != other.clazzLogAttendanceRecordLastChangedBy) return false
 
-        if (clazzLogAttendanceRecordUid != that!!.clazzLogAttendanceRecordUid) return false
-        if (clazzLogAttendanceRecordClazzLogUid != that.clazzLogAttendanceRecordClazzLogUid)
-            return false
-        return if (clazzLogAttendanceRecordClazzMemberUid != that.clazzLogAttendanceRecordClazzMemberUid) false else attendanceStatus == that.attendanceStatus
+        return true
     }
 
     override fun hashCode(): Int {
-        var result = (clazzLogAttendanceRecordUid xor clazzLogAttendanceRecordUid.ushr(32)).toInt()
-        result = 31 * result + (clazzLogAttendanceRecordClazzLogUid xor clazzLogAttendanceRecordClazzLogUid.ushr(32)).toInt()
-        result = 31 * result + (clazzLogAttendanceRecordClazzMemberUid xor clazzLogAttendanceRecordClazzMemberUid.ushr(32)).toInt()
+        var result = clazzLogAttendanceRecordUid.hashCode()
+        result = 31 * result + clazzLogAttendanceRecordClazzLogUid.hashCode()
+        result = 31 * result + clazzLogAttendanceRecordClazzMemberUid.hashCode()
         result = 31 * result + attendanceStatus
+        result = 31 * result + clazzLogAttendanceRecordMasterChangeSeqNum.hashCode()
+        result = 31 * result + clazzLogAttendanceRecordLocalChangeSeqNum.hashCode()
+        result = 31 * result + clazzLogAttendanceRecordLastChangedBy
         return result
     }
+
+
 }

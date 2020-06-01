@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.net.Uri
-import android.view.View
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistry
@@ -61,11 +60,21 @@ fun ImageView.setCustomFieldIcon(customField: CustomField?) {
     setImageDrawable(ContextCompat.getDrawable(context, drawableId))
 }
 
-@BindingAdapter("umResource")
-fun ImageView.setUmResource(resourceId: Int){
-    if(resourceId != 0){
+@BindingAdapter("imageResourceId")
+fun ImageView.setUmResource(resourceId: Int) {
+    if (resourceId != 0) {
         setImageDrawable(ContextCompat.getDrawable(context, resourceId))
     }
+}
+
+@BindingAdapter("attendanceTint")
+fun ImageView.setAttendanceTint(attendancePercentage: Float) {
+    val color = when {
+        attendancePercentage > 0.8f -> R.color.traffic_green
+        attendancePercentage > 0.6f -> R.color.traffic_orange
+        else -> R.color.traffic_red
+    }
+    setColorFilter(ContextCompat.getColor(context, color))
 }
 
 private val ICON_ID_MAP : Map<Int, Int> by lazy {

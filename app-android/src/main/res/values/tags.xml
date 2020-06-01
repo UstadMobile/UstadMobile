@@ -6,4 +6,5 @@
     <item name="tag_messageidoptions" type="id"/>
     <item name="tag_imagefilepath" type="id"/>
     <item name="tag_imageloadjob" type="id"/>
+    <item name="tag_button_toggle_group_map" type="id"/>
 </resources>

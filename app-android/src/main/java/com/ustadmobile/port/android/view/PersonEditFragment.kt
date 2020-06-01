@@ -33,7 +33,6 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import java.io.File
 
@@ -136,6 +135,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.person)
 
         CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->
             findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
@@ -160,11 +160,6 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
         mPresenter = null
         entity = null
 
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setEditFragmentTitle(R.string.person)
     }
 
     override var entity: Person? = null

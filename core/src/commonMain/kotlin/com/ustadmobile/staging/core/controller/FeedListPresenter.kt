@@ -5,10 +5,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.FeedListView
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_REPORT_NAME
-import com.ustadmobile.core.view.ReportSelectionView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzAverage
 import com.ustadmobile.lib.db.entities.FeedEntry
@@ -54,8 +51,8 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>, view: Feed
         updateFeedEntries()
 
         //All clazz's average live data
-        val averageLiveData = repository.clazzDao.getClazzSummaryLiveData()
-        averageLiveData.observeWithLifecycleOwner(lifecycleOwner, this::handleAveragesChanged)
+//        val averageLiveData = repository.clazzDao.getClazzSummaryLiveData()
+//        averageLiveData.observeWithLifecycleOwner(lifecycleOwner, this::handleAveragesChanged)
 
         //Check permissions
         checkPermissions()
@@ -103,15 +100,6 @@ class FeedListPresenter(context: Any, arguments: Map<String, String>, view: Feed
         GlobalScope.launch {
             repository.feedEntryDao.markEntryAsDoneByFeedEntryUid(feedUid, true)
         }
-    }
-
-    /**
-     * Goes to Report selection
-     */
-    fun handleClickViewReports() {
-        val args = HashMap<String, String>()
-        args.put(ARG_REPORT_NAME, "Test Report")
-        impl.go(ReportSelectionView.VIEW_NAME, args, view.viewContext)
     }
 
     /**
