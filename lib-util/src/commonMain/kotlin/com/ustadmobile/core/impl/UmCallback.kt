@@ -6,6 +6,7 @@ import kotlin.js.JsName
  * Generic callback wrapper
  */
 
+@Deprecated("Use coroutines instead")
 interface UmCallback<T> {
 
     /**

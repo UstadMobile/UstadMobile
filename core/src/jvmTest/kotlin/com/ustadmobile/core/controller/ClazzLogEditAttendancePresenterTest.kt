@@ -4,19 +4,20 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.SystemImplRule
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import com.ustadmobile.util.test.ext.insertTestClazzLog
 import com.ustadmobile.util.test.ext.insertTestRecordsForClazzLog
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class ClazzLogEditAttendancePresenterTest {
@@ -31,20 +32,18 @@ class ClazzLogEditAttendancePresenterTest {
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
-    private lateinit var systemImpl: UstadMobileSystemImpl
+    @JvmField
+    @Rule
+    var systemImplRule = SystemImplRule()
 
     private lateinit var activeAccount: DoorMutableLiveData<UmAccount?>
-
-    data class MockLogAndClazzSet(val clazz: Clazz, val personList: List<Person>,
-        val clazzMemberList: List<ClazzMember>, val clazzLog: ClazzLog)
-
 
     @Before
     fun setup() {
         mockView = mock { }
         mockLifecycleOwner = mock { }
         context = Any()
-        systemImpl = spy(UstadMobileSystemImpl.instance)
+        //systemImpl = spy(UstadMobileSystemImpl.instance)
         activeAccount = DoorMutableLiveData(UmAccount(42, "bobjones", "",
                 "http://localhost"))
         val realDb = UmAppDatabase.getInstance(context)
@@ -61,7 +60,7 @@ class ClazzLogEditAttendancePresenterTest {
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImpl, db, repo, activeAccount)
+                mockLifecycleOwner, systemImplRule.systemImpl, db, repo, activeAccount)
         presenter.onCreate(null)
 
         //wait for the view to finish loading
@@ -93,7 +92,7 @@ class ClazzLogEditAttendancePresenterTest {
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImpl, db, repo, activeAccount)
+                mockLifecycleOwner, systemImplRule.systemImpl, db, repo, activeAccount)
         presenter.onCreate(null)
 
         nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
@@ -110,7 +109,7 @@ class ClazzLogEditAttendancePresenterTest {
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImpl, db, repo, activeAccount)
+                mockLifecycleOwner, systemImplRule.systemImpl, db, repo, activeAccount)
         presenter.onCreate(null)
 
         verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = any()

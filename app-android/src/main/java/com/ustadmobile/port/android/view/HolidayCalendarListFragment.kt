@@ -52,6 +52,7 @@ class HolidayCalendarListFragment()
 
         override fun onBindViewHolder(holder: HolidayCalendarListViewHolder, position: Int) {
             val item = getItem(position)
+            holder.itemView.tag = item?.umCalendarUid
             holder.itemBinding.holidayCalendar = item
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }

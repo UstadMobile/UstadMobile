@@ -68,57 +68,6 @@ open class Clazz() {
     fun isActivityFeature() : Boolean{
         return clazzFeatures and CLAZZ_FEATURE_ACTIVITY > 0
     }
-    fun isAssignmentFeature() : Boolean{
-        return clazzFeatures and CLAZZ_FEATURE_ASSIGNMENT > 0
-    }
-
-    fun updateAttendanceFeature(enabled: Boolean){
-        if(!isAttendanceFeature()){
-            if(enabled){
-                clazzFeatures = clazzFeatures or CLAZZ_FEATURE_ATTENDANCE
-            }
-        }else{
-            if(!enabled){
-                clazzFeatures = clazzFeatures xor CLAZZ_FEATURE_ATTENDANCE
-            }
-        }
-    }
-
-    fun updateSelFeature(enabled: Boolean){
-        if(!isSelFeature()){
-            if(enabled){
-                clazzFeatures = clazzFeatures or CLAZZ_FEATURE_SEL
-            }
-        }else{
-            if(!enabled){
-                clazzFeatures = clazzFeatures xor CLAZZ_FEATURE_SEL
-            }
-        }
-    }
-
-    fun updateActivityFeature(enabled: Boolean){
-        if(!isActivityFeature()){
-            if(enabled){
-                clazzFeatures = clazzFeatures or CLAZZ_FEATURE_ACTIVITY
-            }
-        }else{
-            if(!enabled){
-                clazzFeatures = clazzFeatures xor CLAZZ_FEATURE_ACTIVITY
-            }
-        }
-    }
-
-    fun updateAssignmentFeature(enabled: Boolean){
-        if(!isAssignmentFeature()){
-            if(enabled){
-                clazzFeatures = clazzFeatures or CLAZZ_FEATURE_ASSIGNMENT
-            }
-        }else{
-            if(!enabled){
-                clazzFeatures = clazzFeatures xor CLAZZ_FEATURE_ASSIGNMENT
-            }
-        }
-    }
 
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName

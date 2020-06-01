@@ -5,6 +5,7 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="com.ustadmobile.core.controller.PersonConstants"/>
         <import type="com.ustadmobile.port.android.view.PersonDetailFragmentEventHandler"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
@@ -220,7 +221,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="8dp"
                 android:layout_marginStart="48dp"
-                app:textPersonGender="@{person.gender}"
+                app:textMessageIdLookupKey="@{person.gender}"
+                app:textMessageIdLookupMap="@{PersonConstants.GENDER_MESSAGE_ID_MAP}"
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/list_twoline1_textsize_line1"
                 app:layout_constraintStart_toStartOf="parent"

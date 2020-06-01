@@ -824,12 +824,12 @@ Content is provided under license by external content providers. Ustad Mobile, u
     and %2$s will be replaced with the name of the item-->
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
 
-    <!-- Used to create a prompt to the user to add something e.g. "Add Holiday". %1$s will be
+    <!-- Used to create a prompt to the user to add something e.g. "Add a Holiday". %1$s will be
     replaced with the name of the item (e.g. Holiday)-->
     <string name="add_a">Add a %1$s</string>
 
     <!-- Used to set the title on an edit screen where the user is creating a new entity e.g.
-    new class, new assignment, etc. -->
+    new class, new assignment, etc. %1$s will be replaced with the name of the item.-->
     <string name="new_entity">New %1$s</string>
 
     <!-- Used to set the title on an edit screen where the user is editing an existing entity

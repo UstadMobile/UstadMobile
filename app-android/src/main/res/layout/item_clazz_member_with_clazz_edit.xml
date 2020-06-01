@@ -3,6 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <import type="com.ustadmobile.core.controller.ClazzMemberConstants"/>
+
+
         <variable name="clazzMemberWithClazz"
             type="com.ustadmobile.lib.db.entities.ClazzMemberWithClazz" />
 
@@ -50,7 +53,8 @@
         <TextView android:id="@+id/item_clazzmemberwithclazz_line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:textClazzRole="@{clazzMemberWithClazz.clazzMemberRole}"
+            app:textMessageIdLookupKey="@{clazzMemberWithClazz.clazzMemberRole}"
+            app:textMessageIdLookupMap="@{ClazzMemberConstants.ROLE_MESSAGE_ID_OTIONS}"
             app:layout_constraintStart_toStartOf="@+id/item_clazzmemberwithclazz_line1_text"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzmemberwithclazz_line1_text"
             app:layout_constraintEnd_toEndOf="parent"

@@ -49,6 +49,50 @@ fun TextView.setPresenterFieldHeader(presenterField: PersonDetailPresenterField)
     }
 }
 
+/**
+ * This binder will handle situations where a there is a fixed list of flags, each of which
+ * corresponds to a given messageId.
+ *
+ * e.g.
+ * val ROLE_MAP = mapOf(ClazzMember.ROLE_STUDENT to MessageID.student,
+ *                       ClazzMember.ROLE_TEACHER to MessageID.teacher)
+ *
+ * You can then use the following in the view XML
+ * &lt;TextView
+ * ...
+ * app:textMessageIdLookupKey="@{entityObject.memberRole}"
+ * app:textMessageIdLookupMap="@{ROLE_MAP}"
+ * /&gt;
+ *
+ * Note textMessageIdLookupKey and textMessageIdLookupMap are in separate binders because if they
+ * are in the same binder the generated data binding does not always update it when one is set
+ * after the other.
+ */
+@BindingAdapter("textMessageIdLookupKey")
+fun TextView.setTextMessageIdOptionSelected(textMessageIdLookupKey: Int) {
+    setTag(R.id.tag_messageidoption_selected, textMessageIdLookupKey)
+    updateFromTextMessageIdOptions()
+}
+
+@BindingAdapter(value = ["textMessageIdLookupMap", "fallbackMessageId"], requireAll = false)
+fun TextView.setTextMessageIdOptions(textMessageIdLookupMap: Map<Int, Int>?, fallbackMessageId: Int?) {
+    setTag(R.id.tag_messageidoptions_list, textMessageIdLookupMap)
+    setTag(R.id.tag_messageidoptiond_fallback, fallbackMessageId)
+    updateFromTextMessageIdOptions()
+}
+
+private fun TextView.updateFromTextMessageIdOptions() {
+    val currentOption = getTag(R.id.tag_messageidoption_selected) as? Int
+    val textMessageIdOptions = getTag(R.id.tag_messageidoptions_list) as? Map<Int, Int>
+    val fallbackMessageId = getTag(R.id.tag_messageidoptiond_fallback) as? Int
+    if(currentOption != null && textMessageIdOptions != null) {
+        val messageId = textMessageIdOptions[currentOption] ?: fallbackMessageId
+        if(messageId != null) {
+            text = UstadMobileSystemImpl.instance.getString(messageId, context)
+        }
+    }
+}
+
 @BindingAdapter(value= ["textMessageIdOptionSelected","textMessageIdOptions"], requireAll = true)
 fun TextView.setTextFromMessageIdList(textMessageIdOptionSelected: Int, textMessageIdOptions: List<MessageIdOption>) {
     text = UstadMobileSystemImpl.instance.getString(textMessageIdOptions
@@ -79,26 +123,11 @@ fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long)
 }
 
 
-private val textViewGenderStringIds: Map<Int, Int> = mapOf(
-        Person.GENDER_MALE to R.string.male,
-        Person.GENDER_FEMALE to R.string.female,
-        Person.GENDER_OTHER to R.string.other)
-
 private val textViewSchoolGenderStringIds: Map<Int, Int> = mapOf(
         School.SCHOOL_GENDER_MIXED  to R.string.mixed,
         School.SCHOOL_GENDER_FEMALE to R.string.female,
         School.SCHOOL_GENDER_MALE to R.string.male
 )
-
-@BindingAdapter("textPersonGender")
-fun TextView.setGenderText(gender: Int) {
-    val genderStringId = textViewGenderStringIds[gender]
-    text = if(genderStringId != null) {
-        context.getString(genderStringId)
-    }else {
-        ""
-    }
-}
 
 
 @BindingAdapter("textSchoolGender")
@@ -106,21 +135,6 @@ fun TextView.setSchoolGenderText(gender: Int) {
     val genderStringId = textViewSchoolGenderStringIds[gender]
     text = if(genderStringId != null) {
         context.getString(genderStringId)
-    }else {
-        ""
-    }
-}
-
-private val textViewClazzRoleStringIds: Map<Int, Int> = mapOf(
-        ClazzMember.ROLE_STUDENT to R.string.student,
-        ClazzMember.ROLE_TEACHER to R.string.teacher
-)
-
-@BindingAdapter("textClazzRole")
-fun TextView.setClazzMemberRole(clazzRole: Int) {
-    val clazzRoleStringId = textViewClazzRoleStringIds[clazzRole]
-    text = if(clazzRoleStringId != null) {
-        context.getString(clazzRoleStringId)
     }else {
         ""
     }

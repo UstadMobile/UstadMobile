@@ -41,6 +41,7 @@ class ClazzList2Fragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>()
 
         override fun onBindViewHolder(holder: ClazzList2ViewHolder, position: Int) {
             holder.itemBinding.clazz = getItem(position)
+            holder.itemView.tag = holder.itemBinding.clazz?.clazzUid
             holder.itemBinding.presenter = presenter
         }
 
