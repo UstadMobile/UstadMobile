@@ -13,7 +13,7 @@ abstract class SingleItemRecyclerViewAdapter<VH: RecyclerView.ViewHolder>(visibl
             field = value
 
             if(value) {
-                notifyItemChanged(0)
+                notifyItemInserted(0)
             }else {
                 notifyItemRemoved(0)
             }
