@@ -35,8 +35,7 @@ import kotlin.jvm.Volatile
     SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class,
     TimeZoneEntity::class,
     SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
-    ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
-    Comments::class
+    ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES

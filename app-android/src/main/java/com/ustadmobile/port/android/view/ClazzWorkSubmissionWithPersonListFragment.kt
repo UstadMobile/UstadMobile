@@ -27,8 +27,10 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
-class ClazzWorkSubmissionWithPersonListFragment(): UstadListViewFragment<ClazzWorkSubmissionWithPerson, ClazzWorkSubmissionWithPerson>(),
-        ClazzWorkSubmissionWithPersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class ClazzWorkSubmissionWithPersonListFragment()
+    : UstadListViewFragment<ClazzWorkSubmissionWithPerson, ClazzWorkSubmissionWithPerson>(),
+        ClazzWorkSubmissionWithPersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener,
+        View.OnClickListener{
 
     private var mPresenter: ClazzWorkSubmissionWithPersonListPresenter? = null
 
@@ -69,7 +71,7 @@ class ClazzWorkSubmissionWithPersonListFragment(): UstadListViewFragment<ClazzWo
 
         mDataRecyclerViewAdapter = ClazzWorkSubmissionWithPersonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,
-                requireContext().getString(R.string.clazzworksubmissionwithperson))
+                requireContext().getString(R.string.submission))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view
     }
@@ -77,15 +79,16 @@ class ClazzWorkSubmissionWithPersonListFragment(): UstadListViewFragment<ClazzWo
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.clazzworksubmissionwithperson)
+                requireContext().getString(R.string.submission)
     }
 
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.clazzworksubmissionwithperson_edit_dest, ClazzWorkSubmissionWithPerson::class.java)
+        if(view?.id == R.id.item_createnew_layout) {
+            //navigateToEditEntity(null, R.id.clazzworksubmissionwithperson_edit_dest, ClazzWorkSubmissionWithPerson::class.java)
+        }
     }
 
     override fun onDestroyView() {

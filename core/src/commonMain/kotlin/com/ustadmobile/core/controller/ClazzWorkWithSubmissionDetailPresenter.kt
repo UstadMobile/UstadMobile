@@ -3,16 +3,16 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.findClazzTimeZone
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.ClazzWorkWithSubmissionDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.ClazzWithSchool
-import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 
@@ -30,7 +30,6 @@ class ClazzWorkWithSubmissionDetailPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWorkWithSubmission? {
@@ -79,6 +78,11 @@ class ClazzWorkWithSubmissionDetailPresenter(context: Any,
         }
         view.clazzWorkPublicComments = publicComments
 
+        val test = withTimeoutOrNull(2000) {
+            db.commentsDao.findPublicByEntityTypeAndUidList(ClazzWork.CLAZZ_WORK_TABLE_ID,
+                    clazzWorkWithSubmission.clazzWorkUid)
+        }
+
         val privateComments = withTimeoutOrNull(2000){
             db.commentsDao.findPrivateByEntityTypeAndUidLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
                     clazzWorkWithSubmission.clazzWorkUid)
@@ -90,12 +94,28 @@ class ClazzWorkWithSubmissionDetailPresenter(context: Any,
     }
 
     override fun handleClickEdit() {
-        systemImpl.go(ClazzWorkEditView.VIEW_NAME, arguments, context)
+        systemImpl.go(ClazzWorkEditView.VIEW_NAME   , arguments, context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         //TODO: this
         return true
     }
+
+    fun handleClickSave(entity: ClazzWorkWithSubmission){
+        print("hi")
+        print(entity.clazzWorkSubmission?.clazzWorkSubmissionText)
+    }
+
+    fun addComment(comment: String, public: Boolean){
+        val comment = Comments(ClazzWork.CLAZZ_WORK_TABLE_ID, entity?.clazzWorkUid?:0L,
+            UmAccountManager.getActivePersonUid(context), UMCalendarUtil.getDateInMilliPlusDays(0),
+        comment, public)
+        GlobalScope.launch {
+            db.commentsDao.insertAsync(comment)
+        }
+    }
+
+
 
 }

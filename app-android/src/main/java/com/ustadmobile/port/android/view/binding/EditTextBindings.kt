@@ -5,6 +5,7 @@ import android.text.format.DateFormat
 import android.widget.EditText
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
+import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
@@ -94,4 +95,9 @@ fun TextInputEditText.setValueIfZero(value: Int){
     }else{
         setText(Integer.toString(value))
     }
+}
+
+@InverseBindingAdapter(attribute = "dontShowZeroInt")
+fun getRealValueInt(et: TextView): Int {
+    return et.text.toString().toInt()?:0
 }

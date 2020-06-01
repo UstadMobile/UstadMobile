@@ -46,6 +46,16 @@ open class Comments() {
     @LastChangedBy
     var commentsLCB: Int = 0
 
+    constructor(table: Int, uid: Long, personUid: Long, now: Long, comment: String, isPublic: Boolean) : this() {
+        commentsText = comment
+        commentsEntityType = table
+        commentsEntityUid = uid
+        commentsPublic = isPublic
+        commentsPersonUid = personUid
+        commentsDateTimeAdded = now
+
+    }
+
     companion object {
         const val COMMENTS_STATUS_APPROVED = 0
         const val COMMENTS_STATUS_PENDING = 1

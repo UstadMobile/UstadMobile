@@ -39,7 +39,8 @@ class ClazzWorkDetailPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.studentRole = true
+        //TODO: this
+        view.studentRole = false
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {

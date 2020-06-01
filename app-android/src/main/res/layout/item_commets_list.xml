@@ -53,13 +53,25 @@
             android:id="@+id/item_comments_list_line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:text="@{commentwithperson.commentsText}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_comments_list_line3_text"
             app:layout_constraintStart_toStartOf="@+id/item_comments_list_text"
             app:layout_constraintTop_toBottomOf="@+id/item_comments_list_text"
+            tools:text="I like this activity. Shall we discuss this in our next meeting?" />
+
+
+        <TextView
+            android:id="@+id/item_comments_list_line3_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/list_twoline1_margin_horizontal"
+            app:dateTimeLongString="@{commentwithperson.commentsDateTimeAdded}"
+            app:layout_constraintBottom_toTopOf="@+id/item_comments_list_line2_text"
             app:layout_constraintEnd_toEndOf="parent"
-            android:text="@{commentwithperson.commentsText}"
-            tools:text="I like this activity. Shall we discuss this in our next meeting?"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
+            app:layout_constraintTop_toTopOf="@+id/item_comments_list_text"
+            tools:text="4:20" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -3,8 +3,10 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionOption
 import com.ustadmobile.lib.db.entities.ClazzWorkSubmission
 
 @UmDao
@@ -21,6 +23,10 @@ abstract class ClazzWorkSubmissionDao : BaseDao<ClazzWorkSubmission> {
 
     @Query(FIND_BY_CLAZZWORKUID)
     abstract fun findByClazzUidLive(clazzWorkUid: Long): DataSource.Factory<Int,ClazzWorkSubmission>
+
+    @Update
+    abstract suspend fun updateAsync(entity: ClazzWorkSubmission) : Int
+
 
     companion object{
         const val FIND_BY_CLAZZWORKUID = """

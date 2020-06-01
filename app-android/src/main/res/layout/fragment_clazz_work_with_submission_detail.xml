@@ -5,10 +5,15 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <variable
             name="clazzWorkWithSubmission"
             type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
+
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzWorkWithSubmissionDetailPresenter" />
 
         <variable
             name="loading"
@@ -19,13 +24,29 @@
             type="boolean" />
 
         <variable
+            name="freeTextVisibility"
+            type="int"/>
+
+        <variable
+            name="quizVisibility"
+            type="int"/>
+
+        <variable
+            name="attachmentVisibility"
+            type="int"/>
+
+        <variable
+            name="studentVisibility"
+            type="int"/>
+
+        <variable
+            name="submissionVisibility"
+            type="int"/>
+
+        <variable
             name="editButtonMode"
             type="com.ustadmobile.core.view.EditButtonMode"/>
-
-
     </data>
-
-
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/activity_clazzworkwithsubmission_edit_scroll"
@@ -67,8 +88,8 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginEnd="@dimen/form_margin_horizontal"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolDesc)}"
-                android:text="@{schoolWithHolidayCalendar.schoolDesc}"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(clazzWorkWithSubmission.clazzWorkTitle)}"
+                android:text="@{clazzWorkWithSubmission.clazzWorkTitle}"
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/list_twoline1_textsize_line1"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -79,15 +100,11 @@
             <TextView
                 android:id="@+id/fragment_school_overview_gender"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
+                android:layout_height="0dp"
                 tools:text=""
-                android:visibility="@{schoolWithHolidayCalendar.schoolGender != 0 ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                app:layout_constraintTop_toBottomOf="@+id/instructions_title"
-                app:textSchoolGender="@{schoolWithHolidayCalendar.schoolGender}" />
+                app:layout_constraintTop_toBottomOf="@+id/instructions_title" />
 
 
 
@@ -110,7 +127,6 @@
                 android:layout_marginTop="8dp"
                 android:contentDescription="@string/school"
                 android:src="@drawable/ic_event_available_black_24dp"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier2" />
 
@@ -123,11 +139,12 @@
                 android:layout_marginStart="@dimen/activity_vertical_margin"
                 android:layout_marginTop="8dp"
                 android:contentDescription="@string/school"
-                app:dateAppend="@{time}"
-                app:dateLongWithExtra="@{date}"
+                app:dateTimePrepend="@{``}"
+                app:dateTimeTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkStartTime}"
+                app:dateTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkStartDateTime}"
+                app:dateTimeAppend="@{``}"
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/list_twoline1_textsize_line1"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                 app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
                 app:layout_constraintTop_toBottomOf="@+id/barrier2"
                 tools:text="28/Feb/2020 - 8:00 am" />
@@ -138,15 +155,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginStart="@dimen/activity_vertical_margin"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
                 android:contentDescription="@string/school"
+                android:text=""
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/list_twoline1_textsize_line1"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@+id/fragment_school_detail_overview_locataion_tv"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_tv"
-                app:layout_constraintTop_toBottomOf="@+id/barrier2"
+                app:layout_constraintTop_toTopOf="@+id/fragment_school_detail_overview_locataion_tv"
                 tools:text="(Asia, Dubai)" />
 
             <TextView
@@ -154,10 +172,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:text="@string/due_date"
-                app:datePrepend="@string/due_date"
-                app:dateAppend="time"
-                app:dateLongWithExtra="@{date}"
+                app:dateTimePrepend="@{@string/due_date}"
+                app:dateTimeTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkDueTime}"
+                app:dateTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkDueDateTime}"
+                app:dateTimeAppend="@{``}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_locataion_tv"
@@ -211,6 +229,7 @@
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:text="@string/submission"
+                android:visibility="@{studentVisibility}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier8" />
@@ -233,19 +252,21 @@
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp"
                 android:hint="@string/submit_your_answer"
-                android:text="@{text}"
                 android:inputType="textCapSentences"
                 android:singleLine="true"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@={clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionText}"
+                android:visibility="@{freeTextVisibility}"
+                app:layout_constraintEnd_toStartOf="@+id/send_comment"
                 app:layout_constraintHorizontal_bias="0.625"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier11" />
 
             <ImageButton
                 android:id="@+id/send_comment"
-                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+                android:visibility="@{freeTextVisibility}"
+                android:background="?attr/selectableItemBackground"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog.Flush"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
@@ -253,6 +274,7 @@
                 android:layout_marginEnd="8dp"
                 android:src="@drawable/ic_send_black_24dp"
                 app:layout_constraintEnd_toEndOf="parent"
+                android:onClick="@{() -> presenter.handleClickSave(clazzWorkWithSubmission)}"
                 app:layout_constraintTop_toBottomOf="@+id/barrier11" />
 
 
@@ -264,19 +286,18 @@
                 app:constraint_referenced_ids="barrier11, send_comment"
                 />
 
-
             <TextView
                 android:id="@+id/submission_score"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/score"
-                android:layout_marginStart="20dp"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="20dp"
                 android:layout_marginEnd="@dimen/form_margin_horizontal"
-                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolDesc)}"
-                android:text="@{schoolWithHolidayCalendar.schoolDesc}"
+                android:contentDescription="@string/score"
+                android:text="@{`` + clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionScore + '/'+ clazzWorkWithSubmission.clazzWorkMaximumScore}"
                 android:textColor="@color/text_primary"
-                android:textSize="@dimen/list_twoline1_textsize_line1"
+                android:textSize="30sp"
+                android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission != null)?View.VISIBLE:View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier9"
@@ -288,9 +309,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 tools:text="The characters want to learn about each other and play with each other."
-                android:visibility="@{schoolWithHolidayCalendar.schoolGender != 0 ? View.VISIBLE : View.GONE}"
+                android:text="@{clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionText}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission != null)?freeTextVisibility:View.GONE}"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 app:layout_constraintTop_toBottomOf="@+id/submission_score"
                 />
@@ -312,7 +334,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:text="@string/public_comments"
+                android:text="@string/class_comments"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier12" />
@@ -346,7 +368,7 @@
                 android:hint="@string/add_class_comment"
                 android:inputType="textCapSentences"
                 android:singleLine="true"
-                android:text="@{text}"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.625"
                 app:layout_constraintStart_toStartOf="parent"
@@ -360,6 +382,7 @@
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="8dp"
+                android:visibility="gone"
                 android:src="@drawable/ic_send_black_24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier14" />
@@ -380,6 +403,7 @@
                 android:layout_marginVertical="@dimen/formitem_margin_vertical"
                 android:layout_marginHorizontal="@dimen/form_margin_horizontal"
                 android:text="@string/private_comments"
+                android:visibility="@{clazzWorkWithSubmission.clazzWorkCommentsEnabled?View.VISIBLE:View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier10" />
@@ -389,6 +413,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:listitem="@layout/item_commets_list"
+                android:visibility="@{clazzWorkWithSubmission.clazzWorkCommentsEnabled?View.VISIBLE:View.GONE}"
                 tools:itemCount="2"
                 app:layout_constraintTop_toBottomOf="@+id/private_comments_heading"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -404,6 +429,7 @@
                 />
 
             <EditText
+                android:visibility="gone"
                 android:id="@+id/private_comment_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -415,13 +441,13 @@
                 android:hint="@string/add_private_comment"
                 android:inputType="textCapSentences"
                 android:singleLine="true"
-                android:text="@{text}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.625"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier15" />
 
             <ImageButton
+                android:visibility="gone"
                 android:id="@+id/private_send_comment"
                 style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
                 android:layout_width="wrap_content"

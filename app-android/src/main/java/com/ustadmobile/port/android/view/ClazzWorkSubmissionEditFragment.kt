@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkSubmissionEditView
 import com.ustadmobile.lib.db.entities.ClazzWorkSubmission
+import com.ustadmobile.lib.db.entities.ClazzWorkSubmissionWithClazzWork
 
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
@@ -19,13 +20,14 @@ interface ClazzWorkSubmissionEditFragmentEventHandler {
 
 }
 
-class ClazzWorkSubmissionEditFragment: UstadEditFragment<ClazzWorkSubmission>(), ClazzWorkSubmissionEditView, ClazzWorkSubmissionEditFragmentEventHandler {
+class ClazzWorkSubmissionEditFragment: UstadEditFragment<ClazzWorkSubmissionWithClazzWork>(),
+        ClazzWorkSubmissionEditView, ClazzWorkSubmissionEditFragmentEventHandler {
 
     private var mBinding: FragmentClazzWorkSubmissionEditBinding? = null
 
     private var mPresenter: ClazzWorkSubmissionEditPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzWorkSubmission>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzWorkSubmissionWithClazzWork>?
         get() = mPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -53,10 +55,10 @@ class ClazzWorkSubmissionEditFragment: UstadEditFragment<ClazzWorkSubmission>(),
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.clazzworksubmission)
+        setEditFragmentTitle(R.string.submission)
     }
 
-    override var entity: ClazzWorkSubmission? = null
+    override var entity: ClazzWorkSubmissionWithClazzWork? = null
         get() = field
         set(value) {
             field = value

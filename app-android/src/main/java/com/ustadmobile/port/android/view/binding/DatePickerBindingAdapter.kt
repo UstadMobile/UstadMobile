@@ -10,7 +10,11 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.TimeFormat
 import com.toughra.ustadmobile.R
+import java.text.MessageFormat
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -39,6 +43,53 @@ fun updateDateOnEditTextWithExtraText(prepent: String, append: String, et: TextV
     }else{
         et.setText(prepent + " " + dateFormatter.format(date) + " - " + append)
     }
+}
+
+private val MS_PER_HOUR = 3600000
+private val MS_PER_MIN = 60000
+
+private fun scheduleTimeToDate(msSinceMidnight: Int) : Date{
+    val cal = Calendar.getInstance()
+    cal.set(Calendar.HOUR_OF_DAY, msSinceMidnight / 3600000)
+    cal.set(Calendar.MINUTE, msSinceMidnight.rem(MS_PER_HOUR) / MS_PER_MIN)
+    return Date(cal.timeInMillis)
+}
+
+private val dateWithTimeFormat: MessageFormat by lazy {
+    MessageFormat("{0, date} - {1, time, short} {2}")
+}
+
+private val dateWithTimeFormatWithPrepend: MessageFormat by lazy {
+    MessageFormat("{0}: {1, date} - {2, time, short} {3}")
+}
+
+private val dateTimeOnly: MessageFormat by lazy {
+    MessageFormat("{0, date, short} {0, time, short}")
+}
+
+fun updateDateTimeOnEditText(et: TextView, date: Long){
+    val dateDate = Date(date)
+    val text = dateTimeOnly.format(arrayOf(dateDate))
+    et.text = text
+}
+/**
+ * Data binding Adapter for Date picker types.
+ * Contains the logic for linking editText dates with Datepicker
+ */
+
+fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: TextView, date: Long, time: Long) {
+    val dateDate = Date(date)
+
+    val timeDate = scheduleTimeToDate(time.toInt())
+
+    var text = ""
+    text = if(prepend.isEmpty()) {
+        dateWithTimeFormat.format(arrayOf(dateDate, timeDate, append))
+    }else{
+        dateWithTimeFormatWithPrepend.format(arrayOf(prepend, dateDate, timeDate, append))
+    }
+    et.text = text
+
 }
 
 fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: InverseBindingListener) {
@@ -100,6 +151,20 @@ fun setDateWithExtras(et: TextView, date:Long, append: String?, prepend: String?
     updateDateOnEditTextWithExtraText(prependString, appendString, et, date)
     et.setTag(R.id.tag_datelong, date)
 }
+
+@BindingAdapter("dateTimeLongWithExtra", "dateTimeTimeLongWithExtra", "dateTimeAppend", "dateTimePrepend")
+fun setDateWithDateExtras(et: TextView, date:Long, time:Long, append: String?, prepend: String?){
+    updateDateTimeOnEditTextWithExtra(prepend?:"", append?:"", et, date, time)
+    et.setTag(R.id.tag_datelong, date)
+}
+
+@BindingAdapter("dateTimeLongString")
+fun setDateWithDateExtras(et: TextView, date:Long){
+    updateDateTimeOnEditText(et, date)
+    et.setTag(R.id.tag_datelong, date)
+}
+
+
 /**
  * Wrapper to handle when the result of the picker is stored on a string (e.g. CustomFieldValue)
  */

@@ -20,6 +20,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.lib.db.entities.ClazzWorkSubmissionWithClazzWork
 
 
 class ClazzWorkSubmissionEditPresenter(context: Any,
@@ -28,7 +29,7 @@ class ClazzWorkSubmissionEditPresenter(context: Any,
                           systemImpl: UstadMobileSystemImpl,
                           db: UmAppDatabase, repo: UmAppDatabase,
                           activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<ClazzWorkSubmissionEditView, ClazzWorkSubmission>(context, arguments, view, lifecycleOwner, systemImpl,
+    : UstadEditPresenter<ClazzWorkSubmissionEditView, ClazzWorkSubmissionWithClazzWork>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
     override val persistenceMode: PersistenceMode
@@ -44,7 +45,7 @@ class ClazzWorkSubmissionEditPresenter(context: Any,
         //TODO: Set any additional fields (e.g. joinlist) on the view
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWorkSubmission? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWorkSubmissionWithClazzWork? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         //TODO: Load the list for any one to many join helper here
@@ -57,15 +58,15 @@ class ClazzWorkSubmissionEditPresenter(context: Any,
         return TODO("Implement load from Database or return null if using PERSISTENCE_MODE.JSON")
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ClazzWorkSubmission? {
+    override fun onLoadFromJson(bundle: Map<String, String>): ClazzWorkSubmissionWithClazzWork? {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: ClazzWorkSubmission? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(ClazzWorkSubmission.serializer(), entityJsonStr)
+            editEntity = Json.parse(ClazzWorkSubmissionWithClazzWork.serializer(), entityJsonStr)
         }else {
-            editEntity = ClazzWorkSubmission()
+            editEntity = ClazzWorkSubmissionWithClazzWork()
         }
 
         return editEntity
@@ -78,7 +79,7 @@ class ClazzWorkSubmissionEditPresenter(context: Any,
                 entityVal)
     }
 
-    override fun handleClickSave(entity: ClazzWorkSubmission) {
+    override fun handleClickSave(entity: ClazzWorkSubmissionWithClazzWork) {
         //TODO: Any validation that is needed before accepting / saving this entity
         //TODO: Only save to the database when the persistence mode is PERSISTENCE_MODE.DB
         GlobalScope.launch(doorMainDispatcher()) {
@@ -89,7 +90,7 @@ class ClazzWorkSubmissionEditPresenter(context: Any,
             }
 
             //TODO: Call commitToDatabase on any onetomany join helpers
-            view.finishWithResult(listOf(entity))
+            //view.finishWithResult(listOf(entity))
         }
     }
 

@@ -243,7 +243,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/maximum_score"
                     android:inputType="number"
-                    app:dontShowZeroInt="@{clazzWork.clazzWorkMaximumScore}"
+                    android:text="@={`` + clazzWork.clazzWorkMaximumScore}"
                     app:layout_constraintStart_toStartOf="parent"
                     tools:layout_editor_absoluteY="393dp"
                     tools:text="100" />

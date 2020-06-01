@@ -14,6 +14,7 @@ interface ClazzWorkWithSubmissionDetailView: UstadDetailView<ClazzWorkWithSubmis
     var timeZone: String
     var clazzWorkPublicComments: DataSource.Factory<Int, CommentsWithPerson>?
     var clazzWorkPrivateComments: DataSource.Factory<Int, CommentsWithPerson>?
+    var studentMode : Boolean
 
     companion object {
 

@@ -34,7 +34,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
         LEFT JOIN ClazzWorkSubmission ON ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid = ClazzMember.clazzMemberUid 
 		WHERE ClazzWork.clazzWorkUid = :uid
     """)
-    abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission
+    abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission?
 
 
     @Query(FIND_BY_CLAZZUID)

@@ -5,10 +5,12 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <variable
             name="clazzWorkSubmission"
-            type="com.ustadmobile.lib.db.entities.ClazzWorkSubmission" />
+            type="com.ustadmobile.lib.db.entities.ClazzWorkSubmissionWithClazzWork" />
+
 
         <variable
             name="loading"
@@ -27,7 +29,7 @@
 
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/fragment_clazz_work_submission_edit_edit_scroll"
+        android:id="@+id/fragment_clazz_work_submission_edit_nsv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -38,10 +40,167 @@
             android:layout_height="wrap_content">
 
 
-            <!-- TODO: Put the actual view for editing ClazzWorkSubmission here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+            <TextView
+                android:id="@+id/fragment_clazz_work_submission_edit_submission_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:text="@string/submission"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/fragment_clazz_work_submission_edit_submission_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/school"
+                android:layout_marginStart="20dp"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginEnd="@dimen/form_margin_horizontal"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(clazzWorkSubmission.clazzWorkSubmissionText)}"
+                android:text="@{clazzWorkSubmission.clazzWorkSubmissionText}"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/list_twoline1_textsize_line1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_submission_edit_submission_title"
+                tools:text="The characters want to learn about each other and play with each other." />
+
+            <TextView
+                android:id="@+id/fragment_clazz_work_submission_edit_submission_not_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/school"
+                android:layout_marginStart="20dp"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginEnd="@dimen/form_margin_horizontal"
+                android:visibility="@{StringExtKt.visibleIfNullOrEmpty(clazzWorkSubmission.clazzWorkSubmissionText)}"
+                android:text="@string/not_submitted_cap"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/list_twoline1_textsize_line1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_submission_edit_submission_tv"
+                />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fragment_clazz_work_submission_edit_submission_not_tv"
+                />
+
+            <TextView
+                android:id="@+id/fragment_clazz_work_submission_edit_marking_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:text="@string/marking"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/barrier2" />
+
+
+            <EditText
+                android:id="@+id/fragment_clazz_work_submission_edit_score_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="20dp"
+                android:contentDescription="@string/school"
+                android:inputType="number"
+                android:text="@{clazzWorkSubmission.clazzWorkSubmissionScore}"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/list_twoline1_textsize_line1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_submission_edit_marking_title" />
+
+            <TextView
+                android:id="@+id/textView32"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@{`/ ` +  clazzWorkSubmission.clazzWork.clazzWorkMaximumScore}"
+                app:layout_constraintStart_toEndOf="@+id/fragment_clazz_work_submission_edit_score_tv"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_submission_edit_marking_title"
+                tools:text="/ 100" />
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="textView32"/>
+
+            <TextView
+                android:id="@+id/private_comments_heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:text="@string/private_comments"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier3" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/private_comments_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_commets_list"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/private_comments_heading"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/barrier15"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="barrier3, private_comments_rv"
+                />
+
+            <EditText
+                android:id="@+id/private_comment_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="24dp"
+                android:hint="@string/add_private_comment"
+                android:inputType="textCapSentences"
+                android:singleLine="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.625"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier15" />
+
+            <ImageButton
+                android:id="@+id/private_send_comment"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_send_black_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier15" />
+
+
+
+
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

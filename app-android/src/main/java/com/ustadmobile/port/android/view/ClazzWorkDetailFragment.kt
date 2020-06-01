@@ -17,11 +17,8 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ClazzWorkDetailView
-import com.ustadmobile.core.view.ClazzWorkEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
@@ -70,16 +67,16 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
         val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
 
-        val tabs = listOf(ClazzWorkEditView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +
-                entityUidValue)
+        val tabs = listOf(
+                ClazzWorkWithSubmissionDetailView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue)
         val viewNameToTitle = mapOf(
-                ClazzWorkEditView.VIEW_NAME to getText(R.string.assignment).toString()
+                ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
+                ClazzWorkWithSubmissionDetailView.VIEW_NAME to getText(R.string.assignment).toString()
         )
 
-        mPagerAdapter = CustomViewNameListFragmentPageAdapter(childFragmentManager,
+        mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
                 FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
-                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle, this
-        )
+                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle        )
 
         Handler().post {
             mPager?.adapter = mPagerAdapter
@@ -113,7 +110,9 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         get() = field
         set(value) {
             field = value
-            mBinding?.fragmentClazzWorkDetailAbl?.visibility = View.GONE
+            if(value) {
+                mBinding?.fragmentClazzWorkDetailAbl?.visibility = View.GONE
+            }
         }
 
     override fun setEditVisible(visible: Boolean) {
@@ -140,7 +139,8 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
     companion object{
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
-                ClazzWorkEditView.VIEW_NAME to ClazzWorkEditFragment::class.java
+                ClazzWorkEditView.VIEW_NAME to ClazzWorkEditFragment::class.java,
+                ClazzWorkWithSubmissionDetailView.VIEW_NAME to ClazzWorkWithSubmissionDetailFragment::class.java
         )
     }
 
