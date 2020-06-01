@@ -40,7 +40,7 @@ fun InitialContext.bindNewSqliteDataSourceIfNotExisting(dbName: String,
     }
 }
 
-fun bindJndiForActiveEndpoint(url: String) {
+fun InitialContext.bindJndiForActiveEndpoint(url: String) {
     val dbNameSanitized = sanitizeDbNameFromUrl(url)
-    InitialContext().bindNewSqliteDataSourceIfNotExisting(dbNameSanitized)
+    bindNewSqliteDataSourceIfNotExisting(dbNameSanitized)
 }
