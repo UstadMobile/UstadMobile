@@ -238,7 +238,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             currentLiveData?.removeObserver(this)
             val displayTypeRepoVal = displayTypeRepo ?: return
             currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
-            currentLiveData?.observe(this, this)
+            currentLiveData?.observe(viewLifecycleOwner, this)
             field = value
         }
 

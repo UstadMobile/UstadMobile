@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+
         <variable
             name="customFieldValue"
             type="com.ustadmobile.lib.db.entities.CustomFieldValue" />
@@ -29,7 +31,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:src="@drawable/ic_event_black_24dp"
-            app:customFieldIcon="@{customField}"
+            app:imageLookupMap="PersonDetailFragment.FIELD_ICON_ID_MAP"
+            app:imageLookupKey="@{customField.customFieldIconId}"
             />
 
 

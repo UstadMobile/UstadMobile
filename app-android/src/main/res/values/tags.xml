@@ -7,4 +7,8 @@
     <item name="tag_imagefilepath" type="id"/>
     <item name="tag_imageloadjob" type="id"/>
     <item name="tag_button_toggle_group_map" type="id"/>
+    <item name="tag_imagelookup_key" type="id"/>
+    <item name="tag_imagelookup_fallback" type="id"/>
+    <item name="tag_imagelookup_map" type="id"/>
+    <item name="tag_imagelookup_currentres" type="id"/>
 </resources>
