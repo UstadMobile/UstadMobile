@@ -13,7 +13,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-abstract class UstadListPresenter<V: UstadView, RT>(context: Any, arguments: Map<String, String>, view: V,
+abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>, view: V,
                                                     val lifecycleOwner: DoorLifecycleOwner,
                                                     val systemImpl: UstadMobileSystemImpl,
                                                     val db: UmAppDatabase, val repo: UmAppDatabase,
@@ -48,7 +48,16 @@ abstract class UstadListPresenter<V: UstadView, RT>(context: Any, arguments: Map
         }
     }
 
-    abstract fun handleClickEntry(entry: RT)
+    /**
+     * This method will handle calling finishWithResult on the view as the default course of action
+     * when the the mListMode is PICKER.
+     *
+     * If ListMode is BROWSE then the child implementation should call systemImpl.go itself to direct
+     * the user to the detail view (or otherwise)
+     */
+    open fun handleClickEntry(entry: RT) {
+        view.takeIf { mListMode == ListViewMode.PICKER }?.finishWithResult(listOf(entry))
+    }
 
     open fun handleClickSelectionOption(selectedItem: List<RT>, option: SelectionOption) {
 
