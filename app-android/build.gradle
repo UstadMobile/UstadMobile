@@ -449,6 +449,9 @@ dependencies {
     kaptTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
 
     androidTestImplementation project(":lib-test-common")
+    androidTestImplementation "androidx.test:core:$version_android_junit_runner"
+    androidTestImplementation "androidx.test:core-ktx:$version_android_junit_runner"
+
     androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"
     androidTestImplementation "junit:junit:$version_junit"
     androidTestImplementation group: 'androidx.annotation', name: 'annotation', version: "$version_androidx_annotation"

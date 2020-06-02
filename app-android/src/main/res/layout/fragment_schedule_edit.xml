@@ -75,6 +75,7 @@
                 android:hint="@string/day">
 
                 <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                    android:id="@+id/fragment_add_schedule_day_text"
                     android:inputType="none"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

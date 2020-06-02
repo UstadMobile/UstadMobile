@@ -122,7 +122,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String>, view: LoginVi
         if (code == registerCode) {
             goToRegisterView()
         } else {
-            view.showFeedbackMessage(impl.getString(MessageID.invalid_register_code, context), {}, 0)
+            view.showSnackBar(impl.getString(MessageID.invalid_register_code, context), {}, 0)
         }
     }
 

@@ -37,9 +37,8 @@ import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
-import com.ustadmobile.core.view.UstadViewWithNotifications
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithProgress
-import com.ustadmobile.core.view.UstadBaseFeedbackMessageView
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.util.RunnableQueue
@@ -57,7 +56,7 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadBaseFeedbackMessageView, ShakeDetector.Listener, UstadViewWithProgress {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadView, ShakeDetector.Listener, UstadViewWithProgress {
 
     private var baseController: UstadBaseController<*>? = null
 
@@ -291,7 +290,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         }
     }
 
-    override fun showFeedbackMessage(message: String, action: () -> Unit, actionMessageId: Int) {
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         val snackBar = Snackbar.make(coordinator_layout, message, Snackbar.LENGTH_LONG)
         if (actionMessageId != 0) {
             snackBar.setAction(instance.getString(actionMessageId, this)) { action() }
@@ -445,11 +444,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
 
-    override fun showNotification(notification: String, length: Int) {
-        runOnUiThread { Toast.makeText(this, notification, length).show() }
-    }
-
-
     @SuppressLint("ObsoleteSdkInt")
     protected fun runAfterFileSection(runnable: java.lang.Runnable, vararg mimeTypes: String) {
         this.runAfterFileSelection = runnable
@@ -479,6 +473,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      * @param dialogTitle   Permission dialog title
      * @param dialogMessage Permission dialog message
      */
+    @Deprecated("Use ActivityResultContracts.RequestPermission / RequestMultiplePermissions instead")
     fun runAfterGrantingPermission(permissions: Array<String>, runnable: Runnable?,
                                    dialogTitle: String, dialogMessage: String,
                                    dialogBuilder: () -> AlertDialog = {makePermissionDialog(permissions, dialogTitle, dialogMessage) }) {

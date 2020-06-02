@@ -55,6 +55,13 @@ interface UstadView {
     val viewContext: Any
 
     /**
+     * Show a snackbar style notification that an error has happened
+     *
+     * @param message message to show
+     */
+    fun showSnackBar(message: String, action: () -> Unit = {}, actionMessageId: Int = 0)
+
+    /**
      * Most UI platforms require that all UI changes are done in a particular thread. This method
      * simply wraps those implementations.
      *

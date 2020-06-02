@@ -77,6 +77,35 @@ fun ImageView.setAttendanceTint(attendancePercentage: Float) {
     setColorFilter(ContextCompat.getColor(context, color))
 }
 
+@BindingAdapter("imageLookupKey")
+fun ImageView.setImageLookupKey(imageLookupKey: Int) {
+    setTag(R.id.tag_imagelookup_key, imageLookupKey)
+    updateFromImageLookupMap()
+}
+
+@BindingAdapter(value=["imageLookupMap", "imageLookupFallback"], requireAll = false)
+fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallback: Int?) {
+    setTag(R.id.tag_imagelookup_map, imageLookupMap)
+    setTag(R.id.tag_imagelookup_fallback, imageLookupFallback)
+    updateFromImageLookupMap()
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun ImageView.updateFromImageLookupMap() {
+    val lookupKey = getTag(R.id.tag_imagelookup_key) as? Int
+    val lookupMap = getTag(R.id.tag_imagelookup_map) as? Map<Int, Int>
+    val lookupFallback = getTag(R.id.tag_imagelookup_fallback) as? Int
+
+    if(lookupKey != null && lookupMap != null) {
+        val resToUse = lookupMap[lookupKey] ?: lookupFallback
+        val currentImageRes = getTag(R.id.tag_imagelookup_currentres)
+        if(resToUse != null && resToUse != currentImageRes) {
+            setImageResource(resToUse)
+            setTag(R.id.tag_imagelookup_key, resToUse)
+        }
+    }
+}
+
 private val ICON_ID_MAP : Map<Int, Int> by lazy {
     mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
         CustomField.ICON_PERSON to R.drawable.ic_person_black_24dp,

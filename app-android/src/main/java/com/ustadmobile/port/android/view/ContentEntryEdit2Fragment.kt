@@ -108,8 +108,8 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         mBinding?.contentEntry?.publik = isChecked
     }
 
-    override fun showFeedbackMessage(message: String, action: () -> Unit, actionMessageId: Int) {
-        (activity as MainActivity).showFeedbackMessage(message, action, actionMessageId)
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as MainActivity).showSnackBar(message, action, actionMessageId)
     }
 
 
@@ -147,7 +147,7 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
                                 UmAccountManager.getActiveDatabase(requireContext()))
                         entryMetaData = metaData
                         if(entryMetaData == null){
-                            showFeedbackMessage(getString(R.string.import_link_content_not_supported))
+                            showSnackBar(getString(R.string.import_link_content_not_supported))
                         }
                         val entry = entryMetaData?.contentEntry
                         val entryUid = arguments?.get(ARG_ENTITY_UID)

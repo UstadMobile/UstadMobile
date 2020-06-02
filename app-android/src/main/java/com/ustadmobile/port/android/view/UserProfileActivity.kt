@@ -371,7 +371,7 @@ class UserProfileActivity : UstadBaseActivity(), UserProfileView {
                     val picPath = doInBackground(selectedImage!!)
                     imagePathFromCamera = picPath
                     if (imagePathFromCamera == null) {
-                        showFeedbackMessage(getString(R.string.unable_open_image), {}, 0)
+                        showSnackBar(getString(R.string.unable_open_image), {}, 0)
                         return
                     }
 

@@ -144,7 +144,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
     }
 
     override fun showErrorWithAction(message: String, actionMessageId: Int) {
-        showFeedbackMessage(message, {}, actionMessageId)
+        showSnackBar(message, {}, actionMessageId)
     }
 
 

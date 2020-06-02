@@ -51,13 +51,15 @@ class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view
     }
 
     override fun handleClickEntry(entry: @Entity@) {
-        /* TODO: Add code to go to the appropriate detail view or make a selection
-        when(mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(@Entity@DetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to uid, context)
+        /*TODO: Update this to go to the appropriate detail view when an item is clicked e.g.
+
+        if(mListMode == ListViewMode.BROWSER) {
+            systemImpl.go(@Entity@DetailView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to uid, context)
         }
         */
+
+        super.handleClickEntry(entry)
     }
 
     override fun handleClickCreateNewFab() {

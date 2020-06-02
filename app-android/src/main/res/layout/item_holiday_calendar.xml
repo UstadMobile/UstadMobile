@@ -28,6 +28,7 @@
         app:onSelectedStateChanged="@{(view) -> pagedListAdapter.onItemSelectedChanged(view, holidayCalendar)}"
         app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(holidayCalendar)}"
         android:background="@drawable/bg_listitem"
+        android:tag="@{holidayCalendar.umCalendarUid}"
         >
 
         <!-- TODO: Change or remove this icon -->
@@ -45,9 +46,9 @@
             app:layout_constraintStart_toStartOf="parent"
             />
 
-        <!-- Line 1-->
         <TextView
             android:id="@+id/item_holidaycalendar_line1_text"
+            android:tag="@{holidayCalendar.umCalendarUid}"
             android:text="@{holidayCalendar.umCalendarName}"
             tools:text="Holiday Calendar Name"
             android:layout_width="0dp"

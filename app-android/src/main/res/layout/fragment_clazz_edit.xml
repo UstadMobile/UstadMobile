@@ -55,12 +55,13 @@
                 android:hint="@string/start_date">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/start_date_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:runOnClickWhenFocused="@{true}"
                     android:cursorVisible="false"
-                    app:dateLong="@={clazz.clazzStartTime}" />
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:dateLong="@={clazz.clazzStartTime}"
+                    app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -188,6 +189,7 @@
                 android:hint="@string/holiday_calendar">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/activity_clazz_edit_holiday_calendar_text"
                     android:onClick="@{() -> activityEventHandler.showHolidayCalendarPicker()}"
                     android:text="@{clazz.holidayCalendar.umCalendarName}"
                     app:runOnClickWhenFocused="@{true}"

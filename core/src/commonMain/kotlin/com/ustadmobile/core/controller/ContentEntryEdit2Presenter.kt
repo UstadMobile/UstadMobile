@@ -156,7 +156,7 @@ class ContentEntryEdit2Presenter(context: Any,
                     view.finishWithResult(listOf(entity))
                 }
             }else{
-                view.showFeedbackMessage(systemImpl.getString(MessageID.register_empty_fields, context))
+                view.showSnackBar(systemImpl.getString(MessageID.register_empty_fields, context))
                 view.finishWithResult(listOf(entity))
             }
         }

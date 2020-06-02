@@ -83,7 +83,7 @@ class ClazzEdit2Presenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
+        val entityVal = entity ?: return
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                     entityVal)
     }

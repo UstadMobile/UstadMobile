@@ -53,8 +53,8 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             mBinding?.contentEntry = value
         }
 
-    override fun showFeedbackMessage(message: String, action: () -> Unit, actionMessageId: Int) {
-        (activity as MainActivity).showFeedbackMessage(message, action, actionMessageId)
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as MainActivity).showSnackBar(message, action, actionMessageId)
     }
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
@@ -92,7 +92,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
     }
 
     override fun showDownloadOptionsDialog(map: Map<String, String>) {
-        (activity as MainActivity).runAfterGrantingPermission(
+        (activity as? MainActivity)?.runAfterGrantingPermission(
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 Runnable { UstadMobileSystemImpl.instance.go("DownloadDialog", map, requireContext()) }
                 ,getString(R.string.download_storage_permission_title),

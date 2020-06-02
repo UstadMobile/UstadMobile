@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonDetailBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzDetailBinding
 import com.ustadmobile.core.controller.PersonDetailPresenter
@@ -26,6 +27,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
+import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 
 interface PersonDetailFragmentEventHandler {
@@ -143,6 +145,16 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
                 return oldItem == newItem
             }
         }
+
+        @JvmStatic
+        val FIELD_ICON_ID_MAP : Map<Int, Int> by lazy {
+            mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
+                    CustomField.ICON_PERSON to R.drawable.ic_person_black_24dp,
+                    CustomField.ICON_CALENDAR to R.drawable.ic_event_black_24dp,
+                    CustomField.ICON_EMAIL to R.drawable.ic_email_black_24dp,
+                    CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
+        }
+
 
     }
 

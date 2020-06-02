@@ -100,11 +100,11 @@ class ContentEntry2DetailPresenter(context: Any,
                                     ?.toBoolean() ?: false) }
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
-                    view.showFeedbackMessage(systemImpl.getString(MessageID.no_app_found,context))
+                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found,context))
                 } else {
                     val message = e.message
                     if(message != null){
-                        view.showFeedbackMessage(message)
+                        view.showSnackBar(message)
                     }
                 }
             }

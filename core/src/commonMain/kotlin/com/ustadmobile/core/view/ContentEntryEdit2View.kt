@@ -7,7 +7,7 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 
 
-interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage> , UstadBaseFeedbackMessageView{
+interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>?
 

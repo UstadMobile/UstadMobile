@@ -17,6 +17,7 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import javax.naming.InitialContext
 
 
 class LoginPresenterTest {
@@ -103,7 +104,7 @@ class LoginPresenterTest {
 
         val httpUrl = mockWebServer.url("/").toString()
 
-        bindJndiForActiveEndpoint(httpUrl)
+        InitialContext().bindJndiForActiveEndpoint(httpUrl)
 
         val presenter = LoginPresenter(context,
                 mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl,
