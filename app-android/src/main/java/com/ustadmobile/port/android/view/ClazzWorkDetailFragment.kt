@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.navigation.fragment.findNavController
@@ -15,7 +14,6 @@ import com.ustadmobile.core.controller.ClazzWorkDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ClazzWork
@@ -67,10 +65,10 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
 
         val tabs = listOf(
-                ClazzWorkWithSubmissionDetailView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue)
+                ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue)
         val viewNameToTitle = mapOf(
                 ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
-                ClazzWorkWithSubmissionDetailView.VIEW_NAME to getText(R.string.assignment).toString()
+                ClazzWorkDetailOverviewView.VIEW_NAME to getText(R.string.assignment).toString()
         )
 
         mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
@@ -139,7 +137,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
     companion object{
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
                 ClazzWorkEditView.VIEW_NAME to ClazzWorkEditFragment::class.java,
-                ClazzWorkWithSubmissionDetailView.VIEW_NAME to ClazzWorkWithSubmissionDetailFragment::class.java
+                ClazzWorkDetailOverviewView.VIEW_NAME to ClazzWorkWithSubmissionDetailFragment::class.java
         )
     }
 

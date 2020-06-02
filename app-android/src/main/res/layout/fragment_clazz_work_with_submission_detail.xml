@@ -13,7 +13,7 @@
 
         <variable
             name="presenter"
-            type="com.ustadmobile.core.controller.ClazzWorkWithSubmissionDetailPresenter" />
+            type="com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter" />
 
         <variable
             name="loading"

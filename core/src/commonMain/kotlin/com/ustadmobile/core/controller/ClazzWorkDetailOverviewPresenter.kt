@@ -6,7 +6,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.findClazzTimeZone
 import com.ustadmobile.core.view.ClazzWorkEditView
-import com.ustadmobile.core.view.ClazzWorkWithSubmissionDetailView
+import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -16,13 +16,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 
-class ClazzWorkWithSubmissionDetailPresenter(context: Any,
-                          arguments: Map<String, String>, view: ClazzWorkWithSubmissionDetailView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<ClazzWorkWithSubmissionDetailView, ClazzWorkWithSubmission>(context, arguments, view, lifecycleOwner, systemImpl,
+class ClazzWorkDetailOverviewPresenter(context: Any,
+                                       arguments: Map<String, String>, view: ClazzWorkDetailOverviewView,
+                                       lifecycleOwner: DoorLifecycleOwner,
+                                       systemImpl: UstadMobileSystemImpl,
+                                       db: UmAppDatabase, repo: UmAppDatabase,
+                                       activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
+    : UstadDetailPresenter<ClazzWorkDetailOverviewView, ClazzWorkWithSubmission>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
     override val persistenceMode: PersistenceMode

@@ -13,35 +13,32 @@ import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
 import com.toughra.ustadmobile.databinding.ItemClazzworkDetailDescriptionBinding
-import com.toughra.ustadmobile.databinding.ItemCommentNewBinding
 import com.toughra.ustadmobile.databinding.ItemCommetsListBinding
-import com.ustadmobile.core.controller.ClazzWorkWithSubmissionDetailPresenter
+import com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ClazzWorkWithSubmissionDetailView
+import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import kotlinx.android.synthetic.main.fragment_clazz_work_with_submission_detail.view.*
-import kotlinx.android.synthetic.main.item_comment_new.view.*
 
 interface NewCommentHandler{
     fun addComment(view: View, comment: String?, public:Boolean?)
 }
 
 class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSubmission>(),
-        ClazzWorkWithSubmissionDetailView, NewCommentHandler{
+        ClazzWorkDetailOverviewView, NewCommentHandler{
 
     private var mBinding: FragmentClazzWorkWithSubmissionDetailBinding? = null
 
-    private var mPresenter: ClazzWorkWithSubmissionDetailPresenter? = null
+    private var mPresenter: ClazzWorkDetailOverviewPresenter? = null
 
     private lateinit var dbRepo : UmAppDatabase
 
@@ -77,7 +74,7 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
     private var detailRecyclerAdapter: ClazzWorkDetailRecyclerAdapter? = null
 
 
-    class CommentsRecyclerAdapter(var presenter: ClazzWorkWithSubmissionDetailPresenter?)
+    class CommentsRecyclerAdapter(var presenter: ClazzWorkDetailOverviewPresenter?)
         : SelectablePagedListAdapter<CommentsWithPerson,
             CommentsRecyclerAdapter.CommentsWithPersonViewHolder>(DIFF_CALLBACK_COMMENTS) {
 
@@ -101,26 +98,20 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
     }
 
 
-    class ClazzWorkDetailRecyclerAdapter(clazzWork: ClazzWorkWithSubmission)
-        : RecyclerView.Adapter<ClazzWorkDetailRecyclerAdapter.ClazzWorkDetailViewHolder>() {
-
-        var clazzWorkWithSubmission: ClazzWorkWithSubmission? = clazzWork
-            set(value) {
-                field = value
-                viewHolder?.itemBinding?.clazzWorkWithSubmission = value
-                notifyItemInserted(0)
-            }
+    class ClazzWorkDetailRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?)
+        : ListAdapter<ClazzWorkWithSubmission,
+            ClazzWorkDetailRecyclerAdapter.ClazzWorkDetailViewHolder>(DIFFUTIL_CLAZZWORKWITHSUBMISSION) {
 
         class ClazzWorkDetailViewHolder(var itemBinding: ItemClazzworkDetailDescriptionBinding)
             : RecyclerView.ViewHolder(itemBinding.root)
 
         private var viewHolder: ClazzWorkDetailViewHolder? = null
+        private var clazzWorkVal : ClazzWorkWithSubmission? = clazzWork
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkDetailViewHolder {
             return ClazzWorkDetailViewHolder(
                     ItemClazzworkDetailDescriptionBinding.inflate(LayoutInflater.from(parent.context),
                             parent, false).also {
-                        it.clazzWorkWithSubmission = clazzWorkWithSubmission
                     })
         }
 
@@ -133,7 +124,10 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
             return 1
         }
 
-        override fun onBindViewHolder(holder: ClazzWorkDetailViewHolder, position: Int) {}
+        override fun onBindViewHolder(holder: ClazzWorkDetailViewHolder, position: Int) {
+
+            holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
+        }
     }
 
 
@@ -162,7 +156,7 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
         privateCommentsRecyclerView = rootView.findViewById(R.id.private_comments_rv)
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
 
-        mPresenter = ClazzWorkWithSubmissionDetailPresenter(requireContext(),
+        mPresenter = ClazzWorkDetailOverviewPresenter(requireContext(),
                 arguments.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
@@ -170,7 +164,7 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
                 UmAccountManager.activeAccountLiveData)
 
         //Main Merger:
-        detailRecyclerAdapter = ClazzWorkDetailRecyclerAdapter(entity?: ClazzWorkWithSubmission())
+        detailRecyclerAdapter = ClazzWorkDetailRecyclerAdapter(entity)
         detailMergerRecyclerAdapter = MergeAdapter(detailRecyclerAdapter)
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
@@ -250,8 +244,7 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
         set(value) {
             field = value
             mBinding?.clazzWorkWithSubmission = value
-
-            detailRecyclerAdapter?.clazzWorkWithSubmission = entity
+            detailRecyclerAdapter?.submitList(listOf(entity))
 
             if(entity?.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT){
                 mBinding?.quizVisibility = View.GONE
@@ -329,6 +322,16 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
 
             override fun areContentsTheSame(oldItem: CommentsWithPerson,
                                             newItem: CommentsWithPerson): Boolean {
+                return oldItem == newItem
+            }
+        }
+
+        val DIFFUTIL_CLAZZWORKWITHSUBMISSION = object: DiffUtil.ItemCallback<ClazzWorkWithSubmission>() {
+            override fun areItemsTheSame(oldItem: ClazzWorkWithSubmission, newItem: ClazzWorkWithSubmission): Boolean {
+                return oldItem.clazzWorkUid == newItem.clazzWorkUid
+            }
+
+            override fun areContentsTheSame(oldItem: ClazzWorkWithSubmission, newItem: ClazzWorkWithSubmission): Boolean {
                 return oldItem == newItem
             }
         }

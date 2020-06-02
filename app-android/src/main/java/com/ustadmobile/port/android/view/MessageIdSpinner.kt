@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.MessageIdOption
  * field dropdowns, sort options, etc). Each choice has a Message ID that is used to determine
  * the string to show to the user, and a code that is the value to be stored.
  */
+@Deprecated("Use MessageIdAutoCompleteTextView instead to get the correct Material Design styling")
 class MessageIdSpinner: AppCompatSpinner, AdapterView.OnItemSelectedListener{
 
     interface OnMessageIdOptionSelectedListener {

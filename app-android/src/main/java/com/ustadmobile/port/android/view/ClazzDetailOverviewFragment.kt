@@ -26,10 +26,6 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Schedule
 
-interface ClazzDetailOverviewEventHandler {
-
-}
-
 class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(),
         ClazzDetailOverviewView, ClazzDetailFragmentEventHandler, Observer<PagedList<Schedule>> {
 

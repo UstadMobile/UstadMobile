@@ -488,6 +488,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      * @param dialogTitle   Permission dialog title
      * @param dialogMessage Permission dialog message
      */
+    @Deprecated("Use ActivityResultContracts.RequestPermission / RequestMultiplePermissions instead")
     fun runAfterGrantingPermission(permissions: Array<String>, runnable: Runnable?,
                                    dialogTitle: String, dialogMessage: String,
                                    dialogBuilder: () -> AlertDialog = {makePermissionDialog(permissions, dialogTitle, dialogMessage) }) {
