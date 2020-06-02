@@ -35,7 +35,8 @@ import kotlin.jvm.Volatile
     SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class,
     TimeZoneEntity::class,
     SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
-    ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class
+    ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
+    ClazzWorkQuestionResponse::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -252,8 +253,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("clazzWorkQuestionOptionDao")
     abstract val clazzWorkQuestionOptionDao: ClazzWorkQuestionOptionDao
 
-    @JsName("comments")
+    @JsName("commentsDao")
     abstract val commentsDao: CommentsDao
+
+    @JsName("clazzWorkQuestionResponseDao")
+    abstract val clazzWorkQuestionResponseDao: ClazzWorkQuestionResponseDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

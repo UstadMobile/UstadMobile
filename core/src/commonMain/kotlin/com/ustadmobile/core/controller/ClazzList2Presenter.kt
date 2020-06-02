@@ -67,10 +67,9 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
     }
 
     override fun handleClickEntry(entry: Clazz) {
-        when(mListMode) {
-            ListViewMode.BROWSER -> systemImpl.go(ClazzDetailView.VIEW_NAME,
+        if(mListMode == ListViewMode.BROWSER) {
+            systemImpl.go(ClazzDetailView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.clazzUid.toString()), context)
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
         }
     }
 

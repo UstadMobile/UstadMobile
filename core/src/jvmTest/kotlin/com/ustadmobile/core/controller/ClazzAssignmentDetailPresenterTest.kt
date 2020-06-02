@@ -15,13 +15,14 @@ import org.junit.Before
 import org.junit.After
 import org.junit.Test
 
+//Temporarily disabled 2/6/2020 by Mike: this screen is being reworked anyway
 
 class ClazzAssignmentDetailPresenterTest : AbstractSetup() {
 
     lateinit var systemImplSpy: UstadMobileSystemImpl
 
 
-    @Before
+    //@Before
     fun setUp() {
         checkJndiSetup()
         val impl = UstadMobileSystemImpl.instance
@@ -37,7 +38,7 @@ class ClazzAssignmentDetailPresenterTest : AbstractSetup() {
 
     }
 
-    @After
+    //@After
     fun tearDown() {
     }
 
@@ -57,7 +58,7 @@ class ClazzAssignmentDetailPresenterTest : AbstractSetup() {
     }
 
 
-    @Test
+    //@Test
     fun givenPresenterCreated_whenLoaded_shouldSetUpTabs() {
 
         // create presenter, with a mock view, check that it makes that call

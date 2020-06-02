@@ -31,10 +31,9 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:src="@drawable/ic_event_black_24dp"
+            app:imageLookupMap="@{PersonDetailFragment.FIELD_ICON_ID_MAP}"
             app:imageLookupKey="@{customField.customFieldIconId}"
             />
-<!--            app:imageLookupMap="@{PersonDetailFragment.Companion.FIELD_ICON_ID_MAP}"
--->
 
         <TextView
             android:id="@+id/item_presenter_field_row_view_text_value"

@@ -1,19 +1,29 @@
 package com.ustadmobile.util.test.ext
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
+data class TestClazzWork(val clazzAndMembers: TestClazzAndMembers, val clazzWork: ClazzWork)
 
 private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime: Long): ClazzMember {
     return ClazzMember(clazzUid, this.personUid, clazzMemberRole).apply {
         clazzMemberDateJoined = joinTime
     }
 }
+
+suspend fun UmAppDatabase.insertTestClazzWork(clazzWork: ClazzWork):TestClazzWork {
+    val clazzAndMembers = insertTestClazzAndMembers(5, 2)
+    clazzWork.apply{
+        clazzWorkClazzUid = clazzAndMembers.clazz.clazzUid
+        clazzWorkUid = clazzWorkDao.insertAsync(this)
+    }
+
+    return TestClazzWork(clazzAndMembers, clazzWork)
+}
+
+
 
 suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
     studentNamer: (Int) -> Pair<String, String> = {"Test" to "Student $it"},

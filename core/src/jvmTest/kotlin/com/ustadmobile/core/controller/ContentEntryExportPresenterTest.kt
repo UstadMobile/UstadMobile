@@ -5,10 +5,10 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.bindDbForActiveContext
 import com.ustadmobile.core.view.ContentEntryExportView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.util.test.AbstractContentEntryExportTest
+import com.ustadmobile.util.test.ext.bindJndiForActiveEndpoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -17,6 +17,7 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers
 import java.io.File
 import java.util.concurrent.TimeUnit
+import javax.naming.InitialContext
 
 class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
 
@@ -35,7 +36,8 @@ class ContentEntryExportPresenterTest : AbstractContentEntryExportTest(){
 
     @Before
     fun setUp(){
-        UmAccountManager.bindDbForActiveContext(context)
+        //UmAccountManager.bindDbForActiveContext(context)
+        InitialContext().bindJndiForActiveEndpoint(UmAccountManager.getActiveEndpoint(context))
         umAppRepository = UmAccountManager.getRepositoryForActiveAccount(context)
         umAppDatabase = UmAccountManager.getActiveDatabase(context)
         insertContainer(umAppDatabase, umAppRepository)

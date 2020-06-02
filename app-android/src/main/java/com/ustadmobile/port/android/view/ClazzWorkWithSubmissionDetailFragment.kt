@@ -22,6 +22,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -239,6 +241,7 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
                 mBinding?.freeTextVisibility = View.GONE
             }
         }
+
     override var entity: ClazzWorkWithSubmission? = null
         get() = field
         set(value) {
@@ -276,6 +279,11 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
             quizLiveData = value?.asRepositoryLiveData(dbRepo.clazzWorkQuestionOptionDao)
             quizLiveData?.observe(this, quizQuestionObserver)
 
+        }
+    override var clazzWorkQuizQuestionsAndOptionsWithResponse: DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
+        get() = field
+        set(value) {
+            field = value
         }
 
     override var timeZone: String = ""

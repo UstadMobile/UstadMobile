@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -25,12 +26,15 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
     : UstadDetailPresenter<ClazzWorkDetailOverviewView, ClazzWorkWithSubmission>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
+    var clazzWorkWithSubmissionLiveData: DoorMutableLiveData<List<ClazzWorkWithSubmission>>? = null
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
     }
+
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWorkWithSubmission? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
@@ -40,6 +44,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         val clazzWorkWithSubmission = withTimeoutOrNull(2000){
             db.clazzWorkDao.findWithSubmissionByUidAndPerson(entityUid, loggedInPersonUid)
         }?: ClazzWorkWithSubmission()
+
 
         val clazzWithSchool = withTimeoutOrNull(2000){
             db.clazzDao.getClazzWithSchool(clazzWorkWithSubmission.clazzWorkClazzUid)
@@ -57,20 +62,41 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         view.clazzWorkContent = contentList
 
-        //TODO: Questions
-//        val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
-//                withTimeoutOrNull(2000) {
-//                    db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(entityUid)
-//                }?: listOf()
-//
-//        val questionsWithOptionsList: List<ClazzWorkQuestionAndOptions> =
-//                questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
-//                        .map { ClazzWorkQuestionAndOptions(
-//                                it.key?: ClazzWorkQuestion(),
-//                                it.value.map { it.clazzWorkQuestionOption?: ClazzWorkQuestionOption() },
-//                                listOf()) }
-//
-//        questionAndOptionsEditHelper.liveList.sendValue(questionsWithOptionsList)
+        view.studentMode = false
+
+        val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
+                withTimeoutOrNull(2000) {
+                    db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(entityUid)
+                }?: listOf()
+
+        val questionsWithOptionsList: List<ClazzWorkQuestionAndOptions> =
+                questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
+                        .map { ClazzWorkQuestionAndOptions(
+                                it.key?: ClazzWorkQuestion(),
+                                it.value.map { it.clazzWorkQuestionOption?: ClazzWorkQuestionOption() },
+                                listOf()) }
+
+        val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
+                questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
+                        .map {
+                            val questionUid = it.key?.clazzWorkQuestionUid?:0L
+                            val qResponse = db.clazzWorkQuestionResponseDao.findByQuestionUidAsync(
+                                    questionUid).toMutableList()
+                            if(qResponse.isEmpty()){
+                                qResponse.add(ClazzWorkQuestionResponse().apply {
+                                    clazzWorkQuestionResponseQuestionUid = questionUid
+                                    clazzWorkQuestionResponsePersonUid = 0L
+                                    clazzWorkQuestionResponseClazzMemberUid = 0L
+
+                                })
+                            }
+                            ClazzWorkQuestionAndOptionWithResponse(
+                                it.key?: ClazzWorkQuestion(),
+                                it.value.map { it.clazzWorkQuestionOption?: ClazzWorkQuestionOption() },
+                                    qResponse.first()) }
+
+        view.clazzWorkQuizQuestionsAndOptionsWithResponse?.sendValue(questionsAndOptionsWithResponseList)
+
 
         val publicComments = withTimeoutOrNull(2000){
             db.commentsDao.findPublicByEntityTypeAndUidLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
@@ -78,10 +104,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         }
         view.clazzWorkPublicComments = publicComments
 
-        val test = withTimeoutOrNull(2000) {
-            db.commentsDao.findPublicByEntityTypeAndUidList(ClazzWork.CLAZZ_WORK_TABLE_ID,
-                    clazzWorkWithSubmission.clazzWorkUid)
-        }
 
         val privateComments = withTimeoutOrNull(2000){
             db.commentsDao.findPrivateByEntityTypeAndUidLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
@@ -94,7 +116,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
     }
 
     override fun handleClickEdit() {
-        systemImpl.go(ClazzWorkEditView.VIEW_NAME   , arguments, context)
+        systemImpl.go(ClazzWorkEditView.VIEW_NAME , arguments, context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
