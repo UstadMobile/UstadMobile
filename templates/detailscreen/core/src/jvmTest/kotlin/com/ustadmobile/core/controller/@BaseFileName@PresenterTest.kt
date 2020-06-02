@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
+import com.ustadmobile.core.util.ext.captureLastEntityValue
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -70,13 +71,9 @@ class @BaseFileName@PresenterTest {
 
         presenter.onCreate(null)
 
-
-        nullableArgumentCaptor<@DisplayEntity@>().apply {
-            verify(mockView, timeout(5000).atLeastOnce()).entity = capture()
-
-            Assert.assertEquals("Expected entity was set on view",
-                    testEntity.@Entity_VariableName@Uid, lastValue!!.@Entity_VariableName@Uid)
-        }
+        val entityValSet = mockView.captureLastEntityValue()!!
+        Assert.assertEquals("Expected entity was set on view",
+                testEntity.@Entity_VariableName@Uid, entityValSet.@Entity_VariableName@Uid)
     }
 
     @Test
@@ -92,6 +89,9 @@ class @BaseFileName@PresenterTest {
                 clientDbRule.accountLiveData)
 
         presenter.onCreate(null)
+
+        //wait for the entity value to be set
+        mockView.captureLastEntityValue()
 
         presenter.handleClickEdit()
 

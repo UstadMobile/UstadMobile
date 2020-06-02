@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
+abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>(
         context: Any,
         arguments: Map<String, String>,
         view: V,

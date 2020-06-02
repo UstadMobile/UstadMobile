@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-interface UstadSingleEntityView<RT>: UstadView {
+interface UstadSingleEntityView<RT : Any>: UstadView {
 
     var entity: RT?
 
