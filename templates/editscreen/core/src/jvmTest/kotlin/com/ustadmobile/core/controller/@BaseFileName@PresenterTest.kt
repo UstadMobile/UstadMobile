@@ -4,16 +4,16 @@ package com.ustadmobile.core.controller
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.view.@BaseFileName@View
+import com.ustadmobile.core.view.@Entity@DetailView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.util.SystemImplRule
 import com.ustadmobile.core.util.UmAppDatabaseClientRule
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.ClazzDao
+import com.ustadmobile.core.db.dao.@Entity@Dao
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
+import com.ustadmobile.lib.db.entities.@Entity@
+@EditEntity_Import@
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.db.waitUntil
@@ -25,7 +25,7 @@ import com.ustadmobile.core.util.ext.captureLastEntityValue
  *
  * Note:
  */
-class ClazzEdit2PresenterTest {
+class @BaseFileName@PresenterTest {
 
     @JvmField
     @Rule
@@ -35,13 +35,13 @@ class ClazzEdit2PresenterTest {
     @Rule
     var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
 
-    private lateinit var mockView: ClazzEdit2View
+    private lateinit var mockView: @BaseFileName@View
 
     private lateinit var context: Any
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
-    private lateinit var repoClazzDaoSpy: ClazzDao
+    private lateinit var repo@Entity@DaoSpy: @Entity@Dao
 
     @Before
     fun setup() {
@@ -50,8 +50,8 @@ class ClazzEdit2PresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoClazzDaoSpy = spy(clientDbRule.db.clazzDao)
-        whenever(clientDbRule.db.clazzDao).thenReturn(repoClazzDaoSpy)
+        repo@Entity@DaoSpy = spy(clientDbRule.db.@Entity_VariableName@Dao)
+        whenever(clientDbRule.db.@Entity_VariableName@Dao).thenReturn(repo@Entity@DaoSpy)
 
         //TODO: insert any entities required for all tests
     }
@@ -60,7 +60,7 @@ class ClazzEdit2PresenterTest {
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
         val presenterArgs = mapOf<String, String>()
 
-        val presenter = ClazzEdit2Presenter(context,
+        val presenter = @BaseFileName@Presenter(context,
                 presenterArgs, mockView, mockLifecycleOwner,
                 systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
                 clientDbRule.accountLiveData)
@@ -69,27 +69,27 @@ class ClazzEdit2PresenterTest {
         val initialEntity = mockView.captureLastEntityValue()!!
 
         //TODO: Make some changes (e.g. as the user would do using data binding
-        initialEntity.clazzName = "Bob"
+        //e.g. initialEntity.someNameField = "Bob"
 
         presenter.handleClickSave(initialEntity)
 
-        val existingEntitiesLive = clientDbRule.db.clazzDao.findAllLive()
+        val existingEntitiesLive = clientDbRule.db.@Entity_VariableName@Dao.findAllLive()
         val entitySaved = runBlocking {
             existingEntitiesLive.waitUntil { it.size == 1 }
         }.getValue()!!.first()
         Assert.assertEquals("Entity was saved to database", "Bob",
-                entitySaved.clazzName)
+                entitySaved.someNameField)
     }
 
     @Test
-    fun givenExistingClazz_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
-        val testEntity = Clazz().apply {
-            clazzName = "Spelling Clazz"
-            clazzUid = clientDbRule.repo.clazzDao.insert(this)
+    fun givenExisting@Entity@_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
+        val testEntity = @Entity@().apply {
+            someName = "Spelling Clazz"
+            @Entity_VariableName@Uid = clientDbRule.repo.@Entity_VariableName@Dao.insert(this)
         }
 
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
-        val presenter = ClazzEdit2Presenter(context,
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.@Entity_VariableName@Uid.toString())
+        val presenter = @BaseFileName@Presenter(context,
                 presenterArgs, mockView, mockLifecycleOwner,
                 systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
                 clientDbRule.accountLiveData)
@@ -98,17 +98,17 @@ class ClazzEdit2PresenterTest {
         val initialEntity = mockView.captureLastEntityValue()!!
 
         //Make some changes to the entity (e.g. as the user would do using data binding)
-        initialEntity.clazzName = "New Spelling Clazz"
+        //e.g. initialEntity!!.someName = "New Spelling Clazz"
 
         presenter.handleClickSave(initialEntity)
 
         val entitySaved = runBlocking {
-            clientDbRule.db.clazzDao.findByUidLive(testEntity.clazzUid)
-                    .waitUntil(5000) { it?.clazzName == "New Spelling Clazz" }.getValue()
+            clientDbRule.db.@Entity_VariableName@Dao.findByUidLive(testEntity.@Entity_VariableName@Uid)
+                    .waitUntil(5000) { it?.someName == "New Spelling Clazz" }.getValue()
         }
 
         Assert.assertEquals("Name was saved and updated",
-                "New Spelling Clazz", entitySaved!!.clazzName)
+                "New Spelling Clazz", entitySaved!!.someName)
     }
 
 
