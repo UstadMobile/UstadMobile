@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="android.view.View"/>
+
+        <variable
+            name="clazzWorkWithSubmission"
+            type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
+
+        <variable
+            name="freeText"
+            type="Integer" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:id="@+id/item_comment_new_layout"
+        >
+
+        <EditText
+            android:id="@+id/item_clazzwork_submission_text_entry_et"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+            android:layout_marginVertical="@dimen/formitem_margin_vertical"
+            android:layout_marginTop="8dp"
+            android:hint="@string/submit_your_answer"
+            android:inputType="textCapSentences"
+            android:singleLine="true"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission == null &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText)?View.VISIBLE:View.GONE}"
+            android:text="@={clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionText}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/item_clazzwork_submission_text_entry_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@{clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionText}"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission != null &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText)?View.VISIBLE:View.GONE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/item_clazzwork_submission_text_entry_et"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzwork_submission_text_entry_et"
+            tools:text="The characters want to learn about each other and play with each other." />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

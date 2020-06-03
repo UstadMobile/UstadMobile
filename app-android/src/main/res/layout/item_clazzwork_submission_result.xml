@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="android.view.View"/>
+
+        <variable
+            name="clazzWorkWithSubmission"
+            type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:id="@+id/item_comment_new_layout"
+        >
+
+        <TextView
+            android:id="@+id/item_clazzwork_submission_result_score_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/formitem_margin_vertical"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="@dimen/form_margin_horizontal"
+            android:contentDescription="@string/score"
+            android:text="@{`` + clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionScore + '/'+ clazzWorkWithSubmission.clazzWorkMaximumScore}"
+            android:textColor="@color/text_primary"
+            android:textSize="30sp"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission != null)?View.VISIBLE:View.GONE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="42/100" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

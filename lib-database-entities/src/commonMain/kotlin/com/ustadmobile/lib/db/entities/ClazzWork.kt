@@ -53,7 +53,7 @@ open class ClazzWork {
     var clazzWorkLastChangedBy: Int = 0
 
 
-    constructor(){
+        constructor(){
         clazzWorkActive = true
     }
 

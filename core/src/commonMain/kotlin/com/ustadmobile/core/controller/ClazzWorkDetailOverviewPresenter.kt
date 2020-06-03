@@ -26,7 +26,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
     : UstadDetailPresenter<ClazzWorkDetailOverviewView, ClazzWorkWithSubmission>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
-    var clazzWorkWithSubmissionLiveData: DoorMutableLiveData<List<ClazzWorkWithSubmission>>? = null
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -84,12 +83,12 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                                 })
                             }
                             ClazzWorkQuestionAndOptionWithResponse(
+                                    entity?:ClazzWorkWithSubmission(),
                                 it.key?: ClazzWorkQuestion(),
                                 it.value.map { it.clazzWorkQuestionOption?: ClazzWorkQuestionOption() },
                                     qResponse.first()) }
 
         view.clazzWorkQuizQuestionsAndOptionsWithResponse = DoorMutableLiveData(questionsAndOptionsWithResponseList)
-        //view.clazzWorkQuizQuestionsAndOptionsWithResponse?.sendValue(questionsAndOptionsWithResponseList)
 
 
         val publicComments = withTimeoutOrNull(2000){
