@@ -11,14 +11,15 @@ import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
-import com.toughra.ustadmobile.databinding.ItemClazzworkDetailDescriptionBinding
-import com.toughra.ustadmobile.databinding.ItemCommetsListBinding
+import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter
+import com.ustadmobile.core.controller.ClazzWorkEditPresenter
+import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.EditButtonMode
@@ -35,8 +36,10 @@ interface NewCommentHandler{
     fun addComment(view: View, comment: String?, public:Boolean?)
 }
 
-class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSubmission>(),
-        ClazzWorkDetailOverviewView, NewCommentHandler{
+interface QuizQuestionHandler{
+}
+class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmission>(),
+        ClazzWorkDetailOverviewView, NewCommentHandler, QuizQuestionHandler{
 
     private var mBinding: FragmentClazzWorkWithSubmissionDetailBinding? = null
 
@@ -48,11 +51,10 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
     private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
     private var contentRecyclerView: RecyclerView? = null
 
-    private var quizQuestionsRecyclerAdapter: ClazzWorkEditFragment.ClazzWorkQuestionRecyclerAdapter? = null
+    private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter? = null
     private var quizQuestionsRecyclerView: RecyclerView? = null
-    private var quizLiveData: LiveData<PagedList<ClazzWorkQuestionAndOptions>>? = null
-    private val quizQuestionObserver = Observer<List<ClazzWorkQuestionAndOptions>> { t ->
-        quizQuestionsRecyclerAdapter?.submitList(t)
+    private val quizQuestionAndResponseObserver = Observer<List<ClazzWorkQuestionAndOptionWithResponse>?> {
+        t -> quizQuestionsRecyclerAdapter?.submitList(t)
     }
 
     private var publicCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
@@ -74,6 +76,30 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
     private var detailMergerRecyclerView: RecyclerView? = null
 
     private var detailRecyclerAdapter: ClazzWorkDetailRecyclerAdapter? = null
+
+
+    class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
+            val activityEventHandler: QuizQuestionHandler,
+            var presenter: ClazzWorkDetailOverviewPresenter?)
+        : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
+            ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter.ClazzWorkQuestionViewHolder>(
+            DIFFUTIL_CLAZZWORK_QUESTION_AND_OPTION_WITH_RESPONSE) {
+
+        class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseBinding)
+            : RecyclerView.ViewHolder(binding.root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkQuestionViewHolder {
+            val viewHolder = ClazzWorkQuestionViewHolder(ItemClazzworkquestionandoptionswithresponseBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false))
+            viewHolder.binding.mPresenter = presenter
+            viewHolder.binding.mActivity = activityEventHandler
+            return viewHolder
+        }
+
+        override fun onBindViewHolder(holder: ClazzWorkQuestionViewHolder, position: Int) {
+            holder.binding.clazzWorkQuestionAndOptionsWithResponse = getItem(position)
+        }
+    }
 
 
     class CommentsRecyclerAdapter(var presenter: ClazzWorkDetailOverviewPresenter?)
@@ -133,9 +159,6 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
     }
 
 
-
-
-
     override fun addComment(view: View, comment: String?, public: Boolean?) {
         //TODO: Fix this : Disable comment Text
         if(view.comment_text != null) {
@@ -167,7 +190,8 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
 
         //Main Merger:
         detailRecyclerAdapter = ClazzWorkDetailRecyclerAdapter(entity)
-        detailMergerRecyclerAdapter = MergeAdapter(detailRecyclerAdapter)
+        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(this, mPresenter)
+        detailMergerRecyclerAdapter = MergeAdapter(detailRecyclerAdapter, quizQuestionsRecyclerAdapter)
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
@@ -272,14 +296,6 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
         }
 
 
-    override var clazzWorkQuizQuestionsAndOptions: DataSource.Factory<Int, ClazzWorkQuestionAndOptions>? = null
-        get() = field
-        set(value) {
-            quizLiveData?.removeObserver(quizQuestionObserver)
-            quizLiveData = value?.asRepositoryLiveData(dbRepo.clazzWorkQuestionOptionDao)
-            quizLiveData?.observe(this, quizQuestionObserver)
-
-        }
     override var clazzWorkQuizQuestionsAndOptionsWithResponse: DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
         get() = field
         set(value) {
@@ -340,6 +356,16 @@ class ClazzWorkWithSubmissionDetailFragment: UstadDetailFragment<ClazzWorkWithSu
             }
 
             override fun areContentsTheSame(oldItem: ClazzWorkWithSubmission, newItem: ClazzWorkWithSubmission): Boolean {
+                return oldItem == newItem
+            }
+        }
+
+        val DIFFUTIL_CLAZZWORK_QUESTION_AND_OPTION_WITH_RESPONSE = object: DiffUtil.ItemCallback<ClazzWorkQuestionAndOptionWithResponse>() {
+            override fun areItemsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse, newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
+                return oldItem.clazzWorkQuestion.clazzWorkQuestionUid == newItem.clazzWorkQuestion.clazzWorkQuestionUid
+            }
+
+            override fun areContentsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse, newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
                 return oldItem == newItem
             }
         }

@@ -904,5 +904,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     Translators note: translate only the word attendance, do not modify %1.0f%%-->
     <string name="x_percent_attended">%1.0f%% attendance</string>
 
+    <string name="answer">Answer</string>
+
 
 </resources>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="java.util.List"/>
+        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="android.view.View"/>
+
+
+        <variable name="clazzWorkQuestionAndOptionsWithResponse"
+            type="com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse" />
+        <variable
+            name="freeTextType"
+            type="Integer" />
+        <variable
+            name="quizType"
+            type="Integer" />
+
+        <variable name="mPresenter"
+            type="com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter" />
+
+        <variable name="mActivity"
+            type="com.ustadmobile.port.android.view.QuizQuestionHandler" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:background="?attr/selectableItemBackground"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_clazzworkquestionandoptionswithresponse_blah"
+            android:layout_width="@dimen/list_twoline1_imagesize"
+            android:layout_height="@dimen/list_twoline1_imagesize"
+            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_add_black_24dp" />
+        
+        <TextView
+            android:id="@+id/item_clazzworkquestionandoptionswithresponse_title_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:text="@{clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionText}"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_clazzworkquestionandoptionswithresponse_blah"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Question A" />
+
+        <EditText
+            android:id="@+id/item_clazzworkquestionandoptionswithresponse_answer_et"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/answer"
+            android:inputType="textPersonName"
+            android:text="@={clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseText}"
+            android:visibility="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == freeTextType)?View.VISIBLE:View.GONE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            app:layout_constraintStart_toEndOf="@+id/item_clazzworkquestionandoptionswithresponse_blah"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/item_clazzworkquestionandoptionswithresponse_quiz_options_rv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/item_clazzworkquestionandoptionswithresponse_answer_et"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_answer_et" />
+
+        <RadioGroup
+            android:id="@+id/activity_role_assignment_detail_radio_options"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == quizType)?View.VISIBLE:View.GONE}"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/item_clazzworkquestionandoptionswithresponse_answer_et"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_quiz_options_rv">
+
+            <RadioButton
+                android:id="@+id/activity_role_assignment_detail_user_option"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="false"
+                android:text="Option A"
+                android:textSize="12sp" />
+
+            <RadioButton
+                android:id="@+id/activity_role_assignment_detail_group_option"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="false"
+                android:text="Option B"
+                android:textSize="12sp" />
+        </RadioGroup>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

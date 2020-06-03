@@ -100,6 +100,8 @@ class ClazzWorkDetailOverviewPresenterTest {
 
         verify(mockView, timeout(5000).atLeastOnce()).studentMode = false
 
+        //mockView.clazzWorkQuizQuestionsAndOptionsWithResponse!!.value
+
 
     }
 

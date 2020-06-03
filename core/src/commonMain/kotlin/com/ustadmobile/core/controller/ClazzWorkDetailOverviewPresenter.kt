@@ -69,13 +69,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                     db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(entityUid)
                 }?: listOf()
 
-        val questionsWithOptionsList: List<ClazzWorkQuestionAndOptions> =
-                questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
-                        .map { ClazzWorkQuestionAndOptions(
-                                it.key?: ClazzWorkQuestion(),
-                                it.value.map { it.clazzWorkQuestionOption?: ClazzWorkQuestionOption() },
-                                listOf()) }
-
         val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
                 questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
                         .map {
