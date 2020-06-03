@@ -244,10 +244,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
 
     override fun addComment(view: View, comment: String?, public: Boolean?) {
-        //TODO: Fix this : Disable comment Text
-        if(view.comment_text != null) {
-            view.comment_text.setText("")
-        }
         mPresenter?.addComment(comment?:"", public?:false)
     }
 
@@ -260,9 +256,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             rootView = it.root
         }
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
-
-        publicCommentsRecyclerView = rootView.findViewById(R.id.public_comments_rv)
-        privateCommentsRecyclerView = rootView.findViewById(R.id.private_comments_rv)
+        
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
 
         mPresenter = ClazzWorkDetailOverviewPresenter(requireContext(),
@@ -421,7 +415,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         get() = field
         set(value) {
             field = value
-            mBinding?.startDateTimezone?.text = "($value)"
         }
 
     override var clazzWorkPublicComments: DataSource.Factory<Int, CommentsWithPerson>? = null
