@@ -93,6 +93,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                     LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
             viewHolder.binding.mActivity = activityEventHandler
+            viewHolder.binding.freeTextType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
+            viewHolder.binding.quizType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
             return viewHolder
         }
 
@@ -188,9 +190,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
 
-        //Main Merger:
+        //Main Merger:PP
         detailRecyclerAdapter = ClazzWorkDetailRecyclerAdapter(entity)
-        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(this, mPresenter)
+        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
+                this, mPresenter)
         detailMergerRecyclerAdapter = MergeAdapter(detailRecyclerAdapter, quizQuestionsRecyclerAdapter)
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
@@ -299,7 +302,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     override var clazzWorkQuizQuestionsAndOptionsWithResponse: DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
         get() = field
         set(value) {
+            field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
+            value?.observe(viewLifecycleOwner, quizQuestionAndResponseObserver)
         }
 
     override var timeZone: String = ""

@@ -88,7 +88,8 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                                 it.value.map { it.clazzWorkQuestionOption?: ClazzWorkQuestionOption() },
                                     qResponse.first()) }
 
-        view.clazzWorkQuizQuestionsAndOptionsWithResponse?.sendValue(questionsAndOptionsWithResponseList)
+        view.clazzWorkQuizQuestionsAndOptionsWithResponse = DoorMutableLiveData(questionsAndOptionsWithResponseList)
+        //view.clazzWorkQuizQuestionsAndOptionsWithResponse?.sendValue(questionsAndOptionsWithResponseList)
 
 
         val publicComments = withTimeoutOrNull(2000){
