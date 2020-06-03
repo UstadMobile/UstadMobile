@@ -2,7 +2,6 @@ package com.ustadmobile.test.rules
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.door.DoorMutableLiveData
