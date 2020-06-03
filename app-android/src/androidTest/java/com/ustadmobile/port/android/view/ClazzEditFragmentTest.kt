@@ -6,6 +6,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
 import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.soywiz.klock.DateTime
@@ -15,6 +16,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
@@ -83,6 +85,54 @@ class ClazzEditFragmentTest  {
                     .waitUntilWithFragmentScenario(fragmentScenario){ it.isNotEmpty() }?.size)
     }
 
+    @Test
+    fun givenClazzExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
+        val existingHolidayCal = HolidayCalendar().apply {
+            umCalendarName = "Demo Calendar"
+            umCalendarUid = dbRule.db.holidayCalendarDao.insert(this)
+        }
+
+        val existingClazz = ClazzWithHolidayCalendarAndSchool().apply {
+            clazzName = "New Clazz"
+            clazzDesc = "Clazz description"
+            clazzHolidayUMCalendarUid = existingHolidayCal.umCalendarUid
+            clazzUid = dbRule.db.clazzDao.insert(this)
+        }
+
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazz.clazzUid)) {
+            ClazzEditFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }
+
+        val editIdlingResource = SingleEditEntityIdlingResource(fragmentScenario.letOnFragment { it })
+        IdlingRegistry.getInstance().register(editIdlingResource)
+
+        onIdle()
+
+        //Freeze and serialize the value as it was first shown to the user
+        val entityLoadedByFragment = fragmentScenario.letOnFragment { it.entity }
+        val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
+        val newClazzValues = defaultGson().fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchool::class.java).apply {
+            clazzName = "Updated Clazz"
+        }
+
+
+        fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment)
+
+        fragmentScenario.clickOptionMenu(R.id.menu_done)
+
+        Assert.assertEquals("Entity in database was loaded for user",
+                "New Clazz",
+                defaultGson().fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchool::class.java).clazzName)
+
+        val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existingClazz.clazzUid)
+                .waitUntilWithFragmentScenario(fragmentScenario){ it?.clazzName == "Updated Clazz"}
+        Assert.assertEquals("Clazz name is updated", "Updated Clazz",
+                updatedEntityFromDb?.clazzName)
+    }
+
 
     companion object {
 
@@ -93,17 +143,19 @@ class ClazzEditFragmentTest  {
                        schedulesOnForm: List<Schedule>? = null,
                        setFieldsRequiringNavigation: Boolean = true) {
 
-            takeIf { clazz.clazzName != clazzOnForm?.clazzName }?.run {
-                onView(withId(R.id.activity_clazz_edit_name_text)).perform(clearText(), typeText(clazz.clazzName))
+            clazz.clazzName?.takeIf { it != clazzOnForm?.clazzName }?.also {
+                onView(withId(R.id.activity_clazz_edit_name_text)).perform(clearText(), typeText(it))
             }
-            takeIf { clazz.clazzDesc != clazzOnForm?.clazzName}?.run {
-                onView(withId(R.id.activity_clazz_edit_desc_text)).perform(clearText(), typeText(clazz.clazzDesc))
+
+            clazz.clazzDesc?.takeIf { it != clazzOnForm?.clazzDesc}?.also {
+                onView(withId(R.id.activity_clazz_edit_desc_text)).perform(clearText(), typeText(it))
             }
-            takeIf { clazz.clazzStartTime != clazzOnForm?.clazzStartTime }?.run {
-                setDateField(R.id.activity_clazz_edit_start_date_edittext, clazz.clazzStartTime)
+
+            clazz.clazzStartTime.takeIf { it != clazzOnForm?.clazzStartTime }?.also {
+                setDateField(R.id.activity_clazz_edit_start_date_edittext, it)
             }
-            takeIf { clazz.clazzEndTime != clazzOnForm?.clazzEndTime}?.run {
-                setDateField(R.id.activity_clazz_edit_end_date_edittext, clazz.clazzEndTime)
+            clazz.clazzEndTime.takeIf { it != clazzOnForm?.clazzEndTime}?.also {
+                setDateField(R.id.activity_clazz_edit_end_date_edittext, it)
             }
 
 
