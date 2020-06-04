@@ -5,6 +5,8 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 
 interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
 
+    fun showContentEntryAddOptions(parentEntryUid: Long)
+
     companion object {
 
         const val ARG_DOWNLOADED_CONTENT = "downloaded"

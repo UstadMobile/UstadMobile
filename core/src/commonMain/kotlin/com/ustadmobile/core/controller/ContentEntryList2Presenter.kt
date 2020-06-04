@@ -86,8 +86,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickCreateNewFab() {
-        systemImpl.go(ContentEntryAddOptionsView.VIEW_NAME,
-                mapOf(ARG_PARENT_ENTRY_UID to parentUid.toString()), context)
+       view.showContentEntryAddOptions(parentUid)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {

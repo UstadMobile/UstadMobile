@@ -14,6 +14,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -72,6 +73,14 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(R.string.content_editor_create_new_title)
+    }
+
+    override fun showContentEntryAddOptions(parentEntryUid: Long) {
+        val entryAddOption = ContentEntryAddOptionsBottomSheetFragment()
+        entryAddOption.arguments = UMAndroidUtil.mapToBundle(mapOf(UstadView.ARG_PARENT_ENTRY_UID
+                to parentEntryUid.toString()))
+        entryAddOption.show(childFragmentManager, entryAddOption.tag)
+
     }
 
     /**
