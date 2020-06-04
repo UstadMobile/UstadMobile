@@ -2,30 +2,35 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.os.Bundle
-import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.text.HtmlCompat
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.paging.DataSource
+import androidx.paging.PagedList
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
+import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
 import com.ustadmobile.core.controller.ContentEntry2DetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
-import kotlinx.android.synthetic.main.fragment_content_entry2_detail.view.*
+import com.ustadmobile.port.android.util.ext.runAfterPermissionGranted
+import kotlinx.android.synthetic.main.fragment_content_entry2_detail.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -33,18 +38,24 @@ import kotlinx.coroutines.withContext
 
 
 interface ContentEntryDetailFragmentEventHandler {
-    fun handleDescription(description:String?): Spanned?
-
-    fun handleFileSize(fileSize: Long): String
 
     fun handleOnClickOpenDownloadButton()
 }
 
-class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntry2DetailView, ContentEntryDetailFragmentEventHandler, ContentEntryDetailLanguageAdapter.AdapterViewListener {
+class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntry2DetailView, ContentEntryDetailFragmentEventHandler{
 
     private var mBinding: FragmentContentEntry2DetailBinding? = null
 
     private var mPresenter: ContentEntry2DetailPresenter? = null
+
+    private var currentLiveData: LiveData<PagedList<ContentEntryRelatedEntryJoinWithLanguage>>? = null
+
+    private var availableTranslationAdapter: AvailableTranslationRecyclerAdapter? = null
+
+    private val availableTranslationObserver = Observer<List<ContentEntryRelatedEntryJoinWithLanguage>?> {
+        t -> availableTranslationAdapter?.submitList(t)
+    }
+
 
     override var entity: ContentEntryWithMostRecentContainer? = null
         get() = field
@@ -53,9 +64,6 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             mBinding?.contentEntry = value
         }
 
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        (activity as MainActivity).showSnackBar(message, action, actionMessageId)
-    }
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
         get() = field
@@ -66,41 +74,51 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override fun handleDescription(description: String?): Spanned? {
-        return if(description == null) null else HtmlCompat.fromHtml(description, HtmlCompat.FROM_HTML_MODE_LEGACY)
-    }
 
-    override fun handleFileSize(fileSize: Long): String {
-        return UMFileUtil.formatFileSize(fileSize)
-    }
 
     override fun handleOnClickOpenDownloadButton() {
         mPresenter?.handleOnClickOpenDownloadButton()
     }
 
-    override fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>?) {
-        if(result != null){
-            val adapter = ContentEntryDetailLanguageAdapter(result, this@ContentEntry2DetailFragment)
-            mBinding?.translationAdapter = adapter
+    override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
+        get() = field
+        set(value) {
+            currentLiveData?.removeObserver(availableTranslationObserver)
+            val dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+            val displayTypeRepoVal = dbRepo.contentEntryRelatedEntryJoinDao
+            currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
+            currentLiveData?.observe(this, availableTranslationObserver)
+            field = value
         }
-        mBinding?.showTranslation = result!= null && result.isNotEmpty()
-    }
 
-    override fun navigateToTranslation(entryUid: Long) {
-        arguments?.putString(ARG_ENTITY_UID,entryUid.toString())
-        findNavController().navigate(R.id.content_entry_details_dest, arguments)
-    }
 
-    override fun showDownloadOptionsDialog(map: Map<String, String>) {
-        (activity as? MainActivity)?.runAfterGrantingPermission(
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                Runnable { UstadMobileSystemImpl.instance.go("DownloadDialog", map, requireContext()) }
-                ,getString(R.string.download_storage_permission_title),
-                getString(R.string.download_storage_permission_message))
-    }
+    override var downloadOptions: Map<String, String>? = null
+        set(value) {
+            if(value != null){
+                runAfterPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+                    UstadMobileSystemImpl.instance.go("DownloadDialog", value, requireContext())
+                }
+            }
 
-    override fun selectContentEntryOfLanguage(contentEntryUid: Long) {
-       mPresenter?.handleOnTranslationClicked(contentEntryUid)
+        }
+
+    class AvailableTranslationRecyclerAdapter(val activityEventHandler: ContentEntryDetailFragmentEventHandler,
+                                              var presenter: ContentEntry2DetailPresenter?):
+            ListAdapter<ContentEntryRelatedEntryJoinWithLanguage, AvailableTranslationRecyclerAdapter.TranslationViewHolder>(DIFF_CALLBACK_ENTRY_LANGUAGE_JOIN) {
+
+        class TranslationViewHolder(val binding: ItemEntryTranslationBinding): RecyclerView.ViewHolder(binding.root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TranslationViewHolder {
+            val viewHolder = TranslationViewHolder(ItemEntryTranslationBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false))
+            viewHolder.binding.mPresenter = presenter
+            viewHolder.binding.mActivity = activityEventHandler
+            return viewHolder
+        }
+
+        override fun onBindViewHolder(holder: TranslationViewHolder, position: Int) {
+            holder.binding.entryWithLanguage = getItem(position)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -109,26 +127,29 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             rootView = it.root
             it.fragmentEventHandler = this
         }
-
-        val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
-        flexboxLayoutManager.flexDirection = FlexDirection.ROW
-        rootView.entry_detail_flex.layoutManager = flexboxLayoutManager
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         GlobalScope.launch {
-            val networkManagerBle = (activity as MainActivity).networkManagerBle.await()
+            val networkManagerBle = (activity as? MainActivity)?.networkManagerBle?.await()
             val thisFrag = this@ContentEntry2DetailFragment
             withContext(Dispatchers.Main){
                 mPresenter = ContentEntry2DetailPresenter(requireContext(), arguments.toStringMap(), thisFrag,
                         thisFrag, UstadMobileSystemImpl.instance, true,
                         UmAccountManager.getActiveDatabase(requireContext()),
                         UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                        networkManagerBle.containerDownloadManager,
+                        networkManagerBle?.containerDownloadManager,
                         UmAccountManager.activeAccountLiveData, ::goToContentEntry)
                 mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+
+                val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
+                flexboxLayoutManager.flexDirection = FlexDirection.ROW
+
+                availableTranslationAdapter = AvailableTranslationRecyclerAdapter(thisFrag,mPresenter)
+                availableTranslationView.adapter = availableTranslationAdapter
+                availableTranslationView.layoutManager = flexboxLayoutManager
             }
         }
     }
@@ -138,5 +159,23 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         mBinding = null
         mPresenter = null
         entity = null
+    }
+
+
+
+    companion object{
+
+        val DIFF_CALLBACK_ENTRY_LANGUAGE_JOIN: DiffUtil.ItemCallback<ContentEntryRelatedEntryJoinWithLanguage> =
+                object: DiffUtil.ItemCallback<ContentEntryRelatedEntryJoinWithLanguage>() {
+            override fun areItemsTheSame(oldItem: ContentEntryRelatedEntryJoinWithLanguage,
+                                         newItem: ContentEntryRelatedEntryJoinWithLanguage): Boolean {
+                return oldItem.cerejRelatedEntryUid == newItem.cerejRelatedEntryUid
+            }
+
+            override fun areContentsTheSame(oldItem: ContentEntryRelatedEntryJoinWithLanguage,
+                                            newItem: ContentEntryRelatedEntryJoinWithLanguage): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 }

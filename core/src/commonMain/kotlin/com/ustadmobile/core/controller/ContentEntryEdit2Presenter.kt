@@ -154,6 +154,8 @@ class ContentEntryEdit2Presenter(context: Any,
                         containerDownloadManager.handleDownloadJobItemUpdated(downloadJobItem)
                     }
                     view.finishWithResult(listOf(entity))
+                }else{
+                    view.finishWithResult(listOf(entity))
                 }
             }else{
                 view.showSnackBar(systemImpl.getString(MessageID.register_empty_fields, context))

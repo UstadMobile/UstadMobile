@@ -27,11 +27,6 @@
             name="isNewFolder"
             type="boolean" />
 
-
-        <variable
-            name="supportedFiles"
-            type="String" />
-
         <variable
             name="selectedFileUri"
             type="String" />
@@ -113,7 +108,7 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:textSize="@dimen/text_body_small"
                 android:id="@+id/supported_file_list"
-                android:text="@{supportedFiles}"
+                android:text="@string/supported_files"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

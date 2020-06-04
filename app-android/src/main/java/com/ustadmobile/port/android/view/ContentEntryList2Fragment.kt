@@ -22,7 +22,7 @@ import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(),
-        ContentEntryList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+        ContentEntryList2View, View.OnClickListener{
 
     private var mPresenter: ContentEntryList2Presenter? = null
 

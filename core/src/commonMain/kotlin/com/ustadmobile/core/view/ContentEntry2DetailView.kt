@@ -1,16 +1,15 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 
 
 interface ContentEntry2DetailView: UstadDetailView<ContentEntryWithMostRecentContainer> {
 
-    fun setAvailableTranslations(result: List<ContentEntryRelatedEntryJoinWithLanguage>?)
+    var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
 
-    fun navigateToTranslation(entryUid: Long)
-
-    fun showDownloadOptionsDialog(map: Map<String, String>)
+    var downloadOptions: Map<String, String>?
 
     companion object {
 

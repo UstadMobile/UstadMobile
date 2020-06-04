@@ -107,7 +107,7 @@
     <string name="new_tab">العرض على شاشة جديدة</string>
     <string name="loading">تحميل</string>
     <string name="error_opening_file">خطأ في فتح الملف:</string>
-    <string name="content_supported_files">الملفات المدعمة: <b>Epub, TinCan (XAPI) Zip</b>
+    <string name="supported_files">الملفات المدعمة: <b>Epub, TinCan (XAPI) Zip</b>
     </string>
     <string name="logout">تسجيل الخروج</string>
     <string name="about">حول</string>

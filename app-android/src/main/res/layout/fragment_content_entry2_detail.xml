@@ -27,10 +27,6 @@
             type="com.ustadmobile.core.view.EditButtonMode"/>
 
         <variable
-            name="translationAdapter"
-            type="com.ustadmobile.port.android.view.ContentEntryDetailLanguageAdapter"/>
-
-        <variable
             name="fragmentEventHandler"
             type="com.ustadmobile.port.android.view.ContentEntryDetailFragmentEventHandler" />
 
@@ -190,7 +186,7 @@
                     android:textSize="@dimen/text_body_small"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.1"
-                    android:text="@{fragmentEventHandler.handleFileSize(contentEntry.container.fileSize)}"
+                    app:fileSize="@{contentEntry.container.fileSize}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/image_content_size"
                     tools:text="50 mb" />
@@ -237,7 +233,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
-                    android:text='@{fragmentEventHandler.handleDescription(contentEntry.description)}'
+                    app:htmlText='@{contentEntry.description}'
                     android:textColor="@android:color/black"
                     android:textSize="@dimen/text_body"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -281,12 +277,11 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:visibility="@{showTranslation ? View.VISIBLE: View.GONE}"
-                    android:id="@+id/entry_detail_flex"
+                    android:id="@+id/availableTranslationView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:nestedScrollingEnabled="false"
-                    app:languageAdapter="@{translationAdapter}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -303,7 +298,7 @@
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/entry_detail_flex" />
+                    app:layout_constraintTop_toBottomOf="@id/availableTranslationView" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>

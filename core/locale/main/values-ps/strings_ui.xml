@@ -254,7 +254,7 @@
     <string name="xapi_person_header">کس</string>
     <string name="xapi_verb_header">څه کار ترسره کړ</string>
     <string name="xapi_result_header">پایله</string>
-    <string name="content_supported_files">د ملاتړ وړ دوتني: <b> ایپب، ټینکان (XAPI)، زیپ</b>
+    <string name="supported_files">د ملاتړ وړ دوتني: <b> ایپب، ټینکان (XAPI)، زیپ</b>
     </string>
     <string name="content_entry_importing">واردیږی، هیله ده په تمه اوسئ</string>
     <string name="xapi_when_header">کله</string>

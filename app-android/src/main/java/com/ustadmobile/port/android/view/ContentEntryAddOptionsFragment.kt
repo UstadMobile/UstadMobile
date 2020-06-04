@@ -10,7 +10,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ContentEntryAddOptionsView
 import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_IMPORT_CONTENT
-import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.CONTENT_TYPE
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
 
@@ -34,18 +34,19 @@ class ContentEntryAddOptionsFragment : UstadBottomSheetFragment(), ContentEntryA
 
     override fun onClick(view: View?) {
        val contentType =  when(view?.id){
-            R.id.content_create_folder -> CONTENT_CREATE_FOLDER
-            R.id.content_import_content -> CONTENT_IMPORT_CONTENT
+            R.id.content_create_folder -> false
+            R.id.content_import_content -> true
            else -> -1
        }
 
         findNavController().navigate(R.id.content_entry_edit_dest, UMAndroidUtil.mapToBundle(mapOf(
                 ARG_PARENT_ENTRY_UID to arguments?.get(ARG_PARENT_ENTRY_UID).toString(),
-                CONTENT_TYPE to contentType.toString())))
+                ARG_LEAF to contentType.toString())))
         dismiss()
     }
 
     override val viewContext: Any
         get() = requireContext()
+
 
 }

@@ -290,7 +290,7 @@
     <string name="content_entry_label_title">عنوان</string>
     <string name="content_entry_label_save">ذخیره</string>
     <string name="content_from_link">از پیوند</string>
-    <string name="content_supported_files">فایلهای مورد حمایت: <b> ایپب، تینکن (XAPI) زیپ </b>
+    <string name="supported_files">فایلهای مورد حمایت: <b> ایپب، تینکن (XAPI) زیپ </b>
     </string>
     <string name="content_media_photo">عکس</string>
     <string name="content_media_message">چه نوع رسانه را میخواهید بگیرید؟</string>

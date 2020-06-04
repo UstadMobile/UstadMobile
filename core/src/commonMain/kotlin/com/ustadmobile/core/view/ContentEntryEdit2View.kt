@@ -25,7 +25,7 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
         const val VIEW_NAME = "ContentEntryEdit2EditView"
 
-        const val CONTENT_TYPE = "content_type"
+        const val ARG_LEAF = "content_type"
 
     }
 

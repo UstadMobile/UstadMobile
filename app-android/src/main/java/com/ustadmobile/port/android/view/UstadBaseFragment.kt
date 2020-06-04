@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
 import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
 import java.util.*
@@ -12,7 +13,7 @@ import java.util.*
 /**
  * Created by mike on 10/15/15.
  */
-open class UstadBaseFragment : Fragment() {
+open class UstadBaseFragment : Fragment(), UstadView {
 
     private val runOnAttach = Vector<Runnable>()
 
@@ -70,13 +71,21 @@ open class UstadBaseFragment : Fragment() {
 
     }
 
-    fun runOnUiThread(r: Runnable?) {
+    override val viewContext: Any
+        get() = requireContext()
+
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
+    }
+
+    override fun runOnUiThread(r: Runnable?) {
         if (activity != null) {
-            activity!!.runOnUiThread(r)
+            activity?.runOnUiThread(r)
         } else {
             runOnAttach.add(r)
         }
     }
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -38,6 +39,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.UstadViewWithProgress
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
@@ -56,7 +58,7 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadView, ShakeDetector.Listener, UstadViewWithProgress {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications,UstadView, ShakeDetector.Listener,UstadViewWithProgress {
 
     private var baseController: UstadBaseController<*>? = null
 
@@ -290,15 +292,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         }
     }
 
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        val snackBar = Snackbar.make(coordinator_layout, message, Snackbar.LENGTH_LONG)
-        if (actionMessageId != 0) {
-            snackBar.setAction(instance.getString(actionMessageId, this)) { action() }
-            snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
-        }
-        snackBar.anchorView = bottom_nav_view
-        snackBar.show()
-    }
+
 
     /**
      * All activities descending from UstadBaseActivity bind to the network manager. This method
@@ -390,16 +384,26 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         super.onDestroy()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        //This will cause service memory leak
-        /*when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                return true
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        val snackBar = Snackbar.make(coordinator_layout, message, Snackbar.LENGTH_LONG)
+        if (actionMessageId != 0) {
+            snackBar.setAction(instance.getString(actionMessageId, this)) { action() }
+            snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
+        }
+        snackBar.anchorView = bottom_nav_view
+        //Make room for snackbar visbility by hiding/showing FAB
+        snackBar.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+            override fun onShown(transientBottomBar: Snackbar?) {
+                super.onShown(transientBottomBar)
+                activity_listfragmelayout_behaviornt_fab.hide()
             }
-        }*/
 
-        return super.onOptionsItemSelected(item)
+            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                super.onDismissed(transientBottomBar, event)
+                activity_listfragmelayout_behaviornt_fab.show()
+            }
+        })
+        snackBar.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -441,6 +445,11 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         } else {
             super.attachBaseContext(newBase)
         }
+    }
+
+
+    override fun showNotification(notification: String, length: Int) {
+        runOnUiThread { Toast.makeText(this, notification, length).show() }
     }
 
 

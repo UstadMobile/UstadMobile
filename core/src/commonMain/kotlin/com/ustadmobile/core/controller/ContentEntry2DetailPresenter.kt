@@ -63,7 +63,7 @@ class ContentEntry2DetailPresenter(context: Any,
         } ?: ContentEntryWithMostRecentContainer()
 
         val result = db.contentEntryRelatedEntryJoinDao.findAllTranslationsWithContentEntryUid(entityUid)
-        view.setAvailableTranslations(result)
+        view.availableTranslationsList = result
         return entity
     }
 
@@ -72,18 +72,18 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     fun handleOnClickOpenDownloadButton(){
-        val canOpen = !isDownloadEnabled || downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE
+        val canOpen = (!isDownloadEnabled || downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE)
         if (canOpen) {
             val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
                     "false", context)!!.toBoolean()
-
-            if (loginFirst) {
+            val account = UmAccountManager.getActiveAccount(context)
+            if (loginFirst && (account == null || account.personUid == 0L)) {
                 systemImpl.go(LoginView.VIEW_NAME, arguments, context)
             } else {
                 goToSelectedContentEntry()
             }
         } else if (isDownloadEnabled) {
-            view.showDownloadOptionsDialog(arguments)
+            view.downloadOptions = arguments
         }
     }
 
@@ -112,7 +112,7 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     fun handleOnTranslationClicked(entryUid: Long){
-        view.navigateToTranslation(entryUid)
+        systemImpl.go(ContentEntry2DetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString()), context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {

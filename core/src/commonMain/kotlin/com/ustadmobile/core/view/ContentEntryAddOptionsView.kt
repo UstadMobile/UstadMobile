@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-interface ContentEntryAddOptionsView: UstadView {
+interface ContentEntryAddOptionsView {
 
     companion object {
         const val VIEW_NAME = "ContentEntryAddOptionsView"

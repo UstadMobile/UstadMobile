@@ -23,7 +23,6 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_FOLDER
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Container
@@ -108,10 +107,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         mBinding?.contentEntry?.publik = isChecked
     }
 
-    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        (activity as MainActivity).showSnackBar(message, action, actionMessageId)
-    }
-
 
     override fun onClickContentImportSourceSelection() {
         onSaveStateToBackStackStateHandle()
@@ -194,12 +189,10 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
-            val contentType = arguments?.get(ContentEntryEdit2View.CONTENT_TYPE)
             rootView = it.root
             it.licenceSelectionListener = this
             it.activityEventHandler = this
-            it.isNewFolder = if(contentType != null) contentType.toString().toInt() == CONTENT_CREATE_FOLDER else false
-            it.supportedFiles = HtmlCompat.fromHtml(getString(R.string.content_supported_files),HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
+            it.isNewFolder = !arguments?.get(ContentEntryEdit2View.ARG_LEAF).toString().toBoolean()
             it.contentEntry?.lastModified = System.currentTimeMillis()
             it.contentEntry?.ceInactive = true
             it.contentEntry?.leaf = !it.isNewFolder

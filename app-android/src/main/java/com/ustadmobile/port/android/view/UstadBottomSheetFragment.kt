@@ -4,19 +4,28 @@ import android.content.Context
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.ustadmobile.core.view.DialogResultListener
 import com.ustadmobile.core.view.DismissableDialog
+import com.ustadmobile.core.view.UstadView
+import kotlinx.coroutines.Runnable
 import java.util.*
 
 /**
  * Created by kileha3 on 10/05/20.
  */
 
-open class UstadBottomSheetFragment : BottomSheetDialogFragment(), DismissableDialog {
+open class UstadBottomSheetFragment : BottomSheetDialogFragment(), DismissableDialog, UstadView {
 
     protected lateinit var mResultListener: DialogResultListener
 
     private val runOnAttach = Vector<Runnable>()
 
-    fun runOnUiThread(r: Runnable?) {
+    override val viewContext: Any
+        get() = requireContext()
+
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
+    }
+
+    override fun runOnUiThread(r: Runnable?) {
         if (activity != null) {
             activity?.runOnUiThread(r)
         } else {

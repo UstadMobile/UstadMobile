@@ -54,7 +54,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil.getDisplayWidth
 import com.ustadmobile.core.impl.UMAndroidUtil.getMimeType
 import com.ustadmobile.core.impl.UMAndroidUtil.getSpanCount
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
 import com.ustadmobile.core.view.ContentEditorView

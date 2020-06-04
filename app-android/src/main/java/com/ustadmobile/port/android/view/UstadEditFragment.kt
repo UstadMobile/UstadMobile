@@ -70,6 +70,10 @@ abstract class UstadEditFragment<T>: UstadBaseFragment(), UstadEditView<T> {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putAll(mutableMapOf<String, String>().apply { mEditPresenter?.onSaveInstanceState(this) }.toBundle())
