@@ -11,7 +11,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
 
-abstract class UstadDetailFragment<T>: UstadBaseFragment(), UstadDetailView<T> {
+abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView<T> {
 
     override val viewContext: Any
         get() = requireContext()

@@ -52,6 +52,8 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
 
     private val lifecycleStatus = atomic(0)
 
+    private var created: Boolean = false
+
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
      *
@@ -59,6 +61,9 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      */
     @JsName("onCreate")
     open fun onCreate(savedState: Map<String, String>?) {
+        if(created) throw IllegalStateException("onCreate must be called ONCE AND ONLY ONCE! It has already been called")
+        created = true
+
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {
                 listener.onLifecycleCreate(this)

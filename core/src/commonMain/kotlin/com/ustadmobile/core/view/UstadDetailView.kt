@@ -4,7 +4,7 @@ enum class EditButtonMode {
     GONE, FAB
 }
 
-interface UstadDetailView<RT>: UstadSingleEntityView<RT> {
+interface UstadDetailView<RT : Any>: UstadSingleEntityView<RT> {
 
     var editButtonMode: EditButtonMode
 

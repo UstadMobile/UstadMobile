@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-interface UstadEditView<RT>: UstadSingleEntityView<RT> {
+interface UstadEditView<RT : Any>: UstadSingleEntityView<RT> {
 
     var fieldsEnabled: Boolean
 

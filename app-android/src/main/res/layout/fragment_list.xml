@@ -25,64 +25,6 @@
 
     </data>
 
-    <!--
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        tools:context="com.ustadmobile.port.android.view.ClazzList2Fragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-
-        <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
-            app:elevation="0dp"
-            android:background="@android:color/transparent">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="@{sortOptions != null &amp;&amp; sortOptions.size() > 1 ? View.VISIBLE : View.GONE}"
-                app:layout_scrollFlags="scroll">
-
-                <TextView
-                    android:id="@+id/fragment_list_"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="13dp"
-                    android:text="@string/sort_by_text"
-                    android:textColor="@color/secondary_text"
-                    android:textSize="12sp"
-                    android:layout_toStartOf="@+id/fragment_clazz_list_sort_spinner"/>
-
-                <com.ustadmobile.port.android.view.MessageIdSpinner
-                    android:id="@+id/fragment_clazz_list_sort_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_alignParentEnd="true"
-                    app:messageIdOptions="@{sortOptions}"
-                    app:onMessageIdOptionSelected="@{onSortSelected}"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </RelativeLayout>
-        </com.google.android.material.appbar.AppBarLayout>
-
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fragment_list_recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            android:clipToPadding="false"
-            android:paddingBottom="@{addMode == ListViewAddMode.FAB ? @dimen/dimen_fab_clearance: @dimen/dimen_0dp}"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-    -->
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fragment_list_recyclerview"
         android:layout_width="match_parent"
