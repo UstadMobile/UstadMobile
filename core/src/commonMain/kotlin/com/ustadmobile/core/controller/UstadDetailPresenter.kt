@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-abstract class UstadDetailPresenter<V: UstadSingleEntityView<RT>, RT>(context: Any,
+abstract class UstadDetailPresenter<V: UstadSingleEntityView<RT>, RT: Any>(context: Any,
      arguments: Map<String, String>, view: V,
      lifecycleOwner: DoorLifecycleOwner,
      systemImpl: UstadMobileSystemImpl,

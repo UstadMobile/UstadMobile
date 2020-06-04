@@ -34,6 +34,10 @@ Eg. in ClazzMember.kt:
 var clazzMemberPersonUid: Long
 ```
 
+### Active boolean flags
+As the database sync does not support deletion, it is common to use a boolean flag to mark an entity
+as inactive. The default value should be that the entity is active.
+
 ### Field nullability
 Numerical and boolean types must be __non-nullable__ (e.g. as per Java 
 primitive types). Strings must be __nullable__.

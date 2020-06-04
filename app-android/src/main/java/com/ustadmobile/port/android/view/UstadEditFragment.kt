@@ -14,7 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.port.android.util.ext.saveStateToCurrentBackStackStateHandle
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 
-abstract class UstadEditFragment<T>: UstadBaseFragment(), UstadEditView<T> {
+abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> {
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 

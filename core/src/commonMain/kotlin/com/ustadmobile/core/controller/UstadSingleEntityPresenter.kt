@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
+abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>(
         context: Any,
         arguments: Map<String, String>,
         view: V,
@@ -67,9 +67,11 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT>(
             view.entity = entity
         }else if(persistenceMode == PersistenceMode.LIVEDATA) {
             entityLiveData = onLoadLiveData(repo)
+            view.loading = true
             if(entityLiveData != null) {
                 entityLiveDataObserver = object : DoorObserver<RT?> {
                     override fun onChanged(t: RT?) {
+                        view.takeIf { t != null }?.loading = false
                         view.entity = t
                     }
                 }.also {

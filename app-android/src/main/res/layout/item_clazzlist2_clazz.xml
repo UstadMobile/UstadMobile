@@ -56,7 +56,7 @@
             app:barrierDirection="bottom"
             app:constraint_referenced_ids="clazz_description_txt,item_clazzlist_clazz_title"/>
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:visibility="@{ClazzExtKt.isAttendanceEnabledAndRecorded(clazz) ? View.VISIBLE : View.GONE}"
             android:id="@+id/item_clazzlist_attendance_trafficlight"
             android:layout_width="15dp"
@@ -83,7 +83,7 @@
             app:layout_constraintTop_toBottomOf="@+id/clazz_description_txt"
             tools:text="X% attendance" />
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_clazzlist_people_icon"
             android:layout_width="15dp"
             android:layout_height="15dp"

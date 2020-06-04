@@ -12,7 +12,7 @@ import com.ustadmobile.lib.util.copyOnWriteListOf
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-abstract class UstadEditPresenter<V: UstadEditView<RT>, RT>(context: Any,
+abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(context: Any,
     arguments: Map<String, String>, view: V,
     lifecycleOwner: DoorLifecycleOwner,
     systemImpl: UstadMobileSystemImpl,

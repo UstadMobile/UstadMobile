@@ -63,7 +63,7 @@ class Schedule {
     var scheduleLastChangedBy: Int = 0
 
     //active or removed
-    var scheduleActive: Boolean = false
+    var scheduleActive: Boolean = true
 
 
 

@@ -50,6 +50,7 @@ class @BaseFileName@Fragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>
         override fun onBindViewHolder(holder: @Entity@ListViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.@Entity_VariableName@ = item
+            holder.itemView.tag = item.@Entity_VariableName@Uid
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
