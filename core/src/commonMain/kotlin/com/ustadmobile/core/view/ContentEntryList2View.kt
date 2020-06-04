@@ -5,15 +5,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 
 interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
 
-    enum class ContentEntryListViewMode(val viewMode: Int) {
-        NORMAL(1),
-        PICKER(2)
-    }
-
-    fun checkAndGetContentType(type: String?): String
-
-    fun checkAndGetContentResource(type: String?): Int
-
     companion object {
 
         const val ARG_DOWNLOADED_CONTENT = "downloaded"

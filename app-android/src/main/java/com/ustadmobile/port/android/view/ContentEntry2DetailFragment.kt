@@ -27,6 +27,7 @@ import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.port.android.util.ext.runAfterPermissionGranted
@@ -150,6 +151,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
                 availableTranslationAdapter = AvailableTranslationRecyclerAdapter(thisFrag,mPresenter)
                 availableTranslationView.adapter = availableTranslationAdapter
                 availableTranslationView.layoutManager = flexboxLayoutManager
+                fabManager?.visible = true
             }
         }
     }

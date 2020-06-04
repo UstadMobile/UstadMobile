@@ -13,11 +13,13 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -83,9 +85,12 @@ class ContentEntryEdit2Presenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithLanguage? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
+        val isLeaf = arguments[ARG_LEAF]?.toBoolean()
         return withTimeoutOrNull(2000) {
             db.contentEntryDao.findEntryWithLanguageByEntryId(entityUid)
-        } ?: ContentEntryWithLanguage()
+        } ?: ContentEntryWithLanguage().apply {
+            leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
+        }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ContentEntryWithLanguage? {
@@ -120,9 +125,10 @@ class ContentEntryEdit2Presenter(context: Any,
 
                 if(entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
-                    val contentEntryJoin = ContentEntryParentChildJoin()
-                    contentEntryJoin.cepcjChildContentEntryUid = entity.contentEntryUid
-                    contentEntryJoin.cepcjParentContentEntryUid = parentEntryUid
+                    val contentEntryJoin = ContentEntryParentChildJoin().apply {
+                        cepcjChildContentEntryUid = entity.contentEntryUid
+                        cepcjParentContentEntryUid = parentEntryUid
+                    }
                     repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
                 }else {
                     repo.contentEntryDao.updateAsync(entity)
@@ -138,9 +144,9 @@ class ContentEntryEdit2Presenter(context: Any,
                             storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),db, repo)
 
                     if(container != null && containerDownloadManager != null){
-                        val downloadJob = DownloadJob(entity.contentEntryUid, view.jobTimeStamp)
+                        val downloadJob = DownloadJob(entity.contentEntryUid, getSystemTimeInMillis())
                         downloadJob.djStatus = JobStatus.COMPLETE
-                        downloadJob.timeRequested = view.jobTimeStamp
+                        downloadJob.timeRequested = getSystemTimeInMillis()
                         downloadJob.bytesDownloadedSoFar = container.fileSize
                         downloadJob.totalBytesToDownload = container.fileSize
                         downloadJob.djUid = repo.downloadJobDao.insert(downloadJob).toInt()

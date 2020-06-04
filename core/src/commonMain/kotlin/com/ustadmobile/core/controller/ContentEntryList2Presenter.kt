@@ -10,7 +10,6 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FIL
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CONTENT
-import com.ustadmobile.core.view.ContentEntryList2View.ContentEntryListViewMode
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -33,8 +32,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     private var parentUid: Long = 0L
 
     private var loggedPersonUid: Long = 0L
-
-    private var viewMode: ContentEntryListViewMode = ContentEntryListViewMode.NORMAL
 
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
@@ -86,14 +83,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     fun checkPermissionAndHandleDownloadStatusButtonClicked(entry: ContentEntry){
 
-    }
-
-    fun checkAndGetContentType(type: String?): String{
-        return view.checkAndGetContentType(type)
-    }
-
-    fun checkAndGetContentResource(type: String?): Int{
-        return  view.checkAndGetContentResource(type)
     }
 
     override fun handleClickCreateNewFab() {

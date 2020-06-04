@@ -60,13 +60,6 @@ fun ImageView.setCustomFieldIcon(customField: CustomField?) {
     setImageDrawable(ContextCompat.getDrawable(context, drawableId))
 }
 
-@BindingAdapter("imageResourceId")
-fun ImageView.setUmResource(resourceId: Int) {
-    if (resourceId != 0) {
-        setImageDrawable(ContextCompat.getDrawable(context, resourceId))
-    }
-}
-
 @BindingAdapter("attendanceTint")
 fun ImageView.setAttendanceTint(attendancePercentage: Float) {
     val color = when {

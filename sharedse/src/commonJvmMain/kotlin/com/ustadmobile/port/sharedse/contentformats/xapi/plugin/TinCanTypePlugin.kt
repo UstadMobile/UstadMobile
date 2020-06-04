@@ -33,6 +33,7 @@ class TinCanTypePlugin : TinCanType(), ContentTypePlugin {
                             contentFlags = ContentEntry.FLAG_IMPORTED
                             licenseType = ContentEntry.LICENSE_TYPE_OTHER
                             title = activity.name
+                            contentFlags  = ContentEntry.FLAG_IMPORTED
                             author = ""
                             description = activity.desc
                             leaf = true

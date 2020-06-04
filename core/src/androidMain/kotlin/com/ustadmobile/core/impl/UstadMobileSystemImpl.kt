@@ -161,8 +161,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ClazzAssignmentDetailView.VIEW_NAME to "${PACKAGE_NAME}ClazzAssignmentDetailActivity",
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupListView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupListActivity",
-            PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity",
-            ContentEntryAddOptionsView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryAddOptionsFragment"
+            PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
 
 

@@ -24,8 +24,8 @@
             type="boolean" />
 
         <variable
-            name="isNewFolder"
-            type="boolean" />
+            name="viewVisibility"
+            type="Integer" />
 
         <variable
             name="selectedFileUri"
@@ -79,7 +79,7 @@
                 android:onClick="@{()-> activityEventHandler.onClickContentImportSourceSelection()}"
                 android:padding="@dimen/dimen_16dp"
                 android:text="@{contentEntry.contentEntryUid == 0 ? @string/content_import_from_sources: @string/content_update_from_sources}"
-                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
+                android:visibility="@{viewVisibility}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -100,7 +100,7 @@
                 android:layout_height="wrap_content" />
 
             <TextView
-                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
+                android:visibility="@{viewVisibility}"
                 android:layout_margin="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -159,7 +159,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
+                android:visibility="@{viewVisibility}"
                 android:id="@+id/entry_author"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -183,7 +183,7 @@
 
 
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
+                android:visibility="@{viewVisibility}"
                 android:id="@+id/entry_publisher"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -207,7 +207,7 @@
 
 
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
+                android:visibility="@{viewVisibility}"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:id="@+id/entry_licence"
                 app:layout_constraintStart_toStartOf="parent"
@@ -229,7 +229,7 @@
 
 
             <Spinner
-                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
+                android:visibility="@{viewVisibility}"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
@@ -243,7 +243,7 @@
 
 
             <RelativeLayout
-                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
+                android:visibility="@{viewVisibility}"
                 android:layout_margin="@dimen/dimen_16dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -274,7 +274,7 @@
             </RelativeLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{isNewFolder ? View.GONE: View.VISIBLE}"
+                android:visibility="@{viewVisibility}"
                 android:id="@+id/entry_language"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

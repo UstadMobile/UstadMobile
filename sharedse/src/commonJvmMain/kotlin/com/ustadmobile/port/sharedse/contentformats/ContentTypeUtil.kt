@@ -17,6 +17,12 @@ import java.io.IOException
 import java.util.*
 import java.util.zip.ZipException
 
+/**
+ * Class which handles entries and containers for all imported content
+ *
+ * @author kileha3
+ */
+
 
 private val CONTENT_PLUGINS = listOf(EpubTypePlugin(), TinCanTypePlugin())
 
@@ -75,59 +81,3 @@ suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: Um
  *
  */
 data class ImportedContentEntryMetaData(var contentEntry: ContentEntryWithLanguage, var mimeType: String, var file: File)
-
-/**
- * Class which handles entries and containers for all imported content
- *
- * @author kileha3
- */
-object ContentTypeUtil {
-
-
-
-    /**
-     * Get generated content entry from the imported content
-     */
-    @Deprecated("This should be a toplevel function and should just return a nullable ContentEntry")
-    fun getContent(file: File): HashMap<String, Any?> {
-        val content = HashMap<String, Any?>()
-        for (plugin in CONTENT_PLUGINS) {
-            val contentEntry = plugin.getContentEntry(file)
-            if (contentEntry != null) {
-                contentEntry.contentFlags = ContentEntry.FLAG_IMPORTED
-                content[CONTENT_ENTRY] = contentEntry
-                content[CONTENT_MIMETYPE] = plugin.mimeTypes[0]
-                break
-            }
-        }
-
-        return content
-    }
-
-    /**
-     * Import actual content to the database
-     */
-    suspend fun importContentEntryFromFile(context: Any, contentEntry: ContentEntry,mimeType: String?, baseDir: String, file: File): ContentEntry{
-
-        val appDatabase = UmAppDatabase.getInstance(context)
-        val appRepo = UmAccountManager.getRepositoryForActiveAccount(context)
-
-        val container = Container(contentEntry)
-        container.cntLastModified = System.currentTimeMillis()
-        container.fileSize = file.length()
-        container.mimeType = mimeType
-        container.containerUid = appRepo.containerDao.insert(container)
-
-        val containerManager = ContainerManager(container, appDatabase,
-                appRepo, baseDir)
-        try {
-            addEntriesFromZipToContainer(file.absolutePath, containerManager)
-        } catch (e: ZipException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        return contentEntry
-    }
-
-}

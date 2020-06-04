@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.text.HtmlCompat
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
@@ -39,7 +38,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.util.*
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -67,6 +65,7 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         get() = field
         set(value) {
             field = value
+            mBinding?.viewVisibility = if(value != null && value.leaf) View.VISIBLE else View.GONE
             mBinding?.contentEntry = value
         }
 
@@ -82,9 +81,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             field = value
             mBinding?.selectedStorageIndex = value
         }
-    override var jobTimeStamp: Long
-        get() = System.currentTimeMillis()
-        set(value) {}
 
     override fun formatLabel(storage: UMStorageDir): String {
         return String.format(UstadMobileSystemImpl.instance.getString(
@@ -168,15 +164,11 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
 
 
     override fun setUpStorageOptions(storageOptions: List<UMStorageDir>) {
-        val options = ArrayList<String>()
-        storageOptions.forEach {
-            val deviceStorageLabel = String.format(UstadMobileSystemImpl.instance.getString(
+        mBinding?.storageOptions = storageOptions.map {
+            String.format(UstadMobileSystemImpl.instance.getString(
                     MessageID.download_storage_option_device, context as Any), it.name,
                     UMFileUtil.formatFileSize(File(it.dirURI).usableSpace))
-            options.add(deviceStorageLabel)
         }
-
-        mBinding?.storageOptions = options
     }
 
     override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String,db: UmAppDatabase, repo: UmAppDatabase): Container ?{
@@ -192,10 +184,8 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             rootView = it.root
             it.licenceSelectionListener = this
             it.activityEventHandler = this
-            it.isNewFolder = !arguments?.get(ContentEntryEdit2View.ARG_LEAF).toString().toBoolean()
             it.contentEntry?.lastModified = System.currentTimeMillis()
             it.contentEntry?.ceInactive = true
-            it.contentEntry?.leaf = !it.isNewFolder
         }
 
         return rootView
@@ -204,6 +194,7 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
+        title = getString(R.string.content)
 
         GlobalScope.launch {
             val thisFrag = this@ContentEntryEdit2Fragment
@@ -234,11 +225,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         mPresenter = null
         entity = null
         entryMetaData = null
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setEditFragmentTitle( R.string.content)
     }
 
 }

@@ -8,9 +8,7 @@ import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ContentEntryAddOptionsView
-import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_CREATE_FOLDER
-import com.ustadmobile.core.view.ContentEntryAddOptionsView.Companion.CONTENT_IMPORT_CONTENT
-import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_LEAF
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
 
@@ -19,10 +17,9 @@ import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
  * CONTENT_CREATE_FOLDER = Create new content category
  * CONTENT_IMPORT_FILE = Create content from file (epub, h5p e.t.c)
  * CONTENT_CREATE_CONTENT = create content from out content editor
- * CONTENT_IMPORT_LINK = Create content from a link
  */
 
-class ContentEntryAddOptionsFragment : UstadBottomSheetFragment(), ContentEntryAddOptionsView, View.OnClickListener {
+class ContentEntryAddOptionsBottomSheetFragment : UstadBottomSheetFragment(), ContentEntryAddOptionsView, View.OnClickListener {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {

@@ -130,7 +130,7 @@
 
     <dialog
         android:id="@+id/content_entry_add_options_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryAddOptionsFragment"
+        android:name="com.ustadmobile.port.android.view.ContentEntryAddOptionsBottomSheetFragment"
         tools:layout="@layout/fragment_content_entry_add_options"
         />
 

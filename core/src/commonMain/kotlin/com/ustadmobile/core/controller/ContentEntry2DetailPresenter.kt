@@ -72,7 +72,7 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     fun handleOnClickOpenDownloadButton(){
-        val canOpen = (!isDownloadEnabled || downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE)
+        val canOpen = !isDownloadEnabled || downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE
         if (canOpen) {
             val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
                     "false", context)!!.toBoolean()
@@ -80,7 +80,7 @@ class ContentEntry2DetailPresenter(context: Any,
             if (loginFirst && (account == null || account.personUid == 0L)) {
                 systemImpl.go(LoginView.VIEW_NAME, arguments, context)
             } else {
-                goToSelectedContentEntry()
+                openContentEntry()
             }
         } else if (isDownloadEnabled) {
             view.downloadOptions = arguments
@@ -91,7 +91,7 @@ class ContentEntry2DetailPresenter(context: Any,
         if(downloadJobItem != null){}
     }
 
-    private fun goToSelectedContentEntry() {
+    private fun openContentEntry() {
         GlobalScope.launch {
             try {
                 entity?.contentEntryUid?.let { goToEntryFn(it, db, context, systemImpl, isDownloadEnabled,

@@ -88,6 +88,8 @@ interface UstadView {
 
         const val ARG_SCHOOL_UID = "schoolUid"
 
+        const val ARG_LEAF = "content_type"
+
         const val ARG_SCHOOLMEMBER_FILTER_STUDENTS ="schoolMemberFilterStudents"
 
         const val ARG_SCHOOLMEMBER_FILTER_STAFF = "schoolMemberFilterStaff"

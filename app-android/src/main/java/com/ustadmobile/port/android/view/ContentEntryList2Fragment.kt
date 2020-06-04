@@ -92,6 +92,14 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         get() = dbRepo?.contentEntryDao
 
     companion object {
+
+        @JvmField
+        val CONTENT_ENTRY_TYPE_MAP = mapOf(
+                ContentEntry.TYPE_EBOOK to R.drawable.ic_book_black_24dp,
+                ContentEntry.TYPE_VIDEO to R.drawable.ic_video_library_24px,
+                ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
+        )
+
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> = object
             : DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>() {
             override fun areItemsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
@@ -102,25 +110,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             override fun areContentsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
                                             newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer): Boolean {
                 return oldItem == newItem
-            }
-        }
-    }
-
-    override fun checkAndGetContentType(type: String?): String {
-        return if(type == null) "" else "${getString(R.string.content_type, context)} (${type.split("/")[1]})"
-    }
-
-    override fun checkAndGetContentResource(type: String?): Int {
-        //Add here all content type drawables
-        return if(type == null) 0 else when {
-            type.contains("video") -> {
-                R.drawable.ic_video_library_24px
-            }
-            type.contains("epub") -> {
-                R.drawable.ic_book_black_24dp
-            }
-            else -> {
-                R.drawable.ic_audiotrack_24px
             }
         }
     }
