@@ -48,11 +48,6 @@
             name="storageOptions"
             type="java.util.List&lt;String&gt;"/>
 
-        <variable
-            name="licenceSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
-
-
     </data>
 
 
@@ -264,8 +259,7 @@
                     android:layout_height="match_parent" />
 
                 <androidx.appcompat.widget.SwitchCompat
-                    android:onCheckedChanged="@{(compoundButton, checked) -> activityEventHandler.onEntryPublicStatusChanged(checked)}"
-                    android:checked="@{contentEntry.publik}"
+                    android:checked="@={contentEntry.publik}"
                     android:theme="@style/Custom.SwitchCompat"
                     android:layout_alignParentEnd="true"
                     android:id="@+id/entry_public_switch"

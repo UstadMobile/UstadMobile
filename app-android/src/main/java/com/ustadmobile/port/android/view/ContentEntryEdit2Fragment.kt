@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
@@ -18,7 +17,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -42,14 +40,12 @@ import java.io.File
 
 interface ContentEntryEdit2FragmentEventHandler {
 
-    fun onEntryPublicStatusChanged(isChecked:Boolean)
-
     fun onClickContentImportSourceSelection()
 
     fun handleClickLanguage()
 }
 
-class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler, DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption> {
+class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler{
 
     private var mBinding: FragmentContentEntryEdit2Binding? = null
 
@@ -94,15 +90,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             mBinding?.fieldsEnabled = value
             field = value
         }
-
-    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {}
-
-    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {}
-
-    override fun onEntryPublicStatusChanged(isChecked: Boolean) {
-        mBinding?.contentEntry?.publik = isChecked
-    }
-
 
     override fun onClickContentImportSourceSelection() {
         onSaveStateToBackStackStateHandle()
@@ -182,8 +169,8 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         val rootView: View
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.licenceSelectionListener = this
             it.activityEventHandler = this
+            it.viewVisibility = View.GONE
             it.contentEntry?.lastModified = System.currentTimeMillis()
             it.contentEntry?.ceInactive = true
         }
