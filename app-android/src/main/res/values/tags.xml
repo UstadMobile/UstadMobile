@@ -19,4 +19,7 @@
     <item name="tag_messageidoptiond_fallback" type="id"/>
     <item name="tag_messageidoptions_list" type="id"/>
 
+    <item name="tag_clazzwork_quiz_option_uid" type="id"/>
+    <item name="tag_clazzwork_quiz_question_selected_uid" type="id"/>
+
 </resources>

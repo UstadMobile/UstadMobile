@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -26,16 +29,21 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import kotlinx.android.synthetic.main.fragment_clazz_work_with_submission_detail.view.*
 
 interface NewCommentHandler{
     fun addComment(view: View, comment: String?, public:Boolean?)
 }
 
 interface QuizQuestionHandler{
+    fun quizAnswered(rg: RadioGroup, id: Integer)
 }
+
+interface SimpleButtonHandler{
+    fun onClickButton(view: View)
+}
+
 class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmission>(),
-        ClazzWorkDetailOverviewView, NewCommentHandler, QuizQuestionHandler{
+        ClazzWorkDetailOverviewView, NewCommentHandler, QuizQuestionHandler, SimpleButtonHandler{
 
     private var mBinding: FragmentClazzWorkWithSubmissionDetailBinding? = null
 
@@ -244,6 +252,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
 
     override fun addComment(view: View, comment: String?, public: Boolean?) {
+        (view.parent as View).findViewById<EditText>(R.id.item_comment_new_comment_et).setText("")
         mPresenter?.addComment(comment?:"", public?:false)
     }
 
@@ -273,7 +282,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
         submissionButtonRecyclerAdapter = SimpleButtonRecyclerAdapter(
-                getText(R.string.submitliteral).toString())
+                getText(R.string.submitliteral).toString(), this)
         publicCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.class_comments).toString()
         )
@@ -380,6 +389,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             submissionResultRecyclerAdapter?.submitList(listOf(entity))
             submissionFreeTextRecyclerAdapter?.submitList(listOf(entity))
 
+            submissionButtonRecyclerAdapter?.visible = value?.clazzWorkSubmission != null
+
+
             if(entity?.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT){
                 mBinding?.quizVisibility = View.GONE
                 mBinding?.attachmentVisibility = View.GONE
@@ -470,7 +482,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         val DIFFUTIL_CLAZZWORK_QUESTION_AND_OPTION_WITH_RESPONSE = object: DiffUtil.ItemCallback<ClazzWorkQuestionAndOptionWithResponse>() {
             override fun areItemsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse, newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
-                return oldItem.clazzWorkQuestion.clazzWorkQuestionUid == newItem.clazzWorkQuestion.clazzWorkQuestionUid
+                return oldItem.clazzWorkQuestion.clazzWorkQuestionUid === newItem.clazzWorkQuestion.clazzWorkQuestionUid
             }
 
             override fun areContentsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse, newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
@@ -480,6 +492,16 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
     }
 
+    override fun quizAnswered(radioButtonGroup: RadioGroup, id: Integer) {
+//        val optionUid: Long = radioButtonGroup.findViewById<RadioButton>(id.toInt()).getTag(
+//                R.id.tag_clazzwork_quiz_option_uid) as Long
+//        val questionUid: Long = radioButtonGroup.getTag(R.id.tag_clazzwork_quiz_option_uid) as Long
+//        radioButtonGroup.setTag(R.id.tag_clazzwork_quiz_question_selected_uid, optionUid)
+//        //Save it to the object
+//        mPresenter?.updateQuestionResponseAndView(questionUid, optionUid, "")
+    }
 
-
+    override fun onClickButton(view: View) {
+        mPresenter?.handleClickSubmit()
+    }
 }

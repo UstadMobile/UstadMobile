@@ -13,6 +13,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -61,7 +62,14 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         view.clazzWorkContent = contentList
 
-        view.studentMode = false
+        val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
+            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, entity?.clazzWorkClazzUid?:0L)
+        }
+
+        //TODO: DIsable AFTER TESTING
+        //view.studentMode = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        view.studentMode = true
+
 
         val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
                 withTimeoutOrNull(2000) {
@@ -77,8 +85,9 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                             if(qResponse.isEmpty()){
                                 qResponse.add(ClazzWorkQuestionResponse().apply {
                                     clazzWorkQuestionResponseQuestionUid = questionUid
-                                    clazzWorkQuestionResponsePersonUid = 0L
-                                    clazzWorkQuestionResponseClazzMemberUid = 0L
+                                    clazzWorkQuestionResponsePersonUid = loggedInPersonUid
+                                    clazzWorkQuestionResponseClazzMemberUid = clazzMember?.clazzMemberUid?:0L
+                                    clazzWorkQuestionResponseClazzWorkUid = entity?.clazzWorkUid?:0L
 
                                 })
                             }
@@ -117,8 +126,54 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         return true
     }
 
-    fun handleClickSave(entity: ClazzWorkWithSubmission){
-        print(entity.clazzWorkSubmission?.clazzWorkSubmissionText)
+    fun handleClickSubmit(){
+        print("Hi")
+
+        val questionsWithOptionsAndResponse = view.clazzWorkQuizQuestionsAndOptionsWithResponse?.getValue()?: listOf()
+        val newOptionsAndResponse = mutableListOf<ClazzWorkQuestionAndOptionWithResponse>()
+
+        val clazzWorkWithSubmission = view.entity
+        GlobalScope.launch {
+            for (everyResult in questionsWithOptionsAndResponse) {
+                val response = everyResult.clazzWorkQuestionResponse
+                if(response.clazzWorkQuestionResponseUid == 0L) {
+                    response.clazzWorkQuestionResponseUid = db.clazzWorkQuestionResponseDao.insertAsync(response)
+                }else{
+                    db.clazzWorkQuestionResponseDao.updateAsync(response)
+                }
+                everyResult.clazzWorkQuestionResponse = response
+                newOptionsAndResponse.add(everyResult)
+            }
+
+            val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+            val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
+                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, entity?.clazzWorkClazzUid?:0L)
+            }
+
+            var submission = entity?.clazzWorkSubmission
+            if(submission == null) {
+                submission = ClazzWorkSubmission().apply {
+                    clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWorkUid ?: 0L
+                    clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
+                    clazzWorkSubmissionDateTimeFinished = UMCalendarUtil.getDateInMilliPlusDays(0)
+                    clazzWorkSubmissionInactive = false
+                    clazzWorkSubmissionPersonUid = loggedInPersonUid
+                }
+            }
+            if(submission.clazzWorkSubmissionUid != 0L) {
+                submission.clazzWorkSubmissionUid = db.clazzWorkSubmissionDao.insertAsync(submission)
+            }else{
+                db.clazzWorkSubmissionDao.updateAsync(submission)
+            }
+            clazzWorkWithSubmission?.clazzWorkSubmission = submission
+            view.entity = clazzWorkWithSubmission
+
+            //TODO : Update View
+            view.runOnUiThread(Runnable {
+                view.clazzWorkQuizQuestionsAndOptionsWithResponse = DoorMutableLiveData(newOptionsAndResponse)
+            })
+
+        }
     }
 
     fun addComment(comment: String, commentPublic: Boolean){
@@ -128,6 +183,12 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         GlobalScope.launch {
             db.commentsDao.insertAsync(comment)
         }
+    }
+
+    fun updateQuestionResponseAndView(questionUid: Long, responseLong: Long, responseString: String){
+
+
+
     }
 
 

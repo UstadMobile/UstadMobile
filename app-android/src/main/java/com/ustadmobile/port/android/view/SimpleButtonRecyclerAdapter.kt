@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemSimpleButtonBinding
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class SimpleButtonRecyclerAdapter(heading: String)
+class SimpleButtonRecyclerAdapter(heading: String, val buttonHandler: SimpleButtonHandler)
     : SingleItemRecyclerViewAdapter<SimpleButtonRecyclerAdapter.SimpleHeadingViewHolder>() {
 
     var buttonText: String? = heading
@@ -25,6 +25,7 @@ class SimpleButtonRecyclerAdapter(heading: String)
                 ItemSimpleButtonBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.buttonText = buttonText
+                    it.mHandler = buttonHandler
                 })
     }
 

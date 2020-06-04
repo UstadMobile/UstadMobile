@@ -9,6 +9,11 @@
             name="buttonText"
             type="String" />
 
+        <variable
+            name="mHandler"
+            type="com.ustadmobile.port.android.view.SimpleButtonHandler" />
+
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -29,7 +34,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:onClick="@{(view) -> mHandler.onClickButton(view)}"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

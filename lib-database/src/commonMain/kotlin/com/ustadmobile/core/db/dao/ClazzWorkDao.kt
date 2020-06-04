@@ -37,6 +37,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission?
 
 
+
     @Query(FIND_BY_CLAZZUID)
     abstract fun findByClazzUidLive(clazzUid: Long): DataSource.Factory<Int,ClazzWork>
 

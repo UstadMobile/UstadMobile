@@ -42,7 +42,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+            android:layout_marginHorizontal="24dp"
             android:text="@{clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionText}"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/list_twoline1_textsize_line1"
@@ -59,6 +59,7 @@
             android:ems="10"
             android:hint="@string/answer"
             android:inputType="textPersonName"
+            android:enabled="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid == 0L)}"
             android:text="@={clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseText}"
             android:visibility="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == freeTextType)?View.VISIBLE:View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
@@ -79,30 +80,20 @@
             android:id="@+id/activity_role_assignment_detail_radio_options"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/form_margin_horizontal"
+            android:layout_marginVertical="@dimen/activity_vertical_margin"
             android:orientation="vertical"
-            android:layout_marginHorizontal="@dimen/form_margin_horizontal"
             android:visibility="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == quizType)?View.VISIBLE:View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_quiz_options_rv">
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_quiz_options_rv"
+            app:radioGroupOptions="@{clazzWorkQuestionAndOptionsWithResponse.options}"
+            app:radioGroupOptionsResponse="@={clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected}"
+            >
 
-            <RadioButton
-                android:id="@+id/activity_role_assignment_detail_user_option"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:checked="false"
-                android:text="Option A"
-                android:textSize="12sp" />
-
-            <RadioButton
-                android:id="@+id/activity_role_assignment_detail_group_option"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:checked="false"
-                android:text="Option B"
-                android:textSize="12sp" />
+            <!--
+            android:onCheckedChanged="@{mActivity.quizAnswered}"
+            -->
         </RadioGroup>
 
 
