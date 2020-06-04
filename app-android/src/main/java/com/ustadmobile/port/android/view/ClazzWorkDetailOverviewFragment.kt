@@ -256,7 +256,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             rootView = it.root
         }
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
-        
+
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
 
         mPresenter = ClazzWorkDetailOverviewPresenter(requireContext(),
