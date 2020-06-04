@@ -37,12 +37,11 @@ class @BaseFileName@FragmentTest  {
             @Entity_VariableName@Uid = dbRule.db.clazzDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer<@BaseFileName@Fragment>(
-                bundleOf(), themeResId = R.style.Theme_UstadTheme
-        )
-
-        fragmentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+                fragmentArgs = bundleOf()) {
+            @BaseFileName@Fragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
         }
 
         //Note: In order for clicking on the RecyclerView item to work, you MUST set to the tag of
