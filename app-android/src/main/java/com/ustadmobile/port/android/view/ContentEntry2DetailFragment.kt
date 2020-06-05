@@ -26,11 +26,10 @@ import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.port.android.util.ext.runAfterPermissionGranted
+import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
 import kotlinx.android.synthetic.main.fragment_content_entry2_detail.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -98,7 +97,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
     override var downloadOptions: Map<String, String>? = null
         set(value) {
             if(value != null){
-                runAfterPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+                runAfterRequestingPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
                     UstadMobileSystemImpl.instance.go("DownloadDialog", value, requireContext())
                 }
             }

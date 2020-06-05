@@ -19,8 +19,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.port.android.util.ext.runAfterPermissionGranted
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -60,7 +60,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     override var downloadOptions: Map<String, String>? = null
         set(value) {
             if(value != null){
-                runAfterPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+                runAfterRequestingPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
                     UstadMobileSystemImpl.instance.go("DownloadDialog", value, requireContext())
                 }
             }
