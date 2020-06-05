@@ -73,7 +73,7 @@ class @BaseFileName@FragmentTest {
             }
         }
 
-        val editIdlingResource = SingleEditEntityIdlingResource(fragmentScenario.letOnFragment { it })
+        val editIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it })
         IdlingRegistry.getInstance().register(editIdlingResource)
 
         onIdle()

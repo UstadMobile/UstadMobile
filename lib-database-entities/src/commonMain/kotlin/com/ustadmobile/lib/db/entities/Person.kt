@@ -23,9 +23,9 @@ open class Person() {
 
     var username: String? = null
 
-    var firstNames: String? = null
+    var firstNames: String? = ""
 
-    var lastName: String? = null
+    var lastName: String? = ""
 
     var emailAddr: String? = null
 

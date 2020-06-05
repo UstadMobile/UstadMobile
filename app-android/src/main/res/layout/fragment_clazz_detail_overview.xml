@@ -68,15 +68,16 @@
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_description_text"
                 tools:text="X teacher, 1 students" />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/fragment_clazz_detail_overview_membersicon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_description_text"
-                app:srcCompat="@drawable/ic_group_black_24dp" />
+                app:srcCompat="@drawable/ic_group_black_24dp"
+                android:contentDescription="@string/users" />
 
             <LinearLayout
                 android:id="@+id/fragment_clazz_detail_overview_school_linlayout"
@@ -91,7 +92,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_membersicon">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/fragment_clazz_detail_overview_school_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -122,7 +123,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_school_linlayout">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/fragment_clazz_detail_overview_daterange_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -154,7 +155,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_start_end_date_linearlayout">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/fragment_clazz_detail_overview_holidaycalendar_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

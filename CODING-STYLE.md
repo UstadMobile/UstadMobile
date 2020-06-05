@@ -77,7 +77,35 @@ interface BaseNameView: UstadView
 
 ```
 
-Displaying the properties of an entity is handled by data binding on Android and by Angulars own template pattern. It is not required to have a getter/setter for each property.
+Displaying the properties of an entity is handled by data binding on Android and by Angulars own template pattern.
+Do not create a variable for each property (e.g. title, author, etc). Just pass the entity itself
+and use data binding.
+
+If handling an event would require permission (e.g. download requires file permission), the native
+element (eg. fragment) should check for permission before calling the view method.
+
+e.g.
+```
+class SomeDetailFragment {
+
+   var mPresenter: SomeDetailPresenter? = null
+
+   ...
+
+   fun handleClickDownload() {
+       runAfterRequestingPermissionIfNeeded(WRITE_EXTERNAL_STORAGE) { granted ->
+            if(granted) {
+                mPresenter?.handleClickDownload()
+            }else {
+                //Show snackbar that permission is required
+            }
+       }
+   }
+
+}
+
+```
+
 
 *ARG_ constants that are used with more than one view should be placed on UstadView*
 
