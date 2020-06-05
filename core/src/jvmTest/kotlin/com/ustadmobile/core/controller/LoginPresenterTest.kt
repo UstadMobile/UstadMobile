@@ -202,7 +202,7 @@ class LoginPresenterTest {
 
         createPresenterClickRegisterAndEnterRegistrationCode("111")
 
-        verify(view, timeout(5000)).showFeedbackMessage(eq("Invalid Registration Code"), any(), any())
+        verify(view, timeout(5000)).showSnackBar(eq("Invalid Registration Code"), any(), any())
 
     }
 
