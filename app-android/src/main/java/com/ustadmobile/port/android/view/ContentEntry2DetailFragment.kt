@@ -21,8 +21,7 @@ import com.ustadmobile.core.controller.ContentEntry2DetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ext.toNullableStringMap
-import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.EditButtonMode
@@ -30,6 +29,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
+import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.port.android.util.ext.runAfterPermissionGranted
 import kotlinx.android.synthetic.main.fragment_content_entry2_detail.*
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +48,8 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
     private var mBinding: FragmentContentEntry2DetailBinding? = null
 
     private var mPresenter: ContentEntry2DetailPresenter? = null
+
+    private var currentDownloadJobItemStatus: Int = -1
 
     private var currentLiveData: LiveData<PagedList<ContentEntryRelatedEntryJoinWithLanguage>>? = null
 
@@ -101,6 +103,43 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
                 }
             }
 
+        }
+    override var downloadJobItem: DownloadJobItem? = null
+        set(value) {
+            if(currentDownloadJobItemStatus != value?.djiStatus) {
+                when {
+                    value.isStatusCompletedSuccessfully() -> {
+                        entry_download_open_button.visibility = View.VISIBLE
+                        entry_download_open_button.text = resources.getText(R.string.open)
+                        entry_detail_progress.visibility = View.GONE
+                    }
+
+                    value.isStatusQueuedOrDownloading() -> {
+                        entry_download_open_button.visibility = View.GONE
+                        entry_detail_progress.visibility = View.VISIBLE
+                    }
+
+                    else -> {
+                        entry_download_open_button.text = resources.getText(R.string.download)
+                        entry_download_open_button.visibility = View.VISIBLE
+                        entry_detail_progress.visibility = View.GONE
+                    }
+                }
+
+                currentDownloadJobItemStatus = value?.djiStatus ?: 0
+            }
+
+
+            if(value != null && value.isStatusQueuedOrDownloading()) {
+                entry_detail_progress.statusText = value.toStatusString(
+                        UstadMobileSystemImpl.instance, this)
+                entry_detail_progress.progress = if(value.downloadLength > 0) {
+                    (value.downloadedSoFar.toFloat()) / (value.downloadLength.toFloat())
+                }else {
+                    0f
+                }
+            }
+            field = value
         }
 
     class AvailableTranslationRecyclerAdapter(val activityEventHandler: ContentEntryDetailFragmentEventHandler,

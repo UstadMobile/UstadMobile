@@ -113,16 +113,13 @@ class ContentEntryEdit2Presenter(context: Any,
 
 
     override fun handleClickSave(entity: ContentEntryWithLanguage) {
+        view.titleErrorEnabled = false
+        view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
-            val canCreate = entity.title != null && ((entity.language != null
-                    && entity.licenseType != 0 && entity.leaf) || (!entity.leaf && entity.description != null))
+            val canCreate = entity.title != null &&  ((entity.leaf
+                    && view.selectedFileUri != null) || !entity.leaf)
 
             if(canCreate){
-                if(entity.leaf){
-                    entity.licenseName = systemImpl.getString(LicenceOptions.values()
-                            .single { it.optionVal == entity.licenseType }.messageId, context)
-                }
-
                 if(entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
                     val contentEntryJoin = ContentEntryParentChildJoin().apply {
@@ -139,11 +136,11 @@ class ContentEntryEdit2Presenter(context: Any,
                     repo.languageDao.insertAsync(language)
                 }
 
-                if(entity.leaf){
+                if(entity.leaf) {
                     val container = view.saveContainerOnExit(entity.contentEntryUid,
-                            storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),db, repo)
+                            storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(), db, repo)
 
-                    if(container != null && containerDownloadManager != null){
+                    if (container != null && containerDownloadManager != null) {
                         val downloadJob = DownloadJob(entity.contentEntryUid, getSystemTimeInMillis())
                         downloadJob.djStatus = JobStatus.COMPLETE
                         downloadJob.timeRequested = getSystemTimeInMillis()
@@ -159,13 +156,17 @@ class ContentEntryEdit2Presenter(context: Any,
 
                         containerDownloadManager.handleDownloadJobItemUpdated(downloadJobItem)
                     }
-                    view.finishWithResult(listOf(entity))
-                }else{
-                    view.finishWithResult(listOf(entity))
                 }
-            }else{
-                view.showSnackBar(systemImpl.getString(MessageID.register_empty_fields, context))
                 view.finishWithResult(listOf(entity))
+            }else{
+                when {
+                    entity.title == null && view.selectedFileUri != null -> view.titleErrorEnabled = true
+                    entity.title != null && view.selectedFileUri == null -> view.fileImportErrorVisible = true
+                    else -> {
+                        view.titleErrorEnabled = true
+                        view.fileImportErrorVisible = true
+                    }
+                }
             }
         }
     }

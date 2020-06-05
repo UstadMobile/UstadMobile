@@ -147,7 +147,7 @@
         <com.ustadmobile.port.android.view.DownloadStatusButton
             android:id="@+id/content_entry_item_download"
             style="?android:attr/borderlessButtonStyle"
-            android:onClick="@{() -> presenter.checkPermissionAndHandleDownloadStatusButtonClicked(contentEntry)}"
+            android:onClick="@{() -> presenter.handleDownloadStatusButtonClicked(contentEntry)}"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:padding="@dimen/dimen_8dp"

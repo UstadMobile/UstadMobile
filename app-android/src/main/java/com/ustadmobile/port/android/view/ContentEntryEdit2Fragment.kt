@@ -31,6 +31,7 @@ import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.sharedse.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
 import com.ustadmobile.port.sharedse.contentformats.importContainerFromZippedFile
+import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -77,11 +78,33 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             field = value
             mBinding?.selectedStorageIndex = value
         }
+    override var selectedFileUri: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.fileImportInfoVisibility = if(selectedFileUri != null)
+                View.VISIBLE else View.GONE
+            mBinding?.selectedFileUri = value
+        }
 
-    override fun formatLabel(storage: UMStorageDir): String {
+    override var titleErrorEnabled: Boolean = false
+        set(value) {
+            entry_title.error = getString(R.string.field_required_prompt)
+            mBinding?.titleErrorEnabled = value
+            field = value
+        }
+
+    override var fileImportErrorVisible: Boolean = false
+        set(value) {
+            mBinding?.fileImportInfoVisibility = if(value) View.VISIBLE else View.GONE
+            mBinding?.isImportError = value
+            field = value
+        }
+
+    override fun formatStorageOptionLabel(storage: UMStorageDir): String {
         return String.format(UstadMobileSystemImpl.instance.getString(
                 MessageID.download_storage_option_device, context as Any), storage.name,
-                UMFileUtil.formatFileSize(File(storage.dirURI as String).usableSpace))
+                UMFileUtil.formatFileSize(File(storage.dirURI).usableSpace))
     }
 
     override var fieldsEnabled: Boolean = false
@@ -109,7 +132,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
 
     private fun handleFileSelection(){
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            mBinding?.selectedFileUri = uri.toString()
             if(uri != null){
                 try{
                     val input = requireContext().contentResolver.openInputStream(uri)
@@ -124,15 +146,19 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
                         val metaData = extractContentEntryMetadataFromFile(tmpFile.absoluteFile,
                                 UmAccountManager.getActiveDatabase(requireContext()))
                         entryMetaData = metaData
-                        if(entryMetaData == null){
-                            showSnackBar(getString(R.string.import_link_content_not_supported))
+                        when (entryMetaData) {
+                            null -> {
+                                showSnackBar(getString(R.string.import_link_content_not_supported))
+                            }
+                            else -> {
+                                selectedFileUri = uri.toString()
+                            }
                         }
                         val entry = entryMetaData?.contentEntry
                         val entryUid = arguments?.get(ARG_ENTITY_UID)
                         if(entry != null){
-                            if(entryUid != null){
-                                entry.contentEntryUid = entryUid.toString().toLong()
-                            }
+                            if(entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
+                            fileImportErrorVisible = false
                             entity = entry
                         }
                     }
@@ -169,10 +195,9 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         val rootView: View
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
             rootView = it.root
+            it.fileImportInfoVisibility = View.GONE
             it.activityEventHandler = this
             it.viewVisibility = View.GONE
-            it.contentEntry?.lastModified = System.currentTimeMillis()
-            it.contentEntry?.ceInactive = true
         }
 
         return rootView

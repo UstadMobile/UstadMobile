@@ -93,6 +93,7 @@
                     tools:text="Publisher" />
 
                 <TextView
+                    android:visibility="@{contentEntry.licenseName == null ? View.GONE: View.VISIBLE}"
                     android:id="@+id/entry_detail_license_label"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -139,7 +140,7 @@
                         android:id="@+id/entry_download_open_button"
                         android:layout_width="match_parent"
                         android:padding="@dimen/dimen_16dp"
-                        android:text="@{contentEntry.container == null ? @string/cotent_entry_btn_label_download : @string/cotent_entry_btn_label_open}"
+                        android:text="@{contentEntry.container == null ? @string/download : @string/open}"
                         android:layout_height="wrap_content"
                         app:backgroundTint="@color/primary"
                         android:onClick="@{()-> fragmentEventHandler.handleOnClickOpenDownloadButton()}"

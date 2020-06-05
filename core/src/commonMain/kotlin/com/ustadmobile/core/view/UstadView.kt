@@ -80,6 +80,8 @@ interface UstadView {
 
         const val ARG_PARENT_ENTRY_UID = "parentUid"
 
+        const val ARG_PARENT_ENTRY_TITLE = "parentTitle"
+
         const val ARG_CONTENT_ENTRY_UID = "entryid"
 
         const val ARG_NO_IFRAMES = "noiframe"

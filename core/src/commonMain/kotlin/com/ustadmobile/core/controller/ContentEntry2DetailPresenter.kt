@@ -68,7 +68,8 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     override fun handleClickEdit() {
-        systemImpl.go(ContentEntryEdit2View.VIEW_NAME, mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString()), context)
+        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
+                mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString()), context)
     }
 
     fun handleOnClickOpenDownloadButton(){
@@ -88,7 +89,7 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     private fun onDownloadJobItemChanged(downloadJobItem: DownloadJobItem?) {
-        if(downloadJobItem != null){}
+        view.downloadJobItem = downloadJobItem
     }
 
     private fun openContentEntry() {

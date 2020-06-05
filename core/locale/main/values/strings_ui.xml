@@ -82,6 +82,18 @@
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
     <string name="no_video_file_found">No video file found</string>
+    <string name="content_from_file">From file</string>
+    <string name="content_from_link">From link</string>
+    <string-array name="content_source_option">
+        <item>@string/content_from_file</item>
+        <item>@string/content_from_link</item>
+    </string-array>
+    <string name="import_content">Import Content</string>
+    <string name="update_content">Update Content</string>
+    <string name="title">Title</string>
+    <string name="licence">Licence</string>
+    <string name="publicly_accessible">Publicly accessible</string>
+
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
@@ -194,7 +206,6 @@
     <string name="content_action_page_remove">Remove page</string>
     <string name="content_editor_page_view_hint">Title</string>
     <string name="content_editor_page_delete_failure_message">Sorry you can not delete this page</string>
-    <string name="content_entry_not_found">ContentEntry Not Found</string>
     <string name="content_editor_directionality">Directionality</string>
     <string name='content_editor_menu_undo'>Undo</string>
     <string name='content_editor_menu_redo'>Redo</string>
@@ -230,33 +241,8 @@
     <string name="content_editor_edit_category">Edit</string>
     <string name="content_editor_create_new_title">Add content</string>
     <string name="content_editor_action_done">Done</string>
-    <string name="content_entry_label_title">Title</string>
-    <string name="content_entry_label_desc">Description</string>
-    <string name="content_entry_label_save">Save</string>
-    <string name="content_entry_label_update">Update document</string>
-    <string name="content_entry_label_select_file">Select file / Import Link</string>
-    <string name="content_entry_label_update_file">Update from file</string>
-    <string name="content_entry_label_import_link">Import Link</string>
-    <string name="content_entry_label_update_link">Update from Link</string>
-    <string name="content_entry_label_update_content">Update Content</string>
-    <string name="cotent_entry_btn_label_download">Download</string>
-    <string name="cotent_entry_btn_label_open">Open</string>
-    <string name="content_from_file">From file</string>
-    <string name="content_from_link">From link</string>
-    <string-array name="content_source_option">
-        <item>@string/content_from_file</item>
-        <item>@string/content_from_link</item>
-    </string-array>
-    <string name="content_import_from_sources">Import Content</string>
-    <string name="content_update_from_sources">Update Content</string>
-    <string name="content_entry_label_licence">Licence</string>
-    <string name="content_entry_label_public">Publicly accessible</string>
-    <string name="content_entry_label_active">Make content active</string>
-    <string name="content_import_success_message">You have successfully imported a file</string>
-    <string name="content_import_failure_message">Selected file is not supported, try another file</string>
-    <string name="content_creation_empty_field_error">Fill out required fields and try again</string>
     <string name="content_creation_storage_option_title">Storage option</string>
-    <string name="content_creation_file_required_error">File to be imported is not selected, try again</string>
+    <string name="file_required_prompt">File to be imported is not selected, try again</string>
     <string name="content_creation_folder_new_message">New folder was successfully added</string>
     <string name="content_creation_folder_update_message">Folder was successfully updated</string>
     <string name="empty_state_libraries">No folders found</string>
@@ -267,7 +253,6 @@
     <string name="content_update_massage">Updated successfully</string>
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
     <string name="supported_files">Supported files: <b>Video, Audio, EPUB, Xapi Zip,H5P</b></string>
-    <string name="content_entry_importing">Importing, please wait</string>
     <string name="content_editor_save_error">Error while saving, try again</string>
     <string name="content_entry_export">Export</string>
     <string name="content_entry_export_inprogress">Exporting</string>
@@ -817,7 +802,6 @@ Voice of America\n
 Content is provided under license by external content providers. Ustad Mobile, unless explicitly mentioned otherwise, is not endorsed by any such content provider.</string>
 
     <string name="due_date">Due date</string>
-    <string name="title">Title</string>
     <string name="content">Content</string>
     <string name="require_attachment">Require attachment</string>
     <string name="add_assignment">Add Assignment</string>
@@ -886,7 +870,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
 
     <string name="untitled">Untitled</string>
-    <string name="required_field">Required field</string>
     <string name="present_late_absent">%1$d present, %2$d late, %3$d absent</string>
 
     <!-- Used to show the percentage attendance e.g. "50% attendance".

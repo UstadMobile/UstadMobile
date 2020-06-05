@@ -391,18 +391,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
         }
         snackBar.anchorView = bottom_nav_view
-        //Make room for snackbar visbility by hiding/showing FAB
-        snackBar.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-            override fun onShown(transientBottomBar: Snackbar?) {
-                super.onShown(transientBottomBar)
-                activity_listfragmelayout_behaviornt_fab.hide()
-            }
-
-            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                super.onDismissed(transientBottomBar, event)
-                activity_listfragmelayout_behaviornt_fab.show()
-            }
-        })
         snackBar.show()
     }
 

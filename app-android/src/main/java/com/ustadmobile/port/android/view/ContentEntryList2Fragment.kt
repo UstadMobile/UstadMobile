@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.Manifest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,8 +16,10 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.port.android.util.ext.runAfterPermissionGranted
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
@@ -54,8 +57,22 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         }
     }
 
+    override var downloadOptions: Map<String, String>? = null
+        set(value) {
+            if(value != null){
+                runAfterPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+                    UstadMobileSystemImpl.instance.go("DownloadDialog", value, requireContext())
+                }
+            }
+
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
+        val mTitle = arguments?.get(ARG_PARENT_ENTRY_TITLE)
+        if(mTitle != null){
+            title = mTitle.toString()
+        }
         mPresenter = ContentEntryList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
@@ -72,7 +89,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.content_editor_create_new_title)
+                getString(R.string.content_editor_create_new_title)
     }
 
     override fun showContentEntryAddOptions(parentEntryUid: Long) {
@@ -88,7 +105,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.content_entry_add_options_dest, ContentEntry::class.java)
+            navigateToEditEntity(null, R.id.content_entry_list_dest, ContentEntry::class.java)
     }
 
     override fun onDestroyView() {

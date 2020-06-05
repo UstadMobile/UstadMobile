@@ -13,11 +13,17 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var selectedStorageIndex: Int
 
+    var selectedFileUri: String ?
+
+    var titleErrorEnabled: Boolean
+
+    var fileImportErrorVisible: Boolean
+
     suspend fun saveContainerOnExit(entryUid: Long,selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container?
 
     fun setUpStorageOptions(storageOptions:List<UMStorageDir>)
 
-    fun formatLabel(storage: UMStorageDir): String
+    fun formatStorageOptionLabel(storage: UMStorageDir): String
 
     companion object {
 
