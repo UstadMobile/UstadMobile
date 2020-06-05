@@ -93,8 +93,12 @@ class SomeDetailFragment {
    ...
 
    fun handleClickDownload() {
-       runAfterPermissionGranted(WRITE_EXTERNAL_STORAGE) {
-            mPresenter?.handleClickDownload()
+       runAfterRequestingPermissionIfNeeded(WRITE_EXTERNAL_STORAGE) { granted ->
+            if(granted) {
+                mPresenter?.handleClickDownload()
+            }else {
+                //Show snackbar that permission is required
+            }
        }
    }
 
