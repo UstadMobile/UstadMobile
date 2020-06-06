@@ -32,6 +32,8 @@
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, contentEntry)}"
         app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(contentEntry)}"
+        android:id="@+id/item_content_entry_list"
+        android:tag="@{contentEntry.contentEntryUid}"
         android:background="@drawable/bg_listitem">
 
 

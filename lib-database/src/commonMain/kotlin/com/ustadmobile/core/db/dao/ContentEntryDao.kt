@@ -23,7 +23,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("allEntries")
     abstract fun allEntries(): List<ContentEntry>
 
-
     @Query("SELECT * FROM ContentEntry WHERE publik")
     @JsName("publicContentEntries")
     abstract fun publicContentEntries(): List<ContentEntry>
@@ -172,7 +171,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("getChildrenByParentUidWithCategoryFilter")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
-
     @Query("""SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, Container.*
             FROM ContentEntry 
             LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
@@ -259,5 +257,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(entry: ContentEntry)
+
+    @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid")
+    abstract fun findAllLive(): DoorLiveData<List<ContentEntryWithLanguage>>
 
 }

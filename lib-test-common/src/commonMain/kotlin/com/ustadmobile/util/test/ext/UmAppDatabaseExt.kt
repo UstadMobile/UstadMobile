@@ -1,10 +1,7 @@
 package com.ustadmobile.util.test.ext
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
@@ -59,6 +56,31 @@ suspend fun UmAppDatabase.insertClazzLogs(clazzUid: Long, numLogs: Int, logMaker
         logMaker(index).apply {
             clazzLogClazzUid = clazzUid
             clazzLogUid = clazzLogDao.insertAsync(this)
+        }
+    }
+}
+
+suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+        numEntries: Int, parentEntryUid: Long, isLeaf: Boolean = true): List<Container> {
+    return (1 .. numEntries).map {
+        val entry = ContentEntry().apply {
+            title = "Dummy title $it"
+            leaf = isLeaf
+            description = "Dummy description $it"
+            contentEntryUid = contentEntryDao.insertAsync(this)
+        }
+        ContentEntryParentChildJoin().apply {
+            cepcjChildContentEntryUid = entry.contentEntryUid
+            cepcjParentContentEntryUid = parentEntryUid
+            cepcjUid = contentEntryParentChildJoinDao.insertAsync(this)
+        }
+
+        Container().apply {
+            fileSize = 10000
+            cntLastModified = getSystemTimeInMillis()
+            containerContentEntryUid = entry.contentEntryUid
+            containerUid = containerDao.insertAsync(this)
+
         }
     }
 }

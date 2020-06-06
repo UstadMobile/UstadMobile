@@ -206,13 +206,13 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
 
         GlobalScope.launch {
             val thisFrag = this@ContentEntryEdit2Fragment
-            val networkManagerBle = (activity as MainActivity).networkManagerBle.await()
+            val networkManagerBle = (activity as? MainActivity)?.networkManagerBle?.await()
             withContext(Dispatchers.Main){
                 mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), thisFrag,
                         thisFrag, UstadMobileSystemImpl.instance,
                         UmAccountManager.getActiveDatabase(requireContext()),
                         UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                        networkManagerBle.containerDownloadManager,
+                        networkManagerBle?.containerDownloadManager,
                         UmAccountManager.activeAccountLiveData)
 
                 mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
