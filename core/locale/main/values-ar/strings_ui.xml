@@ -25,7 +25,7 @@
     <string name="content_prepare_file">تحضير الملف...</string>
     <string name="content_preview_title">معاينة...</string>
     <string name="content_media_photo">صورة</string>
-    <string name="content_media_video">فيديو</string>
+    <string name="video">فيديو</string>
     <string name="content_media_message">ما نوع الملف الذي تريد إختياره؟</string>
     <string name="content_media_title">نوع الملف</string>
     <string name="content_blank_page_title">صفحة فارغة</string>
@@ -223,7 +223,6 @@
     <string name="empty_state_recycle">لا يوجد ملفات معاد تدويرها</string>
     <string name="content_folder_image_message">سيتوفر الدعم لاضافة الصور قريبا</string>
     <string name="content_editor_save_error">خطأ اثناء الحفظ، حاول مرة اخرى</string>
-    <string name="content_entry_export">تصدير</string>
     <string name="content_entry_export_inprogress">جاري التصدير</string>
     <string name="invalid_register_code">رمز التسجيل غير صحيح</string>
     <string name="enter_register_code">ادخل رمز التسجيل</string>

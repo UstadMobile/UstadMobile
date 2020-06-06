@@ -11,6 +11,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemContentEntryListBinding
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -120,10 +121,27 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     companion object {
 
         @JvmField
-        val CONTENT_ENTRY_TYPE_MAP = mapOf(
+        val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
                 ContentEntry.TYPE_EBOOK to R.drawable.ic_book_black_24dp,
-                ContentEntry.TYPE_VIDEO to R.drawable.ic_video_library_24px,
+                ContentEntry.TYPE_VIDEO to R.drawable.video_youtube,
+                ContentEntry.TYPE_DOCUMENT to R.drawable.text_doc_24px,
+                ContentEntry.TYPE_ARTICLE to R.drawable.article_24px,
+                ContentEntry.TYPE_COLLECTION to R.drawable.collections_24px,
+                ContentEntry.TYPE_INTERACTIVE_EXERCISE to 0,
+                ContentEntry.TYPE_UNDEFINED to R.drawable.unknown,
                 ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
+        )
+
+        @JvmField
+        val CONTENT_ENTRY_TYPE_LABEL_MAP = mapOf(
+                ContentEntry.TYPE_EBOOK to MessageID.ebook,
+                ContentEntry.TYPE_VIDEO to MessageID.video,
+                ContentEntry.TYPE_DOCUMENT to MessageID.document,
+                ContentEntry.TYPE_ARTICLE to MessageID.article,
+                ContentEntry.TYPE_COLLECTION to MessageID.collection,
+                ContentEntry.TYPE_INTERACTIVE_EXERCISE to MessageID.interactive,
+                ContentEntry.TYPE_UNDEFINED to MessageID.unknown,
+                ContentEntry.TYPE_AUDIO to MessageID.audio
         )
 
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> = object

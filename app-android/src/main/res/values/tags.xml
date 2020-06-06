@@ -7,6 +7,7 @@
     <item name="tag_imagefilepath" type="id"/>
     <item name="tag_imageloadjob" type="id"/>
     <item name="tag_button_toggle_group_map" type="id"/>
+    <item name="tag_text_prefix" type="id"/>
 
     <!-- Used by the imagelookup binder -->
     <item name="tag_imagelookup_key" type="id"/>

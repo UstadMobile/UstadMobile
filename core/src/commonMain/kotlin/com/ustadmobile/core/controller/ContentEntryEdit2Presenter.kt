@@ -76,7 +76,7 @@ class ContentEntryEdit2Presenter(context: Any,
                 storageOptions = result
                 if(result != null){
                    view.runOnUiThread(Runnable {
-                       view.setUpStorageOptions(result)
+                       view.storageOptions = result
                    })
                 }
             }
@@ -116,8 +116,8 @@ class ContentEntryEdit2Presenter(context: Any,
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
-            val canCreate = entity.title != null &&  ((entity.leaf
-                    && view.selectedFileUri != null) || !entity.leaf)
+            val canCreate = entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
+                    (entity.contentEntryUid == 0L && view.selectedFileUri != null))
 
             if(canCreate){
                 if(entity.contentEntryUid == 0L) {
@@ -136,7 +136,7 @@ class ContentEntryEdit2Presenter(context: Any,
                     repo.languageDao.insertAsync(language)
                 }
 
-                if(entity.leaf) {
+                if(entity.leaf && view.selectedFileUri != null) {
                     val container = view.saveContainerOnExit(entity.contentEntryUid,
                             storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(), db, repo)
 
@@ -161,10 +161,12 @@ class ContentEntryEdit2Presenter(context: Any,
             }else{
                 when {
                     entity.title == null && view.selectedFileUri != null -> view.titleErrorEnabled = true
-                    entity.title != null && view.selectedFileUri == null -> view.fileImportErrorVisible = true
+                    entity.title != null && view.selectedFileUri == null && entity.leaf -> view.fileImportErrorVisible = true
                     else -> {
                         view.titleErrorEnabled = true
-                        view.fileImportErrorVisible = true
+                        if(entity.leaf){
+                            view.fileImportErrorVisible = true
+                        }
                     }
                 }
             }

@@ -17,6 +17,10 @@
             type="com.ustadmobile.core.controller.ContentEntryList2Presenter" />
 
         <variable
+            name="messageId"
+            type="com.ustadmobile.core.generated.locale.MessageID" />
+
+        <variable
             name="selectablePagedListAdapter"
             type="ContentEntryListRecyclerAdapter" />
     </data>
@@ -120,7 +124,7 @@
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             app:imageLookupKey="@{contentEntry.contentTypeFlag}"
-            app:imageLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_MAP}"
+            app:imageLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP}"
             android:tint="@color/text_secondary"
             app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />
@@ -137,7 +141,9 @@
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:gravity="start"
             android:textSize="@dimen/text_body_mid"
+            app:textPrefix="@{messageId.content_type}"
             app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
+            app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}"
             android:tint="@color/text_secondary"
             app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
             app:layout_constraintStart_toEndOf="@id/content_entry_mimetype_icon"

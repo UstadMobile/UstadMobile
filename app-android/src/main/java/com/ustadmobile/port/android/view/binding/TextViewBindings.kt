@@ -92,6 +92,7 @@ fun TextView.setTextMessageIdOptions(textMessageIdLookupMap: Map<Int, Int>?, fal
     updateFromTextMessageIdOptions()
 }
 
+@SuppressLint("SetTextI18n")
 private fun TextView.updateFromTextMessageIdOptions() {
     val currentOption = getTag(R.id.tag_messageidoption_selected) as? Int
     val textMessageIdOptions = getTag(R.id.tag_messageidoptions_list) as? Map<Int, Int>
@@ -99,7 +100,7 @@ private fun TextView.updateFromTextMessageIdOptions() {
     if(currentOption != null && textMessageIdOptions != null) {
         val messageId = textMessageIdOptions[currentOption] ?: fallbackMessageId
         if(messageId != null) {
-            text = UstadMobileSystemImpl.instance.getString(messageId, context)
+            formatTextWithPrefixIfAny(UstadMobileSystemImpl.instance.getString(messageId, context))
         }
     }
 }
@@ -187,4 +188,16 @@ fun TextView.setHtmlText(htmlText: String?) {
 @BindingAdapter("fileSize")
 fun TextView.setFileSize(fileSize: Long) {
     text = UMFileUtil.formatFileSize(fileSize)
+}
+
+@BindingAdapter("textPrefix")
+fun TextView.setTextPrefix(textPrefixId: Int) {
+    setTag(R.id.tag_text_prefix, textPrefixId)
+}
+
+
+private fun TextView.formatTextWithPrefixIfAny(message: String){
+    val prefixId = getTag(R.id.tag_text_prefix) as? Int
+    val prefixText = if(prefixId == null) "" else " ${UstadMobileSystemImpl.instance.getString(prefixId, context)} "
+    text = if(prefixText.isEmpty()){ message } else { "$prefixText$message" }
 }

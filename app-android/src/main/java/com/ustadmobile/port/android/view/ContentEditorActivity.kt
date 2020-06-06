@@ -1170,7 +1170,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         builder.setMessage(impl.getString(MessageID.content_media_message, this))
         builder.setPositiveButton(impl.getString(MessageID.content_media_photo, this)
         ) { _, _ -> startCameraIntent(true) }
-        builder.setNegativeButton(impl.getString(MessageID.content_media_video, this)
+        builder.setNegativeButton(impl.getString(MessageID.video, this)
         ) { _, _ -> startCameraIntent(false) }
         builder.setCancelable(false)
         builder.show()

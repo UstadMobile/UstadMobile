@@ -101,14 +101,18 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
             field = value
         }
 
-    override fun formatStorageOptionLabel(storage: UMStorageDir): String {
-        return String.format(UstadMobileSystemImpl.instance.getString(
-                MessageID.download_storage_option_device, context as Any), storage.name,
-                UMFileUtil.formatFileSize(File(storage.dirURI).usableSpace))
-    }
+    override var storageOptions: List<UMStorageDir>? = null
+        set(value) {
+            mBinding?.storageOptions = value?.map {
+                String.format(UstadMobileSystemImpl.instance.getString(
+                        MessageID.download_storage_option_device, context as Any), it.name,
+                        UMFileUtil.formatFileSize(File(it.dirURI).usableSpace))
+            }
+            field = value
+        }
+
 
     override var fieldsEnabled: Boolean = false
-        get() = field
         set(value) {
             mBinding?.fieldsEnabled = value
             field = value
@@ -175,14 +179,6 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
         navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
     }
 
-
-    override fun setUpStorageOptions(storageOptions: List<UMStorageDir>) {
-        mBinding?.storageOptions = storageOptions.map {
-            String.format(UstadMobileSystemImpl.instance.getString(
-                    MessageID.download_storage_option_device, context as Any), it.name,
-                    UMFileUtil.formatFileSize(File(it.dirURI).usableSpace))
-        }
-    }
 
     override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String,db: UmAppDatabase, repo: UmAppDatabase): Container ?{
         val file = entryMetaData?.file

@@ -156,7 +156,7 @@
     <string name="content_source_device">از دستگاه</string>
     <string name="content_choose_file">فایل را انتخاب کنید</string>
     <string name="content_prepare_file">در حال آماده ساختن فایل...</string>
-    <string name="content_media_video">ویدیو</string>
+    <string name="video">ویدیو</string>
     <string name="content_media_title">نوع رسانه</string>
     <string name="content_blank_doc_click_label">کلیک</string>
     <string name="content_blank_doc_start_label">برای آغاز ویرایش.</string>
@@ -198,7 +198,7 @@
     <string name="empty_state_recycle">چیز بازیابی شده وجود ندارد</string>
     <string name="error_message_update_document">به روز رسانی مدرک نامؤفق بود</string>
     <string name="content_editor_save_error">اشتباه در هنگام ذخیره سازی، دوباره کوشش نمائید</string>
-    <string name="content_entry_export">صادر کردن</string>
+    <string name="export">صادر کردن</string>
     <string name="content_entry_export_message">شما در حال صادر ساختن %1$s به حافظه دستگاه تان هستید. آیا میخواهید ادامه بدهید؟</string>
     <string name="invalid_register_code">کد راجستر درست نیست</string>
     <string name="enter_register_code">کد راجستر را داخل نمائید</string>

@@ -145,7 +145,7 @@
     <string name="content_choose_file">دوتنه غوره کړئ</string>
     <string name="content_prepare_file">دوتنه تیاروی...</string>
     <string name="content_media_photo">انځور</string>
-    <string name="content_media_video">ویډیو</string>
+    <string name="video">ویډیو</string>
     <string name="content_media_message">کوم ډول رسنۍ غواړئ چې واخلئ؟</string>
     <string name="content_media_title">د رسنې ډول</string>
     <string name="content_blank_doc_click_label">ټک</string>
@@ -199,7 +199,7 @@
     <string name="content_editor_menu_subscript">فرعی لیک</string>
     <string name="empty_state_recycle">هیڅ دوباره په جریان کې اچول شوي توکي نشته</string>
     <string name="content_folder_image_message">د انځور د زیاتولو ملاتړ به په نږدې راتلونکی کې شونی وی</string>
-    <string name="content_entry_export">بهرول</string>
+    <string name="export">بهرول</string>
     <string name="content_entry_export_inprogress">بهرول</string>
     <string name="invalid_register_code">د نومکښنې ناسم کوډ</string>
     <string name="enter_register_code">د نومکښنې کوډ دننه کړئ</string>

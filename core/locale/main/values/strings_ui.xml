@@ -90,9 +90,17 @@
     </string-array>
     <string name="import_content">Import Content</string>
     <string name="update_content">Update Content</string>
+    <string name="publicly_accessible">Publicly accessible</string>
     <string name="title">Title</string>
     <string name="licence">Licence</string>
-    <string name="publicly_accessible">Publicly accessible</string>
+    <string name="ebook">E-book</string>
+    <string name="interactive">Interactive</string>
+    <string name="collection">Collection</string>
+    <string name="document">Document</string>
+    <string name="article">Article</string>
+    <string name="unknown">Unknown</string>
+    <string name="audio">Audio</string>
+
 
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
@@ -191,7 +199,7 @@
     <string name="content_prepare_file">Preparing file...</string>
     <string name="content_preview_title">Previewing...</string>
     <string name="content_media_photo">Photo</string>
-    <string name="content_media_video">Video</string>
+    <string name="video">Video</string>
     <string name="content_media_message">What media type would you like to capture?</string>
     <string name="content_media_title">Media type</string>
     <string name="content_blank_page_title">Blank page</string>
@@ -254,7 +262,6 @@
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
     <string name="supported_files">Supported files: <b>Video, Audio, EPUB, Xapi Zip,H5P</b></string>
     <string name="content_editor_save_error">Error while saving, try again</string>
-    <string name="content_entry_export">Export</string>
     <string name="content_entry_export_inprogress">Exporting</string>
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
 
