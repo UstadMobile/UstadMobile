@@ -1,27 +1,32 @@
 
 package com.ustadmobile.core.controller
 
+import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.dao.ClazzWorkDao
+import com.ustadmobile.core.db.dao.CommentsDao
+import com.ustadmobile.core.db.waitForLiveData
+import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.util.SystemImplRule
+import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
+import com.ustadmobile.core.view.ClazzWorkEditView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
+import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
+import com.ustadmobile.util.test.ext.insertTestClazzWork
+import com.ustadmobile.util.test.ext.insertTestClazzWorkAndQuestionsAndOptionsWithResponse
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
-import com.ustadmobile.core.view.ClazzWorkDetailView
-import com.ustadmobile.core.view.ClazzWorkEditView
-import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.ClazzWorkDao
-import com.ustadmobile.core.db.dao.CommentsDao
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
-import com.ustadmobile.core.util.ext.waitForListToBeSet
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.util.test.ext.insertTestClazzWork
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -61,14 +66,15 @@ class ClazzWorkDetailOverviewPresenterTest {
         repoCommentsDaoSpy = spy(clientDbRule.db.commentsDao)
         whenever(clientDbRule.db.commentsDao).thenReturn(repoCommentsDaoSpy)
 
-        //TODO: insert any entities required for all tests
     }
 
     @Test
     fun givenClazzWorkExists_whenOnCreateCalled_thenClazzWorkIsSetOnView() {
 
         val testClazzWork = runBlocking {
-            clientDbRule.db.insertTestClazzWork(ClazzWork())
+            clientDbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                    ClazzWork(), true, 0, true, 0,
+            false, true)
         }
 
 
@@ -98,20 +104,22 @@ class ClazzWorkDetailOverviewPresenterTest {
         verify(mockView, timeout(5000).atLeastOnce()).timeZone =
                 testClazzWork.clazzAndMembers.clazz.clazzTimeZone!!
 
-        verify(mockView, timeout(5000).atLeastOnce()).studentMode = false
+        verify(mockView, timeout(5000).atLeastOnce()).studentMode = true
 
-        //mockView.clazzWorkQuizQuestionsAndOptionsWithResponse!!.value
-
-
+        val liveDataSet = nullableArgumentCaptor<DoorMutableLiveData<
+                List<ClazzWorkQuestionAndOptionWithResponse>>>().run {
+            verify(mockView, timeout(5000).atLeastOnce()).clazzWorkQuizQuestionsAndOptionsWithResponse = capture()
+            firstValue
+        }
+        val valueLiveDataSet = liveDataSet?.getValue()
+        Assert.assertEquals("Set Ok", valueLiveDataSet?.size, 5)
     }
-
 
     @Test
     fun givenClazzWorkExists_whenClickAddPublicComment_thenShouldPersistComment(){
         val testClazzWork = runBlocking {
             clientDbRule.db.insertTestClazzWork(ClazzWork())
         }
-
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString())
         val presenter = ClazzWorkDetailOverviewPresenter(context,
@@ -128,6 +136,57 @@ class ClazzWorkDetailOverviewPresenterTest {
         verifyBlocking(repoCommentsDaoSpy, timeout(5000)){
             insertAsync(argThat{ this.commentsText == "Hello World"})
         }
+
+    }
+
+    @Test
+    fun givenClazzWorkExists_whenClickSubmit_thenShouldPersistSubmissionResult(){
+        val testClazzWork = runBlocking {
+            clientDbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                    ClazzWork(), true, 0, true, 0,
+                    false, true)
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString())
+        val presenter = ClazzWorkDetailOverviewPresenter(context,
+                presenterArgs, mockView, mockLifecycleOwner,
+                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
+                clientDbRule.accountLiveData)
+
+        presenter.onCreate(null)
+
+        nullableArgumentCaptor<ClazzWorkWithSubmission>().apply {
+            verify(mockView, timeout(5000).atLeastOnce()).entity = capture()
+
+            Assert.assertEquals("Expected entity was set on view",
+                    testClazzWork.clazzWork.clazzWorkUid, lastValue!!.clazzWorkUid)
+        }
+
+
+
+        val liveDataSet = nullableArgumentCaptor<DoorMutableLiveData<
+                List<ClazzWorkQuestionAndOptionWithResponse>>>().run {
+            verify(mockView, timeout(5000).atLeastOnce()).clazzWorkQuizQuestionsAndOptionsWithResponse = capture()
+            firstValue
+        }
+        val valueLiveDataSet = liveDataSet?.getValue()
+        Assert.assertEquals("Set Ok", valueLiveDataSet?.size, 5)
+
+        presenter.handleClickSubmit()
+
+        verify(mockView, timeout(10000).atLeastOnce()).entity = any()
+
+        //Verify submission is set
+        runBlocking {
+            val postSubmission = clientDbRule.db.clazzWorkSubmissionDao.findByClazzWorkUidAsync(
+                    testClazzWork.clazzWork.clazzWorkUid)
+            Assert.assertEquals("Submission set", postSubmission.first().clazzWorkSubmissionClazzWorkUid,
+                    testClazzWork.clazzWork.clazzWorkUid)
+        }
+
+
+
+
 
 
     }

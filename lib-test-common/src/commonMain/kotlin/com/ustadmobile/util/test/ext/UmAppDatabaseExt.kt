@@ -3,6 +3,7 @@ package com.ustadmobile.util.test.ext
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlin.random.Random
 
 data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
 data class TestClazzWork(val clazzAndMembers: TestClazzAndMembers, val clazzWork: ClazzWork)
@@ -23,7 +24,119 @@ suspend fun UmAppDatabase.insertTestClazzWork(clazzWork: ClazzWork):TestClazzWor
     return TestClazzWork(clazzAndMembers, clazzWork)
 }
 
+suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+        clazzWork: ClazzWork, responded : Boolean = false, submissionType: Int = 0 ,
+        quizQuestionTypeMixed: Boolean = false, quizQuestionType: Int = 0,
+        submitted: Boolean = false, isStudentToClazz : Boolean = false
+    ):TestClazzWork {
+    val clazzAndMembers = insertTestClazzAndMembers(5, 2)
+    clazzWork.apply{
+        clazzWorkClazzUid = clazzAndMembers.clazz.clazzUid
+        if(submissionType == 0){
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
+        }else{
+            clazzWorkSubmissionType = submissionType
+        }
+        clazzWorkMaximumScore = 100
+        clazzWorkUid = clazzWorkDao.insertAsync(this)
+    }
 
+    //Getting member
+    val clazzMember: ClazzMember
+    if(isStudentToClazz){
+        clazzMember = clazzAndMembers.studentList.get(0)
+    }else{
+        clazzMember = clazzAndMembers.teacherList.get(0)
+    }
+
+
+    if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
+        //Create questions
+        val questionNamer: (Int) -> String = { "Question $it" }
+        val clazzWorkQuestionsAndOptions = (1..5).map {
+            ClazzWorkQuestionAndOptions(ClazzWorkQuestion(), mutableListOf(), mutableListOf())
+                    .apply {
+                        clazzWorkQuestion.clazzWorkQuestionActive = true
+                        clazzWorkQuestion.clazzWorkQuestionText = questionNamer(it)
+                        clazzWorkQuestion.clazzWorkQuestionClazzWorkUid = clazzWork.clazzWorkUid
+                        clazzWorkQuestion.clazzWorkQuestionIndex = it
+                        if (!quizQuestionTypeMixed) {
+                            clazzWorkQuestion.clazzWorkQuestionType = quizQuestionType
+                        } else {
+                            clazzWorkQuestion.clazzWorkQuestionType = if (it % 2 == 0) {
+                                ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
+                            } else {
+                                ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
+                            }
+                        }
+                        clazzWorkQuestion.clazzWorkQuestionUid = clazzWorkQuestionDao.insertAsync(clazzWorkQuestion)
+                        if (clazzWorkQuestion.clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE) {
+                            //Add options
+                            val optionsToPut = (1..3).map {
+                                ClazzWorkQuestionOption().apply {
+                                    clazzWorkQuestionOptionText = "Option $it"
+                                    clazzWorkQuestionOptionQuestionUid = clazzWorkQuestion.clazzWorkQuestionUid
+                                    clazzWorkQuestionOptionUid = clazzWorkQuestionOptionDao.insertAsync(this)
+                                }
+                            }
+                            options = optionsToPut
+                        }
+                    }
+        }
+
+        val responses = mutableListOf<ClazzWorkQuestionResponse>()
+        if (responded) {
+            //Create question response
+            for ((index, question) in clazzWorkQuestionsAndOptions.withIndex()) {
+                val response =
+                        ClazzWorkQuestionResponse().apply {
+                            clazzWorkQuestionResponseClazzWorkUid = question.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid
+                            clazzWorkQuestionResponseQuestionUid = question.clazzWorkQuestion.clazzWorkQuestionUid
+                            if (question.clazzWorkQuestion.clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT) {
+                                clazzWorkQuestionResponseText = "Answer $index"
+                            } else {
+                                val size = question.options.size
+                                if (size > 0) {
+                                    val r = Random.nextInt(0, size)
+                                    clazzWorkQuestionResponseOptionSelected =
+                                            question.options.get(r).clazzWorkQuestionOptionUid
+                                }
+                            }
+                            clazzWorkQuestionResponsePersonUid = clazzMember.clazzMemberPersonUid
+                            clazzWorkQuestionResponseClazzMemberUid = clazzMember.clazzMemberUid
+                            clazzWorkQuestionResponseInactive = false
+                            //TODO: Dates
+                            clazzWorkQuestionResponseDateResponded = 0
+
+                            clazzWorkQuestionResponseUid = clazzWorkQuestionResponseDao.insertAsync(this)
+                        }
+                responses.add(response)
+            }
+        }
+    }
+
+    //Create Submission
+    if(submitted){
+        ClazzWorkSubmission().apply {
+            clazzWorkSubmissionClazzWorkUid = clazzWork.clazzWorkUid
+            clazzWorkSubmissionClazzMemberUid = clazzMember.clazzMemberUid
+            clazzWorkSubmissionPersonUid = clazzMember.clazzMemberPersonUid
+            clazzWorkSubmissionInactive = false
+            //TODO: dates
+            clazzWorkSubmissionDateTimeStarted = 0
+            clazzWorkSubmissionDateTimeUpdated = 0
+            clazzWorkSubmissionDateTimeFinished = 0
+            if(submissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT){
+                clazzWorkSubmissionText = "This is the test submission"
+            }
+            clazzWorkSubmissionScore = 89
+            clazzWorkSubmissionUid = clazzWorkSubmissionDao.insertAsync(this)
+        }
+    }
+
+
+    return TestClazzWork(clazzAndMembers, clazzWork)
+}
 
 suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
     studentNamer: (Int) -> Pair<String, String> = {"Test" to "Student $it"},

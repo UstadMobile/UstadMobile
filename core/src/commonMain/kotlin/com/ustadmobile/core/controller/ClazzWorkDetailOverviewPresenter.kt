@@ -132,7 +132,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         val questionsWithOptionsAndResponse = view.clazzWorkQuizQuestionsAndOptionsWithResponse?.getValue()?: listOf()
         val newOptionsAndResponse = mutableListOf<ClazzWorkQuestionAndOptionWithResponse>()
 
-        val clazzWorkWithSubmission = view.entity
+        val clazzWorkWithSubmission = entity
         GlobalScope.launch {
             for (everyResult in questionsWithOptionsAndResponse) {
                 val response = everyResult.clazzWorkQuestionResponse
@@ -160,7 +160,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                     clazzWorkSubmissionPersonUid = loggedInPersonUid
                 }
             }
-            if(submission.clazzWorkSubmissionUid != 0L) {
+            if(submission.clazzWorkSubmissionUid == 0L) {
                 submission.clazzWorkSubmissionUid = db.clazzWorkSubmissionDao.insertAsync(submission)
             }else{
                 db.clazzWorkSubmissionDao.updateAsync(submission)
