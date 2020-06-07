@@ -22,6 +22,9 @@ abstract class ClazzWorkSubmissionDao : BaseDao<ClazzWorkSubmission> {
     abstract suspend fun findByClazzWorkUidAsync(clazzWorkUid: Long): List<ClazzWorkSubmission>
 
     @Query(FIND_BY_CLAZZWORKUID)
+    abstract suspend fun findByClazzWorkUidLive(clazzWorkUid: Long): List<ClazzWorkSubmission>
+
+    @Query(FIND_BY_CLAZZWORKUID)
     abstract fun findByClazzUidLive(clazzWorkUid: Long): DataSource.Factory<Int,ClazzWorkSubmission>
 
     @Update

@@ -59,13 +59,16 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //The fab will be managed by the underlying tabs
+        fabManagementEnabled = false
+
         val navController = findNavController()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
         val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
 
         val tabs = listOf(
-                ClazzWorkEditView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue,
+                //ClazzWorkEditView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue,
                 ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue)
         val viewNameToTitle = mapOf(
                 ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
@@ -92,10 +95,6 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         mTabLayout = null
     }
 
-    override fun onResume() {
-        super.onResume()
-        title = getString(R.string.clazz_work)
-    }
 
     override var entity: ClazzWork? = null
         get() = field

@@ -162,8 +162,6 @@ class ClazzWorkDetailOverviewPresenterTest {
                     testClazzWork.clazzWork.clazzWorkUid, lastValue!!.clazzWorkUid)
         }
 
-
-
         val liveDataSet = nullableArgumentCaptor<DoorMutableLiveData<
                 List<ClazzWorkQuestionAndOptionWithResponse>>>().run {
             verify(mockView, timeout(5000).atLeastOnce()).clazzWorkQuizQuestionsAndOptionsWithResponse = capture()
@@ -174,12 +172,12 @@ class ClazzWorkDetailOverviewPresenterTest {
 
         presenter.handleClickSubmit()
 
-        verify(mockView, timeout(10000).atLeastOnce()).entity = any()
+        verify(mockView, timeout(20000).atLeastOnce()).entity = any()
 
         //Verify submission is set
         runBlocking {
-            val postSubmission = clientDbRule.db.clazzWorkSubmissionDao.findByClazzWorkUidAsync(
-                    testClazzWork.clazzWork.clazzWorkUid)
+            val postSubmission = clientDbRule.db.clazzWorkSubmissionDao.findByClazzWorkUidLive(
+                    testClazzWork.clazzWork.clazzWorkUid).waitUntil(5000)
             Assert.assertEquals("Submission set", postSubmission.first().clazzWorkSubmissionClazzWorkUid,
                     testClazzWork.clazzWork.clazzWorkUid)
         }

@@ -81,6 +81,9 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //The fab will be managed by the underlying tabs
+        fabManagementEnabled = false
+
         val navController = findNavController()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 

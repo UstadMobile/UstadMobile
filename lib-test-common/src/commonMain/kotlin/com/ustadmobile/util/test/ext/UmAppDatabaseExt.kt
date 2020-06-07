@@ -43,12 +43,14 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
 
     //Getting member
     val clazzMember: ClazzMember
+
+    val studentClazzMember = clazzAndMembers.studentList.get(0)
+
     if(isStudentToClazz){
         clazzMember = clazzAndMembers.studentList.get(0)
     }else{
         clazzMember = clazzAndMembers.teacherList.get(0)
     }
-
 
     if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
         //Create questions

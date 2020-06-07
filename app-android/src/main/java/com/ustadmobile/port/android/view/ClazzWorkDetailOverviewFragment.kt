@@ -260,6 +260,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                               savedInstanceState: Bundle?): View? {
         val rootView: View
 
+        //The fab will be managed by the underlying tabs
+        fabManagementEnabled = false
+
         mBinding = FragmentClazzWorkWithSubmissionDetailBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
