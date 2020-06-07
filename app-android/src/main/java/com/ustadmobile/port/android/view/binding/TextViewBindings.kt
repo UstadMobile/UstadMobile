@@ -54,14 +54,23 @@ fun TextView.setPresenterFieldHeader(presenterField: PersonDetailPresenterField)
  * corresponds to a given messageId.
  *
  * e.g.
- * val ROLE_MAP = mapOf(ClazzMember.ROLE_STUDENT to MessageID.student,
- *                       ClazzMember.ROLE_TEACHER to MessageID.teacher)
  *
- * You can then use the following in the view XML
+ * class MyPresenter {
+ *    companion object {
+ *       @JvmField
+ *       val ROLE_MAP = mapOf(ClazzMember.ROLE_STUDENT to MessageID.student,
+ *                       ClazzMember.ROLE_TEACHER to MessageID.teacher)
+ *    }
+ * }
+ *
+ * You can then use the following in the view XML:
+ *
+ * &lt;import class="com.packagepath.MyPresenter"/&gt;
+ *
  * &lt;TextView
  * ...
  * app:textMessageIdLookupKey="@{entityObject.memberRole}"
- * app:textMessageIdLookupMap="@{ROLE_MAP}"
+ * app:textMessageIdLookupMap="@{MyPresenter.ROLE_MAP}"
  * /&gt;
  *
  * Note textMessageIdLookupKey and textMessageIdLookupMap are in separate binders because if they

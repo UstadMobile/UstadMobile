@@ -70,6 +70,33 @@ fun ImageView.setAttendanceTint(attendancePercentage: Float) {
     setColorFilter(ContextCompat.getColor(context, color))
 }
 
+/**
+ * This binder will handle situations where there is a fixed list of flags, each of which
+ * corresponds to a given drawable ID
+ *
+ * e.g.
+ *
+ * class MyFragment {
+ *    companion object {
+ *       @JvmField
+ *       val CONTENT_TYPE_ICON_MAP = mapOf(ContentEntry.TYPE_EBOOK to R.drawable.ic_book,
+ *                       ContentEntry.TYPE_EXERCISE to R.drawable.ic_assignment)
+ *    }
+ * }
+ *
+ * You can then use the following in the view XML:
+ *
+ * &lt;import class="com.packagepath.MyFragment"/&gt;
+ *
+ * &lt;TextView
+ * ...
+ * app:imageLookupKey="@{entityObject.contentType}"
+ * app:imageLookupMap="@{MyFragment.CONTENT_TYPE_ICON_MAP}"
+ * /&gt;
+ *
+ * Optionally you can set imageLookupFallback to set an image that will be displayed in case the
+ * key is not found in the map.
+ */
 @BindingAdapter("imageLookupKey")
 fun ImageView.setImageLookupKey(imageLookupKey: Int) {
     setTag(R.id.tag_imagelookup_key, imageLookupKey)

@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view.ext
 
+import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -103,3 +105,17 @@ fun Fragment.navigateToPickEntityFromList(entityClass: Class<*>, destinationId: 
     navController.navigate(destinationId, args, navOptions)
 }
 
+/**
+ * Extension function to request for the permission
+ * @param permission Permission to be request
+ * @param runAfterFun function to executed after permission is granted
+ */
+fun Fragment.runAfterRequestingPermissionIfNeeded(permission: String, runAfterFun: (granted: Boolean) -> Unit) {
+    if(ContextCompat.checkSelfPermission(requireContext(),permission) == PackageManager.PERMISSION_GRANTED) {
+        runAfterFun.invoke(true)
+    }else {
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            runAfterFun(granted)
+        }.launch(permission)
+    }
+}
