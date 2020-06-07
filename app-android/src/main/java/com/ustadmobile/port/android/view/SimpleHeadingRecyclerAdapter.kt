@@ -33,8 +33,4 @@ class SimpleHeadingRecyclerAdapter(heading: String)
         viewHolder = null
     }
 
-    override fun getItemCount(): Int {
-        return 1
-    }
-
 }

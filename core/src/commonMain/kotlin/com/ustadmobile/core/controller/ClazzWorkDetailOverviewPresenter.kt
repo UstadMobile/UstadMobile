@@ -107,11 +107,13 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         view.clazzWorkPublicComments = publicComments
 
 
-        val privateComments = withTimeoutOrNull(2000){
-            db.commentsDao.findPrivateByEntityTypeAndUidLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
-                    clazzWorkWithSubmission.clazzWorkUid)
+        if(clazzWorkWithSubmission.clazzWorkCommentsEnabled) {
+            val privateComments = withTimeoutOrNull(2000) {
+                db.commentsDao.findPrivateByEntityTypeAndUidLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
+                        clazzWorkWithSubmission.clazzWorkUid)
+            }
+            view.clazzWorkPrivateComments = privateComments
         }
-        view.clazzWorkPrivateComments = privateComments
 
 
         return clazzWorkWithSubmission

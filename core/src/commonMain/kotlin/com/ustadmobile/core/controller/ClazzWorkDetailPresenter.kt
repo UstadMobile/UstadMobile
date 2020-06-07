@@ -7,8 +7,11 @@ import com.ustadmobile.core.view.ClazzWorkDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 
@@ -39,8 +42,19 @@ class ClazzWorkDetailPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        //TODO: this
-        view.studentRole = false
+        val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+
+        GlobalScope.launch {
+            val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
+                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, entity?.clazzWorkClazzUid
+                        ?: 0L)
+            }
+
+            //TODO: Enable AFTER TESTING
+            //view.studentRole = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+            view.studentRole = true
+        }
+
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {

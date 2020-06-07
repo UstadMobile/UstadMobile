@@ -24,8 +24,6 @@
         <variable name="mPresenter"
             type="com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter" />
 
-        <variable name="mActivity"
-            type="com.ustadmobile.port.android.view.QuizQuestionHandler" />
 
 
     </data>
@@ -90,10 +88,6 @@
             app:radioGroupOptions="@{clazzWorkQuestionAndOptionsWithResponse.options}"
             app:radioGroupOptionsResponse="@={clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected}"
             >
-
-            <!--
-            android:onCheckedChanged="@{mActivity.quizAnswered}"
-            -->
         </RadioGroup>
 
 

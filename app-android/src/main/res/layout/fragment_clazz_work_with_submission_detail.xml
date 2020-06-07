@@ -23,29 +23,7 @@
             name="fieldsEnabled"
             type="boolean" />
 
-        <variable
-            name="freeTextVisibility"
-            type="int"/>
 
-        <variable
-            name="quizVisibility"
-            type="int"/>
-
-        <variable
-            name="attachmentVisibility"
-            type="int"/>
-
-        <variable
-            name="studentVisibility"
-            type="int"/>
-
-        <variable
-            name="submissionVisibility"
-            type="int"/>
-
-        <variable
-            name="editButtonMode"
-            type="com.ustadmobile.core.view.EditButtonMode"/>
     </data>
 
     <androidx.core.widget.NestedScrollView

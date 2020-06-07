@@ -34,8 +34,5 @@ class SimpleButtonRecyclerAdapter(heading: String, val buttonHandler: SimpleButt
         viewHolder = null
     }
 
-    override fun getItemCount(): Int {
-        return 1
-    }
 
 }

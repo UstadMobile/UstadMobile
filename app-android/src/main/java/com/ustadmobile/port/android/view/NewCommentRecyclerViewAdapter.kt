@@ -4,10 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCommentNewBinding
+import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class NewCommentRecyclerViewAdapter(newCommentHandler: NewCommentHandler? = null,
                                     hintText: String? = null, commentPublic: Boolean)
-    : RecyclerView.Adapter<NewCommentRecyclerViewAdapter.NewCommentViewHolder>() {
+    : SingleItemRecyclerViewAdapter<NewCommentRecyclerViewAdapter.NewCommentViewHolder>() {
 
     var hintText: String? = hintText
         set(value) {
@@ -52,5 +53,4 @@ class NewCommentRecyclerViewAdapter(newCommentHandler: NewCommentHandler? = null
         return 1
     }
 
-    override fun onBindViewHolder(holder: NewCommentViewHolder, position: Int) {}
 }
