@@ -13,10 +13,10 @@ import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_FR
 import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_LOCATION_LIST
 import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_PEOPLE_LIST
 import com.ustadmobile.core.view.AuditLogSelectionView.Companion.ARG_AUDITLOG_TO_TIME
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_ACTOR_SET
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_CLASSES_SET
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_LOCATIONS_SET
-import com.ustadmobile.core.view.ReportEditView.Companion.ARG_PEOPLE_SET
+import com.ustadmobile.staging.core.view.ReportEditView.Companion.ARG_ACTOR_SET
+import com.ustadmobile.staging.core.view.ReportEditView.Companion.ARG_CLASSES_SET
+import com.ustadmobile.staging.core.view.ReportEditView.Companion.ARG_LOCATIONS_SET
+import com.ustadmobile.staging.core.view.ReportEditView.Companion.ARG_PEOPLE_SET
 
 
 /**

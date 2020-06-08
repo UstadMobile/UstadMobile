@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.app.DatePickerDialog
@@ -8,30 +9,44 @@ import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.children
+import androidx.navigation.fragment.findNavController
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.chip.Chip
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.FragmentXapiReportEditBinding
+import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.controller.XapiReportOptionsPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.XapiReportOptionsView
+import com.ustadmobile.lib.db.entities.XapiReportOptions
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import java.util.*
 
 
-class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
-        /* SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,*/
+class XapiReportEditFragment : UstadEditFragment<XapiReportOptions>(), XapiReportOptionsView,
+        */
+/* SelectMultipleLocationTreeDialogFragment.MultiSelectLocationTreeDialogListener,*//*
+
         SelectMultipleEntriesTreeDialogFragment.MultiSelectEntriesTreeDialogListener {
 
+
+    private var mBinding: FragmentXapiReportEditBinding? = null
+
+    private var presenter: XapiReportOptionsPresenter? = null
+
+    override val mEditPresenter: UstadEditPresenter<*, XapiReportOptions>?
+        get() = presenter
 
     private lateinit var visualTypeSpinner: Spinner
 
@@ -59,19 +74,29 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
     private lateinit var whatEditText: EditText
 
-    private lateinit var presenter: XapiReportOptionsPresenter
 
     private lateinit var fromET: EditText
 
     private lateinit var toET: EditText
 
-    private lateinit var umRepo: UmAppDatabase
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val rootView: View
+        mBinding = FragmentXapiReportEditBinding.inflate(inflater, container, false).also {
+            rootView = it.root
+        }
+
+        presenter = XapiReportOptionsPresenter(requireContext(), arguments.toStringMap(), this,
+                UstadMobileSystemImpl.instance, this,
+                UmAccountManager.getActiveDatabase(requireContext()),
+                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
+                UmAccountManager.activeAccountLiveData)
+        presenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
+
+        return rootView
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_xapi_report_options)
-
-        umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
 
         visualTypeSpinner = findViewById(R.id.type_spinner)
         yAxisSpinner = findViewById(R.id.yaxis_spinner)
@@ -89,31 +114,20 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             createDateRangeDialog().show()
         }
 
-        umRepo = UmAccountManager.getRepositoryForActiveAccount(this)
-
-        setUMToolbar(R.id.um_toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
-        supportActionBar!!.setDisplayShowTitleEnabled(false)
-        umToolbar.title = "Report Options"
-
         setProgressBar()
         showBaseProgressBar(false)
 
-        presenter = XapiReportOptionsPresenter(viewContext,
-                Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
-                this, umRepo.personDao, umRepo.xObjectDao, umRepo.xLangMapEntryDao)
-        presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
-
-        /*  whereEditText.setOnClickListener {
+        */
+/*  whereEditText.setOnClickListener {
               presenter.handleWhereClicked()
           }
-  */
+  *//*
+
         whatEditText.setOnClickListener {
-            presenter.handleWhatClicked()
+            presenter?.handleWhatClicked()
         }
 
-        whoDataAdapter = ArrayAdapter(this,
+        whoDataAdapter = ArrayAdapter(requireContext(),
                 android.R.layout.simple_spinner_item, listOf<PersonDao.PersonNameAndUid>())
         whoAutoCompleteView.setAdapter(whoDataAdapter)
         whoAutoCompleteView.addTextChangedListener(textWatcher)
@@ -123,7 +137,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             addChipToDidFlexLayout(selected.name, whoFlexBoxLayout, whoFlexBoxLayout.childCount - 1, selected.personUid)
         }
 
-        didDataAdapter = ArrayAdapter(this,
+        didDataAdapter = ArrayAdapter(requireContext(),
                 android.R.layout.simple_spinner_item, listOf<XLangMapEntryDao.Verb>())
         didAutoCompleteView.setAdapter(didDataAdapter)
         didAutoCompleteView.addTextChangedListener(textWatcher)
@@ -139,7 +153,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                presenter.handleSelectedYAxis(position)
+                presenter?.handleSelectedYAxis(position)
             }
 
         })
@@ -150,7 +164,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                presenter.handleSelectedChartType(position)
+                presenter?.handleSelectedChartType(position)
             }
 
         })
@@ -161,7 +175,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                presenter.handleSelectedXAxis(position)
+                presenter?.handleSelectedXAxis(position)
             }
 
         })
@@ -172,21 +186,23 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                presenter.handleSelectedSubGroup(position)
+                presenter?.handleSelectedSubGroup(position)
             }
 
         })
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+   */
+/* override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_done, menu)
         return super.onCreateOptionsMenu(menu)
-    }
+    }*//*
+
 
 
     private fun setAdapterForSpinner(list: List<String>, spinner: Spinner) {
-        val dataAdapter = ArrayAdapter(this,
+        val dataAdapter = ArrayAdapter(requireContext(),
                 android.R.layout.simple_spinner_item, list)
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = dataAdapter
@@ -275,7 +291,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
             val hash = string.hashCode()
             if (hash == whoAutoCompleteView.text.hashCode()) {
                 val name = whoAutoCompleteView.text.toString()
-                presenter.handleWhoDataTyped(name, whoFlexBoxLayout.children.filter {
+                presenter?.handleWhoDataTyped(name, whoFlexBoxLayout.children.filter {
                     it is Chip
                 }.map {
                     (it as Chip).tag as Long
@@ -283,7 +299,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
             } else if (hash == didAutoCompleteView.text.hashCode()) {
                 val verb = didAutoCompleteView.text.toString()
-                presenter.handleDidDataTyped(verb, didFlexBoxLayout.children.filter {
+                presenter?.handleDidDataTyped(verb, didFlexBoxLayout.children.filter {
                     it is Chip
                 }.map {
                     (it as Chip).tag as Long
@@ -314,7 +330,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_done -> {
-                presenter.handleViewReportPreview(
+                presenter?.handleViewReportPreview(
                         didFlexBoxLayout.children.filter { it is Chip }.map {
                             (it as Chip).tag as Long
                         }.toList(),
@@ -352,7 +368,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
         //date listener - opens a new date picker.
         var dateFieldPicker = DatePickerDialog(
-                this, toDateListener, presenter.toDateTime.yearInt,
+                requireContext(), toDateListener, presenter?.toDateTime.yearInt,
                 presenter.toDateTime.month0, presenter.toDateTime.dayOfMonth)
 
         dateFieldPicker = hideYearFromDatePicker(dateFieldPicker)
@@ -364,7 +380,7 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         //FROM:
         //Date pickers's on click listener - sets text
         val fromDateListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
-            presenter.handleDialogFromCalendarSelected(year, month + 1, dayOfMonth)
+            presenter?.handleDialogFromCalendarSelected(year, month + 1, dayOfMonth)
         }
 
         //Default view: not focusable.
@@ -372,8 +388,8 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
         //date listener - opens a new date picker.
         var fromDateFieldPicker = DatePickerDialog(
-                this, fromDateListener, presenter.fromDateTime.yearInt,
-                presenter.fromDateTime.month0, presenter.fromDateTime.dayOfMonth)
+                requireContext(), fromDateListener, presenter.fromDateTime.yearInt,
+                presenter?.fromDateTime.month0, presenter.fromDateTime.dayOfMonth)
 
         fromDateFieldPicker = hideYearFromDatePicker(fromDateFieldPicker)
 
@@ -381,14 +397,14 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
         fromET.setOnClickListener { finalFromDateFieldPicker.show() }
 
         val positiveOCL = DialogInterface.OnClickListener { dialog, _ ->
-            presenter.handleDateRangeSelected()
+            presenter?.handleDateRangeSelected()
             dialog.cancel()
             presenter
         }
 
         val negativeOCL = DialogInterface.OnClickListener { dialog, _ -> dialog.dismiss() }
 
-        val builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.date_range)
         builder.setView(rootView)
         builder.setPositiveButton(R.string.ok, positiveOCL)
@@ -398,20 +414,22 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
     }
 
 //TODO when varuna branch merges
+*/
 /*  override fun onLocationResult(selected: MutableMap<String, Long>) {
       var locationList = selected.keys.joinToString { it }
       runOnUiThread {
           whereEditText.setText(locationList)
       }
       presenter.handleLocationListSelected(selected.values.toList())
-  }*/
+  }*//*
+
 
     override fun onEntriesSelectedResult(selected: MutableMap<String, Long>) {
         var entriesList = selected.keys.joinToString { it }
         runOnUiThread {
             whatEditText.setText(entriesList)
         }
-        presenter.handleEntriesListSelected(selected.values.toList())
+        presenter?.handleEntriesListSelected(selected.values.toList())
     }
 
 
@@ -432,6 +450,33 @@ class XapiReportOptionsActivity : UstadBaseActivity(), XapiReportOptionsView,
 
         return dateFieldPicker
     }
+
+
+    override var fieldsEnabled: Boolean
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+        set(value) {}
+
+    override var entity: XapiReportOptions?
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+        set(value) {}
+
+
+    override fun onResume() {
+        super.onResume()
+        // TODO create string
+        setEditFragmentTitle('Report Options')
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        presenter?.onDestroy()
+        mBinding = null
+        presenter = null
+        entity = null
+
+    }
 }
 
 
+*/

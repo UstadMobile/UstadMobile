@@ -1,26 +1,33 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.MenuItem
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.controller.XapiReportDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.lib.db.entities.XapiReportOptions
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
-import java.util.*
 
 
-class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
+class XapiReportDetailActivity : UstadDetailFragment<StatementDao.ReportListData>(),        XapiReportDetailView {
 
     private lateinit var recyclerView: RecyclerView
 
@@ -28,24 +35,37 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
 
     private lateinit var viewManager: RecyclerView.LayoutManager
 
-    private lateinit var presenter: XapiReportDetailPresenter
+    private var presenter: XapiReportDetailPresenter? = null
 
     private lateinit var floatingButton: FloatingTextButton
 
     private lateinit var umRepository: UmAppDatabase
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val rootView: View
+        inflater.inflate(R.layout.fragment_xapi_report_detail, container, false).also {
+            rootView = it.rootView
+        }
+        presenter = XapiReportDetailPresenter(requireContext(),
+                arguments.toStringMap(), this, this ,
+                UstadMobileSystemImpl.instance,
+                UmAccountManager.getActiveDatabase(requireContext()),
+                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
+                UmAccountManager.activeAccountLiveData)
+
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val navController = findNavController()
+        presenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_xapi_report_preview)
-
-        setUMToolbar(R.id.um_toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
-        supportActionBar!!.setDisplayShowTitleEnabled(false)
-        umToolbar.title = getString(R.string.activity_preview_xapi)
-
-        setProgressBar()
-        showBaseProgressBar(false)
 
         recyclerView = findViewById(R.id.preview_report_list)
         viewManager = LinearLayoutManager(this)
@@ -57,13 +77,6 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
         floatingButton = findViewById(R.id.preview_fab)
 
         umRepository = UmAccountManager.getRepositoryForActiveAccount(this)
-
-        presenter = XapiReportDetailPresenter(viewContext,
-                Objects.requireNonNull(UMAndroidUtil.bundleToMap(intent.extras)),
-                this, UstadMobileSystemImpl.instance, umRepository.statementDao,
-                umRepository.xLangMapEntryDao
-        )
-        presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         floatingButton.setOnClickListener {
             val alertDialog = AlertDialog.Builder(this)
@@ -83,7 +96,7 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
                 dialog.cancel()
             }
             alertDialog.setPositiveButton("OK") { _, _ ->
-                presenter.handleAddDashboardClicked(input.text.toString())
+                presenter?.handleAddDashboardClicked(input.text.toString())
             }
             alertDialog.show()
         }
@@ -99,14 +112,17 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
 
 
     override fun setReportListData(listResults: List<StatementDao.ReportListData>) {
-        /*   val data = LivePagedListBuilder(listResults, 20).build()
+        */
+/*   val data = LivePagedListBuilder(listResults, 20).build()
            data.observe(this, Observer<PagedList<StatementDao.ReportListData>> { recyclerAdapter!!.submitList(it) })
 
-           recyclerView.adapter = recyclerAdapter*/
+           recyclerView.adapter = recyclerAdapter*//*
+
         recyclerAdapter.submitList(listResults)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+   */
+/* override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             // Respond to the action bar's Up/Home button
             android.R.id.home -> {
@@ -115,6 +131,26 @@ class XapiReportDetailActivity : UstadBaseActivity(), XapiReportDetailView {
             }
         }
         return super.onOptionsItemSelected(item)
+    }*//*
+
+
+    override fun onResume() {
+        super.onResume()
+        setEditFragmentTitle(R.string.activity_preview_xapi)
     }
 
-}
+    override fun onDestroyView() {
+        super.onDestroyView()
+        presenter = null
+        entity = null
+    }
+
+    override val detailPresenter: UstadDetailPresenter<*, *>?
+        get() = presenter
+
+
+    override var entity: StatementDao.ReportListData? = null
+        get() = field
+        set(value) {}
+
+}*/

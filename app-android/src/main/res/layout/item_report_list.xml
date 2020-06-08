@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.Report"/>
+        <import type="com.ustadmobile.port.android.view.ReportListFragment"/>
+        <import type="com.ustadmobile.port.android.view.ReportListFragment.ReportListRecyclerAdapter"/>
+
+        <variable
+            name="report"
+            type="Report" />
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ReportListPresenter" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="ReportListRecyclerAdapter" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, report)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(report)}"
+        android:background="@drawable/bg_listitem">
+
+        <!-- Line 1-->
+        <TextView
+            android:id="@+id/report_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="@dimen/list_twoline1_textsize_line1"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:textSize="@dimen/list_twoline1_textsize_line1"
+            android:textColor="@color/text_primary"
+            />
+
+        <!-- Line 2-->
+        <com.ustadmobile.port.android.view.XapiChartView
+            android:id="@+id/list_report_chart"
+            android:layout_width="0dp"
+            android:layout_height="250dp"
+            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            app:layout_constraintStart_toStartOf="@+id/report_title"
+            app:layout_constraintTop_toBottomOf="@+id/report_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

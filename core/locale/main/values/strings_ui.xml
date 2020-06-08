@@ -303,6 +303,14 @@
     <string name="xapi_options_what">What</string>
     <string name="xapi_options_when">When</string>
     <string name="xapi_options_where">Where</string>
+    <string name="xapi_options_content">Content</string>
+
+    <string name="report">Add Report</string>
+    <string name="verb">Verb</string>
+    <string name="id_verbentity_urlid">ID: %s</string>
+    <string name="verb_filter">verb filter</string>
+    <string name="person_filter">person filter</string>
+    <string name="content_filter">content filter</string>
 
     <string name="activity_preview_xapi">Preview</string>
     <string name="add_to_dashboard">Add to Dashboard</string>

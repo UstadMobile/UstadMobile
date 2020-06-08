@@ -1,17 +1,20 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.db.dao.XObjectDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView
+import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.SelectMultipleEntriesTreeDialogView.Companion.ARG_CONTENT_ENTRY_SET
-import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView
 import com.ustadmobile.core.view.SelectMultipleLocationTreeDialogView.Companion.ARG_LOCATIONS_SET
-import com.ustadmobile.core.view.XapiReportDetailView
-import com.ustadmobile.core.view.XapiReportOptionsView
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.XapiReportOptions
 import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.listOfGraphs
 import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.xAxisList
@@ -23,10 +26,10 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlin.js.JsName
 
-class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
-                                 view: XapiReportOptionsView, private val personDao: PersonDao,
-                                 private val xObjectDao: XObjectDao, private val xLangMapEntryDao: XLangMapEntryDao)
-    : UstadBaseController<XapiReportOptionsView>(context, arguments!!, view) {
+class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>,
+                                 view: XapiReportOptionsView, systemImpl: UstadMobileSystemImpl,
+                                 lifecycleOwner: DoorLifecycleOwner, db: UmAppDatabase, repo: UmAppDatabase, activeAccount: DoorLiveData<UmAccount?>)
+    : UstadEditPresenter<XapiReportOptionsView, XapiReportOptions>(context, arguments, view, lifecycleOwner, systemImpl, db, repo, activeAccount) {
 
 
     private lateinit var impl: UstadMobileSystemImpl
@@ -55,6 +58,15 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
 
     private var activeJobCount = 0
 
+    override fun onLoadFromJson(bundle: Map<String, String>): XapiReportOptions? {
+        super.onLoadFromJson(bundle)
+        val entityJsonStr = bundle[UstadEditView.ARG_ENTITY_JSON]
+        if(entityJsonStr != null){
+            reportOptions = Json.parse(XapiReportOptions.serializer(), entityJsonStr)
+        }
+        return reportOptions
+    }
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         impl = UstadMobileSystemImpl.instance
@@ -72,18 +84,19 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
         val json = Json(JsonConfiguration.Stable)
         val reportOptionsString = arguments[XapiReportDetailView.ARG_REPORT_OPTIONS]
         if (reportOptionsString != null) {
-            reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString)
-            selectedChartType = listOfGraphs.indexOf(reportOptions!!.chartType)
-            selectedYaxis = yAxisList.indexOf(reportOptions!!.yAxis)
-            selectedXAxis = xAxisList.indexOf(reportOptions!!.xAxis)
-            selectedSubGroup = xAxisList.indexOf(reportOptions!!.subGroup)
-            selectedLocations = reportOptions!!.locationsList
-            selectedEntries = reportOptions!!.entriesList
-            selectedObjects = reportOptions!!.objectsList
+            val reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString)
+            this.reportOptions = reportOptions
+            selectedChartType = listOfGraphs.indexOf(reportOptions.chartType)
+            selectedYaxis = yAxisList.indexOf(reportOptions.yAxis)
+            selectedXAxis = xAxisList.indexOf(reportOptions.xAxis)
+            selectedSubGroup = xAxisList.indexOf(reportOptions.subGroup)
+            selectedLocations = reportOptions.locationsList
+            selectedEntries = reportOptions.entriesList
+            selectedObjects = reportOptions.objectsList
 
-            if (reportOptions!!.fromDate > 0L && reportOptions!!.toDate > 0L) {
-                fromDateTime = DateTime(reportOptions!!.fromDate)
-                toDateTime = DateTime(reportOptions!!.toDate)
+            if (reportOptions.fromDate > 0L && reportOptions.toDate > 0L) {
+                fromDateTime = DateTime(reportOptions.fromDate)
+                toDateTime = DateTime(reportOptions.toDate)
                 handleDateRangeSelected()
             }
 
@@ -93,22 +106,20 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
             view.updateSubgroupTypeSelected(selectedSubGroup)
 
             activeJobCount += 1
-            view.showBaseProgressBar(activeJobCount > 0)
             GlobalScope.launch {
-                if (reportOptions!!.didFilterList.isNotEmpty()) {
-                    val verbs = xLangMapEntryDao.getAllVerbsInList(reportOptions!!.didFilterList)
+                if (reportOptions.didFilterList.isNotEmpty()) {
+                    val verbs = repo.xLangMapEntryDao.getAllVerbsInList(reportOptions.didFilterList)
                     view.runOnUiThread(Runnable {
                         view.updateDidListSelected(verbs)
                     })
                 }
-                if (reportOptions!!.whoFilterList.isNotEmpty()) {
-                    val personList = personDao.getAllPersonsInList(reportOptions!!.whoFilterList)
+                if (reportOptions.whoFilterList.isNotEmpty()) {
+                    val personList = repo.personDao.getAllPersonsInList(reportOptions.whoFilterList)
                     view.runOnUiThread(Runnable {
                         view.updateWhoListSelected(personList)
                     })
                 }
                 activeJobCount -= 1
-                view.showBaseProgressBar(activeJobCount > 0)
             }
 
         }
@@ -150,13 +161,12 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
     @JsName("handleWhoDataTyped")
     fun handleWhoDataTyped(name: String, uidList: List<Long>) {
         activeJobCount += 1
-        view.showBaseProgressBar(activeJobCount > 0)
+
         GlobalScope.launch {
-            val personsNames = personDao.getAllPersons("%$name%", uidList)
+            val personsNames = db.personDao.getAllPersons("%$name%", uidList)
             view.runOnUiThread(Runnable {
                 view.updateWhoDataAdapter(personsNames)
                 activeJobCount -= 1
-                view.showBaseProgressBar(activeJobCount > 0)
             })
         }
     }
@@ -164,13 +174,12 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
     @JsName("handleDidDataTyped")
     fun handleDidDataTyped(verb: String, uidList: List<Long>) {
         activeJobCount++
-        view.showBaseProgressBar(activeJobCount > 0)
+
         GlobalScope.launch {
-            val verbs = xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
+            val verbs = db.xLangMapEntryDao.getAllVerbs("%$verb%", uidList)
             view.runOnUiThread(Runnable {
                 view.updateDidDataAdapter(verbs)
                 activeJobCount--
-                view.showBaseProgressBar(activeJobCount > 0)
             })
 
         }
@@ -194,7 +203,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
 
     @JsName("handleViewReportPreview")
     fun handleViewReportPreview(didOptionsList: List<Long>, whoOptionsList: List<Long>) {
-        reportOptions = XapiReportOptions(
+        val reportOptions = XapiReportOptions(
                 listOfGraphs[selectedChartType],
                 yAxisList[selectedYaxis],
                 xAxisList[selectedXAxis],
@@ -207,9 +216,9 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
                 toDateTimeMillis,
                 selectedLocations, reportOptions?.reportTitle.toString())
 
-        var args = HashMap<String, String?>()
+        val args = HashMap<String, String?>()
         args.putAll(arguments)
-        args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptions!!)
+        args[XapiReportDetailView.ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptions)
         impl.go(XapiReportDetailView.VIEW_NAME, args, context)
     }
 
@@ -222,7 +231,7 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
     fun handleEntriesListSelected(entriesList: List<Long>) {
         selectedEntries = entriesList
         GlobalScope.launch {
-            selectedObjects = xObjectDao.findListOfObjectUidFromContentEntryUid(selectedEntries)
+            selectedObjects = repo.xObjectDao.findListOfObjectUidFromContentEntryUid(selectedEntries)
         }
     }
 
@@ -245,6 +254,20 @@ class XapiReportOptionsPresenter(context: Any, arguments: Map<String, String>?,
     fun handleSelectedSubGroup(position: Int) {
         selectedSubGroup = position
     }
+
+    override fun handleClickSave(entity: XapiReportOptions) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
+        super.onSaveInstanceState(savedState)
+        val entityVal = entity
+        savedState.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, null,
+                entityVal)
+    }
+
+    override val persistenceMode: PersistenceMode
+        get() = PersistenceMode.JSON
 
 
 }

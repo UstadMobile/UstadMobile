@@ -1,16 +1,20 @@
 package com.ustadmobile.core.controller
 
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.XapiReportDetailView
 import com.ustadmobile.core.view.XapiReportDetailView.Companion.ARG_REPORT_OPTIONS
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_FEMALE
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_MALE
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_OTHER
 import com.ustadmobile.lib.db.entities.Person.Companion.GENDER_UNSET
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.XapiReportOptions
 import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.AVG_DURATION
 import com.ustadmobile.lib.db.entities.XapiReportOptions.Companion.CONTENT_ENTRY
@@ -28,11 +32,13 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlin.js.JsName
 
-class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
-                                view: XapiReportDetailView, val impl: UstadMobileSystemImpl,
-                                private val statementDao: StatementDao,
-                                private val xLangMapEntryDao: XLangMapEntryDao)
-    : UstadBaseController<XapiReportDetailView>(context, arguments!!, view) {
+class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>,
+                                view: XapiReportDetailView, lifecycleOwner: DoorLifecycleOwner,
+                                val impl: UstadMobileSystemImpl,
+                                db: UmAppDatabase,
+                                repo: UmAppDatabase,
+                                activeAccount: DoorLiveData<UmAccount?>)
+    : UstadDetailPresenter<XapiReportDetailView, StatementDao.ReportListData>(context, arguments, view, lifecycleOwner, impl, db, repo, activeAccount) {
 
     private lateinit var reportOptions: XapiReportOptions
 
@@ -40,28 +46,26 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
         super.onCreate(savedState)
 
         val json = Json(JsonConfiguration.Stable)
-        val reportOptionsString = arguments.getValue(ARG_REPORT_OPTIONS)!!
+        val reportOptionsString = arguments.getValue(ARG_REPORT_OPTIONS)
         reportOptions = json.parse(XapiReportOptions.serializer(), reportOptionsString)
-        view.showBaseProgressBar(true)
         GlobalScope.launch {
 
-            var data = statementDao.getResultsFromOptions(reportOptions)
+            var data = db.statementDao.getResultsFromOptions(reportOptions)
             var time = SECS
             if (reportOptions.yAxis == DURATION || reportOptions.yAxis == AVG_DURATION) {
                 time = getMeasureTime(data)
                 data = changeUnitInList(data, time)
             }
-            val xAxisLabel = getLabelList(reportOptions.xAxis, data.map { it.xAxis!! }.distinct())
-            val subgroupLabel = getLabelList(reportOptions.subGroup, data.map { it.subgroup!! }.distinct())
+            val xAxisLabel = getLabelList(reportOptions.xAxis, data.filter { it.xAxis != null  }.map { it.xAxis }.distinct() as List<String>)
+            val subgroupLabel = getLabelList(reportOptions.subGroup, data.filter { it.subgroup != null  }.map { it.subgroup }.distinct() as List<String>)
             val yAxisLabel = getLabel(reportOptions.yAxis, time)
             view.runOnUiThread(Runnable {
                 view.setChartData(data, reportOptions, xAxisLabel, subgroupLabel)
                 view.setChartYAxisLabel(yAxisLabel)
             })
-            val results = statementDao.getResultsListFromOptions(reportOptions)
+            val results = db.statementDao.getResultsListFromOptions(reportOptions)
             view.runOnUiThread(Runnable {
                 view.setReportListData(results)
-                view.showBaseProgressBar(false)
             })
 
         }
@@ -71,14 +75,14 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
     @JsName("handleAddDashboardClicked")
     fun handleAddDashboardClicked(title: String){
         reportOptions.reportTitle = title
-        var args = HashMap<String, String?>()
+        val args = HashMap<String, String?>()
         args[ARG_REPORT_OPTIONS] = Json(JsonConfiguration.Stable).stringify(XapiReportOptions.serializer(), reportOptions)
         //impl.go(XapiReportDetailView.VIEW_NAME, args, context)
     }
 
     private fun getMeasureTime(data: List<StatementDao.ReportData>): Int {
-        var units = data.maxBy { it.yAxis }
-        if (units?.yAxis!! > 3600000) {
+        val units = data.maxBy { it.yAxis } ?: return SECS
+        if (units.yAxis > 3600000) {
             return HRS
         } else if (units.yAxis > 60000) {
             return MINS
@@ -123,7 +127,7 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
 
             }
             CONTENT_ENTRY -> {
-                val valueList = xLangMapEntryDao.getValuesWithListOfId(list.map { it.toInt() })
+                val valueList = db.xLangMapEntryDao.getValuesWithListOfId(list.map { it.toInt() })
                 valueList.forEach {
                     mutableMap[it.objectLangMapUid.toString()] = it.valueLangMap
                 }
@@ -138,6 +142,8 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
         return mutableMap.toMap()
     }
 
+
+
     companion object {
 
         const val SECS = MessageID.xapi_seconds
@@ -148,5 +154,11 @@ class XapiReportDetailPresenter(context: Any, arguments: Map<String, String>?,
 
     }
 
+    override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
+        return true
+    }
+
+    override val persistenceMode: PersistenceMode
+        get() = PersistenceMode.DB
 
 }

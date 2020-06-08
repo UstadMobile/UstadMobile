@@ -12,9 +12,14 @@ fun TextInputLayout.setHintMessageId(messageId: Int) {
 
 @BindingAdapter("customFieldHint")
 fun TextInputLayout.setCustomFieldHint(customField: CustomField?) {
-    hint = if(customField != null) {
+    hint = if (customField != null) {
         UstadMobileSystemImpl.instance.getString(customField.customFieldLabelMessageID, context)
-    }else {
+    } else {
         ""
     }
+}
+
+@BindingAdapter("errorText")
+fun TextInputLayout.setErrorText(errorMessage: String?) {
+    this.error = errorMessage
 }

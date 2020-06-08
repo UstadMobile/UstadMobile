@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.BaseReportView
-import com.ustadmobile.core.view.ReportEditView
+import com.ustadmobile.staging.core.view.ReportEditView
 
 
 /**

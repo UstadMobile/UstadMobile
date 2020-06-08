@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.lib.db.entities.XapiReportOptions
 import kotlin.js.JsName
 
-interface XapiReportDetailView : UstadView, UstadViewWithProgress {
+interface XapiReportDetailView : UstadDetailView<StatementDao.ReportListData> {
 
     @JsName("setChartData")
     fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions, xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>)

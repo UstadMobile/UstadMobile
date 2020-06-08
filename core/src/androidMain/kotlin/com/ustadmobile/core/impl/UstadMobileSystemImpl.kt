@@ -54,6 +54,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
+import com.ustadmobile.staging.core.view.ReportEditView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
@@ -158,7 +159,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             AddCustomFieldOptionDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddCustomFieldOptionDialogFragment",
             ChangePasswordView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ChangePasswordActivity",
             PeopleListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PeopleListActivity",
-
             ContentEntryExportView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryExportFragmentDialog",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             ClazzAssignmentEditView.VIEW_NAME to "${PACKAGE_NAME}ClazzAssignmentEditActivity",

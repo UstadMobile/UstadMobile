@@ -8,6 +8,7 @@ import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.annotation.ParamName
 import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.lib.db.entities.XapiReportOptions
 import kotlinx.serialization.Serializable
@@ -33,12 +34,23 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<ReportData>
 
+    // TODO to be deleted
     open suspend fun getResultsFromOptions(@ParamName("options") options: XapiReportOptions): List<ReportData> {
         val sql = options.toSql()
         return getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
     }
 
     open suspend fun getResultsListFromOptions(@ParamName("options") options: XapiReportOptions): List<ReportListData> {
+        val sql = options.toSql()
+        return getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
+    }
+
+    open suspend fun getResultsFromOptions(@ParamName("options") options: ReportWithFilters): List<ReportData> {
+        val sql = options.toSql()
+        return getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
+    }
+
+    open suspend fun getResultsListFromOptions(@ParamName("options") options: ReportWithFilters): List<ReportListData> {
         val sql = options.toSql()
         return getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
     }

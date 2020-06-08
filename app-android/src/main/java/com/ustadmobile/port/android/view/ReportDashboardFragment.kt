@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.github.clans.fab.FloatingActionButton
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.view.XapiReportDetailView
 
 /**
  * A simple [Fragment] subclass.
@@ -21,7 +22,7 @@ class ReportDashboardFragment : UstadBaseFragment() {
         val view:View =  inflater.inflate(R.layout.fragment_report_dashboard, container, false)
 
         view.findViewById<FloatingActionButton>(R.id.create_report).setOnClickListener {
-            startActivity(Intent(activity, XapiReportOptionsActivity::class.java))
+            startActivity(Intent(activity, XapiReportDetailView::class.java))
         }
         return  view
     }

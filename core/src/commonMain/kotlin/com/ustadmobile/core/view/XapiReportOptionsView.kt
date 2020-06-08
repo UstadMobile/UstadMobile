@@ -2,9 +2,10 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.XLangMapEntryDao
+import com.ustadmobile.lib.db.entities.XapiReportOptions
 import kotlin.js.JsName
 
-interface XapiReportOptionsView : UstadView, UstadViewWithProgress {
+interface XapiReportOptionsView : UstadEditView<XapiReportOptions> {
 
     @JsName("fillVisualChartType")
     fun fillVisualChartType(translatedGraphList: List<String>)

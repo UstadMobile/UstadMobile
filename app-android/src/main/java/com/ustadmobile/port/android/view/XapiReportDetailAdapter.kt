@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.content.Context
@@ -108,4 +109,4 @@ class XapiReportDetailAdapter(var context: Context) :
         val verticalTextView: VerticalTextView = view.findViewById(R.id.preview_ylabel)
     }
 
-}
+}*/

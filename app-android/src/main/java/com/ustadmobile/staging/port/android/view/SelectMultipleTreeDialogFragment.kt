@@ -20,7 +20,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.SelectMultipleTreeDialogPresenter
+import com.ustadmobile.staging.core.controller.SelectMultipleTreeDialogPresenter
 import com.ustadmobile.core.db.dao.LocationDao
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
