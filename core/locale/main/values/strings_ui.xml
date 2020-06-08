@@ -305,7 +305,7 @@
     <string name="xapi_options_where">Where</string>
     <string name="xapi_options_content">Content</string>
 
-    <string name="report">Add Report</string>
+    <string name="report">Report</string>
     <string name="verb">Verb</string>
     <string name="id_verbentity_urlid">ID: %s</string>
     <string name="verb_filter">verb filter</string>

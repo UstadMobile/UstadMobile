@@ -109,13 +109,14 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         verbDisplayRecyclerAdapter?.presenter = mPresenter
         contentDisplayRecyclerAdapter?.presenter = mPresenter
 
-        setEditFragmentTitle(R.string.report)
+
 
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.report)
 
         val navController = findNavController()
 
