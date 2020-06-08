@@ -159,16 +159,9 @@ class ContentEntryEdit2Presenter(context: Any,
                 }
                 view.finishWithResult(listOf(entity))
             }else{
-                when {
-                    entity.title == null && view.selectedFileUri != null -> view.titleErrorEnabled = true
-                    entity.title != null && view.selectedFileUri == null && entity.leaf -> view.fileImportErrorVisible = true
-                    else -> {
-                        view.titleErrorEnabled = true
-                        if(entity.leaf){
-                            view.fileImportErrorVisible = true
-                        }
-                    }
-                }
+                view.titleErrorEnabled = entity.title == null
+                view.fileImportErrorVisible = entity.title != null && entity.leaf
+                        && view.selectedFileUri == null
             }
         }
     }

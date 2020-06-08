@@ -63,7 +63,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         get() = field
         set(value) {
             field = value
-            mBinding?.viewVisibility = if(value != null && value.leaf) View.VISIBLE else View.GONE
             mBinding?.contentEntry = value
         }
 
@@ -73,12 +72,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             mBinding?.licenceOptions = value
         }
 
+
     override var selectedStorageIndex: Int = 0
         get() = field
         set(value) {
             field = value
             mBinding?.selectedStorageIndex = value
         }
+
+
     override var selectedFileUri: String? = null
         get() = field
         set(value) {
@@ -104,11 +106,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     override var storageOptions: List<UMStorageDir>? = null
         set(value) {
-            mBinding?.storageOptions = value?.map {
-                String.format(UstadMobileSystemImpl.instance.getString(
-                        MessageID.download_storage_option_device, context as Any), it.name,
-                        UMFileUtil.formatFileSize(File(it.dirURI).usableSpace))
-            }
+            mBinding?.storageOptions = value
             field = value
         }
 
@@ -195,7 +193,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             rootView = it.root
             it.fileImportInfoVisibility = View.GONE
             it.activityEventHandler = this
-            it.viewVisibility = View.GONE
         }
 
         return rootView

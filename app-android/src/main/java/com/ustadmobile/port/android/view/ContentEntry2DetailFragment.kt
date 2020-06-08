@@ -55,7 +55,10 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
     private var availableTranslationAdapter: AvailableTranslationRecyclerAdapter? = null
 
     private val availableTranslationObserver = Observer<List<ContentEntryRelatedEntryJoinWithLanguage>?> {
-        t -> availableTranslationAdapter?.submitList(t)
+        t -> run {
+            mBinding?.translationVisibility = if (t != null && t.isNotEmpty()) View.VISIBLE else View.GONE
+            availableTranslationAdapter?.submitList(t)
+        }
     }
 
 
@@ -185,7 +188,6 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
                 val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
                 flexboxLayoutManager.flexDirection = FlexDirection.ROW
-
                 availableTranslationAdapter = AvailableTranslationRecyclerAdapter(thisFrag,mPresenter)
                 availableTranslationView.adapter = availableTranslationAdapter
                 availableTranslationView.layoutManager = flexboxLayoutManager

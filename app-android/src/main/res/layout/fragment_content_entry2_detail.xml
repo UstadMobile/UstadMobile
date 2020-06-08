@@ -15,8 +15,8 @@
             type="boolean" />
 
         <variable
-            name="showTranslation"
-            type="boolean" />
+            name="translationVisibility"
+            type="Integer" />
 
         <variable
             name="fieldsEnabled"
@@ -263,7 +263,7 @@
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_description" />
 
                 <TextView
-                    android:visibility="@{showTranslation ? View.VISIBLE: View.GONE}"
+                    android:visibility="@{translationVisibility}"
                     android:id="@+id/entry_detail_available_label"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -277,7 +277,7 @@
 
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:visibility="@{showTranslation ? View.VISIBLE: View.GONE}"
+                    android:visibility="@{translationVisibility}"
                     android:id="@+id/availableTranslationView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

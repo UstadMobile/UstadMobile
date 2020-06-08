@@ -67,6 +67,8 @@ class ContentEntryEdit2FragmentTest  {
 
         onView(withId(R.id.content_entry_select_file)).check(matches(not(isDisplayed())))
 
+        onView(withId(R.id.container_storage_option)).check(matches(not(isDisplayed())))
+
         formVals.title?.takeIf { it != currentEntity?.title }?.also {
             onView(withId(R.id.entry_title_text)).perform(clearText(), typeText(it))
         }
@@ -118,6 +120,8 @@ class ContentEntryEdit2FragmentTest  {
         sleep(1000)
 
         onView(withId(R.id.content_entry_select_file)).check(matches(isDisplayed()))
+
+        onView(withId(R.id.container_storage_option)).check(matches(isDisplayed()))
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
