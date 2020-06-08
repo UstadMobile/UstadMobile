@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
@@ -46,7 +47,7 @@ interface ContentEntryEdit2FragmentEventHandler {
     fun handleClickLanguage()
 }
 
-class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler{
+class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null): UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler{
 
     private var mBinding: FragmentContentEntryEdit2Binding? = null
 
@@ -134,8 +135,9 @@ class ContentEntryEdit2Fragment: UstadEditFragment<ContentEntryWithLanguage>(), 
 
     }
 
-    private fun handleFileSelection(){
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    open fun handleFileSelection(){
+        registerForActivityResult(ActivityResultContracts.GetContent(),
+                registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
             if(uri != null){
                 try{
                     val input = requireContext().contentResolver.openInputStream(uri)
