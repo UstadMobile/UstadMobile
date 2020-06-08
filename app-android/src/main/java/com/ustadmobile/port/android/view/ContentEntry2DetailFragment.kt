@@ -200,6 +200,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         super.onDestroyView()
         mBinding = null
         mPresenter = null
+        availableTranslationAdapter = null
         entity = null
     }
 

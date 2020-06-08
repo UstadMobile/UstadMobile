@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ContentEntryAddOptionsView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import kotlinx.android.synthetic.main.fragment_content_entry_add_options.*
 import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
 
 /**
@@ -21,12 +22,22 @@ import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
 
 class ContentEntryAddOptionsBottomSheetFragment : UstadBottomSheetFragment(), ContentEntryAddOptionsView, View.OnClickListener {
 
+    override val viewContext: Any
+        get() = requireContext()
+
+
+    private var createFolderOptionView: View? = null
+
+    private var importContentOptionView: View? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_content_entry_add_options, container, false)
-        rootView.content_create_folder.setOnClickListener(this)
-        rootView.content_import_content.setOnClickListener(this)
-        return rootView;
+        createFolderOptionView = rootView.content_create_folder
+        importContentOptionView = rootView.content_import_content
+        createFolderOptionView?.setOnClickListener(this)
+        importContentOptionView?.setOnClickListener(this)
+        return rootView
     }
 
     override fun onClick(view: View?) {
@@ -42,8 +53,12 @@ class ContentEntryAddOptionsBottomSheetFragment : UstadBottomSheetFragment(), Co
         dismiss()
     }
 
-    override val viewContext: Any
-        get() = requireContext()
-
+    override fun onDestroy() {
+        super.onDestroy()
+        importContentOptionView?.setOnClickListener(null)
+        createFolderOptionView?.setOnClickListener(null)
+        importContentOptionView = null
+        createFolderOptionView = null
+    }
 
 }
