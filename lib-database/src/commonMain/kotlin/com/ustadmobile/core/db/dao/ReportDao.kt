@@ -5,10 +5,12 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.Update
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.annotation.ParamName
 import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.XapiReportOptions
@@ -36,6 +38,12 @@ abstract class ReportDao : BaseDao<Report> {
 
     @Update
     abstract fun updateAsync(entity: Report)
+
+    @Query("SELECT * From Report WHERE  reportUid = :uid")
+    abstract fun findByUidLive(uid: Long): DoorLiveData<Report?>
+
+    @Query("Select * From Report")
+    abstract fun findAllLive(): DoorLiveData<List<Report>>
 
 
 }
