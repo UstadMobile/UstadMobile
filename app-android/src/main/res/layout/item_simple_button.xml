@@ -21,6 +21,7 @@
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
         android:id="@+id/item_simple_button_cl"
+        android:onClick="@{(view) -> mHandler.onClickButton(view)}"
         >
 
         <Button

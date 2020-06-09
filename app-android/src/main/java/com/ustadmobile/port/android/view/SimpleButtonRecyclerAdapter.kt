@@ -29,6 +29,12 @@ class SimpleButtonRecyclerAdapter(heading: String, val buttonHandler: SimpleButt
                 })
     }
 
+    override fun onBindViewHolder(holder: SimpleHeadingViewHolder, position: Int) {
+        super.onBindViewHolder(holder, position)
+        holder.itemView.tag = buttonText
+        //holder.itemBinding.itemSimplButtonButtonTv.tag = buttonText
+    }
+
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         viewHolder = null

@@ -27,6 +27,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
@@ -40,19 +41,22 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
 
     class ClazzWorkListViewHolder(val itemBinding: ItemClazzWorkListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-    class ClazzWorkListRecyclerAdapter(var presenter: ClazzWorkListPresenter?)
+    class ClazzWorkListRecyclerAdapter(var presenter: ClazzWorkListPresenter?,
+                                       val canSeeResult: Boolean = false)
         : SelectablePagedListAdapter<ClazzWorkWithMetrics, ClazzWorkListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkListViewHolder {
             val itemBinding = ItemClazzWorkListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
+            itemBinding.showMetrics = canSeeResult
             return ClazzWorkListViewHolder(itemBinding)
         }
 
         override fun onBindViewHolder(holder: ClazzWorkListViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.clazzWork = item
+            holder.itemBinding.showMetrics = canSeeResult
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
@@ -70,7 +74,7 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
 
-        mDataRecyclerViewAdapter = ClazzWorkListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ClazzWorkListRecyclerAdapter(mPresenter, false)
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.clazz_work))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
@@ -119,4 +123,10 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
             }
         }
     }
+
+    override var canSeeResult: Boolean = false
+        get() = field
+        set(value){
+            mDataRecyclerViewAdapter = ClazzWorkListRecyclerAdapter(mPresenter, value)
+        }
 }

@@ -39,7 +39,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_clazz_edit_edit_clx"
             android:layout_width="match_parent"
-            android:layout_height="500dp">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/fragment_clazz_detail_overview_description_text"

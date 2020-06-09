@@ -34,7 +34,7 @@
         <!-- Line 1-->
         <TextView
             android:id="@+id/item_comments_list_text"
-            android:text='@{commentwithperson.commentsPerson.firstNames + " " + commentwithperson.commentsPerson.lastName}'
+            android:text='@{commentwithperson.commentsPerson.fullName()}'
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"

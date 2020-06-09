@@ -32,10 +32,12 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
         super.onCreate(savedState)
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { ClazzWorkListSortOption(it, context) }
+
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         //TODO
+
         return true
     }
 

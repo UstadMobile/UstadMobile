@@ -450,6 +450,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }
 
             submissionButtonRecyclerAdapter?.visible = studentMode &&
+                    value?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L &&
                     value?.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
 
             submissionHeadingRecyclerAdapter?.visible =

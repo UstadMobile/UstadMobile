@@ -7,6 +7,7 @@
         <import type="com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics"/>
         <import type="com.ustadmobile.port.android.view.ClazzWorkListFragment"/>
         <import type="com.ustadmobile.port.android.view.ClazzWorkListFragment.ClazzWorkListRecyclerAdapter"/>
+        <import type="android.view.View"/>
 
         <variable
             name="clazzWork"
@@ -14,7 +15,9 @@
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.ClazzWorkListPresenter" />
-
+        <variable
+            name="showMetrics"
+            type="Boolean" />
         <variable
             name="selectablePagedListAdapter"
             type="ClazzWorkListRecyclerAdapter" />
@@ -66,10 +69,11 @@
             android:id="@+id/line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:text="@{@string/three_num_items_with_name_with_comma(clazzWork.markedStudents, @string/marked, clazzWork.submittedStudents, @string/submitted, clazzWork.notSubmittedStudents, @string/not_submitted)}"
+            android:visibility="@{showMetrics?View.VISIBLE:View.GONE}"
+            app:layout_constraintEnd_toEndOf="@+id/line1_text"
             app:layout_constraintStart_toStartOf="@+id/line1_text"
             app:layout_constraintTop_toBottomOf="@+id/line1_text"
-            android:text="@{@string/three_num_items_with_name_with_comma(clazzWork.markedStudents, @string/marked, clazzWork.submittedStudents, @string/submitted, clazzWork.notSubmittedStudents, @string/not_submitted)}"
             tools:text="1 marked, 2 submitted, 2 not submitted" />
 
         <!-- Line 3-->
@@ -80,10 +84,10 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
             app:dateTimeAppend="@{clazzWork.clazzTimeZone}"
+            app:dateTimeLongWithExtra="@{clazzWork.clazzWorkDueDateTime}"
             app:dateTimePrepend="@{``}"
             app:dateTimeTimeLongWithExtra="@{clazzWork.clazzWorkDueTime}"
-            app:dateTimeLongWithExtra="@{clazzWork.clazzWorkDueDateTime}"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/line1_text"
             app:layout_constraintStart_toEndOf="@+id/imageView11"
             app:layout_constraintTop_toBottomOf="@+id/line2_text"
             tools:text="28/Feb/2020 - 09:00 (Asia/Dubai)" />
@@ -92,9 +96,8 @@
             android:id="@+id/imageView11"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="-8dp"
             android:layout_marginTop="6dp"
-            app:layout_constraintStart_toStartOf="@+id/line2_text"
+            app:layout_constraintStart_toStartOf="@+id/line1_text"
             app:layout_constraintTop_toBottomOf="@+id/line2_text"
             app:srcCompat="@drawable/ic_event_available_black_24dp" />
 
