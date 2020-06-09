@@ -25,9 +25,13 @@ var fieldsVisible = false
 ```
 
 * Ensure that logic and display are not mixed. Business logic should be in the presenter, and the view
-should display it. The presenter should tell the view what to do, and receive events. The view
-generally **should not** otherwise talk back to the presenter. An edit view should use two-way data
-binding to save the result of the changes made by the user to the entity object.
+should display it. The presenter should tell the view what to display, and receive events. The
+presenter can pass entity objects to display, DataSource.Factory for lists, or LiveData. When something
+to display is not part of the entity (e.g. validation error messages, the visibility of certain fields,
+etc) then this can be added as a variable on the view interface and the XML data binding as needed.
+
+The view generally **should not** otherwise talk back to the presenter. An edit view should use
+two-way data binding to save the result of the changes made by the user to the entity object itself.
 
 Good:
 ```
@@ -40,7 +44,7 @@ Fragment:
 View XML:
    <TextView
    ...
-   android:customBinder="@{entity.value}/>
+   app:customBinder="@{entity.value}/>
 ```
 
 Not good:
