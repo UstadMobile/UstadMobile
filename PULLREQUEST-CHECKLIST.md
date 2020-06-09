@@ -24,6 +24,40 @@ Not good (unspecific)
 var fieldsVisible = false
 ```
 
+* Ensure that logic and display are not mixed. Business logic should be in the presenter, and the view
+should display it. The presenter should tell the view what to do, and receive events. The view
+generally **should not** otherwise talk back to the presenter. An edit view should use two-way data
+binding to save the result of the changes made by the user to the entity object.
+
+Good:
+```
+Presenter:
+   view.entity = queryResult
+
+Fragment:
+   mBinding?.entity = value
+
+View XML:
+   <TextView
+   ...
+   android:customBinder="@{entity.value}/>
+```
+
+Not good:
+```
+Presenter:
+   view.entity = queryResult
+
+Fragment:
+   mBinding?.entity = value
+
+View XML:
+   <TextView
+   ...
+   android:text="@{mPresenter.formatSomething(entity.value)}/>
+```
+
+
 ### Testing
 
 * Ensure all screens have JVM and Espresso tests as per relevant templates. All tests should run to
