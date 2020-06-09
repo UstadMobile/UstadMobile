@@ -23,7 +23,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("allEntries")
     abstract fun allEntries(): List<ContentEntry>
 
-
     @Query("SELECT * FROM ContentEntry WHERE publik")
     @JsName("publicContentEntries")
     abstract fun publicContentEntries(): List<ContentEntry>
@@ -34,10 +33,20 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             LEFT JOIN ContentEntry on  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
             LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
             LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
-            WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} """)
+            WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} ORDER BY ContentEntry.title ASC""")
     @JsName("downloadedRootItems")
-    abstract fun downloadedRootItems(): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun downloadedRootItemsAsc(): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
+
+    @Query("""SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, Container.*,
+            0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 0 AS cepcjLastChangedBy 
+            FROM DownloadJob 
+            LEFT JOIN ContentEntry on  DownloadJob.djRootContentEntryUid = ContentEntry.contentEntryUid 
+            LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
+            LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
+            WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} ORDER BY ContentEntry.title DESC""")
+    @JsName("downloadedRootItems")
+    abstract fun downloadedRootItemsDesc(): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Query("""SELECT DISTINCT ContentEntry.*, Container.*, 
@@ -49,9 +58,16 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun recycledItems(ceInactive:Boolean = true): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
-    @Query("SELECT * FROM ContentEntry WHERE contentEntryUid=:entryUuid")
-    @JsName("findByEntryId")
-    abstract suspend fun findByEntryId(entryUuid: Long): ContentEntry?
+    @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid " +
+            "WHERE ContentEntry.contentEntryUid=:entryUuid"
+    )
+    @JsName("findEntryWithLanguageByEntryId")
+    abstract suspend fun findEntryWithLanguageByEntryId(entryUuid: Long): ContentEntryWithLanguage?
+
+    @Query("SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container "+
+            "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE ContentEntry.contentEntryUid=:entryUuid")
+    @JsName("findByEntryIdWithContainer")
+    abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
 
     @Query("SELECT * FROM ContentEntry WHERE title =:title")
     @JsName("findByEntryTitle")
@@ -151,10 +167,30 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             AND (ContentEntry.publik OR :personUid != 0)
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
-            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
+            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntry.title ASC , ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilter")
-    abstract fun getChildrenByParentUidWithCategoryFilter(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
+    @Query("""SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, Container.*
+            FROM ContentEntry 
+            LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
+            LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid
+            LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
+                WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1)
+            WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
+            AND 
+            (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
+            AND NOT ContentEntry.ceInactive
+            AND (ContentEntry.publik OR :personUid != 0)
+            AND 
+            (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
+            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntry.title DESC , ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
+    @JsName("getChildrenByParentUidWithCategoryFilter")
+    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+
+
+    @Update
+    abstract suspend fun updateAsync(entity: ContentEntry): Int
 
     @Query("SELECT ContentEntry.* FROM ContentEntry "+
             "LEFT JOIN ContentEntryParentChildJoin ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid" +
@@ -221,5 +257,8 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(entry: ContentEntry)
+
+    @Query("SELECT ContentEntry.*, Language.* FROM ContentEntry LEFT JOIN Language ON Language.langUid = ContentEntry.primaryLanguageUid")
+    abstract fun findAllLive(): DoorLiveData<List<ContentEntryWithLanguage>>
 
 }

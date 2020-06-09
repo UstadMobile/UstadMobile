@@ -28,11 +28,11 @@ class TestOpfDocument {
         Assert.assertEquals("Language loaded", "en-US", opf.getLanguages()[0])
         Assert.assertEquals("Cover image as expected", "cover.png", opf.getCoverImage("")!!.href)
         Assert.assertEquals("Loaded author 1 as expected", "Benita Rowe",
-                opf.getCreator(0).creator)
+                opf.getCreator(0)?.creator)
         Assert.assertEquals("Loaded author 1 as expected -id", "author1",
-                opf.getCreator(0).id)
+                opf.getCreator(0)?.id)
         Assert.assertEquals("Loaded author 2 as expected", "Mike Dawson",
-                opf.getCreator(1).creator)
+                opf.getCreator(1)?.creator)
         Assert.assertEquals("Loaded mime type as expected for page", "application/xhtml+xml",
                 opf.getMimeType("Page_1.xhtml"))
     }

@@ -265,6 +265,10 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         saveResultToBackStackSavedStateHandle(result)
     }
 
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
+    }
+
     override val viewContext: Any
         get() = requireContext()
 

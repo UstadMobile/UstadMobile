@@ -39,6 +39,10 @@ abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView
         mActivityWithFab = (context as? UstadListViewActivityWithFab)
     }
 
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
+    }
+
     override fun onDetach() {
         super.onDetach()
         mActivityWithFab = null

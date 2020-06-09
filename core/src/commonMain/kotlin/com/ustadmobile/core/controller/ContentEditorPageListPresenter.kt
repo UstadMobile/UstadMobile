@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.view.ContentEditorPageListView
-import com.ustadmobile.core.view.ContentEntryEditView
+import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -91,7 +91,7 @@ class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String
     }
 
     fun handleEditDocument(){
-        UstadMobileSystemImpl.instance.go(ContentEntryEditView.VIEW_NAME,
+        UstadMobileSystemImpl.instance.go(ContentEntryEdit2View.VIEW_NAME,
                 arguments, view.viewContext)
     }
 

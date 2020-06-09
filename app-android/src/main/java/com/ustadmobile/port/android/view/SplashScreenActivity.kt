@@ -48,6 +48,8 @@ class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
     override val viewContext: Any
         get() = this
 
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {}
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         //add translucent effect on toolbar - full screen
