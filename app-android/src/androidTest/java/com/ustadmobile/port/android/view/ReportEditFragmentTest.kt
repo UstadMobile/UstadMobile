@@ -51,6 +51,12 @@ class ReportEditFragmentTest {
             statementLangMapUid = dbRule.db.xLangMapEntryDao.insert(this)
         }
 
+        val verbDisplay = VerbDisplay().apply {
+            verbUid = verb.verbUid
+            urlId = verb.urlId
+            display = xlangEntry.valueLangMap
+        }
+
         val person = Person().apply {
             firstNames = "Ustad"
             lastName = "Mobile"
@@ -70,22 +76,9 @@ class ReportEditFragmentTest {
             xAxis = Report.AVG_DURATION
             yAxis = Report.WEEK
             subGroup = Report.WEEK
-            reportFilterList = listOf(
-                    ReportFilter().apply {
-                        entityType = ReportFilter.PERSON_FILTER
-                        entityUid = person.personUid
-                    },
-                    ReportFilter().apply {
-                        entityType = ReportFilter.VERB_FILTER
-                        entityUid = verb.verbUid
-                    },
-                    ReportFilter().apply {
-                        entityType = ReportFilter.CONTENT_FILTER
-                        entityUid = contentEntry.contentEntryUid
-                    })
         }
 
-        fillFields(fragmentScenario, formVals, currentEntity)
+        fillFields(fragmentScenario, formVals, currentEntity, true, person, verbDisplay, contentEntry)
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
@@ -93,8 +86,12 @@ class ReportEditFragmentTest {
             it.isNotEmpty()
         }
 
-        Assert.assertEquals("Report data set", "New Report",
-                reportList?.first()?.reportTitle)
+        Assert.assertEquals("Should not be in db", 0, reportList?.size)
+
+        Assert.assertEquals("After finishing edit report, it navigates to detail view",
+                R.id.report_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+        val currentArgs = systemImplNavRule.navController.currentDestination?.arguments
+
     }
 
 
@@ -130,7 +127,7 @@ class ReportEditFragmentTest {
 
         Assert.assertEquals("Entity in database was loaded for user",
                 "New Report",
-                defaultGson().fromJson(entityLoadedJson, ReportWithFilters::class.java))
+                defaultGson().fromJson(entityLoadedJson, ReportWithFilters::class.java).reportTitle)
 
         val updatedEntityFromDb = dbRule.db.reportDao.findByUidLive(existingReport.reportUid)
                 .waitUntilWithFragmentScenario(fragmentScenario) { it?.reportTitle == "Updated Report" }
@@ -143,24 +140,34 @@ class ReportEditFragmentTest {
         fun fillFields(fragmentScenario: FragmentScenario<ReportEditFragment>,
                        report: ReportWithFilters,
                        reportOnForm: ReportWithFilters?,
-                       setFieldsRequiringNavigation: Boolean = true) {
+                       setFieldsRequiringNavigation: Boolean = true, person: Person? = null,
+                       verbDisplay: VerbDisplay? = null, entry: ContentEntry? = null) {
 
             report.reportTitle?.takeIf { it != reportOnForm?.reportTitle }?.also {
                 onView(withId(R.id.fragment_report_edit_title)).perform(clearText(), typeText(it))
             }
 
 
-
             if (!setFieldsRequiringNavigation) {
                 return
             }
 
-            //TODO: if required, use the savedstatehandle to add link entities
+            fragmentScenario.onFragment { fragment ->
+                fragment.takeIf { verbDisplay != null }
+                        ?.findNavController()?.currentBackStackEntry?.savedStateHandle
+                        ?.set("VerbDisplay", defaultGson().toJson(listOf(verbDisplay)))
+            }
 
             fragmentScenario.onFragment { fragment ->
-                fragment.takeIf { report.reportFilterList != reportOnForm?.reportFilterList }
+                fragment.takeIf { person != null }
                         ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                        ?.set("VerbDisplay", defaultGson().toJson(listOf(ReportFilter())))
+                        ?.set("Person", defaultGson().toJson(listOf(person)))
+            }
+
+            fragmentScenario.onFragment { fragment ->
+                fragment.takeIf { entry != null }
+                        ?.findNavController()?.currentBackStackEntry?.savedStateHandle
+                        ?.set("ContentEntry", defaultGson().toJson(listOf(entry)))
             }
 
         }
