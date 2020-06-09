@@ -95,7 +95,7 @@ suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: In
 }
 
 suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentContainer(
-        numEntries: Int, parentEntryUid: Long, isLeaf: Boolean = true): List<Container> {
+        numEntries: Int, parentEntryUid: Long, isLeaf: Boolean = true): List<ContentEntry> {
     return (1 .. numEntries).map {
         val entry = ContentEntry().apply {
             title = "Dummy title $it"
@@ -116,5 +116,6 @@ suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentCont
             containerUid = containerDao.insertAsync(this)
 
         }
+        entry
     }
 }

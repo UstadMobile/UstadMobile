@@ -73,14 +73,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickEntry(entry: ContentEntry) {
+        val args = if(entry.leaf) mapOf(ARG_ENTITY_UID to entry.contentEntryUid.toString())
+        else mapOf( ARG_PARENT_ENTRY_UID to entry.contentEntryUid.toString(),
+                    ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT, ARG_PARENT_ENTRY_TITLE to entry.title)
+
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(
-                    if(entry.leaf) ContentEntry2DetailView.VIEW_NAME else ContentEntryList2View.VIEW_NAME,
-                    mapOf(ARG_ENTITY_UID to entry.contentEntryUid.toString(), ARG_PARENT_ENTRY_UID
-                            to (if(entry.leaf) parentUid else entry.contentEntryUid).toString(),
-                            ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT, ARG_PARENT_ENTRY_TITLE to entry.title),
-                    context)
+            ListViewMode.BROWSER -> systemImpl.go(if(entry.leaf) ContentEntry2DetailView.VIEW_NAME
+            else ContentEntryList2View.VIEW_NAME, args,context)
         }
     }
 
