@@ -19,7 +19,7 @@
             android:padding="@dimen/dimen_16dp"
             android:textSize="@dimen/text_title_medium"
             android:id="@+id/dialog_title"
-            android:text="@string/content_entry_export"
+            android:text="@string/export"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

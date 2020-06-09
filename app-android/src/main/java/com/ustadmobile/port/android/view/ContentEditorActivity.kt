@@ -54,7 +54,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil.getDisplayWidth
 import com.ustadmobile.core.impl.UMAndroidUtil.getMimeType
 import com.ustadmobile.core.impl.UMAndroidUtil.getSpanCount
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
 import com.ustadmobile.core.view.ContentEditorView
@@ -135,9 +134,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
     }
 
 
-    override fun updateDocument(title: String, description: String) {
+   /* override fun updateDocument(title: String, description: String) {
         presenter.handleUpdateDocumentMetaInfo(title, description)
-    }
+    }*/
 
     @VisibleForTesting
     fun selectAllTestContent() {
@@ -620,15 +619,14 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             val rootView = inflater.inflate(R.layout.fragment_content_formatting,
                     container, false)
             val mRecyclerView:RecyclerView = rootView.findViewById(R.id.formats_list)
-            umFormats = umFormatHelper!!.getFormatListByType(arguments!!.getInt(FORMAT_TYPE, 0))
+            //umFormats = umFormatHelper!!.getFormatListByType(requireActivity().getInt(FORMAT_TYPE, 0))
             umFormatHelper!!.setStateChangeListener(this)
 
 
             adapter = FormatsAdapter()
             adapter!!.setUmFormats(umFormats)
 
-            val spanCount = getSpanCount(activity!!,
-                    resources.getInteger(R.integer.format_item_width))
+            val spanCount = getSpanCount(requireActivity(), resources.getInteger(R.integer.format_item_width))
             val spacing = convertDpToPixel(resources
                     .getInteger(R.integer.format_item_spacing))
 
@@ -754,7 +752,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         mFromDevice.setOnClickListener {
             isOpeningFilePickerOrCamera = true
             viewSwitcher!!.closeAnimatedView(UmEditorAnimatedViewSwitcher.ANIMATED_MEDIA_TYPE_PANEL)
-            browseFiles(object : UmResultCallback<String>{
+            /*browseFiles(object : UmResultCallback<String>{
                 override fun onDone(result: String?) {
                     try {
                         mimeType = getMimeType(applicationContext, selectedFileUri!!).toString()
@@ -763,7 +761,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                         e.printStackTrace()
                     }
                 }
-            }, "image/*", "video/*", "audio/*")
+            }, "image*", "video*", "audio*")*/
         }
 
         mFromCamera.setOnClickListener {
@@ -810,9 +808,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         if (fragment is ContentEditorPageListFragment) {
             fragment.setUmFileHelper(presenter)
             fragment.setCurrentPage(presenter.currentPage)
-        } else if (fragment is ContentEntryEditFragment) {
+        } /*else if (fragment is ContentEntryEditFragment) {
             fragment.setActionListener(this)
-        }
+        }*/
     }
 
 
@@ -1172,7 +1170,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         builder.setMessage(impl.getString(MessageID.content_media_message, this))
         builder.setPositiveButton(impl.getString(MessageID.content_media_photo, this)
         ) { _, _ -> startCameraIntent(true) }
-        builder.setNegativeButton(impl.getString(MessageID.content_media_video, this)
+        builder.setNegativeButton(impl.getString(MessageID.video, this)
         ) { _, _ -> startCameraIntent(false) }
         builder.setCancelable(false)
         builder.show()

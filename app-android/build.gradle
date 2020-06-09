@@ -310,6 +310,7 @@ dependencies {
     implementation "androidx.activity:activity:$version_androidx_activity"
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"
     implementation "androidx.fragment:fragment:$version_androidx_fragment"
+    implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
     vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
@@ -477,8 +478,6 @@ dependencies {
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
     androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-
-
 
 
     //TODO: this and core should be modified so that Android uses only Android kotlin multiplatform variants

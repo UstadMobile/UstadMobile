@@ -10,12 +10,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.runner.AndroidJUnit4
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryStatus
@@ -32,7 +30,6 @@ import org.junit.runner.RunWith
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.nio.file.Files
 import java.util.*
 
 @RunWith(AndroidJUnit4::class)

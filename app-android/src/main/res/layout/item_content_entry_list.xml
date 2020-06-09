@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
+        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment"/>
+        <import type="android.view.View"/>
+        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment.ContentEntryListRecyclerAdapter"/>
+
+        <variable
+            name="contentEntry"
+            type="ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer" />
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ContentEntryList2Presenter" />
+        <variable
+            name="placeholder"
+            type="Integer" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="ContentEntryListRecyclerAdapter" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dimen_10dp"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, contentEntry)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(contentEntry)}"
+        android:id="@+id/item_content_entry_list"
+        android:tag="@{contentEntry.contentEntryUid}"
+        android:background="@drawable/bg_listitem">
+
+
+        <ImageView
+            android:scaleType="fitCenter"
+            android:id="@+id/content_entry_item_thumbnail"
+            android:layout_width="@dimen/dimen_70dp"
+            android:layout_height="@dimen/dimen_70dp"
+            app:fallbackDrawable="@{contentEntry.leaf ? @drawable/book_24px:@drawable/ic_folder_black_24dp}"
+            app:imageUri="@{contentEntry.thumbnailUrl}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:visibility="gone"
+            android:id="@+id/content_entry_progress"
+            android:layout_width="@dimen/dimen_70dp"
+            android:layout_marginTop="66dp"
+            android:layout_height="@dimen/dimen_4dp"
+            android:progress="100"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/content_entry_status"
+            android:layout_width="60dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/dimen_60dp"
+            android:layout_marginTop="@dimen/dimen_60dp"
+            android:background="@color/colorAccent"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/content_entry_item_title"
+            android:text="@{contentEntry.title}"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_10dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Content Title" />
+
+        <TextView
+            android:id="@+id/content_entry_item_description"
+            android:text="@{contentEntry.description}"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_10dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:textSize="@dimen/text_body_mid"
+            android:maxLines="2"
+            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
+            tools:text="Content Description" />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/content_entry_locally_available"
+            android:layout_width="@dimen/dimen_16dp"
+            android:layout_height="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:src="@drawable/ic_location_pin_24dp"
+            android:tint="@color/text_secondary"
+            tools:visibility="gone"
+            app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />
+
+        <ImageView
+            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
+            android:id="@+id/content_entry_mimetype_icon"
+            android:layout_width="@dimen/dimen_16dp"
+            android:layout_height="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            app:imageLookupKey="@{contentEntry.contentTypeFlag}"
+            app:imageLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP}"
+            android:tint="@color/text_secondary"
+            app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />
+
+
+        <TextView
+            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
+            android:id="@+id/content_entry_item_mimetype_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:gravity="start"
+            android:textSize="@dimen/text_body_mid"
+            app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
+            app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}"
+            android:tint="@color/text_secondary"
+            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintStart_toEndOf="@id/content_entry_mimetype_icon"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_item_description"/>
+
+
+        <com.ustadmobile.port.android.view.DownloadStatusButton
+            android:id="@+id/content_entry_item_download"
+            style="?android:attr/borderlessButtonStyle"
+            android:onClick="@{() -> presenter.handleDownloadStatusButtonClicked(contentEntry)}"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="@dimen/dimen_8dp"
+            android:visibility="gone"
+            android:contentDescription="@string/download"
+            android:tint="@color/text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_file_download_black_24dp" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

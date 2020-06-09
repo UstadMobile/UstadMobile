@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.text.format.DateFormat
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
 import com.soywiz.klock.DateTimeTz
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -10,6 +11,7 @@ import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.lib.db.entities.*
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.UMFileUtil
 import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 
@@ -90,6 +92,7 @@ fun TextView.setTextMessageIdOptions(textMessageIdLookupMap: Map<Int, Int>?, fal
     updateFromTextMessageIdOptions()
 }
 
+@SuppressLint("SetTextI18n")
 private fun TextView.updateFromTextMessageIdOptions() {
     val currentOption = getTag(R.id.tag_messageidoption_selected) as? Int
     val textMessageIdOptions = getTag(R.id.tag_messageidoptions_list) as? Map<Int, Int>
@@ -175,4 +178,14 @@ fun TextView.setTextLocalDayAndTime(time: Long, timeZone: TimeZone){
     timeFormat.timeZone = timeZone
     dateFormat.timeZone = timeZone
     text = dateFormat.format(time) + " - " + timeFormat.format(time)
+}
+
+@BindingAdapter("htmlText")
+fun TextView.setHtmlText(htmlText: String?) {
+    text = if(htmlText != null) HtmlCompat.fromHtml(htmlText, HtmlCompat.FROM_HTML_MODE_LEGACY) else ""
+}
+
+@BindingAdapter("fileSize")
+fun TextView.setFileSize(fileSize: Long) {
+    text = UMFileUtil.formatFileSize(fileSize)
 }

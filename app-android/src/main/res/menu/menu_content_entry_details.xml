@@ -5,7 +5,7 @@
     <item
         android:visible="false"
         android:id="@+id/export_content"
-        android:title="@string/content_entry_export"
+        android:title="@string/export"
         app:showAsAction="never"/>
 
 </menu>

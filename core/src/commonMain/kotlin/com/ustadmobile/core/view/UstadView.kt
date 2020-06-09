@@ -55,6 +55,13 @@ interface UstadView {
     val viewContext: Any
 
     /**
+     * Show a snackbar style notification that an error has happened
+     *
+     * @param message message to show
+     */
+    fun showSnackBar(message: String, action: () -> Unit = {}, actionMessageId: Int = 0)
+
+    /**
      * Most UI platforms require that all UI changes are done in a particular thread. This method
      * simply wraps those implementations.
      *
@@ -71,11 +78,19 @@ interface UstadView {
 
         const val ARG_CONTAINER_UID = "containerUid"
 
+        const val ARG_PARENT_ENTRY_UID = "parentUid"
+
+        const val ARG_PARENT_ENTRY_TITLE = "parentTitle"
+
         const val ARG_CONTENT_ENTRY_UID = "entryid"
+
+        const val ARG_NO_IFRAMES = "noiframe"
 
         const val ARG_CLAZZ_UID = "clazzUid"
 
         const val ARG_SCHOOL_UID = "schoolUid"
+
+        const val ARG_LEAF = "content_type"
 
         const val ARG_SCHOOLMEMBER_FILTER_STUDENTS ="schoolMemberFilterStudents"
 
@@ -90,6 +105,10 @@ interface UstadView {
         const val ARG_LISTADDMODE = "listAddMode"
 
         const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
+
+        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
+        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+
 
     }
 

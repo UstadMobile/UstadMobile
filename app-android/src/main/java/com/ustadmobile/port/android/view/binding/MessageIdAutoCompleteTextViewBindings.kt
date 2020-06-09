@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view.binding
 
-import android.view.View
 import android.widget.AdapterView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
@@ -28,11 +27,7 @@ fun MessageIdAutoCompleteTextView.getSelectedMessageIdOption(): Int {
 
 @BindingAdapter("selectedMessageIdOptionAttrChanged")
 fun MessageIdAutoCompleteTextView.setSelectedMessageIdListener(inverseBindingListener: InverseBindingListener) {
-    onItemClickListener = object : AdapterView.OnItemClickListener {
-        override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            inverseBindingListener.onChange()
-        }
-    }
+    onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> inverseBindingListener.onChange() }
 }
 
 
