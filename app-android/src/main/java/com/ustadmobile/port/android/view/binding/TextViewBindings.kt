@@ -189,8 +189,3 @@ fun TextView.setHtmlText(htmlText: String?) {
 fun TextView.setFileSize(fileSize: Long) {
     text = UMFileUtil.formatFileSize(fileSize)
 }
-
-@BindingAdapter("textPrefix")
-fun TextView.setTextPrefix(textPrefixId: Int) {
-    setTag(R.id.tag_text_prefix, textPrefixId)
-}

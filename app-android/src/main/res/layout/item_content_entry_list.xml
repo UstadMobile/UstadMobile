@@ -15,6 +15,9 @@
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.ContentEntryList2Presenter" />
+        <variable
+            name="placeholder"
+            type="Integer" />
 
         <variable
             name="selectablePagedListAdapter"
@@ -34,11 +37,12 @@
 
 
         <ImageView
-            android:background="@color/secondary_text_light"
             android:scaleType="fitCenter"
             android:id="@+id/content_entry_item_thumbnail"
             android:layout_width="@dimen/dimen_70dp"
             android:layout_height="@dimen/dimen_70dp"
+            app:fallbackDrawable="@{contentEntry.leaf ? @drawable/book_24px:@drawable/ic_folder_black_24dp}"
+            app:imageUri="@{contentEntry.thumbnailUrl}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

@@ -30,7 +30,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
-import kotlinx.android.synthetic.main.fragment_content_entry2_detail.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -111,20 +110,20 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             if(currentDownloadJobItemStatus != value?.djiStatus) {
                 when {
                     value.isStatusCompletedSuccessfully() -> {
-                        entry_download_open_button.visibility = View.VISIBLE
-                        entry_download_open_button.text = resources.getText(R.string.open)
-                        entry_detail_progress.visibility = View.GONE
+                        mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
+                        mBinding?.entryDownloadOpenBtn?.text = resources.getText(R.string.open)
+                        mBinding?.entryDetailProgress?.visibility = View.GONE
                     }
 
                     value.isStatusQueuedOrDownloading() -> {
-                        entry_download_open_button.visibility = View.GONE
-                        entry_detail_progress.visibility = View.VISIBLE
+                        mBinding?.entryDownloadOpenBtn?.visibility = View.GONE
+                        mBinding?.entryDetailProgress?.visibility = View.VISIBLE
                     }
 
                     else -> {
-                        entry_download_open_button.text = resources.getText(R.string.download)
-                        entry_download_open_button.visibility = View.VISIBLE
-                        entry_detail_progress.visibility = View.GONE
+                        mBinding?.entryDownloadOpenBtn?.text = resources.getText(R.string.download)
+                        mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
+                        mBinding?.entryDetailProgress?.visibility = View.GONE
                     }
                 }
 
@@ -133,9 +132,9 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
 
             if(value != null && value.isStatusQueuedOrDownloading()) {
-                entry_detail_progress.statusText = value.toStatusString(
+                mBinding?.entryDetailProgress?.statusText = value.toStatusString(
                         UstadMobileSystemImpl.instance, this)
-                entry_detail_progress.progress = if(value.downloadLength > 0) {
+                mBinding?.entryDetailProgress?.progress = if(value.downloadLength > 0) {
                     (value.downloadedSoFar.toFloat()) / (value.downloadLength.toFloat())
                 }else {
                     0f
@@ -144,7 +143,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             field = value
         }
 
-    class AvailableTranslationRecyclerAdapter(val activityEventHandler: ContentEntryDetailFragmentEventHandler,
+    class AvailableTranslationRecyclerAdapter(var activityEventHandler: ContentEntryDetailFragmentEventHandler?,
                                               var presenter: ContentEntry2DetailPresenter?):
             ListAdapter<ContentEntryRelatedEntryJoinWithLanguage, AvailableTranslationRecyclerAdapter.TranslationViewHolder>(DIFF_CALLBACK_ENTRY_LANGUAGE_JOIN) {
 
@@ -160,6 +159,12 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
         override fun onBindViewHolder(holder: TranslationViewHolder, position: Int) {
             holder.binding.entryWithLanguage = getItem(position)
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            presenter = null
+            activityEventHandler = null
         }
     }
 
@@ -179,7 +184,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             val thisFrag = this@ContentEntry2DetailFragment
             withContext(Dispatchers.Main){
                 mPresenter = ContentEntry2DetailPresenter(requireContext(), arguments.toStringMap(), thisFrag,
-                        thisFrag, UstadMobileSystemImpl.instance, true,
+                        thisFrag.viewLifecycleOwner, UstadMobileSystemImpl.instance, true,
                         UmAccountManager.getActiveDatabase(requireContext()),
                         UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                         networkManagerBle?.containerDownloadManager,
@@ -189,19 +194,24 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
                 val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
                 flexboxLayoutManager.flexDirection = FlexDirection.ROW
                 availableTranslationAdapter = AvailableTranslationRecyclerAdapter(thisFrag,mPresenter)
-                availableTranslationView.adapter = availableTranslationAdapter
-                availableTranslationView.layoutManager = flexboxLayoutManager
+                mBinding?.availableTranslationView?.adapter = availableTranslationAdapter
+                mBinding?.availableTranslationView?.layoutManager = flexboxLayoutManager
                 fabManager?.visible = true
             }
         }
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         mBinding = null
         mPresenter = null
+        downloadOptions = null
+        currentLiveData = null
+        downloadJobItem = null
+        mBinding?.availableTranslationView?.adapter = null
         availableTranslationAdapter = null
+        availableTranslationsList = null
         entity = null
+        super.onDestroyView()
     }
 
 

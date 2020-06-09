@@ -41,6 +41,7 @@ class ContentEntryAddOptionsBottomSheetFragment : UstadBottomSheetFragment(), Co
     }
 
     override fun onClick(view: View?) {
+        val isShowing = this.dialog?.isShowing
        val contentType =  when(view?.id){
             R.id.content_create_folder -> false
             R.id.content_import_content -> true
@@ -50,11 +51,13 @@ class ContentEntryAddOptionsBottomSheetFragment : UstadBottomSheetFragment(), Co
         findNavController().navigate(R.id.content_entry_edit_dest, UMAndroidUtil.mapToBundle(mapOf(
                 ARG_PARENT_ENTRY_UID to arguments?.get(ARG_PARENT_ENTRY_UID).toString(),
                 ARG_LEAF to contentType.toString())))
-        dismiss()
+        if(isShowing != null && isShowing){
+            dismiss()
+        }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         importContentOptionView?.setOnClickListener(null)
         createFolderOptionView?.setOnClickListener(null)
         importContentOptionView = null

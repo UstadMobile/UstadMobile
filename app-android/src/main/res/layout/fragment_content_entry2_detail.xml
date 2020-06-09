@@ -44,12 +44,13 @@
             android:layout_height="wrap_content">
 
                 <ImageView
+                    android:scaleType="fitCenter"
                     android:id="@+id/entry_detail_thumbnail"
                     android:layout_width="110dp"
                     android:layout_height="110dp"
                     android:layout_margin="@dimen/dimen_8dp"
+                    app:fallbackDrawable="@{@drawable/book_24px}"
                     app:imageUri="@{contentEntry.thumbnailUrl}"
-                    android:background="@color/secondary_text_light"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -137,7 +138,7 @@
 
                     <Button
                         android:textStyle="bold"
-                        android:id="@+id/entry_download_open_button"
+                        android:id="@+id/entryDownloadOpenBtn"
                         android:layout_width="match_parent"
                         android:padding="@dimen/dimen_16dp"
                         android:text="@{contentEntry.container == null ? @string/download : @string/open}"
@@ -147,7 +148,7 @@
                         android:textColor="@android:color/white" />
 
                     <com.ustadmobile.port.android.view.DownloadProgressView
-                        android:id="@+id/entry_detail_progress"
+                        android:id="@+id/entryDetailProgress"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:visibility="gone" />

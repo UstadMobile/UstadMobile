@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.GoToEntryFn
+import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.ext.observeWithPresenter
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
@@ -50,7 +51,7 @@ class ContentEntry2DetailPresenter(context: Any,
         if (containerDownloadManager != null) {
             GlobalScope.launch(doorMainDispatcher()) {
                 downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).apply {
-                    observeWithPresenter(this@ContentEntry2DetailPresenter, this@ContentEntry2DetailPresenter::onDownloadJobItemChanged)
+                    observeWithLifecycleOwner(lifecycleOwner, this@ContentEntry2DetailPresenter::onDownloadJobItemChanged)
                 }
             }
         }

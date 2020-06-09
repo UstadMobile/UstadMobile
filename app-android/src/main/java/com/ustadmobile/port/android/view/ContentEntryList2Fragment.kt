@@ -128,7 +128,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 ContentEntry.TYPE_ARTICLE to R.drawable.article_24px,
                 ContentEntry.TYPE_COLLECTION to R.drawable.collections_24px,
                 ContentEntry.TYPE_INTERACTIVE_EXERCISE to 0,
-                ContentEntry.TYPE_UNDEFINED to R.drawable.unknown,
                 ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
         )
 
@@ -140,7 +139,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 ContentEntry.TYPE_ARTICLE to MessageID.article,
                 ContentEntry.TYPE_COLLECTION to MessageID.collection,
                 ContentEntry.TYPE_INTERACTIVE_EXERCISE to MessageID.interactive,
-                ContentEntry.TYPE_UNDEFINED to MessageID.unknown,
                 ContentEntry.TYPE_AUDIO to MessageID.audio
         )
 
