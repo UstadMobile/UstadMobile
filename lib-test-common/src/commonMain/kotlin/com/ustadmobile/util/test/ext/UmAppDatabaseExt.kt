@@ -7,6 +7,8 @@ import kotlin.random.Random
 
 data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
 data class TestClazzWork(val clazzAndMembers: TestClazzAndMembers, val clazzWork: ClazzWork)
+data class TestClazzWorkWithQuestionAndOptionsAndResponse(val clazzWork: ClazzWork,
+      val questionsAndOptions: List<ClazzWorkQuestionAndOptions>, val responses: List<ClazzWorkQuestionResponse?>)
 
 private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime: Long): ClazzMember {
     return ClazzMember(clazzUid, this.personUid, clazzMemberRole).apply {
@@ -24,38 +26,53 @@ suspend fun UmAppDatabase.insertTestClazzWork(clazzWork: ClazzWork):TestClazzWor
     return TestClazzWork(clazzAndMembers, clazzWork)
 }
 
-suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-        clazzWork: ClazzWork, responded : Boolean = false, submissionType: Int = 0 ,
-        quizQuestionTypeMixed: Boolean = false, quizQuestionType: Int = 0,
-        submitted: Boolean = false, isStudentToClazz : Boolean = false
-    ):TestClazzWork {
-    val clazzAndMembers = insertTestClazzAndMembers(5, 2)
-    clazzWork.apply{
-        clazzWorkClazzUid = clazzAndMembers.clazz.clazzUid
-        if(submissionType == 0){
-            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
-        }else{
-            clazzWorkSubmissionType = submissionType
+suspend fun UmAppDatabase.insertPublicAndPrivateComments(dateNow: Long, clazzWork: ClazzWork, clazzAndMembers: TestClazzAndMembers){
+    //Public+Private comments
+    for(studentWithIndex in clazzAndMembers.studentList.withIndex()){
+        val index = studentWithIndex.index
+        val student = studentWithIndex.value
+        Comments().apply {
+            commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
+            commentsEntityUid = clazzWork.clazzWorkUid
+            commentsPublic = index%2 ==0
+            if(commentsPublic){
+                commentsText = "Public comment $index"
+            }else{
+                commentsText = "Private comment $index"
+            }
+            commentsPersonUid = student.clazzMemberPersonUid
+            commentsInActive = false
+            commentsDateTimeAdded = dateNow
+            commentsUid = commentsDao.insertAsync(this)
+
         }
-        clazzWorkMaximumScore = 100
-        clazzWorkUid = clazzWorkDao.insertAsync(this)
     }
 
-    //Getting member
-    val clazzMember: ClazzMember
 
-    val studentClazzMember = clazzAndMembers.studentList.get(0)
 
-    if(isStudentToClazz){
-        clazzMember = clazzAndMembers.studentList.get(0)
-    }else{
-        clazzMember = clazzAndMembers.teacherList.get(0)
+}
+
+suspend fun UmAppDatabase.insertQuizQuestionsAndOptions(
+        clazzWork: ClazzWork, responded: Boolean = false, clazzMemberUid: Long = 0, personUid: Long = 0,
+        quizQuestionType: Int, quizQuestionTypeMixed: Boolean = false): TestClazzWorkWithQuestionAndOptionsAndResponse {
+
+    clazzWork.apply {
+        clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
+        if(clazzWorkUid != 0L){
+            clazzWorkDao.updateAsync(this)
+        }else {
+            clazzWorkUid = clazzWorkDao.insertAsync(this)
+        }
     }
 
+    var  clazzWorkQuestionsAndOptions = listOf<ClazzWorkQuestionAndOptions>()
+    val responses = mutableListOf<ClazzWorkQuestionResponse>()
     if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
         //Create questions
         val questionNamer: (Int) -> String = { "Question $it" }
-        val clazzWorkQuestionsAndOptions = (1..5).map {
+        var qn = 0
+        clazzWorkQuestionsAndOptions = (1..5).map {
+            qn++
             ClazzWorkQuestionAndOptions(ClazzWorkQuestion(), mutableListOf(), mutableListOf())
                     .apply {
                         clazzWorkQuestion.clazzWorkQuestionActive = true
@@ -76,8 +93,10 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                             //Add options
                             val optionsToPut = (1..3).map {
                                 ClazzWorkQuestionOption().apply {
-                                    clazzWorkQuestionOptionText = "Option $it"
+                                    clazzWorkQuestionOptionText = "Question $qn Option $it"
                                     clazzWorkQuestionOptionQuestionUid = clazzWorkQuestion.clazzWorkQuestionUid
+                                    clazzWorkQuestionOptionActive = true
+
                                     clazzWorkQuestionOptionUid = clazzWorkQuestionOptionDao.insertAsync(this)
                                 }
                             }
@@ -86,8 +105,8 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     }
         }
 
-        val responses = mutableListOf<ClazzWorkQuestionResponse>()
-        if (responded) {
+
+        if (responded && clazzMemberUid != 0L && personUid != 0L ) {
             //Create question response
             for ((index, question) in clazzWorkQuestionsAndOptions.withIndex()) {
                 val response =
@@ -104,8 +123,8 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                                             question.options.get(r).clazzWorkQuestionOptionUid
                                 }
                             }
-                            clazzWorkQuestionResponsePersonUid = clazzMember.clazzMemberPersonUid
-                            clazzWorkQuestionResponseClazzMemberUid = clazzMember.clazzMemberUid
+                            clazzWorkQuestionResponsePersonUid = personUid
+                            clazzWorkQuestionResponseClazzMemberUid = clazzMemberUid
                             clazzWorkQuestionResponseInactive = false
                             //TODO: Dates
                             clazzWorkQuestionResponseDateResponded = 0
@@ -115,6 +134,49 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                 responses.add(response)
             }
         }
+    }
+
+    return TestClazzWorkWithQuestionAndOptionsAndResponse(clazzWork, clazzWorkQuestionsAndOptions,
+            responses)
+
+}
+
+suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+        clazzWork: ClazzWork, responded : Boolean = false, submissionType: Int = -1 ,
+        quizQuestionTypeMixed: Boolean = false, quizQuestionType: Int = 0,
+        submitted: Boolean = false, isStudentToClazz : Boolean = false
+    ):TestClazzWork {
+    val clazzAndMembers = insertTestClazzAndMembers(5, 2)
+    clazzWork.apply{
+        clazzWorkTitle = "Clazz Work A"
+        clazzWorkClazzUid = clazzAndMembers.clazz.clazzUid
+        if(submissionType < 0){
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
+        }else{
+            clazzWorkSubmissionType = submissionType
+        }
+        clazzWorkMaximumScore = 120
+        if(clazzWorkUid != 0L){
+            clazzWorkDao.updateAsync(this)
+        }else {
+            clazzWorkUid = clazzWorkDao.insertAsync(this)
+        }
+    }
+
+    //Getting member
+    val clazzMember: ClazzMember
+
+    val studentClazzMember = clazzAndMembers.studentList.get(0)
+
+    if(isStudentToClazz){
+        clazzMember = clazzAndMembers.studentList.get(0)
+    }else{
+        clazzMember = clazzAndMembers.teacherList.get(0)
+    }
+
+    if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
+        insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzMemberUid,
+            studentClazzMember.clazzMemberPersonUid, quizQuestionType, quizQuestionTypeMixed)
     }
 
     //Create Submission

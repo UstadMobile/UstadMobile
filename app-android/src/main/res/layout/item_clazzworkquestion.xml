@@ -20,6 +20,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_clazzworkquestion_cl"
         android:layout_width="match_parent"
         android:background="?attr/selectableItemBackground"
         android:onClick="@{() -> mActivity.onClickClazzWorkQuestion(clazzWorkQuestionAndOptions)}"

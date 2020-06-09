@@ -55,11 +55,11 @@ private fun scheduleTimeToDate(msSinceMidnight: Int) : Date{
     return Date(cal.timeInMillis)
 }
 
-private val dateWithTimeFormat: MessageFormat by lazy {
+val dateWithTimeFormat: MessageFormat by lazy {
     MessageFormat("{0, date} - {1, time, short} {2}")
 }
 
-private val dateWithTimeFormatWithPrepend: MessageFormat by lazy {
+val dateWithTimeFormatWithPrepend: MessageFormat by lazy {
     MessageFormat("{0}: {1, date} - {2, time, short} {3}")
 }
 

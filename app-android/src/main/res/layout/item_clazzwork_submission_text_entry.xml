@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
-        android:id="@+id/item_comment_new_layout"
+        android:id="@+id/item_clazzwork_submission_text_entry_cl"
         >
 
         <EditText
@@ -34,7 +34,7 @@
             android:hint="@string/submit_your_answer"
             android:inputType="textCapSentences"
             android:singleLine="true"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission == null &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText)?View.VISIBLE:View.GONE}"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid ==0L &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText)?View.VISIBLE:View.GONE}"
             android:text="@={clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionText}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -46,13 +46,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
             android:text="@{clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionText}"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission != null &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText)?View.VISIBLE:View.GONE}"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText)?View.VISIBLE:View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/item_clazzwork_submission_text_entry_et"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazzwork_submission_text_entry_et"
+            app:layout_constraintTop_toTopOf="@+id/item_clazzwork_submission_text_entry_et"
             tools:text="The characters want to learn about each other and play with each other." />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

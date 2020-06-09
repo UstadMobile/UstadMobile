@@ -50,7 +50,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var contentRecyclerView: RecyclerView? = null
 
     private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter? = null
-    private var quizQuestionsRecyclerView: RecyclerView? = null
     private val quizQuestionAndResponseObserver = Observer<List<ClazzWorkQuestionAndOptionWithResponse>?> {
         t -> quizQuestionsRecyclerAdapter?.submitList(t)
     }
@@ -59,33 +58,30 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var submissionResultRecyclerAdapter: SubmissionResultRecyclerAdapter? = null
     private var submissionFreeTextRecyclerAdapter: SubmissionTextEntryWithResultRecyclerAdapter ? = null
     private var submissionHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
+    private var questionsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
     private var submissionButtonRecyclerAdapter: SimpleButtonRecyclerAdapter? = null
     private var publicCommentsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var privateCommentsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
 
     private var publicCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
-    private var publicCommentsRecyclerView: RecyclerView? = null
     private var publicCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
     private var publicCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
     private var newPublicCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
     private var publicCommentsMergerRecyclerAdapter: MergeAdapter? = null
 
     private var privateCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
-    private var privateCommentsRecyclerView: RecyclerView? = null
     private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
     private var privateCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
     private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
 
-
+    private var detailRecyclerAdapter: ClazzWorkBasicDetailsRecyclerAdapter? = null
     private var detailMergerRecyclerAdapter: MergeAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
 
-    private var detailRecyclerAdapter: ClazzWorkBasicDetailsRecyclerAdapter? = null
-
 
     class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
-            var presenter: ClazzWorkDetailOverviewPresenter?)
+            var presenter: ClazzWorkDetailOverviewPresenter?, var studentMode: Boolean)
         : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
             ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter.ClazzWorkQuestionViewHolder>(
             DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
@@ -100,11 +96,13 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             viewHolder.binding.freeTextType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
             viewHolder.binding.quizType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
             viewHolder.binding.clazzWorkQuizType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
+            viewHolder.binding.studentMode = studentMode?:false
             return viewHolder
         }
 
         override fun onBindViewHolder(holder: ClazzWorkQuestionViewHolder, position: Int) {
             holder.binding.clazzWorkQuestionAndOptionsWithResponse = getItem(position)
+            holder.binding.studentMode = studentMode
         }
     }
 
@@ -145,12 +143,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                     return
 
                 field = value
-
-//                if(value) {
-//                    notifyItemInserted(0)
-//                }else {
-//                    notifyItemRemoved(0)
-//                }
             }
 
         class SubmissionResultViewHolder(var itemBinding: ItemClazzworkSubmissionResultBinding)
@@ -196,12 +188,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                     return
 
                 field = value
-
-                if(value) {
-                    notifyItemInserted(0)
-                }else {
-                    notifyItemRemoved(0)
-                }
             }
 
         class SubmissionTextEntryWithResultViewHolder(var itemBinding: ItemClazzworkSubmissionTextEntryBinding)
@@ -249,12 +235,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                     return
 
                 field = value
-
-//                if(value) {
-//                    notifyItemInserted(0)
-//                }else {
-//                    notifyItemRemoved(0)
-//                }
             }
 
         class ClazzWorkDetailViewHolder(var itemBinding: ItemClazzworkDetailDescriptionBinding)
@@ -322,14 +302,18 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         detailRecyclerAdapter?.visible = false
 
         quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
-                mPresenter)
+                mPresenter, studentMode)
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
-        submissionHeadingRecyclerAdapter?.visible = true
+        submissionHeadingRecyclerAdapter?.visible = false
+
+        questionsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
+                getText(R.string.questions).toString())
+        questionsHeadingRecyclerAdapter?.visible = false
 
         submissionButtonRecyclerAdapter = SimpleButtonRecyclerAdapter(
                 getText(R.string.submitliteral).toString(), this)
-        submissionButtonRecyclerAdapter?.visible = true
+        submissionButtonRecyclerAdapter?.visible = false
 
         publicCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.class_comments).toString()
@@ -345,7 +329,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         submissionResultRecyclerAdapter?.visible = true
 
         submissionFreeTextRecyclerAdapter = SubmissionTextEntryWithResultRecyclerAdapter(entity)
-        submissionFreeTextRecyclerAdapter?.visible = true
+        submissionFreeTextRecyclerAdapter?.visible = false
 
 
         //Public comments:
@@ -360,8 +344,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         publicCommentsMergerRecyclerAdapter = MergeAdapter(newPublicCommentRecyclerAdapter,
                 publicCommentsRecyclerAdapter)
-        publicCommentsRecyclerView?.adapter = publicCommentsMergerRecyclerAdapter
-        publicCommentsRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         //Private comments section:
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
@@ -374,8 +356,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
         privateCommentsMergerRecyclerAdapter = MergeAdapter(newPrivateCommentRecyclerAdapter,
                         privateCommentsRecyclerAdapter)
-        privateCommentsRecyclerView?.adapter = privateCommentsMergerRecyclerAdapter
-        privateCommentsRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         contentHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.content).toString()
@@ -387,6 +367,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 contentHeadingRecyclerAdapter,
                 submissionHeadingRecyclerAdapter,
                 submissionResultRecyclerAdapter, submissionFreeTextRecyclerAdapter,
+                questionsHeadingRecyclerAdapter,
                 quizQuestionsRecyclerAdapter, submissionButtonRecyclerAdapter,
                 publicCommentsHeadingRecyclerAdapter, publicCommentsMergerRecyclerAdapter,
                 privateCommentsHeadingRecyclerAdapter, privateCommentsMergerRecyclerAdapter
@@ -404,6 +385,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 
+    override fun onClickButton(view: View) {
+        mPresenter?.handleClickSubmit()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null
@@ -412,23 +397,33 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         contentRecyclerView?.adapter = null
         contentRecyclerAdapter = null
         contentRecyclerView = null
-        quizQuestionsRecyclerView?.adapter = null
         quizQuestionsRecyclerAdapter = null
-        quizQuestionsRecyclerView = null
-        publicCommentsRecyclerView?.adapter = null
         publicCommentsRecyclerAdapter = null
-        publicCommentsRecyclerView = null
-        privateCommentsRecyclerView?.adapter = null
         privateCommentsRecyclerAdapter = null
-        privateCommentsRecyclerView = null
 
     }
-
 
     override var studentMode: Boolean = false
         get() = field
         set(value) {
             field = value
+            newPrivateCommentRecyclerAdapter?.visible = value
+            privateCommentsHeadingRecyclerAdapter?.visible = value
+
+            submissionButtonRecyclerAdapter?.visible = value
+            quizQuestionsRecyclerAdapter?.studentMode = value
+            submissionFreeTextRecyclerAdapter?.visible = value
+            if(entity?.clazzWorkCommentsEnabled == false){
+                privateCommentsHeadingRecyclerAdapter?.visible = false
+                newPrivateCommentRecyclerAdapter?.visible = false
+            }else if (studentMode){
+                privateCommentsHeadingRecyclerAdapter?.visible = true
+                newPrivateCommentRecyclerAdapter?.visible = true
+            }else if(entity?.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
+                questionsHeadingRecyclerAdapter?.visible = true
+            }
+
         }
 
     override var entity: ClazzWorkWithSubmission? = null
@@ -440,13 +435,30 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             detailRecyclerAdapter?.visible = true
 
             submissionResultRecyclerAdapter?.submitList(listOf(entity))
-            submissionFreeTextRecyclerAdapter?.submitList(listOf(entity))
 
-            submissionButtonRecyclerAdapter?.visible = value?.clazzWorkSubmission == null
+            if(value?.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT && studentMode){
+                submissionFreeTextRecyclerAdapter?.submitList(listOf(entity))
+                submissionFreeTextRecyclerAdapter?.visible = true
+            }else{
+                submissionFreeTextRecyclerAdapter?.visible = false
+            }
+
+            if(value?.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ && !studentMode){
+                questionsHeadingRecyclerAdapter?.visible = true
+            }
+
+            submissionButtonRecyclerAdapter?.visible = studentMode &&
+                    value?.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+
+            submissionHeadingRecyclerAdapter?.visible =
+                    submissionButtonRecyclerAdapter?.visible?:false
+
             if(entity?.clazzWorkCommentsEnabled == false){
                 privateCommentsHeadingRecyclerAdapter?.visible = false
                 newPrivateCommentRecyclerAdapter?.visible = false
-            }else{
+            }else if (studentMode){
                 privateCommentsHeadingRecyclerAdapter?.visible = true
                 newPrivateCommentRecyclerAdapter?.visible = true
             }
@@ -537,10 +549,5 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 return oldItem == newItem
             }
         }
-
-    }
-
-    override fun onClickButton(view: View) {
-        mPresenter?.handleClickSubmit()
     }
 }

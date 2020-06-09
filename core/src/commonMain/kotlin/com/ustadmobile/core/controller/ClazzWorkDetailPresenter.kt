@@ -3,7 +3,9 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ClazzWorkDetailView
+import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -62,4 +64,9 @@ class ClazzWorkDetailPresenter(context: Any,
         return true
     }
 
+    override fun handleClickEdit() {
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        systemImpl.go(ClazzWorkEditView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entityUid.toString()),
+                context)
+    }
 }

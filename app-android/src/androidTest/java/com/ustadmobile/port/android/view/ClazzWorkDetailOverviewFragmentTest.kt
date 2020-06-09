@@ -1,38 +1,45 @@
 package com.ustadmobile.port.android.view
 
+import android.text.format.DateFormat
+import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
-import com.ustadmobile.util.test.ext.insertClazzLogs
 import com.ustadmobile.util.test.ext.insertTestClazzWorkAndQuestionsAndOptionsWithResponse
-import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions.Companion.childOfViewAtPositionWithMatcher
 import kotlinx.coroutines.runBlocking
-import org.junit.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.*
+import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.lib.db.entities.Comments
+import com.ustadmobile.port.android.view.binding.*
+import com.ustadmobile.util.test.ext.insertPublicAndPrivateComments
+import com.ustadmobile.util.test.ext.insertQuizQuestionsAndOptions
 import org.junit.runner.RunWith
+import java.text.MessageFormat
+import java.util.*
+import org.hamcrest.Matchers.not
 
 @RunWith(AndroidJUnit4::class)
 class ClazzWorkDetailOverviewFragmentTest {
@@ -50,6 +57,15 @@ class ClazzWorkDetailOverviewFragmentTest {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
+    private val MS_PER_HOUR = 3600000
+    private val MS_PER_MIN = 60000
+    fun scheduleTimeToDate(msSinceMidnight: Int) : Date {
+        val cal = Calendar.getInstance()
+        cal.set(Calendar.HOUR_OF_DAY, msSinceMidnight / 3600000)
+        cal.set(Calendar.MINUTE, msSinceMidnight.rem(MS_PER_HOUR) / MS_PER_MIN)
+        return Date(cal.timeInMillis)
+    }
 
     @Before
     fun setup() {
@@ -72,141 +88,288 @@ class ClazzWorkDetailOverviewFragmentTest {
     }
 
     @Test
-    fun givenLValidClazzWorkUid_whenLoadedAsStudent_thenShouldShow() {
+    fun givenValidClazzWorkUid_whenLoadedAsStudent_thenShouldShow() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
         navController.setGraph(R.navigation.mobile_navigation)
 
+        var clazzWork = ClazzWork().apply {
+            clazzWorkTitle = "Test ClazzWork A"
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+            clazzWorkInstructions = "Pass espresso test for ClazzWork"
+            clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+            clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+            clazzWorkCommentsEnabled = true
+            clazzWorkMaximumScore = 120
+
+        }
+
         val testClazzWork = runBlocking {
             db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-                    ClazzWork(), false, 0, true,
+                    clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE, true,
                     0,false, true)
         }
 
+        val studentMember = testClazzWork.clazzAndMembers.studentList.get(0)
+        dbRule.account.personUid = studentMember.clazzMemberPersonUid
 
-        val studentScenario = launchFragmentInContainer(
-                bundleOf(UstadView.ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString()),
-                themeResId = R.style.Theme_UstadTheme) {
-            ClazzWorkDetailOverviewFragment().also{
-                it.installNavController(systemImplNavRule.navController)
-            }
+        val activeAccount = UmAccount(studentMember.clazzMemberPersonUid, "bond", "", "http://localhost")
+        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
+
+        reloadFragment(testClazzWork.clazzWork)
+
+        onView(withId(R.id.item_clazzwork_detail_description_cl)).check(matches(isDisplayed()))
+        onView(withId(R.id.item_clazzwork_detail_description_title)).check(matches(isDisplayed()))
+        onView(withText(clazzWork.clazzWorkInstructions)).check(matches(isDisplayed()))
+
+        val startDateString =  dateWithTimeFormat.format(
+                arrayOf(clazzWork.clazzWorkStartDateTime, scheduleTimeToDate(clazzWork.clazzWorkStartTime.toInt()), ""))
+        val dueDateString =  dateWithTimeFormatWithPrepend.format(
+                arrayOf("Due date", clazzWork.clazzWorkDueDateTime, scheduleTimeToDate(clazzWork.clazzWorkDueTime.toInt()), ""))
+        onView(withText(startDateString)).check(matches(isDisplayed()))
+        onView(withText(dueDateString)).check(matches(isDisplayed()))
+        onView(withText("Content")).check(matches(isDisplayed()))
+        //TODO: Test Content when ready
+
+        //None type does not exist
+        onView(withId(R.id.item_simpl_button_button_tv)).check(doesNotExist())
+
+        //Test comments loaded (if any)
+        runBlocking {
+            db.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
+                    testClazzWork.clazzWork, testClazzWork.clazzAndMembers)
+        }
+        reloadFragment(testClazzWork.clazzWork)
+        onView(withText("Class comments")).check(matches(isEnabled()))
+        onView(withText("Private comments")).check(matches(isEnabled()))
+
+        //Change type:
+        clazzWork.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
+        runBlocking{
+            db.clazzWorkDao.updateAsync(clazzWork)
         }
 
-        studentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), navController)
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkWithSubmissionDetailRv
+        reloadFragment(testClazzWork.clazzWork)
+
+        //Submission exists:
+        onView(withText("Submission")).check(matches(isDisplayed()))
+        onView(withId(R.id.item_simpl_button_button_tv)).check(matches(isEnabled()))
+        onView(withId(R.id.item_clazzwork_submission_text_entry_et)).check(matches(isDisplayed()))
+
+        //Change type to quiz
+        runBlocking{
+            val clazzWorkQuizStuff = db.insertQuizQuestionsAndOptions(clazzWork, false, 0,
+                    0, 0, true)
+            clazzWork = clazzWorkQuizStuff.clazzWork
         }
 
-       //TODO: Test the values set for detail, the right questions, etc
+        reloadFragment(testClazzWork.clazzWork)
 
-        //TODO: Test comments loaded (if any)
+        //Submission exists:
+        onView(withText("Submission")).check(matches(isDisplayed()))
+        onView(withId(R.id.item_clazzwork_submission_text_entry_et)).check(doesNotExist())
+        onView(withText("Question 1")).check(matches(isEnabled()))
+        onView(withText("Question 1 Option 1")).check(matches(isEnabled()))
+        onView(withText("Question 1 Option 2")).check(matches(isEnabled()))
+        onView(withText("Question 1 Option 3")).check(matches(isEnabled()))
 
-        //TODO: Test Submit button and headings are shown OK
+        onView(withText("Question 2")).check(matches(isEnabled()))
+        onView(withText("Question 3")).check(matches(isEnabled()))
+        onView(withText("Question 3 Option 1")).check(matches(isEnabled()))
+        onView(withText("Question 3 Option 2")).check(matches(isEnabled()))
+        onView(withText("Question 3 Option 3")).check(matches(isEnabled()))
+        onView(withText("Question 4")).check(matches(isEnabled()))
+        onView(withText("Question 5")).check(matches(isEnabled()))
+        onView(withText("Question 5 Option 1")).check(matches(isEnabled()))
+        onView(withText("Question 5 Option 2")).check(matches(isEnabled()))
+        onView(withText("Question 5 Option 3")).check(matches(isEnabled()))
+
+        //TODO: Edit button doesn't exist?
 
     }
-
     @Test
-    fun givenLValidClazzWorkUid_whenQuestionAnsweredAsStudentAndSubmitted_thenShouldUpdateView() {
+    fun givenValidClazzWorkUid_whenLoadedAsTeacher_thenShouldShow() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
         navController.setGraph(R.navigation.mobile_navigation)
 
-        val testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-                    ClazzWork(), false, 0, true,
-                    0,false, true)
+        var clazzWork = ClazzWork().apply {
+            clazzWorkTitle = "Test ClazzWork A"
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+            clazzWorkInstructions = "Pass espresso test for ClazzWork"
+            clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+            clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+            clazzWorkCommentsEnabled = true
+            clazzWorkMaximumScore = 120
+
         }
-
-
-        val studentScenario = launchFragmentInContainer(
-                bundleOf(UstadView.ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString()),
-                themeResId = R.style.Theme_UstadTheme) {
-            ClazzWorkDetailOverviewFragment().also{
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-
-        studentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), navController)
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkWithSubmissionDetailRv
-        }
-
-        //TODO: Answer questions
-
-
-        //TODO: Hit Submit
-
-        //TODO: Check view
-
-    }
-
-    @Test
-    fun givenLValidClazzWorkUid_whenSubmissionMarkedByTeacherAndStudentLogsIn_thenShouldUpdateScore() {
-        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
-        navController.setGraph(R.navigation.mobile_navigation)
 
         val testClazzWork = runBlocking {
             db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-                    ClazzWork(), false, 0, true,
-                    0,false, true)
+                    clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE, true,
+                    0,false, false)
         }
 
+        val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
+        dbRule.account.personUid = teacherMember.clazzMemberPersonUid
 
-        val studentScenario = launchFragmentInContainer(
-                bundleOf(UstadView.ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString()),
-                themeResId = R.style.Theme_UstadTheme) {
-            ClazzWorkDetailOverviewFragment().also{
-                it.installNavController(systemImplNavRule.navController)
-            }
+        val activeAccount = UmAccount(teacherMember.clazzMemberPersonUid, "bond", "", "http://localhost")
+        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
+
+        reloadFragment(testClazzWork.clazzWork)
+
+        onView(withId(R.id.item_clazzwork_detail_description_cl)).check(matches(isDisplayed()))
+        onView(withId(R.id.item_clazzwork_detail_description_title)).check(matches(isDisplayed()))
+        onView(withText(clazzWork.clazzWorkInstructions)).check(matches(isDisplayed()))
+
+        val startDateString =  dateWithTimeFormat.format(
+                arrayOf(clazzWork.clazzWorkStartDateTime, scheduleTimeToDate(clazzWork.clazzWorkStartTime.toInt()), ""))
+        val dueDateString =  dateWithTimeFormatWithPrepend.format(
+                arrayOf("Due date", clazzWork.clazzWorkDueDateTime, scheduleTimeToDate(clazzWork.clazzWorkDueTime.toInt()), ""))
+        onView(withText(startDateString)).check(matches(isDisplayed()))
+        onView(withText(dueDateString)).check(matches(isDisplayed()))
+        onView(withText("Content")).check(matches(isDisplayed()))
+        //TODO: Test Content when ready
+
+        //Submit button never exists
+        onView(withId(R.id.item_simpl_button_button_tv)).check(doesNotExist())
+
+        //Test comments loaded (if any)
+        runBlocking {
+            db.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
+                    testClazzWork.clazzWork, testClazzWork.clazzAndMembers)
+        }
+        reloadFragment(testClazzWork.clazzWork)
+        onView(withText("Class comments")).check(matches(isEnabled()))
+        onView(withText("Private comments")).check(doesNotExist())
+
+        //Change type:
+        clazzWork.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
+        runBlocking{
+            db.clazzWorkDao.updateAsync(clazzWork)
         }
 
-        studentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), navController)
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkWithSubmissionDetailRv
+        reloadFragment(testClazzWork.clazzWork)
+
+        //Submission doesnt exists:
+        onView(withText("Submission")).check(doesNotExist())
+        onView(withId(R.id.item_simpl_button_button_tv)).check(doesNotExist())
+        onView(withId(R.id.item_clazzwork_submission_text_entry_et)).check(doesNotExist())
+
+        //Change type to quiz
+        runBlocking{
+            val clazzWorkQuizStuff = db.insertQuizQuestionsAndOptions(clazzWork, false, 0,
+                    0, 0, true)
+            clazzWork = clazzWorkQuizStuff.clazzWork
         }
 
-        //TODO: Set user Student
-        //TODO: Answer questions
+        reloadFragment(testClazzWork.clazzWork)
 
-        //TODO: Hit Submit
+        //Submission exists:
+        //Submission doesnt exists:
+        onView(withText("Submission")).check(doesNotExist())
+        onView(withId(R.id.item_simpl_button_button_tv)).check(doesNotExist())
+        onView(withId(R.id.item_clazzwork_submission_text_entry_et)).check(doesNotExist())
 
-        //TODO: Set user Teacher
-        //TODO: Mark score
+        //But can see questions OK
+        onView(withText("Question 1")).check(matches(isEnabled()))
+        onView(withText("Question 1 Option 1")).check(matches(not(isEnabled())))
+        onView(withText("Question 1 Option 2")).check(matches(not(isEnabled())))
+        onView(withText("Question 1 Option 3")).check(matches(not(isEnabled())))
 
-        //TODO: Set user student
-        //TODO: Check score ok on view and unable to edit
+        onView(withText("Question 2")).check(matches(isEnabled()))
+        onView(withText("Question 3")).check(matches(isEnabled()))
+        onView(withText("Question 3 Option 1")).check(matches(not(isEnabled())))
+        onView(withText("Question 3 Option 2")).check(matches(not(isEnabled())))
+        onView(withText("Question 3 Option 3")).check(matches(not(isEnabled())))
+        onView(withText("Question 4")).check(matches(isEnabled()))
+        onView(withText("Question 5")).check(matches(isEnabled()))
+        onView(withText("Question 5 Option 1")).check(matches(not(isEnabled())))
+        onView(withText("Question 5 Option 2")).check(matches(not(isEnabled())))
+        onView(withText("Question 5 Option 3")).check(matches(not(isEnabled())))
 
-    }
-
-    @Test
-    fun givenLValidClazzWorkUid_whenLoadedAsTeacher_thenShouldShow() {
-        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
-        navController.setGraph(R.navigation.mobile_navigation)
-
-        val testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-                    ClazzWork(), false, 0, true,
-                    0,false, true)
-        }
-        //TODO Add comments, etc
-
-
-        val studentScenario = launchFragmentInContainer(
-                bundleOf(UstadView.ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString()),
-                themeResId = R.style.Theme_UstadTheme) {
-            ClazzWorkDetailOverviewFragment().also{
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-
-        studentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), navController)
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkWithSubmissionDetailRv
-        }
-
-        //TODO: Test the values set for detail, the right questions, etc
-
-        //TODO :Public comments show OK
 
         //TODO: Edit button goes to edit screen OK
+
+    }
+
+    private fun reloadFragment(clazzWork: ClazzWork){
+        val studentScenario = launchFragmentInContainer(
+                bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString()),
+                themeResId = R.style.Theme_UstadTheme) {
+            ClazzWorkDetailOverviewFragment().also{
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }
+        studentScenario.onFragment {
+            Navigation.setViewNavController(it.requireView(), navController)
+            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkWithSubmissionDetailRv
+        }
+        Thread.sleep(2000)
+    }
+
+    @Test
+    fun givenValidClazzWorkUid_whenQuestionAnsweredAsStudentAndSubmitted_thenShouldUpdateView() {
+        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+        navController.setGraph(R.navigation.mobile_navigation)
+
+        val testClazzWork = runBlocking {
+            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                    ClazzWork(), false, 0, true,
+                    0,false, true)
+        }
+
+        val studentMember = testClazzWork.clazzAndMembers.studentList.get(0)
+        dbRule.account.personUid = studentMember.clazzMemberPersonUid
+
+        val activeAccount = UmAccount(studentMember.clazzMemberPersonUid, "bond", "", "http://localhost")
+        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
+
+        reloadFragment(testClazzWork.clazzWork)
+
+        //TODO: Answer questions, write, scroll, select
+
+
+        //TODO: Hit Submit: Find and hit Submit button
+
+
+        //TODO: Check view is updated
+
+    }
+
+    @Test
+    fun givenValidClazzWorkUid_whenSubmissionMarkedByTeacherAndStudentLogsIn_thenShouldUpdateScore() {
+        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+        navController.setGraph(R.navigation.mobile_navigation)
+
+        val clazzWork = ClazzWork().apply {
+            clazzWorkTitle = "Test ClazzWork A"
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+            clazzWorkInstructions = "Pass espresso test for ClazzWork"
+            clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+            clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+            clazzWorkCommentsEnabled = true
+            clazzWorkMaximumScore = 120
+
+        }
+
+        val testClazzWork = runBlocking {
+            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                    clazzWork, true, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ,
+                    true,0,true, true)
+        }
+
+        val studentMember = testClazzWork.clazzAndMembers.studentList.get(0)
+        dbRule.account.personUid = studentMember.clazzMemberPersonUid
+
+        val activeAccount = UmAccount(studentMember.clazzMemberPersonUid, "bond", "", "http://localhost")
+        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
+
+        reloadFragment(testClazzWork.clazzWork)
+
+        onView(withId(R.id.item_clazzwork_detail_description_cl)).check(matches(isDisplayed()))
+        onView(withId(R.id.item_clazzwork_detail_description_title)).check(matches(isDisplayed()))
+        onView(withText(clazzWork.clazzWorkInstructions)).check(matches(isDisplayed()))
+        onView(withText("89/120")).check(matches(isDisplayed()))
+
 
     }
 
@@ -216,29 +379,68 @@ class ClazzWorkDetailOverviewFragmentTest {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
         navController.setGraph(R.navigation.mobile_navigation)
 
+        val clazzWork = ClazzWork().apply {
+            clazzWorkTitle = "Test ClazzWork A"
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+            clazzWorkInstructions = "Pass espresso test for ClazzWork"
+            clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+            clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+            clazzWorkCommentsEnabled = true
+            clazzWorkMaximumScore = 120
+
+        }
+
         val testClazzWork = runBlocking {
             db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-                    ClazzWork(), false, 0, true,
+                    clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE, true,
                     0,false, true)
         }
 
+        //Student 1 logged in user. Makes private comment :
+        val studentMember1 = testClazzWork.clazzAndMembers.studentList.get(0)
+        val studentMember2 = testClazzWork.clazzAndMembers.studentList.get(1)
 
-        val studentScenario = launchFragmentInContainer(
-                bundleOf(UstadView.ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString()),
-                themeResId = R.style.Theme_UstadTheme) {
-            ClazzWorkDetailOverviewFragment().also{
-                it.installNavController(systemImplNavRule.navController)
+        //Test comments loaded (if any)
+        runBlocking {
+            Comments().apply {
+                commentsText = "Student 1 private comment"
+                commentsDateTimeAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
+                commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
+                commentsPublic = false
+                commentsPersonUid = studentMember1.clazzMemberPersonUid
+                commentsUid = db.commentsDao.insertAsync(this)
             }
+            Comments().apply {
+                commentsText = "Student 2 private comment"
+                commentsDateTimeAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
+                commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
+                commentsPublic = false
+                commentsPersonUid = studentMember2.clazzMemberPersonUid
+                commentsUid = db.commentsDao.insertAsync(this)
+            }
+
         }
 
-        studentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), navController)
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkWithSubmissionDetailRv
-        }
+        dbRule.account.personUid = studentMember1.clazzMemberPersonUid
+        var activeAccount = UmAccount(studentMember1.clazzMemberPersonUid, "bond",
+                "", "http://localhost")
+        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
+        reloadFragment(testClazzWork.clazzWork)
 
-        //TODO: Student 1 logged in user. Makes private comment .
+        onView(withText("Student 1 private comment")).check(matches(isEnabled()))
+        onView(withText("Student 2 private comment")).check(doesNotExist())
 
-        //TODO: Student 2 logged in user. Cannot see private comment.
+        //Student 2 logged in user. Cannot see private comment.
+        dbRule.account.personUid = studentMember2.clazzMemberPersonUid
+        activeAccount = UmAccount(studentMember2.clazzMemberPersonUid, "bond",
+                "", "http://localhost")
+        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
+        reloadFragment(testClazzWork.clazzWork)
+
+        onView(withText("Student 1 private comment")).check(doesNotExist())
+        onView(withText("Student 2 private comment")).check(matches(isEnabled()))
 
     }
 

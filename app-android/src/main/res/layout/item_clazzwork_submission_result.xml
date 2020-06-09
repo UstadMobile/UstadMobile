@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
-        android:id="@+id/item_comment_new_layout"
+        android:id="@+id/item_clazzwork_submission_result_cl"
         >
 
         <TextView
@@ -32,7 +32,7 @@
             android:text="@{`` + clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionScore + '/'+ clazzWorkWithSubmission.clazzWorkMaximumScore}"
             android:textColor="@color/text_primary"
             android:textSize="30sp"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission != null)?View.VISIBLE:View.GONE}"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

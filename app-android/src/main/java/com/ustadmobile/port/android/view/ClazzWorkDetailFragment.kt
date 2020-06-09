@@ -120,20 +120,6 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         }
     }
 
-//    override var title: String? = null
-//        get() = field
-//        set(value) {
-//            field = value
-//            (activity as? AppCompatActivity)?.supportActionBar?.title = title
-//        }
-
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
-        }
-
     companion object{
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
                 ClazzWorkEditView.VIEW_NAME to ClazzWorkEditFragment::class.java,
