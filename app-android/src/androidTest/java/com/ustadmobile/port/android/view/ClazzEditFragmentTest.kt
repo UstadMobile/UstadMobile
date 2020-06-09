@@ -13,6 +13,8 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.soywiz.klock.hours
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
@@ -27,6 +29,7 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
+@AdbScreenRecord("Class edit screen tests")
 class ClazzEditFragmentTest  {
 
     @JvmField
@@ -37,7 +40,12 @@ class ClazzEditFragmentTest  {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
 
+
+    @AdbScreenRecord("")
     @Test
     fun givenNoClazzPresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
         val existingHolidayCal = HolidayCalendar().apply {

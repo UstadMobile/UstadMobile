@@ -69,7 +69,7 @@ class EpubContentActivityEspressoTest {
 
     private var idleProgress: ProgressIdlingResource? = null
 
-    @Before
+    //@Before
     @Throws(IOException::class, XmlPullParserException::class)
     fun setup() {
         db = UmAppDatabase.getInstance(InstrumentationRegistry.getInstrumentation().context)
@@ -108,7 +108,7 @@ class EpubContentActivityEspressoTest {
         navDocIn.close()
     }
 
-    @After
+    //@After
     fun tearDown() {
         epubTmpFile!!.delete()
         UmFileUtilSe.deleteRecursively(containerTmpDir!!)
@@ -123,7 +123,7 @@ class EpubContentActivityEspressoTest {
         return mActivityRule.activity
     }
 
-    @Test
+    //@Test
     fun givenValidEpub_whenOpened_thenShouldShowContentAndMenu() {
         var activity = launchActivity()
 
@@ -144,7 +144,7 @@ class EpubContentActivityEspressoTest {
     }
 
 
-    @Test
+    //@Test
     fun givenValidEpubOpen_whenClickOnNavigationDrawItem_thenShouldOpenPage() {
         var activity = launchActivity()
 

@@ -42,7 +42,7 @@ allprojects {
         }
 
         maven {
-            url  "https://dl.bintray.com/ustadmobile/maven"
+            url "https://dl.bintray.com/ustadmobile/adbscreenrecord"
         }
 
         maven {
@@ -175,6 +175,7 @@ ext {
     version_android_leakcanary = "2.2"
     version_android_play_services_safetynet = "17.0.0"
     version_android_circleimageview = "3.1.0"
+    version_android_adbscreenrecorder = "0.1-alpha01"
 
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"

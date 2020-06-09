@@ -1,4 +1,17 @@
+pluginManagement {
+    repositories {
+        maven {
+            url "https://dl.bintray.com/ustadmobile/adbscreenrecord"
+        }
 
+        jcenter()
+        mavenCentral()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+
+    }
+}
 
 
 include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':lib-database-annotation-processor-mpp-test', ':lib-database-annotation-processor-testdb',
