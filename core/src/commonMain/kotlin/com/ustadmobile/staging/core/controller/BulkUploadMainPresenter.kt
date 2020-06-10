@@ -4,15 +4,15 @@ import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.view.BulkUploadMasterView
+import com.ustadmobile.core.view.BulkUploadMainView
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-class BulkUploadMasterPresenter(context: Any, arguments: Map<String, String>?,
-                                view: BulkUploadMasterView) :
-        UstadBaseController<BulkUploadMasterView>(context, arguments!!, view) {
+class BulkUploadMainPresenter(context: Any, arguments: Map<String, String>?,
+                              view: BulkUploadMainView) :
+        UstadBaseController<BulkUploadMainView>(context, arguments!!, view) {
 
     internal var repository = UmAccountManager.getRepositoryForActiveAccount(context)
 

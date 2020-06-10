@@ -16,22 +16,22 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.BulkUploadMasterPresenter
+import com.ustadmobile.core.controller.BulkUploadMainPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.BulkUploadMasterView
+import com.ustadmobile.core.view.BulkUploadMainView
 import com.ustadmobile.port.android.view.UstadBaseActivity
 import ru.dimorinny.floatingtextbutton.FloatingTextButton
 import java.io.*
 import java.util.*
 
-class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
+class BulkUploadMainActivity : UstadBaseActivity(), BulkUploadMainView {
 
 
     private var filePathFromFilePicker: String? = null
     private var selectedPathUri : Uri? = null
-    private var mPresenter: BulkUploadMasterPresenter? = null
+    private var mPresenter: BulkUploadMainPresenter? = null
     private var mProgressBar: ProgressBar? = null
     private var fab: FloatingTextButton? = null
     private var selectFileButton: Button? = null
@@ -48,16 +48,16 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
         allErrors = ArrayList()
 
         //Set layout
-        setContentView(R.layout.activity_bulk_upload_master)
+        setContentView(R.layout.activity_bulk_upload_main)
 
         //Toolbar
-        toolbar = findViewById(R.id.activity_bulk_upload_master_toolbar)
-        toolbar!!.setTitle(R.string.bulk_upload_master)
+        toolbar = findViewById(R.id.activity_bulk_upload_main_toolbar)
+        toolbar!!.setTitle(R.string.bulk_upload_main)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         //Timezone spinner
-        timeZoneSpinner = findViewById(R.id.activity_bulk_upload_master_timezone_spinner)
+        timeZoneSpinner = findViewById(R.id.activity_bulk_upload_main_timezone_spinner)
         timeZoneSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 (parent.getChildAt(0) as TextView).setTextColor(Color.BLACK)
@@ -70,17 +70,17 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
         }
 
         //Call the presenter
-        mPresenter = BulkUploadMasterPresenter(this,
+        mPresenter = BulkUploadMainPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //Button
-        selectFileButton = findViewById(R.id.activity_bulk_upload_master_upload_button)
+        selectFileButton = findViewById(R.id.activity_bulk_upload_main_upload_button)
         selectFileButton!!.setOnClickListener { v -> chooseFileFromDevice() }
 
         //Errors and warnings:
-        errorsLL = findViewById(R.id.activity_bulk_upload_master_errors_ll)
-        errorHeading = findViewById(R.id.activity_bulk_upload_master_errors_heading)
+        errorsLL = findViewById(R.id.activity_bulk_upload_main_errors_ll)
+        errorHeading = findViewById(R.id.activity_bulk_upload_main_errors_heading)
         errorsLL!!.removeAllViews()
 
         errorsLL!!.visibility = View.INVISIBLE
@@ -90,12 +90,12 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
         heading = findViewById(R.id.activity_bulk_upload_select_file_text)
 
         //Progress bar
-        mProgressBar = findViewById(R.id.activity_bulk_upload_master_progressbar)
+        mProgressBar = findViewById(R.id.activity_bulk_upload_main_progressbar)
         mProgressBar!!.isIndeterminate = false
         mProgressBar!!.scaleY = 3f
 
         //FAB
-        fab = findViewById(R.id.activity_bulk_upload_master_fab)
+        fab = findViewById(R.id.activity_bulk_upload_main_fab)
 //        fab!!.setOnClickListener { v -> parseFile(filePathFromFilePicker!!) }
         fab!!.setOnClickListener { v -> parseThisUri() }
     }
@@ -187,7 +187,7 @@ class BulkUploadMasterActivity : UstadBaseActivity(), BulkUploadMasterView {
 
         if (ContextCompat.checkSelfPermission(applicationContext,
                         Manifest.permission.READ_EXTERNAL_STORAGE) !== PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this@BulkUploadMasterActivity,
+            ActivityCompat.requestPermissions(this@BulkUploadMainActivity,
                     arrayOf<String>(Manifest.permission.READ_EXTERNAL_STORAGE),
                     FILE_PERMISSION_REQUEST)
             return

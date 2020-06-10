@@ -58,7 +58,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
 import java.util.*
-import java.util.concurrent.Executors
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -132,7 +131,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             AddActivityChangeDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddActivityChangeDialogFragment",
             SelectMultipleTreeDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectMultipleTreeDialogFragment",
             SelectTwoDatesDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectTwoDatesDialogFragment",
-            BulkUploadMasterView.VIEW_NAME to "${STAGING_PACKAGE_NAME}BulkUploadMasterActivity",
+            BulkUploadMainView.VIEW_NAME to "${STAGING_PACKAGE_NAME}BulkUploadMainActivity",
             AddQuestionSetDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddQuestionSetDialogFragment",
             PersonPictureDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonPictureDialogFragment",
             AddQuestionOptionDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddQuestionOptionDialogFragment",
@@ -157,8 +156,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
             ContentEntryExportView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryExportFragmentDialog",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            ClazzAssignmentEditView.VIEW_NAME to "${PACKAGE_NAME}ClazzAssignmentEditActivity",
-            ClazzAssignmentDetailView.VIEW_NAME to "${PACKAGE_NAME}ClazzAssignmentDetailActivity",
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupListView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupListActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"

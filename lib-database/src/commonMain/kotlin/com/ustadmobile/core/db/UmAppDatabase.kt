@@ -32,7 +32,7 @@ import kotlin.jvm.Volatile
     ContextXObjectStatementJoin::class, AgentEntity::class,
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
-    SyncResult::class, School::class, ClazzAssignment::class, ClazzAssignmentContentJoin::class,
+    SyncResult::class, School::class,
     TimeZoneEntity::class,
     SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
@@ -224,8 +224,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val holidayCalendarDao : HolidayCalendarDao
     abstract val holidayDao: HolidayDao
     abstract val schoolDao : SchoolDao
-    abstract val clazzAssignmentDao : ClazzAssignmentDao
-    abstract val clazzAssignmentContentJoinDao : ClazzAssignmentContentJoinDao
 
     @JsName("xLangMapEntryDao")
     abstract val xLangMapEntryDao: XLangMapEntryDao

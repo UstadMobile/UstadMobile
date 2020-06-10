@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-interface BulkUploadMasterView : UstadView {
+interface BulkUploadMainView : UstadView {
 
     /**
      * Set time zone as list to the activity.
@@ -51,6 +51,6 @@ interface BulkUploadMasterView : UstadView {
 
     companion object {
 
-        val VIEW_NAME = "BulkUploadMaster"
+        val VIEW_NAME = "BulkUploadMain"
     }
 }

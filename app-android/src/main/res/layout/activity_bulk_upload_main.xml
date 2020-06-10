@@ -17,15 +17,15 @@
 
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/activity_bulk_upload_master_toolbar"
+            android:id="@+id/activity_bulk_upload_main_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
             android:background="@color/primary"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:title="@string/bulk_upload_master" />
+            app:title="@string/bulk_upload_main" />
 
         <ProgressBar
-            android:id="@+id/activity_bulk_upload_master_progressbar"
+            android:id="@+id/activity_bulk_upload_main_progressbar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dimen_4dp"
@@ -43,7 +43,7 @@
         android:text="@string/select_file"
         android:textSize="@dimen/dimen_20dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_master_appbar"
+        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_main_appbar"
         android:layout_marginLeft="16dp" />
 
     <TextView
@@ -57,10 +57,10 @@
         android:textSize="@dimen/dimen_20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_master_upload_button" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_main_upload_button" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/activity_bulk_upload_master_upload_button"
+        android:id="@+id/activity_bulk_upload_main_upload_button"
         style="@style/Widget.AppCompat.Button.Small"
         android:layout_width="172dp"
         android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
 
 
     <ru.dimorinny.floatingtextbutton.FloatingTextButton
-        android:id="@+id/activity_bulk_upload_master_fab"
+        android:id="@+id/activity_bulk_upload_main_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
@@ -92,7 +92,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.appcompat.widget.AppCompatSpinner
-        android:id="@+id/activity_bulk_upload_master_timezone_spinner"
+        android:id="@+id/activity_bulk_upload_main_timezone_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -105,7 +105,7 @@
     </androidx.appcompat.widget.AppCompatSpinner>
 
     <TextView
-        android:id="@+id/activity_bulk_upload_master_errors_heading"
+        android:id="@+id/activity_bulk_upload_main_errors_heading"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -115,10 +115,10 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_master_timezone_spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_main_timezone_spinner" />
 
     <LinearLayout
-        android:id="@+id/activity_bulk_upload_master_errors_ll"
+        android:id="@+id/activity_bulk_upload_main_errors_ll"
         android:layout_width="0dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
@@ -127,7 +127,7 @@
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_master_errors_heading"
+        app:layout_constraintTop_toBottomOf="@+id/activity_bulk_upload_main_errors_heading"
         >
 
     </LinearLayout>

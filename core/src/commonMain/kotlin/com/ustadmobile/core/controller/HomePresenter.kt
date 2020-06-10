@@ -96,7 +96,7 @@ class HomePresenter(context: Any, arguments: Map<String, String>,  view: HomeVie
 
     fun handleDownloadAllClicked(){
         val args = HashMap<String, String>()
-        args["contentEntryUid"] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
+        args["contentEntryUid"] = PRIMARY_SERVER_ROOT_ENTRY_UID.toString()
         impl.go("DownloadDialog", args, context)
     }
 
@@ -120,8 +120,8 @@ class HomePresenter(context: Any, arguments: Map<String, String>,  view: HomeVie
     override fun handleNavigation() {}
 
     companion object {
-        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
-        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+        @JsName("PRIMARY_SERVER_ROOT_ENTRY_UID")
+        const val PRIMARY_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
 
         /**
          * This view name will generate a tabbed set of ContentEntryList views. See

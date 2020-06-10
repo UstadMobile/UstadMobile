@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ReportMasterItem {
+class ReportMainItem {
 
     var clazzName: String? = null
     var clazzUid: String? = null

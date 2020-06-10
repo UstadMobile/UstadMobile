@@ -136,7 +136,7 @@
             android:name="com.ustadmobile.staging.port.android.view.SelectTwoDatesDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.BulkUploadMasterActivity"
+            android:name="com.ustadmobile.staging.port.android.view.BulkUploadMainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.AddQuestionSetDialogFragment"
@@ -204,16 +204,6 @@
             android:name="com.ustadmobile.staging.port.android.view.PeopleListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/people"
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/assignment"
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/assignment"
             android:theme="@style/Theme.UstadTheme" />
 
 

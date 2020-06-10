@@ -533,7 +533,7 @@
     <string name="at_risk_students">At risk students</string>
     <string name="operations_report">Operations report</string>
     <string name="number_of_days_classes_open">Number of days classes open</string>
-    <string name="irc_master_list_report">IRC master list report</string>
+    <string name="irc_main_list_report">IRC main list report</string>
     <string name="sel_report">SEL report</string>
     <string name="select_attendance_thresholds">Select Attendance Thresholds</string>
     <string name="select_classes">Select classes</string>
@@ -549,7 +549,7 @@
     <!-- Get started - e.g. as used in the button when the app first runs-->
     <string name="get_started2">Get started</string>
     <string name="select_file">Select file</string>
-    <string name="bulk_upload_master">Bulk Upload Master</string>
+    <string name="bulk_upload_main">Bulk Upload Main</string>
     <string name="apply">Apply</string>
     <string name="file_selected">File selected:</string>
     <string name="all">All</string>
