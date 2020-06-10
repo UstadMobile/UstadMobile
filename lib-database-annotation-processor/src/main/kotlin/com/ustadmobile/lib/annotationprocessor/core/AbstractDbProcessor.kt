@@ -429,7 +429,7 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
         }
         CodeBlock.of("$kotlinxSerializationJsonVarName.parse(%T.%L.%M, $httpStatementVarName.%M<String>())\n",
                 httpResultType.typeArguments[0], serializerFnCodeBlock,
-                MemberName("kotlinx.serialization", "list"),
+                MemberName("kotlinx.serialization.builtins", "list"),
                 CLIENT_RECEIVE_MEMBER_NAME)
     }else{
         CodeBlock.Builder().beginControlFlow("$httpStatementVarName.execute")
