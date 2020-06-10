@@ -371,7 +371,7 @@ class ClazzWorkDetailOverviewFragmentTest {
         onView(withText("Question 5 Option 3")).check(matches(isEnabled()))
         onView(withText("Question 5 Option 3")).perform(click())
 
-        //TODO: Check after student is back that its up to date 
+        //TODO: Check after student is back that its up to date
 
     }
 
