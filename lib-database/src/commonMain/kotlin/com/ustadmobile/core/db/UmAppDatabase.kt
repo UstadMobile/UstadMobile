@@ -235,6 +235,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("schoolMemberDao")
     abstract val schoolMemberDao: SchoolMemberDao
 
+    @JsName("syncNodeDao")
+    abstract val syncNodeDao: SyncNodeDao
+
+
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
 

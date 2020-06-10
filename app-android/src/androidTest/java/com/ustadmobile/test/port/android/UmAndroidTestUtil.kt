@@ -9,7 +9,6 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.test.port.android.view.VideoPlayerTest
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
