@@ -50,6 +50,7 @@
     <string name="unset">Unset</string>
     <string name='settings'>Settings</string>
     <string name='language'>Language</string>
+    <string name='select_language'>Pick Language</string>
     <string name='advanced'>Advanced</string>
     <string name='optional'>Optional</string>
     <string name='email'>Email</string>
@@ -81,6 +82,26 @@
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
     <string name="no_video_file_found">No video file found</string>
+    <string name="content_from_file">From file</string>
+    <string name="content_from_link">From link</string>
+    <string-array name="content_source_option">
+        <item>@string/content_from_file</item>
+        <item>@string/content_from_link</item>
+    </string-array>
+    <string name="import_content">Import Content</string>
+    <string name="update_content">Update Content</string>
+    <string name="publicly_accessible">Publicly accessible</string>
+    <string name="title">Title</string>
+    <string name="licence">Licence</string>
+    <string name="ebook">E-book</string>
+    <string name="interactive">Interactive</string>
+    <string name="collection">Collection</string>
+    <string name="document">Document</string>
+    <string name="article">Article</string>
+    <string name="unknown">Unknown</string>
+    <string name="audio">Audio</string>
+
+
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
@@ -148,13 +169,15 @@
     <string name="get_app">Get app</string>
     <string name="no_app_found">"No app found to open file"</string>
     <string name="entry_details_author">Author</string>
-    <string name="entry_details_license">License</string>
+    <string name="entry_details_publisher">Publisher</string>
+    <string name="entry_details_license">License: </string>
     <string name="entry_details_description">Description</string>
     <string name="library_reading_level">Reading Level</string>
     <string name="file_not_found">File Not Found</string>
 
     <!--Content editor -->
     <string name="content_type_multimedia">Multimedia</string>
+    <string name="content_type">Content type </string>
     <string name="content_type_multiple_choice">Multiple choice</string>
     <string name="content_type_fill_the_blanks">Fill in the blanks</string>
     <string name="content_type_link">Link</string>
@@ -176,7 +199,7 @@
     <string name="content_prepare_file">Preparing file...</string>
     <string name="content_preview_title">Previewing...</string>
     <string name="content_media_photo">Photo</string>
-    <string name="content_media_video">Video</string>
+    <string name="video">Video</string>
     <string name="content_media_message">What media type would you like to capture?</string>
     <string name="content_media_title">Media type</string>
     <string name="content_blank_page_title">Blank page</string>
@@ -191,7 +214,6 @@
     <string name="content_action_page_remove">Remove page</string>
     <string name="content_editor_page_view_hint">Title</string>
     <string name="content_editor_page_delete_failure_message">Sorry you can not delete this page</string>
-    <string name="content_entry_not_found">ContentEntry Not Found</string>
     <string name="content_editor_directionality">Directionality</string>
     <string name='content_editor_menu_undo'>Undo</string>
     <string name='content_editor_menu_redo'>Redo</string>
@@ -220,30 +242,15 @@
     <string name="permission_camera_title">Camera and File Permission Required</string>
     <string name="permission_camera_message">This app requires both camera and file permissions to take photos and record videos</string>
     <string name="content_editor_create_new">Add new</string>
-    <string name="content_editor_create_new_import">Import from file</string>
-    <string name="content_editor_create_new_import_link">Import from link</string>
+    <string name="content_editor_create_new_import">Import file</string>
+    <string name="content_editor_create_new_import_link">Import link</string>
     <string name="content_editor_create_new_content">Create new content</string>
-    <string name="content_editor_create_new_category">Create new folder</string>
+    <string name="content_editor_create_new_category">New folder</string>
     <string name="content_editor_edit_category">Edit</string>
     <string name="content_editor_create_new_title">Add content</string>
     <string name="content_editor_action_done">Done</string>
-    <string name="content_entry_label_title">Title</string>
-    <string name="content_entry_label_desc">Description</string>
-    <string name="content_entry_label_save">Save</string>
-    <string name="content_entry_label_update">Update document</string>
-    <string name="content_entry_label_select_file">Select file</string>
-    <string name="content_entry_label_update_file">Update file</string>
-    <string name="content_entry_label_update_content">Update Content</string>
-    <string name="content_from_file">From file</string>
-    <string name="content_from_link">From link</string>
-    <string name="content_entry_label_licence">License</string>
-    <string name="content_entry_label_visibility">Make content public</string>
-    <string name="content_entry_label_active">Make content active</string>
-    <string name="content_import_success_message">You have successfully imported a file</string>
-    <string name="content_import_failure_message">Selected file is not supported, try another file</string>
-    <string name="content_creation_empty_field_error">Fill out required fields and try again</string>
     <string name="content_creation_storage_option_title">Storage option</string>
-    <string name="content_creation_file_required_error">File to be imported is not selected, try again</string>
+    <string name="file_required_prompt">File to be imported is not selected, try again</string>
     <string name="content_creation_folder_new_message">New folder was successfully added</string>
     <string name="content_creation_folder_update_message">Folder was successfully updated</string>
     <string name="empty_state_libraries">No folders found</string>
@@ -253,10 +260,8 @@
     <string name="error_message_update_document">Failed to update document</string>
     <string name="content_update_massage">Updated successfully</string>
     <string name="content_folder_image_message">Support for adding an image is coming soon</string>
-    <string name="content_supported_files">Supported files: <![CDATA[<b>Epub, TinCan (XAPI) Zip</b>]]></string>
-    <string name="content_entry_importing">Importing, please wait</string>
+    <string name="supported_files">Supported files: <b>Video, Audio, EPUB, Xapi Zip,H5P</b></string>
     <string name="content_editor_save_error">Error while saving, try again</string>
-    <string name="content_entry_export">Export</string>
     <string name="content_entry_export_inprogress">Exporting</string>
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
 
@@ -304,6 +309,8 @@
     <string name="xapi_options_when">When</string>
     <string name="xapi_options_where">Where</string>
 
+
+
     <string name="activity_preview_xapi">Preview</string>
     <string name="add_to_dashboard">Add to Dashboard</string>
     <string name="activity_import_link">Import Link</string>
@@ -332,7 +339,6 @@
     <string name="error_not_found_status">404 !</string>
     <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
 
-
     <string name="offline_sharing_enable_bluetooth_prompt">Offline sharing requires Bluetooth</string>
     <string name="offline_sharing_enable_wifi_promot">Offline sharing requires WiFi to be switched on</string>
     <string name="enable">Enable</string>
@@ -345,7 +351,14 @@
     <string name="repo_loading_status_failed_noconnection">No connection or peer</string>
     <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
-
+    <string name="licence_type_cc_by">CC BY</string>
+    <string name="licence_type_cc_by_sa">CC BY SA</string>
+    <string name="licence_type_cc_by_sa_nc">CC BY SA NC</string>
+    <string name="licence_type_cc_by_nc">CC BY NC</string>
+    <string name="licence_type_cc_by_nc_sa">CC BY NC SA</string>
+    <string name="licence_type_public_domain">Public Domain</string>
+    <string name="licence_type_all_rights">All Rights Reserved</string>
+    <string name="licence_type_other">Other</string>
 
     <string name="syncing">Syncing..</string>
     <string name="node_title_list">Node List</string>
@@ -796,7 +809,6 @@ Voice of America\n
 Content is provided under license by external content providers. Ustad Mobile, unless explicitly mentioned otherwise, is not endorsed by any such content provider.</string>
 
     <string name="due_date">Due date</string>
-    <string name="title">Title</string>
     <string name="content">Content</string>
     <string name="require_attachment">Require attachment</string>
     <string name="add_assignment">Add Assignment</string>
@@ -865,7 +877,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
 
     <string name="untitled">Untitled</string>
-    <string name="required_field">Required field</string>
     <string name="present_late_absent">%1$d present, %2$d late, %3$d absent</string>
 
     <string name="clazz_work">Class work</string>

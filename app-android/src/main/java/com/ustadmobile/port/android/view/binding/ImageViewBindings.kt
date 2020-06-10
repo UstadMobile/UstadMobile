@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view.binding
 
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
@@ -18,25 +19,24 @@ class ImageViewLifecycleObserver2(view: ImageView, registry: ActivityResultRegis
     : ViewActivityLauncherLifecycleObserver<ImageView>(view, registry, inverseBindingListener) {
 
     override fun onPictureTakenOrSelected(pictureUri: Uri?) {
-        view.setImageFilePath(pictureUri?.toString())
+        view.setImageFilePath(pictureUri?.toString(),null)
         inverseBindingListener?.onChange()
     }
 }
 
-@BindingAdapter("imageUri")
-fun ImageView.setImageFilePath(imageFilePath: String?) {
+@BindingAdapter(value=["imageUri", "fallbackDrawable"], requireAll = false)
+fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawable?) {
     //start observing
     setTag(R.id.tag_imagefilepath, imageFilePath)
-    if(imageFilePath == null){
-        setImageResource(android.R.color.transparent)
-        return
+    val drawable = fallbackDrawable?: ContextCompat.getDrawable(context,android.R.color.transparent)
+    val picasso = Picasso.get().load(if(imageFilePath != null) Uri.parse(imageFilePath) else null)
+    if(drawable != null){
+        picasso.placeholder(drawable).error(drawable)
     }
+    picasso.noFade().into(this)
 
-    Picasso.get()
-            .load(Uri.parse(imageFilePath))
-            .noFade()
-            .into(this)
 }
+
 @BindingAdapter("imageUriAttrChanged")
 fun ImageView.getImageFilePath(inverseBindingListener: InverseBindingListener) {
     val activity = context.getActivityContext() as ComponentActivity

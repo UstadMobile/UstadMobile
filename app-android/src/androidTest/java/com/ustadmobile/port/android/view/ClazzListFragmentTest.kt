@@ -11,6 +11,7 @@ import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -20,6 +21,7 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
+@AdbScreenRecord("Class list screen tests")
 class ClazzListFragmentTest  {
 
     @JvmField
@@ -30,6 +32,7 @@ class ClazzListFragmentTest  {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @AdbScreenRecord("List screen should show class in database and allow clicking on item")
     @Test
     fun givenClazzPresent_whenClickOnClazz_thenShouldNavigateToClazzDetail() {
         val testEntity = Clazz().apply {

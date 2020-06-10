@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -8,27 +7,18 @@ import android.view.MenuItem
 import android.widget.ArrayAdapter
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityClazzAssignmentEditBinding
 import com.ustadmobile.core.controller.ClazzAssignmentEditPresenter
-import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzAssignmentEditView
-import com.ustadmobile.core.view.ContentEntryListView
-import com.ustadmobile.core.view.ContentEntryListView.Companion.EXTRA_RESULT_CONTENTENTRY
-import com.ustadmobile.core.view.ContentEntryListViewMode
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzAssignment
 import com.ustadmobile.lib.db.entities.ClazzAssignmentContentEntryJoinWithContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntry
-import kotlinx.serialization.json.Json
 
 class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView {
 
@@ -127,10 +117,10 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
     override var contentEntryList: DoorMutableLiveData<List<ClazzAssignmentContentEntryJoinWithContentEntry>>? = null
         get() = field
         set(value) {
-            val recyclerAdapter = ContentEntryListRecyclerAdapter(DIFF_CALLBACK_CONTENT_ENTRY_JOIN_WITH_CONTENT_ENTRY)
-            value?.observe(this, Observer { list -> recyclerAdapter.submitList(list)})
+            //val recyclerAdapter = ContentEntryListRecyclerAdapter(DIFF_CALLBACK_CONTENT_ENTRY_JOIN_WITH_CONTENT_ENTRY)
+            /*value?.observe(this, Observer { list -> recyclerAdapter.submitList(list)})
                     mRecyclerView?.adapter = recyclerAdapter
-                    field = value
+                    field = value*/
         }
 
     override fun setClazzAssignment(clazzAssignment: ClazzAssignment) {
@@ -151,60 +141,29 @@ class ClazzAssignmentEditActivity : UstadBaseActivity(), ClazzAssignmentEditView
      * Handle what happens when you click add Content button
      */
     private fun handleClickAddContent(){
-        val args = mapOf(
+       /* val args = mapOf(
                 ContentEntryListView.ARG_VIEWMODE to  ContentEntryListViewMode.PICKER.toString(),
                 UstadView.ARG_CONTENT_ENTRY_UID to HomePresenter.MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                 ContentEntryListView.ARG_LIBRARIES_CONTENT to "")
         val bundle = UMAndroidUtil.mapToBundle(args)?: Bundle()
-        val startIntent = Intent(this, ContentEntryListActivity::class.java)
+       val startIntent = Intent(this, ContentEntryListActivity::class.java)
         startIntent.putExtras(bundle)
-        startActivityForResult(startIntent, REQUEST_CODE_CONTENT_PICKER)
+        startActivityForResult(startIntent, REQUEST_CODE_CONTENT_PICKER)*/
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(requestCode == REQUEST_CODE_CONTENT_PICKER && resultCode == Activity.RESULT_OK
+       /* if(requestCode == REQUEST_CODE_CONTENT_PICKER && resultCode == Activity.RESULT_OK
                 && data != null ){
             val json = data.getStringExtra(EXTRA_RESULT_CONTENTENTRY)
             val contentEntry = Json.parse(ContentEntry.serializer(), json)
             mPresenter?.handleContentEntryAdded(contentEntry)
-        }
+        }*/
     }
 
     companion object{
 
-        const val REQUEST_CODE_CONTENT_PICKER = 212
-        /**
-         * The DIFF Callback.
-         */
-        val DIFF_CALLBACK_CONTENT_ENTRY_JOIN_WITH_CONTENT_ENTRY: DiffUtil.ItemCallback<ClazzAssignmentContentEntryJoinWithContentEntry> = object
-            : DiffUtil.ItemCallback<ClazzAssignmentContentEntryJoinWithContentEntry>() {
-            override fun areItemsTheSame(oldItem: ClazzAssignmentContentEntryJoinWithContentEntry,
-                                         newItem: ClazzAssignmentContentEntryJoinWithContentEntry): Boolean {
-                return oldItem == newItem
-            }
 
-            override fun areContentsTheSame(oldItem: ClazzAssignmentContentEntryJoinWithContentEntry,
-                                            newItem: ClazzAssignmentContentEntryJoinWithContentEntry): Boolean {
-                return oldItem == newItem
-            }
-        }
-
-        /**
-         * The DIFF Callback.
-         */
-        val DIFF_CALLBACK_CONTENT: DiffUtil.ItemCallback<ContentEntry> = object
-            : DiffUtil.ItemCallback<ContentEntry>() {
-            override fun areItemsTheSame(oldItem: ContentEntry,
-                                         newItem: ContentEntry): Boolean {
-                return oldItem == newItem
-            }
-
-            override fun areContentsTheSame(oldItem: ContentEntry,
-                                            newItem: ContentEntry): Boolean {
-                return oldItem == newItem
-            }
-        }
     }
 }

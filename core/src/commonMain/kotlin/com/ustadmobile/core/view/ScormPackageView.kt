@@ -6,7 +6,7 @@ import com.ustadmobile.core.impl.UmCallback
  * Created by mike on 1/6/18.
  */
 
-interface ScormPackageView : UstadView, UstadViewWithNotifications {
+interface ScormPackageView : UstadView {
 
     fun setTitle(title: String)
 

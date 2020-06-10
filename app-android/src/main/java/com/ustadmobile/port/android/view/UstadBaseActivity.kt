@@ -22,8 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -35,23 +34,22 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadBaseController
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.UstadViewWithProgress
-import com.ustadmobile.core.view.UstadViewWithSnackBar
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.port.sharedse.util.RunnableQueue
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
-import java.lang.ref.WeakReference
 import java.util.*
 
 /**
@@ -60,7 +58,7 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadViewWithSnackBar, ShakeDetector.Listener, UstadViewWithProgress {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications,UstadView, ShakeDetector.Listener,UstadViewWithProgress {
 
     private var baseController: UstadBaseController<*>? = null
 
@@ -294,22 +292,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         }
     }
 
-    /**
-     * Display the snackbar at the bottom of the page
-     *
-     * @param errorMessage    message for the snackbar
-     * @param actionMessageId id of action name
-     * @param action          action listener
-     */
-    override fun showSnackBarNotification(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
-        val snackbar = Snackbar.make(findViewById(android.R.id.content), errorMessage, Snackbar.LENGTH_LONG)
-        val impl = instance
-        if (actionMessageId != 0) {
-            snackbar.setAction(impl.getString(actionMessageId, this)) { action() }
-            snackbar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
-        }
-        snackbar.show()
-    }
+
 
     /**
      * All activities descending from UstadBaseActivity bind to the network manager. This method
@@ -401,15 +384,14 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         super.onDestroy()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                return true
-            }
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        val snackBar = Snackbar.make(coordinator_layout, message, Snackbar.LENGTH_LONG)
+        if (actionMessageId != 0) {
+            snackBar.setAction(instance.getString(actionMessageId, this)) { action() }
+            snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
         }
-
-        return super.onOptionsItemSelected(item)
+        snackBar.anchorView = bottom_nav_view
+        snackBar.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

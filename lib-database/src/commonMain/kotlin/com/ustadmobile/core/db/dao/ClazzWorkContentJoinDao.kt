@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzWorkContentJoin
 import com.ustadmobile.lib.db.entities.ContentEntryWithMetrics
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 
 @UmDao
 @UmRepository
@@ -38,6 +39,24 @@ abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin> {
         AND CAST(clazzWorkContentJoinInactive AS INTEGER) = 0""")
     abstract fun findContentByClazzWorkUid(clazzWorkUid: Long, fromDate: Long, endDate: Long)
             : List <ContentEntryWithMetrics>
+
+    @Query("""SELECT ContentEntry.*, ContentEntryStatus.*, ContentEntryParentChildJoin.*, Container.*
+            FROM ClazzWorkContentJoin
+            LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = clazzWorkContentJoinContentUid
+            LEFT JOIN ContentEntryParentChildJoin ON 
+                ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
+            LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid
+            LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
+                WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1)
+            WHERE 
+            ClazzWorkContentJoin.clazzWorkContentJoinClazzWorkUid = :clazzWorkUid
+            AND CAST(clazzWorkContentJoinInactive AS INTEGER) = 0
+            AND NOT ContentEntry.ceInactive
+            AND (ContentEntry.publik OR :personUid != 0)
+            ORDER BY ContentEntry.title ASC , 
+                    ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
+    abstract fun findAllContentByClazzWorkUid(clazzWorkUid: Long, personUid : Long)
+            :List <ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Query("""SELECT ContentEntry.* ,

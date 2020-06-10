@@ -46,7 +46,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private lateinit var dbRepo : UmAppDatabase
 
     //TODO: Build Content list when ready
-    private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
+    private var contentRecyclerAdapter: ContentEntryList2Fragment.ContentEntryListRecyclerAdapter? = null
     private var contentRecyclerView: RecyclerView? = null
 
     private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter? = null

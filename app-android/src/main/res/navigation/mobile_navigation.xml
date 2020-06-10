@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/mobile_navigation"
-    app:startDestination="@id/home_clazzlist_dest">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/home_content_dest">
 
     <fragment
         android:id="@+id/home_clazzlist_dest"
@@ -39,7 +40,7 @@
 
     <fragment
         android:id="@+id/clazz_detail_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzDetailFragment"/>
+        android:name="com.ustadmobile.port.android.view.ClazzDetailFragment" />
 
     <fragment
         android:id="@+id/clazz_log_edit_attendance_dest"
@@ -132,6 +133,36 @@
         android:id="@+id/clazzwork_detail_list"
         android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment"
         android:label="ClazzWorkDetailFragment" />
+
+    <fragment
+        android:id="@+id/home_content_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryListTabsFragment"
+        android:label="@string/content">
+        <argument
+            android:name="parentUid"
+            app:argType="long"
+            android:defaultValue="-4103245208651563007L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/content_entry_list_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
+        android:label="@string/content"/>
+
+    <fragment
+        android:id="@+id/content_entry_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryEdit2Fragment"
+        android:label="@string/content" />
+
+    <fragment
+        android:id="@+id/language_list_dest"
+        android:name="com.ustadmobile.port.android.view.LanguageListFragment"
+        android:label="@string/select_language" />
+
+    <fragment
+        android:id="@+id/content_entry_details_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
+        android:label="" />
 
 
 </navigation>

@@ -35,6 +35,10 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzWorkEditView.VIEW_NAME to UstadDestination(R.id.clazzwork_edit_dest, false),
             ClazzWorkQuestionAndOptionsEditView.VIEW_NAME to UstadDestination(R.id.clazzworkquestionandoptions_edit_dest, false),
             ClazzWorkDetailView.VIEW_NAME to UstadDestination(R.id.clazzwork_detail_list, true),
+            ContentEntryEdit2View.VIEW_NAME to UstadDestination(R.id.content_entry_edit_dest, false),
+            ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest, true),
+            ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest, true),
+            ContentEntry2DetailView.VIEW_NAME to UstadDestination(R.id.content_entry_details_dest, true),
             ClazzLogEditAttendanceView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest, false)
     )
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -19,8 +20,11 @@ abstract class LanguageDao : BaseDao<Language> {
     @Insert
     abstract suspend fun insertListAsync(languageList: List<Language>)
 
-    @Query("SELECT * FROM Language")
-    abstract fun publicLanguages(): List<Language>
+    @Query("SELECT * FROM Language ORDER BY name ASC")
+    abstract fun publicLanguagesOrderByNameAsc(): DataSource.Factory<Int, Language>
+
+    @Query("SELECT * FROM Language ORDER BY name DESC")
+    abstract fun publicLanguagesOrderByNameDesc(): DataSource.Factory<Int, Language>
 
 
     @Query("SELECT * FROM Language WHERE name = :name LIMIT 1")

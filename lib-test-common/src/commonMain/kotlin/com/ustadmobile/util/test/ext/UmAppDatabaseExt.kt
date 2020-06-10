@@ -2,6 +2,7 @@ package com.ustadmobile.util.test.ext
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_TRANSLATED_VERSION
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlin.random.Random
 
@@ -247,5 +248,64 @@ suspend fun UmAppDatabase.insertClazzLogs(clazzUid: Long, numLogs: Int, logMaker
             clazzLogClazzUid = clazzUid
             clazzLogUid = clazzLogDao.insertAsync(this)
         }
+    }
+}
+
+suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: Int,entryUid: Long): ContentEntry{
+    val entry = ContentEntry().apply {
+        title = "Dummy Content Entry"
+        leaf = true
+        description = "Dummy Entry description"
+        contentEntryUid = entryUid
+        contentEntryDao.insertAsync(this)
+    }
+
+     (1 .. numTranslations).map {
+        val entryOfLanguage = ContentEntry().apply {
+            title = "Language $it Content Entry"
+            leaf = true
+            description = "Dummy Entry description language $it"
+            contentEntryUid = contentEntryDao.insertAsync(this)
+        }
+        val language = Language().apply {
+            name = "Language $it"
+            iso_639_2_standard = "${if(it >= 10) it else "0$it"}"
+            langUid = languageDao.insertAsync(this)
+        }
+
+         ContentEntryRelatedEntryJoin().apply {
+             cerejContentEntryUid = entry.contentEntryUid
+             cerejRelatedEntryUid = entryOfLanguage.contentEntryUid
+             cerejRelLanguageUid = language.langUid
+             relType = REL_TYPE_TRANSLATED_VERSION
+             cerejUid = contentEntryRelatedEntryJoinDao.insertAsync(this)
+        }
+    }
+    return entry
+}
+
+suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+        numEntries: Int, parentEntryUid: Long, isLeaf: Boolean = true): List<ContentEntry> {
+    return (1 .. numEntries).map {
+        val entry = ContentEntry().apply {
+            title = "Dummy title $it"
+            leaf = isLeaf
+            description = "Dummy description $it"
+            contentEntryUid = contentEntryDao.insertAsync(this)
+        }
+        ContentEntryParentChildJoin().apply {
+            cepcjChildContentEntryUid = entry.contentEntryUid
+            cepcjParentContentEntryUid = parentEntryUid
+            cepcjUid = contentEntryParentChildJoinDao.insertAsync(this)
+        }
+
+        Container().apply {
+            fileSize = 10000
+            cntLastModified = getSystemTimeInMillis()
+            containerContentEntryUid = entry.contentEntryUid
+            containerUid = containerDao.insertAsync(this)
+
+        }
+        entry
     }
 }

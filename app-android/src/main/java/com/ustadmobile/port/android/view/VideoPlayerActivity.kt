@@ -18,7 +18,6 @@ import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.MergingMediaSource
 import com.google.android.exoplayer2.source.SingleSampleMediaSource
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.ByteArrayDataSource
 import com.google.android.exoplayer2.upstream.FileDataSourceFactory
@@ -145,7 +144,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
     }
 
     override fun showErrorWithAction(message: String, actionMessageId: Int) {
-        showSnackBarNotification(message, {}, actionMessageId)
+        showSnackBar(message, {}, actionMessageId)
     }
 
 

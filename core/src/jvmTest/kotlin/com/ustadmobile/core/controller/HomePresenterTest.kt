@@ -1,24 +1,15 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
-import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_LIBRARIES_CONTENT
-import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
-import org.junit.Test
 import org.mockito.ArgumentMatchers
 
 class HomePresenterTest {

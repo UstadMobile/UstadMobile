@@ -50,19 +50,22 @@ class ClazzWorkEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
 
-    val contentJoinEditHelper = DefaultOneToManyJoinEditHelper<ContentEntryWithMetrics>(
-            ContentEntryWithMetrics::contentEntryUid,
+    val contentJoinEditHelper = DefaultOneToManyJoinEditHelper<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::contentEntryUid,
             "state_ContentEntryWithMetrics_list",
-            ContentEntryWithMetrics.serializer().list,
-            ContentEntryWithMetrics.serializer().list, this) { contentEntryUid = it }
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
+            this) { contentEntryUid = it }
 
-    fun handleAddOrEditContent(entityClass: ContentEntryWithMetrics) {
+    fun handleAddOrEditContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         contentJoinEditHelper.onEditResult(entityClass)
     }
 
-    fun handleRemoveContent(entityClass: ContentEntryWithMetrics) {
+    fun handleRemoveContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         contentJoinEditHelper.onDeactivateEntity(entityClass)
     }
+
+
 
     val questionAndOptionsEditHelper =
             DefaultOneToManyJoinEditHelper<ClazzWorkQuestionAndOptions>(
@@ -101,11 +104,12 @@ class ClazzWorkEditPresenter(context: Any,
 
         view.timeZone = clazzWithSchool.findClazzTimeZone()
 
+        val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+
         val contentList = withTimeoutOrNull(2000) {
-            db.clazzWorkContentJoinDao.findContentByClazzWorkUid(
-                    clazzWork.clazzWorkUid,
-                    clazzWork.clazzWorkStartDateTime,
-                    clazzWork.clazzWorkDueDateTime)
+            db.clazzWorkContentJoinDao.findAllContentByClazzWorkUid(
+                    clazzWork.clazzWorkUid, loggedInPersonUid
+            )
          }?: listOf()
 
         contentJoinEditHelper.liveList.sendValue(contentList)
