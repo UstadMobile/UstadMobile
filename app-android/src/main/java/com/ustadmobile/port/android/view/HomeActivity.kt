@@ -40,7 +40,7 @@ import java.lang.IllegalArgumentException
 
 
 class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.OnPageChangeListener,
-    UstadListViewActivityWithFab{
+        UstadListViewActivityWithFab {
 
     private lateinit var presenter: HomePresenter
     private lateinit var profileImage: CircleImageView
@@ -54,15 +54,15 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     private lateinit var mBinder: ActivityHomeBinding
 
     private class HomePagerAdapter(fm: FragmentManager,
-                                   val options: List<Pair<Int, String>>): FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+                                   val options: List<Pair<Int, String>>) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
 
         override fun getItem(position: Int): Fragment {
             val viewUri = options[position].second // the ViewName followed by ? and any arguments
 
             val viewName = viewUri.substringBefore('?')
-            val fragmentClass = VIEW_NAME_TO_FRAGMENT_CLASS[viewName] ?:
-                throw IllegalArgumentException("HomeActivity does not know Fragment to create for $viewName")
+            val fragmentClass = VIEW_NAME_TO_FRAGMENT_CLASS[viewName]
+                    ?: throw IllegalArgumentException("HomeActivity does not know Fragment to create for $viewName")
 
             return fragmentClass.newInstance().also {
                 it.arguments = UMAndroidUtil.mapToBundle(UMFileUtil.parseURLQueryString(viewUri))
@@ -98,8 +98,8 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
     }
 
     override fun loadProfileIcon(profileUrl: String) {
-        if(Build.VERSION.SDK_INT > 21) {
-            UMAndroidUtil.loadImage(profileUrl,R.drawable.ic_account_circle_white_24dp, profileImage)
+        if (Build.VERSION.SDK_INT > 21) {
+            UMAndroidUtil.loadImage(profileUrl, R.drawable.ic_account_circle_white_24dp, profileImage)
         }
     }
 
@@ -120,7 +120,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         umBottomNavigation.removeAllItems()
         options.forEach {
             val navIcon = BOTTOM_LABEL_MESSAGEID_TO_ICON_MAP[it.first]
-            if(navIcon != null){
+            if (navIcon != null) {
                 val navigationItem = AHBottomNavigationItem(
                         impl.getString(it.first, this), navIcon)
                 umBottomNavigation.addItem(navigationItem)
@@ -153,14 +153,14 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
         val fragmentClass = VIEW_NAME_TO_FRAGMENT_CLASS[viewName]
 
         //if the fragment is an UstadListViewFragment - it will come back to us and tell us what it wants for the FAB
-        if(fragmentClass != null && UstadListViewFragment::class.java.isAssignableFrom(fragmentClass) == false) {
+        if (fragmentClass != null && UstadListViewFragment::class.java.isAssignableFrom(fragmentClass) == false) {
             activityFloatingActionButton?.visibility = View.GONE
             activityFloatingActionButton?.setOnClickListener(null)
         }
 
-        ViewCompat.setElevation(findViewById(R.id.appBar), if(viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
+        ViewCompat.setElevation(findViewById(R.id.appBar), if (viewName == HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME) {
             0f
-        }else {
+        } else {
             10f
         })
     }
@@ -179,8 +179,7 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun setCurrentLanguage(language: String?) {}
 
-    override fun setLanguageOption(languages: MutableList<String>) { }
-
+    override fun setLanguageOption(languages: MutableList<String>) {}
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -196,10 +195,10 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
         super.onBleNetworkServiceBound(networkManagerBle)
-        val locationPermissionArr =arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
+        val locationPermissionArr = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION)
-        val dialogTitle =impl.getString(MessageID.location_permission_title, this)
-        val dialogMessage =impl.getString(MessageID.location_permission_message, this)
+        val dialogTitle = impl.getString(MessageID.location_permission_title, this)
+        val dialogMessage = impl.getString(MessageID.location_permission_message, this)
         val afterPermissionGrantedRunnable = Runnable { networkManagerBle.checkP2PBleServices() }
 
         runAfterGrantingPermission(locationPermissionArr, afterPermissionGrantedRunnable,
@@ -216,15 +215,15 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
                     .create()
 
             alertDialog.setOnShowListener {
-                alertDialog.findViewById<Button>(R.id.view_locationpermission_showmore_button)!!.setOnClickListener {view ->
+                alertDialog.findViewById<Button>(R.id.view_locationpermission_showmore_button)!!.setOnClickListener { view ->
                     val extraInfo = alertDialog.findViewById<TextView>(R.id.view_locationpermission_extra_details)!!
                     val button = view as Button
-                    if(extraInfo.visibility == View.GONE) {
+                    if (extraInfo.visibility == View.GONE) {
                         extraInfo.visibility = View.VISIBLE
                         button.text = resources.getText(R.string.less_information)
                         button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
                                 R.drawable.ic_keyboard_arrow_up_black_24dp, 0)
-                    }else {
+                    } else {
                         extraInfo.visibility = View.GONE
                         button.text = resources.getText(R.string.more_information)
                         button.setCompoundDrawablesWithIntrinsicBounds(0, 0,
@@ -245,14 +244,9 @@ class HomeActivity : UstadBaseWithContentOptionsActivity(), HomeView, ViewPager.
 
     companion object {
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
-                ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
-                HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java,
-                ContentEntryListView.VIEW_NAME to HomeContentEntryTabsFragment::class.java,
                 FeedListView.VIEW_NAME to FeedListFragment::class.java,
-                ContentEntryListView.VIEW_NAME to ContentEntryListFragment::class.java,
                 ClazzList2View.VIEW_NAME to ClazzList2Fragment::class.java,
-                PeopleListView.VIEW_NAME to PeopleListFragment::class.java,
-                HomePresenter.HOME_CONTENTENTRYLIST_TABS_VIEWNAME to HomeContentEntryTabsFragment::class.java)
+                PeopleListView.VIEW_NAME to PeopleListFragment::class.java)
 
         /**
          * In case we have addition bottom nav items, add icons here and map to their labels

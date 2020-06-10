@@ -3,7 +3,9 @@ package com.ustadmobile.port.sharedse.contentformats.epub
 import com.ustadmobile.core.catalog.contenttype.EPUBType
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.sharedse.contentformats.ContentTypePlugin
 
 import org.xmlpull.v1.XmlPullParserException
@@ -21,8 +23,8 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
  */
 class EpubTypePlugin : EPUBType(), ContentTypePlugin {
 
-    override fun getContentEntry(file: File): ContentEntry? {
-        var contentEntry: ContentEntry? = null
+    override fun getContentEntry(file: File): ContentEntryWithLanguage? {
+        var contentEntry: ContentEntryWithLanguage? = null
         try {
             ZipInputStream(FileInputStream(file)).use {
                 var zipEntry: ZipEntry? = null
@@ -33,13 +35,19 @@ class EpubTypePlugin : EPUBType(), ContentTypePlugin {
                         val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
                         val opfDocument = OpfDocument()
                         opfDocument.loadFromOPF(xpp)
-                        val contentEntryVal = ContentEntry()
+                        val contentEntryVal = ContentEntryWithLanguage()
                         contentEntryVal.contentFlags = ContentEntry.FLAG_IMPORTED
                         contentEntryVal.licenseType = LICENSE_TYPE_OTHER
                         contentEntryVal.title = opfDocument.title
-                        contentEntryVal.author = opfDocument.getCreator(0).creator
+                        contentEntryVal.author = opfDocument.getCreator(0)?.creator
                         contentEntryVal.description = opfDocument.description
                         contentEntryVal.leaf = true
+                        val languageCode = opfDocument.getLanguage(0)
+                        if(languageCode != null){
+                            val language = Language()
+                            language.iso_639_1_standard = languageCode
+                            contentEntryVal.language = language
+                        }
                         contentEntry = contentEntryVal
                         break
                     }

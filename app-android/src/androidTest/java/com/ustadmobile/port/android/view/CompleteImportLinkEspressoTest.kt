@@ -26,8 +26,8 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
 
 
-    @get:Rule
-    var mActivityRule = IntentsTestRule(ContentEntryListActivity::class.java, false, false)
+    //@get:Rule
+    //var mActivityRule = IntentsTestRule(ContentEntryListActivity::class.java, false, false)
 
     @get:Rule
     val mServiceRule = ServiceTestRule()
@@ -71,8 +71,8 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
 
         val intent = Intent()
         intent.putExtra(UstadView.ARG_CONTENT_ENTRY_UID, (-101).toString())
-        mActivityRule.launchActivity(intent)
-        activity = mActivityRule.activity
+        //mActivityRule.launchActivity(intent)
+        //activity = mActivityRule.activity
 
 
 

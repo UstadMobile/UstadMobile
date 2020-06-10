@@ -48,6 +48,10 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
     override val viewContext: Any
         get() = activity!!
 
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+
+    }
+
     private var mItemTouchHelper: ItemTouchHelper? = null
 
     private val impl = UstadMobileSystemImpl.instance

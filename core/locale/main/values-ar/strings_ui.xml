@@ -25,7 +25,7 @@
     <string name="content_prepare_file">تحضير الملف...</string>
     <string name="content_preview_title">معاينة...</string>
     <string name="content_media_photo">صورة</string>
-    <string name="content_media_video">فيديو</string>
+    <string name="video">فيديو</string>
     <string name="content_media_message">ما نوع الملف الذي تريد إختياره؟</string>
     <string name="content_media_title">نوع الملف</string>
     <string name="content_blank_page_title">صفحة فارغة</string>
@@ -40,7 +40,6 @@
     <string name="content_action_page_remove">إلغاء الصفحة</string>
     <string name="content_editor_page_view_hint">عنوان</string>
     <string name="content_editor_page_delete_failure_message">للأسف، لا يمكنك إلغاء هذه الصفحة</string>
-    <string name="content_entry_not_found">المحتوى غير موجود</string>
     <string name="content_editor_directionality">اتجاهية</string>
     <string name="content_editor_menu_undo">تراجع</string>
     <string name="content_editor_menu_redo">اعادة</string>
@@ -75,20 +74,10 @@
     <string name="content_editor_edit_category">تحرير</string>
     <string name="content_editor_create_new_title">اضافة محتوى</string>
     <string name="content_editor_action_done">انتهاء</string>
-    <string name="content_entry_label_title">عنوان</string>
-    <string name="content_entry_label_desc"> الوصف</string>
-    <string name="content_entry_label_save">حفظ</string>
-    <string name="content_entry_label_update">تحديث المستند</string>
-    <string name="content_entry_label_select_file">اختيار ملف</string>
-    <string name="content_entry_label_update_file">تحديث الملف</string>
-    <string name="content_entry_label_licence">رخصة</string>
-    <string name="content_entry_label_visibility">انشر المحتوى</string>
-    <string name="content_entry_label_active">فعل المحتوى</string>
-    <string name="content_import_success_message">تم استيراد الملف بنجاح</string>
-    <string name="content_import_failure_message">الملف المحدد غير معتمد، الرجاء اختيار ملف اخر</string>
-    <string name="content_creation_empty_field_error">الرجاء تعبئة الحقول المطلوبة ثم حاول مرة اخرى</string>
+    <string name="licence">رخصة</string>
+    <string name="publicly_accessible">انشر المحتوى</string>
     <string name="content_creation_storage_option_title">خيار التخزين</string>
-    <string name="content_creation_file_required_error">الرجاء اختيار الملف المراد استيراده و المحاولة مرة اخرى</string>
+    <string name="file_required_prompt">الرجاء اختيار الملف المراد استيراده و المحاولة مرة اخرى</string>
     <string name="content_creation_folder_new_message">تم اضافة مستند جديد بنجاح</string>
     <string name="content_creation_folder_update_message">تم تحديث المستند بنجاح</string>
     <string name="empty_state_libraries">لا يوجد مجلدات</string>
@@ -103,11 +92,10 @@
 التخزين على بطاقة ذاكرة %2$s جيجابيت متوفر</string>
     <string name="content_from_file">من الملف</string>
     <string name="confirm">تأكيد</string>
-    <string name="content_entry_importing">جاري الاستيراد، الرجاء الانتظار</string>
     <string name="new_tab">العرض على شاشة جديدة</string>
     <string name="loading">تحميل</string>
     <string name="error_opening_file">خطأ في فتح الملف:</string>
-    <string name="content_supported_files">الملفات المدعمة: <b>Epub, TinCan (XAPI) Zip</b>
+    <string name="supported_files">الملفات المدعمة: <b>Epub, TinCan (XAPI) Zip</b>
     </string>
     <string name="logout">تسجيل الخروج</string>
     <string name="about">حول</string>
@@ -232,11 +220,9 @@
     <string name="first_name">الاسم الأول</string>
     <string name="download_state_downloaded">
         <b>تم تنزيل</b> ما مجموعه %1$s بند، الذي سيستخدم %2$s من مساحة التخزين.</string>
-    <string name="content_entry_label_update_content">تحديث المحتوى</string>
     <string name="empty_state_recycle">لا يوجد ملفات معاد تدويرها</string>
     <string name="content_folder_image_message">سيتوفر الدعم لاضافة الصور قريبا</string>
     <string name="content_editor_save_error">خطأ اثناء الحفظ، حاول مرة اخرى</string>
-    <string name="content_entry_export">تصدير</string>
     <string name="content_entry_export_inprogress">جاري التصدير</string>
     <string name="invalid_register_code">رمز التسجيل غير صحيح</string>
     <string name="enter_register_code">ادخل رمز التسجيل</string>

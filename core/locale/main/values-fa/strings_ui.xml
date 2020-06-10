@@ -156,7 +156,7 @@
     <string name="content_source_device">از دستگاه</string>
     <string name="content_choose_file">فایل را انتخاب کنید</string>
     <string name="content_prepare_file">در حال آماده ساختن فایل...</string>
-    <string name="content_media_video">ویدیو</string>
+    <string name="video">ویدیو</string>
     <string name="content_media_title">نوع رسانه</string>
     <string name="content_blank_doc_click_label">کلیک</string>
     <string name="content_blank_doc_start_label">برای آغاز ویرایش.</string>
@@ -166,7 +166,6 @@
     <string name="content_update_page_title">بهنگام سازی صفحه</string>
     <string name="content_update_document_title">بهنگام سازی مدرک</string>
     <string name="content_editor_page_delete_failure_message">ببخشید، شما نمیتوانید این صفحه را حذف نمائید</string>
-    <string name="content_entry_not_found">ورودی محتوا دریافت نگردید</string>
     <string name="content_editor_menu_undo">ناکرده ساختن</string>
     <string name="content_editor_menu_pages">صفحات</string>
     <string name="content_editor_menu_indent">فاصله در شروع متن</string>
@@ -188,27 +187,18 @@
     <string name="content_editor_create_new_import_link">وارد ساختن از پیوند</string>
     <string name="content_editor_create_new_content">ایجاد محتوای جدید</string>
     <string name="content_editor_create_new_title">علاوه ساختن محتوا</string>
-    <string name="content_entry_label_desc">تشریح</string>
-    <string name="content_entry_label_update">به روز رسانی مدرک</string>
-    <string name="content_entry_label_select_file">انتخاب فایل</string>
-    <string name="content_entry_label_update_file">به روز رسانی فایل</string>
-    <string name="content_entry_label_update_content">به روز رسانی محتوا</string>
     <string name="content_from_file">از فایل</string>
-    <string name="content_entry_label_licence">مجوز</string>
-    <string name="content_import_success_message">شما فایل را مؤفقانه وارد ساختید</string>
-    <string name="content_import_failure_message">فایل انتخاب شده قابل حمایت نیست، فایل دیگر را باز کنید</string>
-    <string name="content_creation_empty_field_error">جاهای لازمی پر کنید و دوباره کوشش نمائید</string>
+    <string name="licence">مجوز</string>
     <string name="content_creation_storage_option_title">گزینۀ ذخیره گاه</string>
-    <string name="content_creation_file_required_error">فایل که وارد گردد انتخاب نگردیده، دوباره کوشش نمائید</string>
+    <string name="file_required_prompt">فایل که وارد گردد انتخاب نگردیده، دوباره کوشش نمائید</string>
     <string name="content_creation_folder_new_message">دوسیۀ جدید مؤفقانه علاوه گردید</string>
     <string name="content_creation_folder_update_message">دوسیه مؤفقانه به روز رسانی گردید</string>
     <string name="empty_state_libraries">هیچ دوسیه دریافت نگردید</string>
     <string name="empty_state_downloaded">هیچ دانلود دریافت نگردید</string>
     <string name="empty_state_recycle">چیز بازیابی شده وجود ندارد</string>
     <string name="error_message_update_document">به روز رسانی مدرک نامؤفق بود</string>
-    <string name="content_entry_importing">در حال وارد ساختن، لطفاً منتظر باشید</string>
     <string name="content_editor_save_error">اشتباه در هنگام ذخیره سازی، دوباره کوشش نمائید</string>
-    <string name="content_entry_export">صادر کردن</string>
+    <string name="export">صادر کردن</string>
     <string name="content_entry_export_message">شما در حال صادر ساختن %1$s به حافظه دستگاه تان هستید. آیا میخواهید ادامه بدهید؟</string>
     <string name="invalid_register_code">کد راجستر درست نیست</string>
     <string name="enter_register_code">کد راجستر را داخل نمائید</string>
@@ -274,7 +264,7 @@
     <string name="repo_loading_status_loaded_empty">هیج محتوا دریافت نگردید</string>
     <string name="repo_loading_status_failed_noconnection">ارتباط و یا همتا وجود ندارد</string>
     <string name="repo_loading_status_failed_connection_error">اشتباه در اتصال</string>
-    <string name="content_entry_label_visibility">محتوا را عمومی سازید</string>
+    <string name="publicly_accessible">محتوا را عمومی سازید</string>
     <string name="error_message_load_page">بارسازی صفحه نامؤفق بود</string>
     <string name="xapi_options_when">چه وقت</string>
     <string name="content_source_camera">از کامره</string>
@@ -287,10 +277,8 @@
     <string name="content_editor_menu_align_center">مرکز</string>
     <string name="content_editor_preview">پیش دید</string>
     <string name="content_editor_edit_category">ویرایش</string>
-    <string name="content_entry_label_title">عنوان</string>
-    <string name="content_entry_label_save">ذخیره</string>
     <string name="content_from_link">از پیوند</string>
-    <string name="content_supported_files">فایلهای مورد حمایت: <b> ایپب، تینکن (XAPI) زیپ </b>
+    <string name="supported_files">فایلهای مورد حمایت: <b> ایپب، تینکن (XAPI) زیپ </b>
     </string>
     <string name="content_media_photo">عکس</string>
     <string name="content_media_message">چه نوع رسانه را میخواهید بگیرید؟</string>
@@ -301,9 +289,7 @@
     <string name="permission_camera_message">این اپلیکیشن به اجازه کامره و فایل نیاز دارد تا عکس بگیرد و ویدیو ثبت نماید</string>
     <string name="content_editor_create_new_import">وارد ساختن از فایل</string>
     <string name="content_editor_action_done">تمام</string>
-    <string name="content_entry_label_active">محتوا را فعال سازید</string>
     <string name="content_update_massage">به روز رسانی مؤفقانه صورت گرفت</string>
-    <string name="content_entry_export_inprogress">در حال صادر کردن</string>
     <string name="done">تمام</string>
     <string name="content_editor_create_new_category">ایجاد دوسیه جدید</string>
 </resources>

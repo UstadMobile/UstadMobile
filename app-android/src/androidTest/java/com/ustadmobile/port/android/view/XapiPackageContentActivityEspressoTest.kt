@@ -9,10 +9,8 @@ import androidx.test.espresso.web.assertion.WebViewAssertions.webContent
 import androidx.test.espresso.web.matcher.DomMatchers.hasElementWithId
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.platform.app.InstrumentationRegistry
-import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import org.junit.After
 import org.junit.Before

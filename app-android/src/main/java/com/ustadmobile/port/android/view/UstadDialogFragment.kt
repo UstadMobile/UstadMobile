@@ -4,21 +4,29 @@ import android.content.Context
 import androidx.fragment.app.DialogFragment
 import com.ustadmobile.core.view.DialogResultListener
 import com.ustadmobile.core.view.DismissableDialog
+import com.ustadmobile.core.view.UstadView
 import java.util.*
 
 /**
  * Created by mike on 7/17/17.
  */
 
-open class UstadDialogFragment : DialogFragment(), DismissableDialog {
+open class UstadDialogFragment : DialogFragment(), DismissableDialog, UstadView {
 
     protected lateinit var mResultListener: DialogResultListener
 
     private val runOnAttach = Vector<Runnable>()
 
-    fun runOnUiThread(r: Runnable?) {
+    override val viewContext: Any
+        get() = requireContext()
+
+    override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
+        (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
+    }
+
+    override fun runOnUiThread(r: Runnable?) {
         if (activity != null) {
-            activity!!.runOnUiThread(r)
+            activity?.runOnUiThread(r)
         } else {
             runOnAttach.add(r)
         }

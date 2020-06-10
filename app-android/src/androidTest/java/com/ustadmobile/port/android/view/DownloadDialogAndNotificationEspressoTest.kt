@@ -25,7 +25,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
-import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -71,7 +71,7 @@ import java.util.concurrent.TimeUnit
 class DownloadDialogAndNotificationEspressoTest {
 
     @get:Rule
-    public var mHomeActivityRule = ActivityTestRule(HomeActivity::class.java, false, false)
+    public var mHomeActivityRule = ActivityTestRule(MainActivity::class.java, false, false)
 
 
     @get:Rule

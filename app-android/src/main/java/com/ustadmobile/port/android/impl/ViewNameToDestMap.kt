@@ -31,8 +31,11 @@ class ViewNameToDestMap: DestinationProvider {
             PersonDetailView.VIEW_NAME to UstadDestination(R.id.person_detail_dest, true),
             PersonListView.VIEW_NAME to UstadDestination(R.id.person_list_dest, false),
             SchoolMemberListView.VIEW_NAME to UstadDestination(R.id.schoolmember_list_dest, true),
+            ContentEntryEdit2View.VIEW_NAME to UstadDestination(R.id.content_entry_edit_dest, false),
+            ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest, true),
+            ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest, true),
+            ContentEntry2DetailView.VIEW_NAME to UstadDestination(R.id.content_entry_details_dest, true),
             ClazzLogEditAttendanceView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest, false),
-            SchoolMemberListView.VIEW_NAME to UstadDestination(R.id.schoolmember_list_dest, true),
             ReportListView.VIEW_NAME to UstadDestination(R.id.report_list_dest, true),
             ReportEditView.VIEW_NAME to UstadDestination(R.id.report_edit_dest, false),
             ReportDetailView.VIEW_NAME to UstadDestination(R.id.report_detail_dest, false)

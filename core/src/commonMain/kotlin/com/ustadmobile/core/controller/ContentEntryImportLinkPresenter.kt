@@ -9,11 +9,8 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.core.view.ContentEntryImportLinkView.Companion.CONTENT_ENTRY_PARENT_UID
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.H5PImportData
-import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.response.discardRemaining
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.URLParserException
 import io.ktor.http.Url

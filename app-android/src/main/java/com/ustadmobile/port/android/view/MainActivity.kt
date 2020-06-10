@@ -3,7 +3,7 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
+
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
@@ -23,19 +23,20 @@ import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
+import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
+class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         NavController.OnDestinationChangedListener {
 
     private lateinit var appBarConfiguration : AppBarConfiguration
 
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
-        get() = findViewById(R.id.activity_listfragmelayout_behaviornt_fab)
-
-    private lateinit var mAppBar: AppBarLayout
+        get() = activity_listfragmelayout_behaviornt_fab
 
     private lateinit var mBinding: ActivityMainBinding
+
+    private lateinit var mAppBar: AppBarLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +52,6 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
 
         appBarConfiguration = AppBarConfiguration(navController.graph)
-
         mBinding.bottomNavView.setupWithNavController(navController)
         setupActionBarWithNavController(navController, AppBarConfiguration(mBinding.bottomNavView.menu))
 
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
                                       arguments: Bundle?) {
         invalidateOptionsMenu()
-        mAppBar.setExpanded(true)
+        appBar.setExpanded(true)
 
         val layoutParams = (mBinding.bottomNavView.layoutParams as? CoordinatorLayout.LayoutParams)
         val bottomNavBehavior = layoutParams?.behavior as? HideBottomViewOnScrollBehavior
@@ -83,13 +83,15 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         when (item.itemId) {
             R.id.menu_main_settings -> handleClickSettings()
         }
         return item.onNavDestinationSelected(findNavController(R.id.activity_main_navhost_fragment))
                 || super.onOptionsItemSelected(item)
     }
+
+    override val viewContext: Any
+        get() = this
 
     /**
      * When settings gear clicked in the menu options - Goes to the settings activity.
@@ -99,6 +101,6 @@ class MainActivity : AppCompatActivity(), UstadListViewActivityWithFab,
     }
 
     companion object{
-        val BOTTOM_NAV_DEST = listOf<Int>(R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest)
+        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest,R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest)
     }
 }
