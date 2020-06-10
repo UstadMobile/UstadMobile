@@ -1,16 +1,12 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.RawQuery
+import androidx.paging.DataSource
+import androidx.room.*
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.annotation.ParamName
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.ReportWithFilters
-import com.ustadmobile.lib.db.entities.StatementEntity
-import com.ustadmobile.lib.db.entities.XapiReportOptions
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
 
@@ -34,35 +30,28 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<ReportData>
 
-    // TODO to be deleted
-    open suspend fun getResultsFromOptions(@ParamName("options") options: XapiReportOptions): List<ReportData> {
-        val sql = options.toSql()
-        return getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
-    }
-
-    open suspend fun getResultsListFromOptions(@ParamName("options") options: XapiReportOptions): List<ReportListData> {
-        val sql = options.toSql()
-        return getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
-    }
-
     open suspend fun getResultsFromOptions(@ParamName("options") options: ReportWithFilters): List<ReportData> {
         val sql = options.toSql()
         return getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
     }
 
-    open suspend fun getResultsListFromOptions(@ParamName("options") options: ReportWithFilters): List<ReportListData> {
+    open suspend fun getResultsListFromOptions(@ParamName("options") options: ReportWithFilters): DataSource.Factory<Int, StatementListReport> {
         val sql = options.toSql()
         return getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
     }
 
+    @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
+    abstract fun getListResults(query: DoorQuery): DataSource.Factory<Int, StatementListReport>
 
-    @RawQuery
-    abstract fun getListResults(query: DoorQuery): List<ReportListData>
 
+    // This is required because of above raw query
+    @Query("SELECT * FROM PERSON LIMIT 1")
+    abstract fun getPerson(): Person?
+
+    @Query("SELECT * FROM XLangMapEntry LIMIT 1")
+    abstract fun getXLangMap(): XLangMapEntry?
 
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")
 
-    @Serializable
-    data class ReportListData(var name: String? = "", var verb: String? = "", var result: Byte = 0.toByte(), var whenDate: Long = 0L)
 }

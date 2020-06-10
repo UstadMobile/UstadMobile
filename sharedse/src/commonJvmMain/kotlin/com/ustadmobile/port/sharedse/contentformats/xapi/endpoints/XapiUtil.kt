@@ -268,9 +268,9 @@ object XapiUtil {
         var statementEntity: StatementEntity? = dao.findByStatementId(statementId)
         if (statementEntity == null) {
             statementEntity = StatementEntity().also {
-                it.personUid = personUid
+                it.statementPersonUid = personUid
                 it.statementId = statement.id
-                it.verbUid = verbUid
+                it.statementVerbUid = verbUid
                 it.xObjectUid = objectUid
                 it.agentUid = agentUid
                 it.authorityUid = authorityUid

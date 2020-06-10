@@ -4,24 +4,25 @@
 
     <data>
 
+        <import type="com.ustadmobile.core.controller.StatementConstants"/>
         <import type="com.ustadmobile.lib.db.entities.ReportWithFilters" />
-
         <import type="com.ustadmobile.port.android.view.ReportDetailFragment" />
+        <import type="com.ustadmobile.lib.db.entities.StatementListReport" />
 
-        <import type="com.ustadmobile.port.android.view.ReportDetailFragment.RecyclerViewStatmentAdapter" />
 
-
-        <variable
-            name="report"
-            type="ReportWithFilters" />
+        <import type="com.ustadmobile.port.android.view.ReportDetailFragment.StatementViewRecyclerAdapter" />
 
         <variable
-            name="presenter"
+            name="mPresenter"
             type="com.ustadmobile.core.controller.ReportDetailPresenter" />
 
         <variable
             name="adapter"
-            type="RecyclerViewStatmentAdapter" />
+            type="StatementViewRecyclerAdapter" />
+
+        <variable
+            name="report"
+            type="StatementListReport" />
     </data>
 
 
@@ -68,7 +69,6 @@
             android:id="@+id/xapi_result"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-
             app:layout_constraintEnd_toStartOf="@+id/guideline_result"
             app:layout_constraintStart_toEndOf="@id/guideline_verb"
             app:layout_constraintTop_toTopOf="parent" />
@@ -85,7 +85,7 @@
             android:id="@+id/xapi_when"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-
+            app:textDate="@{report.timestamp}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/guideline_result"
             app:layout_constraintTop_toTopOf="parent" />

@@ -29,23 +29,22 @@ class ReportWithFilters() : Report() {
         require(xAxis != subGroup) { "XAxis Selection and subGroup selection was the same" }
         val paramList = mutableListOf<Any>()
 
-        var sqlList = "SELECT (Person.firstNames || ' ' || Person.lastName) AS name, " +
-                "XLangMapEntry.valueLangMap AS verb, " +
-                "StatementEntity.resultSuccess AS result, " +
-                "StatementEntity.timestamp As whenDate " +
-                "FROM StatementEntity " +
-                "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid " +
-                "LEFT JOIN XLangMapEntry ON StatementEntity.verbUid = XLangMapEntry.verbLangMapUid "
+        var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
+                FROM StatementEntity 
+                LEFT JOIN Person ON Person.personUid = StatementEntity.personUid 
+                LEFT JOIN XLangMapEntry ON StatementEntity.statementVerbUid = XLangMapEntry.verbLangMapUid """
 
         var sql = "SELECT " + when (yAxis) {
-            XapiReportOptions.SCORE -> "AVG(StatementEntity.resultScoreScaled) AS yAxis, "
-            XapiReportOptions.DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
-            XapiReportOptions.AVG_DURATION -> "AVG(StatementEntity.resultDuration) AS yAxis, "
-            XapiReportOptions.COUNT_ACTIVITIES -> "COUNT(*) AS yAxis, "
+            SCORE -> "AVG(StatementEntity.resultScoreScaled) AS yAxis, "
+            DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
+            AVG_DURATION -> "AVG(StatementEntity.resultDuration) AS yAxis, "
+            COUNT_ACTIVITIES -> "COUNT(*) AS yAxis, "
             else -> ""
         }
-        sql += groupBy(xAxis) + "AS xAxis, "
-        sql += groupBy(subGroup) + "AS subgroup "
+        sql += groupBy(xAxis) + "AS xAxis "
+        if (subGroup != 0) {
+            sql += " , " + groupBy(subGroup) + "AS subgroup "
+        }
         sql += "FROM StatementEntity "
 
         val objectsList = reportFilterList.filter { it.entityType == ReportFilter.CONTENT_FILTER }.map { it.entityUid }
@@ -53,8 +52,8 @@ class ReportWithFilters() : Report() {
         val didFilterList = reportFilterList.filter { it.entityType == ReportFilter.VERB_FILTER }.map { it.entityUid }
 
 
-        if (xAxis == XapiReportOptions.GENDER || subGroup == XapiReportOptions.GENDER) {
-            sql += "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
+        if (xAxis == GENDER || subGroup == GENDER) {
+            sql += "LEFT JOIN PERSON ON Person.personUid = StatementEntity.statementPersonUid "
         }
         if (objectsList.isNotEmpty() || whoFilterList.isNotEmpty() || didFilterList.isNotEmpty() || (toDate > 0L && fromDate > 0L)) {
             var where = "WHERE "
@@ -69,11 +68,11 @@ class ReportWithFilters() : Report() {
                 paramList.addAll(listOf<Any>(objectsList, objectsList))
             }
             if (whoFilterList.isNotEmpty()) {
-                whereList.add("StatementEntity.personUid IN (?) ")
+                whereList.add("StatementEntity.statementPersonUid IN (?) ")
                 paramList.addAll(listOf<Any>(whoFilterList))
             }
             if (didFilterList.isNotEmpty()) {
-                whereList.add("StatementEntity.verbUid IN (?) ")
+                whereList.add("StatementEntity.statementVerbUid IN (?) ")
                 paramList.addAll(listOf<Any>(didFilterList))
             }
             if (toDate > 0L && fromDate > 0L) {
@@ -86,18 +85,22 @@ class ReportWithFilters() : Report() {
             sqlList += whereListStr
 
         }
-        sql += "GROUP BY xAxis, subgroup"
+        sql += "GROUP BY xAxis"
+        if (subGroup != 0) {
+            sql += ", subgroup"
+        }
+
         return QueryParts(sql, sqlList, paramList.toTypedArray())
     }
 
     private fun groupBy(value: Int): String {
         return when (value) {
-            XapiReportOptions.DAY -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
-            XapiReportOptions.WEEK -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
-            XapiReportOptions.MONTH -> "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
-            XapiReportOptions.CONTENT_ENTRY -> "StatementEntity.xObjectUid "
+            DAY -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
+            WEEK -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
+            MONTH -> "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
+            CONTENT_ENTRY -> "StatementEntity.xObjectUid "
             //LOCATION -> "Location.title"
-            XapiReportOptions.GENDER -> "Person.gender "
+            GENDER -> "Person.gender "
             else -> ""
         }
     }
@@ -118,5 +121,11 @@ class ReportWithFilters() : Report() {
         var result = super.hashCode()
         result = 31 * result + reportFilterList.hashCode()
         return result
+    }
+
+    companion object{
+
+
+
     }
 }

@@ -111,8 +111,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEntryEditView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryEditFragment",
             SelectMultipleLocationTreeDialogView.VIEW_NAME to "${PACKAGE_NAME}SelectMultipleLocationTreeDialogFragment",
             SelectMultipleEntriesTreeDialogView.VIEW_NAME to "${PACKAGE_NAME}SelectMultipleEntriesTreeDialogFragment",
-            XapiReportOptionsView.VIEW_NAME to "${PACKAGE_NAME}XapiReportOptionsActivity",
-            XapiReportDetailView.VIEW_NAME to "${PACKAGE_NAME}XapiReportDetailActivity",
             WebChunkView.VIEW_NAME to "${PACKAGE_NAME}WebChunkActivity",
             Register2View.VIEW_NAME to "${PACKAGE_NAME}Register2Activity",
             HomeView.VIEW_NAME to "${PACKAGE_NAME}HomeActivity",

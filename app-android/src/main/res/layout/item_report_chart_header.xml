@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
-        <import type="com.ustadmobile.core.db.dao.StatementDao.ReportData" />
-
+        <import type="com.ustadmobile.core.util.ReportGraphHelper.ChartData" />
         <import type="com.ustadmobile.port.android.view.ReportDetailFragment" />
-
         <import type="com.ustadmobile.port.android.view.ReportDetailFragment.RecyclerViewChartAdapter" />
+        <import type="com.ustadmobile.port.android.view.ext.ReportWithFiltersExt"/>
 
 
         <variable
-            name="report"
-            type="ReportData" />
+            name="chart"
+            type="ChartData" />
 
         <variable
-            name="presenter"
+            name="mPresenter"
             type="com.ustadmobile.core.controller.ReportDetailPresenter" />
 
         <variable
             name="adapter"
             type="RecyclerViewChartAdapter" />
+
+        <variable
+            name="activityEventHandler"
+            type="com.ustadmobile.port.android.view.ReportDetailFragmentEventHandler" />
+
     </data>
 
 
@@ -39,12 +44,32 @@
             app:layout_constraintStart_toEndOf="@+id/preview_ylabel"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/preview_add_to_dashboard_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableStart="@{ReportWithFiltersExt.addToDashboardIcon(chart.reportWithFilters)}"
+            tools:drawableStart="@drawable/fab_add"
+            android:text="@{ReportWithFiltersExt.addToDashboardText(chart.reportWithFilters, context)}"
+            tools:text="Add to Dashboard"
+            app:drawableTint="@{ReportWithFiltersExt.addToDashboardColor(chart.reportWithFilters)}"
+            tools:drawableTint="@color/primary"
+            android:textColor="@{ReportWithFiltersExt.addToDashboardColor(chart.reportWithFilters)}"
+            tools:textColor="@color/primary"
+            app:backgroundTint="@android:color/white"
+            android:drawablePadding="@dimen/dimen_4dp"
+            android:onClick="@{() -> activityEventHandler.onClickAddRemoveDashboard(chart.reportWithFilters)}"
+            app:layout_constraintBottom_toBottomOf="@+id/preview_chart_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <com.ustadmobile.port.android.view.VerticalTextView
             android:id="@+id/preview_ylabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="bottom|end"
-            app:layout_constraintBottom_toBottomOf="@+id/preview_chart_view"
+            android:text="@{chart.YAxisLabel}"
+            app:layout_constraintBottom_toBottomOf="@+id/preview_add_to_dashboard_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -55,7 +80,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dimen_16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/preview_chart_view" />
+            app:layout_constraintTop_toBottomOf="@id/preview_add_to_dashboard_button" />
 
 
         <TextView

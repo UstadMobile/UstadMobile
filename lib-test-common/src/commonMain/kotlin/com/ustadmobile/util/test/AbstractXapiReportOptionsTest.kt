@@ -180,10 +180,10 @@ abstract class AbstractXapiReportOptionsTest {
 
 
         var firstStatement = StatementEntity()
-        firstStatement.personUid = firstPerson.personUid
+        firstStatement.statementPersonUid = firstPerson.personUid
         firstStatement.resultDuration = 2400000
         firstStatement.resultScoreScaled = 50
-        firstStatement.verbUid = firstVerb.verbUid
+        firstStatement.statementVerbUid = firstVerb.verbUid
         firstStatement.xObjectUid = firstObject.xObjectUid
         firstStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         firstStatement.timestamp = DateTime(2019, 6, 11).unixMillisLong
@@ -191,10 +191,10 @@ abstract class AbstractXapiReportOptionsTest {
 
 
         var secondStaement = StatementEntity()
-        secondStaement.personUid = firstPerson.personUid
+        secondStaement.statementPersonUid = firstPerson.personUid
         secondStaement.resultDuration = 7200000
         secondStaement.resultScoreScaled = 100
-        secondStaement.verbUid = secondVerb.verbUid
+        secondStaement.statementVerbUid = secondVerb.verbUid
         secondStaement.xObjectUid = firstObject.xObjectUid
         secondStaement.resultSuccess = StatementEntity.RESULT_FAILURE
         secondStaement.timestamp = DateTime(2019, 5, 1).unixMillisLong
@@ -202,20 +202,20 @@ abstract class AbstractXapiReportOptionsTest {
 
 
         var thirdStatement = StatementEntity()
-        thirdStatement.personUid = secondPerson.personUid
+        thirdStatement.statementPersonUid = secondPerson.personUid
         thirdStatement.resultDuration = 600000
         thirdStatement.resultScoreScaled = 50
-        thirdStatement.verbUid = firstVerb.verbUid
+        thirdStatement.statementVerbUid = firstVerb.verbUid
         thirdStatement.xObjectUid = secondObject.xObjectUid
         thirdStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         thirdStatement.timestamp = DateTime(2019, 4, 10).unixMillisLong
         thirdStatement.statementUid = statementDao.insert(thirdStatement)
 
         var fourthStatement = StatementEntity()
-        fourthStatement.personUid = thirdPerson.personUid
+        fourthStatement.statementPersonUid = thirdPerson.personUid
         fourthStatement.resultDuration = 120000
         fourthStatement.resultScoreScaled = 20
-        fourthStatement.verbUid = firstVerb.verbUid
+        fourthStatement.statementVerbUid = firstVerb.verbUid
         fourthStatement.xObjectUid = secondObject.xObjectUid
         fourthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         fourthStatement.timestamp = DateTime(2019, 6, 30).unixMillisLong
@@ -223,10 +223,10 @@ abstract class AbstractXapiReportOptionsTest {
 
 
         var fifthStatement = StatementEntity()
-        fifthStatement.personUid = fourthPerson.personUid
+        fifthStatement.statementPersonUid = fourthPerson.personUid
         fifthStatement.resultDuration = 100000
         fifthStatement.resultScoreScaled = 85
-        fifthStatement.verbUid = thirdVerb.verbUid
+        fifthStatement.statementVerbUid = thirdVerb.verbUid
         fifthStatement.xObjectUid = firstObject.xObjectUid
         fifthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         fifthStatement.timestamp = DateTime(2019, 7, 10).unixMillisLong
@@ -234,10 +234,10 @@ abstract class AbstractXapiReportOptionsTest {
 
 
         var sixthStatement = StatementEntity()
-        sixthStatement.personUid = thirdPerson.personUid
+        sixthStatement.statementPersonUid = thirdPerson.personUid
         sixthStatement.resultDuration = 60000
         sixthStatement.resultScoreScaled = 25
-        sixthStatement.verbUid = firstVerb.verbUid
+        sixthStatement.statementVerbUid = firstVerb.verbUid
         sixthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         sixthStatement.xObjectUid = secondObject.xObjectUid
         sixthStatement.timestamp = DateTime(2019, 5, 25).unixMillisLong
@@ -245,10 +245,10 @@ abstract class AbstractXapiReportOptionsTest {
 
 
         var seventhStatement = StatementEntity()
-        seventhStatement.personUid = secondPerson.personUid
+        seventhStatement.statementPersonUid = secondPerson.personUid
         seventhStatement.resultDuration = 30000
         seventhStatement.resultScoreScaled = 5
-        seventhStatement.verbUid = firstVerb.verbUid
+        seventhStatement.statementVerbUid = firstVerb.verbUid
         seventhStatement.xObjectUid = firstObject.xObjectUid
         seventhStatement.resultSuccess = StatementEntity.RESULT_FAILURE
         seventhStatement.timestamp = DateTime(2019, 6, 11).unixMillisLong
@@ -257,10 +257,10 @@ abstract class AbstractXapiReportOptionsTest {
         var i = 0
         while (i < 100) {
             var statement = StatementEntity()
-            statement.personUid = secondPerson.personUid
+            statement.statementPersonUid = secondPerson.personUid
             statement.resultDuration = 30000
             statement.resultScoreScaled = 5
-            statement.verbUid = firstVerb.verbUid
+            statement.statementVerbUid = firstVerb.verbUid
             statement.xObjectUid = firstObject.xObjectUid
             statement.resultSuccess = StatementEntity.RESULT_SUCCESS
             statement.timestamp = DateTime(2019, 6, 11).unixMillisLong

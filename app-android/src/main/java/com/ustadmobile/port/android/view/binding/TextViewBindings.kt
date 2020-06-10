@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.text.format.DateFormat
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
+import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
@@ -138,20 +139,6 @@ private val textViewSchoolGenderStringIds: Map<Int, Int> = mapOf(
         School.SCHOOL_GENDER_MALE to R.string.male
 )
 
-private val textViewStatementResultStringId: Map<Byte, Int> = mapOf(
-        StatementEntity.RESULT_SUCCESS to R.string.success,
-        StatementEntity.RESULT_FAILURE to R.string.failed,
-        StatementEntity.RESULT_UNSET to R.string.unset
-)
-
-@BindingAdapter("statementResult")
-fun TextView.setResultText(result: Byte) {
-    val resultStringId = textViewStatementResultStringId[result]
-    text = if (resultStringId != null) {
-        context.getString(resultStringId)
-    } else ""
-}
-
 
 @BindingAdapter("textSchoolGender")
 fun TextView.setSchoolGenderText(gender: Int) {
@@ -189,4 +176,10 @@ fun TextView.setTextLocalDayAndTime(time: Long, timeZone: TimeZone) {
     timeFormat.timeZone = timeZone
     dateFormat.timeZone = timeZone
     text = dateFormat.format(time) + " - " + timeFormat.format(time)
+}
+
+@BindingAdapter("textDate")
+fun TextView.setDateText(time: Long){
+    val dateFormat = DateFormat.getDateFormat(context)
+    text = if (time > 0) dateFormat.format(time) else ""
 }

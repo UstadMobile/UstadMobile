@@ -14,7 +14,9 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.ustadmobile.core.db.dao.StatementDao
-import com.ustadmobile.lib.db.entities.XapiReportOptions
+import com.ustadmobile.core.util.ReportGraphHelper
+import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportWithFilters
 
 
 class XapiChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
@@ -22,13 +24,13 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     var colorList = listOf("#009688", "#FF9800", "#2196F3", "#f44336", "#673AB7", "#607D8B", "#E91E63", "#9C27B0", "#795548", "9E9E9E", "#4CAF50")
 
-    fun setChartData(chartData: List<StatementDao.ReportData>, options: XapiReportOptions, xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>) {
+    fun setChartData(chartData: ReportGraphHelper.ChartData) {
         removeAllViewsInLayout()
-        val chart = createChart(chartData, options, xAxisLabels, subgroupLabels)
+        val chart = createChart(chartData.dataList, chartData.reportWithFilters,  chartData.xAxisLabel, chartData.subGroupLabel)
         addView(chart)
     }
 
-    private fun createChart(chartData: List<StatementDao.ReportData>, options: XapiReportOptions,
+    private fun createChart(chartData: List<StatementDao.ReportData>, options: ReportWithFilters,
                             xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>): View? {
 
         val xAxisLabelList: MutableSet<String> = mutableSetOf()
@@ -37,7 +39,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         val distinctSubgroups = chartData.distinctBy { it.subgroup }.map { it.subgroup }
         val groupedByXAxis = chartData.groupBy { it.xAxis }
 
-        if (options.chartType == XapiReportOptions.BAR_CHART) {
+        if (options.chartType == Report.BAR_CHART) {
 
             val barChart = BarChart(context)
             val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -115,7 +117,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             barChart.invalidate()
 
             return barChart
-        } else if (options.chartType == XapiReportOptions.LINE_GRAPH) {
+        } else if (options.chartType == Report.LINE_GRAPH) {
 
             val lineChart = LineChart(context)
             val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
