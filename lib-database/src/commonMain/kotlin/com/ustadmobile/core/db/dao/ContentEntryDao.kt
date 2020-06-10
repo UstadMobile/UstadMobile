@@ -34,7 +34,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
             LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
             WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} ORDER BY ContentEntry.title ASC""")
-    @JsName("downloadedRootItems")
+    @JsName("downloadedRootItemsAsc")
     abstract fun downloadedRootItemsAsc(): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
@@ -45,7 +45,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid 
             LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container 
             WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE DownloadJob.djStatus < ${JobStatus.CANCELED} ORDER BY ContentEntry.title DESC""")
-    @JsName("downloadedRootItems")
+    @JsName("downloadedRootItemsDesc")
     abstract fun downloadedRootItemsDesc(): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
@@ -168,7 +168,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
             WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntry.title ASC , ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
-    @JsName("getChildrenByParentUidWithCategoryFilter")
+    @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameAsc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
     @Query("""SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, Container.*
@@ -185,7 +185,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
             WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntry.title DESC , ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
-    @JsName("getChildrenByParentUidWithCategoryFilter")
+    @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameDesc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
