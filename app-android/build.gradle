@@ -17,7 +17,7 @@ buildscript {
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha01"
+    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha02"
 }
 
 apply plugin: 'com.android.library'
