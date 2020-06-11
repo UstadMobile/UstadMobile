@@ -34,6 +34,7 @@ class ContentEntry2DetailFragmentTest {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
     @Test
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntry() {
@@ -47,13 +48,12 @@ class ContentEntry2DetailFragmentTest {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also {
-                it.installNavController(systemImplNavRule.navController)
+            ContentEntry2DetailFragment().also {fragment ->
+                fragment.installNavController(systemImplNavRule.navController)
+                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragment).also {
+                    IdlingRegistry.getInstance().register(it)
+                }
             }
-        }
-
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
         }
 
         onView(withText(entryTitle)).check(matches(isDisplayed()))
@@ -73,13 +73,12 @@ class ContentEntry2DetailFragmentTest {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also {
-                it.installNavController(systemImplNavRule.navController)
+            ContentEntry2DetailFragment().also {fragment ->
+                fragment.installNavController(systemImplNavRule.navController)
+                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragment).also {
+                    IdlingRegistry.getInstance().register(it)
+                }
             }
-        }
-
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
         }
 
         onView(withText(testEntry.title)).check(matches(isDisplayed()))
@@ -102,13 +101,12 @@ class ContentEntry2DetailFragmentTest {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also {
-                it.installNavController(systemImplNavRule.navController)
+            ContentEntry2DetailFragment().also {fragment ->
+                fragment.installNavController(systemImplNavRule.navController)
+                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragment).also {
+                    IdlingRegistry.getInstance().register(it)
+                }
             }
-        }
-
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
         }
 
 

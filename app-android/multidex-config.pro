@@ -1,0 +1,1 @@
+-keep class com.ustadmobile.port.android.view.**Test

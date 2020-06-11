@@ -76,10 +76,6 @@
             android:name="com.ustadmobile.port.android.view.VideoPlayerActivity"
             android:configChanges="keyboardHidden|keyboard|screenSize"
             android:label="" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.HomeActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="" />
 
 
         <activity
@@ -201,11 +197,6 @@
             android:label="@string/change_password"
             android:theme="@style/Theme.UstadTheme" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.PeopleListActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/people"
-            android:theme="@style/Theme.UstadTheme" />
-        <activity
             android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/assignment"
@@ -217,11 +208,6 @@
             android:theme="@style/Theme.UstadTheme" />
 
 
-        <activity
-            android:name="com.ustadmobile.port.android.view.PersonGroupListActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/groups"
-            android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.PersonGroupEditActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"

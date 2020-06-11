@@ -19,14 +19,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Insert
     abstract suspend fun insertListAsync(entityList: List<ContentEntry>)
 
-    @Query("SELECT * FROM ContentEntry")
-    @JsName("allEntries")
-    abstract fun allEntries(): List<ContentEntry>
-
-    @Query("SELECT * FROM ContentEntry WHERE publik")
-    @JsName("publicContentEntries")
-    abstract fun publicContentEntries(): List<ContentEntry>
-
     @Query("""SELECT DISTINCT ContentEntry.*, ContentEntryStatus.*, Container.*, 
             0 AS cepcjUid, 0 as cepcjChildContentEntryUid, 0 AS cepcjParentContentEntryUid, 0 as childIndex, 0 AS cepcjLocalChangeSeqNum, 0 AS cepcjMasterChangeSeqNum, 0 AS cepcjLastChangedBy
             FROM DownloadJob 
@@ -68,10 +60,6 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE ContentEntry.contentEntryUid=:entryUuid")
     @JsName("findByEntryIdWithContainer")
     abstract suspend fun findEntryWithContainerByEntryId(entryUuid: Long): ContentEntryWithMostRecentContainer?
-
-    @Query("SELECT * FROM ContentEntry WHERE title =:title")
-    @JsName("findByEntryTitle")
-    abstract suspend fun findByEntryTitle(title: String): ContentEntry?
 
     @Query("SELECT * FROM ContentEntry WHERE sourceUrl = :sourceUrl LIMIT 1")
     @JsName("findBySourceUrl")

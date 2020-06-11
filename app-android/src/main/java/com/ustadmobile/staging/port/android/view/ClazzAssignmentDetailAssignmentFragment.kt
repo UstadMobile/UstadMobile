@@ -32,11 +32,12 @@ import kotlinx.coroutines.launch
 class ClazzAssignmentDetailAssignmentFragment : UstadBaseFragment(), ClazzAssignmentDetailAssignmentView {
 
     override fun setEditVisibility(visible: Boolean) {
-        if(visible){
-            rootContainer?.fragmentClazzAssignmentDetailAssignmentEdit?.visibility = View.VISIBLE
-        }else{
-            rootContainer?.fragmentClazzAssignmentDetailAssignmentEdit?.visibility = View.INVISIBLE
-        }
+        //Disabled as this is anyway obsolete
+//        if(visible){
+//            rootContainer?.fragmentClazzAssignmentDetailAssignmentEdit?.visibility = View.VISIBLE
+//        }else{
+//            rootContainer?.fragmentClazzAssignmentDetailAssignmentEdit?.visibility = View.INVISIBLE
+//        }
     }
 
     override fun setClazzAssignment(clazzAssignment: ClazzAssignment) {

@@ -43,7 +43,7 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: Set
 
     fun goToPeopleList() {
         val args = HashMap<String, String>()
-        impl.go(PeopleListView.VIEW_NAME, args, context)
+        impl.go(PersonListView.VIEW_NAME, args, context)
     }
 
     fun goToAuditLogSelection() {

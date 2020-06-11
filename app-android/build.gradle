@@ -162,6 +162,7 @@ android {
             dimension "config"
             minSdkVersion 18
             multiDexEnabled true
+            multiDexKeepProguard file('multidex-config.pro')
         }
 
         /**
@@ -170,7 +171,6 @@ android {
         devMinApi21 {
             dimension "config"
             minSdkVersion 21
-            multiDexEnabled true
         }
     }
 
@@ -369,9 +369,6 @@ dependencies {
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
 
-    //Floating action button with support for popup choices
-    implementation 'com.github.clans:fab:1.6.4'
-
     //Page indicator
     implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
 
@@ -408,9 +405,6 @@ dependencies {
     //Codec2 (low bitrate voice) Android library
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64-2"
 
-    //Implements app-wide rotation for presentation mode
-    implementation "rongi.rotate-layout:rotate-layout:$version_android_rotatelayout"
-
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -420,9 +414,6 @@ dependencies {
 
     //extended fab
     implementation "com.github.dimorinny:floating-text-button:$version_android_fab_extended"
-
-    //bottom navigation
-    implementation "com.aurelhubert:ahbottomnavigation:$version_android_bottom_nav"
 
     //Range seekbar by Crystal
     implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"

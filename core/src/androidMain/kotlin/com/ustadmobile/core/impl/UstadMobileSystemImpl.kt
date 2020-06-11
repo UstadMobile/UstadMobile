@@ -84,17 +84,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     var messageIdMap: Map<Int, Int> = mapOf()
 
     /**
-     * The rotation option is used for app demonstrations where a projector is used. The device
-     * must be in landscape mode when connected to HDMI output. Therefor to project portrait, the
-     * app itself must rotate it's views, and then the projector itself can be placed at a 90
-     * degree angle
-     *
-     * This is implemented by overrinding the setContentView method on UstadBaseActivity
-     */
-    var rotationEnabled: Boolean? = false
-        internal set
-
-    /**
      * This should be used only for testing. This will use the given navcontroller instead of
      * finding the navcontroller from the mainactivity. This is used for Espresso testing on Fragments.
      */
@@ -113,7 +102,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             XapiReportDetailView.VIEW_NAME to "${PACKAGE_NAME}XapiReportDetailActivity",
             WebChunkView.VIEW_NAME to "${PACKAGE_NAME}WebChunkActivity",
             Register2View.VIEW_NAME to "${PACKAGE_NAME}Register2Activity",
-            HomeView.VIEW_NAME to "${PACKAGE_NAME}HomeActivity",
             SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
             OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
             LoginView.VIEW_NAME to "${PACKAGE_NAME}LoginActivity",
@@ -153,14 +141,12 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             CustomFieldDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CustomFieldDetailActivity",
             AddCustomFieldOptionDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddCustomFieldOptionDialogFragment",
             ChangePasswordView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ChangePasswordActivity",
-            PeopleListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PeopleListActivity",
 
             ContentEntryExportView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryExportFragmentDialog",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             ClazzAssignmentEditView.VIEW_NAME to "${PACKAGE_NAME}ClazzAssignmentEditActivity",
             ClazzAssignmentDetailView.VIEW_NAME to "${PACKAGE_NAME}ClazzAssignmentDetailActivity",
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
-            PersonGroupListView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupListActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
 

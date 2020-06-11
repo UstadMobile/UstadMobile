@@ -2,7 +2,6 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.HomeView
 import io.ktor.client.request.get
 import kotlinx.io.InputStream
 import kotlin.browser.localStorage
@@ -41,7 +40,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val umContext: dynamic = context
-        umContext.router.navigateByUrl("/${HomeView.VIEW_NAME}/$viewName?${UMFileUtil.mapToQueryString(args)}")
+        //Note:HomeView name has changed
+        umContext.router.navigateByUrl("/Home/$viewName?${UMFileUtil.mapToQueryString(args)}")
     }
 
     /**

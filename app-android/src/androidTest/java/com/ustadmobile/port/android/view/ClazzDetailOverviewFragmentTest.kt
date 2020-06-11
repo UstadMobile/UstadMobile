@@ -20,6 +20,7 @@ import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Rule
 import org.junit.Test
 
+
 class ClazzDetailOverviewFragmentTest {
 
     @JvmField

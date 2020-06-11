@@ -245,21 +245,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     }
 
-    /**
-     * We intercept this to implement app-wide rotation for presentation purposes.
-     *
-     * See UstadMobileSystemImpl.rotationEnabled for details
-     */
-    override fun setContentView(layoutResID: Int) {
-        if(UstadMobileSystemImpl.instance.rotationEnabled ?: false) {
-            super.setContentView(R.layout.activity_rotatelayoutroot)
-            LayoutInflater.from(this).inflate(layoutResID,
-                    findViewById(R.id.activity_rotatelayout), true)
-        }else {
-            super.setContentView(layoutResID)
-        }
-    }
-
     override fun hearShake() {
 
         if (feedbackDialogVisible) {
