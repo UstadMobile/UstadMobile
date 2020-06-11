@@ -32,6 +32,7 @@
 
     <style name="UmTheme.TextAppearance.Subtitle2" parent="TextAppearance.MaterialComponents.Subtitle2">
         <!--Your custom type style here-->
+        <item name="android:textSize">@dimen/text_dimen_13sp</item>
     </style>
 
     <style name="UmTheme.TextAppearance.Body1" parent="TextAppearance.MaterialComponents.Body1">

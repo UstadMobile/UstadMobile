@@ -16,13 +16,14 @@
         <item name="colorOnBackground">@color/primaryTextColor</item>
         <item name="colorOnSurface">@color/primaryTextColor</item>
         <item name="colorOnError">@color/secondaryTextColor</item>
+        <item name="colorOnIconTint">?colorOnSurface</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorSurface</item>
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
         <item name="colorTabIndicator">@color/primaryColor</item>
         <item name="colorTabText" >@color/primaryTextColor</item>
         <item name="colorSelectedTabText">@color/primaryColor</item>
-        <item name="colorPrimaryBackground">?colorSurface</item>
-        <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
+        <item name="colorPrimaryBackground">@android:color/transparent</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">?colorSurface</item>
     </style>
 </resources>

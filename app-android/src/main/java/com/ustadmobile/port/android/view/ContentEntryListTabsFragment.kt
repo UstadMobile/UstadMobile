@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_C
 import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
+import kotlinx.android.synthetic.main.fragment_contententry_tabs.view.*
 
 class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsView {
 
@@ -28,9 +29,10 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_contententrytabs, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_contententry_tabs, container, false)
 
         val mTabLayout: TabLayout = rootView.findViewById(R.id.home_contententry_tabs)
+        rootView.fragmentAppBar.elevation = 10f
         val mPager: ViewPager = rootView.findViewById(R.id.home_contententry_viewpager)
 
         //Unfortunately if we dont use a Handler here then the first tab will not show up on first load

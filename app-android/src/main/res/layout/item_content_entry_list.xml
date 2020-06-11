@@ -15,9 +15,6 @@
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.ContentEntryList2Presenter" />
-        <variable
-            name="placeholder"
-            type="Integer" />
 
         <variable
             name="selectablePagedListAdapter"
@@ -70,7 +67,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:textAppearance="@style/UmTheme.TextAppearance.Headline6"
+            android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
             android:id="@+id/content_entry_item_title"
             android:text="@{contentEntry.title}"
             android:layout_width="0dp"
@@ -93,7 +90,7 @@
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:maxLines="2"
-            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"

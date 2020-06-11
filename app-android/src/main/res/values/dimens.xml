@@ -87,4 +87,12 @@
     <dimen name="dimen_60dp">60dp</dimen>
 
 
+    <dimen name="text_dimen_13sp">13sp</dimen>
+    <dimen name="layout_dimen_0dp">0dp</dimen>
+    <dimen name="layout_dimen_4dp">4dp</dimen>
+    <dimen name="layout_dimen_8dp">8dp</dimen>
+    <dimen name="layout_dimen_10dp">10dp</dimen>
+    <dimen name="layout_dimen_16dp">16dp</dimen>
+    <dimen name="layout_dimen_22dp">22dp</dimen>
+    <dimen name="layout_dimen_110dp">110dp</dimen>
 </resources>

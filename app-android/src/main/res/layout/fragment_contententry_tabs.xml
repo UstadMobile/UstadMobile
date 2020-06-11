@@ -8,10 +8,11 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/fragmentAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:elevation="1.1dp">
+        android:outlineProvider="bounds"
+        android:elevation="10dp">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/home_contententry_tabs"

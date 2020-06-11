@@ -46,21 +46,20 @@
                 <ImageView
                     android:scaleType="fitCenter"
                     android:id="@+id/entry_detail_thumbnail"
-                    android:layout_width="110dp"
-                    android:layout_height="110dp"
-                    android:layout_margin="@dimen/dimen_8dp"
+                    android:layout_width="@dimen/layout_dimen_110dp"
+                    android:layout_height="@dimen/layout_dimen_110dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     app:fallbackDrawable="@{@drawable/book_24px}"
                     app:imageUri="@{contentEntry.thumbnailUrl}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Headline6"
                     android:id="@+id/entry_detail_title"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="20sp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     android:text="@{contentEntry.title}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
@@ -68,12 +67,11 @@
                     tools:text="Content Title" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                     android:id="@+id/entry_detail_author"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="@dimen/text_body"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_title"
@@ -81,12 +79,11 @@
                     tools:text="Author" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                     android:id="@+id/entry_detail_publisher"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="@dimen/text_body"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     android:text="@{contentEntry.publisher}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
@@ -96,9 +93,9 @@
                 <TextView
                     android:visibility="@{contentEntry.licenseName == null ? View.GONE: View.VISIBLE}"
                     android:id="@+id/entry_detail_license_label"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     android:textColor="@android:color/black"
                     android:textSize="@dimen/text_body_small"
                     android:text="@{@string/entry_details_license + contentEntry.licenseName}"
@@ -109,11 +106,10 @@
 
                 <TextView
                     android:id="@+id/entry_detail_license"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="@dimen/text_body_small"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Subtitle2"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/entry_detail_license_label"
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
@@ -128,9 +124,9 @@
 
                 <LinearLayout
                     android:id="@+id/entry_detail_anchor_download"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     android:orientation="horizontal"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -140,7 +136,7 @@
                         android:textStyle="bold"
                         android:id="@+id/entryDownloadOpenBtn"
                         android:layout_width="match_parent"
-                        android:padding="@dimen/dimen_16dp"
+                        android:padding="@dimen/layout_dimen_16dp"
                         android:text="@{contentEntry.container == null ? @string/download : @string/open}"
                         android:layout_height="wrap_content"
                         app:backgroundTint="@color/primary"
@@ -158,9 +154,9 @@
 
                 <View
                     android:id="@+id/library_size_divider"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="1dp"
-                    android:layout_margin="8dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     android:background="@color/secondary_text"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -170,9 +166,11 @@
                 <ImageView
                     android:visibility="@{contentEntry.container == null ? View.GONE: View.VISIBLE}"
                     android:id="@+id/image_content_size"
-                    android:layout_width="@dimen/dimen_16dp"
-                    android:layout_height="@dimen/dimen_16dp"
-                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_width="@dimen/layout_dimen_16dp"
+                    android:layout_height="@dimen/layout_dimen_16dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+
+                    android:tint="?colorOnIconTint"
                     app:layout_constraintEnd_toEndOf="@id/entry_detail_content_size"
                     app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
                     app:layout_constraintTop_toBottomOf="@id/library_size_divider"
@@ -180,12 +178,11 @@
 
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Caption"
                     android:id="@+id/entry_detail_content_size"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="@dimen/text_body_small"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.1"
                     app:fileSize="@{contentEntry.container.fileSize}"
@@ -196,9 +193,9 @@
                 <ImageView
                     android:visibility="gone"
                     android:id="@+id/content_status_icon"
-                    android:layout_width="@dimen/dimen_16dp"
-                    android:layout_height="@dimen/dimen_16dp"
-                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_width="@dimen/layout_dimen_16dp"
+                    android:layout_height="@dimen/layout_dimen_16dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     app:layout_constraintEnd_toEndOf="@id/content_status_text"
                     app:layout_constraintStart_toStartOf="@id/content_status_text"
                     app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
@@ -206,12 +203,12 @@
 
                 <TextView
                     android:visibility="gone"
-                    android:layout_marginEnd="@dimen/dimen_16dp"
+                    android:layout_marginEnd="@dimen/layout_dimen_16dp"
                     android:id="@+id/content_status_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:textColor="@android:color/black"
                     android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -222,56 +219,53 @@
 
                 <View
                     android:id="@+id/description_divider"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="1dp"
-                    android:layout_margin="8dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     android:background="@color/secondary_text"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_content_size" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/entry_detail_description_label"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     app:htmlText='@{contentEntry.description}'
-                    android:textColor="@android:color/black"
-                    android:textSize="@dimen/text_body"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/description_divider" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/entry_detail_description"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_description_label" />
 
                 <View
                     android:id="@+id/language_divider"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="1dp"
-                    android:layout_margin="8dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     android:background="@color/secondary_text"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_description" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                     android:visibility="@{translationVisibility}"
                     android:id="@+id/entry_detail_available_label"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     android:text="@string/also_available_in"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/language_divider" />
@@ -280,9 +274,9 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:visibility="@{translationVisibility}"
                     android:id="@+id/availableTranslationView"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:nestedScrollingEnabled="false"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
@@ -291,9 +285,9 @@
 
                 <TextView
                     android:id="@+id/entry_detail_see_also_label"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_margin="@dimen/layout_dimen_8dp"
                     android:text="SEE ALSO"
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
