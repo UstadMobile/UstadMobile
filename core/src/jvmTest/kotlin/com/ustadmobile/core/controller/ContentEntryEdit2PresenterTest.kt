@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -127,6 +128,9 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
+
+        val initialEntry = mockView.captureLastEntityValue()
+
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
@@ -145,8 +149,7 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
 
     }
 
-    /*
-    TODO: This JVM test needs fixed
+
     @Test
     fun givenPresenterCreatedAndFolderNotCreated_whenClickSave_shouldCreateAFolder() {
         createMockView()
@@ -155,7 +158,7 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
-        //TODO: this needs to wait for the entity to be set
+        mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
@@ -170,7 +173,7 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
             mockView.saveContainerOnExit(any(), any(), eq(db), eq(repo))
         }
     }
-    */
+
 
     @Test
     fun givenPresenterCreatedAndEntryCreated_whenClickSave_shouldUpdateAnEntry() {
@@ -180,6 +183,7 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
+        mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
@@ -207,6 +211,7 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
+        mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<Boolean>().apply {
@@ -223,6 +228,7 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
+        mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<Boolean>().apply {
