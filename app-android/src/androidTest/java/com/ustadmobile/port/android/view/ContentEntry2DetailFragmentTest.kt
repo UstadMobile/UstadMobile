@@ -81,7 +81,7 @@ class ContentEntry2DetailFragmentTest {
         val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
             IdlingRegistry.getInstance().register(it)
         }
-        sleep(500)
+
         onView(withText(testEntry.title)).check(matches(isDisplayed()))
 
         onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
@@ -111,7 +111,7 @@ class ContentEntry2DetailFragmentTest {
             IdlingRegistry.getInstance().register(it)
         }
 
-        sleep(500)
+
         onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
 
         onView(withId(R.id.availableTranslationView)).check(matches(hasChildCount(totalTranslations)))
