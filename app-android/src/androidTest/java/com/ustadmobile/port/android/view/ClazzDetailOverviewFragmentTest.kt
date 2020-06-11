@@ -30,6 +30,7 @@ class ClazzDetailOverviewFragmentTest {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
     @Test
     fun givenClazzExists_whenLaunched_thenShouldShowClazz() {
@@ -45,11 +46,9 @@ class ClazzDetailOverviewFragmentTest {
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazz.clazzUid)) {
             ClazzDetailOverviewFragment().also {
                 it.installNavController(systemImplNavRule.navController)
+                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(it)
+                IdlingRegistry.getInstance().register(fragmentIdlingResource)
             }
-        }
-
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
         }
 
         onView(withText("Test Description")).check(matches(isDisplayed()))
