@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -49,11 +50,10 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
     }
 
     override fun handleClickEntry(entry: Report) {
-        // TODO: Add code to go to the appropriate detail view or make a selection
         when (mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> systemImpl.go(ReportDetailView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to entry.reportUid))
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.reportUid.toString()), context)
         }
     }
 
@@ -68,4 +68,15 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
             updateListOnView()
         }
     }
+
+    suspend fun getGraphData(item: Report): ReportGraphHelper.ChartData {
+        val reportList = db.reportFilterDao.findByReportUid(item.reportUid)
+        val graphHelper = ReportGraphHelper(context, systemImpl, repo)
+        return graphHelper.getChartDataForReport(ReportWithFilters(item, reportList))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
 }

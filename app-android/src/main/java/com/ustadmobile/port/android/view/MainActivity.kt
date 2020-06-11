@@ -101,6 +101,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     }
 
     companion object{
-        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest,R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest)
+        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest, R.id.report_list_dest, R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest)
     }
 }

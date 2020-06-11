@@ -17,9 +17,6 @@
             name="fieldsEnabled"
             type="boolean" />
 
-        <variable
-            name="editButtonMode"
-            type="com.ustadmobile.core.view.EditButtonMode" />
     </data>
 
 

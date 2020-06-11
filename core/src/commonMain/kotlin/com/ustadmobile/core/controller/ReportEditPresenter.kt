@@ -181,7 +181,7 @@ class ReportEditPresenter(context: Any,
     override fun handleClickSave(entity: ReportWithFilters) {
 
         if (entity.reportTitle.isNullOrEmpty()) {
-            view.titleErrorText = systemImpl.getString(MessageID.required_field, context)
+            view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, context)
             return
         } else {
             view.titleErrorText = null
@@ -206,6 +206,10 @@ class ReportEditPresenter(context: Any,
                 repo.reportFilterDao.deactivateByUids(contentOneToManyJoinEditHelper.primaryKeysToDeactivate)
 
                 repo.reportDao.updateAsync(entity)
+
+                withContext(doorMainDispatcher()) {
+                    view.finishWithResult(listOf(entity))
+                }
 
             } else {
 

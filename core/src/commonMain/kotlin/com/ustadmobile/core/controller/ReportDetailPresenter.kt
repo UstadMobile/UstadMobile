@@ -75,8 +75,7 @@ class ReportDetailPresenter(context: Any,
 
     private fun setReportData(reportWithFilters: ReportWithFilters) {
         GlobalScope.launch {
-
-            val chartData = DoorMutableLiveData(graphHelper.getChartDataForReport(reportWithFilters))
+            val chartData = graphHelper.getChartDataForReport(reportWithFilters)
             val statementList = graphHelper.getStatementListForReport(reportWithFilters)
 
             view.runOnUiThread(Runnable {
@@ -85,7 +84,6 @@ class ReportDetailPresenter(context: Any,
             })
 
         }
-
 
     }
 
@@ -104,13 +102,9 @@ class ReportDetailPresenter(context: Any,
     /**
      *
      */
-    fun handleOnClickAddOrRemoveFromDashboard(report: ReportWithFilters) {
-        if (report.reportUid != 0L) {
-            repo.reportDao.updateReportInactive(!report.reportInactive, report.reportUid)
-        } else {
-            repo.reportDao.insert(report)
-            repo.reportFilterDao.insertList(report.reportFilterList)
-        }
+    fun handleOnClickAddFromDashboard(report: ReportWithFilters) {
+        repo.reportDao.insert(report)
+        repo.reportFilterDao.insertList(report.reportFilterList)
     }
 
     companion object {

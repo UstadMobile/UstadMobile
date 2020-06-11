@@ -11,10 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.MergeAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentReportDetailBinding
 import com.toughra.ustadmobile.databinding.ItemReportChartHeaderBinding
@@ -25,23 +22,17 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ReportGraphHelper
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.ReportDetailView
-import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMigration
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.StatementListReport
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
 
 interface ReportDetailFragmentEventHandler {
-    fun onClickAddRemoveDashboard(report: ReportWithFilters)
+    fun onClickAddToDashboard(report: ReportWithFilters)
 }
 
 class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDetailView, ReportDetailFragmentEventHandler {
@@ -59,6 +50,8 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
 
     private var mergeAdapter: MergeAdapter? = null
 
+    private var reportRecyclerView: RecyclerView? = null
+
     var dbRepo: UmAppDatabase? = null
 
     class ChartViewHolder(val itemBinding: ItemReportChartHeaderBinding) : RecyclerView.ViewHolder(itemBinding.root)
@@ -70,6 +63,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
             return ChartViewHolder(ItemReportChartHeaderBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false).apply {
                 mPresenter = presenter
+                eventHandler = activityEventHandler
             })
         }
 
@@ -121,20 +115,12 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
     }
 
 
-    override var chartData: DoorMutableLiveData<ReportGraphHelper.ChartData>? = null
+    override var chartData: ReportGraphHelper.ChartData? = null
         get() = field
         set(value) {
-            field?.removeObserver(chartListObserver)
             field = value
-            entity = value?.value?.reportWithFilters
-            value?.observe(this, chartListObserver)
+            chartAdapter?.submitList(listOf(value))
         }
-
-
-    private val chartListObserver = Observer<ReportGraphHelper.ChartData?> { t ->
-        chartAdapter?.submitList(listOf(t))
-    }
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -142,19 +128,22 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
             rootView = it.root
         }
 
+        reportRecyclerView = rootView.findViewById(R.id.fragment_detail_report_list)
         chartAdapter = RecyclerViewChartAdapter(this, null)
         statementAdapter = StatementViewRecyclerAdapter(this, null)
 
         mergeAdapter = MergeAdapter(chartAdapter, statementAdapter)
-        mBinding?.fragmentDetailReportList?.adapter = mergeAdapter
+        reportRecyclerView?.adapter = mergeAdapter
+        reportRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = ReportDetailPresenter(requireContext(), arguments.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
+        chartAdapter?.presenter = mPresenter
+        statementAdapter?.presenter = mPresenter
 
         return rootView
     }
@@ -165,9 +154,14 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
             val report = entity
             if (report == null || report.reportUid == 0L) {
                 findNavController().popBackStack()
-            } else detailPresenter?.handleClickEdit()
+            } else mPresenter?.handleClickEdit()
 
         }
+
+        val navController = findNavController()
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
+
     }
 
     override fun onDestroyView() {
@@ -176,8 +170,10 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         mPresenter = null
         entity = null
         chartAdapter = null
-        mergeAdapter = null
         statementAdapter = null
+        mergeAdapter = null
+        dbRepo = null
+        chartData = null
     }
 
     override fun onResume() {
@@ -192,18 +188,15 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         set(value) {
             field = value
             mBinding?.report = value
-        }
-
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
+            title = value?.reportTitle
         }
 
 
-    override fun onClickAddRemoveDashboard(report: ReportWithFilters) {
-        mPresenter?.handleOnClickAddOrRemoveFromDashboard(report)
+    override fun onClickAddToDashboard(report: ReportWithFilters) {
+        mPresenter?.handleOnClickAddFromDashboard(report)
+        if (report.reportUid == 0L) {
+            findNavController().popBackStack(R.id.report_edit_dest, true)
+        }
     }
 
 
@@ -228,7 +221,6 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
                 return oldItem == newItem
             }
         }
-
 
     }
 

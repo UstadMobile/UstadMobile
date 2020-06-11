@@ -25,18 +25,24 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import okhttp3.Dispatcher
 
-class ReportListFragment(): UstadListViewFragment<Report, Report>(),
-        ReportListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class ReportListFragment() : UstadListViewFragment<Report, Report>(),
+        ReportListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
     private var mPresenter: ReportListPresenter? = null
 
     override val listPresenter: UstadListPresenter<*, in Report>?
         get() = mPresenter
 
-    class ReportListViewHolder(val itemBinding: ItemReportListBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class ReportListViewHolder(val itemBinding: ItemReportListBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class ReportListRecyclerAdapter(var presenter: ReportListPresenter?)
         : SelectablePagedListAdapter<Report, ReportListViewHolder>(DIFF_CALLBACK) {
@@ -49,9 +55,17 @@ class ReportListFragment(): UstadListViewFragment<Report, Report>(),
         }
 
         override fun onBindViewHolder(holder: ReportListViewHolder, position: Int) {
-            val item = getItem(position)
+            val item = getItem(position) ?: Report()
             holder.itemBinding.report = item
+            holder.itemView.tag = holder.itemBinding.report?.reportUid
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
+            (holder.itemBinding.listReportChart.getTag(R.id.tag_graphlookup_key) as? Job)?.cancel()
+            val graphJob = GlobalScope.async(Dispatchers.Main) {
+                val chartData = presenter?.getGraphData(item)
+                holder.itemBinding.listReportChart.setChartData(chartData)
+            }
+            holder.itemBinding.listReportChart.setTag(R.id.tag_graphlookup_key, graphJob)
+
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -85,7 +99,7 @@ class ReportListFragment(): UstadListViewFragment<Report, Report>(),
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
+        if (view?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.report_edit_dest, Report::class.java)
     }
 

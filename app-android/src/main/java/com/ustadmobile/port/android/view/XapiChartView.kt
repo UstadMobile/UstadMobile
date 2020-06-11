@@ -24,7 +24,10 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     var colorList = listOf("#009688", "#FF9800", "#2196F3", "#f44336", "#673AB7", "#607D8B", "#E91E63", "#9C27B0", "#795548", "9E9E9E", "#4CAF50")
 
-    fun setChartData(chartData: ReportGraphHelper.ChartData) {
+    fun setChartData(chartData: ReportGraphHelper.ChartData?) {
+        if(chartData == null){
+            return
+        }
         removeAllViewsInLayout()
         val chart = createChart(chartData.dataList, chartData.reportWithFilters,  chartData.xAxisLabel, chartData.subGroupLabel)
         addView(chart)

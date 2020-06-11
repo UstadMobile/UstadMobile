@@ -14,7 +14,7 @@ interface ReportDetailView: UstadDetailView<ReportWithFilters> {
 
     var statementList: DataSource.Factory<Int, StatementListReport>?
 
-    var chartData: DoorMutableLiveData<ReportGraphHelper.ChartData>?
+    var chartData: ReportGraphHelper.ChartData?
 
     companion object {
 

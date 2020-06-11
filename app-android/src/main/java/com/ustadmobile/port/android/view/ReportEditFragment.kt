@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
@@ -104,11 +105,9 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
 
-
         personRecyclerAdapter?.presenter = mPresenter
         verbDisplayRecyclerAdapter?.presenter = mPresenter
         contentDisplayRecyclerAdapter?.presenter = mPresenter
-
 
 
         return rootView
@@ -264,12 +263,22 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
     override fun onClickAddNewContentFilter() {
         onSaveStateToBackStackStateHandle()
         val list = contentFilterList?.value?.map { it.entityUid }
-        /*navigateToPickEntityFromList(VerbDisplay::class.java,
-            R.id.verb_list_dest)*/
+        navigateToPickEntityFromList(ContentEntry::class.java,
+                R.id.content_entry_list_dest)
     }
 
     override fun onClickRemoveContent(content: ReportFilterWithDisplayDetails) {
         mPresenter?.handleRemoveContent(content)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_done -> {
+                onSaveStateToBackStackStateHandle()
+                return super.onOptionsItemSelected(item)
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroyView() {

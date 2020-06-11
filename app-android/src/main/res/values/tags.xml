@@ -19,4 +19,6 @@
     <item name="tag_messageidoptiond_fallback" type="id"/>
     <item name="tag_messageidoptions_list" type="id"/>
 
+    <item name="tag_graphlookup_key" type="id"/>
+
 </resources>
