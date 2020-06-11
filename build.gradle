@@ -215,7 +215,9 @@ if(project.file("buildconfig.local.properties").exists()) {
 }
 
 ext.localProperties = new Properties()
-ext.localProperties.load(new FileInputStream(project.file("local.properties")))
+if(project.file("local.properties").exists()) {
+    ext.localProperties.load(new FileInputStream(project.file("local.properties")))
+}
 
 /**
  * Make sure lib-database:jsJar depends on lib-database:jvmJar
