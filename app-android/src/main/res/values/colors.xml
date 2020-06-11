@@ -75,4 +75,30 @@
     <color name="toolbar">#000</color>
 
 
+
+    <!--MATERIAL THEMING STARTS-->
+
+    <color name="primaryLightColor">#48a999</color> <!--@200 Intensity-->
+    <color name="primaryLightVariantColor">#C2FFF5</color>
+    <color name="primaryColor">#00796b</color> <!--@500 Intensity-->
+    <color name="primaryVariantColor">#005E55</color> <!--@600 Intensity-->
+    <color name="primaryDarkColor">#004c40</color> <!--@700 Intensity-->
+
+    <color name="secondaryColor">#ff9800</color> <!--@500 Intensity-->
+    <color name="secondaryDarkColor">#c66900</color> <!--@700 Intensity-->
+
+    <color name="errorLightColor">#cf6679</color> <!--@200 Intensity-->
+    <color name="errorColor">#b00020</color> <!--@500 Intensity-->
+
+    <color name="primaryTextColor">#ffffff</color>
+
+    <color name="secondaryVariantTextColor">#121212</color>
+    <color name="secondaryTextColor">#000000</color>
+    <color name="colorIconTint">#727272</color>
+
+    <!--MATERIAL THEMING ENDS-->
+
+
+
+
 </resources>

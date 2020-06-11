@@ -70,6 +70,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Headline6"
             android:id="@+id/content_entry_item_title"
             android:text="@{contentEntry.title}"
             android:layout_width="0dp"
@@ -77,9 +78,6 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toTopOf="parent"
@@ -94,8 +92,8 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            android:textSize="@dimen/text_body_mid"
             android:maxLines="2"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"

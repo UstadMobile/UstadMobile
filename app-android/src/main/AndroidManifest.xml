@@ -26,7 +26,7 @@
 
     <application
         android:supportsRtl="true"
-        android:theme="@style/Theme.UstadTheme"
+        android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
         <activity android:name="com.ustadmobile.port.android.view.MainActivity">
             <intent-filter>
@@ -198,35 +198,29 @@
         <activity
             android:name="com.ustadmobile.staging.port.android.view.ChangePasswordActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/change_password"
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="@string/change_password" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.PeopleListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/people"
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="@string/people" />
         <activity
             android:name="com.ustadmobile.port.android.view.ClazzAssignmentEditActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/assignment"
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="@string/assignment" />
         <activity
             android:name="com.ustadmobile.port.android.view.ClazzAssignmentDetailActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/assignment"
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="@string/assignment"/>
 
 
         <activity
             android:name="com.ustadmobile.port.android.view.PersonGroupListActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/groups"
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="@string/groups" />
         <activity
             android:name="com.ustadmobile.port.android.view.PersonGroupEditActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/groups"
-            android:theme="@style/Theme.UstadTheme" />
+            android:label="@string/groups" />
 
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"

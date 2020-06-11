@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="UmTheme.App" parent="UmTheme.MaterialComponents">
+
+        <!--Material color attributes (Night Mode) -->
+        <item name="colorPrimary">@color/primaryLightColor</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantColor</item>
+        <item name="colorSecondary">@color/secondaryColor</item>
+        <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
+        <item name="android:colorBackground">@color/secondaryTextColor</item>
+        <item name="colorSurface">@color/secondaryVariantTextColor</item>
+        <item name="colorError">@color/errorLightColor</item>
+        <item name="colorOnPrimary">@color/secondaryTextColor</item>
+        <item name="colorOnSecondary">@color/secondaryTextColor</item>
+        <item name="colorOnBackground">@color/primaryTextColor</item>
+        <item name="colorOnSurface">@color/primaryTextColor</item>
+        <item name="colorOnError">@color/secondaryTextColor</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorSurface</item>
+        <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
+        <item name="colorTabIndicator">@color/primaryColor</item>
+        <item name="colorTabText" >@color/primaryTextColor</item>
+        <item name="colorSelectedTabText">@color/primaryColor</item>
+        <item name="colorPrimaryBackground">?colorSurface</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
+    </style>
+</resources>
