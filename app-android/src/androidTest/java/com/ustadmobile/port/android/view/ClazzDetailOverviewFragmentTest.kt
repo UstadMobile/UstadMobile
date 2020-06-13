@@ -15,8 +15,10 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import org.junit.Rule
 import org.junit.Test
 
@@ -30,6 +32,10 @@ class ClazzDetailOverviewFragmentTest {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
 
     lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
@@ -53,7 +59,8 @@ class ClazzDetailOverviewFragmentTest {
                 fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(it)
                 IdlingRegistry.getInstance().register(fragmentIdlingResource)
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+
 
         onView(withText("Test Description")).check(matches(isDisplayed()))
 

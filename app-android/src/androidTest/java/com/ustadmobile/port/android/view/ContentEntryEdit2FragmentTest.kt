@@ -22,8 +22,10 @@ import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.not
 import org.junit.Assert
@@ -42,6 +44,10 @@ class ContentEntryEdit2FragmentTest  {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+
 
     @Test
     fun givenNoFolderYet_whenFormFilledInAndSaveClicked_thenShouldSaveToDatabase (){
@@ -54,7 +60,7 @@ class ContentEntryEdit2FragmentTest  {
             ContentEntryEdit2Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         //wait for the fragment to be ready since we are waiting on onViewCreated to create a presenter
         sleep(1000)
@@ -114,7 +120,7 @@ class ContentEntryEdit2FragmentTest  {
             } }) { onFragment { fragment ->
                 fragment.handleFileSelection()
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         //wait for the fragment to be ready since we are waiting on onViewCreated to create a presenter
         sleep(1000)

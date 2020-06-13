@@ -17,7 +17,7 @@ buildscript {
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha02"
+    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha03"
 }
 
 apply plugin: 'com.android.library'
@@ -67,6 +67,7 @@ tasks.whenTaskAdded { task ->
 android {
     dataBinding {
         enabled = true
+        enabledForTests = true
     }
 
     kotlinOptions {

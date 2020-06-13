@@ -16,8 +16,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +40,10 @@ class ClazzLogEditAttendanceFragmentTest  {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
 
     @Before
     fun setup() {
@@ -73,7 +79,7 @@ class ClazzLogEditAttendanceFragmentTest  {
             ClazzLogEditAttendanceFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             recyclerViewIdlingResource.recyclerView = it.mBinding!!.clazzLogEditRecyclerView
@@ -127,7 +133,7 @@ class ClazzLogEditAttendanceFragmentTest  {
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
                 bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.Theme_UstadTheme
-        )
+        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
