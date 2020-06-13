@@ -122,11 +122,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract suspend fun personHasPermissionWithClazz(accountPersonUid: Long, clazzUid: Long,
                                                       permission: Long) : Boolean
 
-    @QueryLiveTables(["Person", "PersonGroupMember"])
-    @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
-            + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
-    abstract fun personHasPermissionLive(accountPersonUid: Long, permission: Long)
-            : DoorLiveData<Boolean>
 
     @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
             + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")

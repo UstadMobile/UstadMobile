@@ -37,7 +37,6 @@
         </activity>
 
         <activity android:name="com.ustadmobile.port.android.view.RepoLoadingStatusTestActivity" />
-        <activity android:name="com.ustadmobile.port.android.view.UserProfileActivity" />
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:noHistory="true"
@@ -138,16 +137,10 @@
             android:name="com.ustadmobile.staging.port.android.view.AddQuestionSetDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.staging.port.android.view.PersonPictureDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
             android:name="com.ustadmobile.staging.port.android.view.SELQuestionDetail2Activity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.AddQuestionOptionDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.staging.port.android.view.CallPersonRelatedDialogFragment"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
             android:name="com.ustadmobile.staging.port.android.view.ReportSELActivity"

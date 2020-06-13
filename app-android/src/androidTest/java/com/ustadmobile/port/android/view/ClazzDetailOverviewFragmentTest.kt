@@ -33,6 +33,9 @@ class ClazzDetailOverviewFragmentTest {
 
     lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
+    // We need this: https://github.com/android/architecture-components-samples/tree/7f861fd45d158e6277a3c35163c7f663e135b2cf/GithubBrowserSample/app/src/androidTest/java/com/android/example/github/util
+    // https://medium.com/freenet-engineering/running-android-espresso-tests-with-data-binding-and-koin-a57a8d38daa5
+    // https://android.jlelse.eu/espresso-ui-test-for-data-binding-dbe988d97340
     @Test
     fun givenClazzExists_whenLaunched_thenShouldShowClazz() {
         val existingClazz = Clazz().apply {
