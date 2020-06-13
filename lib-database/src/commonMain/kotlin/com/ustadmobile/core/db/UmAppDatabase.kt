@@ -11,7 +11,7 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
-    ClazzLog::class,ClazzLogAttendanceRecord::class, FeedEntry::class,PersonField::class,
+    ClazzLog::class,ClazzLogAttendanceRecord::class, PersonField::class,
     PersonDetailPresenterField::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
     ScheduledCheck::class,
@@ -92,12 +92,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("contentEntryDao")
     abstract val contentEntryDao: ContentEntryDao
-
-    @JsName("personCustomFieldDao")
-    abstract val personCustomFieldDao: PersonCustomFieldDao
-
-    @JsName("personCustomFieldValueDao")
-    abstract val personCustomFieldValueDao: PersonCustomFieldValueDao
 
     @JsName("contentEntryContentCategoryJoinDao")
     abstract val contentEntryContentCategoryJoinDao: ContentEntryContentCategoryJoinDao

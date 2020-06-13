@@ -94,17 +94,8 @@
         <activity
             android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.DownloadDialogFragment"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
 
-
-        <activity
-            android:name="com.ustadmobile.port.android.view.PersonGroupEditActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/groups"
-            android:theme="@style/Theme.UstadTheme" />
 
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
