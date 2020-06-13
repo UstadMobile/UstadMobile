@@ -13,7 +13,6 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: Set
 
     fun goToSELQuestionSets() {
         val args = HashMap<String, String>()
-        impl.go(SelQuestionSetListView.VIEW_NAME, args, context)
     }
 
     fun goToHolidayCalendarList() {
@@ -23,22 +22,18 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: Set
 
     fun goToRolesList() {
         val args = HashMap<String, String>()
-        impl.go(RoleListView.VIEW_NAME, args, context)
     }
 
     fun goToGroupsList() {
         val args = HashMap<String, String>()
-        impl.go(PersonGroupListView.VIEW_NAME, args, context)
     }
 
     fun goToRolesAssignmentList() {
         val args = HashMap<String, String>()
-        impl.go(RoleAssignmentListView.VIEW_NAME, args, context)
     }
 
     fun goToLocationsList() {
         val args = HashMap<String, String>()
-        impl.go(LocationListView.VIEW_NAME, args, context)
     }
 
     fun goToPeopleList() {
@@ -48,12 +43,10 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: Set
 
     fun goToAuditLogSelection() {
         val args = HashMap<String, String>()
-        impl.go(AuditLogSelectionView.VIEW_NAME, args, context)
     }
 
     fun goToCustomFieldsList() {
         val args = HashMap<String, String>()
-        impl.go(CustomFieldListView.VIEW_NAME, args, context)
     }
 
 

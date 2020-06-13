@@ -9,9 +9,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzLog
-import com.ustadmobile.lib.db.entities.ClazzLogWithScheduleStartEndTimes
 import com.ustadmobile.lib.db.entities.Role
-import kotlinx.serialization.Serializable
 
 
 @UmDao(permissionJoin = "INNER JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid", 

@@ -23,12 +23,6 @@ abstract class PersonCustomFieldValueDao : BaseDao<PersonCustomFieldValue> {
     @Query("SELECT * FROM PersonCustomFieldValue WHERE personCustomFieldValueUid = :uid")
     abstract fun findByUid(uid: Long): PersonCustomFieldValue?
 
-    @Query("SELECT * FROM PersonCustomFieldValue WHERE " +
-            "personCustomFieldValuePersonUid = :personUid AND " +
-            "personCustomFieldValuePersonCustomFieldUid = :fieldUid")
-    abstract suspend fun findCustomFieldByFieldAndPersonAsync(fieldUid: Long, personUid: Long)
-            : PersonCustomFieldValue?
-
     @Update
     abstract suspend fun updateAsync(entity: PersonCustomFieldValue) : Int
 

@@ -16,7 +16,6 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.util.test.AbstractSetup
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.After
@@ -24,7 +23,7 @@ import org.junit.Before
 import org.junit.Test
 
 
-class ContentEntryEdit2PresenterTest : AbstractSetup() {
+class ContentEntryEdit2PresenterTest  {
 
     lateinit var systemImpl: UstadMobileSystemImpl
 
