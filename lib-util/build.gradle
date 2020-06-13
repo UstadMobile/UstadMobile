@@ -84,7 +84,6 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
             }
         }
 
