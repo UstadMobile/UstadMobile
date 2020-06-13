@@ -79,10 +79,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         }
     }
 
-
-    @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER )
-    abstract fun findAllClazzesByPersonUid(personUid: Long): DataSource.Factory<Int, ClazzWithNumStudents>
-
     @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +
             " WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
@@ -121,7 +117,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + "))")
     abstract suspend fun personHasPermissionWithClazz(accountPersonUid: Long, clazzUid: Long,
                                                       permission: Long) : Boolean
-
 
     @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
             + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")

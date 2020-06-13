@@ -207,7 +207,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val customFieldDao: CustomFieldDao
     abstract val customFieldValueDao : CustomFieldValueDao
     abstract val customFieldValueOptionDao : CustomFieldValueOptionDao
-    abstract val dateRangeDao : DateRangeDao
     abstract val feedEntryDao : FeedEntryDao
     abstract val personDetailPresenterFieldDao : PersonDetailPresenterFieldDao
     abstract val scheduleDao : ScheduleDao

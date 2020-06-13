@@ -34,7 +34,6 @@ import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import org.apache.commons.io.IOUtils
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matchers.allOf
 import org.json.JSONException
@@ -151,12 +150,13 @@ class DownloadDialogAndNotificationEspressoTest {
 
     @Throws(IOException::class, JSONException::class)
     private fun sendCommand(command: String, bytespersecond: Long): JSONObject {
-        return JSONObject(IOUtils.toString(URL("$testManagerUrl?cmd=" +
-                if (bytespersecond == 0L)
-                    command
-                else
-                    command + "&bytespersecond=" + bytespersecond
-                            + "&port=" + serverActivePort).openStream(), StandardCharsets.UTF_8))
+        TODO("Update this")
+//        return JSONObject(IOUtils.toString(URL("$testManagerUrl?cmd=" +
+//                if (bytespersecond == 0L)
+//                    command
+//                else
+//                    command + "&bytespersecond=" + bytespersecond
+//                            + "&port=" + serverActivePort).openStream(), StandardCharsets.UTF_8))
     }
 
     private fun startDownloading(wifiOnly: Boolean) {

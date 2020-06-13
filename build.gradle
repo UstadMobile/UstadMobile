@@ -142,24 +142,24 @@ ext {
     version_android_material = "1.1.0"
     version_androidx_appcompat = "1.1.0"
     version_androidx_legacy_support = "1.0.0"
-    version_androidx_activity = "1.2.0-alpha04"
-    version_androidx_fragment = "1.3.0-alpha04"
-    version_androidx_core = '1.2.0'
+    version_androidx_activity = "1.2.0-alpha05"
+    version_androidx_fragment = "1.3.0-alpha05"
+    version_androidx_core = '1.3.0'
     version_androidx_cardview = "1.0.0"
     version_androidx_coordinatorlayout = "1.1.0"
-    version_androidx_lifecycle = "2.3.0-alpha01"
+    version_androidx_lifecycle = "2.3.0-alpha03"
     version_androidx_legacy = "1.0.0"
     version_android_room = "2.2.5"
     version_androidx_arch = "2.1.0"
     version_androidx_recyclerview = "1.2.0-alpha03"
     version_android_multidex = "2.0.1"
-    version_android_workmanager = "2.2.0"
+    version_android_workmanager = "2.3.4"
     version_androidx_paging = "2.1.2"
     version_android_constraint_layout = "1.1.3"
     version_android_flexbox = "2.0.1"
-    version_android_espresso = "3.1.0"
+    version_android_espresso = "3.2.0"
     version_android_acra = "5.5.0"
-    version_android_junit_runner = "1.3.0-beta01"
+    version_android_junit_runner = "1.3.0-rc01"
     version_androidx_test_ext_junit = "1.1.1" //see https://mvnrepository.com/artifact/androidx.test.ext/junit
     version_android_espresso_recyclerviewchildactions = "1.0"
     version_androidx_databinding = "3.5.0"
@@ -173,9 +173,8 @@ ext {
     version_android_seismic = "1.0.2"
     version_android_fab_extended = "0.0.4"
     version_android_rotatelayout = "3.0.0"
-    version_android_bottom_nav = "2.3.4"
-    version_android_navigation = "2.3.0-alpha06"
-    version_play_core = "1.7.2"
+    version_android_navigation = "2.3.0-beta01"
+    version_play_core = "1.7.3"
     version_android_leakcanary = "2.2"
     version_android_play_services_safetynet = "17.0.0"
     version_android_circleimageview = "3.1.0"
@@ -185,7 +184,7 @@ ext {
     version_js_yarn="1.13.0"
 
     version_crystalrangeseekbar="1.1.3"
-    version_android_ahbottomnavigation="2.1.0"
+
 }
 
 /*

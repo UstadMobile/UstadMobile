@@ -4,6 +4,6 @@
 
     <application
         android:supportsRtl="true"
-        android:name="androidx.multidex.MultiDexApplication"/>
+        android:name="com.ustadmobile.port.android.TestApp"/>
 
 </manifest>
