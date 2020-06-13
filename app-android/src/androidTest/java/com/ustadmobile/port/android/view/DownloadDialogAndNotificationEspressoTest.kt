@@ -160,10 +160,10 @@ class DownloadDialogAndNotificationEspressoTest {
     }
 
     private fun startDownloading(wifiOnly: Boolean) {
-        onView(allOf<View>(
-                withTagValue(equalTo(entry1.contentEntryUid)),
-                withId(R.id.entry_holder)
-        )).perform(click())
+//        onView(allOf<View>(
+//                withTagValue(equalTo(entry1.contentEntryUid)),
+//                withId(R.id.entry_holder)
+//        )).perform(click())
 
         SystemClock.sleep(WAIT_TIME_MIN)
 

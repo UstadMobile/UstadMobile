@@ -166,11 +166,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                 " AND (" +
                 "(EntityRole.ertableId = " + Clazz.TABLE_ID +
                 " AND EntityRole.erEntityUid = Clazz.clazzUid) " +
-                "OR" +
-                "(EntityRole.ertableId = " + Location.TABLE_ID +
-                " AND EntityRole.erEntityUid IN (SELECT locationAncestorAncestorLocationUid " +
-                " FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = " +
-                " Clazz.clazzLocationUid))" +
+
                 ") AND (Role.rolePermissions & "
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"

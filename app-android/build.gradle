@@ -352,8 +352,6 @@ dependencies {
     implementation "ch.acra:acra-http:$version_android_acra"
 
 
-    implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
-
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
     implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
     implementation "androidx.cardview:cardview:$version_androidx_cardview"
@@ -410,12 +408,8 @@ dependencies {
     //image compressor
     implementation "id.zelory:compressor:$version_compressor"
 
-    //extended fab
-    implementation "com.github.dimorinny:floating-text-button:$version_android_fab_extended"
-
     //Range seekbar by Crystal
     implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
-
 
     //Android play core for update support within the application
     implementation "com.google.android.play:core:$version_play_core"
