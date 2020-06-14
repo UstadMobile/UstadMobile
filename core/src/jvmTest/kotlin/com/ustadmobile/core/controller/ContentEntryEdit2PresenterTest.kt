@@ -133,7 +133,7 @@ class ContentEntryEdit2PresenterTest  {
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao){
+            verifyBlocking(mockEntryDao, timeout(5000)){
                 insertAsync(capture())
             }
             assertEquals("Got expected content entry title",contentEntry.title, firstValue.title)
@@ -161,7 +161,7 @@ class ContentEntryEdit2PresenterTest  {
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao){
+            verifyBlocking(mockEntryDao, timeout(5000)){
                 insertAsync(capture())
             }
             assertEquals("Got expected folder title",contentEntry.title, firstValue.title)
@@ -186,7 +186,7 @@ class ContentEntryEdit2PresenterTest  {
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao){
+            verifyBlocking(mockEntryDao, timeout(5000)){
                 updateAsync(capture())
             }
             assertEquals("Got expected content entry title",contentEntry.title, firstValue.title)
