@@ -102,6 +102,7 @@ class TestXapiStateResponder {
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
     }
 
+    @ExperimentalStdlibApi
     @Test
     @Throws(IOException::class)
     fun testAll() {

@@ -15,6 +15,8 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -22,8 +24,10 @@ import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.not
 import org.junit.Assert
@@ -32,6 +36,7 @@ import org.junit.Test
 import java.io.File
 import java.lang.Thread.sleep
 
+@AdbScreenRecord("Content entry edit screen tests")
 class ContentEntryEdit2FragmentTest  {
 
     @JvmField
@@ -42,7 +47,15 @@ class ContentEntryEdit2FragmentTest  {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
 
+    @JvmField
+    @Rule
+    val adbScreenRecordRule = AdbScreenRecordRule()
+
+    @AdbScreenRecord("Given folder does not yet exist, when user fills in form for new folder, should be saved to database")
     @Test
     fun givenNoFolderYet_whenFormFilledInAndSaveClicked_thenShouldSaveToDatabase (){
         val dummyTitle = "New Folder Entry"
@@ -54,7 +67,7 @@ class ContentEntryEdit2FragmentTest  {
             ContentEntryEdit2Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         //wait for the fragment to be ready since we are waiting on onViewCreated to create a presenter
         sleep(1000)
@@ -87,6 +100,7 @@ class ContentEntryEdit2FragmentTest  {
 
     }
 
+    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects file, should save to database")
     @Test
     fun givenNoEntryYet_whenFormFilledInAndSaveClicked_thenShouldSaveToDatabase (){
         val context = getApplicationContext<Application>()
@@ -114,7 +128,7 @@ class ContentEntryEdit2FragmentTest  {
             } }) { onFragment { fragment ->
                 fragment.handleFileSelection()
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         //wait for the fragment to be ready since we are waiting on onViewCreated to create a presenter
         sleep(1000)

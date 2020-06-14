@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkQuestionAndOptionsEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzWorkQuestionOptionBinding
-import com.toughra.ustadmobile.databinding.ItemSelquestionoptionBinding
 import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager

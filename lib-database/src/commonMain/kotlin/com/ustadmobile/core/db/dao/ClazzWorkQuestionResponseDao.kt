@@ -18,28 +18,14 @@ abstract class ClazzWorkQuestionResponseDao : BaseDao<ClazzWorkQuestionResponse>
             " AND CAST(clazzWorkQuestionResponseInactive AS INTEGER) = 0")
     abstract fun findByUidAsync(uid: Long): ClazzWorkQuestionResponse?
 
-    @Query(FIND_BY_CLAZZWORKUID)
-    abstract suspend fun findByClazzWorkUidAsync(uid: Long): List<ClazzWorkQuestionResponse>
-
-    @Query(FIND_BY_CLAZZWORKUID)
-    abstract fun findByClazzWorkUidLive(uid: Long): DataSource.Factory<Int,ClazzWorkQuestionResponse>
-
     @Query(FIND_BY_QUESTIONUID)
     abstract fun findByQuestionUidAsync(uid: Long):List<ClazzWorkQuestionResponse>
 
-    @Query(FIND_BY_QUESTIONUID)
-    abstract fun findByQuestionUidLive(uid: Long): DataSource.Factory<Int, ClazzWorkQuestionResponse>
     @Update
     abstract suspend fun updateAsync(entity: ClazzWorkQuestionResponse) : Int
 
 
     companion object{
-        const val FIND_BY_CLAZZWORKUID = """
-            SELECT * FROM ClazzWorkQuestionResponse 
-            LEFT JOIN ClazzWorkQuestion ON ClazzWorkQuestion.clazzWorkQuestionUid = ClazzWorkQuestionResponse.clazzWorkQuestionResponseQuestionUid
-            WHERE ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid = :uid
-            AND CAST(clazzWorkQuestionResponseInactive AS INTEGER) = 0
-        """
 
         const val FIND_BY_QUESTIONUID = """
             SELECT * FROM ClazzWorkQuestionResponse WHERE

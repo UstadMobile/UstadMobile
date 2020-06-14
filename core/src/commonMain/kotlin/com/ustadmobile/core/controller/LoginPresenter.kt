@@ -6,7 +6,6 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
-import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.LoginView
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.door.DoorDatabaseRepository
@@ -31,7 +30,7 @@ class LoginPresenter(context: Any, arguments: Map<String, String>, view: LoginVi
 
     init {
         mNextDest = arguments[ARG_NEXT] ?: impl.getAppConfigString(
-                AppConfig.KEY_FIRST_DEST, HomeView.VIEW_NAME, context) ?: HomeView.VIEW_NAME
+                AppConfig.KEY_FIRST_DEST, "Home", context) ?: "HOME" //TODO: Change this to use mainactivity
 
         registerCode = (impl.getAppConfigString(AppConfig.KEY_SHOW_REGISTER_CODE, "", context) ?: "")
                 .trim()

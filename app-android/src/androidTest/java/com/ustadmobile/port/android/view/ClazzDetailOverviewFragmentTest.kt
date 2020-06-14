@@ -15,10 +15,13 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import org.junit.Rule
 import org.junit.Test
+
 
 class ClazzDetailOverviewFragmentTest {
 
@@ -30,7 +33,15 @@ class ClazzDetailOverviewFragmentTest {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
 
+    lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
+
+    // We need this: https://github.com/android/architecture-components-samples/tree/7f861fd45d158e6277a3c35163c7f663e135b2cf/GithubBrowserSample/app/src/androidTest/java/com/android/example/github/util
+    // https://medium.com/freenet-engineering/running-android-espresso-tests-with-data-binding-and-koin-a57a8d38daa5
+    // https://android.jlelse.eu/espresso-ui-test-for-data-binding-dbe988d97340
     @Test
     fun givenClazzExists_whenLaunched_thenShouldShowClazz() {
         val existingClazz = Clazz().apply {
@@ -45,12 +56,11 @@ class ClazzDetailOverviewFragmentTest {
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazz.clazzUid)) {
             ClazzDetailOverviewFragment().also {
                 it.installNavController(systemImplNavRule.navController)
+                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(it)
+                IdlingRegistry.getInstance().register(fragmentIdlingResource)
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
-        }
 
         onView(withText("Test Description")).check(matches(isDisplayed()))
 

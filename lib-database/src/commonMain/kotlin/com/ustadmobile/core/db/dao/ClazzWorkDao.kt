@@ -19,9 +19,6 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             " AND CAST(clazzWorkActive AS INTEGER) = 1")
     abstract fun findByUidAsync(clazzWorkUid: Long): ClazzWork?
 
-    @Query(FIND_BY_CLAZZUID)
-    abstract suspend fun findByClazzUidAsync(clazzUid: Long): List<ClazzWork>
-
 
     @Update
     abstract suspend fun updateAsync(entity: ClazzWork) : Int
@@ -36,10 +33,6 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     """)
     abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission?
 
-
-    @Query(FIND_BY_CLAZZUID)
-    abstract fun findByClazzUidLive(clazzUid: Long): DataSource.Factory<Int,ClazzWork>
-
     @Query(FIND_WITH_METRICS_BY_CLAZZUID + " ORDER BY ClazzWork.clazzWorkTitle ASC")
     abstract fun findWithMetricsByClazzUidLiveAsc(clazzUid: Long): DataSource.Factory<Int,ClazzWorkWithMetrics>
 
@@ -48,10 +41,6 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
 
     companion object{
-        const val FIND_BY_CLAZZUID = """
-            SELECT * FROM ClazzWork WHERE clazzWorkClazzUid = :clazzUid
-            AND CAST(clazzWorkActive as INTEGER) = 1
-        """
 
         const val FIND_WITH_METRICS_BY_CLAZZUID = """
             SELECT ClazzWork.*, 

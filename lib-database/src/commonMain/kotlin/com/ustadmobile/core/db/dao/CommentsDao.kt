@@ -37,34 +37,6 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
         AND Comments.commentsEntityUid = :entityUid
         AND CAST(Comments.commentsFlagged AS INTEGER) = 0
         AND CAST(Comments.commentsInActive AS INTEGER) = 0
-        AND CAST(Comments.commentsPublic AS INTEGER) = 1
-        ORDER BY Comments.commentsDateTimeAdded DESC 
-    """)
-    abstract suspend fun findPublicByEntityTypeAndUidList(entityType: Int, entityUid: Long):
-            List<CommentsWithPerson>
-
-    @Query("""
-        SELECT Comments.*, Person.* FROM Comments
-        LEFT JOIN Person ON Person.personUid = Comments. commentsPersonUid 
-        WHERE Comments.commentsEntityType = :entityType 
-        AND Comments.commentsEntityUid = :entityUid
-        AND CAST(Comments.commentsFlagged AS INTEGER) = 0
-        AND CAST(Comments.commentsInActive AS INTEGER) = 0
-        AND CAST(Comments.commentsPublic AS INTEGER) = 0
-        ORDER BY Comments.commentsDateTimeAdded DESC 
-    """)
-    abstract fun findPrivateByEntityTypeAndUidLive(entityType: Int, entityUid: Long):
-            DataSource.Factory<Int, CommentsWithPerson>
-
-
-
-    @Query("""
-        SELECT Comments.*, Person.* FROM Comments
-        LEFT JOIN Person ON Person.personUid = Comments. commentsPersonUid 
-        WHERE Comments.commentsEntityType = :entityType 
-        AND Comments.commentsEntityUid = :entityUid
-        AND CAST(Comments.commentsFlagged AS INTEGER) = 0
-        AND CAST(Comments.commentsInActive AS INTEGER) = 0
         AND CAST(Comments.commentsPublic AS INTEGER) = 0
         AND Person.personUid = :personUid
         ORDER BY Comments.commentsDateTimeAdded DESC 
@@ -72,23 +44,6 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
     abstract fun findPrivateByEntityTypeAndUidAndPersonLive(entityType: Int, entityUid: Long,
                                                                 personUid: Long):
             DataSource.Factory<Int, CommentsWithPerson>
-//
-//
-//    @Query("""
-//        SELECT Comments.*, Person.* FROM Comments
-//        LEFT JOIN ClazzMember AS cm ON  = :personUid
-//        LEFT JOIN Person ON Person.personUid = Comments. commentsPersonUid
-//        WHERE Comments.commentsEntityType = :entityType
-//        AND Comments.commentsEntityUid = :entityUid
-//        AND CAST(Comments.commentsFlagged AS INTEGER) = 0
-//        AND CAST(Comments.commentsInActive AS INTEGER) = 0
-//        AND CAST(Comments.commentsPublic AS INTEGER) = 0
-//
-//        ORDER BY Comments.commentsDateTimeAdded DESC
-//    """)
-//    abstract fun findPrivateByPersonAndEntityTypeAndUidLive(personUid: Long, entityType: Int,
-//                                                            entityUid: Long):
-//            DataSource.Factory<Int, CommentsWithPerson>
 
     @Query("""
         UPDATE Comments SET commentsInActive = :inActive WHERE 

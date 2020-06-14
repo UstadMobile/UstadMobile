@@ -5,7 +5,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.GlobalScope
@@ -21,7 +20,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String>, view: Reg
 
     init {
         mNextDest = arguments[LoginPresenter.ARG_NEXT] ?: UstadMobileSystemImpl.instance.getAppConfigString(
-                AppConfig.KEY_FIRST_DEST, HomeView.VIEW_NAME, context) ?: HomeView.VIEW_NAME
+                AppConfig.KEY_FIRST_DEST, "Home", context) ?: "Home"
     }
 
     override fun onCreate(savedState: Map<String, String>?) {

@@ -18,10 +18,6 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     @Query("SELECT * FROM ClazzWorkQuestion WHERE clazzWorkQuestionUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : ClazzWorkQuestion?
 
-    @Query("SELECT * FROM ClazzWorkQuestion WHERE " +
-            "clazzWorkQuestionClazzWorkUid = :clazzWorkUid AND " +
-            " CAST(clazzWorkQuestionActive AS INTEGER) = 0")
-    abstract fun findAllActiveQuestionsInClazzWorkAsList(clazzWorkUid: Long): List<ClazzWorkQuestion>
 
     @Query("UPDATE ClazzWorkQuestion SET clazzWorkQuestionActive = :active " +
             "WHERE clazzWorkQuestionUid = :clazzWorkQuestionUid ")
@@ -37,13 +33,6 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     """)
     abstract fun findAllActiveQuestionsWithOptionsInClazzWorkAsList(clazzWorkUid: Long)
                     : List<ClazzWorkQuestionAndOptionRow>
-
-    companion object {
-
-        val SEL_QUESTION_TYPE_NOMINATION = 0
-        val SEL_QUESTION_TYPE_MULTI_CHOICE = 1
-        val SEL_QUESTION_TYPE_FREE_TEXT = 2
-    }
 
     override suspend fun deactivateByUids(uidList: List<Long>) {
         uidList.forEach {

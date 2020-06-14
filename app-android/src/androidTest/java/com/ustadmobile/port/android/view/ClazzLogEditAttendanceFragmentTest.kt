@@ -11,26 +11,49 @@ import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.nhaarman.mockitokotlin2.mock
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
+import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
+import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
-class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
+@AdbScreenRecord("Attendance recording scren test")
+class ClazzLogEditAttendanceFragmentTest  {
 
     lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
 
+    @JvmField
+    @Rule
+    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+
+    @JvmField
+    @Rule
+    var systemImplNavRule = SystemImplTestNavHostRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
+
     @Before
     fun setup() {
-        setupDbWithAccount()
-        setupNavController()
         recyclerViewIdlingResource = RecyclerViewIdlingResource(null, 3)
     }
 
@@ -42,28 +65,31 @@ class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
 
     private fun waitForAttendanceToSave(clazzLogUid: Long) {
         runBlocking(Dispatchers.Main) {
-            waitForLiveData(db.clazzLogDao.findByUidLive(clazzLogUid), 5000) {
+            waitForLiveData(dbRule.db.clazzLogDao.findByUidLive(clazzLogUid), 5000) {
                 it?.clazzLogStatusFlag == ClazzLog.STATUS_RECORDED
             }
         }
     }
 
+    @AdbScreenRecord("Given an existing class when mixed attendance is recorded should be saved to database")
     @Test
     fun givenExistingClazzWithMembesAndClazzLog_whenMixedStudentAttendanceRecorded_thenShouldBeSavedToDatabase() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
 
-        val clazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5) }
+        val clazzAndMembers = runBlocking { dbRule.db.insertTestClazzAndMembers(5) }
 
         val clazzLog = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis(), 0L).apply {
-            clazzLogUid = db.clazzLogDao.insert(this)
+            clazzLogUid = dbRule.db.clazzLogDao.insert(this)
         }
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
-            bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.Theme_UstadTheme
-        )
+            fragmentArgs = bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.Theme_UstadTheme) {
+            ClazzLogEditAttendanceFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), navController)
             recyclerViewIdlingResource.recyclerView = it.mBinding!!.clazzLogEditRecyclerView
         }
 
@@ -86,7 +112,7 @@ class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
         waitForAttendanceToSave(clazzLog.clazzLogUid)
 
 
-        val clazzLogAttendanceRecords = db.clazzLogAttendanceRecordDao.findByClazzLogUid(clazzLog.clazzLogUid)
+        val clazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(clazzLog.clazzLogUid)
         Assert.assertEquals("Found expected number of attendance records", clazzAndMembers.studentList.size,
                 clazzLogAttendanceRecords.size)
         Assert.assertEquals("Expected number of students are present", 3,
@@ -94,7 +120,7 @@ class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
         Assert.assertEquals("Expected number of students are absent",2,
                 clazzLogAttendanceRecords.filter {it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ABSENT}.size)
 
-        val clazzLogInDb = db.clazzLogDao.findByUid(clazzLog.clazzLogUid)
+        val clazzLogInDb = dbRule.db.clazzLogDao.findByUid(clazzLog.clazzLogUid)
         Assert.assertEquals("Expected numbe of students are present on ClazzLog entity", 3,
             clazzLogInDb!!.clazzLogNumPresent)
 
@@ -104,21 +130,22 @@ class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
 
 
     @Test
+    @AdbScreenRecord("Given an existing class when mark all is clicked and user saves, then should be saved to database")
     fun givenExistingClazzLog_whenClickMarkAll_thenShouldBeSavedToDatabase() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
 
-        val clazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5) }
+        val clazzAndMembers = runBlocking { dbRule.db.insertTestClazzAndMembers(5) }
 
         val clazzLog = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis(), 0L).apply {
-            clazzLogUid = db.clazzLogDao.insert(this)
+            clazzLogUid = dbRule.db.clazzLogDao.insert(this)
         }
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
                 bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.Theme_UstadTheme
-        )
+        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), navController)
+            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
             recyclerViewIdlingResource.recyclerView = it.mBinding!!.clazzLogEditRecyclerView
         }
 
@@ -128,7 +155,7 @@ class ClazzLogEditAttendanceFragmentTest : UstadFragmentTest() {
 
         waitForAttendanceToSave(clazzLog.clazzLogUid)
 
-        val clazzLogAttendanceRecords = db.clazzLogAttendanceRecordDao.findByClazzLogUid(
+        val clazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(
                 clazzLog.clazzLogUid)
         Assert.assertTrue("All clazz logs are marked as attended",
                 clazzLogAttendanceRecords.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED})

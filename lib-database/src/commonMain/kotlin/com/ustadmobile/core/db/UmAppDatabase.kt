@@ -11,21 +11,18 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
-    ClazzLog::class,ClazzLogAttendanceRecord::class, FeedEntry::class,PersonField::class,
-    PersonDetailPresenterField::class,SelQuestion::class,
-    SelQuestionResponse::class, SelQuestionResponseNomination::class, SelQuestionSet::class,
-    SelQuestionSetRecognition::class, SelQuestionSetResponse::class,
+    ClazzLog::class,ClazzLogAttendanceRecord::class, PersonField::class,
+    PersonDetailPresenterField::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
-    ClazzActivity::class, ClazzActivityChange::class,
-    SelQuestionOption::class, ScheduledCheck::class,
+    ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
     Clazz::class, ClazzMember::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
-    EntityRole::class, PersonGroup::class, PersonGroupMember::class, Location::class,
-    LocationAncestorJoin::class, PersonLocationJoin::class, PersonPicture::class,
+    EntityRole::class, PersonGroup::class, PersonGroupMember::class,
+    PersonPicture::class,
     ScrapeQueueItem::class, ScrapeRun::class, ContentEntryStatus::class, ConnectivityStatus::class,
     Container::class, ContainerEntry::class, ContainerEntryFile::class,
     VerbEntity::class, XObjectEntity::class, StatementEntity::class,
@@ -99,12 +96,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("contentEntryDao")
     abstract val contentEntryDao: ContentEntryDao
 
-    @JsName("personCustomFieldDao")
-    abstract val personCustomFieldDao: PersonCustomFieldDao
-
-    @JsName("personCustomFieldValueDao")
-    abstract val personCustomFieldValueDao: PersonCustomFieldValueDao
-
     @JsName("contentEntryContentCategoryJoinDao")
     abstract val contentEntryContentCategoryJoinDao: ContentEntryContentCategoryJoinDao
 
@@ -148,15 +139,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("entityRoleDao")
     abstract val entityRoleDao: EntityRoleDao
-
-    @JsName("locationDao")
-    abstract val locationDao: LocationDao
-
-    @JsName("locationAncestorJoinDao")
-    abstract val locationAncestorJoinDao: LocationAncestorJoinDao
-
-    @JsName("personLocationJoinDao")
-    abstract val personLocationJoinDao: PersonLocationJoinDao
 
     @JsName("personPictureDao")
     abstract val personPictureDao: PersonPictureDao
@@ -202,25 +184,19 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     abstract val syncresultDao : SyncResultDao
 
-    abstract val auditLogDao : AuditLogDao
-    abstract val clazzActivityChangeDao : ClazzActivityChangeDao
-    abstract val clazzActivityDao : ClazzActivityDao
+
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao : ClazzLogDao
     abstract val customFieldDao: CustomFieldDao
     abstract val customFieldValueDao : CustomFieldValueDao
     abstract val customFieldValueOptionDao : CustomFieldValueOptionDao
-    abstract val dateRangeDao : DateRangeDao
-    abstract val feedEntryDao : FeedEntryDao
+
     abstract val personDetailPresenterFieldDao : PersonDetailPresenterFieldDao
+
     abstract val scheduleDao : ScheduleDao
+
     abstract val scheduledCheckDao : ScheduledCheckDao
-    abstract val selQuestionDao : SelQuestionDao
-    abstract val selQuestionOptionDao : SelQuestionOptionDao
-    abstract val selQuestionResponseDao : SelQuestionResponseDao
-    abstract val selQuestionResponseNominationDao : SelQuestionResponseNominationDao
-    abstract val selQuestionSetDao : SelQuestionSetDao
-    abstract val selQuestionSetResponseDao : SelQuestionSetResponseDao
+
     abstract val holidayCalendarDao : HolidayCalendarDao
     abstract val holidayDao: HolidayDao
     abstract val schoolDao : SchoolDao
@@ -256,6 +232,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("clazzWorkQuestionResponseDao")
     abstract val clazzWorkQuestionResponseDao: ClazzWorkQuestionResponseDao
+
+    @JsName("syncNodeDao")
+    abstract val syncNodeDao: SyncNodeDao
+
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

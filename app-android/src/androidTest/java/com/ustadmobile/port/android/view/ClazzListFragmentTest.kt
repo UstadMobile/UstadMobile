@@ -14,8 +14,10 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert
 import org.junit.Rule
@@ -32,6 +34,11 @@ class ClazzListFragmentTest  {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+
+
     @AdbScreenRecord("List screen should show class in database and allow clicking on item")
     @Test
     fun givenClazzPresent_whenClickOnClazz_thenShouldNavigateToClazzDetail() {
@@ -43,7 +50,7 @@ class ClazzListFragmentTest  {
 
         val fragmentScenario = launchFragmentInContainer<ClazzList2Fragment>(
             bundleOf(), themeResId = R.style.Theme_UstadTheme
-        )
+        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         fragmentScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
