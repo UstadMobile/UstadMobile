@@ -10,18 +10,25 @@ import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withTagValue
+import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class ReportListFragmentTest  {
+@AdbScreenRecord("Report list screen test")
+class ReportListFragmentTest : AbstractXapiReportOptionsTest() {
 
     @JvmField
     @Rule
@@ -31,10 +38,36 @@ class ReportListFragmentTest  {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+
+    @Before
+    fun setup(){
+        insertXapi(dbRule.db)
+    }
+
+    @AdbScreenRecord("")
     @Test
     fun givenClazzPresent_whenClickOnClazz_thenShouldNavigateToClazzDetail() {
-        val testEntity = Report().apply {
+        val testEntity = ReportWithFilters().apply {
             reportTitle = "Test Name"
+            chartType = Report.BAR_CHART
+            yAxis = Report.AVG_DURATION
+            xAxis = Report.MONTH
+            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            toDate = DateTime(2019, 6, 11).unixMillisLong
+            reportFilterList = listOf(
+                    ReportFilter().apply {
+                        entityUid = 100
+                        entityType = ReportFilter.PERSON_FILTER
+                    },
+                    ReportFilter().apply {
+                        entityUid = 200
+                        entityType = ReportFilter.VERB_FILTER
+                    },
+                    ReportFilter().apply {
+                        entityUid = 300
+                        entityType = ReportFilter.CONTENT_FILTER
+                    }
+            )
             reportUid = dbRule.db.reportDao.insert(this)
         }
 

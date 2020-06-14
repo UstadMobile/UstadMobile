@@ -22,11 +22,13 @@ import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.soywiz.klock.DateTime
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 
+@AdbScreenRecord("Report edit screen tests")
 class ReportEditFragmentTest {
 
     @JvmField
@@ -38,6 +40,7 @@ class ReportEditFragmentTest {
     var systemImplNavRule = SystemImplTestNavHostRule()
 
 
+    @AdbScreenRecord("")
     @Test
     fun givenNoReportPresentYet_whenFilledInAndSaveClicked_thenShouldNavigateToDetailScreen() {
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme) {
@@ -104,6 +107,7 @@ class ReportEditFragmentTest {
     }
 
 
+    @AdbScreenRecord("")
     @Test
     fun givenReportExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
         val existingReport = ReportWithFilters().apply {

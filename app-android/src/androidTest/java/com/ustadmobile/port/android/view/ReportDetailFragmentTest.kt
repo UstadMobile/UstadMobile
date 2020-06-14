@@ -22,6 +22,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.whenever
 import com.soywiz.klock.DateTime
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.lib.db.entities.Report
@@ -38,6 +39,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+@AdbScreenRecord("Report Detail Screen Test")
 class ReportDetailFragmentTest : AbstractXapiReportOptionsTest() {
 
     @JvmField
@@ -59,6 +61,7 @@ class ReportDetailFragmentTest : AbstractXapiReportOptionsTest() {
         insertXapi(dbRule.db)
     }
 
+    @AdbScreenRecord("")
     @Test
     fun givenReportExists_whenLaunched_thenShouldShowReport() {
         val existingClazz = ReportWithFilters().apply {
