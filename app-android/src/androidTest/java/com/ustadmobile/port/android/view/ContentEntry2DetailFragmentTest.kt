@@ -15,8 +15,10 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
 import junit.framework.Assert
 import kotlinx.coroutines.runBlocking
@@ -34,6 +36,11 @@ class ContentEntry2DetailFragmentTest {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+
+    lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
     @Test
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntry() {
@@ -47,14 +54,13 @@ class ContentEntry2DetailFragmentTest {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also {
-                it.installNavController(systemImplNavRule.navController)
+            ContentEntry2DetailFragment().also {fragment ->
+                fragment.installNavController(systemImplNavRule.navController)
+                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragment).also {
+                    IdlingRegistry.getInstance().register(it)
+                }
             }
-        }
-
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         onView(withText(entryTitle)).check(matches(isDisplayed()))
 
@@ -73,15 +79,14 @@ class ContentEntry2DetailFragmentTest {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also {
-                it.installNavController(systemImplNavRule.navController)
+            ContentEntry2DetailFragment().also {fragment ->
+                fragment.installNavController(systemImplNavRule.navController)
+                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragment).also {
+                    IdlingRegistry.getInstance().register(it)
+                }
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
-        }
-        sleep(500)
         onView(withText(testEntry.title)).check(matches(isDisplayed()))
 
         onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
@@ -102,16 +107,15 @@ class ContentEntry2DetailFragmentTest {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also {
-                it.installNavController(systemImplNavRule.navController)
+            ContentEntry2DetailFragment().also {fragment ->
+                fragment.installNavController(systemImplNavRule.navController)
+                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragment).also {
+                    IdlingRegistry.getInstance().register(it)
+                }
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
-        }
 
-        sleep(500)
         onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
 
         onView(withId(R.id.availableTranslationView)).check(matches(hasChildCount(totalTranslations)))

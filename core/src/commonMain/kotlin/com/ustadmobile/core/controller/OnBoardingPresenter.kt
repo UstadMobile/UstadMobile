@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LOCALE_USE_SYSTEM
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.HomeView
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.OnBoardingView.Companion.PREF_TAG
 
@@ -20,7 +19,8 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: On
     fun handleClickGetStarted() {
         val args: Map<String,String?> = arguments
         impl.setAppPref(PREF_TAG, true.toString(), view.viewContext)
-        impl.go(HomeView.VIEW_NAME, args, context)
+        //TODO: Change this to use navigation activity
+        impl.go("Home", args, context)
     }
 
     fun handleLanguageSelected(position: Int){

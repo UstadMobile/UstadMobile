@@ -2,11 +2,8 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.HomeView
 import io.ktor.client.request.get
 import kotlinx.io.InputStream
-import kotlinx.io.charsets.Charsets
-import kotlinx.io.core.toByteArray
 import kotlin.browser.localStorage
 import kotlin.browser.window
 
@@ -43,7 +40,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val umContext: dynamic = context
-        umContext.router.navigateByUrl("/${HomeView.VIEW_NAME}/$viewName?${UMFileUtil.mapToQueryString(args)}")
+        //Note:HomeView name has changed
+        umContext.router.navigateByUrl("/Home/$viewName?${UMFileUtil.mapToQueryString(args)}")
     }
 
     /**
@@ -72,14 +70,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun getSystemLocale(context: Any): String {
         return "${window.navigator.language}.UTF-8"
-    }
-
-    /**
-     * Get an asset (from files that are in core/src/flavorName/assets)
-     *
-     */
-    actual fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     /**
@@ -173,16 +163,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     /**
-     * Get an asset Synchronously
-     * @param context
-     * @param path
-     * @return
-     */
-    actual fun getAssetSync(context: Any, path: String): InputStream {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
      * Returns the system base directory to work from
      *
      * @return
@@ -211,19 +191,12 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        val client = defaultHttpClient()
-        val content = client.get<String>( "${localStorage.getItem("doordb.endpoint.url")}H5PResources/$path")
-        return content.toByteArray(Charsets.UTF_8)
+        TODO("Fix this to avoid using clases no longer available")
+//        val client = defaultHttpClient()
+//        val content = client.get<String>( "${localStorage.getItem("doordb.endpoint.url")}H5PResources/$path")
+//        return content.toByteArray(Charsets.UTF_8)
     }
 
-
-
-    /**
-     * Get asset as an input stream asynchronously
-     */
-    actual suspend fun getAssetInputStreamAsync(context: Any, path: String): InputStream {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

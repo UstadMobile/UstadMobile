@@ -96,15 +96,11 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     private var permissionRequestRationalesShown = false
 
-    private var afterPermissionMethodRunner: Runnable? = null
-
     private val runWhenServiceConnectedQueue = RunnableQueue()
 
     private var permissionDialogTitle: String? = null
 
     private var permissionDialogMessage: String? = null
-
-    private var permissions: Array<String>? = null
 
     internal var selectedFileUri: Uri? = null
 
@@ -243,21 +239,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         shakeDetector = ShakeDetector(this)
 
-    }
-
-    /**
-     * We intercept this to implement app-wide rotation for presentation purposes.
-     *
-     * See UstadMobileSystemImpl.rotationEnabled for details
-     */
-    override fun setContentView(layoutResID: Int) {
-        if(UstadMobileSystemImpl.instance.rotationEnabled ?: false) {
-            super.setContentView(R.layout.activity_rotatelayoutroot)
-            LayoutInflater.from(this).inflate(layoutResID,
-                    findViewById(R.id.activity_rotatelayout), true)
-        }else {
-            super.setContentView(layoutResID)
-        }
     }
 
     override fun hearShake() {
@@ -460,98 +441,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         }
         startActivityForResult(Intent.createChooser(intent, ""),
                 FILE_SELECTION_REQUEST_CODE)
-    }
-
-    /**
-     * Responsible for running task after checking permissions
-     *
-     * @param permissions    Permission to be checked
-     * @param runnable      Future task to be executed
-     * @param dialogTitle   Permission dialog title
-     * @param dialogMessage Permission dialog message
-     */
-    @Deprecated("Use FragmentExt.runAfterRequestingPermissionIfNeeded. This function will " +
-            "not work when conducting fragment tests and will not correctly handle concurrent requests.")
-    fun runAfterGrantingPermission(permissions: Array<String>, runnable: Runnable?,
-                                   dialogTitle: String, dialogMessage: String,
-                                   dialogBuilder: () -> AlertDialog = {makePermissionDialog(permissions, dialogTitle, dialogMessage) }) {
-        this.afterPermissionMethodRunner = runnable
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            afterPermissionMethodRunner!!.run()
-            afterPermissionMethodRunner = null
-            return
-        }
-
-
-        this.permissionDialogMessage = dialogMessage
-        this.permissionDialogTitle = dialogTitle
-        this.permissions = permissions
-
-        if (!permissionGranted(permissions)) {
-            if (!permissionRequestRationalesShown) {
-                val dialog = dialogBuilder.invoke()
-                dialog.show()
-                permissionRequestRationalesShown = true
-            } else {
-                permissionRequestRationalesShown = false
-                ActivityCompat.requestPermissions(this, permissions, RUN_TIME_REQUEST_CODE)
-            }
-        } else {
-            afterPermissionMethodRunner!!.run()
-            afterPermissionMethodRunner = null
-        }
-    }
-
-    private fun makePermissionDialog(permissions: Array<String>, dialogTitle: String,
-                                     dialogMessage: String): AlertDialog {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(permissionDialogTitle)
-                .setMessage(permissionDialogMessage)
-                .setNegativeButton(getString(android.R.string.cancel)
-                ) { dialog, _ -> dialog.dismiss() }
-                .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
-                    runAfterGrantingPermission(permissions, afterPermissionMethodRunner,
-                            dialogTitle, dialogMessage)
-                }
-        return builder.create()
-    }
-
-
-    private fun permissionGranted(permissions: Array<String>): Boolean {
-        val requiredPermissions: MutableList<String> = mutableListOf<String>()
-        for (permission in permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                requiredPermissions.add(permission)
-            }
-        }
-
-        return requiredPermissions.isEmpty()
-    }
-
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
-                                            grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            RUN_TIME_REQUEST_CODE -> {
-                var allPermissionGranted = grantResults.size == permissions.size
-                for (result in grantResults) {
-                    allPermissionGranted = allPermissionGranted and (result == PackageManager.PERMISSION_GRANTED)
-                }
-
-                if (!allPermissionGranted && permissions.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    afterPermissionMethodRunner!!.run()
-                    afterPermissionMethodRunner = null
-                }
-
-                if (allPermissionGranted) {
-                    afterPermissionMethodRunner!!.run()
-                    afterPermissionMethodRunner = null
-                    return
-                }
-            }
-        }
     }
 
     /**

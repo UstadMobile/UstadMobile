@@ -1,23 +1,18 @@
 package com.ustadmobile.lib.rest
 
-import ch.qos.logback.core.util.ContentTypeUtil
 import com.google.gson.Gson
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
-import com.ustadmobile.core.controller.HomePresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.encryptPassword
-import com.ustadmobile.port.sharedse.contentformats.importContentEntryFromFile
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.staging.lib.rest.LoadInitialData
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.features.AutoHeadResponse
 import io.ktor.features.CORS
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
@@ -29,7 +24,6 @@ import io.ktor.http.HttpMethod
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.get
-import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
 import java.io.File
 import java.nio.file.Files

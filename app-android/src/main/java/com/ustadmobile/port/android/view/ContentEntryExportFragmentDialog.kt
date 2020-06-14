@@ -108,17 +108,6 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
         }
     }
 
-    override fun checkFilePermissions() {
-        baseActivity.runAfterGrantingPermission(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                Runnable {
-                    runOnUiThread(Runnable {
-                        mDialog.show()
-                    })
-                },
-                getString(R.string.download_storage_permission_title),
-                getString(R.string.download_storage_permission_message))
-    }
-
     override fun setUpStorageOptions(storageOptions: List<UMStorageDir>) {
         val options = ArrayList<String>()
         this.storageDirs = storageOptions

@@ -22,14 +22,13 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions.Companion.childOfViewAtPositionWithMatcher
 import kotlinx.coroutines.runBlocking
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -40,6 +39,11 @@ class ClazzLogListAttendanceFragmentTest {
     lateinit var navController: NavController
 
     private lateinit var db: UmAppDatabase
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+
 
     @Before
     fun setup() {
@@ -73,7 +77,7 @@ class ClazzLogListAttendanceFragmentTest {
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
             bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
                 themeResId = R.style.Theme_UstadTheme
-        )
+        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             recyclerViewIdlingResource.recyclerView = it.mDataBinding!!.fragmentListRecyclerview
@@ -116,7 +120,7 @@ class ClazzLogListAttendanceFragmentTest {
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
                 bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()),
                 themeResId = R.style.Theme_UstadTheme
-        )
+        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), navController)

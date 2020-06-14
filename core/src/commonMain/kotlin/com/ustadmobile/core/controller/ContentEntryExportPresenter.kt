@@ -44,7 +44,7 @@ class ContentEntryExportPresenter(context: Any, arguments: Map<String, String>, 
                     view.setUpStorageOptions(result!!)
                     destinationDir = result[0].dirURI!!
                     view.setDialogMessage(entryTile)
-                    view.checkFilePermissions()
+                    //view.checkFilePermissions()
                 }
             })
         }

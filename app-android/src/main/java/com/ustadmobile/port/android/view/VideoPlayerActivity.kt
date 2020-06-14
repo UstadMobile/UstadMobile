@@ -41,7 +41,7 @@ import java.io.BufferedInputStream
 import java.io.IOException
 import java.util.*
 
-
+@ExperimentalStdlibApi
 class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
 
     private lateinit var playerView: PlayerView

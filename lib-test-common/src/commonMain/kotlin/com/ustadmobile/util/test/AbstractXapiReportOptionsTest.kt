@@ -11,7 +11,6 @@ abstract class AbstractXapiReportOptionsTest {
         val entryLangMap = db.xLangMapEntryDao
         val personDao = db.personDao
         val verbDao = db.verbDao
-        val locationDao = db.locationDao
         val entryDao = db.contentEntryDao
         val entryJoinDao = db.contentEntryParentChildJoinDao
         val statementDao = db.statementDao
@@ -65,40 +64,6 @@ abstract class AbstractXapiReportOptionsTest {
 
         var thirdVerbLangMap = XLangMapEntry(thirdVerb.verbUid, 0, 0, 0, "Attempted question 5 from Entry 3")
         thirdVerbLangMap.languageLangMapUid = entryLangMap.insert(thirdVerbLangMap)
-
-
-        var newLocation = Location("Test Location", "Test location added from Dummy data", false, 0)
-        newLocation.locationUid = locationDao.insert(newLocation)
-
-        val afg = Location("Afghanistan",
-                "Afghanistan whole region", true)
-        val afgLocationUid = locationDao.insert(afg)
-        val centralAfg = Location("Central Afghanistan", "Center region", true, afgLocationUid)
-        val centralAfgLocationUid = locationDao.insert(centralAfg)
-        val easternAfg = Location("Eastern Afghanistan", "Eastern region", true, afgLocationUid)
-        locationDao.insert(Location("Kabul Province",
-                "Kabul area", true, centralAfgLocationUid))
-
-        locationDao.insert(easternAfg)
-        val northernAfg = Location("Northern Afghanistan", "Northern region", true, afgLocationUid)
-        val northernAfgLocationUid = locationDao.insert(northernAfg)
-        val westernAfg = Location("Western Afghanistan", "Western region", true, afgLocationUid)
-        locationDao.insert(Location("Kunduz Province",
-                "Kunduz area", true, northernAfgLocationUid))
-
-        val westernAfgLocationUid = locationDao.insert(westernAfg)
-        val southeastAfg = Location("Southeast Afghanistan", "Southeast region", true, afgLocationUid)
-        locationDao.insert(Location("Herat Province",
-                "Herat area", true, westernAfgLocationUid))
-        val southeastAfgLocationUid = locationDao.insert(southeastAfg)
-        locationDao.insert(Location("Khost Province",
-                "Khost area", true, southeastAfgLocationUid))
-        locationDao.insert(Location("Paktika Province",
-                "Paktika area", true, southeastAfgLocationUid))
-
-        val southWestAfg = Location("Southwest Afghanistan",
-                "Southwest region", true, afgLocationUid)
-        locationDao.insert(southWestAfg)
 
         var firstEntry = ContentEntry()
         firstEntry.title = "Ustad Mobile"

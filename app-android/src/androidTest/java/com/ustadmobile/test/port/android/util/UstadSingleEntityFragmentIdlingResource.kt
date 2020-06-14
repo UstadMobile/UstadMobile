@@ -13,7 +13,10 @@ class UstadSingleEntityFragmentIdlingResource(var ustadFragment: UstadBaseFragme
 
     override fun isIdleNow(): Boolean {
         val fragmentVal = ustadFragment
-        val isIdle = if(fragmentVal is UstadEditFragment<*>) {
+        val entityValue = (ustadFragment as? UstadEditFragment<*>)?.entity
+                ?: (ustadFragment as? UstadDetailFragment<*>)?.entity
+
+        val isIdle = (entityValue != null) && if(fragmentVal is UstadEditFragment<*>) {
             !fragmentVal.loading && fragmentVal.fieldsEnabled
         }else if(fragmentVal is UstadDetailFragment<*>){
             !fragmentVal.loading

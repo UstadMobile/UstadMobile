@@ -118,18 +118,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
     }
 
     fun handleUpNavigation() {
-        val impl = UstadMobileSystemImpl.instance
-        val lastEntryListArgs = UMFileUtil.getLastReferrerArgsByViewname(ContentEntry2DetailView.VIEW_NAME, navigation!!)
-        if (lastEntryListArgs !=
-                null) {
-            impl.go(ContentEntry2DetailView.VIEW_NAME,
-                    UMFileUtil.parseURLQueryString(lastEntryListArgs), view.viewContext,
-                    UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
-        } else {
-            impl.go(HomeView.VIEW_NAME, mapOf(), view.viewContext,
-                    UstadMobileSystemCommon.GO_FLAG_CLEAR_TOP or UstadMobileSystemCommon.GO_FLAG_SINGLE_TOP)
-        }
-
+        //This is now handled by jetpack navcontroller
     }
 
 }

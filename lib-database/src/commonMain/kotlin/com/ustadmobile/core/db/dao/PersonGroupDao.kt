@@ -16,47 +16,6 @@ import com.ustadmobile.lib.db.entities.PersonGroup
 @Dao
 abstract class PersonGroupDao : BaseDao<PersonGroup> {
 
-    @Query("SELECT *, 0 AS memberCount FROM PersonGroup")
-    abstract fun findAllGroups(): DataSource.Factory<Int, PersonGroupWithMemberCount>
-
-    @Query("SELECT PersonGroup.*, " +
-            " (SELECT COUNT(*) FROM PersonGroupMember " +
-            "  WHERE groupMemberGroupUid = PersonGroup.groupUid AND" +
-            "  CAST(groupMemberActive AS INTEGER) = 1) AS memberCount " +
-            "FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 ORDER BY PersonGroup.groupName ASC")
-    abstract fun findAllActiveGroups(): DataSource.Factory<Int, PersonGroupWithMemberCount>
-
-    @Query("SELECT PersonGroup.*, " +
-            " (SELECT COUNT(*) FROM PersonGroupMember " +
-            "  WHERE groupMemberGroupUid = PersonGroup.groupUid AND" +
-            "  CAST(groupMemberActive AS INTEGER) = 1) AS memberCount " +
-            "FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 AND groupPersonUid = 0 ORDER BY PersonGroup.groupName ASC")
-    abstract fun findAllActiveGroupsWithoutIndividualGroup(): DataSource.Factory<Int, PersonGroupWithMemberCount>
-
-    @Query("SELECT *, 0 AS memberCount FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1")
-    abstract fun findAllActiveGroupsLive(): DoorLiveData<List<PersonGroupWithMemberCount>>
-
-    @Query("SELECT * FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1")
-    abstract fun findAllActivePersonGroupsLive(): DoorLiveData<List<PersonGroup>>
-
-    @Query("SELECT * FROM PersonGroup WHERE CAST(groupActive AS INTEGER) = 1 AND groupPersonUid = 0")
-    abstract fun findAllActiveGroupPersonGroupsLive(): DoorLiveData<List<PersonGroup>>
-
-    @Query("SELECT PersonGroup.groupMasterCsn, PersonGroup.groupLocalCsn, " +
-            " PersonGroup.groupLastChangedBy, " +
-            " PersonGroup.groupActive, PersonGroup.groupPersonUid, PersonGroup.groupUid, " +
-            " Person.firstNames||' '||Person.lastName as groupName " +
-            " FROM PersonGroup LEFT JOIN PERSON ON Person.personUid = PersonGroup.groupPersonUid " +
-            "  WHERE CAST(groupActive AS INTEGER) = 1 AND groupPersonUid != 0 " +
-            "  AND CAST(Person.active AS INTEGER) = 1")
-    abstract fun findAllActivePersonPersonGroupLive(): DoorLiveData<List<PersonGroup>>
-
-    @Query("SELECT * FROM PersonGroup WHERE groupPersonUid = :personUid ")
-    abstract suspend fun findPersonIndividualGroup(personUid: Long): PersonGroup?
-
-    @Query("UPDATE PersonGroup SET groupActive = 0 WHERE groupUid = :uid")
-    abstract suspend fun inactivateGroupAsync(uid: Long) : Int
-
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")
     abstract fun findByUid(uid: Long): PersonGroup?
 

@@ -16,7 +16,6 @@ pluginManagement {
 
 include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':lib-database-annotation-processor-mpp-test', ':lib-database-annotation-processor-testdb',
         ':app-angular',
-        ':dbcompress',
         ':app-ktor-server',
         ':lib-test-common',
         ':core',
@@ -32,7 +31,6 @@ include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':lib-
         ':lib-room-annotations',
         ':lib-content-editor'
         //':lib-content-scrapers'
-//include ':app-rest-server'
 
 rootProject.name = "UstadMobile"
 enableFeaturePreview("GRADLE_METADATA")

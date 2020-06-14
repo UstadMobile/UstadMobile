@@ -24,6 +24,7 @@ import java.util.*
 import java.util.regex.Pattern
 
 
+@ExperimentalStdlibApi
 class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter, context: Any) : WebViewClient() {
 
 

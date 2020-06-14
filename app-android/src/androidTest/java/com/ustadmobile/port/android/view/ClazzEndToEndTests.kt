@@ -10,24 +10,34 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.NavigationViewActions
 import androidx.test.espresso.contrib.PickerActions
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.hamcrest.Matchers.*
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@AdbScreenRecord("Class end-to-end test")
 class ClazzEndToEndTests {
 
     private lateinit var db: UmAppDatabase
 
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
+
+    @AdbScreenRecord("Given an empty class list, when the user clicks add class and fills in form, then the new class is shown in list")
     @Test
     fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndShownInList() {
         val activeAccount = UmAccount(7L, "bond", "", "http://localhost")
@@ -41,6 +51,8 @@ class ClazzEndToEndTests {
         })
 
         val activityScenario = launchActivity<MainActivity>()
+
+        onView(withId(R.id.home_clazzlist_dest)).perform(click())
         onView(withText(R.string.clazz)).perform(click())
         onView(withId(R.id.activity_clazz_edit_name_text)).perform(typeText("Test Class"))
         closeSoftKeyboard()

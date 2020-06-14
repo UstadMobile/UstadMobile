@@ -10,7 +10,6 @@
         <import type="com.ustadmobile.lib.db.entities.ReportWithFilters" />
         <import type="com.ustadmobile.port.android.view.ReportDetailFragment" />
         <import type="com.ustadmobile.port.android.view.ReportDetailFragment.RecyclerViewChartAdapter" />
-        <import type="com.ustadmobile.port.android.view.ext.ReportWithFiltersExt"/>
 
 
         <variable
