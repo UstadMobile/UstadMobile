@@ -24,8 +24,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.StatementListReport
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -85,34 +85,40 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
                 RecyclerView.ViewHolder(binding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StatementViewHolder {
-            val viewHolder = StatementViewHolder(ItemReportStatementListBinding.inflate(
+            return StatementViewHolder(ItemReportStatementListBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false).apply {
                 mPresenter = presenter
             })
-
-            return viewHolder
         }
 
         override fun onBindViewHolder(holder: StatementViewHolder, position: Int) {
             holder.binding.report = getItem(position)
         }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            presenter = null
+        }
     }
+
+
+    private var statementListObserver = Observer<PagedList<StatementListReport>?> { t ->
+        run {
+            statementAdapter?.submitList(t)
+        }
+    }
+
+    private var currentLiveData: LiveData<PagedList<StatementListReport>>? = null
 
     override var statementList: DataSource.Factory<Int, StatementListReport>? = null
         get() = field
         set(value) {
-            statementLiveData?.removeObserver(statementListObserver)
+            currentLiveData?.removeObserver(statementListObserver)
+            val displayTypeRepoVal = dbRepo?.statementDao ?: return
+            currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
+            currentLiveData?.observe(this, statementListObserver)
             field = value
-            val statementDao = dbRepo?.statementDao ?: return
-            statementLiveData = value?.asRepositoryLiveData(statementDao)
-            statementLiveData?.observe(viewLifecycleOwner, statementListObserver)
         }
-
-    private var statementLiveData: LiveData<PagedList<StatementListReport>>? = null
-
-    private val statementListObserver = Observer<PagedList<StatementListReport>?> { t ->
-        statementAdapter?.submitList(t)
-    }
 
 
     override var chartData: ReportGraphHelper.ChartData? = null
@@ -127,7 +133,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         mBinding = FragmentReportDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
-
+        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         reportRecyclerView = rootView.findViewById(R.id.fragment_detail_report_list)
         chartAdapter = RecyclerViewChartAdapter(this, null)
         statementAdapter = StatementViewRecyclerAdapter(this, null)
@@ -174,6 +180,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         mergeAdapter = null
         dbRepo = null
         chartData = null
+        currentLiveData = null
     }
 
     override fun onResume() {

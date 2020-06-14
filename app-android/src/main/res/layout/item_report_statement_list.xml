@@ -6,19 +6,11 @@
 
         <import type="com.ustadmobile.core.controller.StatementConstants"/>
         <import type="com.ustadmobile.lib.db.entities.ReportWithFilters" />
-        <import type="com.ustadmobile.port.android.view.ReportDetailFragment" />
         <import type="com.ustadmobile.lib.db.entities.StatementListReport" />
-
-
-        <import type="com.ustadmobile.port.android.view.ReportDetailFragment.StatementViewRecyclerAdapter" />
 
         <variable
             name="mPresenter"
             type="com.ustadmobile.core.controller.ReportDetailPresenter" />
-
-        <variable
-            name="adapter"
-            type="StatementViewRecyclerAdapter" />
 
         <variable
             name="report"
