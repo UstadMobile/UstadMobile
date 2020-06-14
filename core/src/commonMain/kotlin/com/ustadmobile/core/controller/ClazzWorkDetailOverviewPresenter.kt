@@ -67,8 +67,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         }
 
         view.studentMode = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-        //TODO: Disable AFTER TESTING
-        //view.studentMode = true
 
 
         if(clazzWorkWithSubmission.clazzWorkSubmission == null){
