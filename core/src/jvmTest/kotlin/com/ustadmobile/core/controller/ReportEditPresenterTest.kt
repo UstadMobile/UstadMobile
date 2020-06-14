@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.dao.ReportDao
+import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SystemImplRule
 import com.ustadmobile.core.util.UmAppDatabaseClientRule
@@ -12,12 +13,16 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyMap
+import org.mockito.ArgumentMatchers.anyString
 
 class ReportEditPresenterTest {
 
@@ -62,17 +67,14 @@ class ReportEditPresenterTest {
 
         val initialEntity = mockView.captureLastEntityValue()!!
 
-        //TODO: Make some changes (e.g. as the user would do using data binding
         initialEntity.reportTitle = "New Report Title"
 
         presenter.handleClickSave(initialEntity)
 
+        val jsonStr = Json.stringify(ReportWithFilters.serializer(), initialEntity)
+
         verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ReportDetailView.VIEW_NAME),
-                eq(mapOf(UstadEditView.ARG_ENTITY_JSON to """{"reportUid":0,"reportOwnerUid":0,
-                    |"chartType":100,"xAxis":300,"yAxis":201,"subGroup":0,"fromDate":0,"toDate":0,
-                    |"reportTitle":"New Report Title","reportInactive":false,
-                    |"reportMasterChangeSeqNum":0,"reportLocalChangeSeqNum":0,
-                    |"reportLastChangedBy":0,"reportFilterList":[]}"}""".trimMargin())), any())
+              eq(mapOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)), eq(context))
     }
 
     @Test
@@ -102,8 +104,6 @@ class ReportEditPresenterTest {
     }
 
 
-
-
     @Test
     fun givenExistingReport_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val testEntity = ReportWithFilters().apply {
@@ -126,14 +126,13 @@ class ReportEditPresenterTest {
         presenter.handleClickSave(initialEntity)
 
         val entitySaved = runBlocking {
-            clientDbRule.db.reportDao.findByUid(initialEntity.reportUid)
+            clientDbRule.db.reportDao.findByUidLive(initialEntity.reportUid)
+                    .waitUntil(5000) { it?.reportTitle == "new Title" }.getValue()
         }
 
         Assert.assertEquals("Name was saved and updated",
                 "new Title", entitySaved?.reportTitle)
     }
-
-
 
 
 }
