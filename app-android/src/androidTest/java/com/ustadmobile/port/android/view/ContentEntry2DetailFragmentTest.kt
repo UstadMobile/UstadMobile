@@ -10,6 +10,8 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
@@ -40,8 +42,13 @@ class ContentEntry2DetailFragmentTest {
     @Rule
     val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
 
+    @JvmField
+    @Rule
+    val adbScreenRecordRule = AdbScreenRecordRule()
+
     lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
+    @AdbScreenRecord("Given content entry exists should show user selected content entry")
     @Test
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntry() {
         val entryTitle = "Dummy Title"
@@ -69,6 +76,7 @@ class ContentEntry2DetailFragmentTest {
 
 
 
+    @AdbScreenRecord("Given a content entry with available translations, should show translations to user")
     @Test
     fun givenContentEntryWithTranslationExists_whenLaunched_thenShouldShowTranslations() {
         val parentUid = 10000L
@@ -97,6 +105,7 @@ class ContentEntry2DetailFragmentTest {
     }
 
 
+    @AdbScreenRecord("Given content entry with translation exists, when user clicks translation, should navigate to translated entry")
     @Test
     fun givenContentEntryWithTranslationExists_whenTranslationClicked_thenShouldShowContentEntry() {
         val parentUid = 10001L
