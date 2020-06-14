@@ -65,8 +65,6 @@ class ClazzWorkEditPresenter(context: Any,
         contentJoinEditHelper.onDeactivateEntity(entityClass)
     }
 
-
-
     val questionAndOptionsEditHelper =
             DefaultOneToManyJoinEditHelper<ClazzWorkQuestionAndOptions>(
             {it.clazzWorkQuestion.clazzWorkQuestionUid},

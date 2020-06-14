@@ -17,6 +17,7 @@ import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
@@ -45,9 +46,11 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
     private lateinit var dbRepo : UmAppDatabase
 
-    //TODO: Build Content list when ready
     private var contentRecyclerAdapter: ContentEntryList2Fragment.ContentEntryListRecyclerAdapter? = null
-    private var contentRecyclerView: RecyclerView? = null
+    private var contentLiveData: LiveData<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
+    private val contentObserver = Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
+        t -> contentRecyclerAdapter?.submitList(t)
+    }
 
     private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter? = null
     private val quizQuestionAndResponseObserver = Observer<List<ClazzWorkQuestionAndOptionWithResponse>?> {
@@ -79,58 +82,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var detailMergerRecyclerAdapter: MergeAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
 
-
-    class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
-            var presenter: ClazzWorkDetailOverviewPresenter?, var studentMode: Boolean)
-        : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
-            ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter.ClazzWorkQuestionViewHolder>(
-            DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
-
-        class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseBinding)
-            : RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkQuestionViewHolder {
-            val viewHolder = ClazzWorkQuestionViewHolder(ItemClazzworkquestionandoptionswithresponseBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
-            viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.freeTextType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
-            viewHolder.binding.quizType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
-            viewHolder.binding.clazzWorkQuizType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
-            viewHolder.binding.studentMode = studentMode?:false
-            return viewHolder
-        }
-
-        override fun onBindViewHolder(holder: ClazzWorkQuestionViewHolder, position: Int) {
-            holder.binding.clazzWorkQuestionAndOptionsWithResponse = getItem(position)
-            holder.binding.studentMode = studentMode
-        }
-    }
-
-
-    class CommentsRecyclerAdapter(var presenter: ClazzWorkDetailOverviewPresenter?)
-        : SelectablePagedListAdapter<CommentsWithPerson,
-            CommentsRecyclerAdapter.CommentsWithPersonViewHolder>(DIFF_CALLBACK_COMMENTS) {
-
-        class CommentsWithPersonViewHolder(val binding: ItemCommetsListBinding)
-            : RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentsWithPersonViewHolder {
-            return CommentsWithPersonViewHolder(ItemCommetsListBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
-        }
-
-        override fun onBindViewHolder(holder: CommentsWithPersonViewHolder, position: Int) {
-            if(itemCount > 0 ) {
-                holder.binding.commentwithperson = getItem(position)
-                //holder.binding.mPresenter = presenter
-            }
-        }
-
-        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-            super.onDetachedFromRecyclerView(recyclerView)
-            presenter = null
-        }
-    }
 
     class SubmissionResultRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?,
                                           visible: Boolean = false)
@@ -261,8 +212,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         override fun onBindViewHolder(holder: ClazzWorkDetailViewHolder, position: Int) {
 
+            holder.itemView.tag = clazzWorkVal?.clazzWorkUid?:0L
             if(currentList.size > 0){
                 holder.itemBinding.clazzWorkWithSubmission = getItem(0)
+                holder.itemView.tag = getItem(position).clazzWorkUid
             }else {
                 holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
             }
@@ -301,6 +254,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         detailRecyclerAdapter = ClazzWorkBasicDetailsRecyclerAdapter(entity)
         detailRecyclerAdapter?.visible = false
 
+        contentRecyclerAdapter = ContentEntryList2Fragment.ContentEntryListRecyclerAdapter(null)
+
         quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
                 mPresenter, studentMode)
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
@@ -326,7 +281,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         privateCommentsHeadingRecyclerAdapter?.visible = true
 
         submissionResultRecyclerAdapter = SubmissionResultRecyclerAdapter(entity)
-        submissionResultRecyclerAdapter?.visible = true
+        submissionResultRecyclerAdapter?.visible = false
 
         submissionFreeTextRecyclerAdapter = SubmissionTextEntryWithResultRecyclerAdapter(entity)
         submissionFreeTextRecyclerAdapter?.visible = false
@@ -364,7 +319,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         detailMergerRecyclerAdapter = MergeAdapter(
                 detailRecyclerAdapter,
-                contentHeadingRecyclerAdapter,
+                contentHeadingRecyclerAdapter, contentRecyclerAdapter,
                 submissionHeadingRecyclerAdapter,
                 submissionResultRecyclerAdapter, submissionFreeTextRecyclerAdapter,
                 questionsHeadingRecyclerAdapter,
@@ -394,9 +349,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         mBinding = null
         mPresenter = null
         entity = null
-        contentRecyclerView?.adapter = null
         contentRecyclerAdapter = null
-        contentRecyclerView = null
         quizQuestionsRecyclerAdapter = null
         publicCommentsRecyclerAdapter = null
         privateCommentsRecyclerAdapter = null
@@ -466,10 +419,13 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
     //TODO: Content when ready.
-    override var clazzWorkContent: DataSource.Factory<Int, ContentEntryWithMetrics>? = null
+    override var clazzWorkContent: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
         get() = field
         set(value) {
+            contentLiveData?.removeObserver(contentObserver)
+            contentLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
             field = value
+            contentLiveData?.observe(viewLifecycleOwner, contentObserver)
         }
 
 

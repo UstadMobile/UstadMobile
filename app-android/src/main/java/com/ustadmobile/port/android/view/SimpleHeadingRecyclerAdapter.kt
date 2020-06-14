@@ -33,4 +33,8 @@ class SimpleHeadingRecyclerAdapter(heading: String)
         viewHolder = null
     }
 
+    override fun onBindViewHolder(holder: SimpleHeadingViewHolder, position: Int) {
+        super.onBindViewHolder(holder, position)
+        holder.itemView.tag = headingText
+    }
 }

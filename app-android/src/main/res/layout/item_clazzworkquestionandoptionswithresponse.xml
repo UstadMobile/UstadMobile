@@ -60,10 +60,10 @@
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
             android:ems="10"
             android:hint="@string/answer"
-            android:inputType="textPersonName"
+            android:inputType="text"
             android:enabled="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid == 0L)}"
             android:text="@={clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseText}"
-            android:visibility="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == freeTextType &amp;&amp; studentMode)?View.VISIBLE:View.GONE}"
+            android:visibility="@{((clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == freeTextType || clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == clazzWorkQuizType) &amp;&amp; studentMode)?View.VISIBLE:View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv" />

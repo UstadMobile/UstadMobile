@@ -16,6 +16,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.math.log
 
 
 class ClazzWorkDetailOverviewPresenter(context: Any,
@@ -53,21 +54,21 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         //Find Content and questions
         val contentList = withTimeoutOrNull(2000) {
-            db.clazzWorkContentJoinDao.findContentByClazzWorkUidLive(
+            db.clazzWorkContentJoinDao.findAllContentByClazzWorkUidDF(
                     clazzWorkWithSubmission.clazzWorkUid,
-                    clazzWorkWithSubmission.clazzWorkStartDateTime,
-                    clazzWorkWithSubmission.clazzWorkDueDateTime)
+                    loggedInPersonUid)
         }
 
         view.clazzWorkContent = contentList
 
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
-            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, clazzWorkWithSubmission.clazzWorkClazzUid?:0L)
+            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+                    clazzWorkWithSubmission.clazzWorkClazzUid?:0L)
         }
 
-        //TODO: DIsable AFTER TESTING
         view.studentMode = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-//        view.studentMode = true
+        //TODO: Disable AFTER TESTING
+        //view.studentMode = true
 
 
         if(clazzWorkWithSubmission.clazzWorkSubmission == null){

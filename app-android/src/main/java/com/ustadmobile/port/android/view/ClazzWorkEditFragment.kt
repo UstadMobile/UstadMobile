@@ -133,7 +133,11 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             mPresenter?.handleAddOrEditClazzQuestionAndOptions(selQuestionAndOptions)
         }
 
-        //TODO: Content when that is ready
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class.java){
+            val contentEntrySelected = it.firstOrNull()?:return@observeResult
+            mPresenter?.handleAddOrEditContent(contentEntrySelected)
+        }
     }
 
     override var timeZone: String = ""

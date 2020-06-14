@@ -8,7 +8,8 @@ import com.ustadmobile.lib.db.entities.*
 
 interface ClazzWorkDetailOverviewView: UstadDetailView<ClazzWorkWithSubmission> {
 
-    var clazzWorkContent: DataSource.Factory<Int,ContentEntryWithMetrics>?
+    var clazzWorkContent
+            :DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
     var clazzWorkQuizQuestionsAndOptionsWithResponse
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
     var timeZone: String

@@ -7,9 +7,12 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlin.random.Random
 
 data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
-data class TestClazzWork(val clazzAndMembers: TestClazzAndMembers, val clazzWork: ClazzWork)
+data class TestClazzWork(val clazzAndMembers: TestClazzAndMembers, val clazzWork: ClazzWork,
+            val quizQuestionsAndOptions: TestClazzWorkWithQuestionAndOptionsAndResponse? = null)
 data class TestClazzWorkWithQuestionAndOptionsAndResponse(val clazzWork: ClazzWork,
       val questionsAndOptions: List<ClazzWorkQuestionAndOptions>, val responses: List<ClazzWorkQuestionResponse?>)
+data class TestContentAndJoin(val contentList : List<ContentEntry> ,
+                               val joinList: List<ClazzWorkContentJoin>)
 
 private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime: Long): ClazzMember {
     return ClazzMember(clazzUid, this.personUid, clazzMemberRole).apply {
@@ -27,7 +30,8 @@ suspend fun UmAppDatabase.insertTestClazzWork(clazzWork: ClazzWork):TestClazzWor
     return TestClazzWork(clazzAndMembers, clazzWork)
 }
 
-suspend fun UmAppDatabase.insertPublicAndPrivateComments(dateNow: Long, clazzWork: ClazzWork, clazzAndMembers: TestClazzAndMembers){
+suspend fun UmAppDatabase.insertPublicAndPrivateComments(dateNow: Long, clazzWork:
+                ClazzWork, clazzAndMembers: TestClazzAndMembers){
     //Public+Private comments
     for(studentWithIndex in clazzAndMembers.studentList.withIndex()){
         val index = studentWithIndex.index
@@ -48,8 +52,6 @@ suspend fun UmAppDatabase.insertPublicAndPrivateComments(dateNow: Long, clazzWor
 
         }
     }
-
-
 
 }
 
@@ -142,6 +144,50 @@ suspend fun UmAppDatabase.insertQuizQuestionsAndOptions(
 
 }
 
+suspend fun UmAppDatabase.createTestContentEntriesAndJoinToClazzWork(clazzWork: ClazzWork,
+                                 numContentEntries: Int): TestContentAndJoin{
+
+    val joinList = mutableListOf<ClazzWorkContentJoin>()
+    val contentList = (1 .. numContentEntries).map {
+        ContentEntry().apply {
+            title = "Content  $it"
+            description = "Content description $it"
+            entryId = "42$it"
+            author = "Mr.Tester McTestface"
+            publik = true
+            publisher = "TestCorp"
+            leaf = true
+            contentEntryUid = contentEntryDao.insertAsync(this)
+
+            joinList.add(ClazzWorkContentJoin().apply {
+
+                clazzWorkContentJoinContentUid = contentEntryUid
+                clazzWorkContentJoinClazzWorkUid = clazzWork.clazzWorkUid
+                clazzWorkContentJoinInactive = false
+                clazzWorkContentJoinUid = clazzWorkContentJoinDao.insertAsync(this)
+            })
+        }
+    }
+
+    return TestContentAndJoin(contentList, joinList)
+}
+
+suspend fun UmAppDatabase.createTestContentEntries(num: Int): List<ContentEntry>{
+
+    return (1 .. num).map {
+        ContentEntry().apply {
+            title = "Content  $it"
+            description = "Content description $it"
+            entryId = "42$it"
+            author = "Mr.Tester McTestface"
+            publik = true
+            publisher = "TestCorp"
+            leaf = true
+            contentEntryUid = contentEntryDao.insertAsync(this)
+        }
+    }
+}
+
 suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
         clazzWork: ClazzWork, responded : Boolean = false, submissionType: Int = -1 ,
         quizQuestionTypeMixed: Boolean = false, quizQuestionType: Int = 0,
@@ -175,8 +221,9 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
         clazzMember = clazzAndMembers.teacherList.get(0)
     }
 
+    var quizQuestionsAndOptions: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
     if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
-        insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzMemberUid,
+        quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzMemberUid,
             studentClazzMember.clazzMemberPersonUid, quizQuestionType, quizQuestionTypeMixed)
     }
 
@@ -200,7 +247,7 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
     }
 
 
-    return TestClazzWork(clazzAndMembers, clazzWork)
+    return TestClazzWork(clazzAndMembers, clazzWork, quizQuestionsAndOptions)
 }
 
 suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
