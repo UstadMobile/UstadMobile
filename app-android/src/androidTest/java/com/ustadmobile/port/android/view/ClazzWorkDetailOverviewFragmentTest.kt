@@ -415,7 +415,8 @@ class ClazzWorkDetailOverviewFragmentTest {
 
         onView(allOf(withId(R.id.item_clazzworkquestionandoptionswithresponse_answer_et),
                 withTagValue(`is`(q2uid)))).perform(
-                ViewActions.clearText(), ViewActions.typeText("Cow says moo"))
+                ViewActions.clearText(), ViewActions.typeText("Cow says moo"),
+                ViewActions.closeSoftKeyboard())
 
         val q3uid = testClazzWork.quizQuestionsAndOptions?.questionsAndOptions?.get(2)?.clazzWorkQuestion?.clazzWorkQuestionUid
         onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(
@@ -432,7 +433,8 @@ class ClazzWorkDetailOverviewFragmentTest {
         onView(withText("Question 4")).check(matches(isEnabled()))
         onView(allOf(withId(R.id.item_clazzworkquestionandoptionswithresponse_answer_et),
                 withTagValue(`is`(q4uid)))).perform(
-                ViewActions.clearText(), ViewActions.typeText("Dog says woof"))
+                ViewActions.clearText(), ViewActions.typeText("Dog says woof",
+                ViewActions.closeSoftKeyboard()))
 
         val q5uid = testClazzWork.quizQuestionsAndOptions?.questionsAndOptions?.get(4)?.clazzWorkQuestion?.clazzWorkQuestionUid
         onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(
