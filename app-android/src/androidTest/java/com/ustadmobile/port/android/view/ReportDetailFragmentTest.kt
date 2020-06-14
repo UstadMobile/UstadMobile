@@ -18,17 +18,27 @@ import com.ustadmobile.test.port.android.util.installNavController
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.whenever
+import com.soywiz.klock.DateTime
+import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class ReportDetailFragmentTest {
+class ReportDetailFragmentTest : AbstractXapiReportOptionsTest() {
 
     @JvmField
     @Rule
@@ -38,11 +48,39 @@ class ReportDetailFragmentTest {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+
+    lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
+
+    @Before
+    fun setup() {
+        insertXapi(dbRule.db)
+    }
 
     @Test
     fun givenReportExists_whenLaunched_thenShouldShowReport() {
         val existingClazz = ReportWithFilters().apply {
-            reportTitle = "Test Report"
+            chartType = Report.BAR_CHART
+            yAxis = Report.AVG_DURATION
+            xAxis = Report.MONTH
+            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            toDate = DateTime(2019, 6, 11).unixMillisLong
+            reportFilterList = listOf(
+                    ReportFilter().apply {
+                        entityUid = 100
+                        entityType = ReportFilter.PERSON_FILTER
+                    },
+                    ReportFilter().apply {
+                        entityUid = 200
+                        entityType = ReportFilter.VERB_FILTER
+                    },
+                    ReportFilter().apply {
+                        entityUid = 300
+                        entityType = ReportFilter.CONTENT_FILTER
+                    }
+            )
             reportUid = dbRule.db.reportDao.insert(this)
         }
 
@@ -50,16 +88,13 @@ class ReportDetailFragmentTest {
                 fragmentArgs = bundleOf(ARG_ENTITY_UID to existingClazz.reportUid)) {
             ReportDetailFragment().also {
                 it.installNavController(systemImplNavRule.navController)
+                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(it)
+                IdlingRegistry.getInstance().register(fragmentIdlingResource)
             }
-        }
-
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
-        }
-
-
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
+
     }
 
 }

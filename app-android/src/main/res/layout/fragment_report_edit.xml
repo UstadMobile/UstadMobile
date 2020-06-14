@@ -6,6 +6,7 @@
     <data>
 
         <import type="android.view.View" />
+        <import type="android.text.InputType" />
         <import type="com.ustadmobile.core.util.MessageIdOption"/>
 
         <variable
@@ -173,6 +174,7 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:hint="@string/from"
+                    android:inputType="@{InputType.TYPE_NULL}"
                     app:runOnClickWhenFocused="@{true}"
                     app:dateLong="@={report.fromDate}" />
 
@@ -196,7 +198,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
-                    android:inputType="none"
+                    android:inputType="@{InputType.TYPE_NULL}"
                     app:runOnClickWhenFocused="@{true}"
                     app:dateLong="@={report.toDate}" />
 

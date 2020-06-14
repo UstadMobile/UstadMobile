@@ -31,7 +31,7 @@ class ReportWithFilters() : Report() {
 
         var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
                 FROM StatementEntity 
-                LEFT JOIN Person ON Person.personUid = StatementEntity.personUid 
+                LEFT JOIN Person ON Person.personUid = StatementEntity.statementPersonUid 
                 LEFT JOIN XLangMapEntry ON StatementEntity.statementVerbUid = XLangMapEntry.verbLangMapUid """
 
         var sql = "SELECT " + when (yAxis) {

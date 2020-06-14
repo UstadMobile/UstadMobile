@@ -13,6 +13,7 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.lib.db.entities.Report
@@ -25,11 +26,11 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
     var colorList = listOf("#009688", "#FF9800", "#2196F3", "#f44336", "#673AB7", "#607D8B", "#E91E63", "#9C27B0", "#795548", "9E9E9E", "#4CAF50")
 
     fun setChartData(chartData: ReportGraphHelper.ChartData?) {
-        if(chartData == null){
+        if (chartData == null) {
             return
         }
         removeAllViewsInLayout()
-        val chart = createChart(chartData.dataList, chartData.reportWithFilters,  chartData.xAxisLabel, chartData.subGroupLabel)
+        val chart = createChart(chartData.dataList, chartData.reportWithFilters, chartData.xAxisLabel, chartData.subGroupLabel)
         addView(chart)
     }
 
@@ -71,50 +72,84 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
             barChart.setTouchEnabled(false)
 
-            val secondList = mutableListOf<MutableList<BarEntry>>()
-            distinctSubgroups.forEachIndexed { idx, subGroup ->
+
+            val barData = BarData()
+            if(subgroupLabels.isEmpty()){
+
+
                 val xAxisList = mutableListOf<BarEntry>()
-                subgroupList.add(subgroupLabels[subGroup] ?: error(""))
-                groupedByXAxis.keys.forEach { xAxisKey ->
+                groupedByXAxis.keys.forEachIndexed{ idx, xAxisKey ->
+
                     xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
-                    val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
-                    val barValue = barReportData?.yAxis ?: 0f
+                    val barValue = groupedByXAxis[xAxisKey]?.first()?.yAxis ?: 0f
                     val barEntry = BarEntry((idx).toFloat(), barValue)
                     xAxisList.add(barEntry)
                 }
-                secondList.add(xAxisList)
-            }
 
-            val sizeOfX = subgroupList.size
-            val barSpace = 0.01f
-            val groupSpace = 0.08f
-            val barWidth = (1 - groupSpace) / sizeOfX - barSpace
 
-            val barData = BarData()
-            barData.barWidth = barWidth
-            secondList.forEachIndexed { idx, it ->
-                val barDataSet = BarDataSet(it, subgroupList.elementAt(idx))
-                barDataSet.color = Color.parseColor(colorList[idx])
+                val barDataSet = BarDataSet(xAxisList, "")
                 barDataSet.setDrawValues(false)
+                barDataSet.color = Color.parseColor(colorList[0])
                 barData.addDataSet(barDataSet)
-            }
+                barData.barWidth = 0.9f
+                barChart.data = barData
+                barChart.setFitBars(true)
 
-            val xAxis = barChart.xAxis
-            barChart.axisLeft.axisMinimum = 0f
-            barChart.xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
-            barChart.data = barData
+               val xAxis = barChart.xAxis
+                barChart.axisLeft.axisMinimum = 0f
+                barChart.xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
+                barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+                barChart.xAxis.granularity = 1f
+                xAxis.labelRotationAngle = -45f
+                barChart.xAxis.isGranularityEnabled = true
 
 
-            barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-            barChart.xAxis.setCenterAxisLabels(true)
-            barChart.xAxis.granularity = 1f
-            xAxis.labelRotationAngle = -45f
-            barChart.xAxis.isGranularityEnabled = true
-            xAxis.axisMinimum = 0f
-            xAxis.axisMaximum = xAxisLabelList.size.toFloat()
-            barChart.xAxis.mAxisMaximum = 0 + barChart.barData.getGroupWidth(groupSpace, barSpace) * xAxis.axisMaximum
-            if(sizeOfX > 1){
-                barChart.groupBars(0f, groupSpace, barSpace)
+            }else{
+
+                val secondList = mutableListOf<MutableList<BarEntry>>()
+                distinctSubgroups.forEachIndexed { idx, subGroup ->
+                    val xAxisList = mutableListOf<BarEntry>()
+                    subgroupList.add(subgroupLabels[subGroup] ?: error(""))
+                    groupedByXAxis.keys.forEach { xAxisKey ->
+                        xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
+                        val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
+                        val barValue = barReportData?.yAxis ?: 0f
+                        val barEntry = BarEntry((idx).toFloat(), barValue)
+                        xAxisList.add(barEntry)
+                    }
+                    secondList.add(xAxisList)
+                }
+
+                val sizeOfX = subgroupList.size
+                val barSpace = 0.01f
+                val groupSpace = 0.08f
+                val barWidth = (1 - groupSpace) / sizeOfX - barSpace
+
+                barData.barWidth = barWidth
+                secondList.forEachIndexed { idx, it ->
+                    val barDataSet = BarDataSet(it, subgroupList.elementAt(idx))
+                    barDataSet.color = Color.parseColor(colorList[idx])
+                    barDataSet.setDrawValues(false)
+                    barData.addDataSet(barDataSet)
+                }
+
+                val xAxis = barChart.xAxis
+                barChart.axisLeft.axisMinimum = 0f
+                barChart.xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
+                barChart.data = barData
+
+
+                barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+                barChart.xAxis.setCenterAxisLabels(true)
+                barChart.xAxis.granularity = 1f
+                xAxis.labelRotationAngle = -45f
+                barChart.xAxis.isGranularityEnabled = true
+                xAxis.axisMinimum = 0f
+                xAxis.axisMaximum = xAxisLabelList.size.toFloat()
+                barChart.xAxis.mAxisMaximum = 0 + barChart.barData.getGroupWidth(groupSpace, barSpace) * xAxis.axisMaximum
+                if(sizeOfX > 1){
+                    barChart.groupBars(0f, groupSpace, barSpace)
+                }
             }
 
             barChart.invalidate()
@@ -179,7 +214,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             val xAxis = lineChart.xAxis
             lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.granularity = 1f
-            xAxis.valueFormatter =  IndexAxisValueFormatter(xAxisLabelList)
+            xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
             xAxis.labelRotationAngle = -45f
             xAxis.axisMinimum = 0f
 

@@ -4,8 +4,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
-import androidx.test.espresso.Espresso.onIdle
-import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.*
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.toughra.ustadmobile.R
@@ -18,9 +18,14 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.matcher.RootMatchers
+import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.withText
+import com.soywiz.klock.DateTime
+import com.ustadmobile.core.controller.ReportEditPresenter
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
-
 
 class ReportEditFragmentTest {
 
@@ -31,6 +36,7 @@ class ReportEditFragmentTest {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
 
     @Test
     fun givenNoReportPresentYet_whenFilledInAndSaveClicked_thenShouldNavigateToDetailScreen() {
@@ -65,6 +71,7 @@ class ReportEditFragmentTest {
 
         val contentEntry = ContentEntry().apply {
             title = "Khan Academy"
+            description = "content here"
             contentEntryUid = dbRule.db.contentEntryDao.insert(this)
         }
 
@@ -73,9 +80,11 @@ class ReportEditFragmentTest {
         val formVals = ReportWithFilters().apply {
             reportTitle = "New Report"
             chartType = Report.LINE_GRAPH
-            xAxis = Report.AVG_DURATION
-            yAxis = Report.WEEK
+            yAxis = Report.AVG_DURATION
+            xAxis = Report.WEEK
             subGroup = Report.WEEK
+            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            toDate = DateTime(2019, 6, 11).unixMillisLong
         }
 
         fillFields(fragmentScenario, formVals, currentEntity, true, person, verbDisplay, contentEntry)
@@ -99,6 +108,10 @@ class ReportEditFragmentTest {
     fun givenReportExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
         val existingReport = ReportWithFilters().apply {
             reportTitle = "New Report"
+            chartType = Report.LINE_GRAPH
+            yAxis = Report.AVG_DURATION
+            xAxis = Report.WEEK
+            subGroup = Report.WEEK
             reportUid = dbRule.db.reportDao.insert(this)
         }
 
@@ -119,9 +132,19 @@ class ReportEditFragmentTest {
         val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
         val newClazzValues = defaultGson().fromJson(entityLoadedJson, ReportWithFilters::class.java).apply {
             reportTitle = "Updated Report"
+            chartType = Report.BAR_CHART
+            yAxis = Report.COUNT_ACTIVITIES
+            xAxis = Report.MONTH
+            subGroup = Report.MONTH
         }
 
-        fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment)
+        val person = Person().apply {
+            firstNames = "Ustad"
+            lastName = "Mobile"
+            personUid = dbRule.db.personDao.insert(this)
+        }
+
+        fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment, person = person)
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
@@ -131,8 +154,24 @@ class ReportEditFragmentTest {
 
         val updatedEntityFromDb = dbRule.db.reportDao.findByUidLive(existingReport.reportUid)
                 .waitUntilWithFragmentScenario(fragmentScenario) { it?.reportTitle == "Updated Report" }
+        val reportFilerListFromDb = dbRule.db.reportFilterDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
+            it.isNotEmpty()
+        }
+
         Assert.assertEquals("Report name is updated", "Updated Report",
                 updatedEntityFromDb?.reportTitle)
+        Assert.assertEquals("chart type updated", Report.BAR_CHART,
+                updatedEntityFromDb?.chartType)
+        Assert.assertEquals("y axis updated", Report.COUNT_ACTIVITIES,
+                updatedEntityFromDb?.yAxis)
+        Assert.assertEquals("y axis updated", Report.COUNT_ACTIVITIES,
+                updatedEntityFromDb?.yAxis)
+        Assert.assertEquals("x axis updated", Report.MONTH,
+                updatedEntityFromDb?.xAxis)
+        Assert.assertEquals("subgroup updated", Report.MONTH,
+                updatedEntityFromDb?.subGroup)
+        Assert.assertEquals("one filter added",1,
+                reportFilerListFromDb!!.size)
     }
 
     companion object {
@@ -147,6 +186,34 @@ class ReportEditFragmentTest {
                 onView(withId(R.id.fragment_report_edit_title)).perform(clearText(), typeText(it))
             }
 
+            Espresso.closeSoftKeyboard()
+
+            report.chartType.takeIf { it != reportOnForm?.chartType }?.also {
+                setMessageIdOption(R.id.fragment_edit_report_dialog_visual_type_textinputlayout,
+                        it, fragmentScenario.letOnFragment { it.chartOptions }!!)
+            }
+
+            report.yAxis.takeIf { it != reportOnForm?.yAxis }?.also {
+                setMessageIdOption(R.id.fragment_edit_report_dialog_yaxis_textinputlayout,
+                        it, fragmentScenario.letOnFragment { it.yAxisOptions }!!)
+            }
+
+            report.xAxis.takeIf { it != reportOnForm?.xAxis }?.also {
+                setMessageIdOption(R.id.fragment_edit_report_dialog_xaxis_textinputlayout,
+                        it, fragmentScenario.letOnFragment { it.xAxisOptions }!!)
+            }
+
+            report.subGroup.takeIf { it != reportOnForm?.subGroup }?.also {
+                setMessageIdOption(R.id.fragment_edit_report_dialog_subgroup_textinputlayout,
+                        it, fragmentScenario.letOnFragment { it.groupOptions }!!)
+            }
+
+            report.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
+                setDateField(R.id.activity_report_edit_fromDate_textinputlayout, it)
+            }
+            report.toDate.takeIf { it != reportOnForm?.toDate }?.also {
+                setDateField(R.id.activity_report_edit_toDate_textinputlayout, it)
+            }
 
             if (!setFieldsRequiringNavigation) {
                 return
@@ -167,7 +234,7 @@ class ReportEditFragmentTest {
             fragmentScenario.onFragment { fragment ->
                 fragment.takeIf { entry != null }
                         ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                        ?.set("ContentEntry", defaultGson().toJson(listOf(entry)))
+                        ?.set("Content", defaultGson().toJson(listOf(entry)))
             }
 
         }

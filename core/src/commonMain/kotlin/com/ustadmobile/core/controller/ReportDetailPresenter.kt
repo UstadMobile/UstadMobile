@@ -26,7 +26,7 @@ class ReportDetailPresenter(context: Any,
         db, repo, activeAccount) {
 
 
-    val graphHelper = ReportGraphHelper(context, systemImpl, repo)
+    private val graphHelper = ReportGraphHelper(context, systemImpl, repo)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -77,7 +77,6 @@ class ReportDetailPresenter(context: Any,
         GlobalScope.launch {
             val chartData = graphHelper.getChartDataForReport(reportWithFilters)
             val statementList = graphHelper.getStatementListForReport(reportWithFilters)
-
             view.runOnUiThread(Runnable {
                 view.chartData = chartData
                 view.statementList = statementList

@@ -50,7 +50,7 @@
             android:id="@+id/preview_add_to_dashboard_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:icon="@drawable/fab_add"
+            app:icon="@drawable/ic_add_white_24dp"
             app:iconTint="@color/primary"
             android:textColor="@color/primary"
             android:text="@{@string/add_to(@string/dashboard)}"

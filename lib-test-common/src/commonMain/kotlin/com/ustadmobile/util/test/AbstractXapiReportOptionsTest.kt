@@ -38,7 +38,7 @@ abstract class AbstractXapiReportOptionsTest {
         var fourthPerson = Person()
         fourthPerson.firstNames = "Never"
         fourthPerson.lastName = "Give"
-        fourthPerson.gender = Person.GENDER_OTHER
+        fourthPerson.gender = Person.GENDER_FEMALE
         fourthPerson.personUid = personDao.insert(fourthPerson)
 
         var firstVerb = VerbEntity()

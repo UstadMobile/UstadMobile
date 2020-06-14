@@ -108,15 +108,15 @@ class ReportEditPresenter(context: Any,
 
 
     val contentOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
-            "state_Person_list", ReportFilterWithDisplayDetails.serializer().list,
+            "state_Content_list", ReportFilterWithDisplayDetails.serializer().list,
             ReportFilterWithDisplayDetails.serializer().list, this) { reportFilterUid = it }
 
-    fun handleAddOrEditContent(person: ReportFilterWithDisplayDetails) {
-        contentOneToManyJoinEditHelper.onEditResult(person)
+    fun handleAddOrEditContent(content: ReportFilterWithDisplayDetails) {
+        contentOneToManyJoinEditHelper.onEditResult(content)
     }
 
-    fun handleRemoveContent(person: ReportFilterWithDisplayDetails) {
-        contentOneToManyJoinEditHelper.onDeactivateEntity(person)
+    fun handleRemoveContent(content: ReportFilterWithDisplayDetails) {
+        contentOneToManyJoinEditHelper.onDeactivateEntity(content)
     }
 
     override fun onCreate(savedState: Map<String, String>?) {

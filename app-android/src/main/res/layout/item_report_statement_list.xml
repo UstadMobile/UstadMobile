@@ -36,7 +36,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/dimen_8dp"
-
+            android:text="@{report.person.fullName()}"
             app:layout_constraintEnd_toStartOf="@+id/guideline_person"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -52,7 +52,7 @@
             android:id="@+id/xapi_verb"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-
+            android:text="@{report.xlangMapEntry.valueLangMap}"
             app:layout_constraintEnd_toStartOf="@+id/guideline_verb"
             app:layout_constraintStart_toEndOf="@id/guideline_person"
             app:layout_constraintTop_toTopOf="parent" />
@@ -69,6 +69,8 @@
             android:id="@+id/xapi_result"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            app:textMessageIdLookupKey="@{report.resultSuccess}"
+            app:textMessageIdLookupMap="@{StatementConstants.STATEMENT_RESULT_OPTIONS}"
             app:layout_constraintEnd_toStartOf="@+id/guideline_result"
             app:layout_constraintStart_toEndOf="@id/guideline_verb"
             app:layout_constraintTop_toTopOf="parent" />

@@ -131,7 +131,6 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
             mPresenter?.handleAddOrEditPerson(filterDetail)
         }
 
-
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 VerbDisplay::class.java) {
             val verb = it.firstOrNull() ?: return@observeResult
@@ -147,7 +146,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
                 ContentEntry::class.java) {
             val entry = it.firstOrNull() ?: return@observeResult
             val filterDetail = ReportFilterWithDisplayDetails()
-            filterDetail.entityType = ReportFilter.VERB_FILTER
+            filterDetail.entityType = ReportFilter.CONTENT_FILTER
             filterDetail.entityUid = entry.contentEntryUid
             filterDetail.contentEntry = entry
             mPresenter?.handleAddOrEditContent(filterDetail)
@@ -262,7 +261,6 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
 
     override fun onClickAddNewContentFilter() {
         onSaveStateToBackStackStateHandle()
-        val list = contentFilterList?.value?.map { it.entityUid }
         navigateToPickEntityFromList(ContentEntry::class.java,
                 R.id.content_entry_list_dest)
     }
@@ -289,6 +287,8 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         personRecyclerAdapter = null
         verbDisplayRecyclerAdapter = null
         verbDisplayRecyclerView = null
+        contentDisplayRecyclerAdapter = null
+        contentDisplayRecyclerView = null
         entity = null
     }
 
@@ -325,7 +325,6 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
     override var chartOptions: List<ReportEditPresenter.ChartTypeMessageIdOption>? = null
 
     override var yAxisOptions: List<ReportEditPresenter.YAxisMessageIdOption>? = null
-
 
     override var xAxisOptions: List<ReportEditPresenter.XAxisMessageIdOption>? = null
 
