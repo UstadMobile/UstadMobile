@@ -73,7 +73,7 @@ class ClazzWorkDetailOverviewPresenterTest {
 
         val testClazzWork = runBlocking {
             clientDbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-                    ClazzWork(), true, 0, true, 0,
+                    ClazzWork(), true, -1, true, 0,
             false, true)
         }
 
@@ -97,14 +97,10 @@ class ClazzWorkDetailOverviewPresenterTest {
                 ClazzWork.CLAZZ_WORK_TABLE_ID, testClazzWork.clazzWork.clazzWorkUid)
         verify(mockView, timeout(5000).atLeastOnce()).clazzWorkPublicComments = any()
 
-        verify(repoCommentsDaoSpy, timeout(5000).atLeastOnce()).findPrivateByEntityTypeAndUidLive(
-                ClazzWork.CLAZZ_WORK_TABLE_ID, testClazzWork.clazzWork.clazzWorkUid)
-        verify(mockView, timeout(5000).atLeastOnce()).clazzWorkPrivateComments = any()
-
         verify(mockView, timeout(5000).atLeastOnce()).timeZone =
                 testClazzWork.clazzAndMembers.clazz.clazzTimeZone!!
 
-        verify(mockView, timeout(5000).atLeastOnce()).studentMode = true
+        verify(mockView, timeout(5000).atLeastOnce()).studentMode = false
 
         val liveDataSet = nullableArgumentCaptor<DoorMutableLiveData<
                 List<ClazzWorkQuestionAndOptionWithResponse>>>().run {
@@ -143,7 +139,9 @@ class ClazzWorkDetailOverviewPresenterTest {
     fun givenClazzWorkExists_whenClickSubmit_thenShouldPersistSubmissionResult(){
         val testClazzWork = runBlocking {
             clientDbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-                    ClazzWork(), true, 0, true, 0,
+                    ClazzWork().apply {
+                        clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
+                    }, true, -1, true, 0,
                     false, true)
         }
 
@@ -175,18 +173,14 @@ class ClazzWorkDetailOverviewPresenterTest {
         verify(mockView, timeout(20000).atLeastOnce()).entity = any()
 
         //Verify submission is set
-        runBlocking {
-            val postSubmission = clientDbRule.db.clazzWorkSubmissionDao.findByClazzWorkUidLive(
-                    testClazzWork.clazzWork.clazzWorkUid).waitUntil(5000)
-            Assert.assertEquals("Submission set", postSubmission.first().clazzWorkSubmissionClazzWorkUid,
+        GlobalScope.launch {
+            val postSubmission = clientDbRule.db.clazzWorkSubmissionDao.findByClazzWorkUidAsync(
+                    testClazzWork.clazzWork.clazzWorkUid)
+
+            Assert.assertEquals("Submission set",
+                    postSubmission.first().clazzWorkSubmissionClazzWorkUid,
                     testClazzWork.clazzWork.clazzWorkUid)
         }
-
-
-
-
-
-
     }
 
 
