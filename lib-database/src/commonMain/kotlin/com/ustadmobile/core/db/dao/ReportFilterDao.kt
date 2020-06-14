@@ -4,11 +4,9 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.ReportFilterWithDisplayDetails
-import com.ustadmobile.lib.db.entities.VerbDisplay
+import com.ustadmobile.lib.db.entities.*
 
 @Dao
 @UmRepository
@@ -38,6 +36,12 @@ abstract class ReportFilterDao : BaseDao<ReportFilter>, OneToManyJoinDao<ReportF
     override suspend fun deactivateByUids(uidList: List<Long>) {
         uidList.forEach { updateActiveByUid(it, true) }
     }
+
+    @Query("SELECT * From ReportFilter WHERE reportFilterUid = :uid")
+    abstract fun findByUidLive(uid: Long): DoorLiveData<ReportFilter?>
+
+    @Query("Select * From ReportFilter")
+    abstract fun findAllLive(): DoorLiveData<List<ReportFilter>>
 
 
 

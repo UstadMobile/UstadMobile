@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.dao.ReportDao
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SystemImplRule
 import com.ustadmobile.core.util.UmAppDatabaseClientRule
 import com.ustadmobile.core.util.ext.captureLastEntityValue
@@ -73,6 +74,35 @@ class ReportEditPresenterTest {
                     |"reportMasterChangeSeqNum":0,"reportLocalChangeSeqNum":0,
                     |"reportLastChangedBy":0,"reportFilterList":[]}"}""".trimMargin())), any())
     }
+
+    @Test
+    fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalledAndTitleNotSet_thenShouldNotGoToDetailWithJson() {
+        val presenterArgs = mapOf<String, String>()
+
+        val presenter = ReportEditPresenter(context,
+                presenterArgs, mockView, mockLifecycleOwner,
+                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
+                clientDbRule.accountLiveData)
+        presenter.onCreate(null)
+
+        val initialEntity = mockView.captureLastEntityValue()!!
+
+        presenter.handleClickSave(initialEntity)
+
+        verify(systemImplRule.systemImpl, timeout(5000)).getString(eq(MessageID.field_required_prompt), any())
+
+        // verify its never called because view would show as error
+        verify(systemImplRule.systemImpl, never()).go(eq(ReportDetailView.VIEW_NAME),
+                eq(mapOf(UstadEditView.ARG_ENTITY_JSON to """{"reportUid":0,"reportOwnerUid":0,
+                    |"chartType":100,"xAxis":300,"yAxis":201,"subGroup":0,"fromDate":0,"toDate":0,
+                    |"reportTitle":"New Report Title","reportInactive":false,
+                    |"reportMasterChangeSeqNum":0,"reportLocalChangeSeqNum":0,
+                    |"reportLastChangedBy":0,"reportFilterList":[]}"}""".trimMargin())), any())
+
+    }
+
+
+
 
     @Test
     fun givenExistingReport_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {

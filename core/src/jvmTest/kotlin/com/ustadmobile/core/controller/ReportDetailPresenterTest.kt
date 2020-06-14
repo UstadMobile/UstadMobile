@@ -11,14 +11,19 @@ import com.ustadmobile.core.util.SystemImplRule
 import com.ustadmobile.core.util.UmAppDatabaseClientRule
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ReportDao
+import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -95,6 +100,54 @@ class ReportDetailPresenterTest : AbstractXapiReportOptionsTest() {
     }
 
     @Test
+    fun givenNewReport_whenUserClicksOnAddToDashboard_thenDatabaseIsCreated(){
+        val testEntity = ReportWithFilters().apply {
+            //set variables here
+            reportTitle = "New Report Title"
+            chartType = Report.BAR_CHART
+            xAxis = Report.MONTH
+            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            toDate = DateTime(2019, 6, 11).unixMillisLong
+            reportFilterList = listOf(
+                    ReportFilter().apply {
+                        entityUid = 100
+                        entityType = ReportFilter.PERSON_FILTER
+                    },
+                    ReportFilter().apply {
+                        entityUid = 200
+                        entityType = ReportFilter.VERB_FILTER
+                    },
+                    ReportFilter().apply {
+                        entityUid = 300
+                        entityType = ReportFilter.CONTENT_FILTER
+                    }
+            )
+        }
+
+        val presenterArgs = mapOf(ARG_ENTITY_JSON to Json.stringify(ReportWithFilters.serializer(), testEntity))
+        val presenter = ReportDetailPresenter(context,
+                presenterArgs, mockView, mockLifecycleOwner,
+                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
+                clientDbRule.accountLiveData)
+
+        presenter.onCreate(null)
+
+
+        presenter.handleOnClickAddFromDashboard(testEntity)
+
+        val existingEntitiesLive = clientDbRule.db.reportDao.findAllLive()
+        val entitySaved = runBlocking {
+            existingEntitiesLive.waitUntil { it.size == 1 }
+        }.getValue()!!.first()
+        Assert.assertEquals("Entity was saved to database", "New Report Title",
+                entitySaved.reportTitle)
+
+
+
+
+    }
+
+    @Test
     fun givenReportExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
         val testEntity = ReportWithFilters().apply {
             //set variables here
@@ -127,7 +180,7 @@ class ReportDetailPresenterTest : AbstractXapiReportOptionsTest() {
         presenter.onCreate(null)
 
         //wait for the entity value to be set
-        val value = mockView.captureLastEntityValue(120000)
+        mockView.captureLastEntityValue(120000)
 
         presenter.handleClickEdit()
 
