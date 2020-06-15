@@ -15,6 +15,7 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AuditLogListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -79,7 +80,7 @@ class AuditLogListActivity : UstadBaseActivity(), AuditLogListView, PopupMenu.On
         setContentView(R.layout.activity_audit_log_list)
 
         //Toolbar:
-        toolbar = findViewById(R.id.activity_audit_log_list_toolbar)
+        toolbar = findViewById(R.id.toolbar)
         toolbar!!.setTitle(getText(R.string.audit_log))
         setSupportActionBar(toolbar)
         Objects.requireNonNull(supportActionBar)!!.setDisplayHomeAsUpEnabled(true)
@@ -95,7 +96,7 @@ class AuditLogListActivity : UstadBaseActivity(), AuditLogListView, PopupMenu.On
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
 
         //FAB and its listener
-        val fab = findViewById<FloatingTextButton>(R.id.activity_audit_log_list_fab)
+        val fab = findViewById<ExtendedFloatingActionButton>(R.id.activity_audit_log_list_fab)
 
         fab.setOnClickListener { v -> showPopup(v) }
 

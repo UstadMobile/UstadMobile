@@ -83,7 +83,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_16dp"
-                android:backgroundTint="@color/accent"
+                android:backgroundTint="?colorSecondary"
                 android:onClick="@{()-> activityEventHandler.onClickContentImportSourceSelection()}"
                 android:padding="@dimen/dimen_16dp"
                 android:text="@{contentEntry.contentEntryUid == 0 ? @string/import_content: @string/update_content}"

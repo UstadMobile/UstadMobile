@@ -94,5 +94,6 @@
     <dimen name="layout_dimen_10dp">10dp</dimen>
     <dimen name="layout_dimen_16dp">16dp</dimen>
     <dimen name="layout_dimen_22dp">22dp</dimen>
+    <dimen name="layout_dimen_52dp">110dp</dimen>
     <dimen name="layout_dimen_110dp">110dp</dimen>
 </resources>

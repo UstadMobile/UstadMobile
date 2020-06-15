@@ -120,6 +120,7 @@ class ContentEntryEdit2Presenter(context: Any,
                     (entity.contentEntryUid == 0L && view.selectedFileUri != null))
 
             if(canCreate){
+                entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
                 if(entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
                     val contentEntryJoin = ContentEntryParentChildJoin().apply {

@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.ustadmobile.port.android.view.AttendanceActivity">
+    android:orientation="vertical">
 
     <include android:id="@+id/um_toolbar" layout="@layout/toolbar"/>
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <FrameLayout
         android:id="@+id/attendance_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >

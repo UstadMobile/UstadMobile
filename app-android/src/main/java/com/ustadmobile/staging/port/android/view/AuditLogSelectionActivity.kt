@@ -2,30 +2,29 @@ package com.ustadmobile.staging.port.android.view
 
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.Toast
 import androidx.appcompat.app.ActionBar
-import androidx.appcompat.widget.Toolbar
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.databinding.ActivityAuditLogSelectionBinding
 import com.ustadmobile.core.controller.AuditLogSelectionPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.AuditLogSelectionView
-import com.ustadmobile.port.android.view.*
-import ru.dimorinny.floatingtextbutton.FloatingTextButton
+import com.ustadmobile.port.android.impl.UmDropDownOption
+import com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView
+import com.ustadmobile.port.android.view.UstadBaseActivity
+import kotlinx.android.synthetic.main.layout_toolbar.view.*
 import java.util.*
 
 class AuditLogSelectionActivity : UstadBaseActivity(), AuditLogSelectionView,
         //SelectClazzesDialogFragment.ClazzSelectDialogListener,
         SelectMultipleTreeDialogFragment.MultiSelectTreeDialogListener,
-        SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener {
+        SelectTwoDatesDialogFragment.CustomTimePeriodDialogListener,
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<UmDropDownOption> {
 
-    private var toolbar: Toolbar? = null
     private var mPresenter: AuditLogSelectionPresenter? = null
-    private var timePeriodSpinner: Spinner? = null
-    private var classesTextView: TextView? = null
-    private var locationsTextView: TextView? = null
-    private var personTextView: TextView? = null
-    private var actorTextView: TextView? = null
+    private var mBiding: ActivityAuditLogSelectionBinding? = null
+    private var timePeriodPresets: List<UmDropDownOption> ? = null
 
 
     /**
@@ -47,24 +46,12 @@ class AuditLogSelectionActivity : UstadBaseActivity(), AuditLogSelectionView,
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        //Setting layout:
-        setContentView(R.layout.activity_audit_log_selection)
-
-        //Toolbar:
-        toolbar = findViewById(R.id.activity_audit_log_selection_toolbar)
-        toolbar!!.title = getText(R.string.audit_log)
-        setSupportActionBar(toolbar)
+        mBiding = ActivityAuditLogSelectionBinding.inflate(layoutInflater)
+        setContentView(mBiding?.root)
+        mBiding?.root?.toolbar?.title = getText(R.string.audit_log)
+        setSupportActionBar(mBiding?.root?.toolbar)
         Objects.requireNonNull<ActionBar>(supportActionBar).setDisplayHomeAsUpEnabled(true)
 
-        timePeriodSpinner = findViewById(R.id.activity_audit_log_time_period_spinner)
-        classesTextView = findViewById(R.id.activity_audit_log_classes_edittext)
-        locationsTextView = findViewById(R.id.activity_audit_log_location_edittext)
-        personTextView = findViewById(R.id.activity_audit_log_person_edittext)
-        actorTextView = findViewById(R.id.activity_audit_log_changed_by_edittext)
-
-
-        //Call the Presenter
         mPresenter = AuditLogSelectionPresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)
         mPresenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
@@ -75,29 +62,17 @@ class AuditLogSelectionActivity : UstadBaseActivity(), AuditLogSelectionView,
         updateActorIfEmpty()
 
 
-        timePeriodSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                mPresenter!!.handleTimePeriodSelected(position)
-            }
+        mBiding?.timePeriodChoices?.onDropDownListItemSelectedListener = this
 
-            override fun onNothingSelected(parent: AdapterView<*>) {
+        mBiding?.activityAuditLogClassesEdittext?.setOnClickListener { v -> mPresenter!!.goToSelectClassesDialog() }
 
-            }
-        }
+        mBiding?.activityAuditLogLocationEdittext?.setOnClickListener { v -> mPresenter!!.goToLocationDialog() }
 
-        classesTextView!!.setOnClickListener { v -> mPresenter!!.goToSelectClassesDialog() }
+        mBiding?.activityAuditLogPersonEdittext?.setOnClickListener { v -> mPresenter!!.goToPersonDialog() }
 
-        locationsTextView!!.setOnClickListener { v -> mPresenter!!.goToLocationDialog() }
+        mBiding?.activityAuditLogChangedByEdittext?.setOnClickListener { v -> mPresenter!!.goToActorDialog() }
 
-        personTextView!!.setOnClickListener { v -> mPresenter!!.goToPersonDialog() }
-
-        actorTextView!!.setOnClickListener { v -> mPresenter!!.goToActorDialog() }
-
-
-        //FAB and its listener
-        val fab = findViewById<FloatingTextButton>(R.id.activity_audit_log_selection_fab)
-
-        fab.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
+        mBiding?.activityAuditLogSelectionFab?.setOnClickListener { v -> mPresenter!!.handleClickPrimaryActionButton() }
 
 
     }
@@ -181,39 +156,54 @@ class AuditLogSelectionActivity : UstadBaseActivity(), AuditLogSelectionView,
 
     override fun populateTimePeriod(options: HashMap<Int, String>) {
 
-        val timePeriodPresets = options.values.toTypedArray()
-        val adapter = ArrayAdapter(applicationContext,
-                R.layout.item_simple_spinner, timePeriodPresets)
+        timePeriodPresets = options.values.toTypedArray().map {
+            UmDropDownOption(it)
+        }
+        mBiding?.optionItems = timePeriodPresets
 
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        timePeriodSpinner!!.adapter = adapter
     }
 
     override fun updateLocationsSelected(locations: String) {
-        locationsTextView!!.text = locations
+        mBiding?.activityAuditLogLocationEdittext?.text = locations
         if (locations == "") {
             updateLocationIfEmpty()
         }
     }
 
     override fun updateClazzesSelected(clazzes: String) {
-        classesTextView!!.text = clazzes
+        mBiding?.activityAuditLogClassesEdittext?.text = clazzes
         if (clazzes == "") {
             updateClassesIfEmpty()
         }
     }
 
     override fun updatePeopleSelected(people: String) {
-        personTextView!!.text = people
+        mBiding?.activityAuditLogPersonEdittext?.text = people
         if (people == "") {
             updatePeopleIfEmpty()
         }
     }
 
     override fun updateActorsSelected(actors: String) {
-        actorTextView!!.text = actors
+        mBiding?.activityAuditLogChangedByEdittext?.text = actors
         if (actors == "") {
             updateActorIfEmpty()
         }
+    }
+
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: UmDropDownOption) {
+        val index = timePeriodPresets?.indexOf(selectedOption)
+        if(index != null){
+            mPresenter!!.handleTimePeriodSelected(index)
+        }
+    }
+
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {}
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mPresenter = null
+        mBiding = null
+        timePeriodPresets = null
     }
 }

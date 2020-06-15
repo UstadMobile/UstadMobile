@@ -91,13 +91,12 @@
                     tools:text="Publisher" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:visibility="@{contentEntry.licenseName == null ? View.GONE: View.VISIBLE}"
                     android:id="@+id/entry_detail_license_label"
                     android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/layout_dimen_8dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="@dimen/text_body_small"
                     android:text="@{@string/entry_details_license + contentEntry.licenseName}"
                     app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
@@ -139,9 +138,7 @@
                         android:padding="@dimen/layout_dimen_16dp"
                         android:text="@{contentEntry.container == null ? @string/download : @string/open}"
                         android:layout_height="wrap_content"
-                        app:backgroundTint="@color/primary"
-                        android:onClick="@{()-> fragmentEventHandler.handleOnClickOpenDownloadButton()}"
-                        android:textColor="@android:color/white" />
+                        android:onClick="@{()-> fragmentEventHandler.handleOnClickOpenDownloadButton()}" />
 
                     <com.ustadmobile.port.android.view.DownloadProgressView
                         android:id="@+id/entryDetailProgress"
@@ -169,7 +166,6 @@
                     android:layout_width="@dimen/layout_dimen_16dp"
                     android:layout_height="@dimen/layout_dimen_16dp"
                     android:layout_marginTop="@dimen/layout_dimen_8dp"
-
                     android:tint="?colorOnIconTint"
                     app:layout_constraintEnd_toEndOf="@id/entry_detail_content_size"
                     app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
@@ -202,6 +198,7 @@
 
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:visibility="gone"
                     android:layout_marginEnd="@dimen/layout_dimen_16dp"
                     android:id="@+id/content_status_text"
@@ -209,8 +206,6 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/layout_dimen_8dp"
                     android:layout_marginTop="@dimen/layout_dimen_8dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.973"
                     app:layout_constraintStart_toStartOf="parent"
@@ -284,13 +279,12 @@
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_available_label" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                     android:id="@+id/entry_detail_see_also_label"
                     android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/layout_dimen_8dp"
-                    android:text="SEE ALSO"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp"
+                    tools:text="SEE ALSO"
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
