@@ -53,27 +53,13 @@ class ReportListFragmentTest : AbstractXapiReportOptionsTest() {
     @AdbScreenRecord("given report in list, when clicked, go to detail report")
     @Test
     fun givenReportPresent_whenClickOnReport_thenShouldNavigateToReportDetail() {
-        val testEntity = ReportWithFilters().apply {
+        val testEntity = Report().apply {
             reportTitle = "Test Name"
             chartType = Report.BAR_CHART
             yAxis = Report.AVG_DURATION
             xAxis = Report.MONTH
             fromDate =  DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportFilterList = listOf(
-                    ReportFilter().apply {
-                        entityUid = 100
-                        entityType = ReportFilter.PERSON_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 200
-                        entityType = ReportFilter.VERB_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 300
-                        entityType = ReportFilter.CONTENT_FILTER
-                    }
-            )
             reportUid = dbRule.db.reportDao.insert(this)
         }
 

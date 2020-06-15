@@ -185,38 +185,73 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             lineChart.setTouchEnabled(false)
 
 
-            val secondList = mutableListOf<MutableList<Entry>>()
-            distinctSubgroups.forEach { subGroup ->
+            val barData = LineData()
+            if(subgroupLabels.isEmpty()){
+
+
                 val xAxisList = mutableListOf<Entry>()
-                subgroupList.add(subgroupLabels[subGroup] ?: error(""))
-                groupedByXAxis.keys.forEachIndexed { idx, xAxisKey ->
+                groupedByXAxis.keys.forEachIndexed{ idx, xAxisKey ->
+
                     xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
-                    val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
-                    val barValue = barReportData?.yAxis ?: 0f
+                    val barValue = groupedByXAxis[xAxisKey]?.first()?.yAxis ?: 0f
                     val barEntry = Entry((idx).toFloat(), barValue)
                     xAxisList.add(barEntry)
                 }
-                secondList.add(xAxisList)
-            }
 
-
-            val barData = LineData()
-            secondList.forEachIndexed { idx, it ->
-                val barDataSet = LineDataSet(it, subgroupList.elementAt(idx))
-                barDataSet.axisDependency = YAxis.AxisDependency.LEFT
-                barDataSet.color = Color.parseColor(colorList[idx])
+                val barDataSet = LineDataSet(xAxisList, "")
                 barDataSet.setDrawValues(false)
+                barDataSet.color = Color.parseColor(colorList[0])
                 barData.addDataSet(barDataSet)
+                lineChart.data = barData
+
+                val xAxis = lineChart.xAxis
+                lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.granularity = 1f
+                xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
+                xAxis.labelRotationAngle = -45f
+                xAxis.axisMinimum = 0f
+
+
+            }else {
+
+
+                val secondList = mutableListOf<MutableList<Entry>>()
+                distinctSubgroups.forEach { subGroup ->
+                    val xAxisList = mutableListOf<Entry>()
+                    subgroupList.add(subgroupLabels[subGroup] ?: error(""))
+                    groupedByXAxis.keys.forEachIndexed { idx, xAxisKey ->
+                        xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
+                        val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
+                        val barValue = barReportData?.yAxis ?: 0f
+                        val barEntry = Entry((idx).toFloat(), barValue)
+                        xAxisList.add(barEntry)
+                    }
+                    secondList.add(xAxisList)
+                }
+
+
+
+                secondList.forEachIndexed { idx, it ->
+                    val barDataSet = LineDataSet(it, subgroupList.elementAt(idx))
+                    barDataSet.axisDependency = YAxis.AxisDependency.LEFT
+                    barDataSet.color = Color.parseColor(colorList[idx])
+                    barDataSet.setDrawValues(false)
+                    barData.addDataSet(barDataSet)
+                }
+                lineChart.data = barData
+
+
+                val xAxis = lineChart.xAxis
+                lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.granularity = 1f
+                xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
+                xAxis.labelRotationAngle = -45f
+                xAxis.axisMinimum = 0f
+
+
             }
-            lineChart.data = barData
 
 
-            val xAxis = lineChart.xAxis
-            lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-            xAxis.granularity = 1f
-            xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
-            xAxis.labelRotationAngle = -45f
-            xAxis.axisMinimum = 0f
 
             lineChart.invalidate()
 
