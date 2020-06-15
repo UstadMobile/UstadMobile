@@ -101,6 +101,8 @@ class ReportDetailFragmentTest : AbstractXapiReportOptionsTest() {
             }
         }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
+        Thread.sleep(2000)
+
         IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
 
     }
