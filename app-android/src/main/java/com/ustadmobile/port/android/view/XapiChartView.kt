@@ -62,7 +62,6 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             barChart.axisRight.isEnabled = false
 
             //Legend:
-            barChart.legend.isEnabled = true
             barChart.legend.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
             barChart.legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
             barChart.legend.setDrawInside(true)
@@ -94,6 +93,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 barData.barWidth = 0.9f
                 barChart.data = barData
                 barChart.setFitBars(true)
+                barChart.legend.isEnabled = false
 
                val xAxis = barChart.xAxis
                 barChart.axisLeft.axisMinimum = 0f
@@ -137,6 +137,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 barChart.axisLeft.axisMinimum = 0f
                 barChart.xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
                 barChart.data = barData
+                barChart.legend.isEnabled = true
 
 
                 barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -175,7 +176,6 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             lineChart.axisRight.isEnabled = false
 
             //Legend:
-            lineChart.legend.isEnabled = true
             lineChart.legend.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
             lineChart.legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
             lineChart.legend.setDrawInside(true)
@@ -203,6 +203,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 barDataSet.color = Color.parseColor(colorList[0])
                 barData.addDataSet(barDataSet)
                 lineChart.data = barData
+                lineChart.legend.isEnabled = false
 
                 val xAxis = lineChart.xAxis
                 lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -239,6 +240,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                     barData.addDataSet(barDataSet)
                 }
                 lineChart.data = barData
+                lineChart.legend.isEnabled = true
 
 
                 val xAxis = lineChart.xAxis
