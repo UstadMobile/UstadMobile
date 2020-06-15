@@ -44,7 +44,9 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
 
     private var clazzTimeZone: String? = null
 
-    private val graphObserver = object: DoorObserver<List<ClazzLog>> {
+    //It is required to explicitly specify the type due to a compiler bug:
+    // https://youtrack.jetbrains.com/issue/KT-20996
+    private val graphObserver : DoorObserver<List<ClazzLog>> = object: DoorObserver<List<ClazzLog>> {
         override fun onChanged(t: List<ClazzLog>) {
             graphDisplayData.sendValue(AttendanceGraphData(
                 t.map { it.logDate to it.attendancePercentage() },

@@ -23,8 +23,10 @@ import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.test.port.android.util.*
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -44,6 +46,10 @@ class ClazzEditFragmentTest  {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+
 
     @AdbScreenRecord("")
     @Test
@@ -58,7 +64,7 @@ class ClazzEditFragmentTest  {
                 it.installNavController(systemImplNavRule.navController)
                 it.arguments = bundleOf()
             }
-        }
+        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         val currentEntity = fragmentScenario.letOnFragment { it.entity }
         val formVals = ClazzWithHolidayCalendarAndSchool().apply {
@@ -113,6 +119,7 @@ class ClazzEditFragmentTest  {
                 it.installNavController(systemImplNavRule.navController)
             }
         }
+        dataBindingIdlingResourceRule.idlingResource.monitorFragment(fragmentScenario)
 
         val editIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it })
         IdlingRegistry.getInstance().register(editIdlingResource)

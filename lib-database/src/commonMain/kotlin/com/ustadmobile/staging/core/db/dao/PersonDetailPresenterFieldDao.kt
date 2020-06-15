@@ -26,37 +26,11 @@ abstract class PersonDetailPresenterFieldDao : BaseDao<PersonDetailPresenterFiel
     @Query("SELECT * FROM PersonDetailPresenterField WHERE personDetailPresenterFieldUid = :uid")
     abstract fun findByUid(uid: Long): PersonDetailPresenterField?
 
-    @Query("SELECT * FROM PersonDetailPresenterField WHERE CAST(viewModeVisible AS INTEGER) = 1 ORDER BY fieldIndex")
-    abstract fun findAllPersonDetailPresenterFieldsViewModeLive() : DoorLiveData<List<PersonDetailPresenterField>>
-
-    @Query("SELECT * FROM PersonDetailPresenterField WHERE CAST(editModeVisible AS INTEGER) = 1 ORDER BY fieldIndex")
-    abstract fun findAllPersonDetailPresenterFieldsEditModeLive() :
-            DoorLiveData<List<PersonDetailPresenterField>>
 
     @Query("SELECT * FROM PersonDetailPresenterField WHERE fieldIndex = :id")
     abstract suspend fun findAllByFieldIndex(id: Int) : List<PersonDetailPresenterField>
 
     //TODO: Could this use subquery instead of left join to avoid possible duplicate rows?
     // eg. http://dcx.sybase.com/1200/en/dbusage/subinjo.html
-
-
-    @Query(FIND_BYPERSON_UID_WITH_FIELD_AND_VALUE_SQL)
-    abstract fun findByPersonUidWithFieldAndValue(personUid: Long): DoorLiveData<List<PresenterFieldQueryRow>>
-
-    @Query(FIND_BYPERSON_UID_WITH_FIELD_AND_VALUE_SQL)
-    abstract fun findByPersonUidWithFieldAndValueAsList(personUid: Long): List<PresenterFieldQueryRow>
-
-
-    companion object {
-        const val FIND_BYPERSON_UID_WITH_FIELD_AND_VALUE_SQL =
-            """SELECT PersonDetailPresenterField.*, CustomField.*, CustomFieldValue.*,
-             CustomFieldValueOption.*
-             FROM PersonDetailPresenterField
-             LEFT JOIN CustomField ON PersonDetailPresenterField.fieldUid = CustomField.customFieldUid
-             LEFT JOIN CustomFieldValue ON CustomFieldValue.customFieldValueEntityUid = :personUid AND CustomFieldValue.customFieldValueFieldUid = CustomField.customFieldUid
-             LEFT JOIN CustomFieldValueOption ON CustomFieldValueOption.customFieldValueOptionFieldUid = CustomField.customFieldUid
-             ORDER BY PersonDetailPresenterField.fieldIndex
-            """
-    }
 
 }

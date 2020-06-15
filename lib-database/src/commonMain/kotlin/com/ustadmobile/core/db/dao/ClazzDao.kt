@@ -79,10 +79,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         }
     }
 
-
-    @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER )
-    abstract fun findAllClazzesByPersonUid(personUid: Long): DataSource.Factory<Int, ClazzWithNumStudents>
-
     @Query(CLAZZ_SELECT + CLAZZ_WHERE_CLAZZMEMBER +
             " WHERE CAST(Clazz.isClazzActive AS INTEGER) = 1 " +
             " AND Clazz.clazzName like :searchQuery" +
@@ -121,12 +117,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             " :permission" + ENTITY_LEVEL_PERMISSION_CONDITION2 + "))")
     abstract suspend fun personHasPermissionWithClazz(accountPersonUid: Long, clazzUid: Long,
                                                       permission: Long) : Boolean
-
-    @QueryLiveTables(["Person", "PersonGroupMember"])
-    @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
-            + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
-    abstract fun personHasPermissionLive(accountPersonUid: Long, permission: Long)
-            : DoorLiveData<Boolean>
 
     @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
             + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
@@ -176,11 +166,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                 " AND (" +
                 "(EntityRole.ertableId = " + Clazz.TABLE_ID +
                 " AND EntityRole.erEntityUid = Clazz.clazzUid) " +
-                "OR" +
-                "(EntityRole.ertableId = " + Location.TABLE_ID +
-                " AND EntityRole.erEntityUid IN (SELECT locationAncestorAncestorLocationUid " +
-                " FROM LocationAncestorJoin WHERE locationAncestorChildLocationUid = " +
-                " Clazz.clazzLocationUid))" +
+
                 ") AND (Role.rolePermissions & "
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"

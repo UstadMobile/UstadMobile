@@ -202,7 +202,8 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
         titleView = rootView.findViewById(R.id.document_title)
 
         val pageListView : RecyclerView = rootView.findViewById(R.id.page_list)
-        val btnAddPage:View = rootView.findViewById(R.id.btn_add_page)
+        //this has been changed to avoid requiring an third party extended fab lib
+        val btnAddPage:View = rootView.findViewById(R.id.page_list)
         val layoutManager = LinearLayoutManager(activity)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         pageListView.layoutManager = layoutManager

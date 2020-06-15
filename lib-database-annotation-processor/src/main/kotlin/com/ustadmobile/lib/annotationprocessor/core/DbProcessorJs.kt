@@ -144,7 +144,8 @@ class DbProcessorJs : AbstractDbProcessor(){
             implTypeSpec.addAccessorOverride(it, CodeBlock.of("return _${daoTypeClassName.simpleName}\n"))
         }
 
-        return implFileSpec.addType(implTypeSpec.build()).build()
+        return implFileSpec.addType(implTypeSpec.build())
+                .build()
     }
 
 
@@ -158,7 +159,7 @@ class DbProcessorJs : AbstractDbProcessor(){
                 .addDbJsImplPropsAndConstructor(addDbProp = true)
                 .superclass(daoTypeEl.asClassName())
 
-        methodsToImplement(daoTypeEl, daoType as DeclaredType, processingEnv, includeImplementedMethods = true).forEach {daoSubEl ->
+        methodsToImplement(daoTypeEl, daoType as DeclaredType, processingEnv).forEach {daoSubEl ->
             if (daoSubEl.kind != ElementKind.METHOD)
                 return@forEach
 
@@ -235,6 +236,7 @@ class DbProcessorJs : AbstractDbProcessor(){
         }
 
         daoImplFile.addType(daoTypeSpec.build())
+                .addImport("kotlinx.serialization.builtins", "serializer")
         return daoImplFile.build()
 
     }

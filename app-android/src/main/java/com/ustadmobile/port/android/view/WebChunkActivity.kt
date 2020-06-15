@@ -15,6 +15,7 @@ import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient
 
+@ExperimentalStdlibApi
 class WebChunkActivity : UstadBaseActivity(), WebChunkView {
 
     private var mPresenter: WebChunkPresenter? = null

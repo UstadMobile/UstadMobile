@@ -106,6 +106,7 @@ object UMIOUtils {
         out.flush()
     }
 
+    @ExperimentalStdlibApi
     @JvmOverloads
     @JvmStatic
     fun readStreamToString(`in`: InputStream, bufsize: Int = DEFAULT_BUFFER_SIZE): String {
@@ -113,7 +114,7 @@ object UMIOUtils {
         readFully(`in`, bout, bufsize)
         `in`.close()
 
-        return stringFromUtf8Bytes(bout.toByteArray())
+        return  bout.toByteArray().decodeToString() //stringFromUtf8Bytes(bout.toByteArray())
     }
 
     @JvmOverloads
@@ -125,20 +126,7 @@ object UMIOUtils {
     }
 
 
-    /**
-     * Read from the given input stream and return a string
-     *
-     * @param in Input Stream to read from
-     * @param encoding Encoding to use
-     * @return String from the given input stream in the given encoding
-     * @throws IOException
-     */
-    fun readToString(`in`: InputStream, encoding: String): String {
-        val bout = ByteArrayOutputStream()
-        readFully(`in`, bout, 1024)
-        `in`.close()
-        return stringFromUtf8Bytes(bout.toByteArray())
-    }
+
 
 
     fun throwIfNotNullIO(e: Exception?) {

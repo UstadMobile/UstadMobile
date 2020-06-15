@@ -6,7 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.lib.db.entities.Container
 
-actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
+actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String>,
                                                        view: ContentEditorView, private val storage: String?,
                                                        private val database : UmAppDatabase,
                                                        private val repository : UmAppDatabase,

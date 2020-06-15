@@ -57,23 +57,24 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "org.jetbrains.kotlinx:atomicfu-common:$atomicfu_version"
                 compileOnly project(":lib-room-annotations")
             }
         }
 
-        jsTest {
-            dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-test-js:$version_kotlin"
-            }
-        }
+//        jsTest {
+//            dependencies {
+//                implementation "org.jetbrains.kotlin:kotlin-test-js:$version_kotlin"
+//            }
+//        }
 
-        commonTest {
-            commonTest {
-                dependencies {
-                    implementation project(":lib-database-mpp")
-                }
-            }
-        }
+//        commonTest {
+//            commonTest {
+//                dependencies {
+//                    implementation project(":lib-database-mpp")
+//                }
+//            }
+//        }
 
         commonJvmMain {
             dependencies {

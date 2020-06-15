@@ -17,7 +17,7 @@ buildscript {
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha01"
+    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha03"
 }
 
 apply plugin: 'com.android.library'
@@ -67,6 +67,7 @@ tasks.whenTaskAdded { task ->
 android {
     dataBinding {
         enabled = true
+        enabledForTests = true
     }
 
     kotlinOptions {
@@ -162,6 +163,7 @@ android {
             dimension "config"
             minSdkVersion 18
             multiDexEnabled true
+            multiDexKeepProguard file('multidex-config.pro')
         }
 
         /**
@@ -170,7 +172,6 @@ android {
         devMinApi21 {
             dimension "config"
             minSdkVersion 21
-            multiDexEnabled true
         }
     }
 
@@ -312,7 +313,6 @@ dependencies {
 
     implementation "com.github.aakira:napier-android:$version_napier"
     implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
-    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation "androidx.activity:activity:$version_androidx_activity"
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"
     implementation "androidx.fragment:fragment:$version_androidx_fragment"
@@ -353,8 +353,6 @@ dependencies {
     implementation "ch.acra:acra-http:$version_android_acra"
 
 
-    implementation "com.github.TellH:RecyclerTreeView:$version_tellh_recyclertreeview"
-
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
     implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
     implementation "androidx.cardview:cardview:$version_androidx_cardview"
@@ -366,9 +364,6 @@ dependencies {
 
     //Image loading library
     implementation "com.squareup.picasso:picasso:$version_android_picasso"
-
-    //Floating action button with support for popup choices
-    implementation 'com.github.clans:fab:1.6.4'
 
     //Page indicator
     implementation 'com.romandanylyk:pageindicatorview:1.0.0@aar'
@@ -406,9 +401,6 @@ dependencies {
     //Codec2 (low bitrate voice) Android library
     implementation "com.ustadmobile.codec2:libcodec2-android:0.8-SNAPSHOT64-2"
 
-    //Implements app-wide rotation for presentation mode
-    implementation "rongi.rotate-layout:rotate-layout:$version_android_rotatelayout"
-
     //http server
     implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
@@ -416,17 +408,8 @@ dependencies {
     //image compressor
     implementation "id.zelory:compressor:$version_compressor"
 
-    //extended fab
-    implementation "com.github.dimorinny:floating-text-button:$version_android_fab_extended"
-
-    //bottom navigation
-    implementation "com.aurelhubert:ahbottomnavigation:$version_android_bottom_nav"
-
     //Range seekbar by Crystal
     implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
-
-    //Bottom Navigation
-    implementation "com.aurelhubert:ahbottomnavigation:$version_android_ahbottomnavigation"
 
     //Android play core for update support within the application
     implementation "com.google.android.play:core:$version_play_core"
@@ -448,7 +431,6 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
     testImplementation "androidx.test.espresso:espresso-core:$version_android_espresso"
     testImplementation "androidx.test.espresso:espresso-contrib:$version_android_espresso"
-    testImplementation "com.azimolabs.conditionwatcher:conditionwatcher:0.2"
 
     //Required for databinding to work using JVM tests
     kaptTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"

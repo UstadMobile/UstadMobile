@@ -8,9 +8,6 @@ interface ContentEntryExportView : UstadView{
     @JsName("updateExportProgress")
     fun updateExportProgress(progress: Int)
 
-    @JsName("checkFilePermissions")
-    fun checkFilePermissions()
-
     @JsName("setDialogMessage")
     fun setDialogMessage(title: String)
 

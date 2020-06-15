@@ -84,17 +84,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     var messageIdMap: Map<Int, Int> = mapOf()
 
     /**
-     * The rotation option is used for app demonstrations where a projector is used. The device
-     * must be in landscape mode when connected to HDMI output. Therefor to project portrait, the
-     * app itself must rotate it's views, and then the projector itself can be placed at a 90
-     * degree angle
-     *
-     * This is implemented by overrinding the setContentView method on UstadBaseActivity
-     */
-    var rotationEnabled: Boolean? = false
-        internal set
-
-    /**
      * This should be used only for testing. This will use the given navcontroller instead of
      * finding the navcontroller from the mainactivity. This is used for Espresso testing on Fragments.
      */
@@ -107,13 +96,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             VideoPlayerView.VIEW_NAME to "${PACKAGE_NAME}VideoPlayerActivity",
             ContentEditorView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorActivity",
             ContentEditorPageListView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorPageListFragment",
-            SelectMultipleLocationTreeDialogView.VIEW_NAME to "${PACKAGE_NAME}SelectMultipleLocationTreeDialogFragment",
-            SelectMultipleEntriesTreeDialogView.VIEW_NAME to "${PACKAGE_NAME}SelectMultipleEntriesTreeDialogFragment",
-            XapiReportOptionsView.VIEW_NAME to "${PACKAGE_NAME}XapiReportOptionsActivity",
-            XapiReportDetailView.VIEW_NAME to "${PACKAGE_NAME}XapiReportDetailActivity",
             WebChunkView.VIEW_NAME to "${PACKAGE_NAME}WebChunkActivity",
             Register2View.VIEW_NAME to "${PACKAGE_NAME}Register2Activity",
-            HomeView.VIEW_NAME to "${PACKAGE_NAME}HomeActivity",
             SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
             OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
             LoginView.VIEW_NAME to "${PACKAGE_NAME}LoginActivity",
@@ -121,46 +105,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             XapiPackageContentView.VIEW_NAME to "${PACKAGE_NAME}XapiPackageContentActivity",
             ScormPackageView.VIEW_NAME to "${PACKAGE_NAME}ScormPackageActivity",
-            UserProfileView.VIEW_NAME to "${PACKAGE_NAME}UserProfileActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            SELSelectStudentView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELSelectStudentActivity",
-            SELSelectConsentView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELSelectConsentActivity",
-            SELEditView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELEditActivity",
-            SELQuestionView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELQuestionActivity",
-            SELRecognitionView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SELRecognitionActivity",
-            ClazzActivityEditView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ClazzActivityEditActivity",
-            AddActivityChangeDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddActivityChangeDialogFragment",
-            SelectMultipleTreeDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectMultipleTreeDialogFragment",
-            SelectTwoDatesDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}SelectTwoDatesDialogFragment",
-            BulkUploadMasterView.VIEW_NAME to "${STAGING_PACKAGE_NAME}BulkUploadMasterActivity",
-            AddQuestionSetDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddQuestionSetDialogFragment",
-            PersonPictureDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonPictureDialogFragment",
-            AddQuestionOptionDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddQuestionOptionDialogFragment",
-            CallPersonRelatedDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CallPersonRelatedDialogFragment",
-            ReportSELView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportSELActivity",
-            PersonListSearchView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonListSearchActivity",
-            BaseReportView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ReportSelectionFragment",
-            GroupListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}GroupListActivity",
-            GroupDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}GroupDetailActivity",
-            RoleAssignmentDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}RoleAssignmentDetailActivity",
-            RoleAssignmentListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}RoleAssignmentListActivity",
-            LocationListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}LocationListActivity",
-            LocationDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}LocationDetailActivity",
-            AuditLogSelectionView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AuditLogSelectionActivity",
-            AuditLogListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AuditLogListActivity",
-            PersonAuthDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PersonAuthDetailActivity",
-            CustomFieldListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CustomFieldListActivity",
-            CustomFieldDetailView.VIEW_NAME to "${STAGING_PACKAGE_NAME}CustomFieldDetailActivity",
-            AddCustomFieldOptionDialogView.VIEW_NAME to "${STAGING_PACKAGE_NAME}AddCustomFieldOptionDialogFragment",
-            ChangePasswordView.VIEW_NAME to "${STAGING_PACKAGE_NAME}ChangePasswordActivity",
-            PeopleListView.VIEW_NAME to "${STAGING_PACKAGE_NAME}PeopleListActivity",
 
             ContentEntryExportView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryExportFragmentDialog",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-            ClazzAssignmentEditView.VIEW_NAME to "${PACKAGE_NAME}ClazzAssignmentEditActivity",
-            ClazzAssignmentDetailView.VIEW_NAME to "${PACKAGE_NAME}ClazzAssignmentDetailActivity",
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
-            PersonGroupListView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupListActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
 
@@ -662,7 +611,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         const val TAG = "UstadMobileImplAndroid"
 
         private const val PACKAGE_NAME = "com.ustadmobile.port.android.view."
-        private const val STAGING_PACKAGE_NAME = "com.ustadmobile.staging.port.android.view."
 
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 

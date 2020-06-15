@@ -15,6 +15,8 @@ import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -22,16 +24,16 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions.Companion.childOfViewAtPositionWithMatcher
 import kotlinx.coroutines.runBlocking
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 
+@AdbScreenRecord("Attendance list screen tests")
 @RunWith(AndroidJUnit4::class)
 class ClazzLogListAttendanceFragmentTest {
 
@@ -40,6 +42,14 @@ class ClazzLogListAttendanceFragmentTest {
     lateinit var navController: NavController
 
     private lateinit var db: UmAppDatabase
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
 
     @Before
     fun setup() {
@@ -59,6 +69,7 @@ class ClazzLogListAttendanceFragmentTest {
         UstadMobileSystemImpl.instance.navController = null
     }
 
+    @AdbScreenRecord("Given class is scheduled, when user clicks on a day then should navigate to record attendance")
     @Test
     fun givenClazzUidWithExistingLog_whenClickOnClazzLog_thenShouldNavigateToClazzEditAttendance() {
         recyclerViewIdlingResource.minItemCount = 2 //as the chart header item is one
@@ -73,7 +84,7 @@ class ClazzLogListAttendanceFragmentTest {
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
             bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
                 themeResId = R.style.Theme_UstadTheme
-        )
+        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             recyclerViewIdlingResource.recyclerView = it.mDataBinding!!.fragmentListRecyclerview
@@ -88,6 +99,7 @@ class ClazzLogListAttendanceFragmentTest {
                 navController.currentDestination?.id, R.id.clazz_log_edit_attendance_dest)
     }
 
+    @AdbScreenRecord("Given attendance has been recorded for past days, graph should be displayed to user")
     @Test
     fun givenListOfRecordedClazzLogs_whenCreated_thenGraphShouldShow() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
@@ -116,7 +128,7 @@ class ClazzLogListAttendanceFragmentTest {
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
                 bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()),
                 themeResId = R.style.Theme_UstadTheme
-        )
+        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), navController)

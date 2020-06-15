@@ -17,7 +17,7 @@ class AboutActivity : UstadBaseActivity(), AboutView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
-        setUMToolbar(R.id.um_toolbar)
+        setUMToolbar(R.id.toolbar)
         setTitle(R.string.about)
         mAboutPresenter = AboutPresenter(this,
                 bundleToMap(intent.extras),

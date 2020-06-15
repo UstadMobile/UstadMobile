@@ -10,17 +10,22 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import com.ustadmobile.util.test.ext.insertContentEntryWithParentChildJoinAndMostRecentContainer
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 
+@AdbScreenRecord("Content entry list screen tests")
 class ContentEntryList2FragmentTest  {
 
     @JvmField
@@ -31,7 +36,15 @@ class ContentEntryList2FragmentTest  {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
 
+    @JvmField
+    @Rule
+    val adbScreenRecordRule = AdbScreenRecordRule()
+
+    @AdbScreenRecord("Given Content entry present when user clicks on an entry then should navigate to entry")
     @Test
     fun givenContentEntryPresent_whenClickOnContentEntry_thenShouldNavigateToContentEntryDetail() {
         val parentEntryUid = 10000L
@@ -43,7 +56,7 @@ class ContentEntryList2FragmentTest  {
                 bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                         ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT),
                 themeResId = R.style.Theme_UstadTheme
-        )
+        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         fragmentScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)

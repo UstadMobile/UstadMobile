@@ -1,6 +1,5 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
@@ -9,7 +8,6 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.EntityRole
-import com.ustadmobile.lib.db.entities.EntityRoleWithGroupName
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)", 
         updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN, 
@@ -38,28 +36,6 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
     @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " + "AND erGroupUid = :groupUid")
     abstract suspend fun findByEntitiyAndPersonGroup(tableId: Int, entityUid: Long, groupUid:
         Long) : List<EntityRole>
-
-    @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " + "AND erGroupUid = :groupUid")
-    abstract fun findByEntitiyAndPersonGroupSync(tableId: Int, entityUid: Long, groupUid: Long): List<EntityRole>
-
-    @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " + "AND erRoleUid = :roleUid")
-    abstract suspend fun findGroupByRoleAndEntityTypeAndUid(tableId: Int, entityUid: Long,
-                                                            roleUid: Long) :List<EntityRole>
-
-    @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " + "AND erRoleUid = :roleUid")
-    abstract fun findGroupByRoleAndEntityTypeAndUidSync(tableId: Int, entityUid: Long,
-                                                        roleUid: Long): List<EntityRole>
-
-    @Query(SELECT_ROLE_ASSIGNMENT_QUERY)
-    abstract fun findAllActiveRoleAssignments(): DataSource.Factory<Int, EntityRoleWithGroupName>
-
-    @Query(SELECT_ROLE_ASSIGNMENT_QUERY + ROLE_ASSIGNMENT_BY_PERSONGROUP_WHERE )
-    abstract fun findAllActiveRoleAssignmentsByGroupPersonUid(groupPersonUid: Long)
-            : DataSource.Factory<Int, EntityRoleWithGroupName>
-
-    @Query("UPDATE EntityRole SET erActive = 0 where erUid = :uid ")
-    abstract suspend fun inavtivateEntityRoleAsync(uid: Long) :Int
-
 
     @Query("SELECT * FROM EntityRole WHERE erUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : EntityRole?

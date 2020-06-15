@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -15,7 +16,6 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.util.test.AbstractSetup
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.After
@@ -23,7 +23,7 @@ import org.junit.Before
 import org.junit.Test
 
 
-class ContentEntryEdit2PresenterTest : AbstractSetup() {
+class ContentEntryEdit2PresenterTest  {
 
     lateinit var systemImpl: UstadMobileSystemImpl
 
@@ -127,10 +127,13 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
+
+        val initialEntry = mockView.captureLastEntityValue()
+
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao){
+            verifyBlocking(mockEntryDao, timeout(5000)){
                 insertAsync(capture())
             }
             assertEquals("Got expected content entry title",contentEntry.title, firstValue.title)
@@ -145,6 +148,7 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
 
     }
 
+
     @Test
     fun givenPresenterCreatedAndFolderNotCreated_whenClickSave_shouldCreateAFolder() {
         createMockView()
@@ -153,10 +157,11 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
+        mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao){
+            verifyBlocking(mockEntryDao, timeout(5000)){
                 insertAsync(capture())
             }
             assertEquals("Got expected folder title",contentEntry.title, firstValue.title)
@@ -166,8 +171,8 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
         verifyBlocking(mockView, times(0)){
             mockView.saveContainerOnExit(any(), any(), eq(db), eq(repo))
         }
-
     }
+
 
     @Test
     fun givenPresenterCreatedAndEntryCreated_whenClickSave_shouldUpdateAnEntry() {
@@ -177,10 +182,11 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
+        mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao){
+            verifyBlocking(mockEntryDao, timeout(5000)){
                 updateAsync(capture())
             }
             assertEquals("Got expected content entry title",contentEntry.title, firstValue.title)
@@ -204,6 +210,7 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
+        mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<Boolean>().apply {
@@ -220,6 +227,7 @@ class ContentEntryEdit2PresenterTest : AbstractSetup() {
                 ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
 
         presenter.onCreate(null)
+        mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<Boolean>().apply {
