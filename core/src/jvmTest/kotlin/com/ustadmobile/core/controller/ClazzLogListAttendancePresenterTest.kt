@@ -105,15 +105,15 @@ class ClazzLogListAttendancePresenterTest {
             verify(mockView, timeout(5000)).graphData = capture()
             runBlocking {
                 waitForLiveData(firstValue as DoorLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>, 5000) {
-                    it.graphData.size == 5
+                    it.percentageAttendedSeries.size == 5 && it.percentageLateSeries.size == 5
                 }
             }
 
             val currentGraphData = firstValue!!.getValue()
             assertEquals("Found expected number of ClazzLogs in graph data", clazzLogs.size,
-                currentGraphData!!.graphData.size)
+                currentGraphData!!.percentageAttendedSeries.size)
             assertTrue("Clazz logs have expected absent or present percentage value",
-                    currentGraphData.graphData.all { it.second == 0.8f || it.second == 0.6f })
+                    currentGraphData.percentageAttendedSeries.all { it.second == 0.8f || it.second == 0.6f })
         }
     }
 

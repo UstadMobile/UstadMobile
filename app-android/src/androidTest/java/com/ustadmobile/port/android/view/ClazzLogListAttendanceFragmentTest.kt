@@ -120,7 +120,8 @@ class ClazzLogListAttendanceFragmentTest {
             ClazzLog().apply {
                 logDate = timeRange.first + (index * oneDayInMs) + (1000 * 60 * 60 * 8)
                 clazzLogNumAbsent = if(index.rem(2) == 0) 2 else 4
-                clazzLogNumPresent = numInClazz - clazzLogNumAbsent
+                clazzLogNumPartial = if(index.rem(2) == 0) 1 else 2
+                clazzLogNumPresent = numInClazz - (clazzLogNumAbsent + clazzLogNumPartial)
                 clazzLogStatusFlag = ClazzLog.STATUS_RECORDED
             }
         } }

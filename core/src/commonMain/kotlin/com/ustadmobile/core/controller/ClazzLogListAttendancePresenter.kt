@@ -10,6 +10,7 @@ import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.attendancePercentage
 import com.ustadmobile.core.util.ext.effectiveTimeZone
+import com.ustadmobile.core.util.ext.latePercentage
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -27,8 +28,10 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     : UstadListPresenter<ClazzLogListAttendanceView, ClazzLog>(context, arguments, view, lifecycleOwner, systemImpl,
         db, repo, activeAccount) {
 
-
-    data class AttendanceGraphData(val graphData: List<Pair<Long, Float>>, val graphDateRange: Pair<Long, Long>)
+    //List of points to plot.
+    data class AttendanceGraphData(val percentageAttendedSeries: List<Pair<Long, Float>>,
+                                   val percentageLateSeries: List<Pair<Long, Float>>,
+                                   val graphDateRange: Pair<Long, Long>)
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
@@ -50,6 +53,7 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         override fun onChanged(t: List<ClazzLog>) {
             graphDisplayData.sendValue(AttendanceGraphData(
                 t.map { it.logDate to it.attendancePercentage() },
+                t.map { it.logDate to it.latePercentage() },
                 graphDateRange
             ))
         }
