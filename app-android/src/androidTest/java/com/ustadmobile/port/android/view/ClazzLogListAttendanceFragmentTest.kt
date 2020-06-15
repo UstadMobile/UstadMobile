@@ -83,7 +83,7 @@ class ClazzLogListAttendanceFragmentTest {
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
             bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
-                themeResId = R.style.Theme_UstadTheme
+                themeResId = R.style.UmTheme_App
         ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
@@ -127,7 +127,7 @@ class ClazzLogListAttendanceFragmentTest {
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
                 bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()),
-                themeResId = R.style.Theme_UstadTheme
+                themeResId = R.style.UmTheme_App
         ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {

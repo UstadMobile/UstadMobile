@@ -83,7 +83,7 @@ class ClazzLogEditAttendanceFragmentTest  {
         }
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
-            fragmentArgs = bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.Theme_UstadTheme) {
+            fragmentArgs = bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.UmTheme_App) {
             ClazzLogEditAttendanceFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
@@ -141,7 +141,7 @@ class ClazzLogEditAttendanceFragmentTest  {
         }
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
-                bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.Theme_UstadTheme
+                bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.UmTheme_App
         ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {

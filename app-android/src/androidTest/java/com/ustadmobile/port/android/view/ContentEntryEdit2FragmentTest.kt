@@ -63,7 +63,7 @@ class ContentEntryEdit2FragmentTest  {
         val fragmentScenario = launchFragmentInContainer(
                 fragmentArgs = bundleOf(ARG_LEAF to false.toString(),
                         ARG_PARENT_ENTRY_UID to 10000L.toString()),
-                themeResId = R.style.Theme_UstadTheme) {
+                themeResId = R.style.UmTheme_App) {
             ContentEntryEdit2Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
@@ -122,7 +122,7 @@ class ContentEntryEdit2FragmentTest  {
 
         val fragmentScenario  = with(launchFragmentInContainer(
                 fragmentArgs = bundleOf(ARG_LEAF to true.toString(),
-                ARG_PARENT_ENTRY_UID to 10000L.toString()), themeResId = R.style.Theme_UstadTheme) {
+                ARG_PARENT_ENTRY_UID to 10000L.toString()), themeResId = R.style.UmTheme_App) {
             ContentEntryEdit2Fragment(umTestRegistry).also {
                 it.installNavController(systemImplNavRule.navController)
             } }) { onFragment { fragment ->
