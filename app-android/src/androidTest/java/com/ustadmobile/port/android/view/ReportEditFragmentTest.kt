@@ -23,6 +23,7 @@ import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.soywiz.klock.DateTime
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.UstadView
@@ -37,10 +38,14 @@ class ReportEditFragmentTest {
 
     @JvmField
     @Rule
+    val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
 
-    @AdbScreenRecord("")
+    @AdbScreenRecord("with no report present, fill all the fields and navigate to detail")
     @Test
     fun givenNoReportPresentYet_whenFilledInAndSaveClicked_thenShouldNavigateToDetailScreen() {
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme) {
@@ -107,7 +112,7 @@ class ReportEditFragmentTest {
     }
 
 
-    @AdbScreenRecord("")
+    @AdbScreenRecord("with an existing report, when updated, on click done, save on database")
     @Test
     fun givenReportExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
         val existingReport = ReportWithFilters().apply {

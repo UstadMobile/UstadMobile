@@ -13,6 +13,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportFilter
@@ -39,14 +40,19 @@ class ReportListFragmentTest : AbstractXapiReportOptionsTest() {
     var systemImplNavRule = SystemImplTestNavHostRule()
 
 
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
+
+
     @Before
     fun setup(){
         insertXapi(dbRule.db)
     }
 
-    @AdbScreenRecord("")
+    @AdbScreenRecord("given report in list, when clicked, go to detail report")
     @Test
-    fun givenClazzPresent_whenClickOnClazz_thenShouldNavigateToClazzDetail() {
+    fun givenReportPresent_whenClickOnReport_thenShouldNavigateToReportDetail() {
         val testEntity = ReportWithFilters().apply {
             reportTitle = "Test Name"
             chartType = Report.BAR_CHART

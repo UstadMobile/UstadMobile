@@ -23,6 +23,7 @@ import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.whenever
 import com.soywiz.klock.DateTime
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.lib.db.entities.Report
@@ -52,6 +53,10 @@ class ReportDetailFragmentTest : AbstractXapiReportOptionsTest() {
 
     @JvmField
     @Rule
+    val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
     val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
 
     lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
@@ -61,7 +66,7 @@ class ReportDetailFragmentTest : AbstractXapiReportOptionsTest() {
         insertXapi(dbRule.db)
     }
 
-    @AdbScreenRecord("")
+    @AdbScreenRecord("show report on detail")
     @Test
     fun givenReportExists_whenLaunched_thenShouldShowReport() {
         val existingClazz = ReportWithFilters().apply {
