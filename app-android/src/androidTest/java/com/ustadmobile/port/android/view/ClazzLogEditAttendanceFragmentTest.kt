@@ -11,6 +11,8 @@ import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.nhaarman.mockitokotlin2.mock
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -29,6 +31,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+@AdbScreenRecord("Attendance recording scren test")
 class ClazzLogEditAttendanceFragmentTest  {
 
     lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
@@ -44,6 +47,10 @@ class ClazzLogEditAttendanceFragmentTest  {
     @JvmField
     @Rule
     val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
 
     @Before
     fun setup() {
@@ -64,6 +71,7 @@ class ClazzLogEditAttendanceFragmentTest  {
         }
     }
 
+    @AdbScreenRecord("Given an existing class when mixed attendance is recorded should be saved to database")
     @Test
     fun givenExistingClazzWithMembesAndClazzLog_whenMixedStudentAttendanceRecorded_thenShouldBeSavedToDatabase() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
@@ -122,6 +130,7 @@ class ClazzLogEditAttendanceFragmentTest  {
 
 
     @Test
+    @AdbScreenRecord("Given an existing class when mark all is clicked and user saves, then should be saved to database")
     fun givenExistingClazzLog_whenClickMarkAll_thenShouldBeSavedToDatabase() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
 

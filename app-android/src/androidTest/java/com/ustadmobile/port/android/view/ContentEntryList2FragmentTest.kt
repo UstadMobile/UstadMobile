@@ -10,6 +10,8 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
@@ -23,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 
+@AdbScreenRecord("Content entry list screen tests")
 class ContentEntryList2FragmentTest  {
 
     @JvmField
@@ -37,7 +40,11 @@ class ContentEntryList2FragmentTest  {
     @Rule
     val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
 
+    @JvmField
+    @Rule
+    val adbScreenRecordRule = AdbScreenRecordRule()
 
+    @AdbScreenRecord("Given Content entry present when user clicks on an entry then should navigate to entry")
     @Test
     fun givenContentEntryPresent_whenClickOnContentEntry_thenShouldNavigateToContentEntryDetail() {
         val parentEntryUid = 10000L

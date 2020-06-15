@@ -15,6 +15,8 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -34,6 +36,7 @@ import org.junit.Test
 import java.io.File
 import java.lang.Thread.sleep
 
+@AdbScreenRecord("Content entry edit screen tests")
 class ContentEntryEdit2FragmentTest  {
 
     @JvmField
@@ -48,7 +51,11 @@ class ContentEntryEdit2FragmentTest  {
     @Rule
     val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
 
+    @JvmField
+    @Rule
+    val adbScreenRecordRule = AdbScreenRecordRule()
 
+    @AdbScreenRecord("Given folder does not yet exist, when user fills in form for new folder, should be saved to database")
     @Test
     fun givenNoFolderYet_whenFormFilledInAndSaveClicked_thenShouldSaveToDatabase (){
         val dummyTitle = "New Folder Entry"
@@ -93,6 +100,7 @@ class ContentEntryEdit2FragmentTest  {
 
     }
 
+    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects file, should save to database")
     @Test
     fun givenNoEntryYet_whenFormFilledInAndSaveClicked_thenShouldSaveToDatabase (){
         val context = getApplicationContext<Application>()
