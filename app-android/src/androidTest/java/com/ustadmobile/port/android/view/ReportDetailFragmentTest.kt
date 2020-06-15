@@ -4,6 +4,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.contrib.RecyclerViewActions
@@ -101,7 +102,9 @@ class ReportDetailFragmentTest : AbstractXapiReportOptionsTest() {
             }
         }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
-        Thread.sleep(2000)
+        onView(withId(R.id.fragment_detail_report_list)).check(matches(isDisplayed()))
+
+        onIdle()
 
         IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
 
