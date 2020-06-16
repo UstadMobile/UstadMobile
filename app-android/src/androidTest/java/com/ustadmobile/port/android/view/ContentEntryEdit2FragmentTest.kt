@@ -131,7 +131,7 @@ class ContentEntryEdit2FragmentTest  {
         }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         //wait for the fragment to be ready since we are waiting on onViewCreated to create a presenter
-        sleep(1000)
+        sleep(2000)
 
         onView(withId(R.id.content_entry_select_file)).check(matches(isDisplayed()))
 
