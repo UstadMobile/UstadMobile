@@ -2,14 +2,10 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentClazzLogEditAttendanceBinding
-import com.toughra.ustadmobile.databinding.ItemClazzLogAttendanceRecordEditBinding
-import com.toughra.ustadmobile.databinding.ItemClazzLogEditAttendanceDateheaderBinding
-import com.toughra.ustadmobile.databinding.ItemClazzLogEditAttendanceMarkallBinding
+import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.controller.ClazzLogEditAttendancePresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
@@ -61,7 +57,9 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
         }
     }
 
-    class DateHeaderRecyclerViewAdapter(): ListAdapter<Pair<Long, TimeZone>, DateHeaderRecyclerViewAdapter.DateHeaderViewHolder>(DIFFUTIL_TIME_TIMEZONEPAIR) {
+    class ClazzLogListDateHeaderRecyclerAdapter(): ListAdapter<ClazzLog, ClazzLogListDateHeaderRecyclerAdapter.DateHeaderViewHolder>(DIFFUTIL_CLAZZLOG) {
+
+        var timeZone: TimeZone = TimeZone.getTimeZone("UTC")
 
         class DateHeaderViewHolder(var binding: ItemClazzLogEditAttendanceDateheaderBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -71,10 +69,35 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
 
         override fun onBindViewHolder(holder: DateHeaderViewHolder, position: Int) {
             val item = getItem(position)
-            holder.binding.date = item.first
-            holder.binding.timeZone = item.second
+            holder.binding.date = item.logDate
+            holder.binding.timeZone = timeZone
         }
     }
+
+    class ClazzLogEditHeaderRecyclerAdapter(): ListAdapter<List<ClazzLog>, ClazzLogEditHeaderRecyclerAdapter.ClazzLogEditHeaderViewHolder>(DIFFUTIL_CLAZZLOGLIST) {
+
+        class ClazzLogEditHeaderViewHolder(val binding: ItemClazzlogeditClazzlogviewpagerBinding) : RecyclerView.ViewHolder(binding.root){
+            var clazzLogListDateHeaderRecyclerAdapter = ClazzLogListDateHeaderRecyclerAdapter()
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzLogEditHeaderViewHolder {
+            val holder = ClazzLogEditHeaderViewHolder(ItemClazzlogeditClazzlogviewpagerBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false))
+            holder.binding.clazzlogViewpager2.apply {
+                adapter = holder.clazzLogListDateHeaderRecyclerAdapter
+            }
+
+            return holder
+        }
+
+        override fun onBindViewHolder(holder: ClazzLogEditHeaderViewHolder, position: Int) {
+            val clazzLogList = getItem(position)
+            holder.clazzLogListDateHeaderRecyclerAdapter.submitList(clazzLogList)
+        }
+    }
+
+    private var clazzLogEditHeaderRecyclerAdapter: ClazzLogEditHeaderRecyclerAdapter? = null
+
 
     class ClazzLogAttendanceRecordRecyclerAdapter(val activityEventHandler: ClazzLogEditAttendanceFragmentEventHandler,
             var presenter: ClazzLogEditAttendancePresenter?): ListAdapter<ClazzLogAttendanceRecordWithPerson, ClazzLogAttendanceRecordRecyclerAdapter.ClazzLogAttendanceRecordViewHolder>(DIFFUTIL_CLAZZATTENDANCERECORD) {
@@ -110,6 +133,18 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
         t -> clazzLogAttendanceRecordRecyclerAdapter?.submitList(t)
     }
 
+    override var clazzLogsList: DoorLiveData<List<ClazzLog>>? = null
+        get() = field
+        set(value) {
+            field?.removeObserver(clazzLogListObserver)
+            field = value
+            value?.observe(viewLifecycleOwner, clazzLogListObserver)
+        }
+
+    var clazzLogListObserver = Observer<List<ClazzLog>> {
+        this.clazzLogEditHeaderRecyclerAdapter?.submitList(listOf(it))
+    }
+
 
     override val mEditPresenter: UstadEditPresenter<*, ClazzLog>?
         get() = mPresenter
@@ -117,8 +152,6 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
     private var mMarkAllRecyclerAdapter: MarkAllRecyclerAdapter? = null
 
     override var clazzLogTimezone: String? = null
-
-    private var mDateHeaderRecylerViewAdapter: DateHeaderRecyclerViewAdapter? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -138,10 +171,12 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
             it.submitList(listOf(ClazzLogAttendanceRecord.STATUS_ATTENDED, ClazzLogAttendanceRecord.STATUS_ABSENT))
         }
 
+        clazzLogEditHeaderRecyclerAdapter = ClazzLogEditHeaderRecyclerAdapter()
+
         clazzLogAttendanceRecordRecyclerAdapter = ClazzLogAttendanceRecordRecyclerAdapter(
                 this, mPresenter)
-        mDateHeaderRecylerViewAdapter = DateHeaderRecyclerViewAdapter()
-        clazzLogAttendanceRecordRecyclerView?.adapter = MergeAdapter(mDateHeaderRecylerViewAdapter,
+
+        clazzLogAttendanceRecordRecyclerView?.adapter = MergeAdapter(clazzLogEditHeaderRecyclerAdapter,
                 mMarkAllRecyclerAdapter, clazzLogAttendanceRecordRecyclerAdapter)
 
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
@@ -154,6 +189,7 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
         mBinding = null
         mPresenter = null
         entity = null
+        clazzLogEditHeaderRecyclerAdapter = null
     }
 
     override var entity: ClazzLog? = null
@@ -161,9 +197,10 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
         set(value) {
             field = value
             mBinding?.clazzLog = value
+            //TODO: pass this onwards
             val timeZoneVal = clazzLogTimezone
-            if(value != null && timeZoneVal != null)
-                mDateHeaderRecylerViewAdapter?.submitList(listOf(value.logDate to TimeZone.getTimeZone(timeZoneVal)))
+//            if(value != null && timeZoneVal != null)
+//                mClazzLogListDateHeaderRecylerAdapter?.submitList(listOf(value.logDate to TimeZone.getTimeZone(timeZoneVal)))
         }
 
     override var fieldsEnabled: Boolean = false
@@ -204,9 +241,30 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
             }
         }
 
+        val DIFFUTIL_CLAZZLOG = object  : DiffUtil.ItemCallback<ClazzLog>() {
+            override fun areItemsTheSame(oldItem: ClazzLog, newItem: ClazzLog): Boolean {
+                return oldItem.clazzLogUid == newItem.clazzLogUid
+            }
+
+            override fun areContentsTheSame(oldItem: ClazzLog, newItem: ClazzLog): Boolean {
+                return oldItem == newItem
+            }
+        }
+
+        val DIFFUTIL_CLAZZLOGLIST = object  : DiffUtil.ItemCallback<List<ClazzLog>>() {
+            override fun areItemsTheSame(oldItem: List<ClazzLog>, newItem: List<ClazzLog>): Boolean {
+                return true
+            }
+
+            override fun areContentsTheSame(oldItem: List<ClazzLog>, newItem: List<ClazzLog>): Boolean {
+                return oldItem == newItem
+            }
+        }
+
         val STATUS_MAP = mapOf(ClazzLogAttendanceRecord.STATUS_ATTENDED to R.id.present_button,
             ClazzLogAttendanceRecord.STATUS_ABSENT to R.id.absent_button,
             ClazzLogAttendanceRecord.STATUS_PARTIAL to R.id.late_button)
+
     }
 
 }

@@ -46,6 +46,14 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
+        WHERE clazzLogClazzUid = :clazzUid
+        AND clazzLog.clazzLogStatusFlag != :excludeStatus
+        ORDER BY ClazzLog.logDate DESC""")
+    abstract fun findByClazzUidAsLiveData(clazzUid: Long, excludeStatus: Int): DoorLiveData<List<ClazzLog>>
+
+
+
+    @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE 
         ClazzLog.clazzLogClazzUid = :clazzUid 
         AND ClazzLog.logDate BETWEEN :fromTime AND :toTime

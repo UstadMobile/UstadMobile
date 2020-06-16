@@ -80,6 +80,11 @@ class ClazzLogEditAttendancePresenter(context: Any,
 
         attendanceRecordOneToManyJoinHelper.liveList.sendValue(allMembers)
 
+        if(view.clazzLogsList == null) {
+            view.clazzLogsList = repo.clazzLogDao.findByClazzUidAsLiveData(clazzLog.clazzLogClazzUid,
+                ClazzLog.STATUS_HOLIDAY)
+        }
+
         return clazzLog
     }
 

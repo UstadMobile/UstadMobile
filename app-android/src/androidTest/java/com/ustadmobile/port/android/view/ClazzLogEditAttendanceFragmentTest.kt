@@ -10,6 +10,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.nhaarman.mockitokotlin2.mock
+import com.soywiz.klock.hours
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -137,6 +138,11 @@ class ClazzLogEditAttendanceFragmentTest  {
         val clazzAndMembers = runBlocking { dbRule.db.insertTestClazzAndMembers(5) }
 
         val clazzLog = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis(), 0L).apply {
+            clazzLogUid = dbRule.db.clazzLogDao.insert(this)
+        }
+
+        val clazzLog2 = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis() - 24.hours.millisecondsLong,
+            0L).apply {
             clazzLogUid = dbRule.db.clazzLogDao.insert(this)
         }
 
