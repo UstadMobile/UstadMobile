@@ -39,7 +39,7 @@
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:noHistory="true"
-            android:theme="@style/ThemeOnboarding" />
+            android:theme="@style/UmTheme.App.OnBoarding" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

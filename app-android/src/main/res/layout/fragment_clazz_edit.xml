@@ -44,14 +44,14 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/activity_clazz_edit_start_date_edittext"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_description"
                 app:layout_constraintEnd_toStartOf="@+id/activity_clazz_edit_end_date_edittext"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
                 android:hint="@string/start_date">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -67,11 +67,11 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/activity_clazz_edit_end_date_edittext"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_description"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/activity_clazz_edit_start_date_edittext"
@@ -90,24 +90,24 @@
 
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/activity_clazz_edit_basic_details_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 android:text="@string/basic_details"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginLeft="8dp" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:enabled="@{fieldsEnabled}"
                 android:id="@+id/activity_clazz_edit_name"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
+                android:layout_marginBottom="@dimen/layout_dimen_8dp"
                 android:hint="@string/class_name"
                 app:hintEnabled="true"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -127,10 +127,10 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/activity_clazz_edit_description"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
                 android:hint="@string/class_description"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"
@@ -149,12 +149,13 @@
 
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/activity_clazz_edit_schedule_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/form_margin_horizontal_heading"
-                android:layout_marginTop="@dimen/formitem_margin_vertical"
-                android:layout_marginBottom="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
+                android:layout_marginBottom="@dimen/layout_dimen_8dp"
                 android:text="@string/schedule"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_start_date_edittext" />
@@ -165,8 +166,7 @@
                 app:onClickNew="@{() -> activityEventHandler.showNewScheduleDialog()}"
                 app:createNewText="@{@string/add_a(@string/schedule)}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_schedule_heading"
-                app:layout_constraintStart_toStartOf="parent"
-                />
+                app:layout_constraintStart_toStartOf="parent" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/activity_clazz_edit_schedule_recyclerview"
@@ -182,8 +182,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_timezone_text"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/holiday_calendar">
@@ -206,8 +206,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_holiday_calendar_selected"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:hint="@string/features_enabled">
                 <com.google.android.material.textfield.TextInputEditText
@@ -225,7 +225,7 @@
                 android:id="@+id/activity_clazz_edit_customfields_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
                 android:layout_marginBottom="100dp"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -236,10 +236,10 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/activity_clazz_edit_timezone_text"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
                 android:hint="@string/timezone"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"

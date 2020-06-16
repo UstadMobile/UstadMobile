@@ -6,10 +6,8 @@
     android:orientation="vertical">
 
     <include
-        android:id="@+id/activity_video_player_toolbar"
-        layout="@layout/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp" />
+        android:id="@+id/appbar"
+        layout="@layout/appbar_material" />
 
     <com.google.android.exoplayer2.ui.PlayerView
         android:id="@+id/activity_video_player_view"
@@ -19,11 +17,10 @@
         app:use_controller="true"/>
 
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         android:id="@+id/activity_video_player_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:textSize="16sp"
-        android:textColor="@android:color/black" />
+        android:layout_margin="@dimen/layout_dimen_8dp" />
 
 </LinearLayout>

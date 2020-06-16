@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:scaleType="fitCenter"
                     android:id="@+id/entry_detail_thumbnail"
                     android:layout_width="@dimen/layout_dimen_110dp"
@@ -152,15 +152,15 @@
                 <View
                     android:id="@+id/library_size_divider"
                     android:layout_width="@dimen/layout_dimen_0dp"
-                    android:layout_height="1dp"
+                    android:layout_height="@dimen/layout_dimen_1dp"
                     android:layout_margin="@dimen/layout_dimen_8dp"
-                    android:background="@color/secondary_text"
+                    android:background="?colorOnIconTint"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_anchor_download" />
 
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:visibility="@{contentEntry.container == null ? View.GONE: View.VISIBLE}"
                     android:id="@+id/image_content_size"
                     android:layout_width="@dimen/layout_dimen_16dp"
@@ -186,7 +186,7 @@
                     app:layout_constraintTop_toBottomOf="@id/image_content_size"
                     tools:text="50 mb" />
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:visibility="gone"
                     android:id="@+id/content_status_icon"
                     android:layout_width="@dimen/layout_dimen_16dp"
@@ -217,7 +217,7 @@
                     android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="1dp"
                     android:layout_margin="@dimen/layout_dimen_8dp"
-                    android:background="@color/secondary_text"
+                    android:background="?colorOnIconTint"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_content_size" />
@@ -248,7 +248,7 @@
                     android:layout_width="@dimen/layout_dimen_0dp"
                     android:layout_height="1dp"
                     android:layout_margin="@dimen/layout_dimen_8dp"
-                    android:background="@color/secondary_text"
+                    android:background="?colorOnIconTint"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/entry_detail_description" />

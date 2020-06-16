@@ -81,7 +81,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
         playerView = findViewById(R.id.activity_video_player_view)
 
         if (isPortrait) {
-            setUMToolbar(R.id.activity_video_player_toolbar)
+            setUMToolbar(R.id.toolbar)
             supportActionBar!!.setDisplayShowHomeEnabled(true)
             supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         }
@@ -301,7 +301,7 @@ class VideoPlayerActivity : UstadBaseActivity(), VideoPlayerView {
     override fun setVideoInfo(result: ContentEntry) {
         runOnUiThread {
             if (isPortrait) {
-                (findViewById<View>(R.id.activity_video_player_toolbar) as Toolbar).title = result.title
+                (findViewById<View>(R.id.toolbar) as Toolbar).title = result.title
                 (findViewById<View>(R.id.activity_video_player_description) as TextView).text = result.description
             }
         }

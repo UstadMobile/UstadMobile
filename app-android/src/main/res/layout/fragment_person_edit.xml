@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
@@ -45,10 +44,10 @@
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/item_presenter_field_row_image_view"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                app:civ_circle_background_color="@color/accent"
+                android:layout_width="@dimen/layout_dimen_48dp"
+                android:layout_height="@dimen/layout_dimen_48dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
+                app:civ_circle_background_color="?colorSecondary"
                 app:imageUri="@={personPictureUri}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -56,23 +55,23 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/item_presenter_field_row_picture_photoicon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="@dimen/layout_dimen_24dp"
+                android:layout_height="@dimen/layout_dimen_24dp"
                 android:onClick="@{() -> itemPresenterFieldRowImageView.callOnClick()}"
                 app:layout_constraintBottom_toBottomOf="@+id/item_presenter_field_row_image_view"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/item_presenter_field_row_image_view"
                 app:srcCompat="@drawable/ic_add_a_photo_24"
-                app:tint="@color/primary_text" />
+                app:tint="?colorOnError" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/firstnames_textinputlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
+                android:layout_marginEnd="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/item_presenter_field_row_image_view"
@@ -91,9 +90,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
+                android:layout_marginEnd="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/firstnames_textinputlayout">
@@ -110,9 +109,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
+                android:layout_marginEnd="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textInputLayout">
@@ -131,9 +130,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
+                android:layout_marginEnd="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/gender_textinputlayout">
@@ -155,9 +154,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
+                android:layout_marginEnd="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/birthday_textinputlayout">
@@ -174,9 +173,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
+                android:layout_marginEnd="@dimen/layout_dimen_16dp"
 
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -194,9 +193,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
+                android:layout_marginEnd="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/email_textinputlayout">
@@ -213,9 +212,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
+                android:layout_marginEnd="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/address_textinputlayout">
@@ -229,16 +228,18 @@
 
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/clazzlist_header_textview"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
                 android:text="@string/classes"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout" />
 
             <androidx.recyclerview.widget.RecyclerView
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 android:id="@+id/clazzlist_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

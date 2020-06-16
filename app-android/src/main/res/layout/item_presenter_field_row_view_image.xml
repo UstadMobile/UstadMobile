@@ -14,6 +14,6 @@
         app:imageUri="@{customFieldValue.customFieldValueValue}"
         android:scaleType="centerCrop"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dimen_256dp" />
+        android:layout_height="@dimen/layout_dimen_256dp" />
 
 </layout>

@@ -24,7 +24,7 @@ class AboutActivity : UstadBaseActivity(), AboutView {
                 this)
         mAboutPresenter.onCreate(bundleToMap(savedInstanceState))
 
-        setUMToolbar(R.id.um_toolbar)
+        setUMToolbar(R.id.toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }

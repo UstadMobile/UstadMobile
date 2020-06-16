@@ -2,10 +2,31 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="UmTheme.App" parent="UmTheme.MaterialComponents"/>
 
+    <style name="UmTheme.App.Splash" parent="UmTheme.MaterialComponents">
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantColor</item>
+        <item name="colorSecondary">@color/colorPrimary</item>
+        <item name="colorSecondaryVariant">@color/colorPrimary</item>
+        <item name="android:colorBackground">@color/colorPrimary</item>
+        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
+    </style>
+
+    <style name="UmTheme.App.OnBoarding" parent="UmTheme.MaterialComponents">
+        <item name="colorPrimary">@color/primaryTextColor</item>
+        <item name="colorPrimaryVariant">@color/primaryTextColor</item>
+        <item name="colorSecondary">@color/primaryTextColor</item>
+        <item name="colorSecondaryVariant">@color/primaryTextColor</item>
+        <item name="android:colorBackground">@color/primaryTextColor</item>
+        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
+    </style>
+
     <!--Shared theme for both Night and Light themes -->
     <style name="UmTheme.MaterialComponents" parent="UmTheme.MaterialComponents.Parent">
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryVariant">@color/primaryVariantColor</item>
+        <item name="colorPrimaryDark">@color/primaryVariantColor</item>
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
         <item name="android:colorBackground">@color/primaryTextColor</item>
@@ -16,7 +37,9 @@
         <item name="colorOnBackground">@color/secondaryTextColor</item>
         <item name="colorOnSurface">@color/secondaryTextColor</item>
         <item name="colorOnError">@color/primaryTextColor</item>
+        <item name="colorOnSecondaryText">@color/colorIconTint</item>
         <item name="colorOnIconTint">@color/colorIconTint</item>
+        <item name="colorOnTintPrimary">?colorPrimary</item>
         <item name="colorTabIndicator">@color/primaryTextColor</item>
         <item name="colorTabText" >@color/primaryLightVariantColor</item>
         <item name="colorSelectedTabText">@color/primaryTextColor</item>

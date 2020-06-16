@@ -8,6 +8,8 @@
     <attr name="colorSelectedTabText" format="color"/>
     <attr name="colorPrimaryBackground" format="color"/>
     <attr name="colorOnIconTint" format="color"/>
+    <attr name="colorOnSecondaryText" format="color"/>
+    <attr name="colorOnTintPrimary" format="color"/>
 
     <!--For label view's-->
     <declare-styleable name="LabelLinkView">

@@ -34,7 +34,7 @@ class ScormPackageActivity : ZippedContentActivity(), ScormPackageView {
         mWebView!!.webChromeClient = WebChromeClient()
 
 
-        setUMToolbar(R.id.um_toolbar)
+        setUMToolbar(R.id.toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         mPresenter = ScormPackagePresenter(this,
                 UMAndroidUtil.bundleToMap(intent.extras), this)

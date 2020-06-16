@@ -6,24 +6,17 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="4dp">
-
-        <include
-            layout="@layout/toolbar_with_progress"/>
-
-
-    </com.google.android.material.appbar.AppBarLayout>
-
+    <include
+        android:id="@+id/appbar"
+        layout="@layout/appbar_material_with_progress"/>
+    
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
-            android:padding="@dimen/default_margin_dimension"
+            android:padding="@dimen/layout_dimen_16dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -33,24 +26,26 @@
                 layout="@layout/activity_create_account_fields"/>
 
             <TextView
-                android:textColor="@android:color/holo_red_dark"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                android:textColor="?colorError"
                 android:visibility="gone"
-                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
                 android:id="@+id/activity_create_account_error_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
             <Button
                 android:enabled="false"
-                android:layout_marginTop="@dimen/dimen_16dp"
-                android:padding="@dimen/default_margin_dimension"
-                android:textSize="18sp"
+                android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
+                android:textStyle="bold"
+                android:layout_margin="@dimen/layout_dimen_16dp"
+                android:backgroundTint="?colorSecondary"
+                android:padding="@dimen/layout_dimen_16dp"
+                android:textAllCaps="true"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
                 android:id="@+id/activity_create_account_create_account_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:elevation="@dimen/dimen_4dp"
-                android:background="@color/divider"
-                android:textColor="@android:color/black"
                 android:text="@string/create_new_account" />
 
         </LinearLayout>

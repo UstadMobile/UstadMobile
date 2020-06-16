@@ -2,25 +2,24 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:background="@color/icons"
     android:focusable="true"
     android:clickable="true"
     android:foreground="?android:attr/selectableItemBackground"
     android:layout_height="wrap_content">
 
     <FrameLayout
-        android:layout_marginLeft="@dimen/dimen_4dp"
-        android:layout_marginRight="@dimen/dimen_4dp"
+        android:layout_marginLeft="@dimen/layout_dimen_4dp"
+        android:layout_marginRight="@dimen/layout_dimen_4dp"
         android:padding="6dp"
         android:id="@+id/icon_holder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:layout_gravity="center"
             android:id="@+id/format_icon"
-            android:tint="@color/secondary_text"
-            android:layout_width="22dp"
-            android:layout_height="22dp" />
+            android:tint="?colorOnIconTint"
+            android:layout_width="@dimen/layout_dimen_22dp"
+            android:layout_height="@dimen/layout_dimen_22dp" />
     </FrameLayout>
 
 </FrameLayout>

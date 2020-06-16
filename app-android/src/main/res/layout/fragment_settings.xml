@@ -31,15 +31,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/imageView14"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:tint="@color/text_primary"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
+                    android:tint="?colorOnIconTint"
                     app:layout_constraintBottom_toTopOf="@+id/textView10"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -47,26 +46,25 @@
                     app:srcCompat="@drawable/ic_date_range_black_24dp" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/textView10"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@string/holiday_calendars"
                     app:layout_constraintStart_toEndOf="@+id/imageView14"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/textView9"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
                     android:text="@string/holiday_calendars_desc"
-                    android:textColor="@color/text_secondary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imageView14"
                     app:layout_constraintTop_toBottomOf="@+id/textView10" />
@@ -78,48 +76,49 @@
                 android:id="@+id/activity_settings2_users_cl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 android:background="?android:selectableItemBackground"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:onClick="@{() -> presenter.goToPeopleList()}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_settings2_holiday_calendar_cl">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/activity_settings_roles_imageview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
                     app:layout_constraintBottom_toTopOf="@+id/activity_settings_roles_title"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.0"
+                    android:tint="?colorOnIconTint"
                     app:srcCompat="@drawable/ic_person_black_24dp" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/activity_settings_roles_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@string/users"
                     android:textAlignment="viewStart"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings_roles_imageview"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings_roles_desc"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
                     android:text="@string/users_settings_desc"
                     android:textAlignment="viewStart"
-                    android:textColor="@color/text_secondary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/activity_settings_roles_title"
@@ -130,46 +129,45 @@
                 android:id="@+id/activity_settings2_groups_cl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:background="?android:selectableItemBackground"
                 android:onClick="@{() -> presenter.goToGroupsList()}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_settings2_roles_cl">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/imageView12"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:tint="@color/text_primary"
-                    app:layout_constraintBottom_toTopOf="@+id/item_sel_question_title"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
+                    android:tint="?colorOnIconTint"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_people_black_24dp"
-                    android:layout_marginLeft="8dp" />
+                    app:srcCompat="@drawable/ic_people_black_24dp" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/textView7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@string/groups"
                     app:layout_constraintStart_toEndOf="@+id/imageView12"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/textView8"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
                     android:text="@string/group_setting_desc"
-                    android:textColor="@color/text_secondary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imageView12"
                     app:layout_constraintTop_toBottomOf="@+id/textView7" />
@@ -181,21 +179,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:selectableItemBackground"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 android:layout_marginBottom="16dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:onClick="@{() -> presenter.goToCustomFieldsList()}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_settings2_sel_question_set_cl">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/activity_settings2_customfields_imageview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:tint="@color/text_primary"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
+                    android:tint="?colorOnIconTint"
                     app:layout_constraintBottom_toTopOf="@+id/activity_settings2_customfields_title"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -203,24 +201,25 @@
                     app:srcCompat="@drawable/ic_text_fields_black_24dp" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/activity_settings2_customfields_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@string/custom_fields"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_customfields_imageview"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings2_customfields_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
                     android:text="@string/custom_fields_desc"
-                    android:textColor="@color/text_secondary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_customfields_imageview"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_customfields_title"
@@ -232,21 +231,21 @@
                 android:id="@+id/activity_settings2_roles_cl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 android:background="?android:selectableItemBackground"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:onClick="@{() -> presenter.goToRolesList()}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_settings2_users_cl">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/activity_settings2_roles_imageview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:tint="@color/text_primary"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
+                    android:tint="?colorOnIconTint"
                     app:layout_constraintBottom_toTopOf="@+id/activity_settings2_roles_title"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -254,26 +253,25 @@
                     app:srcCompat="@drawable/ic_check_circle_black_24dp" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/activity_settings2_roles_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@string/roles"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_roles_imageview"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings2_roles_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
                     android:text="@string/roles_setting_desc"
-                    android:textColor="@color/text_secondary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_roles_imageview"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_roles_title" />
@@ -284,19 +282,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:selectableItemBackground"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 android:onClick="@{() -> presenter.goToAuditLogSelection()}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_settings2_locations_cl">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/activity_settings2_auditlog_imageview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:tint="@color/text_primary"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
+                    android:tint="?colorOnIconTint"
                     app:layout_constraintBottom_toTopOf="@+id/activity_settings2_auditlog_desc"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -304,25 +302,25 @@
                     app:srcCompat="@drawable/ic_format_list_bulleted_black_24dp" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/activity_settings2_auditlog_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@string/audit_log"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_auditlog_imageview"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginLeft="8dp" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings2_auditlog_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:layout_marginBottom="4dp"
                     android:text="@string/audit_log_setting_desc"
-                    android:textColor="@color/text_secondary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_auditlog_imageview"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_auditlog_title" />
@@ -334,19 +332,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:selectableItemBackground"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 android:onClick="@{() -> presenter.goToLocationsList()}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_settings2_roles_assignment_cl">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/activity_settings2_locations_imageview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:tint="@color/text_primary"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
+                    android:tint="?colorOnIconTint"
                     app:layout_constraintBottom_toTopOf="@+id/activity_settings2_locations_desc"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -354,25 +352,25 @@
                     app:srcCompat="@drawable/ic_pin_drop_black_24dp" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/activity_settings2_locations_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@string/locations"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_locations_imageview"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginLeft="8dp" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings2_locations_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:layout_marginBottom="4dp"
                     android:text="@string/locations_setting_desc"
-                    android:textColor="@color/text_secondary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_locations_imageview"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_locations_title" />
@@ -383,21 +381,20 @@
                 android:id="@+id/activity_settings2_roles_assignment_cl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 android:background="?android:selectableItemBackground"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_settings2_groups_cl"
                 android:visibility="gone">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/activity_settings2_roles_assignment_imageview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:tint="@color/icons"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
+                    android:tint="?colorOnIconTint"
                     app:layout_constraintBottom_toTopOf="@+id/activity_settings2_roles_assignment_desc"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -405,25 +402,25 @@
                     app:srcCompat="@drawable/ic_person_pin_white_24dp" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/activity_settings2_roles_assignment_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@string/rols_assignment"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_roles_assignment_imageview"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings2_roles_assignment_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:layout_marginBottom="4dp"
                     android:text="@string/role_assignment_setting_desc"
-                    android:textColor="@color/text_secondary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_roles_assignment_imageview"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_roles_assignment_title" />
@@ -435,46 +432,45 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:selectableItemBackground"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 android:onClick="@{() -> presenter.goToSELQuestionSets()}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_settings2_audit_log_cl">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/activity_settings2_sel_imageview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:tint="@color/text_primary"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
+                    android:tint="?colorOnIconTint"
                     app:layout_constraintBottom_toTopOf="@+id/activity_settings2_sel_desc"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.0"
-                    app:srcCompat="@drawable/ic_person_pin_white_24dp"
-                    android:layout_marginLeft="8dp" />
+                    app:srcCompat="@drawable/ic_person_pin_white_24dp" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/activity_settings2_sel_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@string/sel_question_set"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_sel_imageview"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginLeft="8dp" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings2_sel_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="19dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_8dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
                     android:text="@string/sel_question_set_desc"
-                    android:textColor="@color/text_secondary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_sel_imageview"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_sel_title" />

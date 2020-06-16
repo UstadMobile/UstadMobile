@@ -31,16 +31,15 @@
 
         <!-- Line 1-->
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/line1_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:padding="@dimen/dimen_16dp"
+            android:padding="@dimen/layout_dimen_16dp"
             android:text="@{language.name}"
-            android:textSize="@dimen/list_twoline1_textsize_line1"
-            android:textColor="@color/text_primary"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

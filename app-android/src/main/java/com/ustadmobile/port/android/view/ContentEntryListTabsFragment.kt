@@ -31,7 +31,7 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_contententry_tabs, container, false)
 
-        val mTabLayout: TabLayout = rootView.findViewById(R.id.home_contententry_tabs)
+        val mTabLayout: TabLayout = rootView.findViewById(R.id.tabs)
         val mPager: ViewPager = rootView.findViewById(R.id.home_contententry_viewpager)
 
         //Unfortunately if we dont use a Handler here then the first tab will not show up on first load

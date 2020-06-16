@@ -7,14 +7,15 @@
 
     <include
         android:id="@+id/entry_import_link_toolbar"
-        layout="@layout/toolbar_with_progress" />
+        layout="@layout/appbar_material_with_progress" />
 
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Body2"
         android:id="@+id/import_link_error_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/dimen_16dp"
-        android:textColor="@color/red"
+        android:padding="@dimen/layout_dimen_16dp"
+        android:textColor="?colorError"
         android:visibility="gone"
         android:gravity="center"
         tools:visibility="visible"
@@ -23,20 +24,21 @@
         app:layout_constraintTop_toBottomOf="@id/entry_import_link_toolbar" />
 
     <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:id="@+id/entry_import_link_textInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/enter_url"
-        android:padding="@dimen/dimen_16dp"
+        android:padding="@dimen/layout_dimen_16dp"
         app:errorEnabled="true"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/import_link_error_message">
 
-
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/entry_import_link_editText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:inputType="text"
+            android:layout_height="wrap_content"
+            android:hint="@string/enter_url" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -44,17 +46,19 @@
         android:id="@+id/entry_import_link_titleInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/import_link_video"
-        android:padding="@dimen/dimen_16dp"
+        android:padding="@dimen/layout_dimen_16dp"
         android:visibility="gone"
         app:errorEnabled="true"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/entry_import_link_textInput">
 
-        <EditText
+
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/entry_import_link_title_editText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:inputType="text"
+            android:layout_height="wrap_content"
+            android:hint="@string/import_link_video" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -63,7 +67,7 @@
         android:id="@+id/import_link_preview_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/dimen_16dp"
+        android:padding="@dimen/layout_dimen_16dp"
         android:text="@string/content_editor_preview"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/entry_import_link_titleInput" />
@@ -73,7 +77,7 @@
         android:id='@+id/import_link_preview_webview'
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:padding="@dimen/dimen_16dp"
+        android:padding="@dimen/layout_dimen_16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/import_link_preview_label" />
 

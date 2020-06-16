@@ -47,14 +47,14 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/activity_school_edit_edit_clx"
-            android:paddingBottom="50dp"
+            android:paddingBottom="@dimen/layout_dimen_52dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/fragment_school_edit_school_picture"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="@dimen/layout_dimen_200dp"
                 android:contentDescription="@string/student_image"
                 android:src="@drawable/ic_photo_camera_black_24dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -68,8 +68,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_picture">
@@ -87,8 +87,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_name_tip">
@@ -105,8 +105,8 @@
                 android:id="@+id/fragment_school_edit_timezone_tip"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
                 android:hint="@string/timezone"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintEnabled="true"
@@ -129,8 +129,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_timezone_tip"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/holiday_calendar">
@@ -150,8 +150,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_holiday_calendar_selected">
@@ -171,8 +171,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_address_tip">
 
                 <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
@@ -191,8 +191,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_gender_til">
@@ -212,8 +212,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_phonenumber_tip">
@@ -231,11 +231,12 @@
 
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/fragment_school_edit_classes_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 android:text="@string/classes"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_edit_school_email_tip" />

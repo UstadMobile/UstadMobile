@@ -37,12 +37,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/school_detail_overview_iv"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="@dimen/layout_dimen_100dp"
                 android:contentDescription="@string/school"
-                android:src="@drawable/ic_photo_camera_black_24dp"
+                android:tint="?colorOnIconTint"
+                app:srcCompat="@drawable/ic_photo_camera_black_24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
@@ -58,32 +59,33 @@
                 />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/school_overview_desc_tv"
                 android:layout_width="0dp"
+                android:textStyle="bold"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/school"
                 android:layout_marginStart="20dp"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginEnd="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_8dp"
+                android:layout_marginEnd="@dimen/layout_dimen_16dp"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolDesc)}"
                 android:text="@{schoolWithHolidayCalendar.schoolDesc}"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/list_twoline1_textsize_line1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier1"
                 tools:text="School description over here." />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:id="@+id/fragment_school_overview_gender"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="@dimen/layout_dimen_20dp"
                 tools:text="Mixed gender"
                 android:visibility="@{schoolWithHolidayCalendar.schoolGender != 0 ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/layout_dimen_16dp"
                 app:layout_constraintTop_toBottomOf="@+id/school_overview_desc_tv"
                 app:textSchoolGender="@{schoolWithHolidayCalendar.schoolGender}" />
 
@@ -97,32 +99,32 @@
                 app:constraint_referenced_ids="fragment_school_overview_gender,school_overview_desc_tv"
                 />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/fragment_school_detail_overview_locataion_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_16dp"
                 android:contentDescription="@string/school"
-                android:src="@drawable/ic_location_pin_24dp"
+                android:tint="?colorOnIconTint"
+                app:srcCompat="@drawable/ic_location_pin_24dp"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier2" />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/fragment_school_detail_overview_locataion_tv"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginStart="@dimen/activity_vertical_margin"
-                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/layout_dimen_8dp"
                 android:contentDescription="@string/school"
                 android:text="@{schoolWithHolidayCalendar.schoolAddress}"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/list_twoline1_textsize_line1"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
@@ -130,12 +132,13 @@
                 tools:text="Nairobi, Kenya" />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:id="@+id/location_title"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginBottom="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginBottom="@dimen/layout_dimen_8dp"
                 android:text="@string/address"
                 app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_locataion_iv"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_locataion_tv"
@@ -160,41 +163,42 @@
                 app:layout_constraintStart_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier3">
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/fragment_school_detail_overview_phone_iv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                    android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                    android:layout_marginVertical="@dimen/layout_dimen_16dp"
+                    android:layout_marginStart="@dimen/layout_dimen_16dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:contentDescription="@string/school"
-                    android:src="@drawable/ic_call_bcd4_24dp"
+                    android:tint="?colorOnIconTint"
+                    app:srcCompat="@drawable/ic_call_bcd4_24dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/fragment_school_detail_overview_detail_school_phonenumber"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                    android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                    android:layout_marginVertical="@dimen/layout_dimen_16dp"
+                    android:layout_marginStart="@dimen/layout_dimen_16dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
                     android:text="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/list_twoline1_textsize_line1"
                     android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolPhoneNumber)}"
                     app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_phone_iv"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="+971 44311111" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/phone_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="@dimen/layout_dimen_16dp"
+                    android:layout_marginBottom="@dimen/layout_dimen_8dp"
                     android:text="@string/phone_number"
                     android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -205,16 +209,16 @@
                     android:id="@+id/phone_num_message_imageview"
                     app:onClickSms="@{schoolWithHolidayCalendar.schoolPhoneNumber}"
                     android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolPhoneNumber)}"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_width="@dimen/layout_dimen_40dp"
+                    android:layout_height="@dimen/layout_dimen_40dp"
+                    android:layout_marginTop="@dimen/layout_dimen_8dp"
+                    android:layout_marginEnd="@dimen/layout_dimen_16dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
                     app:iconGravity="textStart"
                     app:icon="@drawable/ic_message_bcd4_24dp"
-                    app:iconTint="@color/text_primary"
+                    app:iconTint="?colorOnIconTint"
                     app:iconPadding="0dp"
                     />
 
@@ -229,26 +233,26 @@
                 app:constraint_referenced_ids="fragment_school_overview_phone_ll,barrier3"
                 />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/fragment_school_detail_overview_email_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:tint="?colorOnIconTint"
                 android:contentDescription="@string/school"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_16dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 android:visibility="@{schoolWithHolidayCalendar.schoolHolidayCalendarUid != 0 ? View.VISIBLE : View.GONE}"
-                android:src="@drawable/ic_perm_contact_calendar_black_24dp"
+                app:srcCompat="@drawable/ic_perm_contact_calendar_black_24dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier4" />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/fragment_school_detail_overview_detail_school_holiday_calendar_name"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/list_twoline1_textsize_line1"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_16dp"
                 android:text="@{schoolWithHolidayCalendar.holidayCalendar.umCalendarName}"
                 android:visibility="@{schoolWithHolidayCalendar.schoolHolidayCalendarUid != 0 ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -257,11 +261,12 @@
                 tools:text="Kenya calendar A" />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:id="@+id/calendar_title"
                 android:visibility="@{schoolWithHolidayCalendar.schoolHolidayCalendarUid != 0 ? View.VISIBLE : View.GONE}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
                 android:text="@string/holiday_calendar"
                 app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_email_iv"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_detail_school_holiday_calendar_name" />
@@ -287,25 +292,25 @@
                 android:background="@drawable/bg_listitem"
                 >
 
-                <ImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/school_overview_hc_iv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                    android:layout_marginVertical="@dimen/layout_dimen_16dp"
+                    android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                     android:contentDescription="@string/school"
-                    android:src="@drawable/ic_email_black_24dp"
+                    android:tint="?colorOnIconTint"
+                    app:srcCompat="@drawable/ic_email_black_24dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/fragment_school_detail_overview_detail_school_email"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                    android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                    android:textColor="@color/text_primary"
-                    android:textSize="@dimen/list_twoline1_textsize_line1"
+                    android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                    android:layout_marginVertical="@dimen/layout_dimen_16dp"
                     android:text="@{schoolWithHolidayCalendar.schoolEmailAddress}"
                     android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolEmailAddress)}"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -314,11 +319,12 @@
                     tools:text="info@schoola.com" />
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/email_title"
                     android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolAddress)}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="@dimen/layout_dimen_16dp"
                     android:text="@string/email"
                     app:layout_constraintStart_toEndOf="@+id/school_overview_hc_iv"
                     app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_detail_school_email" />
@@ -334,26 +340,26 @@
                 />
 
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/fragment_school_detail_overview_timezone_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/school"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:tint="?colorOnIconTint"
+                android:layout_marginVertical="@dimen/layout_dimen_16dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolTimeZone)}"
-                android:src="@drawable/ic_language_blue_grey_600_24dp"
+                app:srcCompat="@drawable/ic_language_blue_grey_600_24dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/barrier6" />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/fragment_school_detail_overview_timezone_value"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/list_twoline1_textsize_line1"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+                android:layout_marginVertical="@dimen/layout_dimen_16dp"
                 android:text="@{schoolWithHolidayCalendar.schoolTimeZone}"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolTimeZone)}"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -362,11 +368,12 @@
                 tools:text="Asia/Dubai" />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:id="@+id/fragment_school_detail_overview_timezone_title"
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(schoolWithHolidayCalendar.schoolTimeZone)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="@dimen/layout_dimen_16dp"
                 android:text="@string/timezone"
                 app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_overview_timezone_iv"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_overview_timezone_value" />
@@ -382,11 +389,13 @@
                 />
 
             <TextView
+
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/fragment_school_overview_classes_heading"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/layout_dimen_0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+                android:layout_marginVertical="@dimen/layout_dimen_16dp"
+                android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
                 android:text="@string/classes"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

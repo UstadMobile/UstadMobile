@@ -7,23 +7,20 @@
     android:layout_width="match_parent"
     app:contentInsetStartWithNavigation="0dp"
     android:id="@+id/toolbar"
-    android:background="@color/primary"
+    android:background="?colorPrimaryBackground"
     app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
     tools:ignore="PrivateResource">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:layout_marginTop="@dimen/dimen_30dp"
-        android:paddingBottom="@dimen/dimen_16dp"
+        android:textAppearance="@style/UmTheme.TextAppearance.Headline5"
+        android:layout_marginTop="@dimen/layout_dimen_30dp"
+        android:paddingBottom="@dimen/layout_dimen_16dp"
         android:layout_centerInParent="true"
         android:textStyle="bold"
         android:id="@+id/document_title"
         android:gravity="center_vertical"
         android:textColor="@android:color/white"
-        android:autoSizeTextType="uniform"
-        android:autoSizeMinTextSize="@dimen/text_title_medium"
-        android:autoSizeMaxTextSize="@dimen/text_title_big"
-        android:autoSizeStepGranularity="2sp"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

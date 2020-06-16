@@ -26,8 +26,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:layout_marginVertical="@dimen/formitem_margin_vertical"
-        android:layout_marginHorizontal="@dimen/form_margin_horizontal"
+        android:layout_marginVertical="@dimen/layout_dimen_16dp"
+        android:layout_marginHorizontal="@dimen/layout_dimen_8dp"
         app:customFieldHint="@{customField}">
 
         <com.ustadmobile.port.android.view.CustomFieldAutoCompleteTextView

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include android:id="@+id/xapi_activity_toolbarholder" layout="@layout/toolbar_with_progress"/>
+    <include android:id="@+id/appbar"
+        layout="@layout/appbar_material_with_progress"/>
 
     <WebView
         android:id="@+id/activity_xapi_package_webview"

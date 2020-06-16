@@ -8,35 +8,36 @@
     android:focusable="true"
     android:clickable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    android:paddingEnd="@dimen/dimen_8dp"
-    android:paddingTop="@dimen/dimen_16dp"
-    android:paddingBottom="@dimen/dimen_16dp"
-    android:paddingStart="@dimen/dimen_8dp">
-    <ImageView
+    android:paddingEnd="@dimen/layout_dimen_8dp"
+    android:paddingTop="@dimen/layout_dimen_16dp"
+    android:paddingBottom="@dimen/layout_dimen_16dp"
+    android:paddingStart="@dimen/layout_dimen_8dp">
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/page_handle"
-        android:layout_width="@dimen/dimen_30dp"
+        android:layout_width="@dimen/layout_dimen_30dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical|start"
         android:scaleType="center"
+        android:tint="?colorOnIconTint"
         android:src="@drawable/ic_reorder_grey_500_24dp" />
 
     <TextView
-        android:layout_marginEnd="@dimen/dimen_30dp"
+        android:layout_marginEnd="@dimen/layout_dimen_30dp"
         android:layout_marginStart="?listPreferredItemHeightSmall"
         android:id="@+id/page_title"
-        android:textColor="@color/text_secondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="@dimen/dimen_16dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginLeft="@dimen/layout_dimen_16dp"
+        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         tools:ignore="RtlHardcoded" />
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/page_option"
-        android:layout_width="@dimen/dimen_20dp"
+        android:layout_width="@dimen/layout_dimen_20dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical|end"
         android:scaleType="center"
+        android:tint="?colorOnIconTint"
         android:src="@drawable/ic_more_vert_grey_500_24dp" />
 </FrameLayout>

@@ -12,38 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:id="@+id/appBar"
-            android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
-            app:elevation="@dimen/layout_dimen_4dp">
-
-            <com.google.android.material.appbar.CollapsingToolbarLayout
-                android:id="@+id/collapsing_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?colorPrimaryBackground"
-                app:elevation="@dimen/layout_dimen_0dp"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                android:minHeight="?actionBarSize"
-                app:contentScrim="?colorPrimaryBackground"
-                app:expandedTitleMarginStart="@dimen/layout_dimen_0dp"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:titleEnabled="false">
-
-                <com.google.android.material.appbar.MaterialToolbar
-                    android:id="@+id/activity_main_toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?colorPrimaryBackground"
-                    app:elevation="@dimen/layout_dimen_4dp"
-                    android:minHeight="?actionBarSize"/>
-
-
-            </com.google.android.material.appbar.CollapsingToolbarLayout>
-        </com.google.android.material.appbar.AppBarLayout>
+        <include
+            layout="@layout/appbar_material_collapsing"/>
 
 
         <fragment

@@ -65,7 +65,7 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
             }
         }
 
-        setSupportActionBar(findViewById(R.id.um_toolbar))
+        setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         mMountedPath = AtomicReference()

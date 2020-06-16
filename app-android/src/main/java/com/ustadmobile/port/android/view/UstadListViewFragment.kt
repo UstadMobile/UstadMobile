@@ -107,7 +107,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
                 menu.add(0, item.commandId, index,
                         systemImpl.getString(item.messageId, fragmentContext)).apply {
                     val drawable = fragmentContext.getDrawable(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp) ?: return@forEachIndexed
-                    DrawableCompat.setTint(drawable, ContextCompat.getColor(fragmentContext, R.color.primary_text))
+                    DrawableCompat.setTint(drawable, ContextCompat.getColor(fragmentContext, R.color.secondaryTextColor))
                     icon = drawable
                 }
             }

@@ -141,11 +141,11 @@ class UmEditorActionView : Toolbar, UmFormatStateChangeListener {
     private fun changeState(formatIcon: ImageView,
                             formatHolder: FrameLayout, isActivated: Boolean) {
         formatIcon.setColorFilter(ContextCompat.getColor(context,
-                if (isActivated || !isQuickAction) R.color.icons else R.color.text_secondary))
+                if (isActivated || !isQuickAction) R.color.primaryTextColor else R.color.colorIconTint))
 
         if (isQuickAction) {
             formatHolder.setBackgroundColor(ContextCompat.getColor(context,
-                    if (isActivated) R.color.content_icon_active else R.color.icons))
+                    if (isActivated) R.color.colorIconTint else R.color.primaryTextColor))
         }
     }
 

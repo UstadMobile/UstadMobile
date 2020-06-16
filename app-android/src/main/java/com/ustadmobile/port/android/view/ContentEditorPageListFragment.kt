@@ -110,24 +110,24 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
 
             holder.pageTitle.setTextColor(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.text_primary
+                        R.color.secondaryTextColor
                     else
-                        R.color.text_secondary))
+                        R.color.colorIconTint))
             holder.pageOptionHandle.setColorFilter(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.text_primary
+                        R.color.secondaryTextColor
                     else
-                        R.color.text_secondary))
+                        R.color.colorIconTint))
             holder.pageReorderHandle.setColorFilter(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.text_primary
+                        R.color.secondaryTextColor
                     else
-                        R.color.text_secondary))
+                        R.color.colorIconTint))
             holder.itemHolder.setBackgroundColor(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.secondary_text_light
+                        R.color.colorIconTint
                     else
-                        R.color.icons))
+                        R.color.primaryTextColor))
 
             holder.pageOptionHandle.setOnClickListener { showPopUpMenu(holder.itemView.context,
                     holder.pageOptionHandle, pageItem) }
@@ -184,7 +184,6 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
 
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.PageListStyle)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

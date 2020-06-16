@@ -1,89 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="?android:selectableItemBackground"
     android:layout_height="wrap_content"
     android:id="@+id/item_clazzlog_log_cl">
 
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         android:id="@+id/item_clazzlog_log_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="TextView"
+        android:layout_marginStart="@dimen/layout_dimen_8dp"
+        android:layout_marginTop="@dimen/layout_dimen_8dp"
+        android:layout_marginEnd="@dimen/layout_dimen_8dp"
+        tools:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/item_clazzlog_log_calendar_image"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_clazzlog_log_status_text_imageview"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
+        android:layout_width="@dimen/layout_dimen_16dp"
+        android:layout_height="@dimen/layout_dimen_16dp"
+        android:layout_marginStart="@dimen/layout_dimen_8dp"
+        android:layout_marginTop="@dimen/layout_dimen_4dp"
         app:layout_constraintStart_toEndOf="@+id/item_clazzlog_log_calendar_image"
         app:layout_constraintTop_toBottomOf="@+id/item_clazzlog_log_date" />
 
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Caption"
         android:id="@+id/item_clazzlog_log_status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
-        android:text=""
-        android:textSize="10sp"
+        android:layout_marginStart="@dimen/layout_dimen_8dp"
+        android:layout_marginTop="@dimen/layout_dimen_4dp"
+        tools:text="Dummy text goes here"
         app:layout_constraintStart_toEndOf="@+id/item_clazzlog_log_status_text_imageview"
         app:layout_constraintTop_toBottomOf="@+id/item_clazzlog_log_date" />
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_clazzlog_log_calendar_image"
-        android:layout_width="40dp"
-        android:layout_height="43dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="@dimen/layout_dimen_40dp"
+        android:layout_height="@dimen/layout_dimen_40dp"
+        android:layout_marginStart="@dimen/layout_dimen_8dp"
+        android:layout_marginTop="@dimen/layout_dimen_8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_date_range_black_24dp"
-        android:layout_marginLeft="8dp" />
+        app:srcCompat="@drawable/ic_date_range_black_24dp" />
 
 
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Caption"
         android:id="@+id/item_clazzlog_log_day"
         android:layout_width="19dp"
         android:layout_height="13dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="25dp"
+        android:layout_marginBottom="@dimen/layout_dimen_8dp"
+        android:layout_marginEnd="@dimen/layout_dimen_8dp"
+        android:layout_marginStart="@dimen/layout_dimen_10dp"
+        android:layout_marginTop="@dimen/layout_dimen_25dp"
         android:text="Mon"
-        android:textSize="8sp"
         app:layout_constraintBottom_toBottomOf="@+id/item_clazzlog_log_calendar_image"
         app:layout_constraintEnd_toEndOf="@+id/item_clazzlog_log_calendar_image"
         app:layout_constraintStart_toStartOf="@+id/item_clazzlog_log_calendar_image"
-        app:layout_constraintTop_toTopOf="@+id/item_clazzlog_log_calendar_image"
-        android:layout_marginRight="8dp"
-        android:layout_marginLeft="10dp" />
+        app:layout_constraintTop_toTopOf="@+id/item_clazzlog_log_calendar_image" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/item_clazzlog_log_done_image"
         android:layout_width="18dp"
         android:layout_height="18dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="@dimen/layout_dimen_8dp"
+        android:layout_marginBottom="@dimen/layout_dimen_4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <View
         android:id="@+id/item_clazzlog_log_divider"
-        android:layout_width="368dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
+        android:layout_width="@dimen/layout_dimen_368dp"
+        android:layout_height="@dimen/layout_dimen_1dp"
+        android:layout_marginStart="@dimen/layout_dimen_8dp"
+        android:layout_marginTop="@dimen/layout_dimen_8dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/item_clazzlog_log_status_text_imageview" />
