@@ -1,7 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- MATERIAL THEMING STARTS-->
-
     <style name="ExoMediaButton.Subtitle">
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:layout_width">@dimen/layout_dimen_70dp</item>
@@ -59,7 +57,5 @@
     <style name="UmTheme.Widget.NavigationView" parent="Widget.MaterialComponents.NavigationView">
         <item name="itemTextAppearance">?attr/textAppearanceBody2</item>
     </style>
-
-    <!--MATERIAL THEMING ENDS-->
 
 </resources>
