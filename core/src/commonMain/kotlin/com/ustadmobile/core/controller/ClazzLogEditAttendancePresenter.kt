@@ -102,6 +102,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
         GlobalScope.launch {
             //save to the database
             saveCurrent(current)
+            view.entity = next
             currentClazzLogUid = next.clazzLogUid
             onLoadEntityFromDb(repo)
         }

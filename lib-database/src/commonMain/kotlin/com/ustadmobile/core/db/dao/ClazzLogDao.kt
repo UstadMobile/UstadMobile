@@ -45,10 +45,11 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
     abstract fun findByClazzUidAsFactory(clazzUid: Long, excludeStatus: Int): DataSource.Factory<Int, ClazzLog>
 
 
+    //Used by the attendance recording screen to allow the user to go next/prev between days.
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE clazzLogClazzUid = :clazzUid
         AND clazzLog.clazzLogStatusFlag != :excludeStatus
-        ORDER BY ClazzLog.logDate DESC""")
+        ORDER BY ClazzLog.logDate ASC""")
     abstract fun findByClazzUidAsLiveData(clazzUid: Long, excludeStatus: Int): DoorLiveData<List<ClazzLog>>
 
 
