@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -58,8 +59,13 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         WHERE 
         ClazzLog.clazzLogClazzUid = :clazzUid 
         AND ClazzLog.logDate BETWEEN :fromTime AND :toTime
+        AND (:excludeStatusFilter = 0 OR ((ClazzLog.clazzLogStatusFlag & :excludeStatusFilter) = 0))
+        ORDER BY ClazzLog.logDate DESC
+        LIMIT :limit
     """)
-    abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long): List<ClazzLog>
+    abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int, limit: Int): List<ClazzLog>
+
+    fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long) = findByClazzUidWithinTimeRange(clazzUid, fromTime, toTime, 0, Int.MAX_VALUE)
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE 
@@ -69,6 +75,13 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         ORDER BY ClazzLog.logDate
     """)
     abstract fun findByClazzUidWithinTimeRangeLive(clazzUid: Long, fromTime: Long, toTime: Long, statusFilter: Int): DoorLiveData<List<ClazzLog>>
+
+    @Query("""
+        SELECT EXISTS(SELECT ClazzLog.clazzLogUid FROM ClazzLog WHERE clazzLogClazzUid = :clazzUid 
+        AND (:excludeStatusFilter = 0 OR ((ClazzLog.clazzLogStatusFlag & :excludeStatusFilter) = 0)))
+    """)
+    @QueryLiveTables(["ClazzLog"])
+    abstract fun clazzHasScheduleLive(clazzUid: Long, excludeStatusFilter: Int): DoorLiveData<Boolean>
 
 
     @Query("""UPDATE ClazzLog 

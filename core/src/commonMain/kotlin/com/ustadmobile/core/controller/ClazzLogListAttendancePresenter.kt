@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.attendancePercentage
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.latePercentage
+import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.ClazzLog
@@ -72,11 +73,16 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { ClazzLogListSortOption(it, context) }
         view.graphData = graphDisplayData
+        repo.clazzLogDao.clazzHasScheduleLive(clazzUidFilter, ClazzLog.STATUS_INACTIVE)
+                .observeWithLifecycleOwner(lifecycleOwner) { hasClazzLogs ->
+                    view.recordAttendanceButtonVisible = hasClazzLogs ?: false
+                }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //ClazzLogs are always created by the scheduling system
-        return false
+        //This should actually return a value to determine whether or not the user can record / view attendance.
+        //Here the fab does not directly create a new item, rather it opens the most recent log
+        return true
     }
 
     private fun updateListOnView() {
@@ -102,7 +108,14 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     }
 
     override fun handleClickCreateNewFab() {
-        //in this instance we should open up the most recent clazzlog for clazz log detail
+        GlobalScope.launch(doorMainDispatcher()) {
+            val lastLog = db.clazzLogDao.findByClazzUidWithinTimeRange(
+                    clazzUidFilter, 0, Long.MAX_VALUE,
+                    ClazzLog.STATUS_INACTIVE, 1).firstOrNull()
+            if(lastLog != null){
+                handleClickEntry(lastLog)
+            }
+        }
     }
 
     fun handleClickGraphDuration(days: Int) {
