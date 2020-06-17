@@ -63,7 +63,7 @@ class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
 
         super.onCreate(savedInstanceState)
 
-        setTheme(R.style.ThemeSplash)
+        setTheme(R.style.UmTheme_App_Splash)
         setContentView(R.layout.activity_splash_screen)
 
         val presenter = SplashScreenPresenter(this, UMAndroidUtil.bundleToMap(intent.extras),

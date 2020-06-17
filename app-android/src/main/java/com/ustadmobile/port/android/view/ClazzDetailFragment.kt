@@ -22,6 +22,7 @@ import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
+import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
 interface ClazzDetailFragmentEventHandler {
@@ -57,7 +58,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
                         return@also
 
                     it.fragmentClazzDetailViewpager.adapter = mPagerAdapter
-                    it.fragmentClazzDetailTabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
+                    it.root.tabs.setupWithViewPager(it.fragmentClazzDetailViewpager)
                 }
             }
         }
@@ -73,7 +74,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
 
         mBinding = FragmentClazzDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.fragmentClazzDetailTabs.tabGravity = TabLayout.GRAVITY_FILL
+            it.root.tabs.tabGravity = TabLayout.GRAVITY_FILL
         }
 
         mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,

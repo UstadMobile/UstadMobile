@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.InstallState
@@ -252,7 +253,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         builder.setTitle(R.string.send_feedback)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.view_feedback_layout, null)
-        val editText = dialogView.findViewById<EditText>(R.id.feedback_edit_comment)
+        val editText = dialogView.findViewById<TextInputEditText>(R.id.feedback_edit_comment)
         builder.setView(dialogView)
         builder.setPositiveButton(R.string.send) { dialogInterface, whichButton ->
             ACRA.getErrorReporter().handleSilentException(UserFeedbackException(editText.text.toString()))
@@ -369,7 +370,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         val snackBar = Snackbar.make(coordinator_layout, message, Snackbar.LENGTH_LONG)
         if (actionMessageId != 0) {
             snackBar.setAction(instance.getString(actionMessageId, this)) { action() }
-            snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.accent))
+            snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.secondaryColor))
         }
         snackBar.anchorView = bottom_nav_view
         snackBar.show()

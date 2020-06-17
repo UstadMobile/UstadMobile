@@ -31,24 +31,21 @@
 
         <!-- Line 1-->
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_timezoneentity_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
-            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
-            android:textSize="@dimen/list_twoline1_textsize_line1"
-            android:textColor="@color/text_primary"
+            android:layout_margin="@dimen/dimen_16dp"
             tools:text="GMT+4 Asia/Dubai"
             app:timeZoneText="@{timeZoneEntity}"
             />
 
         <!-- Line 2-->
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/item_timezoneentity_line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -57,7 +54,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             tools:text="Secondary"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
+            android:layout_marginBottom="@dimen/dimen_16dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

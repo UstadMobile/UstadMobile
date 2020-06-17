@@ -15,11 +15,10 @@
 
     <!-- Used inside viewpager2 -->
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:textSize="@dimen/list_twoline1_textsize_line1"
-        android:textColor="@color/text_primary"
         android:layout_marginVertical="@dimen/dimen_8dp"
         app:textLocalDateTime="@{date}"
         app:textLocalDateTimeZone="@{timeZone}"/>

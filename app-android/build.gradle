@@ -359,7 +359,6 @@ dependencies {
     implementation "com.google.android.material:material:$version_android_material"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
     implementation "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
-    implementation "androidx.constraintlayout:constraintlayout:$version_android_constraint_layout"
 
     implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
 

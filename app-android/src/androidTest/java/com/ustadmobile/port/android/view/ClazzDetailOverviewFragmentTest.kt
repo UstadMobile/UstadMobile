@@ -52,7 +52,7 @@ class ClazzDetailOverviewFragmentTest {
             clazzUid = dbRule.db.clazzDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazz.clazzUid)) {
             ClazzDetailOverviewFragment().also {
                 it.installNavController(systemImplNavRule.navController)

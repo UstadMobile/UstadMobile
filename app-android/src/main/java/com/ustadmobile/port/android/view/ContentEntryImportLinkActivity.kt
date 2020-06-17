@@ -42,7 +42,7 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         super.onCreate(saved)
         setContentView(R.layout.activity_content_entry_import_link)
 
-        setUMToolbar(R.id.um_toolbar)
+        setUMToolbar(R.id.toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)

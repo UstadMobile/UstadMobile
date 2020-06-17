@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
@@ -70,7 +69,7 @@ class ContentEntryExportFragmentDialog :  UstadDialogFragment() , ContentEntryEx
 
         val umInflater = Objects.requireNonNull<Context>(context)
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val rootView = umInflater.inflate(R.layout.fragment_content_entry_export_fragment_dialog,null)
+        val rootView = umInflater.inflate(R.layout.fragment_content_entry_export_dialog,null)
 
         dialogTitle = rootView.findViewById(R.id.dialog_title)
         dialogMessage = rootView.findViewById(R.id.dialog_message)

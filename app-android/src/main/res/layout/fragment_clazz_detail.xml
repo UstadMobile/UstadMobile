@@ -33,22 +33,8 @@
         android:id="@+id/coordinationLayout"
         android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
-            android:elevation="@dimen/dimen_4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/fragment_clazz_detail_tabs"
-                style="@style/TabLayoutStyleHome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:tabTextColor="@color/primary_light"
-                android:background="?attr/colorPrimary"/>
-
-        </com.google.android.material.appbar.AppBarLayout>
+        <include
+            layout="@layout/appbar_material_tabs_scrollable"/>
 
 
         <androidx.viewpager.widget.ViewPager

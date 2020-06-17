@@ -59,7 +59,7 @@ class ClazzEditFragmentTest  {
             umCalendarUid = dbRule.db.holidayCalendarDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme) {
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
             ClazzEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
                 it.arguments = bundleOf()
@@ -113,7 +113,7 @@ class ClazzEditFragmentTest  {
             clazzUid = dbRule.db.clazzDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingClazz.clazzUid)) {
             ClazzEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)

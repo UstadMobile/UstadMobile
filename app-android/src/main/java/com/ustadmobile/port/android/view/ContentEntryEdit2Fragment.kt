@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -99,7 +100,11 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     override var fileImportErrorVisible: Boolean = false
         set(value) {
+            val typedVal = TypedValue()
+            requireActivity().theme.resolveAttribute(if(value) R.attr.colorError
+            else R.attr.colorOnSurface, typedVal,true)
             mBinding?.fileImportInfoVisibility = if(value) View.VISIBLE else View.GONE
+            mBinding?.importErrorColor = typedVal.data
             mBinding?.isImportError = value
             field = value
         }

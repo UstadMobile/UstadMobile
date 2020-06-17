@@ -12,37 +12,8 @@
         android:id="@+id/activity_fragmentlist_coordinator">
 
         <!-- removed  android:fitsSystemWindows="true" -->
-        <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-            <com.google.android.material.appbar.CollapsingToolbarLayout
-                android:id="@+id/collapsing_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:contentScrim="?colorPrimary"
-                app:expandedTitleMarginStart="0dp"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:titleEnabled="false">
-
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/activity_listfragment_toolbar"
-                    app:elevation="0dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/colorPrimary"
-                    android:minHeight="?attr/actionBarSize"
-                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                    />
-
-            </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-
-
-        </com.google.android.material.appbar.AppBarLayout>
-
+        <include
+            layout="@layout/appbar_material_collapsing"/>
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/activity_listfragment_frame"
@@ -55,14 +26,12 @@
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/activity_listfragment_fab"
             android:text="@string/add_class"
-            android:textColor="@color/primary_text"
-            android:backgroundTint="@color/accent"
+            android:backgroundTint="?colorSecondary"
             app:icon="@drawable/ic_add_black_24dp"
-            app:iconTint="@color/primary_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="@dimen/dimen_16dp"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

@@ -29,7 +29,6 @@ import org.acra.sender.HttpSender
         httpMethod = HttpSender.Method.POST)
 class App : UmBaseApplication() {
 
-
     override fun onCreate() {
         super.onCreate()
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP

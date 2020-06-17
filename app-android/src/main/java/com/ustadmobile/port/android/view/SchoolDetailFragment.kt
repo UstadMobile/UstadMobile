@@ -5,13 +5,11 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager.widget.ViewPager
-import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolDetailBinding
 import com.ustadmobile.core.controller.SchoolDetailPresenter
@@ -23,6 +21,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
+import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
 class CustomViewNameListFragmentPageAdapter(fm: FragmentManager, behavior: Int,
@@ -55,7 +54,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
     private var mPager: ViewPager? = null
 
-    private var mTabLayout: TabLayout? = null
 
     private var mPagerAdapter: CustomViewNameListFragmentPageAdapter? = null
 
@@ -67,7 +65,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
             rootView = it.root
         }
         mPager = mBinding?.fragmentSchoolDetailViewpager
-        mTabLayout = mBinding?.fragmentSchoolDetailTablayout
 
         mPresenter = SchoolDetailPresenter(requireContext(), arguments.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
@@ -109,7 +106,8 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
 
         Handler().post {
             mPager?.adapter = mPagerAdapter
-            mTabLayout?.setupWithViewPager(mPager)
+            mBinding?.root?.tabs?.setupWithViewPager(mPager)
+
         }
     }
 
@@ -129,7 +127,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         entity = null
         mPager = null
         mPagerAdapter = null
-        mTabLayout = null
     }
 
     override var entity: School? = null

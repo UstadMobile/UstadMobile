@@ -28,8 +28,6 @@
             app:onClickNew="@{onClickNew}"
             app:createNewText="@{createNewText}"/>
 
-
-
     </LinearLayout>
 
 
