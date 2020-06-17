@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
@@ -10,6 +11,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.nhaarman.mockitokotlin2.mock
+import com.soywiz.klock.hours
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -17,7 +19,9 @@ import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
+import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
 import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -63,12 +67,13 @@ class ClazzLogEditAttendanceFragmentTest  {
                         RecyclerViewChildActions.actionOnChild(click(), buttonId)))
     }
 
-    private fun waitForAttendanceToSave(clazzLogUid: Long) {
-        runBlocking(Dispatchers.Main) {
-            waitForLiveData(dbRule.db.clazzLogDao.findByUidLive(clazzLogUid), 5000) {
-                it?.clazzLogStatusFlag == ClazzLog.STATUS_RECORDED
-            }
-        }
+    private fun clickDoneAndWaitForAttendanceToSave(scenario: FragmentScenario<*>, clazzLogUid: Long) {
+        scenario.clickOptionMenu(R.id.menu_done)
+
+        dbRule.db.clazzLogDao.findByUidLive(clazzLogUid)
+                .waitUntilWithFragmentScenario(scenario, 5000) {
+                    it?.clazzLogStatusFlag == ClazzLog.STATUS_RECORDED
+                }
     }
 
     @AdbScreenRecord("Given an existing class when mixed attendance is recorded should be saved to database")
@@ -103,13 +108,7 @@ class ClazzLogEditAttendanceFragmentTest  {
             markStudent(position + 3, R.id.absent_button)
         }
 
-        clazzLogAttendanceListScenario.onFragment {
-            it.onOptionsItemSelected(mock {
-                on { itemId }.thenReturn(R.id.menu_done)
-            })
-        }
-
-        waitForAttendanceToSave(clazzLog.clazzLogUid)
+        clickDoneAndWaitForAttendanceToSave(clazzLogAttendanceListScenario, clazzLog.clazzLogUid)
 
 
         val clazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(clazzLog.clazzLogUid)
@@ -140,6 +139,11 @@ class ClazzLogEditAttendanceFragmentTest  {
             clazzLogUid = dbRule.db.clazzLogDao.insert(this)
         }
 
+        val clazzLog2 = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis() - 24.hours.millisecondsLong,
+            0L).apply {
+            clazzLogUid = dbRule.db.clazzLogDao.insert(this)
+        }
+
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
                 bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.Theme_UstadTheme
         ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
@@ -153,7 +157,7 @@ class ClazzLogEditAttendanceFragmentTest  {
                 RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(hasDescendant(withText(R.string.mark_all_present)),
                     click()))
 
-        waitForAttendanceToSave(clazzLog.clazzLogUid)
+        clickDoneAndWaitForAttendanceToSave(clazzLogAttendanceListScenario, clazzLog.clazzLogUid)
 
         val clazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(
                 clazzLog.clazzLogUid)
@@ -163,5 +167,56 @@ class ClazzLogEditAttendanceFragmentTest  {
     }
 
 
+    @Test
+    @AdbScreenRecord("Given an existing class, the user can go to a previous day and fill in attendance for that day. Both are saved to database")
+    fun givenExistingClazzLog_whenClickMarkAllAndClickToPrevClazzLog_willSaveToDatabaseAndCanMarkPrevDay() {
+        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+
+        val clazzAndMembers = runBlocking { dbRule.db.insertTestClazzAndMembers(5) }
+
+        val clazzLog = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis(), 0L).apply {
+            clazzLogUid = dbRule.db.clazzLogDao.insert(this)
+        }
+
+        val prevDayClazzLog = ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis() - 24.hours.millisecondsLong,
+                0L).apply {
+            clazzLogUid = dbRule.db.clazzLogDao.insert(this)
+        }
+
+        val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
+                bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.Theme_UstadTheme
+        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+
+        clazzLogAttendanceListScenario.onFragment {
+            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
+            recyclerViewIdlingResource.recyclerView = it.mBinding!!.clazzLogEditRecyclerView
+        }
+
+        onView(withId(R.id.clazz_log_edit_recycler_view)).perform(
+                RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(hasDescendant(withText(R.string.mark_all_present)),
+                        click()))
+
+        onView(withId(R.id.clazz_log_edit_recycler_view)).perform(
+                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0,
+                        RecyclerViewChildActions.actionOnChild(click(), R.id.prev_button)))
+
+        onView(withId(R.id.clazz_log_edit_recycler_view)).perform(
+                RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(hasDescendant(withText(R.string.mark_all_present)),
+                        click()))
+
+
+        clickDoneAndWaitForAttendanceToSave(clazzLogAttendanceListScenario, prevDayClazzLog.clazzLogUid)
+
+        val clazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(
+                clazzLog.clazzLogUid)
+        Assert.assertTrue("All clazz logs are marked as attended for most recent day",
+                clazzLogAttendanceRecords.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED})
+
+        val prevDayClazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(
+                clazzLog.clazzLogUid)
+        Assert.assertTrue("All clazz logs are marked as attended for most recent day",
+                prevDayClazzLogAttendanceRecords.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED})
+
+    }
 
 }

@@ -14,6 +14,7 @@ private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime:
 }
 
 suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
+                                                    clazzJoinTime: Long = (getSystemTimeInMillis() -  (86400* 1000)),
     studentNamer: (Int) -> Pair<String, String> = {"Test" to "Student $it"},
     teacherNamer: (Int) -> Pair<String, String> = {"Test" to "Teacher $it"}): TestClazzAndMembers {
     val mockClazz = Clazz("Test Clazz").apply {
@@ -34,8 +35,6 @@ suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numCl
             personUid = personDao.insertAsync(this)
         }
     }
-
-    val clazzJoinTime = getSystemTimeInMillis() - 1000
 
     val testStudentClazzMembers = testStudents.map {
         it.asClazzMember(mockClazz.clazzUid, ClazzMember.ROLE_STUDENT, clazzJoinTime).apply {

@@ -61,6 +61,12 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         }
 
 
+    override var recordAttendanceButtonVisible: Boolean
+        get() = fabManager?.visible ?: false
+        set(value) {
+            fabManager?.visible = value
+        }
+
     private var graphRecyclerViewAdapter: ClazzLogListGraphRecyclerAdapter? = null
 
     class ClazzLogListViewHolder(val itemBinding: ItemClazzLogAttendanceListBinding): RecyclerView.ViewHolder(itemBinding.root)
@@ -217,8 +223,9 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
+        autoShowFabOnAddPermission = false
         mPresenter = ClazzLogListAttendancePresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
+                this, viewLifecycleOwner, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData).also {
@@ -236,7 +243,8 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.visible = false
+        fabManager?.text = requireContext().getString(R.string.record_attendance)
+        fabManager?.icon = R.drawable.baseline_assignment_turned_in_24
     }
 
     /**
