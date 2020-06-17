@@ -86,7 +86,7 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
 
         onView(withId(R.id.create_new_content)).perform(click())
         Thread.sleep(100)
-        onView(withId(R.id.content_import_link)).perform(click())
+        //onView(withId(R.id.content_import_link)).perform(click())
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString))
@@ -105,7 +105,7 @@ class CompleteImportLinkEspressoTest : AbstractImportLinkTest() {
 
         onView(withId(R.id.create_new_content)).perform(click())
         Thread.sleep(100)
-        onView(withId(R.id.content_import_link)).perform(click())
+        //onView(withId(R.id.content_import_link)).perform(click())
 
         onView(withId(R.id.entry_import_link_editText)).perform(click())
         onView(withId(R.id.entry_import_link_editText)).perform(replaceText(urlString))
