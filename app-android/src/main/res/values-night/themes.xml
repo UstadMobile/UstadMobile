@@ -33,7 +33,7 @@
         <item name="colorOnIconTint">?colorOnSurface</item>
         <item name="colorOnTintPrimary">?colorOnSurface</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
-        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorSurface</item>
+        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorOnPrimary</item>
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
         <item name="colorTabIndicator">@color/primaryColor</item>
         <item name="colorTabText" >@color/primaryTextColor</item>
