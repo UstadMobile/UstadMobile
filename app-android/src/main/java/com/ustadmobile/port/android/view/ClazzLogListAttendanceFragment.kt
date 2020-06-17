@@ -7,7 +7,7 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Lifecycle
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.MergeAdapter
@@ -61,6 +61,12 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         }
 
 
+    override var recordAttendanceButtonVisible: Boolean
+        get() = fabManager?.visible ?: false
+        set(value) {
+            fabManager?.visible = value
+        }
+
     private var graphRecyclerViewAdapter: ClazzLogListGraphRecyclerAdapter? = null
 
     class ClazzLogListViewHolder(val itemBinding: ItemClazzLogAttendanceListBinding): RecyclerView.ViewHolder(itemBinding.root)
@@ -109,21 +115,30 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         override fun onChanged(t: ClazzLogListAttendancePresenter.AttendanceGraphData?) {
             val graphData = t ?: return
             val contextVal = context ?: return
-            if(graphData.graphData.size < 2) {
+            if(graphData.percentageAttendedSeries.size < 2) {
                 return
             }
 
             val lineData = LineData().apply {
-                addDataSet(LineDataSet(graphData.graphData.map { Entry(it.first.toFloat(), it.second * 100) },
-                        contextVal.getString(R.string.attendance)).apply {
-                    color = Color.BLACK
-                    valueTextColor = Color.BLACK
-                    lineWidth = 1f
-                    setDrawValues(false)
-                    setDrawCircles(false)
-                    mode = LineDataSet.Mode.LINEAR
-                })
-
+                listOf(graphData.percentageAttendedSeries, graphData.percentageLateSeries).forEachIndexed { index, list ->
+                    val colorId = if(index == 0) R.color.traffic_green else R.color.traffic_orange
+                    val seriesColor = context?.let { ContextCompat.getColor(it, colorId) } ?: Color.BLACK
+                    addDataSet(LineDataSet(list.map { Entry(it.first.toFloat(), it.second * 100) },
+                            contextVal.getString(R.string.attendance)).apply {
+                        color = seriesColor
+                        valueTextColor = Color.BLACK
+                        lineWidth = 1f
+                        setDrawValues(false)
+                        setDrawCircles(false)
+                        mode = LineDataSet.Mode.LINEAR
+                        fillColor = seriesColor
+                        fillAlpha = 192
+                        setDrawFilled(true)
+                        setFillFormatter { dataSet, dataProvider ->
+                            0f
+                        }
+                    })
+                }
             }
 
             data = lineData
@@ -208,8 +223,9 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
+        autoShowFabOnAddPermission = false
         mPresenter = ClazzLogListAttendancePresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
+                this, viewLifecycleOwner, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData).also {
@@ -227,7 +243,8 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fabManager?.visible = false
+        fabManager?.text = requireContext().getString(R.string.record_attendance)
+        fabManager?.icon = R.drawable.baseline_assignment_turned_in_24
     }
 
     /**

@@ -16,6 +16,8 @@ interface ClazzLogListAttendanceView: UstadListView<ClazzLog, ClazzLog> {
      */
     var graphData: DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>?
 
+    var recordAttendanceButtonVisible: Boolean
+
     companion object {
         const val VIEW_NAME = "ClazzLogListAttendanceView"
     }

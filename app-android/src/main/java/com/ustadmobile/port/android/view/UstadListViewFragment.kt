@@ -60,6 +60,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
      */
     protected open var autoMergeRecyclerViewAdapter = true
 
+    protected open var autoShowFabOnAddPermission = true
+
     protected var mActivityWithFab: UstadListViewActivityWithFab? = null
         get() {
             /*
@@ -199,7 +201,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         fabManager?.onClickListener = {
             mDataBinding?.presenter?.handleClickCreateNewFab()
         }
-        fabManager?.visible = (addMode == ListViewAddMode.FAB)
+        fabManager?.takeIf { autoShowFabOnAddPermission }?.visible = (addMode == ListViewAddMode.FAB)
         fabManager?.icon = R.drawable.ic_add_white_24dp
 
 
@@ -227,7 +229,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             mDataBinding?.addMode = value
             mNewItemRecyclerViewAdapter.takeIf { autoMergeRecyclerViewAdapter }?.newItemVisible =
                     (value == ListViewAddMode.FIRST_ITEM)
-            fabManager?.visible = (value == ListViewAddMode.FAB)
+            fabManager?.takeIf { autoShowFabOnAddPermission }?.visible = (value == ListViewAddMode.FAB)
 
             field = value
         }
