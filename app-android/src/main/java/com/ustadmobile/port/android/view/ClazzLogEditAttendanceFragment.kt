@@ -60,11 +60,9 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
         }
     }
 
-    class ClazzLogListDateHeaderRecyclerAdapter(): ListAdapter<ClazzLog, ClazzLogListDateHeaderRecyclerAdapter.DateHeaderViewHolder>(DIFFUTIL_CLAZZLOG) {
+    inner class ClazzLogListDateHeaderRecyclerAdapter(): ListAdapter<ClazzLog, ClazzLogListDateHeaderRecyclerAdapter.DateHeaderViewHolder>(DIFFUTIL_CLAZZLOG) {
 
-        var timeZone: TimeZone = TimeZone.getTimeZone("UTC")
-
-        class DateHeaderViewHolder(var binding: ItemClazzLogEditAttendanceDateheaderBinding): RecyclerView.ViewHolder(binding.root)
+        inner class DateHeaderViewHolder(var binding: ItemClazzLogEditAttendanceDateheaderBinding): RecyclerView.ViewHolder(binding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = DateHeaderViewHolder(
             ItemClazzLogEditAttendanceDateheaderBinding.inflate(LayoutInflater.from(parent.context),
@@ -73,7 +71,7 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
         override fun onBindViewHolder(holder: DateHeaderViewHolder, position: Int) {
             val item = getItem(position)
             holder.binding.date = item.logDate
-            holder.binding.timeZone = timeZone
+            holder.binding.timeZone = _clazzLogTimezone
         }
     }
 
@@ -199,6 +197,12 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
     private var mMarkAllRecyclerAdapter: MarkAllRecyclerAdapter? = null
 
     override var clazzLogTimezone: String? = null
+        set(value) {
+            field = value
+            _clazzLogTimezone = TimeZone.getTimeZone(value)
+        }
+
+    internal var _clazzLogTimezone = TimeZone.getTimeZone("UTC")
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
