@@ -112,20 +112,20 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
                     if (pageItem.href == currentSelectedPage)
                         R.color.secondaryTextColor
                     else
-                        R.color.colorIconTint))
+                        R.color.iconTintColor))
             holder.pageOptionHandle.setColorFilter(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
                         R.color.secondaryTextColor
                     else
-                        R.color.colorIconTint))
+                        R.color.iconTintColor))
             holder.pageReorderHandle.setColorFilter(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
                         R.color.secondaryTextColor
                     else
-                        R.color.colorIconTint))
+                        R.color.iconTintColor))
             holder.itemHolder.setBackgroundColor(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.colorIconTint
+                        R.color.iconTintColor
                     else
                         R.color.primaryTextColor))
 

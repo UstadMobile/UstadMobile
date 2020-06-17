@@ -8,8 +8,8 @@
     android:layout_height="wrap_content">
 
     <FrameLayout
-        android:layout_marginLeft="@dimen/layout_dimen_4dp"
-        android:layout_marginRight="@dimen/layout_dimen_4dp"
+        android:layout_marginLeft="@dimen/dimen_4dp"
+        android:layout_marginRight="@dimen/dimen_4dp"
         android:padding="6dp"
         android:id="@+id/icon_holder"
         android:layout_width="wrap_content"
@@ -18,8 +18,8 @@
             android:layout_gravity="center"
             android:id="@+id/format_icon"
             android:tint="?colorOnIconTint"
-            android:layout_width="@dimen/layout_dimen_22dp"
-            android:layout_height="@dimen/layout_dimen_22dp" />
+            android:layout_width="@dimen/dimen_22dp"
+            android:layout_height="@dimen/dimen_22dp" />
     </FrameLayout>
 
 </FrameLayout>

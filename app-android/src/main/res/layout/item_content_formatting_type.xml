@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
 
     <RelativeLayout
-        android:layout_marginTop="@dimen/layout_dimen_8dp"
+        android:layout_marginTop="@dimen/dimen_8dp"
         android:layout_centerVertical="true"
         android:clickable="true"
         android:foreground="?android:attr/selectableItemBackground"
@@ -18,12 +18,12 @@
         tools:targetApi="m">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:layout_marginBottom="@dimen/layout_dimen_10dp"
-            android:layout_marginTop="@dimen/layout_dimen_10dp"
+            android:layout_marginBottom="@dimen/dimen_10dp"
+            android:layout_marginTop="@dimen/dimen_10dp"
             android:tint="?colorOnIconTint"
             android:id="@+id/format_icon"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/layout_dimen_25dp"
+            android:layout_height="@dimen/dimen_25dp"
             android:layout_centerInParent="true" />
     </RelativeLayout>
 

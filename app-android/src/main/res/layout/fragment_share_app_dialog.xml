@@ -5,7 +5,7 @@
 
     android:layout_below="@+id/fragment_login_title_text"
     android:layout_above="@+id/fragment_share_app_button"
-    android:padding="@dimen/layout_dimen_16dp"
+    android:padding="@dimen/dimen_16dp"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -17,8 +17,8 @@
         android:text="@string/share_offline_dialog_message"/>
 
     <CheckBox
-        android:layout_marginTop="@dimen/layout_dimen_8dp"
-        android:layout_marginBottom="@dimen/layout_dimen_8dp"
+        android:layout_marginTop="@dimen/dimen_8dp"
+        android:layout_marginBottom="@dimen/dimen_8dp"
         android:id="@+id/fragment_share_app_zip_checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

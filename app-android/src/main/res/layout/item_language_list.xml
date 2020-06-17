@@ -38,7 +38,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:padding="@dimen/layout_dimen_16dp"
+            android:padding="@dimen/dimen_16dp"
             android:text="@{language.name}"
             />
 

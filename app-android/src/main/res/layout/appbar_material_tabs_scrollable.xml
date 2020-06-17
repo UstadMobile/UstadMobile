@@ -5,7 +5,7 @@
     android:id="@+id/appbar"
     android:layout_height="wrap_content"
     android:fitsSystemWindows="true"
-    android:elevation="@dimen/layout_dimen_4dp"
+    android:elevation="@dimen/dimen_4dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.google.android.material.tabs.TabLayout

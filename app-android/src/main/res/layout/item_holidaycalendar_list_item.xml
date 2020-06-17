@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="38dp"
-            android:padding="@dimen/layout_dimen_16dp"
+            android:padding="@dimen/dimen_16dp"
             android:text="@{holidayCalendar.umCalendarName}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

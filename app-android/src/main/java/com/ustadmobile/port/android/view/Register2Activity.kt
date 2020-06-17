@@ -131,7 +131,7 @@ class Register2Activity : UstadBaseActivity(), Register2View {
 
     private fun disableButton(disable: Boolean) {
         registerUser!!.setBackgroundColor(ContextCompat.getColor(this,
-                if (disable) R.color.colorIconTint else R.color.secondaryColor))
+                if (disable) R.color.iconTintColor else R.color.secondaryColor))
         registerUser!!.isEnabled = !disable
     }
 

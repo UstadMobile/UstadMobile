@@ -16,7 +16,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
-            android:padding="@dimen/layout_dimen_16dp"
+            android:padding="@dimen/dimen_16dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -29,7 +29,7 @@
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:textColor="?colorError"
                 android:visibility="gone"
-                android:layout_marginTop="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
                 android:id="@+id/activity_create_account_error_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -38,11 +38,11 @@
                 android:enabled="false"
                 android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                 android:textStyle="bold"
-                android:layout_margin="@dimen/layout_dimen_16dp"
+                android:layout_margin="@dimen/dimen_16dp"
                 android:backgroundTint="?colorSecondary"
-                android:padding="@dimen/layout_dimen_16dp"
+                android:padding="@dimen/dimen_16dp"
                 android:textAllCaps="true"
-                android:layout_marginTop="@dimen/layout_dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
                 android:id="@+id/activity_create_account_create_account_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

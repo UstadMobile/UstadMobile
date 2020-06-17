@@ -7,11 +7,11 @@
     android:layout_height="wrap_content"
     android:clipToPadding="true"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="@dimen/layout_dimen_0dp"
-    android:paddingBottom="@dimen/layout_dimen_10dp"
+    app:behavior_peekHeight="@dimen/dimen_0dp"
+    android:paddingBottom="@dimen/dimen_10dp"
     android:orientation="vertical"
-    android:elevation="@dimen/layout_dimen_16dp"
-    android:paddingTop="@dimen/layout_dimen_10dp"
+    android:elevation="@dimen/dimen_16dp"
+    android:paddingTop="@dimen/dimen_10dp"
     app:layout_behavior="@string/bottom_sheet_behavior">
 
     <RelativeLayout
@@ -19,8 +19,8 @@
         android:background="@drawable/bg_listitem"
         android:focusable="true"
         android:id="@+id/content_create_folder"
-        android:layout_marginTop="@dimen/layout_dimen_8dp"
-        android:padding="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_8dp"
+        android:padding="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:targetApi="m">
@@ -30,12 +30,12 @@
             app:srcCompat="@drawable/ic_create_new_folder_white_24dp"
             android:layout_centerVertical="true"
             app:tint="?colorOnIconTint"
-            android:layout_width="@dimen/layout_dimen_22dp"
-            android:layout_height="@dimen/layout_dimen_22dp" />
+            android:layout_width="@dimen/dimen_22dp"
+            android:layout_height="@dimen/dimen_22dp" />
 
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            android:layout_marginStart="@dimen/layout_dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_toEndOf="@+id/create_category"
             android:text="@string/content_editor_create_new_category"
             android:layout_width="match_parent"
@@ -47,7 +47,7 @@
         android:background="@drawable/bg_listitem"
         android:focusable="true"
         android:id="@+id/content_import_content"
-        android:padding="@dimen/layout_dimen_16dp"
+        android:padding="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <androidx.appcompat.widget.AppCompatImageView
@@ -56,12 +56,12 @@
             android:id="@+id/import_file"
             android:layout_centerVertical="true"
             app:tint="?colorOnIconTint"
-            android:layout_width="@dimen/layout_dimen_22dp"
-            android:layout_height="@dimen/layout_dimen_22dp" />
+            android:layout_width="@dimen/dimen_22dp"
+            android:layout_height="@dimen/dimen_22dp" />
 
         <TextView
             android:text="@string/import_content"
-            android:layout_marginStart="@dimen/layout_dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_toEndOf="@+id/import_file"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:layout_width="match_parent"

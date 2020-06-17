@@ -25,8 +25,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_presenter_field_row_picture_photoicon"
-            android:layout_width="@dimen/layout_dimen_24dp"
-            android:layout_height="@dimen/layout_dimen_24dp"
+            android:layout_width="@dimen/dimen_24dp"
+            android:layout_height="@dimen/dimen_24dp"
             app:tint="?colorOnError"
             app:srcCompat="@drawable/ic_add_a_photo_24"
             android:onClick="@{() -> itemPresenterFieldRowImageView.callOnClick()}"

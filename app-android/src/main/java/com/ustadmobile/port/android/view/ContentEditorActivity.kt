@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ClipData
@@ -608,7 +607,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                 imageIcon.setColorFilter(ContextCompat.getColor(context!!,
                         if (isActivated) R.color.primaryTextColor else R.color.secondaryTextColor))
                 iconHolder.setBackgroundColor(ContextCompat.getColor(context!!,
-                        if (isActivated) R.color.colorIconTint else R.color.primaryTextColor))
+                        if (isActivated) R.color.iconTintColor else R.color.primaryTextColor))
             }
 
             internal inner class FormatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

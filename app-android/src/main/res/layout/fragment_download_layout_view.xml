@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:padding="@dimen/layout_dimen_16dp"
+    android:padding="@dimen/dimen_16dp"
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -10,23 +10,23 @@
     <TextView
         android:textAppearance="@style/UmTheme.TextAppearance.Body2"
         android:visibility="gone"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:id="@+id/download_option_status_text"
         android:layout_width="match_parent"
         android:text="Sample text "
-        android:lineSpacingExtra="@dimen/layout_dimen_4dp"
+        android:lineSpacingExtra="@dimen/dimen_4dp"
         android:layout_height="wrap_content" />
 
     <TextView
         android:textAppearance="@style/UmTheme.TextAppearance.Body2"
         android:visibility="gone"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:drawableStart="@drawable/icpng_error_black_24dp"
-        android:drawablePadding="@dimen/layout_dimen_8dp"
+        android:drawablePadding="@dimen/dimen_8dp"
         android:id="@+id/download_warning_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lineSpacingExtra="@dimen/layout_dimen_4dp"/>
+        android:lineSpacingExtra="@dimen/dimen_4dp"/>
 
     <RelativeLayout
         android:visibility="gone"
@@ -34,9 +34,9 @@
         android:focusable="true"
         android:clickable="true"
         android:id="@+id/wifi_only_option_holder"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
-        android:paddingTop="@dimen/layout_dimen_10dp"
-        android:paddingBottom="@dimen/layout_dimen_10dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
+        android:paddingTop="@dimen/dimen_10dp"
+        android:paddingBottom="@dimen/dimen_10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <CheckBox
@@ -49,7 +49,7 @@
             android:text="@string/download_wifi_only"
             android:id="@+id/wifi_only_option_label"
             android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/layout_dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_toEndOf="@+id/wifi_only_option"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -57,9 +57,9 @@
 
     <RelativeLayout
         android:id="@+id/use_sdcard_option_holder"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
-        android:paddingTop="@dimen/layout_dimen_10dp"
-        android:paddingBottom="@dimen/layout_dimen_10dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
+        android:paddingTop="@dimen/dimen_10dp"
+        android:paddingBottom="@dimen/dimen_10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -72,8 +72,8 @@
     <RelativeLayout
         android:id="@+id/download_calculate_holder"
         android:layout_width="match_parent"
-        android:paddingTop="@dimen/layout_dimen_16dp"
-        android:paddingBottom="@dimen/layout_dimen_16dp"
+        android:paddingTop="@dimen/dimen_16dp"
+        android:paddingBottom="@dimen/dimen_16dp"
         android:layout_height="wrap_content">
         <ProgressBar
             style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
@@ -83,8 +83,8 @@
             android:layout_height="wrap_content"/>
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
-            android:paddingStart="@dimen/layout_dimen_8dp"
-            android:paddingEnd="@dimen/layout_dimen_8dp"
+            android:paddingStart="@dimen/dimen_8dp"
+            android:paddingEnd="@dimen/dimen_8dp"
             android:text="@string/download_calculating"
             android:textColor="?colorPrimaryBackground"
             android:id="@+id/download_dialog_calculating"
@@ -93,7 +93,7 @@
             android:layout_height="wrap_content" />
     </RelativeLayout>
     <RelativeLayout
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:id="@+id/stacked_option_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

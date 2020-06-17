@@ -9,8 +9,8 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/statusViewImageInner"
-        android:layout_width="@dimen/layout_dimen_80dp"
-        android:layout_height="@dimen/layout_dimen_80dp"
+        android:layout_width="@dimen/dimen_80dp"
+        android:layout_height="@dimen/dimen_80dp"
         android:layout_centerInParent="true"
         android:tint="?colorOnIconTint"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -22,8 +22,8 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/statusViewImage"
-        android:layout_width="@dimen/layout_dimen_80dp"
-        android:layout_height="@dimen/layout_dimen_80dp"
+        android:layout_width="@dimen/dimen_80dp"
+        android:layout_height="@dimen/dimen_80dp"
         android:layout_centerInParent="true"
         android:tint="?colorOnIconTint"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -36,8 +36,8 @@
     <ProgressBar
         android:visibility="gone"
         android:id="@+id/statusViewProgress"
-        android:layout_width="@dimen/layout_dimen_300dp"
-        android:layout_height="@dimen/layout_dimen_300dp"
+        android:layout_width="@dimen/dimen_300dp"
+        android:layout_height="@dimen/dimen_300dp"
         android:layout_centerInParent="true"
         android:tint="?colorOnIconTint"
         style="?android:attr/progressBarStyleLarge"
@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/statusViewImageInner"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/statusViewImageInner" />
@@ -67,7 +67,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/statusViewImage"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/statusViewImage" />

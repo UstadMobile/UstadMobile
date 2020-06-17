@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
-    android:elevation="@dimen/layout_dimen_16dp"
+    android:elevation="@dimen/dimen_16dp"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bottom_multimedia_source_sheet_container"
@@ -8,11 +8,11 @@
     android:layout_height="wrap_content"
     android:clipToPadding="true"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="@dimen/layout_dimen_0dp"
+    app:behavior_peekHeight="@dimen/dimen_0dp"
     app:layout_behavior="@string/bottom_sheet_behavior">
     <LinearLayout
         android:orientation="vertical"
-        android:paddingBottom="@dimen/layout_dimen_16dp"
+        android:paddingBottom="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -24,7 +24,7 @@
                 android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                 android:layout_toStartOf="@+id/action_close_tab_multimedia_options"
                 android:text="@string/content_type_multimedia"
-                android:padding="@dimen/layout_dimen_16dp"
+                android:padding="@dimen/dimen_16dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
             <androidx.appcompat.widget.AppCompatImageView
@@ -32,24 +32,24 @@
                 android:layout_alignParentEnd="true"
                 android:id="@+id/action_close_tab_multimedia_options"
                 android:tint="?colorOnIconTint"
-                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginStart="@dimen/dimen_16dp"
                 app:srcCompat="@drawable/ic_expand_more_black_24dp"
-                android:layout_marginEnd="@dimen/layout_dimen_16dp"
+                android:layout_marginEnd="@dimen/dimen_16dp"
                 android:layout_gravity="center_vertical"
-                android:layout_width="@dimen/layout_dimen_30dp"
-                android:layout_height="@dimen/layout_dimen_30dp" />
+                android:layout_width="@dimen/dimen_30dp"
+                android:layout_height="@dimen/dimen_30dp" />
         </RelativeLayout>
         <View
-            android:layout_marginBottom="@dimen/layout_dimen_8dp"
+            android:layout_marginBottom="@dimen/dimen_8dp"
             android:background="?android:listDivider"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/layout_dimen_1dp"/>
+            android:layout_height="@dimen/dimen_1dp"/>
         <RelativeLayout
             android:clickable="true"
             android:background="@drawable/bg_listitem"
             android:focusable="true"
             android:id="@+id/multimedia_from_camera"
-            android:padding="@dimen/layout_dimen_16dp"
+            android:padding="@dimen/dimen_16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <androidx.appcompat.widget.AppCompatImageView
@@ -57,13 +57,13 @@
                 app:srcCompat="@drawable/ic_photo_camera_black_24dp"
                 android:id="@+id/multiple_choice"
                 android:layout_centerVertical="true"
-                android:layout_width="@dimen/layout_dimen_22dp"
-                android:layout_height="@dimen/layout_dimen_22dp" />
+                android:layout_width="@dimen/dimen_22dp"
+                android:layout_height="@dimen/dimen_22dp" />
 
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:text="@string/content_source_camera"
-                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_toEndOf="@+id/multiple_choice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -75,8 +75,8 @@
             android:background="@drawable/bg_listitem"
             android:focusable="true"
             android:id="@+id/multimedia_from_device"
-            android:layout_marginTop="@dimen/layout_dimen_8dp"
-            android:padding="@dimen/layout_dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:padding="@dimen/dimen_16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <androidx.appcompat.widget.AppCompatImageView
@@ -84,12 +84,12 @@
                 android:id="@+id/device_image"
                 android:src="@drawable/ic_perm_media_black_24dp"
                 android:layout_centerVertical="true"
-                android:layout_width="@dimen/layout_dimen_22dp"
-                android:layout_height="@dimen/layout_dimen_22dp" />
+                android:layout_width="@dimen/dimen_22dp"
+                android:layout_height="@dimen/dimen_22dp" />
 
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-                android:layout_marginStart="@dimen/layout_dimen_16dp"
+                android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_toEndOf="@+id/device_image"
                 android:text="@string/content_source_device"
                 android:layout_width="match_parent"

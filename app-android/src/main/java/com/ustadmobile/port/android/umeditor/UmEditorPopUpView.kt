@@ -174,7 +174,7 @@ class UmEditorPopUpView
             formatTile.setTextColor(ContextCompat.getColor(activity,
                     if (isActivated) R.color.primaryTextColor else R.color.secondaryTextColor))
             formatHolder.setBackgroundColor(ContextCompat.getColor(activity,
-                    if (isActivated) R.color.colorIconTint else R.color.primaryTextColor))
+                    if (isActivated) R.color.iconTintColor else R.color.primaryTextColor))
         }
 
         @NonNull

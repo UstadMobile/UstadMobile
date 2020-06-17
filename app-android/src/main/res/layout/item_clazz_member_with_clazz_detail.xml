@@ -27,7 +27,7 @@
             android:id="@+id/item_clazzmemberwithclazz_newitemicon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/layout_dimen_16dp"
+            android:layout_margin="@dimen/dimen_16dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -35,20 +35,20 @@
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_clazzmemberwithclazz_line1_text"
-            android:layout_width="@dimen/layout_dimen_0dp"
+            android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
             android:text="@{clazzMemberWithClazz.clazz.clazzName}"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="@dimen/layout_dimen_64dp"
+            android:layout_marginStart="@dimen/dimen_64dp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="@dimen/layout_dimen_16dp"
-            android:layout_marginEnd="@dimen/layout_dimen_16dp" />
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp" />
 
         <!-- Line 2-->
         <TextView android:id="@+id/item_clazzmemberwithclazz_line2_text"
-            android:layout_width="@dimen/layout_dimen_0dp"
+            android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
             app:textMessageIdLookupKey="@{clazzMemberWithClazz.clazzMemberRole}"
             app:textMessageIdLookupMap="@{ClazzMemberConstants.ROLE_MESSAGE_ID_OTIONS}"
@@ -56,7 +56,7 @@
             app:layout_constraintTop_toBottomOf="@+id/item_clazzmemberwithclazz_line1_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="@dimen/layout_dimen_8dp" />
+            android:layout_marginBottom="@dimen/dimen_8dp" />
 
 
 

@@ -10,6 +10,6 @@
         android:layout_height="wrap_content"
         android:paddingStart="?android:attr/expandableListPreferredChildPaddingLeft"
         android:paddingEnd="?android:attr/expandableListPreferredChildPaddingLeft"
-        android:paddingTop="@dimen/layout_dimen_10dp"
-        android:paddingBottom="@dimen/layout_dimen_10dp" />
+        android:paddingTop="@dimen/dimen_10dp"
+        android:paddingBottom="@dimen/dimen_10dp" />
 </LinearLayout>

@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:layout_marginVertical="@dimen/layout_dimen_8dp"
+        android:layout_marginVertical="@dimen/dimen_8dp"
         app:textLocalDateTime="@{date}"
         app:textLocalDateTimeZone="@{timeZone}"/>
 

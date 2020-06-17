@@ -18,7 +18,7 @@
 
     <color name="secondaryVariantTextColor">#121212</color>
     <color name="secondaryTextColor">#000000</color>
-    <color name="colorIconTint">#727272</color>
-    <color name="colorSuccess">#4CAF50</color>
+    <color name="iconTintColor">#727272</color>
+    <color name="successColor">#4CAF50</color>
 
 </resources>

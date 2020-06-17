@@ -44,7 +44,7 @@
                     android:id="@+id/role_edit_permission_role_name_til"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/layout_dimen_16dp"
+                    android:layout_margin="@dimen/dimen_16dp"
                     android:hint="@string/role_name"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     app:hintEnabled="true"

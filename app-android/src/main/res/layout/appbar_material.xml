@@ -5,7 +5,7 @@
     android:id="@+id/appbar"
     android:layout_height="wrap_content"
     android:fitsSystemWindows="true"
-    android:elevation="@dimen/layout_dimen_4dp"
+    android:elevation="@dimen/dimen_4dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
 
@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?colorPrimaryBackground"
-        android:elevation="@dimen/layout_dimen_4dp"
+        android:elevation="@dimen/dimen_4dp"
         app:layout_scrollFlags="scroll|enterAlways"
         android:minHeight="?actionBarSize"/>
 

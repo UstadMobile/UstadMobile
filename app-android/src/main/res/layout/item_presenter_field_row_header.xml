@@ -16,6 +16,6 @@
         android:layout_height="wrap_content"
         android:drawableBottom="@drawable/divider_bottom"
         tools:text="Heading"
-        android:layout_marginHorizontal="@dimen/layout_dimen_8dp"
-        android:layout_marginVertical="@dimen/layout_dimen_8dp"/>
+        android:layout_marginHorizontal="@dimen/dimen_8dp"
+        android:layout_marginVertical="@dimen/dimen_8dp"/>
 </layout>

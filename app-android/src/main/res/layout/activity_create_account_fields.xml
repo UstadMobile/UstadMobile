@@ -8,7 +8,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -22,7 +22,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -38,7 +38,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -53,7 +53,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -69,7 +69,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         app:passwordToggleEnabled="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -84,7 +84,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginTop="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         app:passwordToggleEnabled="true"
         android:layout_height="match_parent">

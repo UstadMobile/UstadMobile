@@ -63,7 +63,7 @@ fun ImageView.setCustomFieldIcon(customField: CustomField?) {
 @BindingAdapter("attendanceTint")
 fun ImageView.setAttendanceTint(attendancePercentage: Float) {
     val color = when {
-        attendancePercentage > 0.8f -> R.color.colorSuccess
+        attendancePercentage > 0.8f -> R.color.successColor
         attendancePercentage > 0.6f -> R.color.secondaryColor
         else -> R.color.errorColor
     }

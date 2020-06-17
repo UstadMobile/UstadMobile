@@ -8,7 +8,7 @@
     android:layout_height="wrap_content">
 
     <RelativeLayout
-        android:padding="@dimen/layout_dimen_16dp"
+        android:padding="@dimen/dimen_16dp"
         android:id="@+id/icon_holder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -17,12 +17,12 @@
             android:layout_gravity="center_vertical"
             android:id="@+id/format_icon"
             android:tint="?colorOnIconTint"
-            android:layout_width="@dimen/layout_dimen_20dp"
-            android:layout_height="@dimen/layout_dimen_200dp" />
+            android:layout_width="@dimen/dimen_20dp"
+            android:layout_height="@dimen/dimen_200dp" />
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:gravity="center_vertical"
-            android:layout_marginStart="@dimen/layout_dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_toEndOf="@+id/format_icon"
             android:id="@+id/format_title"
             android:layout_width="match_parent"

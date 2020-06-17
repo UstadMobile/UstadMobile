@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="@dimen/layout_dimen_16dp"
-    android:paddingEnd="@dimen/layout_dimen_16dp"
+    android:paddingStart="@dimen/dimen_16dp"
+    android:paddingEnd="@dimen/dimen_16dp"
     android:orientation="vertical">
 
     <TextView
@@ -14,10 +14,10 @@
         android:drawableStart="@drawable/ic_info_outline_black_12dp"
         android:gravity="center_vertical"
         android:drawableTint="?colorOnIconTint"
-        android:drawablePadding="@dimen/layout_dimen_4dp"
-        android:paddingStart="@dimen/layout_dimen_4dp"
-        android:paddingEnd="@dimen/layout_dimen_4dp"
-        android:layout_marginTop="@dimen/layout_dimen_8dp"
+        android:drawablePadding="@dimen/dimen_4dp"
+        android:paddingStart="@dimen/dimen_4dp"
+        android:paddingEnd="@dimen/dimen_4dp"
+        android:layout_marginTop="@dimen/dimen_8dp"
         android:text="@string/shake_feedback"
         tools:targetApi="m" />
 
@@ -25,8 +25,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_marginVertical="@dimen/layout_dimen_8dp"
-        android:layout_marginHorizontal="@dimen/layout_dimen_8dp">
+        android:layout_marginVertical="@dimen/dimen_8dp"
+        android:layout_marginHorizontal="@dimen/dimen_8dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/feedback_edit_comment"

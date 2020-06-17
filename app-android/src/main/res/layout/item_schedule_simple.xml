@@ -11,8 +11,8 @@
     <TextView
         android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         app:scheduleText="@{schedule}"
-        android:layout_marginVertical="@dimen/layout_dimen_8dp"
-        android:layout_marginHorizontal="@dimen/layout_dimen_16dp"
+        android:layout_marginVertical="@dimen/dimen_8dp"
+        android:layout_marginHorizontal="@dimen/dimen_16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

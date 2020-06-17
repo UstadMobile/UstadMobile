@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:layout_margin="@dimen/layout_dimen_2dp"
+        android:layout_margin="@dimen/dimen_2dp"
         android:id="@+id/view_download_status_button_img"
         app:srcCompat="@drawable/ic_file_download_black_24dp"
         android:tint="?colorOnIconTint"

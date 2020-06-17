@@ -37,8 +37,8 @@
         <item name="colorOnBackground">@color/secondaryTextColor</item>
         <item name="colorOnSurface">@color/secondaryTextColor</item>
         <item name="colorOnError">@color/primaryTextColor</item>
-        <item name="colorOnSecondaryText">@color/colorIconTint</item>
-        <item name="colorOnIconTint">@color/colorIconTint</item>
+        <item name="colorOnSecondaryText">@color/iconTintColor</item>
+        <item name="colorOnIconTint">@color/iconTintColor</item>
         <item name="colorOnTintPrimary">?colorPrimary</item>
         <item name="colorTabIndicator">@color/primaryTextColor</item>
         <item name="colorTabText" >@color/primaryLightVariantColor</item>

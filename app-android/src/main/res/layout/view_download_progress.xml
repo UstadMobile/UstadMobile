@@ -45,7 +45,7 @@
 
     <ImageButton
         android:id="@+id/view_download_progress_stop_button"
-        android:layout_marginStart="@dimen/layout_dimen_16dp"
+        android:layout_marginStart="@dimen/dimen_16dp"
         android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:foreground="?attr/selectableItemBackground"

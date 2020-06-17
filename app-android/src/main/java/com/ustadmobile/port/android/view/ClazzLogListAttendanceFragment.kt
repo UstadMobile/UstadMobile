@@ -121,7 +121,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
             val lineData = LineData().apply {
                 listOf(graphData.percentageAttendedSeries, graphData.percentageLateSeries).forEachIndexed { index, list ->
-                    val colorId = if(index == 0) R.color.traffic_green else R.color.traffic_orange
+                    val colorId = if(index == 0) R.color.successColor else R.color.secondaryColor
                     val seriesColor = context?.let { ContextCompat.getColor(it, colorId) } ?: Color.BLACK
                     addDataSet(LineDataSet(list.map { Entry(it.first.toFloat(), it.second * 100) },
                             contextVal.getString(R.string.attendance)).apply {

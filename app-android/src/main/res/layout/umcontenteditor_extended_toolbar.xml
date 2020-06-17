@@ -14,8 +14,8 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:textAppearance="@style/UmTheme.TextAppearance.Headline5"
-        android:layout_marginTop="@dimen/layout_dimen_30dp"
-        android:paddingBottom="@dimen/layout_dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_30dp"
+        android:paddingBottom="@dimen/dimen_16dp"
         android:layout_centerInParent="true"
         android:textStyle="bold"
         android:id="@+id/document_title"
