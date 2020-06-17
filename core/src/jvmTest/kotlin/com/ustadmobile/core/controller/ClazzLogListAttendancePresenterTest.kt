@@ -76,7 +76,7 @@ class ClazzLogListAttendancePresenterTest {
     }
 
     @Test
-    fun givenExistingCompletedClazzLogs_whenOnCreateCalled_thenShouldSetGraphData() {
+    fun givenExistingCompletedClazzLogs_whenOnCreateCalled_thenShouldSetGraphDataAndSetFabVisible() {
         val testClazz = Clazz("Test Clazz").apply {
             clazzTimeZone = "Asia/Dubai"
             clazzUid = clientDbRule.db.clazzDao.insert(this)
@@ -115,6 +115,8 @@ class ClazzLogListAttendancePresenterTest {
             assertTrue("Clazz logs have expected absent or present percentage value",
                     currentGraphData.percentageAttendedSeries.all { it.second == 0.8f || it.second == 0.6f })
         }
+
+        verify(mockView, timeout(5000).atLeastOnce()).recordAttendanceButtonVisible = true
     }
 
 
