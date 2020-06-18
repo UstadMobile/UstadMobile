@@ -69,10 +69,12 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
         val tabs = listOf(
                 //ClazzWorkEditView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue,
-                ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue)
+                ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue,
+                ClazzWorkDetailProgressListView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" + entityUidValue)
         val viewNameToTitle = mapOf(
                 ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
-                ClazzWorkDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString()
+                ClazzWorkDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
+                ClazzWorkDetailProgressListView.VIEW_NAME to getText(R.string.student_progress).toString()
         )
 
         mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
@@ -123,7 +125,8 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
     companion object{
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
                 ClazzWorkEditView.VIEW_NAME to ClazzWorkEditFragment::class.java,
-                ClazzWorkDetailOverviewView.VIEW_NAME to ClazzWorkDetailOverviewFragment::class.java
+                ClazzWorkDetailOverviewView.VIEW_NAME to ClazzWorkDetailOverviewFragment::class.java,
+                ClazzWorkDetailProgressListView.VIEW_NAME to ClazzWorkDetailProgressListFragment::class.java
         )
     }
 

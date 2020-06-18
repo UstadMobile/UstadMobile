@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.RadioGroup
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -13,7 +12,10 @@ import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.*
+import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
+import com.toughra.ustadmobile.databinding.ItemClazzworkDetailDescriptionBinding
+import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionResultBinding
+import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionTextEntryBinding
 import com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -27,7 +29,6 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
-import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 interface NewCommentHandler{
     fun addComment(view: View, comment: String?, public:Boolean?)

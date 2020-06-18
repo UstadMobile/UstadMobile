@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "8a428cba5bcc986ad64767256b0a6993",
+    "identityHash": "084b9b4e3100765e18ddb20aa123f53d",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4811,6 +4811,74 @@
         "foreignKeys": []
       },
       {
+        "tableName": "ContentEntryProgress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentEntryProgressUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `contentEntryProgressActive` INTEGER NOT NULL, `contentEntryProgressContentEntryUid` INTEGER NOT NULL, `contentEntryProgressPersonUid` INTEGER NOT NULL, `contentEntryProgressProgress` REAL NOT NULL, `contentEntryProgressStatusFlag` INTEGER NOT NULL, `contentEntryProgressLocalChangeSeqNum` INTEGER NOT NULL, `contentEntryProgressMasterChangeSeqNum` INTEGER NOT NULL, `contentEntryProgressLastChangedBy` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "contentEntryProgressUid",
+            "columnName": "contentEntryProgressUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressActive",
+            "columnName": "contentEntryProgressActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressContentEntryUid",
+            "columnName": "contentEntryProgressContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressPersonUid",
+            "columnName": "contentEntryProgressPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressProgress",
+            "columnName": "contentEntryProgressProgress",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressStatusFlag",
+            "columnName": "contentEntryProgressStatusFlag",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressLocalChangeSeqNum",
+            "columnName": "contentEntryProgressLocalChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressMasterChangeSeqNum",
+            "columnName": "contentEntryProgressMasterChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressLastChangedBy",
+            "columnName": "contentEntryProgressLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "contentEntryProgressUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "ClazzLog_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -8073,12 +8141,80 @@
           }
         ],
         "foreignKeys": []
+      },
+      {
+        "tableName": "ContentEntryProgress_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ContentEntryProgress_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryProgress_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8a428cba5bcc986ad64767256b0a6993')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '084b9b4e3100765e18ddb20aa123f53d')"
     ]
   }
 }

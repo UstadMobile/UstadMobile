@@ -1,13 +1,15 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
-import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
+import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 
 @UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzMemberClazzUid",
         inheritPermissionJoinedPrimaryKey = "clazzUid")

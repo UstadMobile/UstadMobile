@@ -33,7 +33,7 @@ import kotlin.jvm.Volatile
     TimeZoneEntity::class,
     SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
-    ClazzWorkQuestionResponse::class
+    ClazzWorkQuestionResponse::class, ContentEntryProgress::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -181,6 +181,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("agentDao")
     abstract val agentDao: AgentDao
+
+    @JsName("contentEntryProgressDao")
+    abstract val contentEntryProgressDao: ContentEntryProgressDao
 
     abstract val syncresultDao : SyncResultDao
 

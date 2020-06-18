@@ -881,8 +881,11 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="clazz_work">Class work</string>
     <string name="marked">marked</string>
+    <string name="marked_cap">Marked</string>
     <string name="submitted">submitted</string>
+    <string name="submitted_cap">Submited</string>
     <string name="not_submitted">not submitted</string>
+    <string name="not_submitted_cap">Not submitted</string>
     <string name="visible_from_date">Visible from date</string>
     <string name="submission_type">Submission type</string>
     <string name="no_submission_required">No submission required</string>
@@ -909,7 +912,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <!-- Used to show a quantity and name e.g. "5 oranges". %1$d will be replaced with the number
     and %2$s will be replaced with the name of the item-->
     <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
-    <string name="not_submitted_cap">Not submitted</string>
     <string name="marking">Marking</string>
 
     <!-- Used to show the percentage attendance e.g. "50% attendance".

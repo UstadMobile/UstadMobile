@@ -48,13 +48,12 @@ class ClazzWorkDetailPresenter(context: Any,
 
         GlobalScope.launch {
             val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
-                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, entity?.clazzWorkClazzUid
-                        ?: 0L)
+                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+                        entity?.clazzWorkClazzUid?: 0L)
             }
-
             //TODO: Enable AFTER TESTING
-            //view.studentRole = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-            view.studentRole = true
+            view.studentRole = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+//            view.studentRole = true
         }
 
     }
