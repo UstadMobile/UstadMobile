@@ -97,8 +97,8 @@ suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentCont
         numEntries: Int, parentEntryUid: Long, nonLeafIndexes: MutableList<Int> = mutableListOf()): List<ContentEntry> {
     return (1 .. numEntries).map {
         val entry = ContentEntry().apply {
-            title = "Dummy title $it"
             leaf = !(nonLeafIndexes.isNotEmpty() && nonLeafIndexes.indexOf(it - 1) != -1)
+            title = "Dummy ${if(leaf) " entry" else "folder"} title $it"
             description = "Dummy description $it"
             contentEntryUid = contentEntryDao.insertAsync(this)
         }

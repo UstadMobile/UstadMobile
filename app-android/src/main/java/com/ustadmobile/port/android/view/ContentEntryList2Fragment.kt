@@ -92,6 +92,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         return view
     }
 
+
+
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
@@ -111,7 +113,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.content_entry_list_dest, ContentEntry::class.java)
+            mPresenter?.handleClickCreateNewFab()
     }
 
     override fun onDestroyView() {

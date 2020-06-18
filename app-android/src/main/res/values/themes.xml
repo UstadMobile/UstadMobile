@@ -74,8 +74,10 @@
         <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.PrimarySurface</item>
     </style>
 
-    <style name="UmTheme.SelectButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
 
+    <style name="UmTheme.Widget.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:paddingStart">@dimen/dimen_10dp</item>
+        <item name="android:paddingEnd">@dimen/dimen_10dp</item>
     </style>
 
     <style name="UmTheme.MaterialComponents.Parent" parent="Theme.MaterialComponents.DayNight.NoActionBar">
