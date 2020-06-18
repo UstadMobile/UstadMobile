@@ -17,6 +17,10 @@
             type="com.ustadmobile.core.controller.ContentEntryList2Presenter" />
 
         <variable
+            name="isPickerMode"
+            type="boolean" />
+
+        <variable
             name="selectablePagedListAdapter"
             type="ContentEntryListRecyclerAdapter" />
     </data>
@@ -76,7 +80,7 @@
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Content Title" />
@@ -92,7 +96,7 @@
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:maxLines="2"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
             tools:text="Content Description" />
@@ -141,24 +145,45 @@
             app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
             app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}"
             android:tint="?colorOnIconTint"
-            app:layout_constraintEnd_toStartOf="@id/content_entry_item_download"
+            app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
             app:layout_constraintStart_toEndOf="@id/content_entry_mimetype_icon"
             app:layout_constraintTop_toBottomOf="@id/content_entry_item_description"/>
 
 
-        <com.ustadmobile.port.android.view.DownloadStatusButton
-            android:id="@+id/content_entry_item_download"
-            style="?android:attr/borderlessButtonStyle"
-            android:onClick="@{() -> presenter.handleDownloadStatusButtonClicked(contentEntry)}"
-            android:layout_width="@dimen/dimen_40dp"
-            android:layout_height="@dimen/dimen_40dp"
-            android:padding="@dimen/dimen_8dp"
-            android:visibility="gone"
-            android:contentDescription="@string/download"
-            android:tint="?colorOnIconTint"
+        <FrameLayout
+            android:id="@+id/action_btn_holder"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_file_download_black_24dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <com.ustadmobile.port.android.view.DownloadStatusButton
+                android:id="@+id/content_entry_item_download"
+                style="?android:attr/borderlessButtonStyle"
+                android:onClick="@{() -> presenter.handleDownloadStatusButtonClicked(contentEntry)}"
+                android:layout_width="@dimen/dimen_40dp"
+                android:layout_height="@dimen/dimen_40dp"
+                android:padding="@dimen/dimen_8dp"
+                android:contentDescription="@string/download"
+                android:tint="?colorOnIconTint"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_file_download_black_24dp" />
+
+            <Button
+                android:id="@+id/content_entry_select_btn"
+                android:visibility="@{isPickerMode ? View.VISIBLE: View.GONE}"
+                style="@style/UmTheme.SelectButton"
+                android:onClick="@{() -> presenter.handleClickEntry(contentEntry)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/dimen_8dp"
+                android:contentDescription="@string/download"
+                android:text="@{@string/select_item(``)}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_file_download_black_24dp" />
+        </FrameLayout>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

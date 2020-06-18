@@ -101,12 +101,16 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 parentUid, 0, 0, loggedPersonUid)
     }
 
-    fun handleOnBackClicked(): Boolean{
+    fun handleOnBackPressed(): Boolean{
         if(mListMode == ListViewMode.PICKER && parentEntryUidStack.size > 1){
             parentEntryUidStack.removeAt(parentEntryUidStack.count() - 1)
             parentUid = parentEntryUidStack[parentEntryUidStack.count() - 1]
             showContentEntryListByParentUid()
-            return true;
+            return true
+        }
+
+        if(mListMode == ListViewMode.BROWSER){
+            return true
         }
         return false
     }

@@ -74,6 +74,10 @@
         <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.PrimarySurface</item>
     </style>
 
+    <style name="UmTheme.SelectButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+
+    </style>
+
     <style name="UmTheme.MaterialComponents.Parent" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>
         <item name="android:navigationBarDividerColor" tools:ignore="NewApi">?attr/colorControlHighlight</item>

@@ -85,6 +85,16 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                 || super.onOptionsItemSelected(item)
     }
 
+    override fun onBackPressed() {
+        val fragment = supportFragmentManager.primaryNavigationFragment?.
+        childFragmentManager?.fragments?.get(0)
+        val canGoBack = ((fragment is ContentEntryList2Fragment
+                && fragment.handleOnBackPressed()) || (fragment !is ContentEntryList2Fragment))
+        if(canGoBack){
+            super.onBackPressed()
+        }
+    }
+
     override val viewContext: Any
         get() = this
 

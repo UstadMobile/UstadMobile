@@ -193,7 +193,7 @@ class ContentEntryList2PresenterTest {
 
         mockView.waitForListToBeSet()
 
-        val canGoBack = createdChildEntries[0].let { presenter.handleOnBackClicked() }
+        val canGoBack = createdChildEntries[0].let { presenter.handleOnBackPressed() }
 
         assertTrue("Can go back to the previous folder", canGoBack)
 
@@ -216,7 +216,7 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        val canGoBack = createdEntries?.get(0).let { presenter.handleOnBackClicked() }
+        val canGoBack = createdEntries?.get(0).let { presenter.handleOnBackPressed() }
 
         assertFalse("Can not go back to the previous folder", canGoBack)
     }
