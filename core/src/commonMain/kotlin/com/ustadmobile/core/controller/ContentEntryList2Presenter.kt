@@ -34,6 +34,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     private var loggedPersonUid: Long = 0L
 
+    private val parentEntryUidStack = mutableListOf<Long>()
+
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
@@ -46,6 +48,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         view.sortOptions = SortOrder.values().toList().map { ContentEntryListSortOption(it, context) }
         contentFilter = arguments[ARG_CONTENT_FILTER].toString()
         parentUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
+        parentEntryUidStack += parentUid
         loggedPersonUid = UmAccountManager.getActivePersonUid(context)
         getAndSetList()
     }
@@ -55,7 +58,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {
-
         view.list  = when(contentFilter){
             ARG_LIBRARIES_CONTENT -> when(sortOrder){
                 SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
@@ -73,15 +75,40 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickEntry(entry: ContentEntry) {
-        val args = if(entry.leaf) mapOf(ARG_ENTITY_UID to entry.contentEntryUid.toString())
-        else mapOf( ARG_PARENT_ENTRY_UID to entry.contentEntryUid.toString(),
-                    ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT, ARG_PARENT_ENTRY_TITLE to entry.title)
+        when{
+            mListMode == ListViewMode.PICKER && !entry.leaf -> {
+                this.parentEntryUidStack += entry.contentEntryUid
+                parentUid = entry.contentEntryUid
+                showContentEntryListByParentUid()
+            }
 
-        when(mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
-            ListViewMode.BROWSER -> systemImpl.go(if(entry.leaf) ContentEntry2DetailView.VIEW_NAME
-            else ContentEntryList2View.VIEW_NAME, args,context)
+            mListMode == ListViewMode.PICKER && entry.leaf -> {
+                view.finishWithResult(listOf(entry))
+            }
+            mListMode == ListViewMode.BROWSER -> {
+                val args = if(entry.leaf) mapOf(ARG_ENTITY_UID to entry.contentEntryUid.toString())
+                else mapOf( ARG_PARENT_ENTRY_UID to entry.contentEntryUid.toString(),
+                        ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT, ARG_PARENT_ENTRY_TITLE to entry.title)
+                systemImpl.go(if(entry.leaf) ContentEntry2DetailView.VIEW_NAME
+                else ContentEntryList2View.VIEW_NAME, args,context)
+            }
         }
+    }
+
+
+    private fun showContentEntryListByParentUid(){
+        view.list = repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
+                parentUid, 0, 0, loggedPersonUid)
+    }
+
+    fun handleOnBackClicked(): Boolean{
+        if(mListMode == ListViewMode.PICKER && parentEntryUidStack.size > 1){
+            parentEntryUidStack.removeAt(parentEntryUidStack.count() - 1)
+            parentUid = parentEntryUidStack[parentEntryUidStack.count() - 1]
+            showContentEntryListByParentUid()
+            return true;
+        }
+        return false
     }
 
     fun handleDownloadStatusButtonClicked(entry: ContentEntry){
