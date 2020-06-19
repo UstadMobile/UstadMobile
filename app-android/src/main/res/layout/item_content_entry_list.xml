@@ -174,7 +174,7 @@
                 android:id="@+id/content_entry_select_btn"
                 android:visibility="@{isPickerMode ? View.VISIBLE: View.GONE}"
                 style="@style/UmTheme.Widget.OutlinedButton"
-                android:onClick="@{() -> presenter.handleClickEntry(contentEntry)}"
+                android:onClick="@{() -> presenter.handleOnSelectClicked(contentEntry)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/dimen_8dp"

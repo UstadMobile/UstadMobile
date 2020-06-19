@@ -94,6 +94,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         }
     }
 
+    fun handleOnSelectClicked(entry: ContentEntry){
+        when(entry.leaf){
+            true -> handleClickEntry(entry)
+            false -> view.finishWithResult(listOf(entry))
+        }
+    }
+
 
     private fun showContentEntryListByParentUid(){
         view.list = repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
