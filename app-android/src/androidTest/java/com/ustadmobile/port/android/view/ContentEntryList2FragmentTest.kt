@@ -143,6 +143,7 @@ class ContentEntryList2FragmentTest  {
     }
 
 
+    @AdbScreenRecord("Given content entry list in a picker mode when on back pressed while in a folder should show previous parent list")
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenOnBackPressedWhileInAFolder_thenShouldGoBackToThePreviousParentFolder() {
         val parentEntryUid = 10000L
