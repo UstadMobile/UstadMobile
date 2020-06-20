@@ -172,22 +172,6 @@ suspend fun UmAppDatabase.createTestContentEntriesAndJoinToClazzWork(clazzWork: 
     return TestContentAndJoin(contentList, joinList)
 }
 
-suspend fun UmAppDatabase.createTestContentEntries(num: Int): List<ContentEntry>{
-
-    return (1 .. num).map {
-        ContentEntry().apply {
-            title = "Content  $it"
-            description = "Content description $it"
-            entryId = "42$it"
-            author = "Mr.Tester McTestface"
-            publik = true
-            publisher = "TestCorp"
-            leaf = true
-            contentEntryUid = contentEntryDao.insertAsync(this)
-        }
-    }
-}
-
 suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
         clazzWork: ClazzWork, responded : Boolean = false, submissionType: Int = -1 ,
         quizQuestionTypeMixed: Boolean = false, quizQuestionType: Int = 0,

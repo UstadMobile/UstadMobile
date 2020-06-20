@@ -19,4 +19,10 @@ class ClazzWorkWithMetrics() : ClazzWork() {
 
     var clazzTimeZone : String? = null
 
+    fun calculateNotSubmittedStudents(): Int {
+        notSubmittedStudents = totalStudents - submittedStudents
+        return notSubmittedStudents
+    }
+
+
 }

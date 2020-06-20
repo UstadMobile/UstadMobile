@@ -7,6 +7,7 @@
         <import type="com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress"/>
         <import type="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment"/>
         <import type="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment.ClazzMemberWithClazzWorkProgressListRecyclerAdapter"/>
+        <import type="android.view.View"/>
 
         <variable
             name="clazzMemberWithClazzWorkProgress"
@@ -66,7 +67,7 @@
             android:layout_height="3dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
-            android:progress="75"
+            android:progress="@{Float.floatToIntBits(clazzMemberWithClazzWorkProgress.mProgress)}"
             app:layout_constraintEnd_toEndOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_progress_member_pic"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzwork_progress_member_name" />
@@ -77,6 +78,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            app:clazzMemberWithClazzWorkAndProgress="@{clazzMemberWithClazzWorkProgress}"
             app:layout_constraintEnd_toEndOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintStart_toStartOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintTop_toBottomOf="@+id/progressBar2"
@@ -87,23 +89,28 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="8dp"
             android:text="@{clazzMemberWithClazzWorkProgress.mLatestPrivateComment.commentsText}"
+            android:visibility="@{(clazzMemberWithClazzWorkProgress.mLatestPrivateComment != null)?View.VISIBLE:View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/item_clazzwork_progress_member_name"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/imageView"
             app:layout_constraintTop_toBottomOf="@+id/item_person_line2_text"
+            app:layout_constraintVertical_bias="1.0"
             tools:text="Can I ask for help from parents?" />
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
             android:layout_marginTop="4dp"
+            android:visibility="@{(clazzMemberWithClazzWorkProgress.mLatestPrivateComment != null)?View.VISIBLE:View.GONE}"
             app:layout_constraintStart_toStartOf="@+id/item_person_line2_text"
             app:layout_constraintTop_toBottomOf="@+id/item_person_line2_text"
-            app:srcCompat="@drawable/ic_baseline_comment_24" />
+            app:srcCompat="@drawable/ic_baseline_comment_24"
+            android:src="@drawable/ic_baseline_comment_24"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

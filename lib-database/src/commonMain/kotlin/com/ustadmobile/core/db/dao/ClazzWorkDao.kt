@@ -4,7 +4,6 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.dao.ClazzWorkDao.Companion.STUDENT_PROGRESS_QUERY
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -50,16 +49,32 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long): DataSource.Factory<Int,
             ClazzMemberWithClazzWorkProgress>
 
+    @Query(STUDENT_PROGRESS_QUERY)
+    abstract fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long): List<ClazzMemberWithClazzWorkProgress>
+
 
     companion object{
 
+
         const val FIND_CLAZZWORKWITHMETRICS_QUERY = """
             SELECT ClazzWork.*, 
-            0 as totalStudents, 
-            0 as submittedStudents, 
+            (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
+                AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
+                AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
+                ) as totalStudents, 
+            (
+                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
+            ) as submittedStudents, 
             0 as notSubmittedStudents,
             0 as completedStudents, 
-            0 as markedStudents,
+            (
+                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeFinished > 0
+                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
+            ) as markedStudents,
             0 as firstContentEntryUid,
             Clazz.clazzTimeZone as clazzTimeZone
             FROM ClazzWork
@@ -67,7 +82,6 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             WHERE ClazzWork.clazzWorkUid = :clazzWorkUid
             AND CAST(ClazzWork.clazzWorkActive AS INTEGER) = 1
         """
-
         const val FIND_WITH_METRICS_BY_CLAZZUID = """
             SELECT ClazzWork.*, 
              0 as totalStudents, 
@@ -86,7 +100,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
         const val STUDENT_PROGRESS_QUERY = """
             SELECT 
                 Person.*, ClazzMember.*, cws.*, 
-                0 as mProgress, cm.*
+                -1.0 as mProgress, cm.*
             FROM ClazzMember
                 LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
                 LEFT JOIN ClazzWork ON ClazzWork.clazzWorkUid = :clazzWorkUid
@@ -95,8 +109,9 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                     SELECT Comments.commentsUid FROM Comments WHERE
                     Comments.commentsEntityType = ${ClazzWork.CLAZZ_WORK_TABLE_ID}
                     AND commentsEntityUid = ClazzWork.clazzWorkUid 
-                    AND CAST(commentsInActive AS INTEGER) = 1 
-                    AND CAST(commentsPublic AS INTEGER) = 1 
+                    AND CAST(commentsInActive AS INTEGER) = 0 
+                    AND CAST(commentsPublic AS INTEGER) = 0 
+                    AND Comments.commentsPersonUid = Person.personUid
                     ORDER BY commentsDateTimeAdded DESC LIMIT 1)
                 LEFT JOIN ClazzWorkSubmission AS cws ON cws.clazzWorkSubmissionUid = 
                     (SELECT ClazzWorkSubmission.clazzWorkSubmissionUid FROM ClazzWorkSubmission WHERE

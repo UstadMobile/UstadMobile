@@ -101,7 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{`` + clazzWorkWithMetrics.notSubmittedStudents}"
+            android:text="@{`` + clazzWorkWithMetrics.calculateNotSubmittedStudents()}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintStart_toStartOf="@+id/textView16"
             app:layout_constraintTop_toTopOf="parent"

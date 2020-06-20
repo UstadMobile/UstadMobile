@@ -264,6 +264,12 @@ class ClazzWorkDetailOverviewFragmentTest {
                     0,false, false)
         }
 
+        //TODO: Test with content:
+//        val contentEntriesWithJoin = runBlocking {
+//            db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+//        }
+//        val contentList = contentEntriesWithJoin.contentList
+
         val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
         dbRule.account.personUid = teacherMember.clazzMemberPersonUid
 

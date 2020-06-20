@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
 import android.text.format.DateFormat
+import android.view.View
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
@@ -188,4 +189,33 @@ fun TextView.setHtmlText(htmlText: String?) {
 @BindingAdapter("fileSize")
 fun TextView.setFileSize(fileSize: Long) {
     text = UMFileUtil.formatFileSize(fileSize)
+}
+
+@BindingAdapter(value=["clazzMemberWithClazzWorkAndProgress"])
+fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMemberWithClazzWorkProgress){
+    val marked = context.getString(R.string.marked_cap)
+    val completed = context.getString(R.string.completed)
+    val submitted = context.getString(R.string.submitted_cap)
+    val notSubmitted = context.getString(R.string.not_submitted_cap)
+    val ofContent = context.getString(R.string.of_content)
+
+    val clazzWorkSubmission = clazzMemberWithClazzWorkAndProgress.mClazzWorkSubmission
+    var line2Bit1 = ""
+    var line2Bit2 = ""
+    if(clazzWorkSubmission == null){
+        line2Bit1 = notSubmitted
+    }else{
+        if(clazzWorkSubmission.clazzWorkSubmissionDateTimeFinished < 1){
+            line2Bit1 = submitted
+        }else{
+            line2Bit1 = marked
+        }
+
+        if(clazzMemberWithClazzWorkAndProgress.mProgress >= 0){
+            line2Bit2 = " - " + completed + " " + clazzMemberWithClazzWorkAndProgress.mProgress + "% " + ofContent
+        }
+    }
+    val line2 = line2Bit1 + line2Bit2
+
+    text = line2
 }

@@ -17,7 +17,6 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
@@ -83,7 +82,6 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
         }
     }
 
-
     override val listPresenter: UstadListPresenter<*, in ClazzMemberWithClazzWorkProgress>?
         get() = mPresenter
 
@@ -130,9 +128,6 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
 
         metricsRecyclerAdapter = ClazzWorkProgressRecyclerAdapter(clazzWorkWithMetricsFlat, false)
         mDataRecyclerViewAdapter = ClazzMemberWithClazzWorkProgressListRecyclerAdapter(mPresenter)
-//        val createNewText = requireContext().getString(R.string.create_new,
-//                requireContext().getString(R.string.student_progress))
-//        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
 
         mMergeRecyclerViewAdapter = MergeAdapter(metricsRecyclerAdapter,
                 mDataRecyclerViewAdapter)

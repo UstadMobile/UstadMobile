@@ -16,6 +16,6 @@ class ClazzMemberWithClazzWorkProgress : Person() {
     var mClazzWorkSubmission: ClazzWorkSubmission? = null
 
     //Progress
-    var mProgress: Int = 0
+    var mProgress: Float = 0.0F
 
 }

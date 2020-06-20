@@ -11,6 +11,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, String>,
@@ -49,15 +50,14 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     private fun updateListOnView() {
 
         GlobalScope.launch {
-        view.clazzWorkWithMetricsFlat =
+        val clazzWorkWithMetrics =
                 repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUidAsync(
                         filterByClazzWorkUid)
+
+            view.runOnUiThread(Runnable {
+                view.clazzWorkWithMetricsFlat = clazzWorkWithMetrics
+            })
         }
-
-//
-//        view.clazzWorkWithMetrics = repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUidLive(
-//                    filterByClazzWorkUid)
-
 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(
                 filterByClazzWorkUid)
