@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -14,13 +15,19 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemListStatusBinding
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.door.RepositoryLoadHelper
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_CONNECTION_ERR
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_FAILED_NOCONNECTIVITYORPEERS
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_WITHDATA
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
+import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_MIRROR
 
 /**
  * This RecyclerViewAdapter is intended to be placed in a MergeAdapter at the end. It
  */
-class ListStatusRecyclerViewAdapter<T>(var lifecycleOwner: LifecycleOwner?): ListAdapter<RepositoryLoadHelper.RepoLoadStatus, ListStatusRecyclerViewAdapter.StatusViewHolder>(LOAD_STATUS_DIFF_UTIL),
+class ListStatusRecyclerViewAdapter<T>(var lifecycleOwner: LifecycleOwner?,
+        val emptyStateString: String? = null,
+        val emptyStateDrawableId: Int = R.drawable.ic_empty): ListAdapter<RepositoryLoadHelper.RepoLoadStatus, ListStatusRecyclerViewAdapter.StatusViewHolder>(LOAD_STATUS_DIFF_UTIL),
         Observer<RepositoryLoadHelper.RepoLoadStatus> {
 
     private inner class ListStatusMediatorLiveData: MediatorLiveData<RepositoryLoadHelper.RepoLoadStatus>() {
@@ -62,7 +69,8 @@ class ListStatusRecyclerViewAdapter<T>(var lifecycleOwner: LifecycleOwner?): Lis
 
 
         private fun emitLoadStatus() {
-            value = if(value?.loadStatus == STATUS_LOADED_NODATA && currentPagedList?.isNotEmpty() ?: false) {
+            val currentLoadStatusFlag = currentLoadStatus?.loadStatus ?: -1
+            value = if(currentLoadStatusFlag in STATUSES_TO_HIDE_IF_LOCALDATA_LOADED && !currentPagedList.isNullOrEmpty()) {
                 RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_WITHDATA)
             }else {
                 currentLoadStatus
@@ -114,7 +122,8 @@ class ListStatusRecyclerViewAdapter<T>(var lifecycleOwner: LifecycleOwner?): Lis
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StatusViewHolder {
         val viewHolder = StatusViewHolder(ItemListStatusBinding.inflate(LayoutInflater.from(parent.context),
             parent, false).also {
-            it.emptyStateMessage = parent.context.getString(R.string.nothing_here)
+            it.emptyStateMessage = emptyStateString ?: parent.context.getString(R.string.nothing_here)
+            it.emptyStateDrawableId = emptyStateDrawableId
         })
 
         return viewHolder
@@ -135,11 +144,22 @@ class ListStatusRecyclerViewAdapter<T>(var lifecycleOwner: LifecycleOwner?): Lis
             }
         }
 
+        val STATUSES_TO_HIDE_IF_LOCALDATA_LOADED = listOf(STATUS_FAILED_CONNECTION_ERR,
+            STATUS_FAILED_NOCONNECTIVITYORPEERS, STATUS_LOADED_NODATA)
+
         @JvmField
         val MAP_STATUS_STRINGS = mapOf(
-                RepositoryLoadHelper.STATUS_LOADING_CLOUD to MessageID.repo_loading_status_loading_cloud,
-                RepositoryLoadHelper.STATUS_LOADING_MIRROR to MessageID.repo_loading_status_loading_mirror,
-                RepositoryLoadHelper.STATUS_FAILED_CONNECTION_ERR to MessageID.repo_loading_status_failed_connection_error)
+                STATUS_LOADING_CLOUD to MessageID.repo_loading_status_loading_cloud,
+                STATUS_LOADING_MIRROR to MessageID.repo_loading_status_loading_mirror,
+                STATUS_FAILED_CONNECTION_ERR to MessageID.repo_loading_status_failed_connection_error,
+                STATUS_FAILED_NOCONNECTIVITYORPEERS to MessageID.repo_loading_status_failed_noconnection)
+
+        @JvmField
+        val MAP_ICON_IMAGEIDS = mapOf(
+                STATUS_LOADING_CLOUD to R.drawable.ic_cloud_download_black_24dp,
+                STATUS_LOADING_MIRROR to R.drawable.ic_loading_from_nearby_device,
+                STATUS_FAILED_CONNECTION_ERR to R.drawable.ic_error_black_24dp,
+                STATUS_FAILED_NOCONNECTIVITYORPEERS to R.drawable.ic_signal_cellular_connected_no_internet_4_bar_black_24dp)
 
     }
 

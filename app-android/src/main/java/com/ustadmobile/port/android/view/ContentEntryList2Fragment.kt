@@ -75,7 +75,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             title = mTitle.toString()
         }
         mPresenter = ContentEntryList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
+                this, viewLifecycleOwner, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
