@@ -55,7 +55,7 @@ class ContentEntryList2FragmentTest  {
         val fragmentScenario = launchFragmentInContainer<ContentEntryList2Fragment>(
                 bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                         ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT),
-                themeResId = R.style.Theme_UstadTheme
+                themeResId = R.style.UmTheme_App
         ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         fragmentScenario.onFragment {

@@ -40,7 +40,7 @@ class LoginActivity : UstadBaseActivity(), LoginView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login2)
 
-        setUMToolbar(R.id.um_toolbar)
+        setUMToolbar(R.id.toolbar)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 

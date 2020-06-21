@@ -27,7 +27,7 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_web_chunk)
 
-        setUMToolbar(R.id.activity_webchunk_toolbar)
+        setUMToolbar(R.id.toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.setDisplayShowTitleEnabled(false)

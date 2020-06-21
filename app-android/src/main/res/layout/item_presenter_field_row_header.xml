@@ -10,11 +10,12 @@
     </data>
 
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         app:presenterFieldHeader="@{presenterField}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawableBottom="@drawable/divider_bottom"
         tools:text="Heading"
-        android:layout_marginHorizontal="@dimen/form_margin_horizontal_heading"
-        android:layout_marginVertical="@dimen/form_margin_vertical_itemspace"/>
+        android:layout_marginHorizontal="@dimen/dimen_8dp"
+        android:layout_marginVertical="@dimen/dimen_8dp"/>
 </layout>

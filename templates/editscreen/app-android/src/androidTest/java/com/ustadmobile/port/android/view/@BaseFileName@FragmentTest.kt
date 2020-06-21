@@ -34,7 +34,7 @@ class @BaseFileName@FragmentTest {
 
     @Test
     fun givenNo@Entity@PresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme) {
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
             @BaseFileName@Fragment(). also {
                 it.installNavController(systemImplNavRule.navController)
             }

@@ -14,7 +14,7 @@
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/chart"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dimen_256dp" />
+            android:layout_height="@dimen/dimen_250dp" />
 
 
         <com.google.android.material.chip.ChipGroup
@@ -23,8 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
-            android:layout_marginVertical="@dimen/dimen_8dp"
-            >
+            android:layout_marginVertical="@dimen/dimen_8dp">
 
             <com.google.android.material.chip.Chip
                 style="@style/Widget.MaterialComponents.Chip.Choice"

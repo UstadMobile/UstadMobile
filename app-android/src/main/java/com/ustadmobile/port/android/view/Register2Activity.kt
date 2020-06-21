@@ -54,7 +54,7 @@ class Register2Activity : UstadBaseActivity(), Register2View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register2)
 
-        setUMToolbar(R.id.um_toolbar)
+        setUMToolbar(R.id.toolbar)
         val actionBar = supportActionBar
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
@@ -131,7 +131,7 @@ class Register2Activity : UstadBaseActivity(), Register2View {
 
     private fun disableButton(disable: Boolean) {
         registerUser!!.setBackgroundColor(ContextCompat.getColor(this,
-                if (disable) R.color.divider else R.color.accent))
+                if (disable) R.color.iconTintColor else R.color.secondaryColor))
         registerUser!!.isEnabled = !disable
     }
 

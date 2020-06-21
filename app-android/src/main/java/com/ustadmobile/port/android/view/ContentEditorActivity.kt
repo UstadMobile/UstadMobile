@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ClipData
@@ -606,9 +605,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             private fun changeState(imageIcon: ImageView, iconHolder: RelativeLayout,
                                     isActivated: Boolean) {
                 imageIcon.setColorFilter(ContextCompat.getColor(context!!,
-                        if (isActivated) R.color.icons else R.color.text_secondary))
+                        if (isActivated) R.color.primaryTextColor else R.color.secondaryTextColor))
                 iconHolder.setBackgroundColor(ContextCompat.getColor(context!!,
-                        if (isActivated) R.color.content_icon_active else R.color.icons))
+                        if (isActivated) R.color.iconTintColor else R.color.primaryTextColor))
             }
 
             internal inner class FormatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -703,7 +702,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         contentOptionsBottomSheetBehavior = BottomSheetBehavior
                 .from(findViewById(R.id.bottom_content_option_sheet_container))
 
-        toolbar = findViewById(R.id.um_toolbar)
+        toolbar = findViewById(R.id.toolbar)
         val mInsertMultimedia = findViewById<RelativeLayout>(R.id.content_option_multimedia)
         val mInsertMultipleChoice = findViewById<RelativeLayout>(R.id.content_option_multiplechoice)
         val mInsertFillBlanks = findViewById<RelativeLayout>(R.id.content_option_filltheblanks)

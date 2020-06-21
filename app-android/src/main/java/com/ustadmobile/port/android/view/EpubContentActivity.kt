@@ -52,7 +52,7 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterVie
         setContentView(R.layout.activity_epub_content)
         mDrawerLayout = findViewById(R.id.container_drawer_layout)
 
-        val toolbar = findViewById<Toolbar>(R.id.um_toolbar)
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
