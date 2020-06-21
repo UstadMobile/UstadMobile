@@ -21,10 +21,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
-import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.Comments
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -95,7 +92,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
     }
 
     @Test
-    fun test1() {
+    fun givenValidClazzWorkUid_whenStudentsPresentInClazzWithComments_thenShouldUpdateView() {
 
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
         navController.setGraph(R.navigation.mobile_navigation)
@@ -158,6 +155,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
         }
 
+        Thread.sleep(2000)
         reloadFragment(testClazzWork.clazzWork)
         onView(withText("Marked")).check(matches(isDisplayed()))
         //TODO: Test comments
@@ -166,7 +164,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
     }
 
     @Test
-    fun test2() {
+    fun givenValidClazzWorkUid_whenStudentSubmittedAndContentProgressed_thenShouldUpdateView() {
 
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
         navController.setGraph(R.navigation.mobile_navigation)
@@ -198,9 +196,9 @@ class ClazzWorkDetailProgressListFragmentTest  {
         val activeAccount = UmAccount(teacherMember.clazzMemberPersonUid, "bond", "", "http://localhost")
         UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
 
-
         val student1 = testClazzWork.clazzAndMembers.studentList.get(0)
         val student3 = testClazzWork.clazzAndMembers.studentList.get(2)
+        val student4 = testClazzWork.clazzAndMembers.studentList.get(3)
 
         runBlocking {
             Comments().apply {
@@ -224,21 +222,49 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
         }
 
+        contentList.forEach{
+            runBlocking {
+                ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressContentEntryUid = it.contentEntryUid
+                    contentEntryProgressPersonUid = student1.clazzMemberPersonUid
+                    contentEntryProgressProgress = 42.0F
+                    contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+                    contentEntryProgressUid = db.contentEntryProgressDao.insertAsync(this)
+                }
 
-        //Make submissions Student 1 and Student 4
-        val student4 = testClazzWork.clazzAndMembers.studentList.get(3)
+                ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressContentEntryUid = it.contentEntryUid
+                    contentEntryProgressPersonUid = student3.clazzMemberPersonUid
+                    contentEntryProgressProgress = 24.0F
+                    contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+                    contentEntryProgressUid = db.contentEntryProgressDao.insertAsync(this)
+                }
+
+                ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressContentEntryUid = it.contentEntryUid
+                    contentEntryProgressPersonUid = student4.clazzMemberPersonUid
+                    contentEntryProgressProgress = 100.0F
+                    contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+                    contentEntryProgressUid = db.contentEntryProgressDao.insertAsync(this)
+                }
+            }
+        }
 
 
+        Thread.sleep(2000)
         reloadFragment(testClazzWork.clazzWork)
         onView(withText("Marked")).check(matches(isDisplayed()))
-        //TODO: Test line2
+        //TODO: Test line2 and progress
 
     }
 
 
 
     @Test
-    fun test3() {
+    fun givenValidClazzWorkUid_whenTeacherSeesStudentListedAndClicked_thenShouldGoToMarking() {
 
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
         navController.setGraph(R.navigation.mobile_navigation)
@@ -307,6 +333,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
     }
 
-    
+
 
 }

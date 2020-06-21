@@ -67,7 +67,7 @@
             android:layout_height="3dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
-            android:progress="@{Float.floatToIntBits(clazzMemberWithClazzWorkProgress.mProgress)}"
+            android:progress="@{Math.round(clazzMemberWithClazzWorkProgress.mProgress)}"
             app:layout_constraintEnd_toEndOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_progress_member_pic"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzwork_progress_member_name" />

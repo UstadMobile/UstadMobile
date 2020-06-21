@@ -205,15 +205,16 @@ fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMembe
     if(clazzWorkSubmission == null){
         line2Bit1 = notSubmitted
     }else{
-        if(clazzWorkSubmission.clazzWorkSubmissionDateTimeFinished < 1){
-            line2Bit1 = submitted
+        line2Bit1 = if(clazzWorkSubmission.clazzWorkSubmissionDateTimeFinished < 1){
+            submitted
         }else{
-            line2Bit1 = marked
+            marked
         }
+    }
 
-        if(clazzMemberWithClazzWorkAndProgress.mProgress >= 0){
-            line2Bit2 = " - " + completed + " " + clazzMemberWithClazzWorkAndProgress.mProgress + "% " + ofContent
-        }
+    if(clazzMemberWithClazzWorkAndProgress.mProgress >= 0){
+        line2Bit2 = " - " + completed + " " + clazzMemberWithClazzWorkAndProgress.mProgress +
+                "% " + ofContent
     }
     val line2 = line2Bit1 + line2Bit2
 

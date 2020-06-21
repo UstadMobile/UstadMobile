@@ -99,8 +99,26 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
         const val STUDENT_PROGRESS_QUERY = """
             SELECT 
-                Person.*, ClazzMember.*, cws.*, 
-                -1.0 as mProgress, cm.*
+                Person.*, ClazzMember.*, cws.*,
+                (
+                    (
+                        SELECT SUM(ContentEntryProgress.contentEntryProgressProgress) 
+                        FROM ContentEntryProgress WHERE
+                        CAST(ContentEntryProgress.contentEntryProgressActive AS INTEGER) = 1 
+                        AND ContentEntryProgress.contentEntryProgressStatusFlag = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED}
+                        AND ContentEntryProgress.contentEntryProgressPersonUid = Person.personUid
+                    ) 
+                    /
+                    (
+                        SELECT COUNT(*) FROM ClazzWorkContentJoin WHERE 
+                        ClazzWorkContentJoin.clazzWorkContentJoinClazzWorkUid = ClazzWork.clazzWorkUid
+                        AND CAST(clazzWorkContentJoinInactive AS INTEGER) = 0
+                    )
+    
+                ) as mProgress, 
+                   
+                -1.0 as mProgress, 
+            cm.*
             FROM ClazzMember
                 LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
                 LEFT JOIN ClazzWork ON ClazzWork.clazzWorkUid = :clazzWorkUid
