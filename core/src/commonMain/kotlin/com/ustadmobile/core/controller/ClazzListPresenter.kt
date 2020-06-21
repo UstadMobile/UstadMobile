@@ -6,20 +6,20 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
 import com.ustadmobile.lib.db.entities.UmAccount
 
-class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
+class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
+                         lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
+                         db: UmAppDatabase, repo: UmAppDatabase,
+                         activeAccount: DoorLiveData<UmAccount?>,
+                         private val clazzList2ItemListener:
+                          DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, systemImpl, context))
     : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+        db, repo, activeAccount), ClazzListItemListener by clazzList2ItemListener {
 
     var searchQuery: String = "%"
 
@@ -42,6 +42,7 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
         super.onCreate(savedState)
 
         filterExcludeMembersOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
+        clazzList2ItemListener.listViewMode = mListMode
 
         loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
         getAndSetList(SortOrder.ORDER_NAME_ASC)
@@ -63,13 +64,6 @@ class ClazzList2Presenter(context: Any, arguments: Map<String, String>, view: Cl
                     searchQuery, loggedInPersonUid, filterExcludeMembersOfSchool)
             SortOrder.ORDER_NAME_DSC -> repo.clazzDao.findAllActiveClazzesSortByNameDesc(
                     searchQuery, loggedInPersonUid, filterExcludeMembersOfSchool)
-        }
-    }
-
-    override fun handleClickEntry(entry: Clazz) {
-        if(mListMode == ListViewMode.BROWSER) {
-            systemImpl.go(ClazzDetailView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to entry.clazzUid.toString()), context)
         }
     }
 

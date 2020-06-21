@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This is actually used by ListStatusRecyclerViewAdapterTest -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="person"
+            type="com.ustadmobile.lib.db.entities.Person" />
+    </data>
+
+    <TextView
+        android:tag="@{person.personUid}"
+        android:text="@{person.lastName}"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </TextView>
+</layout>
