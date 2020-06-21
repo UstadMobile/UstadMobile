@@ -22,6 +22,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -65,6 +66,11 @@ class ClazzEditFragmentTest  {
                 it.arguments = bundleOf()
             }
         }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        val crudIdlingResource = CrudIdlingResource()
+        crudIdlingResource.monitorFragment(fragmentScenario)
+        IdlingRegistry.getInstance().register(crudIdlingResource)
+
+        onIdle()
 
         val currentEntity = fragmentScenario.letOnFragment { it.entity }
         val formVals = ClazzWithHolidayCalendarAndSchool().apply {

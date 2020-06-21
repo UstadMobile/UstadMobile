@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -16,6 +17,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withDataBindingIdlingResource
@@ -51,13 +53,21 @@ class ClazzEndToEndTests {
         val activityScenario = launchActivity<MainActivity>()
                 .withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
+        val crudIdlingResource = CrudIdlingResource()
+        crudIdlingResource.monitorActivity(activityScenario)
+        IdlingRegistry.getInstance().register(crudIdlingResource)
+
         onView(withId(R.id.home_clazzlist_dest)).perform(click())
         onView(withText(R.string.clazz)).perform(click())
         onView(withId(R.id.activity_clazz_edit_name_text)).perform(typeText("Test Class"))
         closeSoftKeyboard()
 
         //select holiday calendar
-        onView(withId(R.id.activity_clazz_edit_holiday_calendar_text)).perform(click())
+        /*
+         * Weird issue: if you specify the EditText itself, instead of the TextInputLayout, Android 5
+         * will click ON 'SCHOOL' THE BOTTOM NAVIGATION instead!
+         */
+        onView(withId(R.id.activity_clazz_edit_holiday_calendar_selected)).perform(click())
         onView(withId(R.id.fragment_list_recyclerview)).perform(
                 RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(
                         withTagValue(equalTo(calendarUid)),
