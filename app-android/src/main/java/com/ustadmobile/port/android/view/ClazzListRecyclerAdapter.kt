@@ -4,17 +4,17 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemClazzlist2ClazzBinding
+import com.toughra.ustadmobile.databinding.ItemClazzListBinding
 import com.ustadmobile.core.controller.ClazzListItemListener
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?): SelectablePagedListAdapter<ClazzWithNumStudents, ClazzListRecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
 
-    class ClazzList2ViewHolder(val itemBinding: ItemClazzlist2ClazzBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class ClazzList2ViewHolder(val itemBinding: ItemClazzListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzList2ViewHolder {
-        val itemBinding = ItemClazzlist2ClazzBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val itemBinding = ItemClazzListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ClazzList2ViewHolder(itemBinding)
     }
 
