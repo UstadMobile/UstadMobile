@@ -85,10 +85,13 @@ fun TextView.setTextMessageIdOptionSelected(textMessageIdLookupKey: Int) {
     updateFromTextMessageIdOptions()
 }
 
-@BindingAdapter(value = ["textMessageIdLookupMap", "fallbackMessageId"], requireAll = false)
-fun TextView.setTextMessageIdOptions(textMessageIdLookupMap: Map<Int, Int>?, fallbackMessageId: Int?) {
+@BindingAdapter(value = ["textMessageIdLookupMap", "fallbackMessageId", "fallbackMessage"], requireAll = false)
+fun TextView.setTextMessageIdOptions(textMessageIdLookupMap: Map<Int, Int>?,
+                                     fallbackMessageId: Int?, fallbackMessage: String?) {
     setTag(R.id.tag_messageidoptions_list, textMessageIdLookupMap)
-    setTag(R.id.tag_messageidoptiond_fallback, fallbackMessageId)
+    setTag(R.id.tag_messageidoption_fallback, fallbackMessage ?:
+        fallbackMessageId?.let { UstadMobileSystemImpl.instance.getString(it, context) } ?: "")
+
     updateFromTextMessageIdOptions()
 }
 
@@ -96,11 +99,13 @@ fun TextView.setTextMessageIdOptions(textMessageIdLookupMap: Map<Int, Int>?, fal
 private fun TextView.updateFromTextMessageIdOptions() {
     val currentOption = getTag(R.id.tag_messageidoption_selected) as? Int
     val textMessageIdOptions = getTag(R.id.tag_messageidoptions_list) as? Map<Int, Int>
-    val fallbackMessageId = getTag(R.id.tag_messageidoptiond_fallback) as? Int
+    val fallbackMessage = getTag(R.id.tag_messageidoption_fallback) as? String
     if(currentOption != null && textMessageIdOptions != null) {
-        val messageId = textMessageIdOptions[currentOption] ?: fallbackMessageId
+        val messageId = textMessageIdOptions[currentOption]
         if(messageId != null) {
             text = UstadMobileSystemImpl.instance.getString(messageId, context)
+        }else if(fallbackMessage != null) {
+            text = fallbackMessage
         }
     }
 }
