@@ -31,6 +31,7 @@ class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
+        @Entity_VariableName@ItemListener.listViewMode = mListMode
         view.sortOptions = SortOrder.values().toList().map { @Entity@ListSortOption(it, context) }
     }
 
