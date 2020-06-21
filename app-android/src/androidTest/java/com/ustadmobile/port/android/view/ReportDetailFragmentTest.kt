@@ -14,7 +14,6 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -22,17 +21,17 @@ import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withDataBindingIdlingResource
-import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
+import com.ustadmobile.util.test.ext.insertTestStatements
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.util.*
 
 @AdbScreenRecord("Report Detail Screen Test")
 @RunWith(Parameterized::class)
-class ReportDetailFragmentTest(val report: Report) : AbstractXapiReportOptionsTest() {
+class ReportDetailFragmentTest(val report: Report){
 
     @JvmField
     @Rule
@@ -54,7 +53,9 @@ class ReportDetailFragmentTest(val report: Report) : AbstractXapiReportOptionsTe
 
     @Before
     fun setup() {
-        insertXapi(dbRule.db)
+        runBlocking {
+            dbRule.db.insertTestStatements()
+        }
     }
 
 

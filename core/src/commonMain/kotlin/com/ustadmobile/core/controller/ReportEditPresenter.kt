@@ -153,6 +153,8 @@ class ReportEditPresenter(context: Any,
         report.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
         report.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong
 
+        handleXAxisSelected(XAxisOptions.values().map { GroupByMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
+
         return ReportWithFilters(report, reportFilterList)
     }
 
@@ -166,6 +168,8 @@ class ReportEditPresenter(context: Any,
         } else {
             editEntity = ReportWithFilters()
         }
+
+        handleXAxisSelected(XAxisOptions.values().map { GroupByMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
 
         return editEntity
     }
@@ -193,17 +197,11 @@ class ReportEditPresenter(context: Any,
             if (entity.reportUid != 0L) {
                 repo.reportDao.updateAsync(entity)
 
-                repo.reportFilterDao.insertListAsync(personOneToManyJoinEditHelper.entitiesToInsert)
-                repo.reportFilterDao.updateAsyncList(personOneToManyJoinEditHelper.entitiesToUpdate)
-                repo.reportFilterDao.deactivateByUids(personOneToManyJoinEditHelper.primaryKeysToDeactivate)
-
-                repo.reportFilterDao.insertListAsync(verbDisplaynOneToManyJoinEditHelper.entitiesToInsert)
-                repo.reportFilterDao.updateAsyncList(verbDisplaynOneToManyJoinEditHelper.entitiesToUpdate)
-                repo.reportFilterDao.deactivateByUids(verbDisplaynOneToManyJoinEditHelper.primaryKeysToDeactivate)
-
-                repo.reportFilterDao.insertListAsync(contentOneToManyJoinEditHelper.entitiesToInsert)
-                repo.reportFilterDao.updateAsyncList(contentOneToManyJoinEditHelper.entitiesToUpdate)
-                repo.reportFilterDao.deactivateByUids(contentOneToManyJoinEditHelper.primaryKeysToDeactivate)
+                listOf(personOneToManyJoinEditHelper, verbDisplaynOneToManyJoinEditHelper, contentOneToManyJoinEditHelper).forEach {
+                    repo.reportFilterDao.insertListAsync(it.entitiesToInsert)
+                    repo.reportFilterDao.updateAsyncList(it.entitiesToUpdate)
+                    repo.reportFilterDao.deactivateByUids(it.primaryKeysToDeactivate)
+                }
 
                 repo.reportDao.updateAsync(entity)
 
@@ -252,6 +250,14 @@ class ReportEditPresenter(context: Any,
             }
 
 
+        }
+    }
+
+    fun handleXAxisSelected(selectedOption: MessageIdOption) {
+        if (selectedOption.code == Report.DAY || selectedOption.code == Report.MONTH || selectedOption.code == Report.WEEK) {
+            view.groupOptions = XAxisOptions.values().map { GroupByMessageIdOption(it, context) }.filter { it.code == Report.GENDER || it.code == Report.CONTENT_ENTRY }
+        } else {
+            view.groupOptions = XAxisOptions.values().map { GroupByMessageIdOption(it, context) }
         }
     }
 

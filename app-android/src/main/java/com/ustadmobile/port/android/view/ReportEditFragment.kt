@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -21,6 +22,7 @@ import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonListView
@@ -41,7 +43,7 @@ interface ReportEditFragmentEventHandler {
     fun onClickRemoveContent(content: ReportFilterWithDisplayDetails)
 }
 
-class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditView, ReportEditFragmentEventHandler {
+class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditView, ReportEditFragmentEventHandler,  DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption> {
     private var mBinding: FragmentReportEditBinding? = null
 
     private var mPresenter: ReportEditPresenter? = null
@@ -82,6 +84,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         mBinding = FragmentReportEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.activityEventHandler = this
+            it.xAxisSelectionListener = this
         }
 
         personRecyclerView = rootView.findViewById(R.id.fragment_edit_who_filter_list)
@@ -329,6 +332,11 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
     override var xAxisOptions: List<ReportEditPresenter.XAxisMessageIdOption>? = null
 
     override var groupOptions: List<ReportEditPresenter.GroupByMessageIdOption>? = null
+        get() = field
+        set(value){
+            field = value
+            mBinding?.subGroupOptions = value
+        }
 
     companion object {
 
@@ -342,6 +350,14 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
                 return oldItem == newItem
             }
         }
+    }
+
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
+        mPresenter?.handleXAxisSelected(selectedOption)
+    }
+
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
+
     }
 
 }

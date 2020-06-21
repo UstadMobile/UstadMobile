@@ -8,6 +8,8 @@
         <import type="android.view.View" />
         <import type="android.text.InputType" />
         <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
 
         <variable
             name="report"
@@ -28,6 +30,10 @@
         <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.ReportEditFragmentEventHandler" />
+
+        <variable
+            name="xAxisSelectionListener"
+            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
 
         <variable
             name="chartOptions"
@@ -133,6 +139,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/xapi_options_x_axes"
+                    app:onMessageIdOptionSelected="@{xAxisSelectionListener}"
                     app:messageIdOptions="@{xAxisOptions}"
                     app:selectedMessageIdOption="@={report.XAxis}" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -230,7 +237,7 @@
                 layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:createNewText="@{@string/add_a(@string/person_filter)}"
+                app:createNewText="@{@string/add_a(@string/x_filter(@string/person))}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_who_filter_list"
                 app:onClickNew="@{() -> activityEventHandler.onClickNewPerson()}" />
@@ -261,7 +268,7 @@
                 layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:createNewText="@{@string/add_a(@string/verb_filter)}"
+                app:createNewText="@{@string/add_a(@string/x_filter(@string/verb))}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_did_filter_list"
                 app:onClickNew="@{() -> activityEventHandler.onClickNewVerbDisplay()}" />
@@ -274,7 +281,7 @@
                 android:layout_marginStart="@dimen/form_margin_horizontal_heading"
                 android:layout_marginTop="@dimen/formitem_margin_vertical"
                 android:layout_marginBottom="@dimen/formitem_margin_vertical"
-                android:text="@string/xapi_options_content"
+                android:text="@string/content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_did_add_layout" />
 
@@ -293,7 +300,7 @@
                 layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:createNewText="@{@string/add_a(@string/content_filter)}"
+                app:createNewText="@{@string/add_a(@string/x_filter(@string/content))}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_content_filter_list"
                 app:onClickNew="@{() -> activityEventHandler.onClickAddNewContentFilter()}" />

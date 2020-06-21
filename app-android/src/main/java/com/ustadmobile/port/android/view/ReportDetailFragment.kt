@@ -29,6 +29,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.StatementListReport
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 
 
 interface ReportDetailFragmentEventHandler {
@@ -102,21 +103,19 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
     }
 
 
-    private var statementListObserver = Observer<PagedList<StatementListReport>?> { t ->
-        run {
-            statementAdapter?.submitList(t)
-        }
-    }
+    private var statementListObserver: Observer<PagedList<StatementListReport>>? = null
+
 
     private var currentLiveData: LiveData<PagedList<StatementListReport>>? = null
 
     override var statementList: DataSource.Factory<Int, StatementListReport>? = null
         get() = field
         set(value) {
-            currentLiveData?.removeObserver(statementListObserver)
+            val statementObsVal = statementListObserver ?: return
+            currentLiveData?.removeObserver(statementObsVal)
             val displayTypeRepoVal = dbRepo?.statementDao ?: return
             currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
-            currentLiveData?.observe(this, statementListObserver)
+            currentLiveData?.observe(this, statementObsVal)
             field = value
         }
 
@@ -136,7 +135,9 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         reportRecyclerView = rootView.findViewById(R.id.fragment_detail_report_list)
         chartAdapter = RecyclerViewChartAdapter(this, null)
-        statementAdapter = StatementViewRecyclerAdapter(this, null)
+        statementAdapter = StatementViewRecyclerAdapter(this, null).also {
+            statementListObserver = PagedListSubmitObserver(it)
+        }
 
         mergeAdapter = MergeAdapter(chartAdapter, statementAdapter)
         reportRecyclerView?.adapter = mergeAdapter
@@ -181,13 +182,6 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         dbRepo = null
         chartData = null
         currentLiveData = null
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (mBinding?.report != null) {
-            (activity as? AppCompatActivity)?.supportActionBar?.title = mBinding?.report?.reportTitle
-        }
     }
 
     override var entity: ReportWithFilters? = null

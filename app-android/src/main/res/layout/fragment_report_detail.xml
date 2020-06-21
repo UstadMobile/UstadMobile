@@ -20,16 +20,9 @@
     </data>
 
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/activity_report_edit_edit_clx"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fragment_detail_report_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fragment_detail_report_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="match_parent" />
 
 </layout>

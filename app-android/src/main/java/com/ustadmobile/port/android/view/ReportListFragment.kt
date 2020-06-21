@@ -63,6 +63,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
             val graphJob = GlobalScope.async(Dispatchers.Main) {
                 val chartData = presenter?.getGraphData(item)
                 holder.itemBinding.listReportChart.setChartData(chartData)
+                holder.itemBinding.chart = chartData
             }
             holder.itemBinding.listReportChart.setTag(R.id.tag_graphlookup_key, graphJob)
 

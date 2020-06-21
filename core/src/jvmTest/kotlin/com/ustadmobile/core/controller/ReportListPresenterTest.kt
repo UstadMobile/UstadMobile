@@ -50,7 +50,6 @@ class ReportListPresenterTest {
         repoReportDaoSpy = spy(clientDbRule.db.reportDao)
         whenever(clientDbRule.db.reportDao).thenReturn(repoReportDaoSpy)
 
-        //TODO: insert any entities required for all tests
     }
 
     @Test

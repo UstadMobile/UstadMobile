@@ -308,15 +308,12 @@
     <string name="xapi_options_did">Did</string>
     <string name="xapi_options_what">What</string>
     <string name="xapi_options_when">When</string>
-    <string name="xapi_options_where">Where</string>
-    <string name="xapi_options_content">Content</string>
+    <string name="xapi_options_where">Where</string>>
 
     <string name="report">Report</string>
     <string name="verb">Verb</string>
     <string name="id_verbentity_urlid">ID: %s</string>
-    <string name="verb_filter">verb filter</string>
-    <string name="person_filter">person filter</string>
-    <string name="content_filter">content filter</string>
+    <string name="x_filter">%1$s filter</string>
 
 
 
@@ -328,10 +325,8 @@
     <string name="xapi_minutes">Mins</string>
     <string name="xapi_seconds">Secs</string>
 
-    <string name="xapi_person_header">Person</string>
     <string name="xapi_verb_header">Did what</string>
     <string name="xapi_result_header">Result</string>
-    <string name="xapi_when_header">When</string>
 
     <string name="xapi_score">Score (%)</string>
     <string name="import_link_video">Title</string>

@@ -90,7 +90,7 @@ class ReportEditFragmentTest {
             chartType = Report.LINE_GRAPH
             yAxis = Report.AVG_DURATION
             xAxis = Report.WEEK
-            subGroup = Report.WEEK
+            subGroup = Report.GENDER
             fromDate =  DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
         }
@@ -120,7 +120,7 @@ class ReportEditFragmentTest {
             chartType = Report.LINE_GRAPH
             yAxis = Report.AVG_DURATION
             xAxis = Report.WEEK
-            subGroup = Report.WEEK
+            subGroup = Report.GENDER
             reportUid = dbRule.db.reportDao.insert(this)
         }
 
@@ -144,7 +144,7 @@ class ReportEditFragmentTest {
             chartType = Report.BAR_CHART
             yAxis = Report.COUNT_ACTIVITIES
             xAxis = Report.MONTH
-            subGroup = Report.MONTH
+            subGroup = Report.GENDER
         }
 
         val person = Person().apply {
@@ -177,7 +177,7 @@ class ReportEditFragmentTest {
                 updatedEntityFromDb?.yAxis)
         Assert.assertEquals("x axis updated", Report.MONTH,
                 updatedEntityFromDb?.xAxis)
-        Assert.assertEquals("subgroup updated", Report.MONTH,
+        Assert.assertEquals("subgroup updated", Report.GENDER,
                 updatedEntityFromDb?.subGroup)
         Assert.assertEquals("one filter added",1,
                 reportFilerListFromDb!!.size)

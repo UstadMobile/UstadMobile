@@ -12,7 +12,6 @@ import com.ustadmobile.core.util.UmAppDatabaseClientRule
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.db.waitUntil
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -21,7 +20,7 @@ import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.ReportWithFilters
-import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
+import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
@@ -30,7 +29,7 @@ import kotlinx.serialization.json.Json
  *
  * Note:
  */
-class ReportDetailPresenterTest : AbstractXapiReportOptionsTest() {
+class ReportDetailPresenterTest {
 
     @JvmField
     @Rule
@@ -58,7 +57,9 @@ class ReportDetailPresenterTest : AbstractXapiReportOptionsTest() {
         repoReportDaoSpy = spy(clientDbRule.db.reportDao)
         whenever(clientDbRule.db.reportDao).thenReturn(repoReportDaoSpy)
 
-        insertXapi(clientDbRule.db)
+        runBlocking {
+            clientDbRule.db.insertTestStatements()
+        }
     }
 
     @Test
@@ -180,7 +181,7 @@ class ReportDetailPresenterTest : AbstractXapiReportOptionsTest() {
         presenter.onCreate(null)
 
         //wait for the entity value to be set
-        mockView.captureLastEntityValue(120000)
+        mockView.captureLastEntityValue(5000)
 
         presenter.handleClickEdit()
 

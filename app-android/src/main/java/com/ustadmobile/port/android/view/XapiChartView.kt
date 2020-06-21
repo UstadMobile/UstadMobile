@@ -9,11 +9,11 @@ import android.widget.LinearLayout
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.lib.db.entities.Report
@@ -56,7 +56,6 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
             //Left Values
             barChart.axisLeft.isEnabled = true
-            barChart.axisLeft.setDrawTopYLabelEntry(true)
 
             //Right Values:
             barChart.axisRight.isEnabled = false
@@ -70,7 +69,6 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             barChart.description.isEnabled = false
 
             barChart.setTouchEnabled(false)
-
 
             val barData = BarData()
             if(subgroupLabels.isEmpty()){
@@ -170,7 +168,6 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
             //Left Values
             lineChart.axisLeft.isEnabled = true
-            lineChart.axisLeft.setDrawTopYLabelEntry(true)
 
             //Right Values:
             lineChart.axisRight.isEnabled = false
