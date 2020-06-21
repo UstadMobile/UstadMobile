@@ -12,8 +12,8 @@
             name="clazz"
             type="com.ustadmobile.lib.db.entities.ClazzWithNumStudents" />
         <variable
-            name="presenter"
-            type="com.ustadmobile.core.controller.ClazzList2Presenter" />
+            name="itemListener"
+            type="com.ustadmobile.core.controller.ClazzListItemListener" />
 
     </data>
 
@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_listitem"
-        android:onClick="@{() -> presenter.handleClickEntry(clazz)}">
+        android:onClick="@{() -> itemListener.onClickClazz(clazz)}">
 
         <TextView
             android:id="@+id/item_clazzlist_clazz_title"
@@ -34,7 +34,7 @@
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_8dp"
             android:text="@{clazz.clazzName}"
-            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

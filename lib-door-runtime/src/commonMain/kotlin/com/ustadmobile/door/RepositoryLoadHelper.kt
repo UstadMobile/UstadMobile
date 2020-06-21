@@ -31,13 +31,6 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
 
-    @Deprecated("Dont use this - it leads to memory leaks - use status live data")
-    interface RepoLoadCallback {
-
-        fun onLoadStatusChanged(status: Int, remoteDevice: String?)
-
-    }
-
     val requestLock = Mutex()
 
     @Volatile

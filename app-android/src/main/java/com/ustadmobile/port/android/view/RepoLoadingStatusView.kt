@@ -58,7 +58,7 @@ class RepoLoadingStatusView: CoordinatorLayout, DoorObserver<RepositoryLoadHelpe
             statusToStatusInfoMap[STATUS_LOADED_NODATA]?.imageResourceToShow = value
         }
 
-    private var statusLiveData: DoorLiveData<RepositoryLoadHelper.RepoLoadStatus>? = null
+    private var repoLiveData: DoorLiveData<RepositoryLoadHelper.RepoLoadStatus>? = null
 
     constructor(context: Context) : super(context) {
         init()
@@ -82,7 +82,7 @@ class RepoLoadingStatusView: CoordinatorLayout, DoorObserver<RepositoryLoadHelpe
 
     private fun observeRepoStatusInternal(liveData: DoorLiveData<*>, lifecycleOwner: LifecycleOwner?) {
         if(liveData.isRepositoryLiveData()) {
-            statusLiveData?.removeObserver(this)
+            repoLiveData?.removeObserver(this)
             val newStatusLiveData = (liveData as RepositoryLoadHelper<*>.LiveDataWrapper2<*>).loadingStatus
             if(lifecycleOwner != null) {
                 newStatusLiveData.observe(lifecycleOwner, this)
@@ -90,7 +90,7 @@ class RepoLoadingStatusView: CoordinatorLayout, DoorObserver<RepositoryLoadHelpe
                 newStatusLiveData.observeForever(this)
             }
 
-            statusLiveData = newStatusLiveData
+            repoLiveData = newStatusLiveData
         }
     }
 
@@ -118,8 +118,8 @@ class RepoLoadingStatusView: CoordinatorLayout, DoorObserver<RepositoryLoadHelpe
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        statusLiveData?.removeObserver(this)
-        statusLiveData = null
+        repoLiveData?.removeObserver(this)
+        repoLiveData = null
     }
 
     override fun onFirstItemLoaded() {
