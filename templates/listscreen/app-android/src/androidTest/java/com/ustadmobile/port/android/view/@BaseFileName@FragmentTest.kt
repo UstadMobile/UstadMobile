@@ -37,7 +37,7 @@ class @BaseFileName@FragmentTest  {
             @Entity_VariableName@Uid = dbRule.db.clazzDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf()) {
             @BaseFileName@Fragment().also {
                 it.installNavController(systemImplNavRule.navController)

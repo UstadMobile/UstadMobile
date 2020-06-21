@@ -775,11 +775,11 @@
 
     <!-- Used to show what percentage of an assignment a student has completed. The %1$s will be
     replaced with the percentage the student completed e.g. "75% complete"-->
-    <string name="percentage_complete">%1$s% complete</string>
+    <string name="percentage_complete" formatted="false">%1$s% complete</string>
 
     <!-- used to show when an assignment (or other work item) was started by the assignee. The
     %1$s% will be replaced with the date that they started.-->
-    <string name="started_date">Started %1$s%</string>
+    <string name="started_date" formatted="false">Started %1$s%</string>
 
     <!-- Used to indicate that something (e.g. an assigment) has been started -->
     <string name="started">Started</string>

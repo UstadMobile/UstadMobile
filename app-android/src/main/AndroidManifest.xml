@@ -26,7 +26,7 @@
 
     <application
         android:supportsRtl="true"
-        android:theme="@style/Theme.UstadTheme"
+        android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
         <activity android:name="com.ustadmobile.port.android.view.MainActivity">
             <intent-filter>
@@ -36,11 +36,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.ustadmobile.port.android.view.RepoLoadingStatusTestActivity" />
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:noHistory="true"
-            android:theme="@style/ThemeOnboarding" />
+            android:theme="@style/UmTheme.App.OnBoarding" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -94,8 +93,6 @@
         <activity
             android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
-
 
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"

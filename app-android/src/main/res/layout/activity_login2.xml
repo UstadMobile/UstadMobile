@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,27 +8,48 @@
     android:background="#fff">
 
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/activity_login_appbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="6dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        tools:ignore="MissingConstraints">
-
-
-        <include layout="@layout/toolbar_with_progress" />
-
-    </com.google.android.material.appbar.AppBarLayout>
+    <include
+        android:id="@+id/appbar"
+        layout="@layout/appbar_material_with_progress" />
 
 
     <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:id="@+id/activity_login_username_layout"
+        android:layout_width="@dimen/dimen_0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dimen_16dp"
+        android:layout_marginTop="@dimen/dimen_22dp"
+        android:layout_marginEnd="@dimen/dimen_16dp"
+        android:layout_marginBottom="@dimen/dimen_16dp"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/activity_login_password_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appbar"
+        app:layout_constraintVertical_bias="0.120000005"
+        app:layout_constraintVertical_chainStyle="packed">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:id="@+id/activity_login_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/username"
+            android:ems="10"
+            android:inputType="text"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:id="@+id/activity_login_password_layout"
-        android:layout_width="0dp"
+        android:layout_width="@dimen/dimen_0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/dimen_16dp"
         android:layout_marginEnd="@dimen/dimen_16dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="@dimen/dimen_8dp"
         app:layout_constraintBottom_toTopOf="@+id/activity_login_errormessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -36,6 +58,7 @@
         app:passwordToggleEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/activity_login_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,47 +70,17 @@
 
 
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/activity_login_username_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/dimen_16dp"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="@dimen/dimen_16dp"
-        android:layout_marginBottom="@dimen/dimen_16dp"
-        android:inputType="textPersonName"
-        android:shadowColor="@color/primary"
-        app:layout_constraintBottom_toTopOf="@+id/activity_login_password_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_login_appbar"
-        app:layout_constraintVertical_bias="0.120000005"
-        app:layout_constraintVertical_chainStyle="packed">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/activity_login_username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/username"
-            android:ems="10"
-            android:inputType="text"/>
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-
-
     <Button
         android:id="@+id/activity_login_button_login"
+        android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textStyle="bold"
         android:layout_margin="@dimen/dimen_16dp"
-        android:backgroundTint="@color/accent"
+        android:backgroundTint="?colorSecondary"
         android:padding="@dimen/dimen_16dp"
+        android:textAllCaps="true"
         android:text="@string/login"
-        android:textAppearance="@style/TextAppearance.AppCompat.Button"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/text_title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -98,13 +91,13 @@
         android:id="@+id/activity_login_forgot_password"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="@dimen/dimen_8dp"
         android:layout_marginTop="@dimen/dimen_16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="@dimen/dimen_8dp"
+        android:layout_marginBottom="@dimen/dimen_8dp"
         android:text="@string/forgot_password"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="@android:color/holo_red_dark"
+        android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+        android:textColor="?colorError"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/activity_login_button_login"
         app:layout_constraintEnd_toEndOf="parent"
@@ -113,15 +106,16 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_login_errormessage" />
 
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         android:id="@+id/activity_login_errormessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="@dimen/dimen_10dp"
         android:layout_marginTop="@dimen/dimen_16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="@dimen/dimen_10dp"
+        android:layout_marginBottom="@dimen/dimen_10dp"
         android:text=""
-        android:textColor="@android:color/holo_red_dark"
+        android:textColor="?colorError"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/activity_login_forgot_password"
         app:layout_constraintEnd_toEndOf="parent"
@@ -130,6 +124,7 @@
         app:layout_constraintTop_toBottomOf="@+id/activity_login_password_layout" />
 
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         android:id="@+id/activity_register_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -137,12 +132,12 @@
         android:gravity="end"
         android:paddingTop="@dimen/dimen_16dp"
         android:text="@string/no_account"
-        android:textColor="@color/text_primary"
         app:layout_constraintStart_toStartOf="@id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_button_login"
         tools:ignore="MissingConstraints" />
 
     <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
         android:id="@+id/activity_register_now"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -152,7 +147,6 @@
         android:paddingStart="@dimen/dimen_16dp"
         android:paddingEnd="@dimen/dimen_16dp"
         android:text="@string/create_new_account"
-        android:textColor="@color/text_primary"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/activity_register_label"
         app:layout_constraintTop_toBottomOf="@+id/activity_login_button_login"

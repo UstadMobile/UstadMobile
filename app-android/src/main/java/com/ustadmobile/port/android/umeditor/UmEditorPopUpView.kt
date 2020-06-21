@@ -170,11 +170,11 @@ class UmEditorPopUpView
         private fun changeState(formatIcon: ImageView,
                                 formatHolder: RelativeLayout, formatTile: TextView, isActivated: Boolean) {
             formatIcon.setColorFilter(ContextCompat.getColor(activity,
-                    if (isActivated) R.color.icons else R.color.text_primary))
+                    if (isActivated) R.color.primaryTextColor else R.color.secondaryTextColor))
             formatTile.setTextColor(ContextCompat.getColor(activity,
-                    if (isActivated) R.color.icons else R.color.text_primary))
+                    if (isActivated) R.color.primaryTextColor else R.color.secondaryTextColor))
             formatHolder.setBackgroundColor(ContextCompat.getColor(activity,
-                    if (isActivated) R.color.content_icon_active else R.color.icons))
+                    if (isActivated) R.color.iconTintColor else R.color.primaryTextColor))
         }
 
         @NonNull

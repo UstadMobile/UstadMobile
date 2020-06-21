@@ -83,7 +83,7 @@ class ClazzLogListAttendanceFragmentTest {
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
             bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
-                themeResId = R.style.Theme_UstadTheme
+                themeResId = R.style.UmTheme_App
         ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
@@ -120,14 +120,15 @@ class ClazzLogListAttendanceFragmentTest {
             ClazzLog().apply {
                 logDate = timeRange.first + (index * oneDayInMs) + (1000 * 60 * 60 * 8)
                 clazzLogNumAbsent = if(index.rem(2) == 0) 2 else 4
-                clazzLogNumPresent = numInClazz - clazzLogNumAbsent
+                clazzLogNumPartial = if(index.rem(2) == 0) 1 else 2
+                clazzLogNumPresent = numInClazz - (clazzLogNumAbsent + clazzLogNumPartial)
                 clazzLogStatusFlag = ClazzLog.STATUS_RECORDED
             }
         } }
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
                 bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()),
-                themeResId = R.style.Theme_UstadTheme
+                themeResId = R.style.UmTheme_App
         ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {

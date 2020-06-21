@@ -123,7 +123,6 @@ android {
         }
 
         release {
-            testCoverageEnabled = true
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -158,6 +157,7 @@ dependencies {
 
     implementation "com.github.aakira:napier-android:$version_napier"
     implementation "com.github.aakira:napier:$version_napier"
+    implementation "com.google.android.material:material:$version_android_material"
 
     implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
 

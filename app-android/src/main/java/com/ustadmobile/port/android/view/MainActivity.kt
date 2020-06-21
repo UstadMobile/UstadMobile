@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
@@ -14,7 +13,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
@@ -24,6 +22,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -36,14 +35,10 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var mBinding: ActivityMainBinding
 
-    private lateinit var mAppBar: AppBarLayout
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
-        mAppBar = mBinding.appBar
-        setSupportActionBar(mBinding.activityMainToolbar)
+        setSupportActionBar(mBinding.root.toolbar)
 
         val host: NavHostFragment = supportFragmentManager
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
@@ -61,7 +56,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
                                       arguments: Bundle?) {
         invalidateOptionsMenu()
-        appBar.setExpanded(true)
+        mBinding.root.appbar.setExpanded(true)
 
         val layoutParams = (mBinding.bottomNavView.layoutParams as? CoordinatorLayout.LayoutParams)
         val bottomNavBehavior = layoutParams?.behavior as? HideBottomViewOnScrollBehavior

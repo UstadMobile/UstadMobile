@@ -14,40 +14,11 @@
         android:orientation="vertical"
         android:id="@+id/container_relative_layout">
 
-        <!-- Not using import here as we need the animate layout changes only for showing
-         / hiding the toolbar -->
-        <com.google.android.material.appbar.AppBarLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
+        <include
             android:id="@+id/appbar"
-            android:elevation="@dimen/dimen_4dp"
-            android:animateLayoutChanges="true"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/um_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
-
-
-            <ProgressBar
-                android:visibility="gone"
-                android:progressDrawable="@drawable/progress_bar_drawable"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:id="@+id/progressBar"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_4dp" />
-
-        </com.google.android.material.appbar.AppBarLayout>
+            layout="@layout/appbar_material_with_progress"/>
 
         <androidx.viewpager.widget.ViewPager
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/container_epubrunner_pager"
             android:layout_below="@+id/appbar"
             android:layout_alignParentBottom="true"
@@ -57,17 +28,12 @@
 
 
     <com.google.android.material.navigation.NavigationView
-        android:elevation="@dimen/default_margin_dimension"
+        android:elevation="@dimen/dimen_16dp"
         android:id="@+id/activity_basepoint_navigationview"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:layout_gravity="end"
-        app:itemIconTint="@color/basepoint_navigation_drawer_tint"
-        android:background="@android:color/white"
-        >
-
-        <!-- // had app:headerLayout="@layout/item_basepoint_header_view"
-        -->
+        app:itemIconTint="?colorOnIconTint">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -78,7 +44,7 @@
                 android:id="@+id/item_basepoint_cover_header_area"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/primary">
+                android:background="?colorPrimaryBackground">
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/item_basepoint_cover_img"
@@ -92,39 +58,27 @@
 
                 <TextView
                     android:id="@+id/item_basepoint_cover_title"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                    android:textColor="@color/primary_text"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
+                    android:textColor="?colorSelectedTabText"
                     android:layout_toEndOf="@+id/item_basepoint_cover_img"
-                    android:layout_toRightOf="@+id/item_basepoint_cover_img"
                     android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
                 <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_container_epubpager_auuthor_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textStyle="italic"
-                    android:textColor="@color/primary_text"
+                    android:textColor="?colorSelectedTabText"
                     android:layout_toEndOf="@+id/item_basepoint_cover_img"
-                    android:layout_toRightOf="@+id/item_basepoint_cover_img"
                     android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
                     android:layout_below="@+id/item_basepoint_cover_title"
                     />
 
 
             </RelativeLayout>
-
-
-
-            <!--
-            <include android:id="@+id/item_basepoint_header_inc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                layout="@layout/item_basepoint_header_view"/>
-            -->
 
             <ScrollView
                 android:layout_below="@id/item_basepoint_cover_header_area"
@@ -134,7 +88,7 @@
 
                 <com.ustadmobile.port.android.view.TocListView
                     android:showDividers="middle"
-                    android:divider="@color/divider"
+                    android:divider="?android:listDivider"
                     android:animateLayoutChanges="true"
                     android:orientation="vertical"
                     android:id="@+id/activity_container_epubpager_toclist"

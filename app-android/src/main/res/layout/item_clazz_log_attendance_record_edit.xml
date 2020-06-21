@@ -26,29 +26,29 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_clazzlog_detail_student_person_icon"
             app:personPicturePersonUid="@{clazzLogAttendanceRecordWithPerson.person.personUid}"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
-            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             />
 
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_clazzlog_detail_student_name"
             android:text="@{PersonExtKt.personFullName(clazzLogAttendanceRecordWithPerson.person)}"
             tools:text="Student Name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_marginTop="19dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
             android:singleLine="false"
             android:maxLines="2"
-            android:textColor="@color/text_primary"
             app:layout_constraintStart_toEndOf="@+id/item_clazzlog_detail_student_person_icon"
             app:layout_constraintTop_toTopOf="parent" />
         
@@ -69,6 +69,7 @@
                 android:contentDescription="@string/present"
                 style="@style/Widget.App.Button.OutlinedButton.IconOnly"
                 app:icon="@drawable/ic_check_black_24dp"
+                app:iconTint="?colorOnIconTint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
@@ -77,12 +78,14 @@
                 android:contentDescription="@string/absent"
                 style="@style/Widget.App.Button.OutlinedButton.IconOnly"
                 app:icon="@drawable/ic_close_black_24dp"
+                app:iconTint="?colorOnIconTint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/late_button"
                 android:contentDescription="@string/partial"
+                app:iconTint="?colorOnIconTint"
                 style="@style/Widget.App.Button.OutlinedButton.IconOnly"
                 app:icon="@drawable/ic_delay"
                 android:layout_width="wrap_content"

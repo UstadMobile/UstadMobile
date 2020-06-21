@@ -70,6 +70,8 @@ open class ClazzLog()  {
         const val STATUS_RECORDED = 4
 
         const val STATUS_RESCHEDULED = 8
+
+        const val STATUS_INACTIVE = 16
     }
 
 

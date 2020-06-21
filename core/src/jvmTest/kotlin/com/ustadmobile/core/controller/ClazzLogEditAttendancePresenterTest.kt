@@ -1,19 +1,26 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.hours
 import com.ustadmobile.core.db.waitForLiveData
+import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.util.SystemImplRule
 import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.ext.waitUntil
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import com.ustadmobile.util.test.ext.insertTestClazzLog
 import com.ustadmobile.util.test.ext.insertTestRecordsForClazzLog
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -91,6 +98,70 @@ class ClazzLogEditAttendancePresenterTest {
             assertEquals("Got expected number of class members", 5,
                     testClazzAndMembers.studentList.size)
         }
+    }
+
+    @Test
+    fun givenExistingClazzLoaded_whenUserSelectsNextClazzDay_currentValuesAreSavedAndNextDayIsDisplayed() {
+        val testClazzAndMembers = runBlocking { clientDbRule.db.insertTestClazzAndMembers(
+                5, 1, (DateTime.now() - 36.hours).unixMillisLong) }
+        val testClazzLog = runBlocking { clientDbRule.db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
+        val prevTestClazzLog = ClazzLog().apply {
+            logDate = System.currentTimeMillis() - 12.hours.millisecondsLong
+            clazzLogClazzUid = testClazzAndMembers.clazz.clazzUid
+            clazzLogUid = clientDbRule.db.clazzLogDao.insert(this)
+        }
+
+        val testAttendanceLogs = runBlocking {
+            clientDbRule.db.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
+                    testClazzAndMembers.studentList)
+        }
+
+        val presenter = ClazzLogEditAttendancePresenter(context,
+                mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
+                mockLifecycleOwner, systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
+                clientDbRule.accountLiveData)
+
+        presenter.onCreate(null)
+
+        //wait for loading to finish
+        verify(mockView, timeout(5000)).loading = false
+
+        val clazzLogAttendanceRecordLiveData = nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().run {
+            verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = capture()
+            firstValue
+        }
+
+        val initialViewOnEntity = mockView.captureLastEntityValue()
+
+        clazzLogAttendanceRecordLiveData!!.setVal(clazzLogAttendanceRecordLiveData!!.getValue()!!.map {
+            it.apply {
+                attendanceStatus = STATUS_ATTENDED
+            }
+        })
+
+        presenter.handleSelectClazzLog(initialViewOnEntity!!, prevTestClazzLog)
+
+        //wait for items to be reset on the view
+        runBlocking { clazzLogAttendanceRecordLiveData.waitUntil { it.all { it.attendanceStatus == 0 } } }
+
+        //wait for items from previous log to be saved
+        runBlocking {
+            clientDbRule.db.waitUntil(5000, listOf("ClazzLogAttendanceRecord")) {
+                clientDbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid).size ==
+                        testClazzAndMembers.studentList.size
+            }
+        }
+
+        Assert.assertTrue("After selecting a different clazz log day, attendance records are reloaded",
+                clazzLogAttendanceRecordLiveData.getValue()!!.all { it.attendanceStatus == 0 })
+        Assert.assertEquals("After selecting a different clazz log day, same number of student records are loaded",
+                testClazzAndMembers.studentList.size, clazzLogAttendanceRecordLiveData.getValue()!!.size)
+
+        val clazzLog1AttendanceRecords = clientDbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid)
+        Assert.assertEquals("Previous clazz log was recorded",  testClazzAndMembers.studentList.size,
+                clazzLog1AttendanceRecords.size)
+        Assert.assertTrue("Previous clazz log attendance records show all students aremarked present",
+            clazzLog1AttendanceRecords.all { it.attendanceStatus == STATUS_ATTENDED})
     }
 
     @Test

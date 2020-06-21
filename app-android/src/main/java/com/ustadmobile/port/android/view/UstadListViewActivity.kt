@@ -13,7 +13,7 @@ abstract class UstadListViewActivity() : UstadBaseActivity(), UstadListViewActiv
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_listfragment_holder)
-        setSupportActionBar(findViewById(R.id.activity_listfragment_toolbar))
+        setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
     }

@@ -6,7 +6,6 @@
         android:icon="@drawable/ic_settings_white_24dp"
         android:title="@string/done"
         android:visible="true"
-        android:iconTint="@color/icons"
         app:showAsAction="always"/>
 
 

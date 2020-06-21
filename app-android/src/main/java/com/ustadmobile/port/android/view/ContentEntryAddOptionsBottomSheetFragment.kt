@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ContentEntryAddOptionsView
@@ -20,10 +21,7 @@ import kotlinx.android.synthetic.main.fragment_content_entry_add_options.view.*
  * CONTENT_CREATE_CONTENT = create content from out content editor
  */
 
-class ContentEntryAddOptionsBottomSheetFragment : UstadBottomSheetFragment(), ContentEntryAddOptionsView, View.OnClickListener {
-
-    override val viewContext: Any
-        get() = requireContext()
+class ContentEntryAddOptionsBottomSheetFragment : BottomSheetDialogFragment(), ContentEntryAddOptionsView, View.OnClickListener {
 
 
     private var createFolderOptionView: View? = null

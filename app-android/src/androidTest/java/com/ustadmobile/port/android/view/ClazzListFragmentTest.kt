@@ -49,7 +49,7 @@ class ClazzListFragmentTest  {
         }
 
         val fragmentScenario = launchFragmentInContainer<ClazzList2Fragment>(
-            bundleOf(), themeResId = R.style.Theme_UstadTheme
+            bundleOf(), themeResId = R.style.UmTheme_App
         ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
         fragmentScenario.onFragment {

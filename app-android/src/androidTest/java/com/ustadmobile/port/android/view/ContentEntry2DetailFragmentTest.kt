@@ -23,6 +23,7 @@ import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withDataBindingIdlingResource
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
 import junit.framework.Assert
+import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -46,7 +47,7 @@ class ContentEntry2DetailFragmentTest {
     @Rule
     val adbScreenRecordRule = AdbScreenRecordRule()
 
-    lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
+    private lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
     @AdbScreenRecord("Given content entry exists should show user selected content entry")
     @Test
@@ -59,7 +60,7 @@ class ContentEntry2DetailFragmentTest {
             contentEntryUid = dbRule.db.contentEntryDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
             ContentEntry2DetailFragment().also {fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
@@ -85,7 +86,7 @@ class ContentEntry2DetailFragmentTest {
             dbRule.db.insertContentEntryWithTranslations(totalTranslations,parentUid)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
             ContentEntry2DetailFragment().also {fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
@@ -114,7 +115,7 @@ class ContentEntry2DetailFragmentTest {
             dbRule.db.insertContentEntryWithTranslations(totalTranslations,parentUid)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
             ContentEntry2DetailFragment().also {fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
@@ -124,6 +125,7 @@ class ContentEntry2DetailFragmentTest {
             }
         }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
 
+        sleep(1000)
 
         onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
 
@@ -132,7 +134,7 @@ class ContentEntry2DetailFragmentTest {
         onView(withId(R.id.availableTranslationView))
                 .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click()))
 
-        Assert.assertEquals("After clicking on item, it navigates to translated detail view",
+        assertEquals("After clicking on item, it navigates to translated detail view",
                 R.id.content_entry_details_dest, systemImplNavRule.navController.currentDestination?.id)
 
         IdlingRegistry.getInstance().unregister(fragmentIdlingResource)

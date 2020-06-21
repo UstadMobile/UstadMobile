@@ -6,7 +6,6 @@
     android:id="@+id/bottom_sheet_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/icons"
     android:clipToPadding="true"
     app:behavior_hideable="true"
     app:behavior_peekHeight="0dp"
@@ -23,26 +22,25 @@
                 android:id="@+id/content_types_tabs"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
-                style="@style/TabLayoutStyleFormat"/>
-            <ImageView
+                android:layout_height="@dimen/dimen_60dp"/>
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/action_close_tab_formats"
-                android:tint="@color/secondary_text"
+                android:tint="?colorOnIconTint"
                 android:layout_marginStart="@dimen/dimen_16dp"
-                android:src="@drawable/ic_expand_more_black_24dp"
+                app:srcCompat="@drawable/ic_expand_more_black_24dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 android:layout_gravity="center_vertical"
                 android:layout_width="@dimen/dimen_30dp"
                 android:layout_height="@dimen/dimen_30dp" />
         </LinearLayout>
         <View
-            android:background="@color/divider_faint"
+            android:background="?android:listDivider"
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="@dimen/dimen_1dp"/>
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/content_types_viewpager"
             android:layout_width="match_parent"
-            android:layout_height="150dp"/>
+            android:layout_height="@dimen/dimen_150dp"/>
     </LinearLayout>
 
 
