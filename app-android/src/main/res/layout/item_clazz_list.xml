@@ -35,7 +35,6 @@
             android:layout_marginBottom="@dimen/dimen_8dp"
             android:text="@{clazz.clazzName}"
             android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
-            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Class Name" />
