@@ -115,7 +115,7 @@ class ReportDetailFragmentTest(val report: Report){
                 chartType = Report.LINE_GRAPH
                 yAxis = Report.SCORE
                 xAxis = Report.MONTH
-                subGroup = Report.WEEK
+                subGroup = Report.CONTENT_ENTRY
                 fromDate = DateTime(2019, 4, 10).unixMillisLong
                 toDate = DateTime(2019, 6, 11).unixMillisLong
             })
