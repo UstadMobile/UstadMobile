@@ -151,8 +151,8 @@ class ListStatusRecyclerViewAdapterTest {
 
     @Test
     fun givenRepoLoading_whenDisplayed_thenShouldShowFirstItemAndLoading() {
-        Assume.assumeTrue("Display of progress indicator test requires SDK > 22",
-            Build.VERSION.SDK_INT > 22)
+        Assume.assumeTrue("Display of progress indicator test requires SDK > 24",
+            Build.VERSION.SDK_INT > 24)
         val person = Person().apply {
             firstNames = "Test Entity"
             lastName = "McLast"
