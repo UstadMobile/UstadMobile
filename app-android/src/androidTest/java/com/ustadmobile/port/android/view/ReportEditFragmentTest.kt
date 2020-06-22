@@ -48,7 +48,7 @@ class ReportEditFragmentTest {
     @AdbScreenRecord("with no report present, fill all the fields and navigate to detail")
     @Test
     fun givenNoReportPresentYet_whenFilledInAndSaveClicked_thenShouldNavigateToDetailScreen() {
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme) {
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
             ReportEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
@@ -124,7 +124,7 @@ class ReportEditFragmentTest {
             reportUid = dbRule.db.reportDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingReport.reportUid)) {
             ReportEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)

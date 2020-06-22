@@ -21,7 +21,8 @@ import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.util.test.AbstractXapiReportOptionsTest
+import com.ustadmobile.util.test.ext.insertTestStatements
+import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert
 import org.junit.Before
@@ -29,7 +30,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @AdbScreenRecord("Report list screen test")
-class ReportListFragmentTest : AbstractXapiReportOptionsTest() {
+class ReportListFragmentTest{
 
     @JvmField
     @Rule
@@ -47,7 +48,9 @@ class ReportListFragmentTest : AbstractXapiReportOptionsTest() {
 
     @Before
     fun setup(){
-        insertXapi(dbRule.db)
+        runBlocking {
+            dbRule.db.insertTestStatements()
+        }
     }
 
     @AdbScreenRecord("given report in list, when clicked, go to detail report")
@@ -63,7 +66,7 @@ class ReportListFragmentTest : AbstractXapiReportOptionsTest() {
             reportUid = dbRule.db.reportDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf()) {
             ReportListFragment().also {
                 it.installNavController(systemImplNavRule.navController)

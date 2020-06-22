@@ -15,12 +15,11 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
-import com.ustadmobile.test.rules.SystemImplTestNavHostRule
-import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -47,7 +46,11 @@ class ReportDetailFragmentTest(val report: Report){
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
@@ -64,14 +67,15 @@ class ReportDetailFragmentTest(val report: Report){
     fun givenReportExists_whenLaunched_thenShouldShowReport() {
         val reportUid = dbRule.db.reportDao.insert(report)
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(ARG_ENTITY_UID to reportUid)) {
             ReportDetailFragment().also {
                 it.installNavController(systemImplNavRule.navController)
                 fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(it)
                 IdlingRegistry.getInstance().register(fragmentIdlingResource)
             }
-        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         onView(withId(R.id.fragment_detail_report_list)).check(matches(isDisplayed()))
 
