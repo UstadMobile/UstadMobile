@@ -5,35 +5,34 @@ import android.os.Handler
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
-import androidx.databinding.DataBindingUtil
-import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.testing.FragmentScenario
+import androidx.lifecycle.Lifecycle
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingResource
+import com.ustadmobile.port.android.view.UstadDetailFragment
+import com.ustadmobile.port.android.view.UstadEditFragment
 import com.ustadmobile.test.rules.ScenarioIdlingResource
-import java.util.UUID
+import java.util.*
 
 /**
- * An espresso idling resource implementation that reports idle status for all data binding
- * layouts. Data Binding uses a mechanism to post messages which Espresso doesn't track yet.
- *
- * Since this application runs UI tests at the fragment layer, this relies on implementations
- * calling [monitorFragment] with a [FragmentScenario], thereby monitoring all bindings in that
- * fragment and any child views.
+ * Note: There is a lot of overlap between this and DataBindingIdlingResource. DataBindingIdlingResource
+ * closely tracks example repositories from Google. That is why there is no common parent class
+ * between the two.
  */
-//Originally from:
-// https://github.com/android/architecture-components-samples/blob/master/GithubBrowserSample/app/src/androidTest/java/com/android/example/github/util/DataBindingIdlingResource.kt
-
-//See also (for activity) https://github.com/googlecodelabs/android-testing/blob/codelab2019/app/src/sharedTest/java/com/example/android/architecture/blueprints/todoapp/util/DataBindingIdlingResource.kt
-
-class DataBindingIdlingResource : IdlingResource, ScenarioIdlingResource {
+class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     // list of registered callbacks
     private val idlingCallbacks = mutableListOf<IdlingResource.ResourceCallback>()
+
     // give it a unique id to workaround an espresso bug where you cannot register/unregister
     // an idling resource w/ the same name.
     private val id = UUID.randomUUID().toString()
+
     // holds whether isIdle is called and the result was false. We track this to avoid calling
     // onTransitionToIdle callbacks if Espresso never thought we were idle in the first place.
     private var wasNotIdle = false
@@ -56,8 +55,8 @@ class DataBindingIdlingResource : IdlingResource, ScenarioIdlingResource {
     }
 
     override fun isIdleNow(): Boolean {
-        val idle = !getBindings().any { it.hasPendingBindings() }
-        @Suppress("LiftReturnOrAssignment")
+        val idle = getFragments().all { it.isIdle() }
+
         if (idle) {
             if (wasNotIdle) {
                 // notify observers to avoid espresso race detector
@@ -84,43 +83,76 @@ class DataBindingIdlingResource : IdlingResource, ScenarioIdlingResource {
                     }, 16)
                 }
             }else {
-                throw IllegalStateException("DataBindingIdlingResource is not connected to any " +
+                throw IllegalStateException("CrudIdlingResource is not connected to any " +
                         "fragment or activity scenario! If you are using a test @Rule, please " +
                         "make sure to call monitorFragment or monitorActivity **BEFORE** any Espresso" +
                         "onView or onIdle call")
             }
         }
+
         return idle
+    }
+
+    fun getFragments(): List<Fragment> {
+        val fragments = mutableListOf<Fragment>()
+        fragmentScenario?.onFragment {
+            fragments += it.flattenHierachy()
+        }
+
+        activityScenario?.onActivity {
+            val activityFragments = (it as? FragmentActivity)?.supportFragmentManager
+                    ?.fragments ?: listOf()
+            activityFragments += activityFragments.flatMap { it.flattenHierachy() }
+        }
+
+        return fragments
+    }
+
+    private fun Fragment.flattenHierachy(): List<Fragment> {
+        return listOf(this) + childFragmentManager.fragments.mapNotNull { it.flattenHierachy() }.flatten()
+    }
+
+    fun Fragment.isIdle(): Boolean {
+        //if the fragment view is not currently live, it doesn't matter
+        if(!this.viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+            return true
+
+        if(this is UstadEditFragment<*> && (this.entity == null || this.loading || !this.fieldsEnabled)) {
+            return false
+        }
+
+        if(this is UstadDetailFragment<*> && (this.entity == null || this.loading)) {
+            return false
+        }
+
+        //look for recyclerviews
+        if(this.view?.flattenHierarchy()?.any { (it as? RecyclerView)?.isIdle() == false } ?: false) {
+            return false
+        }
+
+        return true
     }
 
     override fun registerIdleTransitionCallback(callback: IdlingResource.ResourceCallback) {
         idlingCallbacks.add(callback)
     }
 
-    /**
-     * Find all binding classes in all currently available fragments.
-     */
-    private fun getBindings(): List<ViewDataBinding> {
-        val bindings = mutableListOf<ViewDataBinding>()
-        fragmentScenario?.onFragment { fragment ->
-            bindings += fragment.viewBindings()
-        }
+    private fun RecyclerView.isIdle() : Boolean{
+        if(hasPendingAdapterUpdates())
+            return false
 
-        activityScenario?.onActivity {
-            val fragments = (it as? FragmentActivity)?.supportFragmentManager
-                    ?.fragments ?: listOf()
-            bindings += fragments.flatMap { it.viewBindings() }
-        }
+        val adapterVal = adapter ?: return false
 
-        return bindings
+        val adapters = if(adapterVal is MergeAdapter) adapterVal.adapters else listOf(adapterVal)
+        return adapters.all { it.isIdle() }
     }
 
-    private fun Fragment.viewBindings(): List<ViewDataBinding> {
-        val bindings = view?.flattenHierarchy()?.mapNotNull { view ->
-            DataBindingUtil.getBinding<ViewDataBinding>(view)
-        } ?: listOf()
-        val childBindings = childFragmentManager.fragments.flatMap { it.viewBindings() }
-        return bindings + childBindings
+    private fun RecyclerView.Adapter<*>.isIdle() : Boolean {
+        if(this is PagedListAdapter<*, *> && this.currentList == null) {
+            return false
+        }
+
+        return true
     }
 
     private fun View.flattenHierarchy(): List<View> = if (this is ViewGroup) {

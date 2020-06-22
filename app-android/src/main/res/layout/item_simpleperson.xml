@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- This is actually used by ListStatusRecyclerViewAdapterTest -->
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
@@ -12,8 +13,10 @@
     <TextView
         android:tag="@{person.personUid}"
         android:text="@{person.lastName}"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_margin="@dimen/dimen_8dp"
+        tools:text="Person Name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
     </TextView>
 </layout>

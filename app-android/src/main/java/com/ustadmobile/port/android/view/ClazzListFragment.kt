@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
@@ -71,18 +70,4 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
 
-    companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzWithNumStudents> = object
-            : DiffUtil.ItemCallback<ClazzWithNumStudents>() {
-            override fun areItemsTheSame(oldItem: ClazzWithNumStudents,
-                                         newItem: ClazzWithNumStudents): Boolean {
-                return oldItem.clazzUid == newItem.clazzUid
-            }
-
-            override fun areContentsTheSame(oldItem: ClazzWithNumStudents,
-                                            newItem: ClazzWithNumStudents): Boolean {
-                return oldItem == newItem
-            }
-        }
-    }
 }

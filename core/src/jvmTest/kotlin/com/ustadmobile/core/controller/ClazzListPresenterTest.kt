@@ -104,7 +104,7 @@ class ClazzListPresenterTest {
         mockView.waitForListToBeSet()
 
 
-        presenter.handleClickEntry(testEntity)
+        presenter.onClickClazz(testEntity)
 
         verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ClazzDetailView.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())), any())
