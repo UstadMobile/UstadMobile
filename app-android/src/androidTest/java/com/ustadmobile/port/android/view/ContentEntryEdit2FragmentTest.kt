@@ -20,14 +20,13 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
-import com.ustadmobile.test.rules.SystemImplTestNavHostRule
-import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.rules.*
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.not
 import org.junit.Assert
@@ -49,7 +48,12 @@ class ContentEntryEdit2FragmentTest  {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+
 
     @JvmField
     @Rule
@@ -67,7 +71,8 @@ class ContentEntryEdit2FragmentTest  {
             ContentEntryEdit2Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         //wait for the fragment to be ready since we are waiting on onViewCreated to create a presenter
         sleep(1000)
@@ -128,7 +133,8 @@ class ContentEntryEdit2FragmentTest  {
             } }) { onFragment { fragment ->
                 fragment.handleFileSelection()
             }
-        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         //wait for the fragment to be ready since we are waiting on onViewCreated to create a presenter
         sleep(1000)

@@ -24,8 +24,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions.Companion.childOfViewAtPositionWithMatcher
@@ -45,7 +47,11 @@ class ClazzLogListAttendanceFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @JvmField
     @Rule
@@ -84,7 +90,8 @@ class ClazzLogListAttendanceFragmentTest {
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
             bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
                 themeResId = R.style.UmTheme_App
-        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             recyclerViewIdlingResource.recyclerView = it.mDataBinding!!.fragmentListRecyclerview
@@ -129,7 +136,8 @@ class ClazzLogListAttendanceFragmentTest {
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogListAttendanceFragment>(
                 bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()),
                 themeResId = R.style.UmTheme_App
-        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), navController)

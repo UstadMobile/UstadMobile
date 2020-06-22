@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingResource
+import com.ustadmobile.test.rules.ScenarioIdlingResource
 import java.util.UUID
 
 /**
@@ -27,7 +28,7 @@ import java.util.UUID
 
 //See also (for activity) https://github.com/googlecodelabs/android-testing/blob/codelab2019/app/src/sharedTest/java/com/example/android/architecture/blueprints/todoapp/util/DataBindingIdlingResource.kt
 
-class DataBindingIdlingResource : IdlingResource {
+class DataBindingIdlingResource : IdlingResource, ScenarioIdlingResource {
     // list of registered callbacks
     private val idlingCallbacks = mutableListOf<IdlingResource.ResourceCallback>()
     // give it a unique id to workaround an espresso bug where you cannot register/unregister
@@ -46,11 +47,11 @@ class DataBindingIdlingResource : IdlingResource {
     /**
      * Sets the fragment from a [FragmentScenario] to be used from [DataBindingIdlingResource].
      */
-    fun monitorFragment(fragmentScenario: FragmentScenario<out Fragment>) {
+    override fun monitorFragment(fragmentScenario: FragmentScenario<out Fragment>?) {
         this.fragmentScenario = fragmentScenario
     }
 
-    fun monitorActivity(activityScenario: ActivityScenario<out Activity>) {
+    override fun monitorActivity(activityScenario: ActivityScenario<out Activity>?) {
         this.activityScenario = activityScenario
     }
 

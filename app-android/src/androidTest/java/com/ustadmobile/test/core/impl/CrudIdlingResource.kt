@@ -17,6 +17,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingResource
 import com.ustadmobile.port.android.view.UstadDetailFragment
 import com.ustadmobile.port.android.view.UstadEditFragment
+import com.ustadmobile.test.rules.ScenarioIdlingResource
 import java.util.*
 
 /**
@@ -24,7 +25,7 @@ import java.util.*
  * closely tracks example repositories from Google. That is why there is no common parent class
  * between the two.
  */
-class CrudIdlingResource : IdlingResource {
+class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     // list of registered callbacks
     private val idlingCallbacks = mutableListOf<IdlingResource.ResourceCallback>()
 
@@ -45,11 +46,11 @@ class CrudIdlingResource : IdlingResource {
     /**
      * Sets the fragment from a [FragmentScenario] to be used from [DataBindingIdlingResource].
      */
-    fun monitorFragment(fragmentScenario: FragmentScenario<out Fragment>) {
+    override fun monitorFragment(fragmentScenario: FragmentScenario<out Fragment>?) {
         this.fragmentScenario = fragmentScenario
     }
 
-    fun monitorActivity(activityScenario: ActivityScenario<out Activity>) {
+    override fun monitorActivity(activityScenario: ActivityScenario<out Activity>?) {
         this.activityScenario = activityScenario
     }
 

@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -18,9 +17,8 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
-import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.rules.*
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
@@ -41,7 +39,11 @@ class ClazzEndToEndTests {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @AdbScreenRecord("Given an empty class list, when the user clicks add class and fills in form, then the new class is shown in list")
     @Test
@@ -51,11 +53,8 @@ class ClazzEndToEndTests {
         })
 
         val activityScenario = launchActivity<MainActivity>()
-                .withDataBindingIdlingResource(dataBindingIdlingResourceRule)
-
-        val crudIdlingResource = CrudIdlingResource()
-        crudIdlingResource.monitorActivity(activityScenario)
-        IdlingRegistry.getInstance().register(crudIdlingResource)
+                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         onView(withId(R.id.home_clazzlist_dest)).perform(click())
         onView(withText(R.string.clazz)).perform(click())
