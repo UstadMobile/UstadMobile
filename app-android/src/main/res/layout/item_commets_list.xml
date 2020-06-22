@@ -21,12 +21,12 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_comments_list_newitemicon"
             app:personPicturePersonUid="@{commentwithperson.commentsPerson.personUid}"
-            android:layout_width="@dimen/list_twoline1_imagesize"
-            android:layout_height="@dimen/list_twoline1_imagesize"
-            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
-            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             />
@@ -34,27 +34,22 @@
         <!-- Line 1-->
         <TextView
             android:id="@+id/item_comments_list_text"
-            android:text='@{commentwithperson.commentsPerson.fullName()}'
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            android:text='@{commentwithperson.commentsPerson.fullName()}'
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="@dimen/list_twoline1_margin_text_start"
-            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
-            android:textSize="@dimen/list_twoline1_textsize_line1"
-            tools:text="Bob Dylan"
-            android:textColor="@color/text_primary"
-            />
+            app:layout_constraintStart_toEndOf="@+id/item_comments_list_newitemicon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Bob Dylan" />
 
         <!-- Line 2-->
         <TextView
             android:id="@+id/item_comments_list_line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
+            android:layout_marginBottom="@dimen/dimen_16dp"
             android:text="@{commentwithperson.commentsText}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/item_comments_list_line3_text"
@@ -67,7 +62,7 @@
             android:id="@+id/item_comments_list_line3_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
             app:dateTimeLongString="@{commentwithperson.commentsDateTimeAdded}"
             app:layout_constraintBottom_toTopOf="@+id/item_comments_list_line2_text"
             app:layout_constraintEnd_toEndOf="parent"

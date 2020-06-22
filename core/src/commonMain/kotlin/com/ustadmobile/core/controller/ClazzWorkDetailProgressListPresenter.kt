@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
+import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -65,13 +66,14 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     }
 
     override fun handleClickEntry(entry: ClazzMemberWithClazzWorkProgress) {
-        //TODO:
+
         val clazzMemberUid = entry.mClazzMember?.clazzMemberUid?:0L
         val clazzWorkUid = filterByClazzWorkUid
-        /*
-        systemImpl.go(ClazzWorkMarkingView.VIEW_NAME, mapOf(UstadView.ARG_ENTITY_UID to
-            entry.mClazzWorkSubmission.clazzWorkSubmissionUid.toString()), context)
-        */
+
+        systemImpl.go(ClazzWorkSubmissionMarkingView.VIEW_NAME, mapOf(UstadView.ARG_CLAZZWORK_UID to
+            clazzWorkUid.toString(), UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString()),
+                context)
+
         super.handleClickEntry(entry)
     }
 

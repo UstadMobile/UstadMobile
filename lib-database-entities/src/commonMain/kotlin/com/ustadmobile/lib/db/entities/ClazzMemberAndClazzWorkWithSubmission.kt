@@ -10,11 +10,12 @@ import kotlinx.serialization.Serializable
 class ClazzMemberAndClazzWorkWithSubmission : ClazzMember() {
 
     @Embedded
-    var clazzWork : ClazzWorkWithMetrics? = null
+    var clazzWork: ClazzWork? = null
 
     @Embedded
-    var clazzWorkSubmission: ClazzWorkSubmission? = null
+    var submission: ClazzWorkSubmission? = null
 
     @Embedded
-    var clazzWorkSubmissionPerson: Person ? = null
+    var person: Person ? = null
+
 }

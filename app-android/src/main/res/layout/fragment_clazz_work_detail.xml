@@ -43,10 +43,8 @@
 
         <com.google.android.material.tabs.TabLayout
             android:layout_width="match_parent"
-            style="@style/TabLayoutStyleHome"
             android:layout_height="wrap_content"
             android:id="@+id/fragment_clazzwork_detail_tablayout"
-            app:tabTextColor="@color/primary_light"
             android:background="?attr/colorPrimary"
             />
 

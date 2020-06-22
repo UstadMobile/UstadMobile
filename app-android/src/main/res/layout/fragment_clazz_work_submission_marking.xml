@@ -18,30 +18,34 @@
             name="fieldsEnabled"
             type="boolean" />
 
-        <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzWorkSubmissionWithPersonEditFragmentEventHandler" />
-
     </data>
 
 
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/fragment_clazz_work_submission_with_person_edit_edit_scroll"
+        android:id="@+id/fragment_clazz_work_submission_marking_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fragment_clazz_work_submission_with_person_edit_edit_clx"
+            android:id="@+id/fragment_clazz_work_submission_marking_clx"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
 
-            <!-- TODO: Put the actual view for editing ClazzWorkSubmissionWithPerson here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_clazz_work_submission_marking_rv"
+                android:layout_width="match_parent"
+                android:layout_height="500dp"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:itemCount="8" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -4,10 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCommentNewBinding
+import com.ustadmobile.core.controller.NewCommentItemListener
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class NewCommentRecyclerViewAdapter(newCommentHandler: NewCommentHandler? = null,
-                                    hintText: String? = null, commentPublic: Boolean)
+class NewCommentRecyclerViewAdapter(
+        var itemListener: NewCommentItemListener?,
+        hintText: String? = null, commentPublic: Boolean, entityType: Int, eUid: Long,
+        toComment:Long = 0)
     : SingleItemRecyclerViewAdapter<NewCommentRecyclerViewAdapter.NewCommentViewHolder>() {
 
     var hintText: String? = hintText
@@ -16,7 +19,7 @@ class NewCommentRecyclerViewAdapter(newCommentHandler: NewCommentHandler? = null
             viewHolder?.itemBinding?.hintText = value
         }
 
-    var newCommentHandler: NewCommentHandler? = newCommentHandler
+    var newCommentHandler: NewCommentItemListener? = itemListener
         set(value) {
             field = value
             viewHolder?.itemBinding?.mActivity = newCommentHandler
@@ -28,6 +31,24 @@ class NewCommentRecyclerViewAdapter(newCommentHandler: NewCommentHandler? = null
             viewHolder?.itemBinding?.publicComment = value
         }
 
+    var entityTable : Int = entityType
+        set(value){
+            field = value
+            viewHolder?.itemBinding?.entityType = value
+        }
+
+    var entityUid : Long = eUid
+        set(value){
+            field = value
+            viewHolder?.itemBinding?.entityUid = value
+        }
+
+    var commentTo : Long = toComment
+        set(value){
+            field = value
+            viewHolder?.itemBinding?.toComment = value
+        }
+
     class NewCommentViewHolder(var itemBinding: ItemCommentNewBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
@@ -37,15 +58,18 @@ class NewCommentRecyclerViewAdapter(newCommentHandler: NewCommentHandler? = null
         return NewCommentViewHolder(
                 ItemCommentNewBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                    it.mActivity = newCommentHandler
+                    it.mActivity = itemListener
                     it.hintText = hintText
                     it.publicComment = publicMode
+                    it.entityType = entityTable
+                    it.entityUid = entityUid
+                    it.toComment = commentTo
                 })
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        newCommentHandler = null
+        itemListener = null
         viewHolder = null
     }
 

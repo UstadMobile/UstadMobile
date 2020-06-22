@@ -158,5 +158,10 @@
         android:name="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment"
         android:label="ClazzWorkDetailProgressListFragment" />
 
+    <fragment
+        android:id="@+id/clazzworksubmission_marking_edit"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkSubmissionMarkingFragment"
+        android:label="ClazzWorkSubmissionMarkingFragment" />
+
 
 </navigation>

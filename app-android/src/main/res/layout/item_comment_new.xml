@@ -13,8 +13,20 @@
             name="publicComment"
             type="Boolean" />
 
+        <variable
+            name="entityType"
+            type="Integer" />
+
+        <variable
+            name="entityUid"
+            type="Long" />
+
+        <variable
+            name="toComment"
+            type="Long" />
+
         <variable name="mActivity"
-            type="com.ustadmobile.port.android.view.NewCommentHandler" />
+            type="com.ustadmobile.core.controller.NewCommentItemListener" />
 
         <variable name="hintText" type="java.lang.String"/>
 
@@ -29,10 +41,10 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_comment_new_person_icon"
-            android:layout_width="@dimen/list_twoline1_imagesize"
-            android:layout_height="@dimen/list_twoline1_imagesize"
-            android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-            android:layout_marginVertical="@dimen/formitem_margin_vertical"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -43,8 +55,8 @@
             android:id="@+id/item_comment_new_comment_et"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-            android:layout_marginVertical="@dimen/formitem_margin_vertical"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
             android:hint="@{hintText}"
             android:inputType="textCapSentences"
             android:singleLine="true"
@@ -59,11 +71,11 @@
             style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-            android:layout_marginVertical="@dimen/formitem_margin_vertical"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:onClick="@{(view) -> mActivity.addComment(view, commentText, publicComment)}"
+            android:onClick="@{(view) -> mActivity.addComment(entityType, entityUid,  commentText, publicComment, toComment)}"
             android:src="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -258,7 +258,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         contentRecyclerAdapter = ContentEntryList2Fragment.ContentEntryListRecyclerAdapter(null)
 
         quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
-                mPresenter, studentMode)
+                studentMode)
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
         submissionHeadingRecyclerAdapter?.visible = false
@@ -289,12 +289,13 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
 
         //Public comments:
-        newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_class_comment), true
+        newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(mPresenter,
+                requireContext().getString(R.string.add_class_comment), true, ClazzWork.CLAZZ_WORK_TABLE_ID,
+                entity?.clazzWorkUid?:0L, 0
         )
         newPublicCommentRecyclerAdapter?.visible = true
 
-        publicCommentsRecyclerAdapter = CommentsRecyclerAdapter(mPresenter).also {
+        publicCommentsRecyclerAdapter = CommentsRecyclerAdapter().also {
             publicCommentsObserver = PagedListSubmitObserver(it)
         }
 
@@ -302,12 +303,13 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 publicCommentsRecyclerAdapter)
 
         //Private comments section:
-        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_private_comment), false
+        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(mPresenter,
+                requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
+                entity?.clazzWorkUid?:0L, 0
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 
-        privateCommentsRecyclerAdapter = CommentsRecyclerAdapter(mPresenter).also{
+        privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
         privateCommentsMergerRecyclerAdapter = MergeAdapter(newPrivateCommentRecyclerAdapter,
@@ -410,6 +412,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             submissionHeadingRecyclerAdapter?.visible =
                     submissionButtonRecyclerAdapter?.visible?:false
 
+            newPublicCommentRecyclerAdapter?.entityUid = entity?.clazzWorkUid?:0L
+            newPublicCommentRecyclerAdapter?.entityUid = entity?.clazzWorkUid?:0L
+
             if(entity?.clazzWorkCommentsEnabled == false){
                 privateCommentsHeadingRecyclerAdapter?.visible = false
                 newPrivateCommentRecyclerAdapter?.visible = false
@@ -419,7 +424,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }
         }
 
-    //TODO: Content when ready.
     override var clazzWorkContent: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
         get() = field
         set(value) {

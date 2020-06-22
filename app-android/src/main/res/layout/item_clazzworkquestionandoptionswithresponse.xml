@@ -24,11 +24,6 @@
             name="studentMode"
             type="Boolean" />
 
-        <variable name="mPresenter"
-            type="com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter" />
-
-
-
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -46,8 +41,6 @@
             android:layout_marginTop="16dp"
             android:layout_marginHorizontal="24dp"
             android:text="@{clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionText}"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/list_twoline1_textsize_line1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -82,8 +75,8 @@
             android:id="@+id/activity_role_assignment_detail_radio_options"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/form_margin_horizontal"
-            android:layout_marginVertical="@dimen/activity_vertical_margin"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
             android:orientation="vertical"
             android:visibility="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == quizType)?View.VISIBLE:View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"

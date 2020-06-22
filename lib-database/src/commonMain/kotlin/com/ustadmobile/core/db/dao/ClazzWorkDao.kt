@@ -54,7 +54,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
     @Query(FIND_CLAZZMEMBER_AND_SUBMISSION_WITH_PERSON)
     abstract suspend fun findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid: Long,
-                                        clazzMemberUid: Long): ClazzMemberAndClazzWorkWithSubmission
+                                        clazzMemberUid: Long): ClazzMemberAndClazzWorkWithSubmission?
 
     companion object{
 
@@ -102,14 +102,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
         const val FIND_CLAZZMEMBER_AND_SUBMISSION_WITH_PERSON =
                 """
-            SELECT ClazzWork.*, ClazzSubmission.*, ClazzMember.*, Person.*
-             0 as totalStudents, 
-             0 as submittedStudents, 
-             0 as notSubmittedStudents,
-             0 as completedStudents, 
-             0 as markedStudents, 
-             0 as firstContentEntryUid,
-             Clazz.clazzTimeZone as clazzTimeZone 
+            SELECT ClazzWork.*, ClazzWorkSubmission.*, ClazzMember.*, Person.*
              FROM ClazzWork
             LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid = :clazzMemberUid
             LEFT JOIN Person ON Person.personUid = ClazzMember.clazzMemberPersonUid 

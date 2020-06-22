@@ -4,11 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCommetsListBinding
-import com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class CommentsRecyclerAdapter(var presenter: ClazzWorkDetailOverviewPresenter?)
+class CommentsRecyclerAdapter()
     : SelectablePagedListAdapter<CommentsWithPerson,
         CommentsRecyclerAdapter.CommentsWithPersonViewHolder>(ClazzWorkDetailOverviewFragment.DIFF_CALLBACK_COMMENTS) {
 
@@ -28,6 +27,5 @@ class CommentsRecyclerAdapter(var presenter: ClazzWorkDetailOverviewPresenter?)
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        presenter = null
     }
 }

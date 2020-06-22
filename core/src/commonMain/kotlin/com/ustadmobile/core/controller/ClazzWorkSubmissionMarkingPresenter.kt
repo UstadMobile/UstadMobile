@@ -25,10 +25,12 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
               lifecycleOwner: DoorLifecycleOwner,
               systemImpl: UstadMobileSystemImpl,
               db: UmAppDatabase, repo: UmAppDatabase,
-              activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
+              activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData,
+              private val newCommentItemListener: DefaultNewCommentItemListener =
+                      DefaultNewCommentItemListener(db, context))
     : UstadEditPresenter<ClazzWorkSubmissionMarkingView,
         ClazzMemberAndClazzWorkWithSubmission>(context, arguments, view, lifecycleOwner, systemImpl,
-            db, repo, activeAccount) {
+            db, repo, activeAccount), NewCommentItemListener by newCommentItemListener  {
 
     var filterByClazzWorkUid: Long = -1
 
@@ -38,11 +40,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        filterByClazzWorkUid = arguments[UstadView.ARG_CLAZZWORK_UID]?.toLong()?:0
-        val clazzMemberUid = arguments[UstadView.ARG_CLAZZMEMBER_UID]?.toLong()?:0
-
-
-
+        filterByClazzWorkUid = arguments[ARG_CLAZZWORK_UID]?.toLong()?:0
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzMemberAndClazzWorkWithSubmission? {
@@ -138,17 +136,17 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
     override fun handleClickSave(entity: ClazzMemberAndClazzWorkWithSubmission) {
 
         GlobalScope.launch(doorMainDispatcher()) {
-            val submission = entity.clazzWorkSubmission
-            if(submission != null) {
-                repo.clazzWorkSubmissionDao.updateAsync(submission)
+            val submission = entity?.submission
+            //If submission exists
+            if(submission  != null) {
+                if(submission.clazzWorkSubmissionUid != 0L) {
+                    repo.clazzWorkSubmissionDao.updateAsync(submission)
+                }else{
+                    repo.clazzWorkSubmissionDao.insertAsync(submission)
+                }
             }
 
             view.finishWithResult(listOf(entity))
         }
     }
-
-    companion object {
-
-    }
-
 }

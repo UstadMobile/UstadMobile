@@ -10,8 +10,7 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 
-class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
-        var presenter: ClazzWorkDetailOverviewPresenter?, var studentMode: Boolean)
+class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(var studentMode: Boolean)
     : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
         ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter.ClazzWorkQuestionViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
@@ -20,9 +19,9 @@ class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
         : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkQuestionViewHolder {
-        val viewHolder = ClazzWorkQuestionViewHolder(ItemClazzworkquestionandoptionswithresponseBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false))
-        viewHolder.binding.mPresenter = presenter
+        val viewHolder = ClazzWorkQuestionViewHolder(
+                ItemClazzworkquestionandoptionswithresponseBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false))
         viewHolder.binding.freeTextType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
         viewHolder.binding.quizType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
         viewHolder.binding.clazzWorkQuizType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
@@ -34,6 +33,7 @@ class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
         holder.binding.clazzWorkQuestionAndOptionsWithResponse = getItem(position)
         holder.binding.studentMode = studentMode
         holder.itemView.tag = getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
-        holder.binding.itemClazzworkquestionandoptionswithresponseAnswerEt.tag = getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
+        holder.binding.itemClazzworkquestionandoptionswithresponseAnswerEt.tag =
+                getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
     }
 }
