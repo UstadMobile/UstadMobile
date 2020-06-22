@@ -31,24 +31,24 @@
 
         <!-- Line 1-->
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/line1_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="@dimen/list_twoline1_margin_horizontal"
-            android:layout_marginTop="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical"
-            android:layout_marginEnd="@dimen/list_twoline1_margin_horizontal"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:layout_marginBottom="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
             android:text="@{verbEntity.display}"
-            android:textSize="@dimen/list_twoline1_textsize_line1"
             tools:text="Answered"
-            android:textColor="@color/text_primary"
             />
 
         <!-- Line 2-->
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:text="@{@string/id_verbentity_urlid(verbEntity.urlId)}"
             tools:text="www.url.com/longpathhere"
-            android:layout_marginBottom="@dimen/list_twoline1_margin_vertical" />
+            android:layout_marginBottom="@dimen/dimen_8dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

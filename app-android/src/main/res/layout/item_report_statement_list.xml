@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -24,11 +25,13 @@
         android:padding="@dimen/dimen_16dp">
 
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/xapi_person"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/dimen_8dp"
             android:text="@{report.person.fullName()}"
+            tools:text="Person"
             app:layout_constraintEnd_toStartOf="@+id/guideline_person"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -41,9 +44,11 @@
             app:layout_constraintGuide_percent="0.2" />
 
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/xapi_verb"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            tools:text="Did What"
             android:text="@{report.xlangMapEntry.valueLangMap}"
             app:layout_constraintEnd_toStartOf="@+id/guideline_verb"
             app:layout_constraintStart_toEndOf="@id/guideline_person"
@@ -58,9 +63,11 @@
 
 
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/xapi_result"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            tools:text="Result"
             app:textMessageIdLookupKey="@{report.resultSuccess}"
             app:textMessageIdLookupMap="@{StatementConstants.STATEMENT_RESULT_OPTIONS}"
             app:layout_constraintEnd_toStartOf="@+id/guideline_result"
@@ -76,10 +83,12 @@
 
 
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/xapi_when"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:textDate="@{report.timestamp}"
+            tools:text="When"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/guideline_result"
             app:layout_constraintTop_toTopOf="parent" />

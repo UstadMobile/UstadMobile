@@ -8,7 +8,7 @@
 
     <item
         android:id="@+id/report_list_dest"
-        android:icon="@drawable/ic_newspaper"
+        android:icon="@drawable/ic_report"
         android:title="@string/reports" />
 
     <item
