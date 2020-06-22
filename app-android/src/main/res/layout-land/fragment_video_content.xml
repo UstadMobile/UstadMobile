@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="com.ustadmobile.lib.db.entities.ContentEntry" />
+
+        <variable
+            name="entry"
+            type="ContentEntry" />
+
+    </data>
+
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/activity_video_player_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:controller_layout_id="@layout/view_custom_exo_playback_control"
+        app:use_controller="true" />
+
+</layout>

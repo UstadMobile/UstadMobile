@@ -6,8 +6,7 @@ import kotlin.js.JsName
 
 interface VideoPlayerView : UstadView {
 
-    @JsName("setVideoInfo")
-    fun setVideoInfo(result: ContentEntry)
+    var entry: ContentEntry?
 
     @JsName("setVideoParams")
     fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>)

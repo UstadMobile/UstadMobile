@@ -137,5 +137,10 @@
         android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
         android:label="" />
 
+    <fragment
+        android:id="@+id/video_content"
+        android:name="com.ustadmobile.port.android.view.VideoContentFragment"
+        android:label="" />
+
 
 </navigation>

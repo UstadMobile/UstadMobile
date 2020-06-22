@@ -50,56 +50,7 @@ package com.ustadmobile.test.port.android.view
 //        val contentDao = repo.contentEntryDao
 //        val containerDao = repo.containerDao
 //
-//        val spanishQuiz = ContentEntry()
-//        spanishQuiz.contentEntryUid = 14
-//        spanishQuiz.title = "tiempo de prueba"
-//        spanishQuiz.thumbnailUrl = "https://www.africanstorybook.org/img/asb120.png"
-//        spanishQuiz.description = "todo el contenido"
-//        spanishQuiz.publisher = "CK12"
-//        spanishQuiz.author = "borrachera"
-//        spanishQuiz.primaryLanguageUid = 3
-//        spanishQuiz.leaf = true
-//        contentDao.insert(spanishQuiz)
 //
-//        val tmpDir = UmFileUtilSe.makeTempDir("testVideoPlayer",
-//                "" + System.currentTimeMillis())
-//
-//        val videoFile = File(tmpDir, "video1.webm")
-//        val audioTempFile = File(tmpDir, "audio.c2")
-//        val srtTmpFile = File(tmpDir, "subtitle-english.srt")
-//        val germanTmpFile = File(tmpDir, "subtitle-Deutsch.srt")
-//
-//        FileUtils.copyInputStreamToFile(
-//                javaClass.getResourceAsStream("/com/ustadmobile/app/android/video1.webm")!!,
-//                videoFile)
-//
-//        FileUtils.copyInputStreamToFile(
-//                javaClass.getResourceAsStream("/com/ustadmobile/app/android/video1-codec2-version2.c2")!!,
-//                audioTempFile)
-//        FileUtils.copyInputStreamToFile(
-//                javaClass.getResourceAsStream("/com/ustadmobile/app/android/subtitle-english.srt")!!,
-//                srtTmpFile)
-//
-//        FileUtils.copyInputStreamToFile(
-//                javaClass.getResourceAsStream("/com/ustadmobile/app/android/subtitle-Deutsch.srt")!!,
-//                germanTmpFile)
-//
-//        val dir = Environment.getExternalStorageDirectory()
-//
-//        val container = Container()
-//        container.containerContentEntryUid = 14L
-//        containerUid = containerDao.insert(container)
-//        container.containerUid = containerUid
-//
-//        val manager = ContainerManager(container, db,
-//                repo, dir.absolutePath)
-//
-//        runBlocking {
-//            manager.addEntries(ContainerManager.FileEntrySource(videoFile, "video1.webm"),
-//                    ContainerManager.FileEntrySource(audioTempFile, "audio.c2"),
-//                    ContainerManager.FileEntrySource(srtTmpFile, "subtitle-english.srt"),
-//                    ContainerManager.FileEntrySource(germanTmpFile, "subtitle-Deutsch.srt"))
-//        }
 //    }
 //
 //

@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_TRANSLATED_VERSION
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 
-data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
+data class TestClazzAndMembers(val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
 
 private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime: Long): ClazzMember {
     return ClazzMember(clazzUid, this.personUid, clazzMemberRole).apply {
@@ -14,22 +14,22 @@ private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime:
 }
 
 suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
-                                                    clazzJoinTime: Long = (getSystemTimeInMillis() -  (86400* 1000)),
-    studentNamer: (Int) -> Pair<String, String> = {"Test" to "Student $it"},
-    teacherNamer: (Int) -> Pair<String, String> = {"Test" to "Teacher $it"}): TestClazzAndMembers {
+                                                    clazzJoinTime: Long = (getSystemTimeInMillis() - (86400 * 1000)),
+                                                    studentNamer: (Int) -> Pair<String, String> = { "Test" to "Student $it" },
+                                                    teacherNamer: (Int) -> Pair<String, String> = { "Test" to "Teacher $it" }): TestClazzAndMembers {
     val mockClazz = Clazz("Test Clazz").apply {
         clazzTimeZone = "Asia/Dubai"
         clazzUid = clazzDao.insertAsync(this)
     }
 
-    val testStudents = (1 .. numClazzStudents).map {
+    val testStudents = (1..numClazzStudents).map {
         val (firstName, lastName) = studentNamer(it)
         Person("studentuser$it", firstName, lastName).apply {
             personUid = personDao.insertAsync(this)
         }
     }
 
-    val testTeachers = (1 .. numClazzTeachers).map {
+    val testTeachers = (1..numClazzTeachers).map {
         val (firstName, lastName) = teacherNamer(it)
         Person("studentuser$it", firstName, lastName).apply {
             personUid = personDao.insertAsync(this)
@@ -52,7 +52,7 @@ suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numCl
 }
 
 suspend fun UmAppDatabase.insertClazzLogs(clazzUid: Long, numLogs: Int, logMaker: (Int) -> ClazzLog): List<ClazzLog> {
-    return (0 until numLogs).map {index ->
+    return (0 until numLogs).map { index ->
         logMaker(index).apply {
             clazzLogClazzUid = clazzUid
             clazzLogUid = clazzLogDao.insertAsync(this)
@@ -60,7 +60,7 @@ suspend fun UmAppDatabase.insertClazzLogs(clazzUid: Long, numLogs: Int, logMaker
     }
 }
 
-suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: Int,entryUid: Long): ContentEntry{
+suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: Int, entryUid: Long): ContentEntry {
     val entry = ContentEntry().apply {
         title = "Dummy Content Entry"
         leaf = true
@@ -69,7 +69,7 @@ suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: In
         contentEntryDao.insertAsync(this)
     }
 
-     (1 .. numTranslations).map {
+    (1..numTranslations).map {
         val entryOfLanguage = ContentEntry().apply {
             title = "Language $it Content Entry"
             leaf = true
@@ -78,16 +78,16 @@ suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: In
         }
         val language = Language().apply {
             name = "Language $it"
-            iso_639_2_standard = "${if(it >= 10) it else "0$it"}"
+            iso_639_2_standard = "${if (it >= 10) it else "0$it"}"
             langUid = languageDao.insertAsync(this)
         }
 
-         ContentEntryRelatedEntryJoin().apply {
-             cerejContentEntryUid = entry.contentEntryUid
-             cerejRelatedEntryUid = entryOfLanguage.contentEntryUid
-             cerejRelLanguageUid = language.langUid
-             relType = REL_TYPE_TRANSLATED_VERSION
-             cerejUid = contentEntryRelatedEntryJoinDao.insertAsync(this)
+        ContentEntryRelatedEntryJoin().apply {
+            cerejContentEntryUid = entry.contentEntryUid
+            cerejRelatedEntryUid = entryOfLanguage.contentEntryUid
+            cerejRelLanguageUid = language.langUid
+            relType = REL_TYPE_TRANSLATED_VERSION
+            cerejUid = contentEntryRelatedEntryJoinDao.insertAsync(this)
         }
     }
     return entry
@@ -95,7 +95,7 @@ suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: In
 
 suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentContainer(
         numEntries: Int, parentEntryUid: Long, isLeaf: Boolean = true): List<ContentEntry> {
-    return (1 .. numEntries).map {
+    return (1..numEntries).map {
         val entry = ContentEntry().apply {
             title = "Dummy title $it"
             leaf = isLeaf
@@ -117,4 +117,24 @@ suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentCont
         }
         entry
     }
+}
+
+
+suspend fun UmAppDatabase.insertVideoContent(): Container {
+    val spanishQuiz = ContentEntry()
+    spanishQuiz.title = "tiempo de prueba"
+    spanishQuiz.thumbnailUrl = "https://www.africanstorybook.org/img/asb120.png"
+    spanishQuiz.description = "todo el contenido"
+    spanishQuiz.publisher = "CK12"
+    spanishQuiz.author = "borrachera"
+    spanishQuiz.primaryLanguageUid = 3
+    spanishQuiz.leaf = true
+    spanishQuiz.contentEntryUid = contentEntryDao.insert(spanishQuiz)
+
+    val container = Container()
+    container.containerContentEntryUid = spanishQuiz.contentEntryUid
+    val containerUid = containerDao.insert(container)
+    container.containerUid = containerUid
+
+    return container
 }
