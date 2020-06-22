@@ -7,11 +7,6 @@
         android:title="@string/content" />
 
     <item
-        android:id="@+id/report_list_dest"
-        android:icon="@drawable/ic_report"
-        android:title="@string/reports" />
-
-    <item
         android:id="@+id/home_schoollist_dest"
         android:icon="@drawable/ic_school_black_24dp"
         android:title="@string/schools" />
@@ -25,6 +20,11 @@
         android:id="@+id/home_personlist_dest"
         android:icon="@drawable/ic_person_black_24dp"
         android:title="@string/people" />
+
+    <item
+        android:id="@+id/report_list_dest"
+        android:icon="@drawable/ic_report_24dp"
+        android:title="@string/reports" />
 
     <!--
 
