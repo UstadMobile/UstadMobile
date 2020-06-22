@@ -70,8 +70,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
                 android:hint="@string/xapi_options_report_title"
                 app:errorEnabled="true"
                 app:errorText="@{titleErrorText}"
@@ -91,8 +91,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginTop="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_report_edit_title_layout">
 
@@ -110,9 +110,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginTop="@dimen/formitem_margin_vertical"
-
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_visual_type_textinputlayout">
 
@@ -129,8 +128,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginTop="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_yaxis_textinputlayout">
 
@@ -150,8 +149,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginTop="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_xaxis_textinputlayout">
 
@@ -169,8 +168,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
                 app:layout_constraintEnd_toStartOf="@+id/activity_report_edit_toDate_textinputlayout"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_subgroup_textinputlayout">
@@ -193,8 +192,8 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="@dimen/dimen_0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/form_margin_horizontal"
-                android:layout_marginVertical="@dimen/formitem_margin_vertical"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
                 android:hint="@string/toC"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/activity_report_edit_fromDate_textinputlayout"
@@ -216,9 +215,9 @@
                 android:id="@+id/fragment_edit_report_header_who"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/form_margin_horizontal_heading"
-                android:layout_marginTop="@dimen/formitem_margin_vertical"
-                android:layout_marginBottom="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
                 android:text="@string/xapi_options_who"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_toDate_textinputlayout" />
@@ -246,9 +245,9 @@
                 android:id="@+id/fragment_edit_report_header_did"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/form_margin_horizontal_heading"
-                android:layout_marginTop="@dimen/formitem_margin_vertical"
-                android:layout_marginBottom="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
                 android:text="@string/xapi_options_did"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_who_add_layout" />
@@ -278,9 +277,9 @@
                 android:id="@+id/fragment_edit_report_header_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/form_margin_horizontal_heading"
-                android:layout_marginTop="@dimen/formitem_margin_vertical"
-                android:layout_marginBottom="@dimen/formitem_margin_vertical"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
                 android:text="@string/content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_did_add_layout" />
