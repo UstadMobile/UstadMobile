@@ -14,10 +14,10 @@ import com.ustadmobile.lib.db.entities.UmAccount
 class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view: @BaseFileName@View,
                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
                           db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
+                          activeAccount: DoorLiveData<UmAccount?>,
+                          private val @Entity_VariableName@ItemListener: Default@BaseFileName@ItemListener = Default@BaseFileName@ItemListener(view, ListViewMode.BROWSER, systemImpl, context))
     : UstadListPresenter<@BaseFileName@View, @Entity@>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
-
+        db, repo, activeAccount), @BaseFileName@ItemListener by @Entity_VariableName@ItemListener {
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
@@ -31,6 +31,7 @@ class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
+        @Entity_VariableName@ItemListener.listViewMode = mListMode
         view.sortOptions = SortOrder.values().toList().map { @Entity@ListSortOption(it, context) }
     }
 
@@ -48,18 +49,6 @@ class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view
                     searchQuery, loggedInPersonUid)
         }
         */
-    }
-
-    override fun handleClickEntry(entry: @Entity@) {
-        /*TODO: Update this to go to the appropriate detail view when an item is clicked e.g.
-
-        if(mListMode == ListViewMode.BROWSER) {
-            systemImpl.go(@Entity@DetailView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to uid, context)
-        }
-        */
-
-        super.handleClickEntry(entry)
     }
 
     override fun handleClickCreateNewFab() {

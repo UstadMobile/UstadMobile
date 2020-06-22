@@ -16,7 +16,7 @@
 
     <!--Used by the messageidlookup binder -->
     <item name="tag_messageidoption_selected" type="id"/>
-    <item name="tag_messageidoptiond_fallback" type="id"/>
+    <item name="tag_messageidoption_fallback" type="id"/>
     <item name="tag_messageidoptions_list" type="id"/>
 
 </resources>

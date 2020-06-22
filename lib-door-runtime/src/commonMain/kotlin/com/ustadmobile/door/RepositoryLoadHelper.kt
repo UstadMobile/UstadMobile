@@ -30,13 +30,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val uri: String = "",
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
-
-    @Deprecated("Dont use this - it leads to memory leaks - use status live data")
-    interface RepoLoadCallback {
-
-        fun onLoadStatusChanged(status: Int, remoteDevice: String?)
-
-    }
+    class NoConnectionException(message: String, cause: Throwable? = null): Exception(message, cause)
 
     val requestLock = Mutex()
 
@@ -177,7 +171,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
                     if(!isConnected && mirrorToUse == null) {
                         //it's hopeless - there is no mirror and we have no connection - give up
-                        throw Exception("$PREFIX_NOCONNECTION_NO_MIRRORS_MESSAGE $logPrefix: " +
+                        throw NoConnectionException("$PREFIX_NOCONNECTION_NO_MIRRORS_MESSAGE $logPrefix: " +
                                 "Repository status indicates no connectivity and there are no active " +
                                 "mirrors")
                     }
@@ -248,7 +242,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     //something went wrong with the load
                     Napier.e("$logPrefix Exception attempting to load from $endpointToUse",
                             e)
-                    if(e.message?.startsWith(PREFIX_NOCONNECTION_NO_MIRRORS_MESSAGE) ?: false) {
+                    if(e is NoConnectionException) {
                         Napier.d({"No connection and no mirrors available - giving up"})
                         break
                     }

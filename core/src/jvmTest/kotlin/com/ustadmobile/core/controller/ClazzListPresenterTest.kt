@@ -14,9 +14,8 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.Clazz
-import org.junit.Assert
 
-class ClazzList2PresenterTest {
+class ClazzListPresenterTest {
 
     @JvmField
     @Rule
@@ -58,7 +57,7 @@ class ClazzList2PresenterTest {
         //TODO: add any arguments required for the presenter here e.g.
         // ClazzList2View.ARG_SOME_FILTER to "filterValue"
         val presenterArgs = mapOf<String,String>()
-        val presenter = ClazzList2Presenter(context,
+        val presenter = ClazzListPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner,
                 systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
                 clientDbRule.accountLiveData)
@@ -77,7 +76,7 @@ class ClazzList2PresenterTest {
     fun givenPresenterNotYetCreated_whenOnCreateCalledWithExcludeArgs_thenShouldQueryDatabaseAndSetOnView() {
         val excludeFromSchool = 7L
         val presenterArgs = mapOf<String,String>(PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to excludeFromSchool.toString())
-        val presenter = ClazzList2Presenter(context,
+        val presenter = ClazzListPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner,
                 systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
                 clientDbRule.accountLiveData)
@@ -97,7 +96,7 @@ class ClazzList2PresenterTest {
             //set variables here
             clazzUid = clientDbRule.db.clazzDao.insert(this)
         }
-        val presenter = ClazzList2Presenter(context,
+        val presenter = ClazzListPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner,
                 systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
                 clientDbRule.accountLiveData)
@@ -105,7 +104,7 @@ class ClazzList2PresenterTest {
         mockView.waitForListToBeSet()
 
 
-        presenter.handleClickEntry(testEntity)
+        presenter.onClickClazz(testEntity)
 
         verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ClazzDetailView.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())), any())

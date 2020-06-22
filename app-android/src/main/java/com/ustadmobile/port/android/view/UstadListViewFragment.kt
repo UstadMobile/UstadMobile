@@ -29,6 +29,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.port.android.view.ext.repoLoadingStatus
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -39,6 +40,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
     protected var mRecyclerView: RecyclerView? = null
 
     protected var mNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+
+    protected var mListStatusAdapter: ListStatusRecyclerViewAdapter<DT>? = null
 
     internal var mDataRecyclerViewAdapter: SelectablePagedListAdapter<DT, *>? = null
 
@@ -190,9 +193,11 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
         mDataBinding?.presenter = listPresenter
         mDataBinding?.onSortSelected = this
+        mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
         if(autoMergeRecyclerViewAdapter) {
-            mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter, mDataRecyclerViewAdapter)
+            mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
+                    mDataRecyclerViewAdapter, mListStatusAdapter)
             mRecyclerView?.adapter = mMergeRecyclerViewAdapter
             mDataRecyclerViewAdapter?.selectedItemsLiveData?.observe(this.viewLifecycleOwner,
                     selectionObserver)
@@ -240,6 +245,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             currentLiveData?.removeObserver(this)
             val displayTypeRepoVal = displayTypeRepo ?: return
             currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
+            mListStatusAdapter?.repositoryLoadStatus = currentLiveData?.repoLoadingStatus
+            mListStatusAdapter?.pagedListLiveData = currentLiveData
             currentLiveData?.observe(viewLifecycleOwner, this)
             field = value
         }

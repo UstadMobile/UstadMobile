@@ -19,13 +19,12 @@ import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
-import com.ustadmobile.test.rules.SystemImplTestNavHostRule
-import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +49,11 @@ class ClazzLogEditAttendanceFragmentTest  {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @JvmField
     @Rule
@@ -92,7 +95,8 @@ class ClazzLogEditAttendanceFragmentTest  {
             ClazzLogEditAttendanceFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             recyclerViewIdlingResource.recyclerView = it.mBinding!!.clazzLogEditRecyclerView
@@ -146,7 +150,8 @@ class ClazzLogEditAttendanceFragmentTest  {
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
                 bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.UmTheme_App
-        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
@@ -185,7 +190,8 @@ class ClazzLogEditAttendanceFragmentTest  {
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
                 bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.UmTheme_App
-        ).withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
