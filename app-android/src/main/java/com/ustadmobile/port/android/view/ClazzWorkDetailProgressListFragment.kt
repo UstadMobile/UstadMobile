@@ -146,7 +146,7 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        //TODO: this
+        //TODO: Check if we need this or its been sent to Presenter
 //        if(view?.id == R.id.item_createnew_layout)
 //            navigateToEditEntity(null, R.id.clazzmemberwithclazzworkprogress_edit_dest,
 //                    ClazzMemberWithClazzWorkProgress::class.java)

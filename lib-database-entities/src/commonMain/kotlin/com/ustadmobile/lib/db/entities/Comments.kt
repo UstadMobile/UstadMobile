@@ -29,6 +29,8 @@ open class Comments() {
 
     var commentsPersonUid : Long = 0
 
+    var commentsToPersonUid: Long = 0
+
     var commentsFlagged : Boolean = false
 
     var commentsInActive : Boolean = false

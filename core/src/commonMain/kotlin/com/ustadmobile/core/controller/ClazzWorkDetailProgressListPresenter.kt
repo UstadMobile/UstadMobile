@@ -66,6 +66,8 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
 
     override fun handleClickEntry(entry: ClazzMemberWithClazzWorkProgress) {
         //TODO:
+        val clazzMemberUid = entry.mClazzMember?.clazzMemberUid?:0L
+        val clazzWorkUid = filterByClazzWorkUid
         /*
         systemImpl.go(ClazzWorkMarkingView.VIEW_NAME, mapOf(UstadView.ARG_ENTITY_UID to
             entry.mClazzWorkSubmission.clazzWorkSubmissionUid.toString()), context)

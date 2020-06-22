@@ -52,6 +52,9 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     @Query(STUDENT_PROGRESS_QUERY)
     abstract fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long): List<ClazzMemberWithClazzWorkProgress>
 
+    @Query(FIND_CLAZZMEMBER_AND_SUBMISSION_WITH_PERSON)
+    abstract suspend fun findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid: Long,
+                                        clazzMemberUid: Long): ClazzMemberAndClazzWorkWithSubmission
 
     companion object{
 
@@ -96,6 +99,32 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
              WHERE clazzWorkClazzUid = :clazzUid
             AND CAST(clazzWorkActive as INTEGER) = 1
         """
+
+        const val FIND_CLAZZMEMBER_AND_SUBMISSION_WITH_PERSON =
+                """
+            SELECT ClazzWork.*, ClazzSubmission.*, ClazzMember.*, Person.*
+             0 as totalStudents, 
+             0 as submittedStudents, 
+             0 as notSubmittedStudents,
+             0 as completedStudents, 
+             0 as markedStudents, 
+             0 as firstContentEntryUid,
+             Clazz.clazzTimeZone as clazzTimeZone 
+             FROM ClazzWork
+            LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid = :clazzMemberUid
+            LEFT JOIN Person ON Person.personUid = ClazzMember.clazzMemberPersonUid 
+            LEFT JOIN ClazzWorkSubmission ON ClazzWorkSubmission.clazzWorkSubmissionUid = 
+                (
+                SELECT ClazzWorkSubmission.clazzWorkSubmissionUid FROM ClazzWorkSubmission 
+                WHERE ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid = ClazzMember.clazzMemberUid
+                AND CAST(ClazzWorkSubmission.clazzWorkSubmissionInactive AS INTEGER) = 0
+                AND ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                ORDER BY ClazzWorkSubmission.clazzWorkSubmissionDateTimeStarted DESC LIMIT 1
+                )
+             LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+             WHERE clazzWorkUid = :clazzWorkUid
+            AND CAST(clazzWorkActive as INTEGER) = 1
+                """
 
         const val STUDENT_PROGRESS_QUERY = """
             SELECT 
