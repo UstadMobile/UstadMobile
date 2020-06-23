@@ -5,6 +5,7 @@ import android.text.format.DateFormat
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
+import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
@@ -27,9 +28,9 @@ fun TextView.setHintMessageId(messageId: Int) {
 
 @BindingAdapter("customFieldHint")
 fun TextView.setCustomFieldHint(customField: CustomField?) {
-    hint = if(customField != null) {
+    hint = if (customField != null) {
         UstadMobileSystemImpl.instance.getString(customField.customFieldLabelMessageID, context)
-    }else {
+    } else {
         ""
     }
 }
@@ -37,7 +38,7 @@ fun TextView.setCustomFieldHint(customField: CustomField?) {
 @BindingAdapter(value = ["textBitmaskValue", "textBitmaskFlags"], requireAll = false)
 fun TextView.setBitmaskListText(textBitmaskValue: Long?, textBitmaskFlags: List<BitmaskFlag>?) {
     val systemImpl = UstadMobileSystemImpl.instance
-    if(textBitmaskValue == null || textBitmaskFlags == null)
+    if (textBitmaskValue == null || textBitmaskFlags == null)
         return
 
     text = textBitmaskFlags.filter { (it.flagVal and textBitmaskValue) == it.flagVal }
@@ -46,7 +47,7 @@ fun TextView.setBitmaskListText(textBitmaskValue: Long?, textBitmaskFlags: List<
 
 @BindingAdapter("presenterFieldHeader")
 fun TextView.setPresenterFieldHeader(presenterField: PersonDetailPresenterField) {
-    if(presenterField.headerMessageId != 0) {
+    if (presenterField.headerMessageId != 0) {
         text = UstadMobileSystemImpl.instance.getString(presenterField.headerMessageId, context)
     }
 }
@@ -121,13 +122,13 @@ fun TextView.setTextFromCustomFieldDropDownOption(customFieldValue: CustomFieldV
                                                   customFieldValueOptions: List<CustomFieldValueOption>?) {
     val selectedOption = customFieldValueOptions
             ?.firstOrNull { it.customFieldValueOptionUid == customFieldValue?.customFieldValueCustomFieldValueOptionUid }
-    if(selectedOption != null) {
-        text = if(selectedOption.customFieldValueOptionMessageId != 0) {
+    if (selectedOption != null) {
+        text = if (selectedOption.customFieldValueOptionMessageId != 0) {
             UstadMobileSystemImpl.instance.getString(selectedOption.customFieldValueOptionMessageId, context)
-        }else {
+        } else {
             selectedOption.customFieldValueOptionName ?: ""
         }
-    }else {
+    } else {
         text = ""
     }
 }
@@ -136,12 +137,12 @@ fun TextView.setTextFromCustomFieldDropDownOption(customFieldValue: CustomFieldV
 @BindingAdapter(value = ["textFromDateLong", "textToDateLong"])
 fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
     val dateFormat = DateFormat.getDateFormat(context)
-    text = "${if(textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} - ${if(textToDateLong > 0) dateFormat.format(textToDateLong) else ""}"
+    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} - ${if (textToDateLong > 0) dateFormat.format(textToDateLong) else ""}"
 }
 
 
 private val textViewSchoolGenderStringIds: Map<Int, Int> = mapOf(
-        School.SCHOOL_GENDER_MIXED  to R.string.mixed,
+        School.SCHOOL_GENDER_MIXED to R.string.mixed,
         School.SCHOOL_GENDER_FEMALE to R.string.female,
         School.SCHOOL_GENDER_MALE to R.string.male
 )
@@ -150,16 +151,16 @@ private val textViewSchoolGenderStringIds: Map<Int, Int> = mapOf(
 @BindingAdapter("textSchoolGender")
 fun TextView.setSchoolGenderText(gender: Int) {
     val genderStringId = textViewSchoolGenderStringIds[gender]
-    text = if(genderStringId != null) {
+    text = if (genderStringId != null) {
         context.getString(genderStringId)
-    }else {
+    } else {
         ""
     }
 }
 
 @BindingAdapter("textClazzLogStatus")
 fun TextView.setTextClazzLogStatus(clazzLog: ClazzLog) {
-    text = when(clazzLog.clazzLogStatusFlag) {
+    text = when (clazzLog.clazzLogStatusFlag) {
         ClazzLog.STATUS_CREATED -> context.getString(R.string.not_recorded)
         ClazzLog.STATUS_HOLIDAY -> "${context.getString(R.string.holiday)} - ${clazzLog.cancellationNote}"
         ClazzLog.STATUS_RECORDED -> context.getString(R.string.present_late_absent,
@@ -168,7 +169,7 @@ fun TextView.setTextClazzLogStatus(clazzLog: ClazzLog) {
     }
 }
 
-private val klockDateFormat :KlockDateFormat by lazy { KlockDateFormat("EEE") }
+private val klockDateFormat: KlockDateFormat by lazy { KlockDateFormat("EEE") }
 
 @BindingAdapter("textShortDayOfWeek")
 fun TextView.setTextShortDayOfWeek(localTime: DateTimeTz) {
@@ -176,13 +177,19 @@ fun TextView.setTextShortDayOfWeek(localTime: DateTimeTz) {
 }
 
 @SuppressLint("SetTextI18n")
-@BindingAdapter(value=["textLocalDateTime", "textLocalDateTimeZone"])
-fun TextView.setTextLocalDayAndTime(time: Long, timeZone: TimeZone){
+@BindingAdapter(value = ["textLocalDateTime", "textLocalDateTimeZone"])
+fun TextView.setTextLocalDayAndTime(time: Long, timeZone: TimeZone) {
     val dateFormat = DateFormat.getMediumDateFormat(context)
     val timeFormat = DateFormat.getTimeFormat(context)
     timeFormat.timeZone = timeZone
     dateFormat.timeZone = timeZone
     text = dateFormat.format(time) + " - " + timeFormat.format(time)
+}
+
+@BindingAdapter("textDate")
+fun TextView.setDateText(time: Long){
+    val dateFormat = DateFormat.getDateFormat(context)
+    text = if (time > 0) dateFormat.format(time) else ""
 }
 
 @BindingAdapter("htmlText")

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+        <import type="android.text.InputType" />
+        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
+
+        <variable
+            name="report"
+            type="com.ustadmobile.lib.db.entities.ReportWithFilters" />
+
+        <variable
+            name="loading"
+            type="boolean" />
+
+        <variable
+            name="fieldsEnabled"
+            type="boolean" />
+
+        <variable
+            name="titleErrorText"
+            type="String"/>
+
+        <variable
+            name="activityEventHandler"
+            type="com.ustadmobile.port.android.view.ReportEditFragmentEventHandler" />
+
+        <variable
+            name="xAxisSelectionListener"
+            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="chartOptions"
+            type="java.util.List&lt;MessageIdOption>" />
+
+        <variable
+            name="yAxisOptions"
+            type="java.util.List&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="xAxisOptions"
+            type="java.util.List&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="subGroupOptions"
+            type="java.util.List&lt;MessageIdOption&gt;" />
+
+    </data>
+
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/fragment_report_edit_edit_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fragment_report_edit_edit_clx"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_report_edit_title_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:hint="@string/xapi_options_report_title"
+                app:errorEnabled="true"
+                app:errorText="@{titleErrorText}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/fragment_report_edit_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@={report.reportTitle}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_edit_report_dialog_visual_type_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_report_edit_title_layout">
+
+                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                    android:id="@+id/fragment_edit_report_dialog_visual_type_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:messageIdOptions="@{chartOptions}"
+                    app:selectedMessageIdOption="@={report.chartType}"
+                    android:hint="@string/xapi_options_visual_type"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_edit_report_dialog_yaxis_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_visual_type_textinputlayout">
+
+                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/xapi_options_y_axes"
+                    app:messageIdOptions="@{yAxisOptions}"
+                    app:selectedMessageIdOption="@={report.YAxis}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_edit_report_dialog_xaxis_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_yaxis_textinputlayout">
+
+                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                    android:id="@+id/fragment_edit_report_dialog_xaxis_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/xapi_options_x_axes"
+                    app:onMessageIdOptionSelected="@{xAxisSelectionListener}"
+                    app:messageIdOptions="@{xAxisOptions}"
+                    app:selectedMessageIdOption="@={report.XAxis}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_edit_report_dialog_subgroup_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_xaxis_textinputlayout">
+
+                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                    android:id="@+id/fragment_edit_report_dialog_subgroup_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/xapi_options_subgroup"
+                    app:messageIdOptions="@{subGroupOptions}"
+                    app:selectedMessageIdOption="@={report.subGroup}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/activity_report_edit_fromDate_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                app:layout_constraintEnd_toStartOf="@+id/activity_report_edit_toDate_textinputlayout"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_subgroup_textinputlayout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/activity_report_edit_fromDate_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cursorVisible="false"
+                    android:hint="@string/from"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:runOnClickWhenFocused="@{true}"
+                    app:dateLong="@={report.fromDate}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/activity_report_edit_toDate_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:hint="@string/toC"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/activity_report_edit_fromDate_textinputlayout"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_subgroup_textinputlayout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/activity_report_edit_toDate_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cursorVisible="false"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    app:runOnClickWhenFocused="@{true}"
+                    app:dateLong="@={report.toDate}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <TextView
+                android:id="@+id/fragment_edit_report_header_who"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
+                android:text="@string/xapi_options_who"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activity_report_edit_toDate_textinputlayout" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_edit_who_filter_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_header_who"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_person_report_edit" />
+
+            <include
+                android:id="@+id/fragment_edit_report_who_add_layout"
+                layout="@layout/item_createnew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:createNewText="@{@string/add_a(@string/x_filter(@string/person))}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_who_filter_list"
+                app:onClickNew="@{() -> activityEventHandler.onClickNewPerson()}" />
+
+            <TextView
+                android:id="@+id/fragment_edit_report_header_did"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
+                android:text="@string/xapi_options_did"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_who_add_layout" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_edit_did_filter_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_header_did"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_verb_report_edit" />
+
+            <include
+                android:id="@+id/fragment_edit_report_did_add_layout"
+                layout="@layout/item_createnew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:createNewText="@{@string/add_a(@string/x_filter(@string/verb))}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_did_filter_list"
+                app:onClickNew="@{() -> activityEventHandler.onClickNewVerbDisplay()}" />
+
+
+            <TextView
+                android:id="@+id/fragment_edit_report_header_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginBottom="@dimen/dimen_8dp"
+                android:text="@string/content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_did_add_layout" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_edit_content_filter_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_header_content"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_content_report_edit" />
+
+            <include
+                android:id="@+id/fragment_edit_report_content_add_layout"
+                layout="@layout/item_createnew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:createNewText="@{@string/add_a(@string/x_filter(@string/content))}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_content_filter_list"
+                app:onClickNew="@{() -> activityEventHandler.onClickAddNewContentFilter()}" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+</layout>
