@@ -5,26 +5,38 @@ import android.content.pm.ActivityInfo
 import android.os.Environment
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.navigation.Navigation
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.rule.GrantPermissionRule
+import com.nhaarman.mockitokotlin2.eq
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.insertVideoContent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
+import java.lang.Thread.sleep
 
 @ExperimentalStdlibApi
 class VideoContentFragmentTest {
@@ -36,6 +48,14 @@ class VideoContentFragmentTest {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @get:Rule
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -93,11 +113,18 @@ class VideoContentFragmentTest {
             VideoContentFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }
+        }/*.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)*/
 
         val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
             IdlingRegistry.getInstance().register(it)
+
         }
+
+        sleep(1000)
+
+        onView(withId(R.id.activity_video_player_description))
+                .check(matches(isDisplayed()))
 
         IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
     }

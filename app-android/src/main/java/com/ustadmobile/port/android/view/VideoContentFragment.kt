@@ -16,6 +16,7 @@ import com.google.android.exoplayer2.Format
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.*
+import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.ByteArrayDataSource
 import com.google.android.exoplayer2.upstream.DataSource
@@ -70,10 +71,13 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private var rootView: View? = null
 
+    private var controlsView: PlayerControlView? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mBinding = FragmentVideoContentBinding.inflate(inflater, container, false).also {
             rootView = it.root
             playerView = it.activityVideoPlayerView
+            controlsView = it.playerViewControls
         }
 
         if (savedInstanceState != null) {
@@ -103,6 +107,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         player = null
         audioPlayer = null
         rootView = null
+        controlsView = null
     }
 
     override fun onStart() {
@@ -147,6 +152,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         player = SimpleExoPlayer.Builder(viewContext as Context).build()
 
         playerView?.player = player
+        controlsView?.player = player
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
     }

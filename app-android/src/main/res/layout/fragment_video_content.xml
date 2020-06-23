@@ -23,16 +23,21 @@
             android:id="@+id/activity_video_player_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:controller_layout_id="@layout/view_custom_exo_playback_control"
-            app:use_controller="true" />
+            app:use_controller="false" />
+
+        <com.google.android.exoplayer2.ui.PlayerControlView
+            android:id="@+id/player_view_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:controller_layout_id="@layout/view_custom_exo_playback_control" />
 
         <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/activity_video_player_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dimen_8dp"
             android:text="@{entry.description}"
-            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             tools:text="Description here" />
 
     </LinearLayout>
