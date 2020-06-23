@@ -164,7 +164,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         player?.seekTo(currentWindow, playbackPosition)
     }
 
-
     override fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
         if (audioPath != null) {
             player?.addListener(audioListener)
@@ -289,9 +288,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     }
 
     private fun releaseAudio() {
-        if (audioPlayer != null) {
-            audioPlayer!!.stop()
-        }
+        audioPlayer?.stop()
     }
 
     override fun setVideoParams(videoPath: String?, audioPath: String?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {

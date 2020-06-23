@@ -92,7 +92,6 @@ class VideoContentFragmentTest {
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
 
-        sleep(5000)
 
         onView(withId(R.id.activity_video_player_description))
                 .check(matches(isDisplayed()))

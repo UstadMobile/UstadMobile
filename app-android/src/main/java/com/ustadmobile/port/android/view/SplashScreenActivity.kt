@@ -48,6 +48,13 @@ class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
     override val viewContext: Any
         get() = this
 
+    override var loading: Boolean = false
+        get() = false
+        set(value) {
+            //TODO: set this on the main activity
+            field = value
+        }
+
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
