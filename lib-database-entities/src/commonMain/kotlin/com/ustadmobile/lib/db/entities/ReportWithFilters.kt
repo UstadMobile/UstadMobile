@@ -1,31 +1,38 @@
 package com.ustadmobile.lib.db.entities
+
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SCORE,
-                             var xAxis: Int = DAY, var subGroup: Int = DAY,
-                             var whoFilterList: List<Long> = mutableListOf(),
-                             var didFilterList: List<Long> = mutableListOf(),
-                             var objectsList: List<Long> = mutableListOf(),
-                             var entriesList: List<Long> = mutableListOf(),
-                             var fromDate: Long = 0L, var toDate: Long = 0L,
-                             var locationsList: List<Long> = mutableListOf(),
-                             var reportTitle: String = "") {
+class ReportWithFilters() : Report() {
+
+    constructor(report: Report, filterList: List<ReportFilter>) : this() {
+        this.reportUid = report.reportUid
+        this.reportTitle = report.reportTitle
+        this.reportOwnerUid = report.reportOwnerUid
+        this.reportInactive = report.reportInactive
+        this.fromDate = report.fromDate
+        this.toDate = report.toDate
+        this.chartType = report.chartType
+        this.yAxis = report.yAxis
+        this.xAxis = report.xAxis
+        this.subGroup = report.subGroup
+        this.reportFilterList = filterList
+    }
+
+    var reportFilterList: List<ReportFilter> = listOf()
 
 
     data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
+
 
     fun toSql(): QueryParts {
         require(xAxis != subGroup) { "XAxis Selection and subGroup selection was the same" }
         val paramList = mutableListOf<Any>()
 
-        var sqlList = "SELECT (Person.firstNames || ' ' || Person.lastName) AS name, " +
-                "XLangMapEntry.valueLangMap AS verb, " +
-                "StatementEntity.resultSuccess AS result, " +
-                "StatementEntity.timestamp As whenDate " +
-                "FROM StatementEntity " +
-                "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid " +
-                "LEFT JOIN XLangMapEntry ON StatementEntity.verbUid = XLangMapEntry.verbLangMapUid "
+        var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
+                FROM StatementEntity 
+                LEFT JOIN Person ON Person.personUid = StatementEntity.statementPersonUid 
+                LEFT JOIN XLangMapEntry ON StatementEntity.statementVerbUid = XLangMapEntry.verbLangMapUid """
 
         var sql = "SELECT " + when (yAxis) {
             SCORE -> "AVG(StatementEntity.resultScoreScaled) AS yAxis, "
@@ -34,14 +41,19 @@ data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SC
             COUNT_ACTIVITIES -> "COUNT(*) AS yAxis, "
             else -> ""
         }
-        sql += groupBy(xAxis) + "AS xAxis, "
-        sql += groupBy(subGroup) + "AS subgroup "
+        sql += groupBy(xAxis) + "AS xAxis "
+        if (subGroup != 0) {
+            sql += " , " + groupBy(subGroup) + "AS subgroup "
+        }
         sql += "FROM StatementEntity "
 
+        val objectsList = reportFilterList.filter { it.entityType == ReportFilter.CONTENT_FILTER }.map { it.entityUid }
+        val whoFilterList = reportFilterList.filter { it.entityType == ReportFilter.PERSON_FILTER }.map { it.entityUid }
+        val didFilterList = reportFilterList.filter { it.entityType == ReportFilter.VERB_FILTER }.map { it.entityUid }
 
 
         if (xAxis == GENDER || subGroup == GENDER) {
-            sql += "LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid "
+            sql += "LEFT JOIN PERSON ON Person.personUid = StatementEntity.statementPersonUid "
         }
         if (objectsList.isNotEmpty() || whoFilterList.isNotEmpty() || didFilterList.isNotEmpty() || (toDate > 0L && fromDate > 0L)) {
             var where = "WHERE "
@@ -56,11 +68,11 @@ data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SC
                 paramList.addAll(listOf<Any>(objectsList, objectsList))
             }
             if (whoFilterList.isNotEmpty()) {
-                whereList.add("StatementEntity.personUid IN (?) ")
+                whereList.add("StatementEntity.statementPersonUid IN (?) ")
                 paramList.addAll(listOf<Any>(whoFilterList))
             }
             if (didFilterList.isNotEmpty()) {
-                whereList.add("StatementEntity.verbUid IN (?) ")
+                whereList.add("StatementEntity.statementVerbUid IN (?) ")
                 paramList.addAll(listOf<Any>(didFilterList))
             }
             if (toDate > 0L && fromDate > 0L) {
@@ -73,7 +85,11 @@ data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SC
             sqlList += whereListStr
 
         }
-        sql += "GROUP BY xAxis, subgroup"
+        sql += "GROUP BY xAxis"
+        if (subGroup != 0) {
+            sql += ", subgroup"
+        }
+
         return QueryParts(sql, sqlList, paramList.toTypedArray())
     }
 
@@ -89,39 +105,27 @@ data class XapiReportOptions(var chartType: Int = BAR_CHART, var yAxis: Int = SC
         }
     }
 
-    companion object {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+        if (!super.equals(other)) return false
 
-        const val BAR_CHART = 100
+        other as ReportWithFilters
 
-        const val LINE_GRAPH = 101
+        if (reportFilterList != other.reportFilterList) return false
 
-        val listOfGraphs = arrayOf(BAR_CHART, LINE_GRAPH)
-
-        const val SCORE = 200
-
-        const val DURATION = 201
-
-        const val AVG_DURATION = 202
-
-        const val COUNT_ACTIVITIES = 203
-
-        val yAxisList = arrayOf(SCORE, DURATION, AVG_DURATION, COUNT_ACTIVITIES)
-
-        const val DAY = 300
-
-        const val WEEK = 301
-
-        const val MONTH = 302
-
-        const val CONTENT_ENTRY = 304
-
-        //TODO to be put back when varuna merges his branch
-        // private const val LOCATION = MessageID.xapi_location
-
-        const val GENDER = 306
-
-        val xAxisList = arrayOf(DAY, WEEK, MONTH, CONTENT_ENTRY, /*LOCATION, */ GENDER)
-
+        return true
     }
 
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + reportFilterList.hashCode()
+        return result
+    }
+
+    companion object{
+
+
+
+    }
 }

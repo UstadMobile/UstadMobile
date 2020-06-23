@@ -175,6 +175,7 @@
     <string name="library_reading_level">Reading Level</string>
     <string name="file_not_found">File Not Found</string>
 
+
     <!--Content editor -->
     <string name="content_type_multimedia">Multimedia</string>
     <string name="content_type">Content type </string>
@@ -307,22 +308,25 @@
     <string name="xapi_options_did">Did</string>
     <string name="xapi_options_what">What</string>
     <string name="xapi_options_when">When</string>
-    <string name="xapi_options_where">Where</string>
+    <string name="xapi_options_where">Where</string>>
+
+    <string name="report">Report</string>
+    <string name="verb">Verb</string>
+    <string name="id_verbentity_urlid">ID: %s</string>
+    <string name="x_filter">%1$s filter</string>
 
 
 
     <string name="activity_preview_xapi">Preview</string>
-    <string name="add_to_dashboard">Add to Dashboard</string>
+    <string name="dashboard">Dashboard</string>
     <string name="activity_import_link">Import Link</string>
 
     <string name="xapi_hours">Hrs</string>
     <string name="xapi_minutes">Mins</string>
     <string name="xapi_seconds">Secs</string>
 
-    <string name="xapi_person_header">Person</string>
     <string name="xapi_verb_header">Did what</string>
     <string name="xapi_result_header">Result</string>
-    <string name="xapi_when_header">When</string>
 
     <string name="xapi_score">Score (%)</string>
     <string name="import_link_video">Title</string>
@@ -847,6 +851,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <!-- Used to set the title on an edit screen where the user is editing an existing entity
      e.g. Edit Class, Edit Assignment, etc -->
     <string name="edit_entity">Edit %1$s</string>
+
+    <string name="add_to">Add to %1$s</string>
+    <string name="remove_from">Remove from %1$s</string>
 
     <string name="items_selected">%1$d selected</string>
 

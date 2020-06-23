@@ -4,24 +4,27 @@
     <item
         android:id="@+id/home_content_dest"
         android:icon="@drawable/library_books_24px"
-        android:title="@string/content"/>
-
+        android:title="@string/content" />
 
     <item
         android:id="@+id/home_schoollist_dest"
         android:icon="@drawable/ic_school_black_24dp"
-        android:title="@string/schools"
-        />
+        android:title="@string/schools" />
 
     <item
         android:id="@+id/home_clazzlist_dest"
         android:icon="@drawable/ic_group_black_24dp"
-        android:title="@string/classes"/>
+        android:title="@string/classes" />
 
     <item
         android:id="@+id/home_personlist_dest"
         android:icon="@drawable/ic_person_black_24dp"
-        android:title="@string/people"/>
+        android:title="@string/people" />
+
+    <item
+        android:id="@+id/report_list_dest"
+        android:icon="@drawable/ic_report_24dp"
+        android:title="@string/reports" />
 
     <!--
 

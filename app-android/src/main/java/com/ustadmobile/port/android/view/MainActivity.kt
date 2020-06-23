@@ -28,7 +28,7 @@ import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         NavController.OnDestinationChangedListener {
 
-    private lateinit var appBarConfiguration : AppBarConfiguration
+    private lateinit var appBarConfiguration: AppBarConfiguration
 
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
         get() = activity_listfragmelayout_behaviornt_fab
@@ -71,7 +71,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         menuInflater.inflate(R.menu.menu_main, menu)
 
         val currentFrag =
-                findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id?:0
+                findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id ?: 0
         menu.findItem(R.id.menu_main_settings).isVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         return super.onCreateOptionsMenu(menu)
     }
@@ -95,7 +95,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         UstadMobileSystemImpl.instance.go(SettingsView.VIEW_NAME, mapOf(), this)
     }
 
-    companion object{
-        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest,R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest)
+    companion object {
+        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest, R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
     }
 }
