@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -78,6 +79,9 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             rootView = it.root
             playerView = it.activityVideoPlayerView
             controlsView = it.playerViewControls
+            val isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+            it.isPortrait = isPortrait
+            it.activityVideoPlayerView.useController = !isPortrait
         }
 
         if (savedInstanceState != null) {
@@ -97,6 +101,9 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        val isPortrait = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
+        mBinding?.isPortrait = isPortrait
+        mBinding?.activityVideoPlayerView?.useController = !isPortrait
     }
 
     override fun onDestroyView() {
