@@ -49,14 +49,6 @@ class VideoContentFragmentTest {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
     @get:Rule
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -88,14 +80,12 @@ class VideoContentFragmentTest {
                 javaClass.getResourceAsStream("/com/ustadmobile/app/android/subtitle-Deutsch.srt")!!,
                 germanTmpFile)
 
-        val dir = Environment.getExternalStorageDirectory()
-
         runBlocking {
             container = dbRule.db.insertVideoContent()
         }
 
         val manager = ContainerManager(container!!, dbRule.db,
-                dbRule.db, dir.absolutePath)
+                dbRule.db, tmpDir.absolutePath)
 
         runBlocking {
             manager.addEntries(ContainerManager.FileEntrySource(videoFile, "video1.webm"),
@@ -113,12 +103,6 @@ class VideoContentFragmentTest {
             VideoContentFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }/*.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)*/
-
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
-
         }
 
         sleep(1000)
@@ -126,7 +110,9 @@ class VideoContentFragmentTest {
         onView(withId(R.id.activity_video_player_description))
                 .check(matches(isDisplayed()))
 
-        IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
+        onView(withId(R.id.player_view_controls)).check(matches(isDisplayed()))
+
+
     }
 
 }

@@ -29,6 +29,7 @@
             android:id="@+id/player_view_controls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:show_timeout="0"
             app:controller_layout_id="@layout/view_custom_exo_playback_control" />
 
         <TextView
