@@ -11,6 +11,7 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.GrantPermissionRule
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Container
@@ -35,6 +36,7 @@ import java.io.File
 import java.lang.Thread.sleep
 
 
+@AdbScreenRecord("Video Content Screen Test")
 @ExperimentalStdlibApi
 class VideoContentFragmentTest {
 
@@ -81,6 +83,7 @@ class VideoContentFragmentTest {
         }
     }
 
+    @AdbScreenRecord("given video content when rotated then show video without description")
     @Test
     fun givenVideoContent_whenRotatedWithConfigChanges_thenShowVideoWithoutDescription() {
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
