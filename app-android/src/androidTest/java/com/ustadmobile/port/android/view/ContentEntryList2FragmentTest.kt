@@ -90,7 +90,6 @@ class ContentEntryList2FragmentTest  {
     @AdbScreenRecord("Given content entry list in a picker mode when folder entry clicked should open it and allow entry selection")
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenFolderEntryClicked_thenShouldOpenItAndAllowEntrySelection() {
-        val parentEntryUid = 10000L
         val createdEntries = runBlocking {
             dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3,parentEntryUid,
                     nonLeafIndexes = mutableListOf(0)) }
@@ -153,7 +152,6 @@ class ContentEntryList2FragmentTest  {
     @AdbScreenRecord("Given content entry list in a picker mode when on back pressed while in a folder should show previous parent list")
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenOnBackPressedWhileInAFolder_thenShouldGoBackToThePreviousParentFolder() {
-        val parentEntryUid = 10000L
         val createdEntries = runBlocking {
             dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3,parentEntryUid,
                     nonLeafIndexes = mutableListOf(0)) }
@@ -179,11 +177,12 @@ class ContentEntryList2FragmentTest  {
         onView(withId(R.id.fragment_list_recyclerview))
                 .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(3, click()))
 
-        //observers on list can't be cancelled on background, so cancel on main thread
+        //on back navigation: observers on list can't be cancelled on background, so cancel on main thread
         GlobalScope.launch(doorMainDispatcher()) {
             list2Fragment?.handleOnBackPressed()
         }
 
+        //wait for back navigation to complete before assertions
         sleep(1000)
 
         //items on a recycler should be created parent items + 1 for create new content item view
