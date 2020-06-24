@@ -3,23 +3,17 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import android.content.res.Configuration
 import android.media.session.PlaybackState.STATE_BUFFERING
-import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.NoMatchingViewException
-import androidx.test.espresso.ViewAssertion
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.GrantPermissionRule
-import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.STATE_READY
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -37,9 +31,7 @@ import com.ustadmobile.util.test.ext.insertVideoContent
 import kotlinx.android.synthetic.main.fragment_video_content.*
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
-import org.hamcrest.Matcher
 import org.hamcrest.core.AllOf.allOf
-import org.hamcrest.core.Is.`is`
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -62,6 +54,11 @@ class VideoContentFragmentTest {
     @JvmField
     @Rule
     val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
+
 
     @JvmField
     @Rule
