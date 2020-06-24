@@ -8,13 +8,20 @@ class XapiReportOptionsTest {
     @Test
     fun testSqlWithAVGScoreWithDayAsXaxisAndWeekAsSubGroup() {
 
-        val report = XapiReportOptions(0, XapiReportOptions.SCORE,
-                XapiReportOptions.DAY, XapiReportOptions.WEEK)
+        val report = Report().apply {
+            chartType = 0
+            yAxis = Report.SCORE
+            xAxis = Report.DAY
+            subGroup = Report.WEEK
+        }
+
+
+        val reportFilter = ReportWithFilters(report, listOf())
 
         Assert.assertEquals("SELECT AVG(StatementEntity.resultScoreScaled) AS yAxis, " +
                 "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') " +
                 "AS xAxis, strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') AS subgroup " +
-                "FROM StatementEntity GROUP BY xAxis, subgroup", report.toSql().sqlStr)
+                "FROM StatementEntity GROUP BY xAxis, subgroup", reportFilter.toSql().sqlStr)
 
     }
 
@@ -22,34 +29,68 @@ class XapiReportOptionsTest {
     @Test
     fun testSqlWithSUMDurationWithMonthAsXaxisAndContentEntryAsSubGroup() {
 
-        val report = XapiReportOptions(0, XapiReportOptions.DURATION,
-                XapiReportOptions.MONTH, XapiReportOptions.CONTENT_ENTRY)
+        val report = Report().apply {
+            chartType = 0
+            yAxis = Report.DURATION
+            xAxis = Report.MONTH
+            subGroup = Report.CONTENT_ENTRY
+        }
+
+
+        val reportFilter = ReportWithFilters(report, listOf())
 
         Assert.assertEquals("SELECT SUM(StatementEntity.resultDuration) AS yAxis, " +
                 "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') " +
                 "AS xAxis, StatementEntity.xObjectUid AS subgroup " +
-                "FROM StatementEntity GROUP BY xAxis, subgroup", report.toSql().sqlStr)
+                "FROM StatementEntity GROUP BY xAxis, subgroup", reportFilter.toSql().sqlStr)
 
     }
 
     @Test
     fun testSqlWithCOUNTAcitivitesWithGenderAsXaxisAndContentEntryAsSubGroup() {
 
-        val report = XapiReportOptions(0, XapiReportOptions.COUNT_ACTIVITIES,
-                XapiReportOptions.GENDER, XapiReportOptions.CONTENT_ENTRY)
+
+        val report = Report().apply {
+            chartType = 0
+            yAxis = Report.COUNT_ACTIVITIES
+            xAxis = Report.GENDER
+            subGroup = Report.CONTENT_ENTRY
+        }
+
+
+        val reportFilter = ReportWithFilters(report, listOf())
 
         Assert.assertEquals("SELECT COUNT(*) AS yAxis, " +
                 "Person.gender " +
                 "AS xAxis, StatementEntity.xObjectUid AS subgroup " +
-                "FROM StatementEntity LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid GROUP BY xAxis, subgroup", report.toSql().sqlStr)
+                "FROM StatementEntity LEFT JOIN PERSON ON Person.personUid = StatementEntity.personUid GROUP BY xAxis, subgroup", reportFilter.toSql().sqlStr)
 
     }
 
     @Test
     fun testSqlWithCOUNTAcitivitesWithGenderAsXaxisAndContentEntryAsSubGroupWithWhoListAndVerbList() {
 
-        val report = XapiReportOptions(0, XapiReportOptions.COUNT_ACTIVITIES,
-                XapiReportOptions.GENDER, XapiReportOptions.CONTENT_ENTRY, mutableListOf(1,2), mutableListOf(1,2))
+
+        val report = ReportWithFilters().apply {
+            chartType = 0
+            yAxis = Report.COUNT_ACTIVITIES
+            xAxis = Report.GENDER
+            subGroup = Report.CONTENT_ENTRY
+            reportFilterList = listOf(
+                    ReportFilter().apply {
+                        entityType = ReportFilter.PERSON_FILTER
+                        entityUid = 1
+                    }, ReportFilter().apply {
+                entityType = ReportFilter.PERSON_FILTER
+                entityUid = 2
+            }, ReportFilter().apply {
+                entityType = ReportFilter.VERB_FILTER
+                entityUid = 1
+            }, ReportFilter().apply {
+                entityType = ReportFilter.VERB_FILTER
+                entityUid = 2
+            })
+        }
 
         Assert.assertEquals("SELECT COUNT(*) AS yAxis, " +
                 "Person.gender " +
@@ -62,10 +103,35 @@ class XapiReportOptionsTest {
     @Test
     fun testSqlWithCOUNTAcitivitesWithGenderAsXaxisAndContentEntryAsSubGroupAndAllFilters() {
 
-        val report = XapiReportOptions(0, XapiReportOptions.COUNT_ACTIVITIES,
-                XapiReportOptions.GENDER, XapiReportOptions.CONTENT_ENTRY,
-                mutableListOf(1,2), mutableListOf(1,2), mutableListOf(1,2), mutableListOf(1,3),
-                1L, 1L, mutableListOf(1,3))
+
+        val report = ReportWithFilters().apply {
+            chartType = 0
+            yAxis = Report.COUNT_ACTIVITIES
+            xAxis = Report.GENDER
+            subGroup = Report.CONTENT_ENTRY
+            toDate = 1L
+            fromDate = 1L
+            reportFilterList = listOf(
+                    ReportFilter().apply {
+                        entityType = ReportFilter.PERSON_FILTER
+                        entityUid = 1
+                    }, ReportFilter().apply {
+                entityType = ReportFilter.PERSON_FILTER
+                entityUid = 2
+            }, ReportFilter().apply {
+                entityType = ReportFilter.VERB_FILTER
+                entityUid = 1
+            }, ReportFilter().apply {
+                entityType = ReportFilter.VERB_FILTER
+                entityUid = 2
+            }, ReportFilter().apply {
+                entityType = ReportFilter.CONTENT_FILTER
+                entityUid = 1
+            }, ReportFilter().apply {
+                entityType = ReportFilter.CONTENT_FILTER
+                entityUid = 3
+            })
+        }
 
         Assert.assertEquals("SELECT COUNT(*) AS yAxis, " +
                 "Person.gender " +
@@ -78,7 +144,6 @@ class XapiReportOptionsTest {
                 "GROUP BY xAxis, subgroup", report.toSql().sqlStr)
 
     }
-
 
 
 }
