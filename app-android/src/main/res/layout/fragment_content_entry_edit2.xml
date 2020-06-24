@@ -78,7 +78,7 @@
             android:layout_height="wrap_content">
 
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/content_entry_select_file"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -109,6 +109,7 @@
                 android:layout_height="wrap_content" />
 
             <TextView
+                android:visibility="@{contentEntry.leaf ? View.VISIBLE: View.GONE}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:layout_margin="@dimen/dimen_20dp"
                 app:layout_constraintStart_toStartOf="parent"
