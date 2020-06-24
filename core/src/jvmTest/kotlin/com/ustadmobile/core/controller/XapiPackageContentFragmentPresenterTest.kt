@@ -3,6 +3,8 @@ package com.ustadmobile.core.controller
 //import org.mockito.ArgumentMatchers.any
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
@@ -31,7 +33,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 
-class XapiPackageContentPresenterTest {
+class XapiPackageContentFragmentPresenterTest {
 
     private lateinit var context: Any
 
@@ -45,7 +47,7 @@ class XapiPackageContentPresenterTest {
 
     private lateinit var xapiContainer: Container
 
-    private var mockXapiPackageContentView: XapiPackageContentView? = null
+    private var mockedView: XapiPackageContentView? = null
 
     private var httpd: EmbeddedHTTPD? = null
 
@@ -91,12 +93,14 @@ class XapiPackageContentPresenterTest {
         httpd = EmbeddedHTTPD(0, Any(), db, repo)
         httpd!!.start()
 
-        mockXapiPackageContentView = mock(XapiPackageContentView::class.java)
+        mockedView = mock{
+            onBlocking { mountContainer(xapiContainer.containerUid)}.thenReturn(mountContainer())
+        }
 
         doAnswer { invocation ->
             Thread(invocation.getArgument<Any>(0) as Runnable).start()
             Any()
-        }.`when`<XapiPackageContentView>(mockXapiPackageContentView).runOnUiThread(any())
+        }.`when`<XapiPackageContentView>(mockedView).runOnUiThread(any())
 
     }
 
@@ -104,6 +108,14 @@ class XapiPackageContentPresenterTest {
     fun tearDown() {
         xapiTmpFile.delete()
         UmFileUtilSe.deleteRecursively(containerDirTmp!!)
+    }
+
+    private fun mountContainer(): String{
+        val mountedPath = httpd!!.mountContainer(xapiContainer.containerUid, null)
+        lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
+                mountedPath!!)
+        mountLatch.countDown()
+       return lastMountedUrl!!
     }
 
     @Test
@@ -115,14 +127,8 @@ class XapiPackageContentPresenterTest {
 
         val account = UmAccount(42, "username", "fefe1010fe",
                 "http://localhost/")
-        val xapiPresenter = XapiPackageContentPresenter(
-                context, args, mockXapiPackageContentView!!, account) {
-            val mountedPath = httpd!!.mountContainer(it, null)
-            lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
-                    mountedPath!!)
-            mountLatch.countDown()
-            lastMountedUrl!!
-        }
+        val xapiPresenter = XapiPackageContentFragmentPresenter(
+                context, args, mockedView!!, account)
 
 
         xapiPresenter.onCreate(null)
@@ -131,8 +137,7 @@ class XapiPackageContentPresenterTest {
 
         argumentCaptor<String> {
             val pkgPath = UMFileUtil.joinPaths(lastMountedUrl!!, "tetris.html")
-            verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(5000)).loadUrl(
-                    capture())
+            verify<XapiPackageContentView>(mockedView, timeout(5000)).urlToLoad = capture()
             Assert.assertTrue("Mounted path starts with url and html name",
                     firstValue.startsWith(pkgPath))
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
@@ -147,7 +152,7 @@ class XapiPackageContentPresenterTest {
                     paramsProvided["activity_id"])
         }
 
-        verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(15000)).setTitle("Tin Can Tetris Example")
+        verify<XapiPackageContentView>(mockedView, timeout(15000)).contentTitle = "Tin Can Tetris Example"
     }
 
 }

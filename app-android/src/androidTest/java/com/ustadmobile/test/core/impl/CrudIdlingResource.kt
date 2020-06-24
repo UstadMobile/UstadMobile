@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingResource
+import com.ustadmobile.port.android.view.UstadBaseFragment
 import com.ustadmobile.port.android.view.UstadDetailFragment
 import com.ustadmobile.port.android.view.UstadEditFragment
 import com.ustadmobile.test.rules.ScenarioIdlingResource
@@ -113,6 +114,10 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     }
 
     fun Fragment.isIdle(): Boolean {
+
+        if(this is UstadBaseFragment && this.loading){
+            return true
+        }
         //if the fragment view is not currently live, it doesn't matter
         if(!this.viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
             return true

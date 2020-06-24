@@ -11,7 +11,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.XapiPackageContentPresenter
+import com.ustadmobile.core.controller.XapiPackageContentFragmentPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UmAccountManager
@@ -25,7 +25,7 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 
 class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageContentView {
 
-    private lateinit var mPresenter: XapiPackageContentPresenter
+    private lateinit var mFragmentPresenter: XapiPackageContentFragmentPresenter
 
     private var mMountedPath: AtomicReference<String>? = null
 
@@ -76,11 +76,11 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
     }
 
     override fun onHttpdConnected(httpd: EmbeddedHTTPD) {
-        mPresenter = XapiPackageContentPresenter(this,
+        mFragmentPresenter = XapiPackageContentFragmentPresenter(this,
                 bundleToMap(intent.extras), this,
-                UmAccountManager.getActiveAccount(this), httpd.containerMounter)
-
-        mPresenter.onCreate(bundleToMap(savedState))
+                UmAccountManager.getActiveAccount(this))
+        //httpd.containerMounter
+        mFragmentPresenter.onCreate(bundleToMap(savedState))
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -94,14 +94,14 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
         return super.onOptionsItemSelected(item)
     }
 
-    override fun setTitle(title: String) {
+   /* override fun setTitle(title: String) {
         super.setTitle(title)
     }
 
     override fun loadUrl(url: String) {
         UMLog.l(UMLog.INFO, 0, "Xapi: Loading: $url")
         mWebView!!.loadUrl(url)
-    }
+    }*/
 
     override fun onDestroy() {
        /* val mountedPath = mMountedPath!!.get()
@@ -111,8 +111,23 @@ class XapiPackageContentActivity : ContainerContentActivity(), XapiPackageConten
         super.onDestroy()
     }
 
+    override var contentTitle: String
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var urlToLoad: String
+        get() = TODO("Not yet implemented")
+        set(value) {}
+
     override fun showSnackBar(errorMessage: String, action: () -> Unit, actionMessageId: Int) {
         mProgressBar?.progress = 0
         mProgressBar?.visibility = View.GONE
+    }
+
+    override suspend fun mountContainer(containerUid: Long): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun unMountContainer() {
+        TODO("Not yet implemented")
     }
 }

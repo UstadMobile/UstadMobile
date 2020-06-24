@@ -158,5 +158,10 @@
         android:name="com.ustadmobile.port.android.view.ReportDetailFragment"
         android:label="ReportDetailFragment" />
 
+    <fragment
+        android:id="@+id/content_xapi_dest"
+        android:name="com.ustadmobile.port.android.view.XapiPackageContentFragment"
+        android:label="XapiPackageContentFragment" />
+
 
 </navigation>

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
@@ -31,9 +32,8 @@ import kotlinx.serialization.json.Json
  * https://github.com/RusticiSoftware/launch/blob/master/lms_lrs.md
  *
  */
-class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view: XapiPackageContentView,
-                                  private val account: UmAccount?,
-                                  private val containerMounter: suspend (Long) -> String)
+class XapiPackageContentFragmentPresenter(context: Any, args: Map<String, String>, view: XapiPackageContentView,
+                                          private val account: UmAccount? = UmAccountManager.getActiveAccount(context))
     : UstadBaseController<XapiPackageContentView>(context, args, view) {
 
     private var tinCanXml: TinCanXML? = null
@@ -47,8 +47,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         val contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
 
         GlobalScope.launch {
-            val mountedPath = containerMounter(containerUid)
-
+            val mountedPath = view.mountContainer(containerUid)
             val client = defaultHttpClient()
             val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
 
@@ -68,8 +67,8 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                 val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + "?"  +
                         launchMethodParams.toQueryString()
                 view.runOnUiThread(Runnable {
-                    view.setTitle(tinCanXml?.launchActivity?.name ?: "")
-                    view.loadUrl(launchUrl)
+                    view.contentTitle = tinCanXml?.launchActivity?.name ?: ""
+                    view.urlToLoad = launchUrl
                 })
             }
         }

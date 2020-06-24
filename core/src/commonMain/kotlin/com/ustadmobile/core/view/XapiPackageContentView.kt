@@ -6,13 +6,14 @@ import kotlin.js.JsName
  * Created by mike on 9/13/17.
  */
 
-interface XapiPackageContentView : UstadView {
+interface XapiPackageContentView : UstadView, MountedContainerHandler {
 
     @JsName("setTitle")
-    fun setTitle(title: String)
+    var contentTitle: String
+
 
     @JsName("loadUrl")
-    fun loadUrl(url: String)
+    var urlToLoad: String
 
     companion object {
 
