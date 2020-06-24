@@ -22,6 +22,7 @@ class SystemImplRule : TestWatcher(){
     }
 
     override fun finished(description: Description?) {
+        UstadMobileSystemImpl.instance.clearPrefs()
         systemImplSpy = null
     }
 
