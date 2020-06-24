@@ -56,6 +56,9 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     abstract suspend fun findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid: Long,
                                         clazzMemberUid: Long): ClazzMemberAndClazzWorkWithSubmission?
 
+    @Query("SELECT * FROM ClazzWork")
+    abstract suspend fun findAllTesting(): List<ClazzWork>
+
     companion object{
 
 
@@ -75,7 +78,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             (
                 SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
                 ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeFinished > 0
+                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
                 GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
             ) as markedStudents,
             0 as firstContentEntryUid,

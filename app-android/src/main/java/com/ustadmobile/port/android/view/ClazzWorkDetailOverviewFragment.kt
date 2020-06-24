@@ -291,7 +291,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         //Public comments:
         newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(mPresenter,
                 requireContext().getString(R.string.add_class_comment), true, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWorkUid?:0L, 0
+                entity?.clazzWorkUid?:0L, 0, UmAccountManager.getActivePersonUid(requireContext())
         )
         newPublicCommentRecyclerAdapter?.visible = true
 
@@ -305,7 +305,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         //Private comments section:
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(mPresenter,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWorkUid?:0L, 0
+                entity?.clazzWorkUid?:0L, 0, UmAccountManager.getActivePersonUid(requireContext())
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 

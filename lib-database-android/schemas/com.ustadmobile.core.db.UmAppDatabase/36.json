@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "be562302d42070bad21544b2318703a6",
+    "identityHash": "96e419f7c05167aa8aad96ae2d2fce2c",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4640,7 +4640,7 @@
       },
       {
         "tableName": "ClazzWorkSubmission",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkSubmissionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkSubmissionClazzWorkUid` INTEGER NOT NULL, `clazzWorkSubmissionClazzMemberUid` INTEGER NOT NULL, `clazzWorkSubmissionPersonUid` INTEGER NOT NULL, `clazzWorkSubmissionInactive` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeStarted` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeUpdated` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeFinished` INTEGER NOT NULL, `clazzWorkSubmissionText` TEXT, `clazzWorkSubmissionScore` INTEGER NOT NULL, `clazzWorkSubmissionMCSN` INTEGER NOT NULL, `clazzWorkSubmissionLCSN` INTEGER NOT NULL, `clazzWorkSubmissionLCB` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkSubmissionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkSubmissionClazzWorkUid` INTEGER NOT NULL, `clazzWorkSubmissionClazzMemberUid` INTEGER NOT NULL, `clazzWorkSubmissionMarkerClazzMemberUid` INTEGER NOT NULL, `clazzWorkSubmissionMarkerPersonUid` INTEGER NOT NULL, `clazzWorkSubmissionPersonUid` INTEGER NOT NULL, `clazzWorkSubmissionInactive` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeStarted` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeUpdated` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeFinished` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeMarked` INTEGER NOT NULL, `clazzWorkSubmissionText` TEXT, `clazzWorkSubmissionScore` INTEGER NOT NULL, `clazzWorkSubmissionMCSN` INTEGER NOT NULL, `clazzWorkSubmissionLCSN` INTEGER NOT NULL, `clazzWorkSubmissionLCB` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "clazzWorkSubmissionUid",
@@ -4657,6 +4657,18 @@
           {
             "fieldPath": "clazzWorkSubmissionClazzMemberUid",
             "columnName": "clazzWorkSubmissionClazzMemberUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionMarkerClazzMemberUid",
+            "columnName": "clazzWorkSubmissionMarkerClazzMemberUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionMarkerPersonUid",
+            "columnName": "clazzWorkSubmissionMarkerPersonUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -4687,6 +4699,12 @@
           {
             "fieldPath": "clazzWorkSubmissionDateTimeFinished",
             "columnName": "clazzWorkSubmissionDateTimeFinished",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionDateTimeMarked",
+            "columnName": "clazzWorkSubmissionDateTimeMarked",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8220,7 +8238,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'be562302d42070bad21544b2318703a6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '96e419f7c05167aa8aad96ae2d2fce2c')"
     ]
   }
 }

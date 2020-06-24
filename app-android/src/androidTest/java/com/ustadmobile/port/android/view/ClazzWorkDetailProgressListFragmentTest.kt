@@ -78,7 +78,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
         val teacherScenario = launchFragmentInContainer(
                 bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString()),
-                themeResId = R.style.Theme_UstadTheme) {
+                themeResId = R.style.UmTheme_App) {
             ClazzWorkDetailProgressListFragment().also{
                 it.installNavController(systemImplNavRule.navController)
             }
@@ -261,8 +261,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
     }
 
-
-
     @Test
     fun givenValidClazzWorkUid_whenTeacherSeesStudentListedAndClicked_thenShouldGoToMarking() {
 
@@ -328,6 +326,10 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
 
         reloadFragment(testClazzWork.clazzWork)
+
+        Thread.sleep(2000)
+
+        Thread.sleep(1000)
         onView(withText("Marked")).check(matches(isDisplayed()))
         //TODO: Test clicking on one goes to Marking
 

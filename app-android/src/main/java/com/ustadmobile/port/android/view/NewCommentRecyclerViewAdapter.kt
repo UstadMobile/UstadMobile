@@ -10,7 +10,7 @@ import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 class NewCommentRecyclerViewAdapter(
         var itemListener: NewCommentItemListener?,
         hintText: String? = null, commentPublic: Boolean, entityType: Int, eUid: Long,
-        toComment:Long = 0)
+        toComment:Long = 0, fromComment: Long = 0)
     : SingleItemRecyclerViewAdapter<NewCommentRecyclerViewAdapter.NewCommentViewHolder>() {
 
     var hintText: String? = hintText
@@ -44,9 +44,17 @@ class NewCommentRecyclerViewAdapter(
         }
 
     var commentTo : Long = toComment
+        get() = field
         set(value){
             field = value
             viewHolder?.itemBinding?.toComment = value
+        }
+
+    var commentFrom : Long = fromComment
+        get() = field
+        set(value){
+            field = value
+            viewHolder?.itemBinding?.fromComment = value
         }
 
     class NewCommentViewHolder(var itemBinding: ItemCommentNewBinding)
@@ -64,6 +72,7 @@ class NewCommentRecyclerViewAdapter(
                     it.entityType = entityTable
                     it.entityUid = entityUid
                     it.toComment = commentTo
+                    it.fromComment = commentFrom
                 })
     }
 

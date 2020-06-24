@@ -20,6 +20,10 @@ open class ClazzWorkSubmission() {
 
     var clazzWorkSubmissionClazzMemberUid : Long = 0
 
+    var clazzWorkSubmissionMarkerClazzMemberUid: Long = 0
+
+    var clazzWorkSubmissionMarkerPersonUid: Long = 0
+
     var clazzWorkSubmissionPersonUid: Long = 0
 
     var clazzWorkSubmissionInactive : Boolean = false
@@ -29,6 +33,8 @@ open class ClazzWorkSubmission() {
     var clazzWorkSubmissionDateTimeUpdated: Long = 0
 
     var clazzWorkSubmissionDateTimeFinished: Long = 0
+
+    var clazzWorkSubmissionDateTimeMarked: Long = 0
 
     var clazzWorkSubmissionText : String? = null
 

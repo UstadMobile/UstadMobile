@@ -210,10 +210,14 @@ fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMembe
     if(clazzWorkSubmission == null){
         line2Bit1 = notSubmitted
     }else{
-        line2Bit1 = if(clazzWorkSubmission.clazzWorkSubmissionDateTimeFinished < 1){
-            submitted
+        line2Bit1 = if(clazzWorkSubmission.clazzWorkSubmissionDateTimeFinished > 0){
+            if(clazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0){
+                marked
+            }else{
+                submitted
+            }
         }else{
-            marked
+            notSubmitted
         }
     }
 

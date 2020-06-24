@@ -32,7 +32,7 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    var filterByClazzWorkUid: Long = -1
+    private var filterByClazzWorkUid: Long = -1
 
     class ClazzMemberWithClazzWorkProgressListSortOption(val sortOrder: SortOrder, context: Any)
         : MessageIdOption(sortOrder.messageId, context)
@@ -70,11 +70,12 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
         val clazzMemberUid = entry.mClazzMember?.clazzMemberUid?:0L
         val clazzWorkUid = filterByClazzWorkUid
 
-        systemImpl.go(ClazzWorkSubmissionMarkingView.VIEW_NAME, mapOf(UstadView.ARG_CLAZZWORK_UID to
-            clazzWorkUid.toString(), UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString()),
+        systemImpl.go(ClazzWorkSubmissionMarkingView.VIEW_NAME,
+                mapOf(UstadView.ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
+                        UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString()),
                 context)
 
-        super.handleClickEntry(entry)
+        //super.handleClickEntry(entry)
     }
 
     override fun handleClickCreateNewFab() {

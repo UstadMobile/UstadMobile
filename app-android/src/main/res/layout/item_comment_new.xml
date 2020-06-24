@@ -22,6 +22,10 @@
             type="Long" />
 
         <variable
+            name="fromComment"
+            type="Long" />
+
+        <variable
             name="toComment"
             type="Long" />
 
@@ -75,7 +79,7 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:onClick="@{(view) -> mActivity.addComment(entityType, entityUid,  commentText, publicComment, toComment)}"
+            android:onClick="@{(view) -> mActivity.addComment(entityType, entityUid,  commentText, publicComment, toComment, fromComment)}"
             android:src="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

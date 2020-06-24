@@ -102,7 +102,7 @@ class ClazzWorkDetailOverviewFragmentTest {
 
         val studentScenario = launchFragmentInContainer(
                 bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString()),
-                themeResId = R.style.Theme_UstadTheme) {
+                themeResId = R.style.UmTheme_App) {
             ClazzWorkDetailOverviewFragment().also{
                 it.installNavController(systemImplNavRule.navController)
             }

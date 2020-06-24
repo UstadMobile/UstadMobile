@@ -7,10 +7,6 @@
         <import type="android.view.View"/>
 
         <variable
-            name="clazzWorkSubmissionWithPerson"
-            type="com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission" />
-
-        <variable
             name="loading"
             type="boolean" />
 

@@ -1,11 +1,9 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission
-import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 
 

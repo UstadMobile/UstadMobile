@@ -91,8 +91,8 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                     questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
                             .map {
                                 val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
-                                val qResponse = db.clazzWorkQuestionResponseDao.findByQuestionUidAsync(
-                                        questionUid).toMutableList()
+                                val qResponse = db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
+                                        questionUid, clazzMember?.clazzMemberUid?:0L).toMutableList()
                                 if (qResponse.isEmpty()) {
                                     qResponse.add(ClazzWorkQuestionResponse().apply {
                                         clazzWorkQuestionResponseQuestionUid = questionUid
