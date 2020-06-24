@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.generated.locale.MessageID.loading
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -65,6 +66,7 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
         val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
+        view.loading = true
         GlobalScope.launch {
             view.entry = contentEntryDao.getContentByUuidAsync(entryUuid)
         }

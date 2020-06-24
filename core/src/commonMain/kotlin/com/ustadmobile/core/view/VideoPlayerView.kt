@@ -14,9 +14,6 @@ interface VideoPlayerView : UstadView {
     @JsName("setVideoParamsJs")
     fun setVideoParams(videoPath: String?, audioPath: String?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>)
 
-    @JsName("showErrorWithAction")
-    fun showErrorWithAction(message: String, actionMessageId: Int)
-
 
     companion object {
 

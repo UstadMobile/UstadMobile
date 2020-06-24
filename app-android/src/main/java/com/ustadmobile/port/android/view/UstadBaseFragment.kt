@@ -22,7 +22,7 @@ open class UstadBaseFragment : Fragment(), UstadView {
     protected var fabManager: FabManagerLifecycleObserver? = null
 
     override var loading: Boolean = false
-        get() = false
+        get() = field
         set(value) {
             //TODO: set this on the main activity
             field = value

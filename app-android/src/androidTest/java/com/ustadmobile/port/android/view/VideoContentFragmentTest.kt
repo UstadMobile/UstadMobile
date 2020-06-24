@@ -2,20 +2,28 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.content.res.Configuration
+import android.media.session.PlaybackState.STATE_BUFFERING
+import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.NoMatchingViewException
+import androidx.test.espresso.ViewAssertion
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.GrantPermissionRule
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.contentformats.importContentEntryFromFile
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
@@ -25,15 +33,18 @@ import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import com.ustadmobile.util.test.ext.insertVideoContent
+import kotlinx.android.synthetic.main.fragment_video_content.*
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
+import org.hamcrest.Matcher
 import org.hamcrest.core.AllOf.allOf
+import org.hamcrest.core.Is.`is`
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
-import java.lang.Thread.sleep
 
 
 @AdbScreenRecord("Video Content Screen Test")
@@ -56,7 +67,6 @@ class VideoContentFragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-
     @get:Rule
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -68,18 +78,17 @@ class VideoContentFragmentTest {
         val tmpDir = UmFileUtilSe.makeTempDir("testVideoPlayer",
                 "" + System.currentTimeMillis())
 
-        val videoFile = File(tmpDir, "video1.webm")
+        val videoFile = File(tmpDir, "video.mp4")
 
         copyInputStreamToFile(
                 javaClass.getResourceAsStream("/com/ustadmobile/app/android/video.mp4")!!,
                 videoFile)
 
         runBlocking {
-            val (contentEntry, containerVar) = importContentEntryFromFile(tmpDir, dbRule.db, dbRule.repo,
-                    tmpDir.absolutePath)!!
-            Assert.assertNotNull(contentEntry)
-            Assert.assertNotNull(containerVar)
-            container = containerVar
+            container = dbRule.db.insertVideoContent()
+            val manager = ContainerManager(container!!, dbRule.db,
+                    dbRule.db, tmpDir.absolutePath)
+            manager.addEntries(ContainerManager.FileEntrySource(videoFile, "video.mp4"))
         }
     }
 
@@ -94,14 +103,17 @@ class VideoContentFragmentTest {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-
-
         onView(withId(R.id.activity_video_player_description))
-                .check(matches(isDisplayed()))
+                .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
 
         onView(allOf(withId(R.id.exo_play),
                 isDescendantOfA(withId(R.id.player_view_controls))))
                 .perform(click())
+
+        fragmentScenario.letOnFragment {
+            val playState = it.activity_video_player_view.player?.playbackState
+            Assert.assertTrue("player is playing", playState == STATE_BUFFERING || playState == STATE_READY)
+        }
 
         fragmentScenario.letOnFragment {
             it.onConfigurationChanged(Configuration().apply {

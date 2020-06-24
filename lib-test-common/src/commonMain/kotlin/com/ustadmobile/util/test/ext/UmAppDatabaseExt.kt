@@ -348,3 +348,22 @@ suspend fun UmAppDatabase.insertTestStatements() {
         i++
     }
 }
+
+suspend fun UmAppDatabase.insertVideoContent(): Container {
+    val spanishQuiz = ContentEntry()
+    spanishQuiz.title = "tiempo de prueba"
+    spanishQuiz.thumbnailUrl = "https://www.africanstorybook.org/img/asb120.png"
+    spanishQuiz.description = "todo el contenido"
+    spanishQuiz.publisher = "CK12"
+    spanishQuiz.author = "borrachera"
+    spanishQuiz.primaryLanguageUid = 3
+    spanishQuiz.leaf = true
+    spanishQuiz.contentEntryUid = contentEntryDao.insert(spanishQuiz)
+
+    val container = Container()
+    container.containerContentEntryUid = spanishQuiz.contentEntryUid
+    val containerUid = containerDao.insert(container)
+    container.containerUid = containerUid
+
+    return container
+}

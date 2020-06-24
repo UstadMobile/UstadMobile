@@ -11,13 +11,17 @@ import java.io.File
 class VideoTypePlugin : VideoType(), ContentTypePlugin {
 
     override fun getContentEntry(file: File): ContentEntryWithLanguage? {
+
+        fileExtensions.find { file.name.endsWith(it) } ?: return null
+
         return ContentEntryWithLanguage().apply {
-            this.title = "Video Title"
-            this.description = "Video Description"
+            this.title = ""
+            this.description = ""
             this.leaf = true
-            val language = Language()
-            language.iso_639_1_standard = "en"
-            this.language = language
         }
+    }
+
+   override fun isZipped(): Boolean{
+        return false
     }
 }

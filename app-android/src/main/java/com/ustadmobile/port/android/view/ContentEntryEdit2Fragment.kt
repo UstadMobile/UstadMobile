@@ -188,7 +188,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String,db: UmAppDatabase, repo: UmAppDatabase): Container ?{
         val file = entryMetaData?.file
         return if(file != null){
-            importContainerFromZippedFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo)
+            importContainerFromZippedFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo, true)
         }else null
     }
 

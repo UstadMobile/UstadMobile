@@ -41,6 +41,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
 import java.io.BufferedInputStream
+import java.io.File
 import java.io.IOException
 
 
@@ -157,7 +158,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private fun initializePlayer() {
         player = SimpleExoPlayer.Builder(viewContext as Context).build()
-
+        player?.addListener(videoListener)
         playerView?.player = player
         controlsView?.player = player
         player?.playWhenReady = playWhenReady
@@ -197,14 +198,11 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
             } else {
                 subtitles?.visibility = View.GONE
-
                 player?.prepare(mediaSource, false, false)
             }
+        } else {
+            loading = false
         }
-    }
-
-    override fun showErrorWithAction(message: String, actionMessageId: Int) {
-        showSnackBar(message, {}, actionMessageId)
     }
 
     fun setSubtitle(subtitleData: String?, mediaSource: MediaSource) {
@@ -227,14 +225,21 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
                 val container = mPresenter?.container
                 if (container == null) {
-                    showErrorWithAction(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), 0)
+                    showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), {}, 0)
+                    loading = false
                     return@launch
                 }
 
                 val containerManager = ContainerManager(container, appDatabase, repoAppDatabase)
 
+                val containerEntry = containerManager.getEntry(subtitleData)
+                if (containerEntry == null) {
+                    showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), {}, 0)
+                    loading = false
+                    return@launch
+                }
                 val byteArrayDataSource = ByteArrayDataSource(
-                        UMIOUtils.readStreamToByteArray(containerManager.getInputStream(containerManager.getEntry(subtitleData)!!)))
+                        UMIOUtils.readStreamToByteArray(containerManager.getInputStream(containerEntry)))
 
                 val factory = { byteArrayDataSource }
 
@@ -246,7 +251,15 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
                     player?.prepare(mergedSource, false, false)
                 })
             } catch (ignored: IOException) {
+                loading = false
+            }
+        }
+    }
 
+    private var videoListener = object : Player.EventListener {
+        override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+            if (playbackState == Player.STATE_READY) {
+                loading = false
             }
         }
     }
@@ -267,6 +280,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         }
     }
 
+
     fun playAudio(fromMs: Long) {
         audioPlayer = Codec2Player(BufferedInputStream(mPresenter?.audioInput), fromMs)
         audioPlayer?.play()
@@ -283,7 +297,9 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         playbackPosition = player?.currentPosition!!
         currentWindow = player?.currentWindowIndex!!
         playWhenReady = player?.playWhenReady!!
+        player?.removeListener(videoListener)
         player?.release()
+
         player = null
     }
 

@@ -17,9 +17,6 @@ import java.io.IOException
 import java.util.*
 import java.util.zip.ZipException
 
-import java.nio.file.Paths
-import java.nio.file.Files
-
 import java.util.regex.Pattern
 
 /**
@@ -40,7 +37,7 @@ suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, p
         }
         if (pluginResult != null) {
             pluginResult.contentFlags = ContentEntry.FLAG_IMPORTED
-            return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], file)
+            return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], file, it.isZipped())
         }
     }
 
@@ -48,7 +45,7 @@ suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, p
 }
 
 suspend fun importContainerFromZippedFile(contentEntryUid: Long, mimeType: String?, containerBaseDir: String,
-                                          file: File, db: UmAppDatabase, dbRepo: UmAppDatabase): Container {
+                                          file: File, db: UmAppDatabase, dbRepo: UmAppDatabase, isZipped: Boolean): Container {
 
     val container = Container().apply {
         containerContentEntryUid = contentEntryUid
@@ -61,15 +58,12 @@ suspend fun importContainerFromZippedFile(contentEntryUid: Long, mimeType: Strin
 
     val containerManager = ContainerManager(container, db, dbRepo, containerBaseDir)
     try {
-        if (file.isDirectory()) {
-            val fileMap = HashMap<File, String>()
-            createContainerFromDirectory(file, fileMap)
-            fileMap.forEach {
-                containerManager.addEntries(ContainerManager.FileEntrySource(it.component1(), it.component2()))
-            }
-        } else {
+        if (isZipped) {
             addEntriesFromZipToContainer(file.absolutePath, containerManager)
+        } else {
+            containerManager.addEntries(ContainerManager.FileEntrySource(file, file.name))
         }
+
     } catch (e: ZipException) {
         e.printStackTrace()
     } catch (e: IOException) {
@@ -79,35 +73,15 @@ suspend fun importContainerFromZippedFile(contentEntryUid: Long, mimeType: Strin
     return container
 }
 
-fun createContainerFromDirectory(directory: File, filemap: MutableMap<File, String>): Map<File, String> {
-    val sourceDirPath = Paths.get(directory.toURI())
-    try {
-        Files.walk(sourceDirPath).filter { path -> !Files.isDirectory(path) }
-                .forEach { path ->
-                    val relativePath = sourceDirPath.relativize(path).toString()
-                            .replace(Pattern.quote("\\").toRegex(), "/")
-                    filemap[path.toFile()] = relativePath
 
-                }
-    } catch (e: IOException) {
-        e.printStackTrace()
-    }
-
-    return filemap
-}
-
-
-/**
- * file: add a directory of files or a zipped file
- */
 suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: UmAppDatabase,
                                        containerBaseDir: String, plugins: List<ContentTypePlugin> = CONTENT_PLUGINS): Pair<ContentEntry, Container>? {
-    val (contentEntry, mimeType) = extractContentEntryMetadataFromFile(file, db, plugins)
+    val (contentEntry, mimeType, file, isZipped) = extractContentEntryMetadataFromFile(file, db, plugins)
             ?: return null
 
     contentEntry.contentEntryUid = dbRepo.contentEntryDao.insert(contentEntry)
     val container = importContainerFromZippedFile(contentEntry.contentEntryUid, mimeType, containerBaseDir, file,
-            db, dbRepo)
+            db, dbRepo, isZipped)
 
     return Pair(contentEntry, container)
 }
@@ -115,4 +89,4 @@ suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: Um
 /**
  *
  */
-data class ImportedContentEntryMetaData(var contentEntry: ContentEntryWithLanguage, var mimeType: String, var file: File)
+data class ImportedContentEntryMetaData(var contentEntry: ContentEntryWithLanguage, var mimeType: String, var file: File, var isZipped: Boolean)
