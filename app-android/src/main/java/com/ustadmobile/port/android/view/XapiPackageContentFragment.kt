@@ -11,17 +11,15 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.toughra.ustadmobile.databinding.FragmentXapiPackageContentBinding
 import com.ustadmobile.core.controller.XapiPackageContentFragmentPresenter
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicReference
 
-class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
+class XapiPackageContentFragment(private val networkServiceProvider:CompletableDeferred<NetworkManagerBle>? = null) : UstadBaseFragment(), XapiPackageContentView {
 
     override var contentTitle: String = ""
         set(value) {
@@ -36,8 +34,9 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
         }
 
     override suspend fun mountContainer(containerUid: Long): String {
-        val path = networkManagerBle?.httpd?.mountContainer(containerUid,null)
-        mountedContainerPath?.set(path)
+        val containerPath = networkManagerBle?.httpd?.mountContainer(containerUid,null)
+        mountedContainerPath?.set(UMFileUtil.joinPaths(networkManagerBle?.httpd?.localHttpUrl.toString(),
+                containerPath.toString()))
         return mountedContainerPath?.get()?:""
     }
 
@@ -54,7 +53,7 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
 
     private var networkManagerBle: NetworkManagerBle ? = null
 
-    private var mountedContainerPath: AtomicReference<String>? = null
+    private var mountedContainerPath: AtomicReference<String>? = AtomicReference("")
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -73,7 +72,7 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
         mBinding?.activityXapiPackageWebview?.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, newProgress: Int) {
                 super.onProgressChanged(view, newProgress)
-                loading = newProgress < 100
+                loading = newProgress != 100
                 if (loading) {
                     val isIndeterminate = mBinding?.progressBar?.isIndeterminate
                     if (isIndeterminate != null && isIndeterminate)
@@ -93,7 +92,7 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
         super.onViewCreated(view, savedInstanceState)
         GlobalScope.launch {
             val thisFrag = this@XapiPackageContentFragment
-            networkManagerBle = (activity as? MainActivity)?.networkManagerBle?.await()
+            networkManagerBle = (networkServiceProvider?:(activity as? MainActivity)?.networkManagerBle)?.await()
             withContext(Dispatchers.Main){
                 mPresenter = XapiPackageContentFragmentPresenter(requireContext(), arguments.toStringMap(), thisFrag)
                 mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
