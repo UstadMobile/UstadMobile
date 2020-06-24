@@ -27,7 +27,7 @@ import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(),
-        ContentEntryList2View, View.OnClickListener{
+        ContentEntryList2View, View.OnClickListener, FragmentBackHandler{
 
     private var mPresenter: ContentEntryList2Presenter? = null
 
@@ -59,7 +59,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         }
     }
 
-    fun handleOnBackPressed() = mPresenter?.handleOnBackPressed() ?: false
+    override fun onHostBackPressed() = mPresenter?.handleOnBackPressed() ?: false
 
     override var downloadOptions: Map<String, String>? = null
         set(value) {

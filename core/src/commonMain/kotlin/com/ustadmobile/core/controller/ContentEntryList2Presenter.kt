@@ -113,10 +113,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             showContentEntryListByParentUid()
             return true
         }
-
-        if(mListMode == ListViewMode.BROWSER){
-            return true
-        }
         return false
     }
 

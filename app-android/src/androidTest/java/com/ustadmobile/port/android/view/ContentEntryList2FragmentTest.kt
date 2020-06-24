@@ -179,7 +179,7 @@ class ContentEntryList2FragmentTest  {
 
         //on back navigation: observers on list can't be cancelled on background, so cancel on main thread
         GlobalScope.launch(doorMainDispatcher()) {
-            list2Fragment?.handleOnBackPressed()
+            list2Fragment?.onHostBackPressed()
         }
 
         //wait for back navigation to complete before assertions
