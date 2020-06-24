@@ -67,7 +67,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/present_button"
                 android:contentDescription="@string/present"
-                style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                style="@style/UmTheme.Widget.OutlinedButton.IconOnly"
                 app:icon="@drawable/ic_check_black_24dp"
                 app:iconTint="?colorOnIconTint"
                 android:layout_width="wrap_content"
@@ -76,7 +76,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/absent_button"
                 android:contentDescription="@string/absent"
-                style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                style="@style/UmTheme.Widget.OutlinedButton.IconOnly"
                 app:icon="@drawable/ic_close_black_24dp"
                 app:iconTint="?colorOnIconTint"
                 android:layout_width="wrap_content"
@@ -86,7 +86,7 @@
                 android:id="@+id/late_button"
                 android:contentDescription="@string/partial"
                 app:iconTint="?colorOnIconTint"
-                style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                style="@style/UmTheme.Widget.OutlinedButton.IconOnly"
                 app:icon="@drawable/ic_delay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

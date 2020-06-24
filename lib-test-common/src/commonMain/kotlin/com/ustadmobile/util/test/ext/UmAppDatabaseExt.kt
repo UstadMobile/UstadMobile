@@ -95,11 +95,11 @@ suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: In
 }
 
 suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentContainer(
-        numEntries: Int, parentEntryUid: Long, isLeaf: Boolean = true): List<ContentEntry> {
-    return (1..numEntries).map {
+        numEntries: Int, parentEntryUid: Long, nonLeafIndexes: MutableList<Int> = mutableListOf()): List<ContentEntry> {
+    return (1 .. numEntries).map {
         val entry = ContentEntry().apply {
-            title = "Dummy title $it"
-            leaf = isLeaf
+            leaf = !(nonLeafIndexes.isNotEmpty() && nonLeafIndexes.indexOf(it - 1) != -1)
+            title = "Dummy ${if(leaf) " entry" else "folder"} title $it"
             description = "Dummy description $it"
             contentEntryUid = contentEntryDao.insertAsync(this)
         }

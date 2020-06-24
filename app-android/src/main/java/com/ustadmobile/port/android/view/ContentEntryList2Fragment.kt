@@ -16,18 +16,18 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(),
-        ContentEntryList2View, View.OnClickListener{
+        ContentEntryList2View, View.OnClickListener, FragmentBackHandler{
 
     private var mPresenter: ContentEntryList2Presenter? = null
 
@@ -36,13 +36,14 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
     class ContentEntryListViewHolder(val itemBinding: ItemContentEntryListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-    class ContentEntryListRecyclerAdapter(var presenter: ContentEntryList2Presenter?)
+    class ContentEntryListRecyclerAdapter(var presenter: ContentEntryList2Presenter?, private val pickerMode: String?)
         : SelectablePagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentEntryListViewHolder {
             val itemBinding = ItemContentEntryListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
+            itemBinding.isPickerMode = pickerMode == ListViewMode.PICKER.toString()
             return ContentEntryListViewHolder(itemBinding)
         }
 
@@ -57,6 +58,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             presenter = null
         }
     }
+
+    override fun onHostBackPressed() = mPresenter?.handleOnBackPressed() ?: false
 
     override var downloadOptions: Map<String, String>? = null
         set(value) {
@@ -80,12 +83,15 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
 
-        mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
+                arguments?.get(UstadView.ARG_LISTMODE).toString())
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.content_editor_create_new_title))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view
     }
+
+
 
     override fun onResume() {
         super.onResume()
@@ -106,7 +112,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.content_entry_list_dest, ContentEntry::class.java)
+            mPresenter?.handleClickCreateNewFab()
     }
 
     override fun onDestroyView() {
@@ -117,6 +123,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.contentEntryDao
+
+
 
     companion object {
 
