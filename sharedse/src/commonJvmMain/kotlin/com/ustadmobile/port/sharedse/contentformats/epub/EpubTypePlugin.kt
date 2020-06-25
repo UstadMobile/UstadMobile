@@ -43,7 +43,7 @@ class EpubTypePlugin : EPUBType(), ContentTypePlugin {
                         contentEntryVal.description = opfDocument.description
                         contentEntryVal.leaf = true
                         val languageCode = opfDocument.getLanguage(0)
-                        if(languageCode != null){
+                        if (languageCode != null) {
                             val language = Language()
                             language.iso_639_1_standard = languageCode
                             contentEntryVal.language = language
@@ -61,5 +61,9 @@ class EpubTypePlugin : EPUBType(), ContentTypePlugin {
         }
 
         return contentEntry
+    }
+
+    override fun isZipped(): Boolean {
+        return true
     }
 }

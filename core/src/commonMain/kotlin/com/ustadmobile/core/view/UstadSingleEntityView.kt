@@ -4,6 +4,4 @@ interface UstadSingleEntityView<RT : Any>: UstadView {
 
     var entity: RT?
 
-    var loading: Boolean
-
 }
