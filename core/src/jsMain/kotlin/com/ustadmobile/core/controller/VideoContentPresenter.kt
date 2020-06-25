@@ -9,9 +9,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.browser.localStorage
 
-actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Map<String, String>?,
-                                                     view: VideoPlayerView, db: UmAppDatabase, repo: UmAppDatabase)
-    : VideoPlayerPresenterCommon(context, arguments, view, db, repo) {
+actual class VideoContentPresenter actual constructor(context: Any, arguments: Map<String, String>?,
+                                                      view: VideoPlayerView, db: UmAppDatabase, repo: UmAppDatabase)
+    : VideoContentPresenterCommon(context, arguments, view, db, repo) {
 
     actual override fun handleOnResume() {
 
@@ -25,6 +25,7 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
             if(params.audioPath?.ceUid != 0L){
                 audioPath = UMFileUtil.joinPaths(baseMountUrl, "$containerUid",params.audioPath?.cePath!!)
             }
+            view.videoParams = VideoParams(videoPath, audioPath, params.srtLangList, params.srtMap)
             view.setVideoParams(videoPath, audioPath,params.srtLangList,params.srtMap)
         }
     }

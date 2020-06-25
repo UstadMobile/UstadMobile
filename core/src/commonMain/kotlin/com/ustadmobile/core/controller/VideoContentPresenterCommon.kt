@@ -16,8 +16,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
 
-abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, String>?, view: VideoPlayerView,
-                                          private val db: UmAppDatabase, private val repo: UmAppDatabase)
+abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>?, view: VideoPlayerView,
+                                           private val db: UmAppDatabase, private val repo: UmAppDatabase)
     : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
 
 
@@ -33,26 +33,11 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
                            val srtLangList: MutableList<String> = mutableListOf(),
                            val srtMap: MutableMap<String, String> = mutableMapOf())
 
-    var videoParams: VideoParams? = null
-
     var audioEntry: ContainerEntryWithContainerEntryFile? = null
-
-    var audioInput: InputStream? = null
-        get() {
-            val audioEntryVal = audioEntry
-            return if (audioEntryVal != null) {
-                containerManager.getInputStream(audioEntryVal)
-            } else {
-                null
-            }
-        }
 
     internal var videoPath: String? = null
     internal var srtMap = mutableMapOf<String, String>()
     internal var srtLangList = mutableListOf<String>()
-
-
-    lateinit var containerManager: ContainerManager
 
     abstract fun handleOnResume()
 
