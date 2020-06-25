@@ -229,3 +229,22 @@ fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMembe
 
     text = line2
 }
+
+@BindingAdapter(value=["selectedClazzWorkQuestionType"])
+fun TextView.setTypeText(clazzWorkQuestionType: Int){
+    if(clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT){
+        text = context.getString(R.string.sel_question_type_free_text)
+    }else if(clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE){
+        text = context.getString(R.string.quiz)
+    }
+}
+
+
+@BindingAdapter(value=["responseTextFilled"])
+fun TextView.setResponseTextFilled(responseText: String?){
+    if(responseText == null || responseText.isEmpty()){
+        text = context.getString(R.string.not_answered)
+    }else{
+        text = responseText
+    }
+}

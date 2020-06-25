@@ -133,6 +133,8 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             view.clazzWorkPrivateComments = privateComments
         }
 
+        newCommentItemListener.fromPerson = loggedInPersonUid
+        newCommentItemListener.entityId = clazzWorkWithSubmission.clazzWorkUid
 
         return clazzWorkWithSubmission
     }

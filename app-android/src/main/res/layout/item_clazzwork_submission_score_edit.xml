@@ -11,7 +11,6 @@
             name="clazzWorkWithSubmission"
             type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
 
-
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,16 +20,36 @@
         android:id="@+id/item_clazzwork_submission_score_edit_cl"
         >
 
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
+            android:text="@string/not_submitted_cap"
+            android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.GONE:View.VISIBLE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <EditText
             android:id="@+id/item_clazzwork_submission_score_edit_et"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginVertical="@dimen/dimen_16dp"
             android:inputType="number"
+            tools:text="77"
+            app:minValue="@{`0`}"
+            app:setMaxValue="@{clazzWorkWithSubmission.clazzWorkMaximumScore}"
             android:text="@={`` + clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionScore}"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
+            android:textSize="30sp"
+            app:layout_constraintBottom_toBottomOf="@+id/item_clazzwork_submission_score_edit_total_score_tv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/item_clazzwork_submission_score_edit_total_score_tv" />
 
         <TextView
             android:id="@+id/item_clazzwork_submission_score_edit_total_score_tv"

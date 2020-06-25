@@ -20,6 +20,7 @@ fun RadioGroup.setRadioButtonOptions(options: List<ClazzWorkQuestionOption>, res
         radioButton.setTag(R.id.tag_clazzwork_quiz_option_uid, item.clazzWorkQuestionOptionUid)
         radioButton.isEnabled = response == 0L
         radioButton.isChecked = response == item.clazzWorkQuestionOptionUid
+
         if(!studentMode){
             radioButton.isEnabled = false
         }

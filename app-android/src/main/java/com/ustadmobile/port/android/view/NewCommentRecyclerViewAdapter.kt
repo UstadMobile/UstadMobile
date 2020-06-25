@@ -4,11 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCommentNewBinding
-import com.ustadmobile.core.controller.NewCommentItemListener
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 class NewCommentRecyclerViewAdapter(
-        var itemListener: NewCommentItemListener?,
+        var itemListener: NewCommentHandler?,
         hintText: String? = null, commentPublic: Boolean, entityType: Int, eUid: Long,
         toComment:Long = 0, fromComment: Long = 0)
     : SingleItemRecyclerViewAdapter<NewCommentRecyclerViewAdapter.NewCommentViewHolder>() {
@@ -19,10 +18,10 @@ class NewCommentRecyclerViewAdapter(
             viewHolder?.itemBinding?.hintText = value
         }
 
-    var newCommentHandler: NewCommentItemListener? = itemListener
+    private var newCommentHandler: NewCommentHandler? = itemListener
         set(value) {
             field = value
-            viewHolder?.itemBinding?.mActivity = newCommentHandler
+            viewHolder?.itemBinding?.commentHandler = newCommentHandler
         }
 
     private var publicMode: Boolean = commentPublic
@@ -66,7 +65,7 @@ class NewCommentRecyclerViewAdapter(
         return NewCommentViewHolder(
                 ItemCommentNewBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                    it.mActivity = itemListener
+                    it.commentHandler = newCommentHandler
                     it.hintText = hintText
                     it.publicComment = publicMode
                     it.entityType = entityTable

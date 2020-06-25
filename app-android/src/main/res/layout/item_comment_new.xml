@@ -29,8 +29,8 @@
             name="toComment"
             type="Long" />
 
-        <variable name="mActivity"
-            type="com.ustadmobile.core.controller.NewCommentItemListener" />
+        <variable name="commentHandler"
+            type="com.ustadmobile.port.android.view.NewCommentHandler" />
 
         <variable name="hintText" type="java.lang.String"/>
 
@@ -79,7 +79,7 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:onClick="@{(view) -> mActivity.addComment(entityType, entityUid,  commentText, publicComment, toComment, fromComment)}"
+            android:onClick="@{(view) -> commentHandler.addNewComment2(view, entityType, entityUid, commentText, publicComment, toComment, fromComment)}"
             android:src="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

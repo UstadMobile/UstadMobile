@@ -73,7 +73,9 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                     clazzMemberWithSubmission?.clazzMemberPersonUid?:0L)
         }?: ClazzWorkWithSubmission()
 
-        if(clazzMemberWithSubmission?.clazzWork?.clazzWorkSubmissionType
+        val submission = clazzMemberWithSubmission?.submission
+        if(submission != null && submission.clazzWorkSubmissionUid != 0L &&
+                clazzMemberWithSubmission.clazzWork?.clazzWorkSubmissionType
                 == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
             val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
                     withTimeoutOrNull(2000) {

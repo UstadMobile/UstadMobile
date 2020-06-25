@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
+import android.text.InputFilter
+import android.text.Spanned
 import android.text.format.DateFormat
 import android.widget.EditText
 import android.widget.TextView
@@ -14,6 +16,7 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.TimeZoneEntity
 import java.text.MessageFormat
 import java.util.*
+
 
 private val MS_PER_HOUR = 3600000
 private val MS_PER_MIN = 60000
@@ -100,4 +103,26 @@ fun TextInputEditText.setValueIfZero(value: Int){
 @InverseBindingAdapter(attribute = "dontShowZeroInt")
 fun getRealValueInt(et: TextView): Int {
     return et.text.toString().toInt()?:0
+}
+
+@BindingAdapter(value = ["minValue", "setMaxValue"])
+fun EditText.setMinMax(min: String, max: Int){
+    filters =   arrayOf(InputFilterMinMax(Integer.valueOf(min), max))
+}
+
+
+class InputFilterMinMax(private val minimumValue: Int, private val maximumValue: Int) : InputFilter {
+    override fun filter(source: CharSequence, start: Int, end: Int, dest: Spanned, dstart: Int, dend: Int): CharSequence? {
+        try {
+            val input = (dest.subSequence(0, dstart).toString() + source + dest.subSequence(dend, dest.length)).toInt()
+            if (isInRange(minimumValue, maximumValue, input)) return null
+        } catch (nfe: NumberFormatException) {
+        }
+        return ""
+    }
+
+    private fun isInRange(a: Int, b: Int, c: Int): Boolean {
+        return if (b > a) c >= a && c <= b else c >= b && c <= a
+    }
+
 }

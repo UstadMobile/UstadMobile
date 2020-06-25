@@ -58,7 +58,8 @@ suspend fun UmAppDatabase.insertPublicAndPrivateComments(dateNow: Long, clazzWor
 
 suspend fun UmAppDatabase.insertQuizQuestionsAndOptions(
         clazzWork: ClazzWork, responded: Boolean = false, clazzMemberUid: Long = 0, personUid: Long = 0,
-        quizQuestionType: Int, quizQuestionTypeMixed: Boolean = false): TestClazzWorkWithQuestionAndOptionsAndResponse {
+        quizQuestionType: Int, quizQuestionTypeMixed: Boolean = false,
+        partialFilled: Boolean = false): TestClazzWorkWithQuestionAndOptionsAndResponse {
 
     clazzWork.apply {
         clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
@@ -116,6 +117,14 @@ suspend fun UmAppDatabase.insertQuizQuestionsAndOptions(
         if (responded && clazzMemberUid != 0L && personUid != 0L ) {
             //Create question response
             for ((index, question) in clazzWorkQuestionsAndOptions.withIndex()) {
+
+                //Skip some
+                if(index == 2 && partialFilled){
+                    continue
+                }
+                if(index == 3 && partialFilled){
+                    continue
+                }
                 val response =
                         ClazzWorkQuestionResponse().apply {
                             clazzWorkQuestionResponseClazzWorkUid = question.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid
@@ -180,7 +189,7 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
         clazzWork: ClazzWork, responded : Boolean = false, submissionType: Int = -1 ,
         quizQuestionTypeMixed: Boolean = false, quizQuestionType: Int = 0,
         submitted: Boolean = false, isStudentToClazz : Boolean = false, dateNow: Long = 0,
-        marked: Boolean = true
+        marked: Boolean = true, partialFilled: Boolean = false
     ):TestClazzWork {
     val clazzAndMembers = insertTestClazzAndMembers(5, 2)
     clazzWork.apply{
@@ -214,7 +223,7 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
     var quizQuestionsAndOptions: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
     if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
         quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzMemberUid,
-            studentClazzMember.clazzMemberPersonUid, quizQuestionType, quizQuestionTypeMixed)
+            studentClazzMember.clazzMemberPersonUid, quizQuestionType, quizQuestionTypeMixed, partialFilled)
     }
 
     val submissions : MutableList<ClazzWorkSubmission> = mutableListOf()

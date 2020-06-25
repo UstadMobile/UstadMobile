@@ -31,7 +31,7 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 
 interface NewCommentHandler{
-    fun addComment(view: View, comment: String?, public:Boolean?)
+    fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String, public: Boolean, to: Long, from: Long)
 }
 
 interface SimpleButtonHandler{
@@ -130,7 +130,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     }
 
     class SubmissionTextEntryWithResultRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?,
-        visible: Boolean = false)
+        visible: Boolean = false, editMode: Boolean = true)
         : ListAdapter<ClazzWorkWithSubmission,
             SubmissionTextEntryWithResultRecyclerAdapter.SubmissionTextEntryWithResultViewHolder>(DU_CLAZZWORKWITHSUBMISSION) {
 
@@ -140,6 +140,11 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                     return
 
                 field = value
+            }
+
+        var modeEdit: Boolean = editMode
+            set(value){
+                viewHolder?.itemBinding?.editMode = value
             }
 
         class SubmissionTextEntryWithResultViewHolder(var itemBinding: ItemClazzworkSubmissionTextEntryBinding)
@@ -153,6 +158,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                     ItemClazzworkSubmissionTextEntryBinding.inflate(LayoutInflater.from(parent.context),
                             parent, false).also {
                         it.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
+                        it.editMode = modeEdit
                     })
         }
 
@@ -223,10 +229,11 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
     }
 
-
-    override fun addComment(view: View, comment: String?, public: Boolean?) {
+    override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
+                                public: Boolean, to: Long, from: Long) {
         (view.parent as View).findViewById<EditText>(R.id.item_comment_new_comment_et).setText("")
-        mPresenter?.addComment(comment?:"", public?:false)
+        mPresenter?.addComment(entityType, entityUid, comment, public, to, from)
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -289,7 +296,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
 
         //Public comments:
-        newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(mPresenter,
+        newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_class_comment), true, ClazzWork.CLAZZ_WORK_TABLE_ID,
                 entity?.clazzWorkUid?:0L, 0, UmAccountManager.getActivePersonUid(requireContext())
         )
@@ -299,11 +306,11 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             publicCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        publicCommentsMergerRecyclerAdapter = MergeAdapter(newPublicCommentRecyclerAdapter,
-                publicCommentsRecyclerAdapter)
+        publicCommentsMergerRecyclerAdapter = MergeAdapter(publicCommentsRecyclerAdapter,
+                newPublicCommentRecyclerAdapter)
 
         //Private comments section:
-        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(mPresenter,
+        newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
                 entity?.clazzWorkUid?:0L, 0, UmAccountManager.getActivePersonUid(requireContext())
         )

@@ -4,22 +4,22 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemClazzworkquestionandoptionswithresponseBinding
+import com.toughra.ustadmobile.databinding.ItemClazzworkquestionandoptionswithresponseViewBinding
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 
-class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(var studentMode: Boolean)
+class ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter(var studentMode: Boolean)
     : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
-        ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter.ClazzWorkQuestionViewHolder>(
+        ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter.ClazzWorkQuestionViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
 
-    class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseBinding)
+    class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseViewBinding)
         : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkQuestionViewHolder {
         val viewHolder = ClazzWorkQuestionViewHolder(
-                ItemClazzworkquestionandoptionswithresponseBinding.inflate(
+                ItemClazzworkquestionandoptionswithresponseViewBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
         viewHolder.binding.freeTextType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
         viewHolder.binding.quizType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
@@ -32,7 +32,7 @@ class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(var studentMode: Bo
         holder.binding.clazzWorkQuestionAndOptionsWithResponse = getItem(position)
         holder.binding.studentMode = studentMode
         holder.itemView.tag = getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
-        holder.binding.itemClazzworkquestionandoptionswithresponseAnswerEt.tag =
+        holder.binding.itemClazzworkquestionandoptionswithresponseViewAnswerEt.tag =
                 getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
     }
 }
