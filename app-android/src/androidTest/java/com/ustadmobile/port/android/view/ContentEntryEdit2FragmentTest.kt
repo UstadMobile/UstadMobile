@@ -114,10 +114,10 @@ class ContentEntryEdit2FragmentTest  {
     @Test
     fun givenNoEntryYet_whenFormFilledZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
         val container = createEntryFromFile("test.epub")
-        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
+       /* val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
         assertTrue("File imported was a zipped file", container.mimeType?.contains("zip")!!
                 && containerManager.allEntries.size > 1)
-        containerTmpDir.deleteOnExit()
+        containerTmpDir.deleteOnExit()*/
     }
 
 
@@ -125,10 +125,10 @@ class ContentEntryEdit2FragmentTest  {
     @Test
     fun givenNoEntryYet_whenFormFilledNonZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
         val container = createEntryFromFile("video.mp4", false)
-        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
+        /*val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
         assertTrue("File imported was unzipped file", !container.mimeType?.contains("zip")!!
                 &&  containerManager.allEntries.size == 1)
-        containerTmpDir.deleteOnExit()
+        containerTmpDir.deleteOnExit()*/
     }
 
 
@@ -163,8 +163,6 @@ class ContentEntryEdit2FragmentTest  {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        onIdle()
-
         if(!isZip){
             onView(withId(R.id.entry_title_text)).perform(clearText(), typeText("Dummy Title"))
         }
@@ -175,24 +173,17 @@ class ContentEntryEdit2FragmentTest  {
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-        onIdle()
-
         val entries = dbRule.db.contentEntryDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
             it.isNotEmpty()
         }
 
         assertTrue("Entry's data set and is a leaf", entries?.first()?.title != null && entries.first().leaf)
 
-        val container = runBlocking {
-            dbRule.db.containerDao.getMostRecentContainerForContentEntry(entries?.first()?.contentEntryUid!!)
-        }
-
-        val totalContainerSize = runBlocking {
-            dbRule.db.containerEntryFileDao.sumContainerFileEntrySizes(container?.containerUid!!)
-        }
+        val container = dbRule.db.containerDao.getMostRecentContainerForContentEntryLive(entries?.first()?.contentEntryUid!!)
+                .waitUntilWithFragmentScenario(fragmentScenario){true}
 
         assertTrue("Container for an entry was created created and has files",
-                container != null && totalContainerSize > 0)
+                container != null && container.fileSize > 0)
         testFile.deleteOnExit()
         return container!!
     }

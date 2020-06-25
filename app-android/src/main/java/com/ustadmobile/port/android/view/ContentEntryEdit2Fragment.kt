@@ -189,7 +189,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         val container =  if(file != null && isZipped != null){
             importContainerFromFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo, isZipped)
         }else null
-
         loading = false
         return container
     }
