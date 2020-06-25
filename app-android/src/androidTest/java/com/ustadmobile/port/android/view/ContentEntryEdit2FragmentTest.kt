@@ -180,7 +180,7 @@ class ContentEntryEdit2FragmentTest  {
         assertTrue("Entry's data set and is a leaf", entries?.first()?.title != null && entries.first().leaf)
 
         val container = dbRule.db.containerDao.getMostRecentContainerForContentEntryLive(entries?.first()?.contentEntryUid!!)
-                .waitUntilWithFragmentScenario(fragmentScenario){true}
+                .waitUntilWithFragmentScenario(fragmentScenario){it != null}
 
         assertTrue("Container for an entry was created created and has files",
                 container != null && container.fileSize > 0)
