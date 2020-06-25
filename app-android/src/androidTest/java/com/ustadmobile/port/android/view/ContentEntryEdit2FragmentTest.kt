@@ -17,8 +17,10 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
@@ -27,13 +29,13 @@ import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
 import com.ustadmobile.test.rules.*
+import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.not
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
-import java.lang.Thread.sleep
 
 @AdbScreenRecord("Content entry edit screen tests")
 class ContentEntryEdit2FragmentTest  {
@@ -59,8 +61,12 @@ class ContentEntryEdit2FragmentTest  {
     @Rule
     val adbScreenRecordRule = AdbScreenRecordRule()
 
+    private val context = getApplicationContext<Application>()
+
+    private lateinit var containerTmpDir: File
+
     @AdbScreenRecord("Given folder does not yet exist, when user fills in form for new folder, should be saved to database")
-    //@Test
+    @Test
     fun givenNoFolderYet_whenFormFilledInAndSaveClicked_thenShouldSaveToDatabase (){
         val dummyTitle = "New Folder Entry"
 
@@ -74,18 +80,15 @@ class ContentEntryEdit2FragmentTest  {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        //wait for the fragment to be ready since we are waiting on onViewCreated to create a presenter
-        sleep(1000)
+        onView(withId(R.id.content_entry_select_file)).check(matches(not(isDisplayed())))
+
+        onView(withId(R.id.container_storage_option)).check(matches(not(isDisplayed())))
 
         val currentEntity = fragmentScenario.letOnFragment { it.entity }
         val formVals = ContentEntryWithLanguage().apply {
             title = dummyTitle
             description = "Description"
         }
-
-        onView(withId(R.id.content_entry_select_file)).check(matches(not(isDisplayed())))
-
-        onView(withId(R.id.container_storage_option)).check(matches(not(isDisplayed())))
 
         formVals.title?.takeIf { it != currentEntity?.title }?.also {
             onView(withId(R.id.entry_title_text)).perform(clearText(), typeText(it))
@@ -105,16 +108,37 @@ class ContentEntryEdit2FragmentTest  {
 
     }
 
-    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects file, should save to database")
-    //@Test
-    fun givenNoEntryYet_whenFormFilledInAndSaveClicked_thenShouldSaveToDatabase (){
-        val context = getApplicationContext<Application>()
-        val testFile = File.createTempFile("contentEntryEdit", "testFile", context.cacheDir)
-        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test.epub")
+    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects zipped file, should save to database")
+    @Test
+    fun givenNoEntryYet_whenFormFilledZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
+        val container = createEntryFromFile("test.epub")
+        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
+        assertTrue("File imported was a zipped file", container.mimeType?.contains("zip")!!
+                && containerManager.allEntries.size > 1)
+        containerTmpDir.deleteOnExit()
+    }
+
+
+    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects unzipped file, should save to database")
+    @Test
+    fun givenNoEntryYet_whenFormFilledUnZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
+        val container = createEntryFromFile("video.mp4", false)
+        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
+        assertTrue("File imported was unzipped file", !container.mimeType?.contains("zip")!!
+                &&  containerManager.allEntries.size == 1)
+        containerTmpDir.deleteOnExit()
+    }
+
+
+    private fun createEntryFromFile(fileName: String, isZip: Boolean = true) : Container{
+        containerTmpDir = File(context.cacheDir, "containerTmpDir/")
+        containerTmpDir.mkdir()
+        val testFile = File.createTempFile("contentEntryEdit", fileName, context.cacheDir)
+        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/$fileName")
         testFile.outputStream().use { input?.copyTo(it) }
         val expectedUri = Uri.fromFile(testFile)
 
-        val umTestRegistry = object : ActivityResultRegistry() {
+         val registry = object : ActivityResultRegistry() {
             override fun <I, O> invoke(
                     requestCode: Int,
                     contract: ActivityResultContract<I, O>,
@@ -127,17 +151,18 @@ class ContentEntryEdit2FragmentTest  {
 
         val fragmentScenario  = with(launchFragmentInContainer(
                 fragmentArgs = bundleOf(ARG_LEAF to true.toString(),
-                ARG_PARENT_ENTRY_UID to 10000L.toString()), themeResId = R.style.UmTheme_App) {
-            ContentEntryEdit2Fragment(umTestRegistry).also {
+                        ARG_PARENT_ENTRY_UID to 10000L.toString()), themeResId = R.style.UmTheme_App) {
+            ContentEntryEdit2Fragment(registry).also {
                 it.installNavController(systemImplNavRule.navController)
             } }) { onFragment { fragment ->
-                fragment.handleFileSelection()
-            }
+            fragment.handleFileSelection()
+        }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        //wait for the fragment to be ready since we are waiting on onViewCreated to create a presenter
-        sleep(1000)
+        if(!isZip){
+            onView(withId(R.id.entry_title_text)).perform(clearText(), typeText("Dummy Title"))
+        }
 
         onView(withId(R.id.content_entry_select_file)).check(matches(isDisplayed()))
 
@@ -145,13 +170,11 @@ class ContentEntryEdit2FragmentTest  {
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-        sleep(2500)
-
         val entries = dbRule.db.contentEntryDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
             it.isNotEmpty()
         }
 
-        Assert.assertTrue("Entry's data set and is a leaf", entries?.first()?.title != null && entries.first().leaf)
+        assertTrue("Entry's data set and is a leaf", entries?.first()?.title != null && entries.first().leaf)
 
         val container = runBlocking {
             dbRule.db.containerDao.getMostRecentContainerForContentEntry(entries?.first()?.contentEntryUid!!)
@@ -161,10 +184,9 @@ class ContentEntryEdit2FragmentTest  {
             dbRule.db.containerEntryFileDao.sumContainerFileEntrySizes(container?.containerUid!!)
         }
 
-        Assert.assertTrue("Container for an entry was created created and has files",
+        assertTrue("Container for an entry was created created and has files",
                 container != null && totalContainerSize > 0)
-
         testFile.deleteOnExit()
-
+        return container!!
     }
 }

@@ -18,6 +18,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
@@ -61,6 +62,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         get() = field
         set(value) {
             field = value
+            loading = false
             mBinding?.contentEntry = value
         }
 
@@ -135,14 +137,14 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     }
 
-    open fun handleFileSelection(){
+    internal fun handleFileSelection(){
         registerForActivityResult(ActivityResultContracts.GetContent(),
                 registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
             if(uri != null){
                 try{
                     val input = requireContext().contentResolver.openInputStream(uri)
                     val tmpFile = findNavController().createTempFileForDestination(requireContext(),
-                            "import-${System.currentTimeMillis()}")
+                            "import-${System.currentTimeMillis()}.${UMFileUtil.getExtension(uri.toString())}")
                     val output = tmpFile.outputStream()
                     input?.copyTo(tmpFile.outputStream())
                     output.flush()
@@ -216,9 +218,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                         UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                         networkManagerBle?.containerDownloadManager,
                         UmAccountManager.activeAccountLiveData)
-
                 mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
-
                 navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
                         Language::class.java) {
                     val language = it.firstOrNull() ?: return@observeResult

@@ -1,8 +1,9 @@
 package com.ustadmobile.core.controller
 
-//import org.mockito.ArgumentMatchers.any
-import com.nhaarman.mockitokotlin2.*
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
@@ -45,7 +46,7 @@ class XapiPackageContentPresenterTest {
 
     private lateinit var xapiContainer: Container
 
-    private var mockedView: XapiPackageContentView? = null
+    private lateinit var mockedView: XapiPackageContentView
 
 
     private var httpd: EmbeddedHTTPD? = null
@@ -86,12 +87,11 @@ class XapiPackageContentPresenterTest {
 
         httpd = EmbeddedHTTPD(0, Any(), db, repo)
         httpd!!.start()
-        mockedView = mock{}
-
-        whenever(mockedView?.runOnUiThread(any())).doAnswer { invocation ->
-            Thread(invocation.getArgument<Any>(0) as Runnable).start()
+        mockedView = mock{
+            on { runOnUiThread(any())}.doAnswer{
+                Thread(it.getArgument<Any>(0) as Runnable).start()
+            }
         }
-
     }
 
     @After
@@ -119,7 +119,7 @@ class XapiPackageContentPresenterTest {
         mountLatch.await(15000, TimeUnit.MILLISECONDS)
 
         argumentCaptor<String> {
-            verify<XapiPackageContentView>(mockedView, timeout(5000)).url = capture()
+            verify(mockedView, timeout(5000)).url = capture()
             Assert.assertTrue("Mounted path starts with url and html name",
                     firstValue.startsWith(httpd!!.localHttpUrl) && firstValue.contains("tetris.html"))
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
@@ -134,7 +134,7 @@ class XapiPackageContentPresenterTest {
                     paramsProvided["activity_id"])
         }
 
-        verify<XapiPackageContentView>(mockedView, timeout(15000)).contentTitle = "Tin Can Tetris Example"
+        verify(mockedView, timeout(15000)).contentTitle = "Tin Can Tetris Example"
     }
 
 }

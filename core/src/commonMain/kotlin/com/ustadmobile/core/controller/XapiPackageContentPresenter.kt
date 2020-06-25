@@ -32,7 +32,7 @@ import kotlinx.serialization.json.Json
  *
  */
 class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view: XapiPackageContentView,
-                                  private val mountMounter: ContainerMounter,
+                                  private val mounter: ContainerMounter,
                                   private val account: UmAccount? = UmAccountManager.getActiveAccount(context))
     : UstadBaseController<XapiPackageContentView>(context, args, view) {
 
@@ -49,7 +49,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         val contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
 
         GlobalScope.launch {
-            mountedPath = mountMounter.mountContainer(containerUid)
+            mountedPath = mounter.mountContainer(containerUid)
             val client = defaultHttpClient()
             val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
 
@@ -79,7 +79,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         super.onDestroy()
         GlobalScope.launch (Dispatchers.Main){
             if(mountedPath.isNotEmpty()){
-                mountMounter.unMountContainer(mountedPath)
+                mounter.unMountContainer(mountedPath)
             }
         }
     }
