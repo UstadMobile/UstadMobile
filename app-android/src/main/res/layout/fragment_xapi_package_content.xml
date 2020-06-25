@@ -5,7 +5,7 @@
 
     <data>
         <variable
-            name="urlToLoad"
+            name="url"
             type="String" />
     </data>
 
@@ -23,7 +23,7 @@
             android:progressDrawable="@drawable/progress_bar_drawable" />
 
         <WebView
-            app:webUrl="@{urlToLoad}"
+            app:webUrl="@{url}"
             android:id="@+id/activity_xapi_package_webview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

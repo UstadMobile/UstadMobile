@@ -1,17 +1,13 @@
 package com.ustadmobile.core.controller
 
 //import org.mockito.ArgumentMatchers.any
+import com.nhaarman.mockitokotlin2.*
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.XapiPackageContentView
@@ -28,6 +24,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
+import org.mockito.Mockito.timeout
 import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -91,10 +88,9 @@ class XapiPackageContentPresenterTest {
         httpd!!.start()
         mockedView = mock{}
 
-        doAnswer { invocation ->
+        whenever(mockedView?.runOnUiThread(any())).doAnswer { invocation ->
             Thread(invocation.getArgument<Any>(0) as Runnable).start()
-            Any()
-        }.`when`<XapiPackageContentView>(mockedView).runOnUiThread(any())
+        }
 
     }
 
@@ -123,7 +119,7 @@ class XapiPackageContentPresenterTest {
         mountLatch.await(15000, TimeUnit.MILLISECONDS)
 
         argumentCaptor<String> {
-            verify<XapiPackageContentView>(mockedView, timeout(5000)).urlToLoad = capture()
+            verify<XapiPackageContentView>(mockedView, timeout(5000)).url = capture()
             Assert.assertTrue("Mounted path starts with url and html name",
                     firstValue.startsWith(httpd!!.localHttpUrl) && firstValue.contains("tetris.html"))
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)

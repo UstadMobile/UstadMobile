@@ -3,7 +3,7 @@ package com.ustadmobile.core.view
 /**
  * created @author kileha3
  */
-interface MountedContainerHandler {
+interface ContainerMounter {
 
     suspend fun mountContainer(containerUid: Long): String
 

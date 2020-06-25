@@ -13,7 +13,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.request.get
 import org.kmp.io.KMPXmlParser
 import com.ustadmobile.core.util.ext.toQueryString
-import com.ustadmobile.core.view.MountedContainerHandler
+import com.ustadmobile.core.view.ContainerMounter
 import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.*
 import kotlinx.io.ByteArrayInputStream
@@ -32,7 +32,7 @@ import kotlinx.serialization.json.Json
  *
  */
 class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view: XapiPackageContentView,
-                                  private val mountHandler: MountedContainerHandler,
+                                  private val mountMounter: ContainerMounter,
                                   private val account: UmAccount? = UmAccountManager.getActiveAccount(context))
     : UstadBaseController<XapiPackageContentView>(context, args, view) {
 
@@ -49,7 +49,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         val contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
 
         GlobalScope.launch {
-            mountedPath = mountHandler.mountContainer(containerUid)
+            mountedPath = mountMounter.mountContainer(containerUid)
             val client = defaultHttpClient()
             val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
 
@@ -69,7 +69,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                         launchMethodParams.toQueryString()
                 view.runOnUiThread(Runnable {
                     view.contentTitle = tinCanXml?.launchActivity?.name ?: ""
-                    view.urlToLoad = launchUrl
+                    view.url = launchUrl
                 })
             }
         }
@@ -79,7 +79,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
         super.onDestroy()
         GlobalScope.launch (Dispatchers.Main){
             if(mountedPath.isNotEmpty()){
-                mountHandler.unMountContainer(mountedPath)
+                mountMounter.unMountContainer(mountedPath)
             }
         }
     }
