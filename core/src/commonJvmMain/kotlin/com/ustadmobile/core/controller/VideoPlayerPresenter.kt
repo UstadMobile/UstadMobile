@@ -23,7 +23,8 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
 
                 val containerResult = containerDao.findByUidAsync(containerUid)
                 if (containerResult == null) {
-                    view.showErrorWithAction(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, context), 0)
+                    view.showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, context), {}, 0)
+                    view.loading = false
                     return@launch
                 }
                 container = containerResult

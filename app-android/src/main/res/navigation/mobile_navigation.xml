@@ -161,7 +161,12 @@
     <fragment
         android:id="@+id/content_xapi_dest"
         android:name="com.ustadmobile.port.android.view.XapiPackageContentFragment"
-        android:label="XapiPackageContentFragment" />
+        android:label="" />
+
+    <fragment
+        android:id="@+id/video_content"
+        android:name="com.ustadmobile.port.android.view.VideoContentFragment"
+        android:label="" />
 
 
 </navigation>

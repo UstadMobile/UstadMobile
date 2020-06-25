@@ -17,4 +17,7 @@ interface ContentTypePlugin : ContentTypePlugin {
      */
     fun getContentEntry(file: File): ContentEntryWithLanguage?
 
+
+    fun isZipped(): Boolean
+
 }

@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
+import android.app.Application
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
@@ -30,7 +32,7 @@ import java.io.File
 
 
 @AdbScreenRecord("Xapi package content screen test")
-class XapiPackageContentFragmentTest: NetworkManagerBleServiceConnectionHelper() {
+class XapiPackageContentFragmentTest {
 
     @JvmField
     @Rule
@@ -47,6 +49,10 @@ class XapiPackageContentFragmentTest: NetworkManagerBleServiceConnectionHelper()
     @JvmField
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+
+    private val context: Application = ApplicationProvider.getApplicationContext()
+
+    private val bleServiceHelper = NetworkManagerBleServiceHelper()
 
 
     @JvmField
@@ -82,9 +88,9 @@ class XapiPackageContentFragmentTest: NetworkManagerBleServiceConnectionHelper()
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip")
         testFile.outputStream().use { input?.copyTo(it) }
 
-        val containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo,containerTmpDir?.absolutePath)
+        val containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo,containerTmpDir.absolutePath)
         addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
-        bindService()
+        bleServiceHelper.bindService()
     }
 
     @AdbScreenRecord("Given valid xapi package content when created should be loaded to the view")
@@ -93,8 +99,9 @@ class XapiPackageContentFragmentTest: NetworkManagerBleServiceConnectionHelper()
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_CONTAINER_UID to container?.containerUid,
                         UstadView.ARG_CONTENT_ENTRY_UID to contentEntry?.contentEntryUid)) {
-            XapiPackageContentFragment(networkManagerBle).also { fragment ->
+            XapiPackageContentFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
+                fragment.networkManagerProvider = bleServiceHelper
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)

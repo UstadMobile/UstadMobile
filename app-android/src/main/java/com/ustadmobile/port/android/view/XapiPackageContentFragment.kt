@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,16 +11,26 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.toughra.ustadmobile.databinding.FragmentXapiPackageContentBinding
-import com.ustadmobile.core.controller.XapiPackageContentFragmentPresenter
-import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.coroutines.*
-import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-class XapiPackageContentFragment(private val networkServiceProvider:CompletableDeferred<NetworkManagerBle>? = null) : UstadBaseFragment(), XapiPackageContentView {
+class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
+
+    var networkManagerProvider: BleNetworkManagerProvider? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if(context is BleNetworkManagerProvider){
+            networkManagerProvider = context
+        }
+    }
 
     override var contentTitle: String = ""
         set(value) {
@@ -33,32 +44,17 @@ class XapiPackageContentFragment(private val networkServiceProvider:CompletableD
             mBinding?.urlToLoad = value
         }
 
-    override suspend fun mountContainer(containerUid: Long): String {
-        val containerPath = networkManagerBle?.httpd?.mountContainer(containerUid,null)
-        mountedContainerPath?.set(UMFileUtil.joinPaths(networkManagerBle?.httpd?.localHttpUrl.toString(),
-                containerPath.toString()))
-        return mountedContainerPath?.get()?:""
-    }
-
-
-    override suspend fun unMountContainer() {
-        val path = mountedContainerPath?.get()
-        if(path != null)
-        networkManagerBle?.httpd?.unmountContainer(path)
-    }
-
     private var mBinding: FragmentXapiPackageContentBinding? = null
 
-    private var mPresenter: XapiPackageContentFragmentPresenter? = null
+    private var mPresenter: XapiPackageContentPresenter? = null
 
     private var networkManagerBle: NetworkManagerBle ? = null
-
-    private var mountedContainerPath: AtomicReference<String>? = AtomicReference("")
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
+        WebView.setWebContentsDebuggingEnabled(true)
         mBinding = FragmentXapiPackageContentBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.progressBar.isIndeterminate = true
@@ -90,13 +86,12 @@ class XapiPackageContentFragment(private val networkServiceProvider:CompletableD
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main) {
             val thisFrag = this@XapiPackageContentFragment
-            networkManagerBle = (networkServiceProvider?:(activity as? MainActivity)?.networkManagerBle)?.await()
-            withContext(Dispatchers.Main){
-                mPresenter = XapiPackageContentFragmentPresenter(requireContext(), arguments.toStringMap(), thisFrag)
-                mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-            }
+            val networkManagerBle = networkManagerProvider?.networkManager?.await()
+            mPresenter = XapiPackageContentPresenter(requireContext(), arguments.toStringMap(),
+                    thisFrag, networkManagerBle?.httpd as MountedContainerHandler)
+            mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
         }
     }
 
@@ -104,6 +99,7 @@ class XapiPackageContentFragment(private val networkServiceProvider:CompletableD
     override fun onDestroy() {
         super.onDestroy()
         networkManagerBle = null
+        mPresenter?.onDestroy()
         mPresenter = null
         mBinding = null
     }

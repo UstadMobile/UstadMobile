@@ -1,28 +1,21 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.*
-import android.content.pm.PackageManager
 import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
-import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.webkit.WebView
-import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -59,9 +52,17 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications,UstadView, ShakeDetector.Listener,UstadViewWithProgress {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadView, ShakeDetector.Listener, UstadViewWithProgress, BleNetworkManagerProvider {
 
     private var baseController: UstadBaseController<*>? = null
+
+
+    override var loading: Boolean = false
+        get() = false
+        set(value) {
+            //TODO: set this on the main activity
+            field = value
+        }
 
     /**
      * Get the toolbar that's used for the support action bar
@@ -107,7 +108,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     internal var isOpeningFilePickerOrCamera = false
 
-    lateinit var appUpdateManager : AppUpdateManager
+    lateinit var appUpdateManager: AppUpdateManager
 
 
     private val mSyncServiceConnection = object : ServiceConnection {
@@ -185,6 +186,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                 UMLog.l(UMLog.DEBUG, 0, "BleService Connection: service = $serviceVal")
 
                 val networkManagerBleVal = serviceVal.networkManagerBle!!
+                networkManager = networkManagerBle
                 //this runs after service is ready
                 networkManagerBle.complete(networkManagerBleVal)
                 //networkManagerBle = serviceVal.networkManagerBle
@@ -212,7 +214,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override val viewContext: Any
         get() = this
-
 
 
     //The devMinApi21 flavor has SDK Min 21, but other flavors have a lower SDK
@@ -273,7 +274,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             baseProgressBar.visibility = if (showProgress) View.VISIBLE else View.INVISIBLE
         }
     }
-
 
 
     /**

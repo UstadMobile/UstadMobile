@@ -20,10 +20,14 @@ import com.ustadmobile.core.controller.OnBoardingPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.CompletableDeferred
 
 class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemSelectedListener {
 
     private var pageIndicatorView: PageIndicatorView? = null
+
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     private var presenter: OnBoardingPresenter? = null
 

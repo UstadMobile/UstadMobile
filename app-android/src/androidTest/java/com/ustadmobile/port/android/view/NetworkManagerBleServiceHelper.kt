@@ -13,7 +13,14 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import kotlinx.coroutines.CompletableDeferred
 import org.junit.Rule
 
-abstract class NetworkManagerBleServiceConnectionHelper{
+/**
+ * Helper class responsible for binding NetworkManagerBleAndroidService service on espresso tests
+ *
+ * call bindService() on your setup method or your test case
+ *
+ * @author kileha3
+ */
+class NetworkManagerBleServiceHelper: BleNetworkManagerProvider {
 
     @JvmField
     @Rule
@@ -21,7 +28,13 @@ abstract class NetworkManagerBleServiceConnectionHelper{
 
     val networkManagerBle = CompletableDeferred<NetworkManagerBle>()
 
-    val context: Application = ApplicationProvider.getApplicationContext()
+    private val context: Application = ApplicationProvider.getApplicationContext()
+
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
+        get() = field
+        set(value) {
+            field = value
+        }
 
     private val bleServiceConnection = object : ServiceConnection {
         override fun onServiceDisconnected(p0: ComponentName?) {
@@ -32,6 +45,7 @@ abstract class NetworkManagerBleServiceConnectionHelper{
             val serviceVal = (service as NetworkManagerBleAndroidService.LocalServiceBinder).service
             serviceVal.runWhenNetworkManagerReady{
                 val networkManagerBleVal = serviceVal.networkManagerBle!!
+                networkManager = networkManagerBle
                 networkManagerBle.complete(networkManagerBleVal)
             }
         }

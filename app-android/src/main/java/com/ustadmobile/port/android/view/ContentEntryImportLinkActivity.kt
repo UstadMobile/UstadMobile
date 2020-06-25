@@ -17,6 +17,8 @@ import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
@@ -116,6 +118,7 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         return true
     }
 
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     override fun showUrlStatus(isValid: Boolean, message: String) {
         runOnUiThread {

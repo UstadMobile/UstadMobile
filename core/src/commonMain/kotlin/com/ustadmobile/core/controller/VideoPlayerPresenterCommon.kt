@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.generated.locale.MessageID.loading
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -51,7 +52,6 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
     internal var srtLangList = mutableListOf<String>()
 
 
-
     lateinit var containerManager: ContainerManager
 
     abstract fun handleOnResume()
@@ -63,13 +63,12 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
         contentEntryDao = db.contentEntryDao
 
         navigation = arguments[ARG_REFERRER] ?: ""
-        val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID)!!.toLong()
-        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID)!!.toLong()
+        val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
+        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
+        view.loading = true
         GlobalScope.launch {
-            val contentEntry = contentEntryDao.getContentByUuidAsync(entryUuid)
-            if (contentEntry != null)
-                view.setVideoInfo(contentEntry)
+            view.entry = contentEntryDao.getContentByUuidAsync(entryUuid)
         }
 
     }

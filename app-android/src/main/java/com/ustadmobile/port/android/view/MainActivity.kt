@@ -21,8 +21,10 @@ import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
+import kotlinx.coroutines.CompletableDeferred
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -84,6 +86,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         return item.onNavDestinationSelected(findNavController(R.id.activity_main_navhost_fragment))
                 || super.onOptionsItemSelected(item)
     }
+
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     override fun onBackPressed() {
         val fragment = supportFragmentManager.primaryNavigationFragment?.

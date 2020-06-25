@@ -6,7 +6,7 @@ import kotlin.js.JsName
  * Created by mike on 9/13/17.
  */
 
-interface XapiPackageContentView : UstadView, MountedContainerHandler {
+interface XapiPackageContentView : UstadView {
 
     @JsName("setTitle")
     var contentTitle: String

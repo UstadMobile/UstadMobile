@@ -7,5 +7,5 @@ interface MountedContainerHandler {
 
     suspend fun mountContainer(containerUid: Long): String
 
-    suspend fun unMountContainer()
+    suspend fun unMountContainer(mountPath: String)
 }

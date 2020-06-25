@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.XapiPackageContentView
@@ -33,7 +34,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 
-class XapiPackageContentFragmentPresenterTest {
+class XapiPackageContentPresenterTest {
 
     private lateinit var context: Any
 
@@ -49,12 +50,8 @@ class XapiPackageContentFragmentPresenterTest {
 
     private var mockedView: XapiPackageContentView? = null
 
+
     private var httpd: EmbeddedHTTPD? = null
-
-    private val xapiXml: TinCanXML? = null
-
-    @Volatile
-    private var lastMountedUrl: String? = null
 
     private val mountLatch = CountDownLatch(1)
 
@@ -92,10 +89,7 @@ class XapiPackageContentFragmentPresenterTest {
 
         httpd = EmbeddedHTTPD(0, Any(), db, repo)
         httpd!!.start()
-
-        mockedView = mock{
-            onBlocking { mountContainer(xapiContainer.containerUid)}.thenReturn(mountContainer())
-        }
+        mockedView = mock{}
 
         doAnswer { invocation ->
             Thread(invocation.getArgument<Any>(0) as Runnable).start()
@@ -110,13 +104,6 @@ class XapiPackageContentFragmentPresenterTest {
         UmFileUtilSe.deleteRecursively(containerDirTmp!!)
     }
 
-    private fun mountContainer(): String{
-        val mountedPath = httpd!!.mountContainer(xapiContainer.containerUid, null)
-        lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
-                mountedPath!!)
-        mountLatch.countDown()
-       return lastMountedUrl!!
-    }
 
     @Test
     fun givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {
@@ -127,8 +114,8 @@ class XapiPackageContentFragmentPresenterTest {
 
         val account = UmAccount(42, "username", "fefe1010fe",
                 "http://localhost/")
-        val xapiPresenter = XapiPackageContentFragmentPresenter(
-                context, args, mockedView!!, account)
+        val xapiPresenter = XapiPackageContentPresenter(
+                context, args, mockedView!!,httpd!!, account)
 
 
         xapiPresenter.onCreate(null)
@@ -136,15 +123,14 @@ class XapiPackageContentFragmentPresenterTest {
         mountLatch.await(15000, TimeUnit.MILLISECONDS)
 
         argumentCaptor<String> {
-            val pkgPath = UMFileUtil.joinPaths(lastMountedUrl!!, "tetris.html")
             verify<XapiPackageContentView>(mockedView, timeout(5000)).urlToLoad = capture()
             Assert.assertTrue("Mounted path starts with url and html name",
-                    firstValue.startsWith(pkgPath))
+                    firstValue.startsWith(httpd!!.localHttpUrl) && firstValue.contains("tetris.html"))
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
             val umAccountActor = Json.parse(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
                     umAccountActor.account.name, account.username)
-            val expectedEndpoint = UMFileUtil.resolveLink(lastMountedUrl!!, "/xapi/$contentEntryUid/")
+            val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/xapi/$contentEntryUid/")
             Assert.assertEquals("Received expected Xapi endpoint: /xapi/contentEntryUid",
                     expectedEndpoint, paramsProvided["endpoint"])
             Assert.assertEquals("Received expected activity id",

@@ -23,6 +23,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -94,7 +95,7 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     private fun openContentEntry() {
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
                 entity?.contentEntryUid?.let { goToEntryFn(it, db, context, systemImpl, isDownloadEnabled,
                             false,
