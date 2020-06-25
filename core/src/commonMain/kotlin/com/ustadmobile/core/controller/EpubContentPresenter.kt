@@ -64,12 +64,11 @@ import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
-import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
 import io.ktor.client.request.get
@@ -87,133 +86,129 @@ import kotlin.js.JsName
  * @author mike
  */
 class EpubContentPresenter(context: Any,
-                           args: Map<String, String>?,
-                           private val epubContentView: EpubContentView)
-    : UstadBaseController<EpubContentView>(context, args!!, epubContentView) {
+                           args: Map<String, String>,
+                           private val epubContentView: EpubContentView,
+                           private val mountHandler: MountedContainerHandler)
+    : UstadBaseController<EpubContentView>(context, args, epubContentView) {
 
     private var ocf: OcfDocument? = null
 
-    private var mountedUrl: String? = null
+    private var mountedPath: String = ""
 
     private var opfBaseUrl: String? = null
 
-    private var linearSpineUrls: Array<String>? = null
-
-    /**
-     * First HTTP callback: run this once the container has been mounted to an http directory
-     *
-     */
-    private val mountedCallbackHandler: UmCallback<String> = object : UmCallback<String> {
-
-        override fun onSuccess(result: String?) {
-            mountedUrl = result
-            val containerUri = UMFileUtil.joinPaths(mountedUrl!!, OCF_CONTAINER_PATH)
-            GlobalScope.launch {
-                try {
-                    val client = defaultHttpClient()
-                    val ocfContent = client.get<String>(containerUri)
-
-                    ocf = OcfDocument()
-                    val ocfParser = KMPXmlParser()
-
-                    ocfParser.setInput(ByteArrayInputStream(ocfContent.toByteArray()), "UTF-8")
-                    ocf!!.loadFromParser(ocfParser)
-
-                    //get and parse the first publication
-                    val opfUrl = UMFileUtil.joinPaths(mountedUrl!!,
-                            ocf!!.rootFiles[0].fullPath!!)
-                    val opfContent = client.get<String>(opfUrl)
-
-                    val opf = OpfDocument()
-                    val opfParser = KMPXmlParser()
-                    opfParser.setInput(ByteArrayInputStream(opfContent.toByteArray()), "UTF-8")
-                    opf.loadFromOPF(opfParser)
-                    val linearSpineHrefsRelative = opf.linearSpineHREFs
-
-                    opfBaseUrl = UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
-                            mountedUrl!!, ocf!!.rootFiles[0].fullPath!!))
-
-                    linearSpineUrls = Array(linearSpineHrefsRelative.size) { "" }
-
-                    for (i in linearSpineHrefsRelative.indices) {
-                        linearSpineUrls!![i] = UMFileUtil.joinPaths(opfBaseUrl!!,
-                                linearSpineHrefsRelative[i])
-                    }
-
-                    val opfCoverImageItem = opf.getCoverImage("")
-                    val authorNames = if (opf.numCreators > 0)
-                        UMUtil.joinStrings(opf.creators!!, ", ")
-                    else
-                        null
-
-                    epubContentView.runOnUiThread(Runnable {
-                        val position : Int = if(arguments.containsKey(EpubContentView.ARG_INITIAL_PAGE_HREF)) opf.getLinearSpinePositionByHREF(
-                                arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)!!) else 0
-
-                        epubContentView.setContainerTitle(opf.title!!)
-                        epubContentView.setSpineUrls(linearSpineUrls!!, if(position >= 0) position else 0)
-                        if (opfCoverImageItem != null) {
-                            epubContentView.setCoverImage(UMFileUtil.resolveLink(opfBaseUrl!!,
-                                    opfCoverImageItem.href!!))
-                        }
-
-                        if (authorNames != null) {
-                            epubContentView.setAuthorName(authorNames)
-                        }
-                    })
-
-                    if (opf.navItem == null)
-                        throw IllegalArgumentException()
-
-                    val navXhtmlUrl = UMFileUtil.resolveLink(UMFileUtil.joinPaths(
-                            mountedUrl!!, ocf!!.rootFiles[0].fullPath!!), opf.navItem!!.href!!)
-
-                    val navContent = client.get<String>(navXhtmlUrl)
-
-                    val navDocument = EpubNavDocument()
-                    val navParser = KMPXmlParser()
-                    navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
-                    navDocument.load(navParser)
-                    epubContentView.runOnUiThread(Runnable { epubContentView.setTableOfContents(navDocument.toc!!) })
-                    view.runOnUiThread(Runnable { view.setProgressBarVisible(false) })
-                } catch (e: Exception) {
-                    dumpException(e)
-                }
-
-            }
-        }
-
-        override fun onFailure(exception: Throwable?) {
-            if (exception != null) {
-                UMLog.l(UMLog.ERROR, 500, "Exception mounting container")
-                dumpException(exception)
-            }
-        }
-    }
+    private var linearSpineUrls: Array<String> = arrayOf()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val containerUid = (arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 0)
-        view.setProgressBarProgress(-1)
-        view.setProgressBarVisible(true)
-        view.mountContainer(containerUid, mountedCallbackHandler)
+        view.progressValue = -1
+        view.progressVisible = true
+        GlobalScope.launch {
+            mountedPath = mountHandler.mountContainer(containerUid)
+            handleMountedContainer()
+        }
+    }
+
+    private suspend fun handleMountedContainer(){
+        try {
+            val client = defaultHttpClient()
+            val ocfContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, OCF_CONTAINER_PATH))
+
+            ocf = OcfDocument()
+            val ocfParser = KMPXmlParser()
+
+            ocfParser.setInput(ByteArrayInputStream(ocfContent.toByteArray()), "UTF-8")
+            ocf?.loadFromParser(ocfParser)
+
+            //get and parse the first publication
+            val opfUrl = ocf?.rootFiles?.get(0)?.fullPath?.let {
+                UMFileUtil.joinPaths(mountedPath, it)
+            }
+            val opfContent = client.get<String>(opfUrl.toString())
+
+            val opf = OpfDocument()
+            val opfParser = KMPXmlParser()
+            opfParser.setInput(ByteArrayInputStream(opfContent.toByteArray()), "UTF-8")
+            opf.loadFromOPF(opfParser)
+            val linearSpineHrefsRelative = opf.linearSpineHREFs
+
+            opfBaseUrl = ocf?.rootFiles?.get(0)?.fullPath?.let {
+                UMFileUtil.joinPaths(mountedPath, it) }?.let {
+                UMFileUtil.getParentFilename(it) }
+
+            linearSpineUrls = Array(linearSpineHrefsRelative.size) { "" }
+
+            for (i in linearSpineHrefsRelative.indices) {
+                linearSpineUrls[i] = opfBaseUrl?.let { UMFileUtil.joinPaths(it,
+                        linearSpineHrefsRelative[i]) }.toString()
+            }
+
+            val opfCoverImageItem = opf.getCoverImage("")
+            val authorNames = if (opf.numCreators > 0)
+                opf.creators?.let { UMUtil.joinStrings(it, ", ") }
+            else
+                null
+
+            epubContentView.runOnUiThread(Runnable {
+                val position : Int = if(arguments.containsKey(EpubContentView.ARG_INITIAL_PAGE_HREF))
+                    opf.getLinearSpinePositionByHREF(arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)) else 0
+
+                epubContentView.containerTitle = opf.title
+                epubContentView.setSpineUrls(linearSpineUrls, if(position >= 0) position else 0)
+                if (opfCoverImageItem != null) {
+                    epubContentView.coverImageUrl = opfCoverImageItem.href?.let {
+                        opfBaseUrl?.let { url -> UMFileUtil.resolveLink(url, it) }
+                    }
+                }
+
+                if (authorNames != null) {
+                    epubContentView.authorName = authorNames
+                }
+            })
+
+            if (opf.navItem == null)
+                throw IllegalArgumentException()
+
+            val navXhtmlUrl = opf.navItem?.href?.let {
+                ocf?.rootFiles?.get(0)?.fullPath?.let { path -> UMFileUtil.joinPaths(mountedPath, path)
+                }?.let { url -> UMFileUtil.resolveLink(url, it) }
+            }
+
+            val navContent = client.get<String>(navXhtmlUrl.toString())
+
+            val navDocument = EpubNavDocument()
+            val navParser = KMPXmlParser()
+            navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
+            navDocument.load(navParser)
+            epubContentView.runOnUiThread(Runnable {
+                epubContentView.tableOfContents = navDocument.toc
+            })
+            view.runOnUiThread(Runnable {
+                view.progressVisible = false
+            })
+        } catch (e: Exception) {
+            dumpException(e)
+        }
     }
 
     @JsName("handleClickNavItem")
     fun handleClickNavItem(navItem: EpubNavItem) {
-        if (opfBaseUrl != null && linearSpineUrls != null) {
-            val navItemUrl = UMFileUtil.resolveLink(opfBaseUrl!!, navItem.href!!)
-            val hrefIndex = listOf(*linearSpineUrls!!).indexOf(navItemUrl)
+        val opfUrl = opfBaseUrl
+        if (opfUrl != null && linearSpineUrls.isNotEmpty()) {
+            val navItemUrl = navItem.href?.let { UMFileUtil.resolveLink(opfUrl, it) }
+            val hrefIndex = listOf(*linearSpineUrls).indexOf(navItemUrl)
             if (hrefIndex != -1) {
-                epubContentView.goToLinearSpinePosition(hrefIndex)
+                epubContentView.spinePosition = hrefIndex
             }
         }
     }
 
+
     override fun onDestroy() {
         super.onDestroy()
-        if (mountedUrl != null) {
-            view.unmountContainer(mountedUrl!!)
+        if (mountedPath.isNotEmpty()) suspend {
+            mountHandler.unMountContainer(mountedPath)
         }
     }
 
