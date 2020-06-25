@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
+import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
@@ -14,7 +14,7 @@ private val mimeTypeToViewNameMap = mapOf(
         "application/khan-video+zip" to VideoPlayerView.VIEW_NAME,
         "application/webchunk+zip" to WebChunkView.VIEW_NAME,
         "application/epub+zip" to EpubContentView.VIEW_NAME
-) + VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoPlayerView.VIEW_NAME }.toMap()
+) + VideoContentPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoPlayerView.VIEW_NAME }.toMap()
 
 
 val mimeTypeToPlayStoreIdMap = mapOf(

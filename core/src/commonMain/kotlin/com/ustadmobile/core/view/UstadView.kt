@@ -54,6 +54,9 @@ interface UstadView {
      */
     val viewContext: Any
 
+
+    var loading: Boolean
+
     /**
      * Show a snackbar style notification that an error has happened
      *

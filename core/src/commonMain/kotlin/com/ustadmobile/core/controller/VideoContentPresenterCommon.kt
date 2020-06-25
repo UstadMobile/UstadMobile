@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.generated.locale.MessageID.loading
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -15,8 +16,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
 
-abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, String>?, view: VideoPlayerView,
-                                          private val db: UmAppDatabase, private val repo: UmAppDatabase)
+abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>?, view: VideoPlayerView,
+                                           private val db: UmAppDatabase, private val repo: UmAppDatabase)
     : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
 
 
@@ -32,27 +33,11 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
                            val srtLangList: MutableList<String> = mutableListOf(),
                            val srtMap: MutableMap<String, String> = mutableMapOf())
 
-    var videoParams: VideoParams? = null
-
     var audioEntry: ContainerEntryWithContainerEntryFile? = null
-
-    var audioInput: InputStream? = null
-        get() {
-            val audioEntryVal = audioEntry
-            return if (audioEntryVal != null) {
-                containerManager.getInputStream(audioEntryVal)
-            } else {
-                null
-            }
-        }
 
     internal var videoPath: String? = null
     internal var srtMap = mutableMapOf<String, String>()
     internal var srtLangList = mutableListOf<String>()
-
-
-
-    lateinit var containerManager: ContainerManager
 
     abstract fun handleOnResume()
 
@@ -63,13 +48,12 @@ abstract class VideoPlayerPresenterCommon(context: Any, arguments: Map<String, S
         contentEntryDao = db.contentEntryDao
 
         navigation = arguments[ARG_REFERRER] ?: ""
-        val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID)!!.toLong()
-        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID)!!.toLong()
+        val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
+        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
+        view.loading = true
         GlobalScope.launch {
-            val contentEntry = contentEntryDao.getContentByUuidAsync(entryUuid)
-            if (contentEntry != null)
-                view.setVideoInfo(contentEntry)
+            view.entry = contentEntryDao.getContentByUuidAsync(entryUuid)
         }
 
     }

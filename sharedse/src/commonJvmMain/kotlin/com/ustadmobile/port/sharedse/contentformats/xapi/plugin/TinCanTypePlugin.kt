@@ -51,4 +51,8 @@ class TinCanTypePlugin : TinCanType(), ContentTypePlugin {
 
         return contentEntry
     }
+
+    override fun isZipped(): Boolean{
+        return true
+    }
 }

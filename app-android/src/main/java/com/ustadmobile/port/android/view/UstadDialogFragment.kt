@@ -20,6 +20,13 @@ open class UstadDialogFragment : DialogFragment(), DismissableDialog, UstadView 
     override val viewContext: Any
         get() = requireContext()
 
+    override var loading: Boolean = false
+        get() = false
+        set(value) {
+            //TODO: set this on the main activity
+            field = value
+        }
+
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }

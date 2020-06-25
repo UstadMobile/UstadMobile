@@ -9,26 +9,28 @@ import com.ustadmobile.lib.db.entities.Container
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Map<String, String>?,
-                                                     view: VideoPlayerView, private val db: UmAppDatabase,
-                                                     private val repo: UmAppDatabase)
-    : VideoPlayerPresenterCommon(context, arguments, view, db, repo) {
+actual class VideoContentPresenter actual constructor(context: Any, arguments: Map<String, String>?,
+                                                      view: VideoPlayerView, private val db: UmAppDatabase,
+                                                      private val repo: UmAppDatabase)
+    : VideoContentPresenterCommon(context, arguments, view, db, repo) {
 
     var container: Container? = null
 
     actual override fun handleOnResume() {
         GlobalScope.launch {
 
-            if (videoParams == null) {
+            if (view.videoParams == null) {
 
                 val containerResult = containerDao.findByUidAsync(containerUid)
                 if (containerResult == null) {
-                    view.showErrorWithAction(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, context), 0)
+                    view.showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, context), {}, 0)
+                    view.loading = false
                     return@launch
                 }
                 container = containerResult
                 val result = containerEntryDao.findByContainerAsync(containerUid)
-                containerManager = ContainerManager(containerResult, db, repo)
+                view.containerManager = ContainerManager(containerResult, db, repo)
+                val containerManager = view.containerManager
                 var defaultLangName = ""
                 for (entry in result) {
 
@@ -40,7 +42,6 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
                             videoPath = containerEntryFile.cefPath
                         } else if (containerEntryPath == "audio.c2") {
                             audioEntry = entry
-                            audioInput = containerManager.getInputStream(entry)
                         } else if (containerEntryPath == "subtitle.srt" || containerEntryPath.toLowerCase() == "subtitle-english.srt") {
 
                             defaultLangName = if (containerEntryPath.contains("-"))
@@ -69,8 +70,7 @@ actual class VideoPlayerPresenter actual constructor(context: Any, arguments: Ma
             }
 
             view.runOnUiThread(kotlinx.coroutines.Runnable {
-                videoParams = VideoParams(videoPath, audioEntry, srtLangList, srtMap)
-                view.setVideoParams(videoPath, audioInput, srtLangList, srtMap)
+                view.videoParams = VideoParams(videoPath, audioEntry, srtLangList, srtMap)
             })
 
         }

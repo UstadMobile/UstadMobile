@@ -15,9 +15,9 @@ private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime:
 }
 
 suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
-                                                    clazzJoinTime: Long = (getSystemTimeInMillis() -  (86400* 1000)),
-    studentNamer: (Int) -> Pair<String, String> = {"Test" to "Student $it"},
-    teacherNamer: (Int) -> Pair<String, String> = {"Test" to "Teacher $it"}): TestClazzAndMembers {
+                                                    clazzJoinTime: Long = (getSystemTimeInMillis() - (86400 * 1000)),
+                                                    studentNamer: (Int) -> Pair<String, String> = { "Test" to "Student $it" },
+                                                    teacherNamer: (Int) -> Pair<String, String> = { "Test" to "Teacher $it" }): TestClazzAndMembers {
     val mockClazz = Clazz("Test Clazz").apply {
         clazzTimeZone = "Asia/Dubai"
         clazzUid = clazzDao.insertAsync(this)
@@ -347,4 +347,23 @@ suspend fun UmAppDatabase.insertTestStatements() {
         statement.statementUid = statementDao.insert(statement)
         i++
     }
+}
+
+suspend fun UmAppDatabase.insertVideoContent(): Container {
+    val spanishQuiz = ContentEntry()
+    spanishQuiz.title = "tiempo de prueba"
+    spanishQuiz.thumbnailUrl = "https://www.africanstorybook.org/img/asb120.png"
+    spanishQuiz.description = "todo el contenido"
+    spanishQuiz.publisher = "CK12"
+    spanishQuiz.author = "borrachera"
+    spanishQuiz.primaryLanguageUid = 3
+    spanishQuiz.leaf = true
+    spanishQuiz.contentEntryUid = contentEntryDao.insert(spanishQuiz)
+
+    val container = Container()
+    container.containerContentEntryUid = spanishQuiz.contentEntryUid
+    val containerUid = containerDao.insert(container)
+    container.containerUid = containerUid
+
+    return container
 }
