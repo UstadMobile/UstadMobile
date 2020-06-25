@@ -54,7 +54,7 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
-        WebView.setWebContentsDebuggingEnabled(true)
+
         mBinding = FragmentXapiPackageContentBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.progressBar.isIndeterminate = true
