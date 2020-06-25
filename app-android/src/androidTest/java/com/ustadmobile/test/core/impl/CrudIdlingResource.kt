@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingResource
+import com.ustadmobile.port.android.view.UstadBaseFragment
 import com.ustadmobile.port.android.view.UstadDetailFragment
 import com.ustadmobile.port.android.view.UstadEditFragment
 import com.ustadmobile.test.rules.ScenarioIdlingResource
@@ -117,11 +118,15 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
         if(!this.viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
             return true
 
-        if(this is UstadEditFragment<*> && (this.entity == null || this.loading || !this.fieldsEnabled)) {
+        if(this is UstadBaseFragment && (this.loading)){
+           return false
+        }
+
+        if(this is UstadEditFragment<*> && (this.entity == null || !this.fieldsEnabled)) {
             return false
         }
 
-        if(this is UstadDetailFragment<*> && (this.entity == null || this.loading)) {
+        if(this is UstadDetailFragment<*> && (this.entity == null)) {
             return false
         }
 

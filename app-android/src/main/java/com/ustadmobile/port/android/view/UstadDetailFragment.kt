@@ -16,13 +16,6 @@ abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView
     override val viewContext: Any
         get() = requireContext()
 
-    override var loading: Boolean = false
-        get() = false
-        set(value) {
-            //TODO: set this on the main activity
-            field = value
-        }
-
     abstract val detailPresenter: UstadDetailPresenter<*, *>?
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE

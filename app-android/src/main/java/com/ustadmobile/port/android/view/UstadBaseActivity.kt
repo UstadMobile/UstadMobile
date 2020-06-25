@@ -59,9 +59,17 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications,UstadView, ShakeDetector.Listener,UstadViewWithProgress {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadView, ShakeDetector.Listener, UstadViewWithProgress {
 
     private var baseController: UstadBaseController<*>? = null
+
+
+    override var loading: Boolean = false
+        get() = false
+        set(value) {
+            //TODO: set this on the main activity
+            field = value
+        }
 
     /**
      * Get the toolbar that's used for the support action bar
@@ -107,7 +115,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     internal var isOpeningFilePickerOrCamera = false
 
-    lateinit var appUpdateManager : AppUpdateManager
+    lateinit var appUpdateManager: AppUpdateManager
 
 
     private val mSyncServiceConnection = object : ServiceConnection {
@@ -214,7 +222,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         get() = this
 
 
-
     //The devMinApi21 flavor has SDK Min 21, but other flavors have a lower SDK
     @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -273,7 +280,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             baseProgressBar.visibility = if (showProgress) View.VISIBLE else View.INVISIBLE
         }
     }
-
 
 
     /**
