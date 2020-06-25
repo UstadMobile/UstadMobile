@@ -119,9 +119,9 @@ class ContentEntryEdit2FragmentTest  {
     }
 
 
-    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects unzipped file, should save to database")
+    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects non zipped file, should save to database")
     @Test
-    fun givenNoEntryYet_whenFormFilledUnZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
+    fun givenNoEntryYet_whenFormFilledNonZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
         val container = createEntryFromFile("video.mp4", false)
         val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
         assertTrue("File imported was unzipped file", !container.mimeType?.contains("zip")!!

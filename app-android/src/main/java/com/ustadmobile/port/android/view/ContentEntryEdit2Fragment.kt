@@ -62,7 +62,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         get() = field
         set(value) {
             field = value
-            loading = false
             mBinding?.contentEntry = value
         }
 
@@ -187,9 +186,12 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String,db: UmAppDatabase, repo: UmAppDatabase): Container ?{
         val file = entryMetaData?.file
         val isZipped = entryMetaData?.isZipped
-        return if(file != null && isZipped != null){
+        val container =  if(file != null && isZipped != null){
             importContainerFromFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo, isZipped)
         }else null
+
+        loading = false
+        return container
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
