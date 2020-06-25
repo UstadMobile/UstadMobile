@@ -17,7 +17,7 @@ interface XapiPackageContentView : UstadView {
 
     companion object {
 
-        const val VIEW_NAME = "XapiContent"
+        const val VIEW_NAME = "XapiPackageContentView"
     }
 
 }
