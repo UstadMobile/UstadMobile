@@ -3,15 +3,15 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.anyArray
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verifyBlocking
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmCallback
-import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -47,6 +47,8 @@ class EpubContentPresenterTest {
 
     private lateinit var mockEpubView: EpubContentView
 
+    private lateinit var mockHandler: MountedContainerHandler
+
     private var epubContainer: Container? = null
 
     private lateinit var httpd: EmbeddedHTTPD
@@ -80,16 +82,18 @@ class EpubContentPresenterTest {
         httpd.start()
 
         mockEpubView = mock {
-            on { mountContainer(eq(epubContainer!!.containerUid), any()) }.doAnswer {
-                val mountedUrl = joinPaths(httpd.localHttpUrl,
-                        httpd.mountContainer(it.getArgument(0),null)!!)
-                UmCallbackUtil.onSuccessIfNotNull(it.getArgument<UmCallback<String>>(1), mountedUrl)
-                Unit
-            }
 
             on { runOnUiThread(any()) }.doAnswer {invocation ->
                 Thread(invocation.getArgument<Any>(0) as Runnable).start()
                 Unit
+            }
+        }
+
+        mockHandler = mock{
+            onBlocking { mountContainer(eq(epubContainer!!.containerUid)) }.doAnswer{
+                val mountedUrl = joinPaths(httpd.localHttpUrl,
+                        httpd.mountContainer(it.getArgument(0), null)!!)
+                mountedUrl
             }
         }
 
@@ -109,7 +113,7 @@ class EpubContentPresenterTest {
     @Test
     @Throws(IOException::class)
     fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefs() {
-      /*  val args = HashMap<String, String>()
+        val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
 
         val hrefListReference = AtomicReference<Any>()
@@ -120,14 +124,16 @@ class EpubContentPresenterTest {
         }.`when`(mockEpubView)?.setSpineUrls(anyArray(), eq(0))
 
         val presenter = EpubContentPresenter(Any(),
-                args, mockEpubView)
+                args, mockEpubView, mockHandler)
         presenter.onCreate(args)
 
-        verify<EpubContentView>(mockEpubView, timeout(15000)).mountContainer(eq(epubContainer!!.containerUid),
-                any<UmCallback<String>>())
-        verify<EpubContentView>(mockEpubView, timeout(15000)).setContainerTitle(opf!!.title!!)
 
-        verify<EpubContentView>(mockEpubView, timeout(20000)).setSpineUrls(any(), eq(0))
+        verifyBlocking(mockHandler, timeout(15000)){
+            mountContainer(eq(epubContainer!!.containerUid))
+        }
+        verify(mockEpubView, timeout(15000)).containerTitle = opf!!.title!!
+
+        verify(mockEpubView, timeout(20000)).setSpineUrls(any(), eq(0))
 
         val linearSpineUrls = hrefListReference.get() as Array<String>
         val client = HttpClient()
@@ -143,14 +149,8 @@ class EpubContentPresenterTest {
                         responseStatusCode)
             }
         }
-
+        epubTmpFile?.deleteOnExit()
         client.close()
-*/
-    }
-
-    @Test
-    fun givenNoOcf_whenCreated_shouldShowErrorMessage() {
-
     }
 
 }
