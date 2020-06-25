@@ -8,6 +8,8 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.clearText
 import androidx.test.espresso.action.ViewActions.typeText
@@ -153,12 +155,15 @@ class ContentEntryEdit2FragmentTest  {
                 fragmentArgs = bundleOf(ARG_LEAF to true.toString(),
                         ARG_PARENT_ENTRY_UID to 10000L.toString()), themeResId = R.style.UmTheme_App) {
             ContentEntryEdit2Fragment(registry).also {
+                it.loading = true
                 it.installNavController(systemImplNavRule.navController)
             } }) { onFragment { fragment ->
             fragment.handleFileSelection()
         }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+
+        onIdle()
 
         if(!isZip){
             onView(withId(R.id.entry_title_text)).perform(clearText(), typeText("Dummy Title"))
@@ -169,6 +174,8 @@ class ContentEntryEdit2FragmentTest  {
         onView(withId(R.id.container_storage_option)).check(matches(isDisplayed()))
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
+
+        onIdle()
 
         val entries = dbRule.db.contentEntryDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
             it.isNotEmpty()
