@@ -44,8 +44,8 @@ suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, p
     return null
 }
 
-suspend fun importContainerFromZippedFile(contentEntryUid: Long, mimeType: String?, containerBaseDir: String,
-                                          file: File, db: UmAppDatabase, dbRepo: UmAppDatabase, isZipped: Boolean): Container {
+suspend fun importContainerFromFile(contentEntryUid: Long, mimeType: String?, containerBaseDir: String,
+                                    file: File, db: UmAppDatabase, dbRepo: UmAppDatabase, isZipped: Boolean): Container {
 
     val container = Container().apply {
         containerContentEntryUid = contentEntryUid
@@ -80,7 +80,7 @@ suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: Um
             ?: return null
 
     contentEntry.contentEntryUid = dbRepo.contentEntryDao.insert(contentEntry)
-    val container = importContainerFromZippedFile(contentEntry.contentEntryUid, mimeType, containerBaseDir, file,
+    val container = importContainerFromFile(contentEntry.contentEntryUid, mimeType, containerBaseDir, file,
             db, dbRepo, isZipped)
 
     return Pair(contentEntry, container)

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.ustadmobile.core.controller.VideoPlayerPresenterCommon.Companion.VIDEO_MIME_MAP
+import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.view.VideoPlayerView
 
 open class VideoType : ContentTypePlugin {

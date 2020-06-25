@@ -30,7 +30,7 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.sharedse.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromZippedFile
+import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -185,7 +185,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String,db: UmAppDatabase, repo: UmAppDatabase): Container ?{
         val file = entryMetaData?.file
         return if(file != null){
-            importContainerFromZippedFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo, true)
+            importContainerFromFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo, true)
         }else null
     }
 
