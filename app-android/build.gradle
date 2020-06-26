@@ -354,7 +354,7 @@ dependencies {
 
 
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
-    implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
+    implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
     implementation "androidx.cardview:cardview:$version_androidx_cardview"
     implementation "com.google.android.material:material:$version_android_material"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
