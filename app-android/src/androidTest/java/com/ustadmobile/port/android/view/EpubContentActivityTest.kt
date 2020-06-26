@@ -34,6 +34,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
+import java.lang.Thread.sleep
 
 
 @AdbScreenRecord("Epub content screen test")
@@ -87,7 +88,7 @@ class EpubContentActivityTest {
         intent.putExtra(ARG_CONTAINER_UID , container.containerUid.toString())
         val activityScenario = launch<EpubContentActivity>(intent)
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-
+        sleep(5000)
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
         onView(allOf(withId(R.id.item_basepoint_cover_title),withText("ರುಮ್ನಿಯಾ"))).check(matches(isDisplayed()))
