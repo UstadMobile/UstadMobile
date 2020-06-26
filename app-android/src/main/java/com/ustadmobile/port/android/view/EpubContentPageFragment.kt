@@ -59,7 +59,7 @@ class EpubContentPageFragment : Fragment() {
         // Inflate the layout for this fragment
         if (viewGroup == null) {
             viewGroup = inflater.inflate(R.layout.fragment_epubcontent_page,
-                    container, false) as RelativeLayout
+                    container, false) as WebView
             webView = viewGroup?.findViewById(R.id.fragment_container_page_webview)
         } else {
             UMLog.l(UMLog.DEBUG, 517, "Containerpage: recycled onCreateView")
