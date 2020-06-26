@@ -4,21 +4,14 @@ import android.app.Application
 import android.content.Intent
 import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.espresso.web.assertion.WebViewAssertions
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
-import androidx.test.espresso.web.sugar.Web
 import androidx.test.espresso.web.sugar.Web.onWebView
-import androidx.test.espresso.web.webdriver.DriverAtoms
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.Locator
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -35,14 +28,13 @@ import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
-import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.*
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.CoreMatchers.containsString
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
-import java.lang.Thread.sleep
 
 
 @AdbScreenRecord("Epub content screen test")
@@ -100,7 +92,6 @@ class EpubContentActivityTest {
         val activityScenario = launch<EpubContentActivity>(intent)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
         onView(allOf(withId(R.id.item_basepoint_cover_title),withText("ರುಮ್ನಿಯಾ"))).check(matches(isDisplayed()))
