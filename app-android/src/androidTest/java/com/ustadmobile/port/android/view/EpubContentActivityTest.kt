@@ -68,8 +68,9 @@ class EpubContentActivityTest {
             containerUid  = 1000
             dbRule.db.containerDao.insert(this)
         }
-        val containerTmpDir = File(context.filesDir,"containerDir/")
-        val testFile = File(containerTmpDir, "epub-${System.currentTimeMillis()}")
+        val containerTmpDir = UmFileUtilSe.makeTempDir("containerTmpDir",
+                "${System.currentTimeMillis()}")
+        val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
 
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test.epub")
         testFile.outputStream().use { input?.copyTo(it) }
