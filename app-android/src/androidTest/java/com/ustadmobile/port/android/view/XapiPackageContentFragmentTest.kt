@@ -111,8 +111,7 @@ class XapiPackageContentFragmentTest {
                 .check(webMatches(getText(), containsString("Tin Can Home")))
 
         //clean up
-        testFile.deleteOnExit()
-        containerTmpDir.deleteOnExit()
+        containerTmpDir.deleteRecursively()
 
     }
 }

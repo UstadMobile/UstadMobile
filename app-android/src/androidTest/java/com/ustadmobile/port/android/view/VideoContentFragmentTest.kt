@@ -87,6 +87,7 @@ class VideoContentFragmentTest {
                     dbRule.db, tmpDir.absolutePath)
             manager.addEntries(ContainerManager.FileEntrySource(videoFile, "video.mp4"))
         }
+        tmpDir.deleteRecursively()
     }
 
     @AdbScreenRecord("given video content when rotated then show video without description")

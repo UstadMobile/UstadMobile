@@ -77,8 +77,7 @@ class EpubContentActivityTest {
 
         val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,containerTmpDir.absolutePath)
         addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
-        testFile.deleteOnExit()
-        containerTmpDir.deleteOnExit()
+        containerTmpDir.deleteRecursively()
     }
 
     @AdbScreenRecord("Given valid epub content when created should be loaded to the view")
