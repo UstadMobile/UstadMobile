@@ -51,23 +51,13 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
             field = value
             title = value
             mBinding.containerTitle = value
-
-            waitForWebViewOnViewPager()
         }
-
-    @TestOnly
-    private fun waitForWebViewOnViewPager(){
-        Handler().postDelayed({
-            loading = false
-        }, TimeUnit.SECONDS.toMillis(10))
-    }
 
     override fun setSpineUrls(urls: Array<String>?, index : Int) {
         mPagerAdapter = urls?.let { ContainerViewPagerAdapter(supportFragmentManager, it) }
         mBinding.containerEpubrunnerPager.offscreenPageLimit = 1
         mBinding.containerEpubrunnerPager.adapter = mPagerAdapter
         mBinding.containerEpubrunnerPager.setCurrentItem(index, true)
-        loading = false
     }
 
     override var pageTitle: String? = null
@@ -75,12 +65,14 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
             title = value
             field = value
         }
+
     override var tableOfContents: EpubNavItem? = null
         set(value) {
             if(value != null){
                 mBinding.activityContainerEpubpagerToclist.setAdapter(ContainerTocListAdapter(value))
                 mBinding.activityContainerEpubpagerToclist.setOnItemClickListener(this)
             }
+            loading = false
             field = value
         }
     override var coverImageUrl: String? = null

@@ -51,8 +51,6 @@ class XapiPackageContentFragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    private val context: Application = ApplicationProvider.getApplicationContext()
-
     private val bleServiceHelper = NetworkManagerBleServiceHelper()
 
 
