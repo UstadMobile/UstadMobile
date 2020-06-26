@@ -150,10 +150,10 @@ class EpubContentPresenter(context: Any,
             else
                 null
 
-            epubContentView.runOnUiThread(Runnable {
-                val position : Int = if(arguments.containsKey(EpubContentView.ARG_INITIAL_PAGE_HREF))
-                    opf.getLinearSpinePositionByHREF(arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)) else 0
+            val position : Int = if(arguments.containsKey(EpubContentView.ARG_INITIAL_PAGE_HREF))
+                opf.getLinearSpinePositionByHREF(arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)) else 0
 
+            epubContentView.runOnUiThread(Runnable {
                 epubContentView.containerTitle = opf.title
                 epubContentView.setSpineUrls(linearSpineUrls, if(position >= 0) position else 0)
                 if (opfCoverImageItem != null) {
@@ -165,6 +165,9 @@ class EpubContentPresenter(context: Any,
                 if (authorNames != null) {
                     epubContentView.authorName = authorNames
                 }
+
+                if (opf.navItem == null)
+                    throw IllegalArgumentException()
             })
 
             if (opf.navItem == null)

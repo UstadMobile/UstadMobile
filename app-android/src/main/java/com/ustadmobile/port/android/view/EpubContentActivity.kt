@@ -49,6 +49,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
     override var containerTitle: String? = null
         set(value) {
             field = value
+            title = value
             mBinding.containerTitle = value
         }
 
@@ -67,8 +68,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
     override var tableOfContents: EpubNavItem? = null
         set(value) {
             if(value != null){
-                tableOfContents?.let { ContainerTocListAdapter(it) }?.let {
-                    mBinding.activityContainerEpubpagerToclist.setAdapter(it) }
+                mBinding.activityContainerEpubpagerToclist.setAdapter(ContainerTocListAdapter(value))
                 mBinding.activityContainerEpubpagerToclist.setOnItemClickListener(this)
             }
             field = value
@@ -141,7 +141,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
                 mView = inflater.inflate(R.layout.item_epubview_child, null)
             }
 
-            val expandedTextView = recycleView?.findViewById<TextView>(R.id.expandedListItem)
+            val expandedTextView = mView?.findViewById<TextView>(R.id.expandedListItem)
             expandedTextView?.text = node.toString()
 
             return mView as View
