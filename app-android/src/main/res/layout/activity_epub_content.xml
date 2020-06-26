@@ -74,6 +74,7 @@
                         />
 
                     <TextView
+                        android:layout_marginStart="@dimen/dimen_8dp"
                         android:id="@+id/item_basepoint_cover_title"
                         android:text="@{containerTitle}"
                         android:textAppearance="@style/UmTheme.TextAppearance.Headline6"
@@ -85,6 +86,7 @@
                         android:layout_height="wrap_content"/>
 
                     <TextView
+                        android:layout_marginStart="@dimen/dimen_8dp"
                         android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

@@ -39,8 +39,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     private var mPresenter: EpubContentPresenter? = null
 
-    val baseURL: String? = null
-
     override val viewContext: Any
         get() = this
 
@@ -197,6 +195,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
     override fun onClick(item: Any?, view: View) {
         val navItem = item as EpubNavItem?
         if(navItem != null)mPresenter?.handleClickNavItem(navItem)
+        pageTitle = navItem?.title
         mBinding.containerDrawerLayout.closeDrawers()
     }
 
@@ -258,6 +257,9 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         mPresenter = null
         mPagerAdapter = null
         coverImageUrl = null
+        containerTitle = null
+        tableOfContents = null
+        pageTitle = null
         super.onDestroy()
     }
 
