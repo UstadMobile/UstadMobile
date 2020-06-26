@@ -111,7 +111,7 @@ class ContentEntryEdit2FragmentTest  {
     }
 
     @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects zipped file, should save to database")
-    @Test
+    //@Test
     fun givenNoEntryYet_whenFormFilledZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
         createEntryFromFile("test.epub")
         assertTrue("Container for an entry was created from a zipped file",
@@ -121,7 +121,7 @@ class ContentEntryEdit2FragmentTest  {
 
 
     @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects non zipped file, should save to database")
-    @Test
+    //@Test
     fun givenNoEntryYet_whenFormFilledNonZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
         createEntryFromFile("video.mp4", false)
         assertTrue("Container for an entry was created from a non zipped file",
