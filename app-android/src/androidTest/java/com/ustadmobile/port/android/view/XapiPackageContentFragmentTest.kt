@@ -17,6 +17,7 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -81,10 +82,9 @@ class XapiPackageContentFragmentTest {
             containerContentEntryUid = contentEntry?.contentEntryUid!!
             containerUid = dbRule.db.containerDao.insert(this)
         }
-        containerTmpDir = File(context.cacheDir, "containerTmpDir/")
-        containerTmpDir.mkdir()
-
-        testFile = File.createTempFile("xapicontent", "xapifile", context.cacheDir)
+        containerTmpDir = UmFileUtilSe.makeTempDir("containerTmpDir",
+                "${System.currentTimeMillis()}")
+        testFile = File.createTempFile("epubcontent", "epubfile", containerTmpDir)
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip")
         testFile.outputStream().use { input?.copyTo(it) }
 
