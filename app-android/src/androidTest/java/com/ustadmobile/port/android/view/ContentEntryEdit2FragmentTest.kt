@@ -8,8 +8,6 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.clearText
 import androidx.test.espresso.action.ViewActions.typeText
@@ -32,7 +30,6 @@ import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
 import com.ustadmobile.test.rules.*
 import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.not
 import org.junit.Assert
 import org.junit.Rule
@@ -65,7 +62,10 @@ class ContentEntryEdit2FragmentTest  {
 
     private val context = getApplicationContext<Application>()
 
-    private lateinit var containerTmpDir: File
+    private var containerManager: ContainerManager ? = null
+
+    private var container : Container ? = null
+
 
     @AdbScreenRecord("Given folder does not yet exist, when user fills in form for new folder, should be saved to database")
     @Test
@@ -113,27 +113,25 @@ class ContentEntryEdit2FragmentTest  {
     @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects zipped file, should save to database")
     @Test
     fun givenNoEntryYet_whenFormFilledZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
-        val container = createEntryFromFile("test.epub")
-       /* val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
-        assertTrue("File imported was a zipped file", container.mimeType?.contains("zip")!!
-                && containerManager.allEntries.size > 1)
-        containerTmpDir.deleteOnExit()*/
+        createEntryFromFile("test.epub")
+        assertTrue("Container for an entry was created from a zipped file",
+                container!!.fileSize > 0 && container!!.mimeType?.contains("zip")!!
+                        && containerManager!!.allEntries.size > 1)
     }
 
 
     @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects non zipped file, should save to database")
     @Test
     fun givenNoEntryYet_whenFormFilledNonZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
-        val container = createEntryFromFile("video.mp4", false)
-        /*val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
-        assertTrue("File imported was unzipped file", !container.mimeType?.contains("zip")!!
-                &&  containerManager.allEntries.size == 1)
-        containerTmpDir.deleteOnExit()*/
+        createEntryFromFile("video.mp4", false)
+        assertTrue("Container for an entry was created from a non zipped file",
+                container!!.fileSize > 0 && !container!!.mimeType?.contains("zip")!!
+                        && containerManager!!.allEntries.size == 1)
     }
 
 
-    private fun createEntryFromFile(fileName: String, isZip: Boolean = true) : Container{
-        containerTmpDir = File(context.cacheDir, "containerTmpDir/")
+    private fun createEntryFromFile(fileName: String, isZipped: Boolean = true){
+        val containerTmpDir = File(context.cacheDir, "containerTmpDir/")
         containerTmpDir.mkdir()
         val testFile = File.createTempFile("contentEntryEdit", fileName, context.cacheDir)
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/$fileName")
@@ -163,7 +161,7 @@ class ContentEntryEdit2FragmentTest  {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        if(!isZip){
+        if(!isZipped){
             onView(withId(R.id.entry_title_text)).perform(clearText(), typeText("Dummy Title"))
         }
 
@@ -177,14 +175,13 @@ class ContentEntryEdit2FragmentTest  {
             it.isNotEmpty()
         }
 
-        assertTrue("Entry's data set and is a leaf", entries?.first()?.title != null && entries.first().leaf)
-
-        val container = dbRule.db.containerDao.getMostRecentContainerForContentEntryLive(entries?.first()?.contentEntryUid!!)
+        container = dbRule.db.containerDao.getMostRecentContainerForContentEntryLive(entries?.first()?.contentEntryUid!!)
                 .waitUntilWithFragmentScenario(fragmentScenario){it != null}
 
-        assertTrue("Container for an entry was created created and has files",
-                container != null && container.fileSize > 0)
+        assertTrue("Entry's data set and is a leaf", entries.first().title != null && entries.first().leaf)
+
+        containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
         testFile.deleteOnExit()
-        return container!!
+        containerTmpDir.deleteOnExit()
     }
 }
