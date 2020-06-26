@@ -82,8 +82,8 @@ class XapiPackageContentFragmentTest {
             containerContentEntryUid = contentEntry?.contentEntryUid!!
             containerUid = dbRule.db.containerDao.insert(this)
         }
-        containerTmpDir = UmFileUtilSe.makeTempDir("", "${System.currentTimeMillis()}")
-        testFile = File.createTempFile("epubcontent", "epubfile", containerTmpDir)
+        containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
+        testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip")
         testFile.outputStream().use { input?.copyTo(it) }
 

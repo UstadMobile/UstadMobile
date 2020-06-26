@@ -70,7 +70,7 @@ class EpubContentActivityTest {
         }
         val containerTmpDir = UmFileUtilSe.makeTempDir("containerTmpDir",
                 "${System.currentTimeMillis()}")
-        val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
+        val testFile = File.createTempFile("epubcontent", "epubfile", containerTmpDir)
 
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test.epub")
         testFile.outputStream().use { input?.copyTo(it) }
