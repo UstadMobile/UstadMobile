@@ -62,7 +62,7 @@ class ContentEntry2DetailFragmentTest {
             contentEntryUid = dbRule.db.contentEntryDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
             ContentEntry2DetailFragment().also {fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
@@ -109,15 +109,13 @@ class ContentEntry2DetailFragmentTest {
             dbRule.db.insertContentEntryWithTranslations(totalTranslations,parentUid)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
             ContentEntry2DetailFragment().also {fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
-        sleep(1000)
 
         onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
 

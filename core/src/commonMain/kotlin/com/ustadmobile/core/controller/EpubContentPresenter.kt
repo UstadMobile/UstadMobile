@@ -101,7 +101,7 @@ class EpubContentPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        val containerUid = (arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 0)
+        val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
         view.progressValue = -1
         view.progressVisible = true
         GlobalScope.launch {

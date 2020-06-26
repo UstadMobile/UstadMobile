@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -26,10 +27,9 @@ import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.appbar_material_with_progress.view.*
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import org.jetbrains.annotations.TestOnly
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnItemClickListener, TocListView.OnItemClickListener {
 
@@ -38,6 +38,8 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
     private var mPagerAdapter: ContainerViewPagerAdapter? = null
 
     private var mPresenter: EpubContentPresenter? = null
+
+    private var mSavedInstanceState: Bundle? = null
 
     override val viewContext: Any
         get() = this
@@ -49,13 +51,23 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
             field = value
             title = value
             mBinding.containerTitle = value
+
+            waitForWebViewOnViewPager()
         }
+
+    @TestOnly
+    private fun waitForWebViewOnViewPager(){
+        Handler().postDelayed({
+            loading = false
+        }, TimeUnit.SECONDS.toMillis(10))
+    }
 
     override fun setSpineUrls(urls: Array<String>?, index : Int) {
         mPagerAdapter = urls?.let { ContainerViewPagerAdapter(supportFragmentManager, it) }
         mBinding.containerEpubrunnerPager.offscreenPageLimit = 1
         mBinding.containerEpubrunnerPager.adapter = mPagerAdapter
         mBinding.containerEpubrunnerPager.setCurrentItem(index, true)
+        loading = false
     }
 
     override var pageTitle: String? = null
@@ -222,9 +234,18 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         mBinding.containerDrawerLayout.closeDrawers()
     }
 
+    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
+        super.onBleNetworkServiceBound(networkManagerBle)
+        mPresenter = EpubContentPresenter(this,
+                bundleToMap(intent.extras), this@EpubContentActivity,
+                networkManagerBle.httpd as MountedContainerHandler)
+        mPresenter?.onCreate(mSavedInstanceState.toStringMap())
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        mSavedInstanceState = savedInstanceState
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_epub_content)
 
         setSupportActionBar(mBinding.root.toolbar)
@@ -233,14 +254,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         if (!UstadMobileSystemImpl.instance.getAppConfigBoolean(AppConfig.KEY_EPUB_TOC_ENABLED,
                         this)) {
             mBinding.containerDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-        }
-
-        GlobalScope.launch(Dispatchers.Main) {
-            val networkManagerBle = networkManager?.await()
-            mPresenter = EpubContentPresenter(this,
-                    bundleToMap(intent.extras), this@EpubContentActivity,
-                    networkManagerBle?.httpd as MountedContainerHandler)
-            mPresenter?.onCreate(savedInstanceState.toStringMap())
         }
     }
 
@@ -254,6 +267,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     override fun onDestroy() {
         mPresenter?.onDestroy()
+        mSavedInstanceState = null
         mPresenter = null
         mPagerAdapter = null
         coverImageUrl = null

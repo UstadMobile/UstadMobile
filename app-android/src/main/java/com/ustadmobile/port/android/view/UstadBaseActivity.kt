@@ -185,13 +185,16 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             serviceVal.runWhenNetworkManagerReady {
                 UMLog.l(UMLog.DEBUG, 0, "BleService Connection: service = $serviceVal")
 
-                val networkManagerBleVal = serviceVal.networkManagerBle!!
+                val networkManagerBleVal = serviceVal.networkManagerBle
                 networkManager = networkManagerBle
-                //this runs after service is ready
-                networkManagerBle.complete(networkManagerBleVal)
-                //networkManagerBle = serviceVal.networkManagerBle
-                bleServiceBound = true
-                onBleNetworkServiceBound(serviceVal.networkManagerBle!!)
+
+                if(networkManagerBleVal != null){
+                    //this runs after service is ready
+                    networkManagerBle.complete(networkManagerBleVal)
+                    //networkManagerBle = serviceVal.networkManagerBle
+                    bleServiceBound = true
+                    onBleNetworkServiceBound(networkManagerBleVal)
+                }
                 runWhenServiceConnectedQueue.setReady(true)
 
 //                //TODO: this is being used for testing purposes only and should be removed
