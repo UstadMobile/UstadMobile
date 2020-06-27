@@ -103,7 +103,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             LoginView.VIEW_NAME to "${PACKAGE_NAME}LoginActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
-            ScormPackageView.VIEW_NAME to "${PACKAGE_NAME}ScormPackageActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
 
             ContentEntryExportView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryExportFragmentDialog",

@@ -3,6 +3,7 @@ package com.ustadmobile.test.port.android.util
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.FragmentScenario
+import androidx.test.espresso.Espresso.onIdle
 import com.nhaarman.mockitokotlin2.mock
 
 /**
@@ -39,6 +40,8 @@ fun <F: Fragment> FragmentScenario<F>.clickOptionMenu(clickOptionId: Int) {
     val menuItem = mock<MenuItem> {
         on { itemId }.thenReturn(clickOptionId)
     }
+
+    onIdle()
 
     onFragment {
         it.onOptionsItemSelected(menuItem)

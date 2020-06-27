@@ -17,6 +17,7 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -50,16 +51,12 @@ class XapiPackageContentFragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    private val context: Application = ApplicationProvider.getApplicationContext()
-
     private val bleServiceHelper = NetworkManagerBleServiceHelper()
 
 
     @JvmField
     @Rule
     val adbScreenRecordRule = AdbScreenRecordRule()
-
-    private lateinit var testFile: File
 
     private var contentEntry: ContentEntry? = null
 
@@ -81,10 +78,8 @@ class XapiPackageContentFragmentTest {
             containerContentEntryUid = contentEntry?.contentEntryUid!!
             containerUid = dbRule.db.containerDao.insert(this)
         }
-        containerTmpDir = File(context.cacheDir, "containerTmpDir/")
-        containerTmpDir.mkdir()
-
-        testFile = File.createTempFile("xapicontent", "xapifile", context.cacheDir)
+        containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
+        val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip")
         testFile.outputStream().use { input?.copyTo(it) }
 
@@ -111,8 +106,7 @@ class XapiPackageContentFragmentTest {
                 .check(webMatches(getText(), containsString("Tin Can Home")))
 
         //clean up
-        testFile.deleteOnExit()
-        containerTmpDir.deleteOnExit()
+        containerTmpDir.deleteRecursively()
 
     }
 }

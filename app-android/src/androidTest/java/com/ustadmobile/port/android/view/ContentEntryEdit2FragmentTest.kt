@@ -171,7 +171,7 @@ class ContentEntryEdit2FragmentTest  {
         }
 
         container = dbRule.db.containerDao.getMostRecentContainerForContentEntryLive(entries?.first()?.contentEntryUid!!)
-                .waitUntilWithFragmentScenario(fragmentScenario){it != null}
+                .waitUntilWithFragmentScenario(fragmentScenario, timeout = 15000){it != null}
 
         assertTrue("Entry's data set and is a leaf", entries.first().title != null && entries.first().leaf)
 

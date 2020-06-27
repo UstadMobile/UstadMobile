@@ -425,7 +425,7 @@ class OpfDocument {
     }
 
     fun getLanguage(index: Int): String? {
-        return languages[index]
+        return if(languages.size > index) languages[index] else null
     }
 
     /**
