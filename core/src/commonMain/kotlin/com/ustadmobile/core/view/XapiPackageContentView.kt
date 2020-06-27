@@ -9,14 +9,15 @@ import kotlin.js.JsName
 interface XapiPackageContentView : UstadView {
 
     @JsName("setTitle")
-    fun setTitle(title: String)
+    var contentTitle: String
 
-    @JsName("loadUrl")
-    fun loadUrl(url: String)
+
+    @JsName("url")
+    var url: String
 
     companion object {
 
-        const val VIEW_NAME = "XapiContent"
+        const val VIEW_NAME = "XapiPackageContentView"
     }
 
 }

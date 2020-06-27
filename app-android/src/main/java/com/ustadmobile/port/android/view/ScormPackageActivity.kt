@@ -11,8 +11,12 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScormPackagePresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ScormPackageView
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.CompletableDeferred
 
 class ScormPackageActivity : ZippedContentActivity(), ScormPackageView {
+
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     private var mWebView: WebView? = null
 

@@ -18,6 +18,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.view.ContainerMounter
+import kotlin.jvm.JvmOverloads
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -32,7 +34,7 @@ import com.ustadmobile.core.impl.UmAccountManager
  */
 open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any,
                                                    private val appDatabase: UmAppDatabase = UmAccountManager.getActiveDatabase(context),
-                                                   private val repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : RouterNanoHTTPD(portNum) {
+                                                   private val repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : RouterNanoHTTPD(portNum) ,ContainerMounter{
 
     private val id: Int
 
@@ -58,11 +60,6 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
      */
     val localHttpUrl: String
         get() = "http://127.0.0.1:$listeningPort/"
-
-    val containerMounter: suspend (Long) -> String = {containerUid ->
-        val contPath = mountContainer(containerUid, null)
-        UMFileUtil.joinPaths(localHttpUrl, contPath!!)
-    }
 
 
     interface ResponseListener {
@@ -148,6 +145,17 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
     }
 
     @JvmOverloads
+    override suspend fun mountContainer(containerUid: Long): String {
+        val contPath = mountContainer(containerUid, null)
+        return UMFileUtil.joinPaths(localHttpUrl, contPath!!)
+    }
+
+
+    override suspend fun unMountContainer(mountPath: String) {
+        removeRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX)
+    }
+
+    @JvmOverloads
     fun mountContainer(containerUid: Long, mountPath: String?,
                        filters: List<MountedContainerResponder.MountedContainerFilter> = ArrayList()): String? {
         val container = repository.containerDao.findByUid(containerUid) ?: return null
@@ -169,9 +177,6 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
         return mountPath
     }
 
-    fun unmountContainer(mountPath: String) {
-        removeRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX)
-    }
 
     private fun toFullZipMountPath(mountPath: String): String? {
         try {

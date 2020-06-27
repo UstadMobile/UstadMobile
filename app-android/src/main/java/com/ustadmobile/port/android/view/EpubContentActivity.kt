@@ -22,6 +22,8 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.CompletableDeferred
 import java.util.*
 
 class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterView.OnItemClickListener, TocListView.OnItemClickListener {
@@ -127,6 +129,8 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterVie
 
         return super.onOptionsItemSelected(item)
     }
+
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     override fun setContainerTitle(title: String) {
         setTitle(title)
@@ -242,4 +246,6 @@ class EpubContentActivity : ZippedContentActivity(), EpubContentView, AdapterVie
     override fun setAuthorName(authorName: String) {
         (findViewById<View>(R.id.activity_container_epubpager_auuthor_text) as TextView).text = authorName
     }
+
+    override fun unmountContainer(mountedUrl: String?) {}
 }

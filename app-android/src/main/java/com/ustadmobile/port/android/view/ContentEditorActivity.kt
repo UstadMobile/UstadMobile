@@ -80,6 +80,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import id.zelory.compressor.Compressor
 import id.zelory.compressor.constraint.quality
 import id.zelory.compressor.constraint.format
+import kotlinx.coroutines.CompletableDeferred
 
 open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback,
@@ -902,6 +903,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
        }
     }
 
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     override fun showErrorMessage(message: String) {
         showBaseMessage(message)

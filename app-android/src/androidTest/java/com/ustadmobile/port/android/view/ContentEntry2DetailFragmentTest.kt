@@ -84,7 +84,7 @@ class ContentEntry2DetailFragmentTest {
             dbRule.db.insertContentEntryWithTranslations(totalTranslations,parentUid)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
             ContentEntry2DetailFragment().also {fragment ->
                 fragment.installNavController(systemImplNavRule.navController)

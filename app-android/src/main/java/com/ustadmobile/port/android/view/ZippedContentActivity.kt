@@ -7,14 +7,11 @@ import android.content.ServiceConnection
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.IBinder
-
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.sharedse.network.EmbeddedHttpdService
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import com.ustadmobile.port.sharedse.util.RunnableQueue
-
+import com.ustadmobile.sharedse.network.EmbeddedHttpdService
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
@@ -97,12 +94,6 @@ abstract class ZippedContentActivity : UstadBaseActivity() {
 
     fun mountContainer(containerUid: Long, callback: UmCallback<String>?) {
         runWhenHttpdReady.runWhenReady(Runnable { MountContainerAsyncTask(callback, httpdRef.get()).execute(containerUid) })
-    }
-
-    fun unmountContainer(mountedUrl: String?) {
-        //note: use -1 so we don't chop off first ./ included in local httpurl from the mounted path
-        val mountedPath = mountedUrl?.substring(httpdRef.get().localHttpUrl.length - 1) + MountedContainerResponder.URI_ROUTE_POSTFIX
-        httpdRef.get().unmountContainer(mountedPath)
     }
 
     fun unmountZipFromHttp(mountedPath: String) {

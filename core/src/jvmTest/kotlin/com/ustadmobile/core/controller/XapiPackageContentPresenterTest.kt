@@ -1,12 +1,12 @@
 package com.ustadmobile.core.controller
 
-//import org.mockito.ArgumentMatchers.any
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView
@@ -25,6 +25,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
+import org.mockito.Mockito.timeout
 import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -45,14 +46,10 @@ class XapiPackageContentPresenterTest {
 
     private lateinit var xapiContainer: Container
 
-    private var mockXapiPackageContentView: XapiPackageContentView? = null
+    private lateinit var mockedView: XapiPackageContentView
+
 
     private var httpd: EmbeddedHTTPD? = null
-
-    private val xapiXml: TinCanXML? = null
-
-    @Volatile
-    private var lastMountedUrl: String? = null
 
     private val mountLatch = CountDownLatch(1)
 
@@ -90,14 +87,11 @@ class XapiPackageContentPresenterTest {
 
         httpd = EmbeddedHTTPD(0, Any(), db, repo)
         httpd!!.start()
-
-        mockXapiPackageContentView = mock(XapiPackageContentView::class.java)
-
-        doAnswer { invocation ->
-            Thread(invocation.getArgument<Any>(0) as Runnable).start()
-            Any()
-        }.`when`<XapiPackageContentView>(mockXapiPackageContentView).runOnUiThread(any())
-
+        mockedView = mock{
+            on { runOnUiThread(any())}.doAnswer{
+                Thread(it.getArgument<Any>(0) as Runnable).start()
+            }
+        }
     }
 
     @After
@@ -105,6 +99,7 @@ class XapiPackageContentPresenterTest {
         xapiTmpFile.delete()
         UmFileUtilSe.deleteRecursively(containerDirTmp!!)
     }
+
 
     @Test
     fun givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {
@@ -116,13 +111,7 @@ class XapiPackageContentPresenterTest {
         val account = UmAccount(42, "username", "fefe1010fe",
                 "http://localhost/")
         val xapiPresenter = XapiPackageContentPresenter(
-                context, args, mockXapiPackageContentView!!, account) {
-            val mountedPath = httpd!!.mountContainer(it, null)
-            lastMountedUrl = UMFileUtil.joinPaths(httpd!!.localHttpUrl,
-                    mountedPath!!)
-            mountLatch.countDown()
-            lastMountedUrl!!
-        }
+                context, args, mockedView!!,httpd!!, account)
 
 
         xapiPresenter.onCreate(null)
@@ -130,16 +119,14 @@ class XapiPackageContentPresenterTest {
         mountLatch.await(15000, TimeUnit.MILLISECONDS)
 
         argumentCaptor<String> {
-            val pkgPath = UMFileUtil.joinPaths(lastMountedUrl!!, "tetris.html")
-            verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(5000)).loadUrl(
-                    capture())
+            verify(mockedView, timeout(5000)).url = capture()
             Assert.assertTrue("Mounted path starts with url and html name",
-                    firstValue.startsWith(pkgPath))
+                    firstValue.startsWith(httpd!!.localHttpUrl) && firstValue.contains("tetris.html"))
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
             val umAccountActor = Json.parse(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
                     umAccountActor.account.name, account.username)
-            val expectedEndpoint = UMFileUtil.resolveLink(lastMountedUrl!!, "/xapi/$contentEntryUid/")
+            val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/xapi/$contentEntryUid/")
             Assert.assertEquals("Received expected Xapi endpoint: /xapi/contentEntryUid",
                     expectedEndpoint, paramsProvided["endpoint"])
             Assert.assertEquals("Received expected activity id",
@@ -147,7 +134,7 @@ class XapiPackageContentPresenterTest {
                     paramsProvided["activity_id"])
         }
 
-        verify<XapiPackageContentView>(mockXapiPackageContentView, timeout(15000)).setTitle("Tin Can Tetris Example")
+        verify(mockedView, timeout(15000)).contentTitle = "Tin Can Tetris Example"
     }
 
 }
