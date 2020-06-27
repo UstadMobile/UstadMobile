@@ -195,7 +195,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        loading = true
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
             rootView = it.root
             it.fileImportInfoVisibility = View.GONE

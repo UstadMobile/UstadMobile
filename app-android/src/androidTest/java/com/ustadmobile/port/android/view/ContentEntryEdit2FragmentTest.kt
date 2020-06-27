@@ -160,8 +160,6 @@ class ContentEntryEdit2FragmentTest  {
 
         onView(withId(R.id.content_entry_select_file)).check(matches(isDisplayed()))
 
-        onView(withId(R.id.container_storage_option)).check(matches(isDisplayed()))
-
         if(!isZipped){
             onView(withId(R.id.entry_title_text)).perform(clearText(), typeText("Dummy Title"))
         }
