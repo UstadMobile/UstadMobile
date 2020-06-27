@@ -10,8 +10,8 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
+import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.EpubContentView
-import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
@@ -47,7 +47,7 @@ class EpubContentPresenterTest {
 
     private lateinit var mockEpubView: EpubContentView
 
-    private lateinit var mockHandler: MountedContainerHandler
+    private lateinit var mockHandler: ContainerMounter
 
     private var epubContainer: Container? = null
 
