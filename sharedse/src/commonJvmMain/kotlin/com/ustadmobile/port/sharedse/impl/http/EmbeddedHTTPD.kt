@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.view.MountedContainerHandler
+import com.ustadmobile.core.view.ContainerMounter
 import kotlin.jvm.JvmOverloads
 
 /**
@@ -34,7 +34,7 @@ import kotlin.jvm.JvmOverloads
  */
 open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any,
                                                    private val appDatabase: UmAppDatabase = UmAccountManager.getActiveDatabase(context),
-                                                   private val repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : RouterNanoHTTPD(portNum) ,MountedContainerHandler{
+                                                   private val repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : RouterNanoHTTPD(portNum) ,ContainerMounter{
 
     private val id: Int
 

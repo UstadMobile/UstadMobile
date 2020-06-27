@@ -45,7 +45,7 @@ import kotlin.js.JsName
  * @author mike
  */
 abstract class UstadBaseController<V : UstadView>(override val context: Any,
-                                                  protected open val arguments: Map<String, String>, open val view: V)
+                                                  protected val arguments: Map<String, String>, val view: V)
     : UmLifecycleOwner {
 
     private val lifecycleListeners = mutableListOf<UmLifecycleListener>()

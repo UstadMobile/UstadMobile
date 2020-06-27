@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-//import org.mockito.ArgumentMatchers.any
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.doAnswer
@@ -8,10 +7,8 @@ import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.XapiPackageContentView
@@ -28,6 +25,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
+import org.mockito.Mockito.timeout
 import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -48,7 +46,7 @@ class XapiPackageContentPresenterTest {
 
     private lateinit var xapiContainer: Container
 
-    private var mockedView: XapiPackageContentView? = null
+    private lateinit var mockedView: XapiPackageContentView
 
 
     private var httpd: EmbeddedHTTPD? = null
@@ -89,13 +87,11 @@ class XapiPackageContentPresenterTest {
 
         httpd = EmbeddedHTTPD(0, Any(), db, repo)
         httpd!!.start()
-        mockedView = mock{}
-
-        doAnswer { invocation ->
-            Thread(invocation.getArgument<Any>(0) as Runnable).start()
-            Any()
-        }.`when`<XapiPackageContentView>(mockedView).runOnUiThread(any())
-
+        mockedView = mock{
+            on { runOnUiThread(any())}.doAnswer{
+                Thread(it.getArgument<Any>(0) as Runnable).start()
+            }
+        }
     }
 
     @After
@@ -123,7 +119,7 @@ class XapiPackageContentPresenterTest {
         mountLatch.await(15000, TimeUnit.MILLISECONDS)
 
         argumentCaptor<String> {
-            verify<XapiPackageContentView>(mockedView, timeout(5000)).urlToLoad = capture()
+            verify(mockedView, timeout(5000)).url = capture()
             Assert.assertTrue("Mounted path starts with url and html name",
                     firstValue.startsWith(httpd!!.localHttpUrl) && firstValue.contains("tetris.html"))
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
@@ -138,7 +134,7 @@ class XapiPackageContentPresenterTest {
                     paramsProvided["activity_id"])
         }
 
-        verify<XapiPackageContentView>(mockedView, timeout(15000)).contentTitle = "Tin Can Tetris Example"
+        verify(mockedView, timeout(15000)).contentTitle = "Tin Can Tetris Example"
     }
 
 }

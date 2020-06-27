@@ -14,7 +14,7 @@ import com.toughra.ustadmobile.databinding.FragmentXapiPackageContentBinding
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.MountedContainerHandler
+import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 
 class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
 
-    var networkManagerProvider: BleNetworkManagerProvider? = null
+    internal var networkManagerProvider: BleNetworkManagerProvider? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -38,10 +38,10 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
             title = value
         }
 
-    override var urlToLoad: String = ""
+    override var url: String = ""
         set(value) {
             field = value
-            mBinding?.urlToLoad = value
+            mBinding?.url = value
         }
 
     private var mBinding: FragmentXapiPackageContentBinding? = null
@@ -90,7 +90,7 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
             val thisFrag = this@XapiPackageContentFragment
             val networkManagerBle = networkManagerProvider?.networkManager?.await()
             mPresenter = XapiPackageContentPresenter(requireContext(), arguments.toStringMap(),
-                    thisFrag, networkManagerBle?.httpd as MountedContainerHandler)
+                    thisFrag, networkManagerBle?.httpd as ContainerMounter)
             mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
         }
     }
@@ -102,5 +102,10 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
         mPresenter?.onDestroy()
         mPresenter = null
         mBinding = null
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        networkManagerProvider = null
     }
 }

@@ -18,6 +18,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
@@ -30,7 +31,7 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.sharedse.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromZippedFile
+import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -135,14 +136,14 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     }
 
-    open fun handleFileSelection(){
+    internal fun handleFileSelection(){
         registerForActivityResult(ActivityResultContracts.GetContent(),
                 registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
             if(uri != null){
                 try{
                     val input = requireContext().contentResolver.openInputStream(uri)
                     val tmpFile = findNavController().createTempFileForDestination(requireContext(),
-                            "import-${System.currentTimeMillis()}")
+                            "import-${System.currentTimeMillis()}.${UMFileUtil.getExtension(uri.toString())}")
                     val output = tmpFile.outputStream()
                     input?.copyTo(tmpFile.outputStream())
                     output.flush()
@@ -184,9 +185,12 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String,db: UmAppDatabase, repo: UmAppDatabase): Container ?{
         val file = entryMetaData?.file
-        return if(file != null){
-            importContainerFromZippedFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo, true)
+        val isZipped = entryMetaData?.isZipped
+        val container =  if(file != null && isZipped != null){
+            importContainerFromFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo, isZipped)
         }else null
+        loading = true
+        return container
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -215,9 +219,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                         UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                         networkManagerBle?.containerDownloadManager,
                         UmAccountManager.activeAccountLiveData)
-
                 mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
-
                 navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
                         Language::class.java) {
                     val language = it.firstOrNull() ?: return@observeResult

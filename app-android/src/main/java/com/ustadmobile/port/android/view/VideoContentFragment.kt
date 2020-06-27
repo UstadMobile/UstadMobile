@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.Format
 import com.google.android.exoplayer2.Player
@@ -27,7 +27,8 @@ import com.google.android.exoplayer2.util.Util
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentVideoContentBinding
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.controller.VideoPlayerPresenter
+import com.ustadmobile.core.controller.VideoContentPresenter
+import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -35,13 +36,14 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.lib.db.entities.ContainerEntry
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
 import java.io.BufferedInputStream
-import java.io.File
 import java.io.IOException
 
 
@@ -55,7 +57,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private var mBinding: FragmentVideoContentBinding? = null
 
-    private var mPresenter: VideoPlayerPresenter? = null
+    private var mPresenter: VideoContentPresenter? = null
 
     private var playerView: PlayerView? = null
 
@@ -91,13 +93,18 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             currentWindow = savedInstanceState.get(CURRENT_WINDOW) as Int
         }
 
-        mPresenter = VideoPlayerPresenter(viewContext,
+        mPresenter = VideoContentPresenter(viewContext,
                 arguments.toStringMap(), this,
                 UmAccountManager.getActiveDatabase(this),
                 UmAccountManager.getRepositoryForActiveAccount(this))
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -118,42 +125,25 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         controlsView = null
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (Util.SDK_INT > 23) {
-            initializePlayer()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (Util.SDK_INT <= 23 || player == null) {
-            initializePlayer()
-        }
-        mPresenter?.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (Util.SDK_INT <= 23) {
-            releasePlayer()
-            releaseAudio()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        if (Util.SDK_INT > 23) {
-            releasePlayer()
-            releaseAudio()
-        }
-    }
-
     override var entry: ContentEntry? = null
         set(value) {
             field = value
             title = value?.title
             mBinding?.entry = value
+        }
+
+    override var videoParams: VideoContentPresenterCommon.VideoParams? = null
+        get() = field
+        set(value) {
+            field = value
+            setVideoParams(value?.videoPath, value?.audioPath, value?.srtLangList
+                    ?: mutableListOf(), value?.srtMap ?: mutableMapOf())
+        }
+
+    override var containerManager: ContainerManager? = null
+        get() = field
+        set(value) {
+            field = value
         }
 
     private fun initializePlayer() {
@@ -165,7 +155,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         player?.seekTo(currentWindow, playbackPosition)
     }
 
-    override fun setVideoParams(videoPath: String?, audioPath: InputStream?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
+    fun setVideoParams(videoPath: String?, audioPath: ContainerEntryWithContainerEntryFile?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
         if (audioPath != null) {
             player?.addListener(audioListener)
         }
@@ -222,19 +212,10 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
         GlobalScope.launch {
             try {
-
-                val container = mPresenter?.container
-                if (container == null) {
-                    showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), {}, 0)
-                    loading = false
-                    return@launch
-                }
-
-                val containerManager = ContainerManager(container, appDatabase, repoAppDatabase)
-
-                val containerEntry = containerManager.getEntry(subtitleData)
+                val containerManager = containerManager
+                val containerEntry = containerManager?.getEntry(subtitleData)
                 if (containerEntry == null) {
-                    showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), {}, 0)
+                    showError()
                     loading = false
                     return@launch
                 }
@@ -254,6 +235,10 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
                 loading = false
             }
         }
+    }
+
+    fun showError() {
+        showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), {}, 0)
     }
 
     private var videoListener = object : Player.EventListener {
@@ -282,7 +267,12 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
 
     fun playAudio(fromMs: Long) {
-        audioPlayer = Codec2Player(BufferedInputStream(mPresenter?.audioInput), fromMs)
+        val audioInput = containerManager?.getInputStream(videoParams?.audioPath
+                ?: ContainerEntryWithContainerEntryFile())
+        if (audioInput == null) {
+            showError()
+        }
+        audioPlayer = Codec2Player(BufferedInputStream(audioInput), fromMs)
         audioPlayer?.play()
     }
 
@@ -294,9 +284,9 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     }
 
     private fun releasePlayer() {
-        playbackPosition = player?.currentPosition!!
-        currentWindow = player?.currentWindowIndex!!
-        playWhenReady = player?.playWhenReady!!
+        playbackPosition = player?.currentPosition ?: 0L
+        currentWindow = player?.currentWindowIndex ?: 0
+        playWhenReady = player?.playWhenReady ?: false
         player?.removeListener(videoListener)
         player?.release()
 
@@ -307,8 +297,40 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         audioPlayer?.stop()
     }
 
-    override fun setVideoParams(videoPath: String?, audioPath: String?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private val viewLifecycleObserver = object : DefaultLifecycleObserver {
+
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner)
+            if (Util.SDK_INT > 23) {
+                initializePlayer()
+            }
+        }
+
+        override fun onResume(owner: LifecycleOwner) {
+            super.onResume(owner)
+            if (Util.SDK_INT <= 23 || player == null) {
+                initializePlayer()
+            }
+            mPresenter?.onResume()
+        }
+
+        override fun onPause(owner: LifecycleOwner) {
+            super.onPause(owner)
+            if (Util.SDK_INT <= 23) {
+                releasePlayer()
+                releaseAudio()
+            }
+        }
+
+        override fun onStop(owner: LifecycleOwner) {
+            super.onStop(owner)
+            if (Util.SDK_INT > 23) {
+                releasePlayer()
+                releaseAudio()
+            }
+
+        }
+
     }
 
     private fun buildMediaSource(uri: Uri): MediaSource {

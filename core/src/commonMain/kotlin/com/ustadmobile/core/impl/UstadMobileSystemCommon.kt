@@ -2,10 +2,6 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
-import com.ustadmobile.core.impl.http.UmHttpCall
-import com.ustadmobile.core.impl.http.UmHttpRequest
-import com.ustadmobile.core.impl.http.UmHttpResponse
-import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.LoginView
 import kotlinx.io.InputStream
@@ -17,7 +13,7 @@ import kotlin.jvm.JvmOverloads
 /**
  * Class has all the shared function across all supported platforms
  */
-open abstract class UstadMobileSystemCommon {
+abstract class UstadMobileSystemCommon {
 
     /**
      * Returns whether or not the init method has already been run
@@ -304,53 +300,6 @@ open abstract class UstadMobileSystemCommon {
         return xpp
     }
 
-
-    /**
-     * Make an asynchronous http request. This can (on platforms with a filesystem) rely on the
-     * caching directory.
-     *
-     * @param request request to make
-     * @param responseListener response listener to receive response when ready
-     */
-    @Deprecated(message = "Actual implementation will be replaced with KTOR")
-    fun makeRequestAsync(request: UmHttpRequest,
-                         responseListener: UmHttpResponseCallback): UmHttpCall {
-        throw Exception("Actual implemtation will be replaced with KTOR")
-    }
-
-    /**
-     * Directly send an asynchronous http request. This must *NOT* rely on the httpcachedir, as it
-     * will be used by HttpCacheDir as the underlying implementation to retrieve data from the network.
-     *
-     * @param request request to make
-     * @param responseListener response listener
-     * @return call
-     */
-    @Deprecated(message = "Actual implementation will be replaced with KTOR")
-    fun sendRequestAsync(request: UmHttpRequest,
-                         responseListener: UmHttpResponseCallback): UmHttpCall {
-        throw Exception("Actual implementation will be replaced with KTOR")
-    }
-
-    /**
-     * Directly send a synchronous request. THIS IS NOT FOR NORMAL USAGE. It is intended only to be
-     * used by the cache so requests can be pumped through the system http library, if present on
-     * that implementation. As http libraries like okhttp
-     *
-     * It must *NOT* be used directly by presenters etc.
-     *
-     * @param request request to make
-     * @return response
-     */
-    @Deprecated(message = "Actual implementation will be replaced with KTOR")
-    fun sendRequestSync(request: UmHttpRequest): UmHttpResponse {
-        throw Exception("Actual implementation will be replaced with KTOR")
-    }
-
-    @Deprecated(message = "Actual implementation will be replaced with KTOR")
-    fun makeRequestSync(request: UmHttpRequest): UmHttpResponse {
-        throw Exception("Actual implementation will be replaced with KTOR")
-    }
 
     /**
      * Get storage directories

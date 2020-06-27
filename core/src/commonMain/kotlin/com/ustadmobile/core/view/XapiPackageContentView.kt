@@ -12,8 +12,8 @@ interface XapiPackageContentView : UstadView {
     var contentTitle: String
 
 
-    @JsName("loadUrl")
-    var urlToLoad: String
+    @JsName("url")
+    var url: String
 
     companion object {
 
