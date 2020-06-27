@@ -67,8 +67,8 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.EpubContentView
-import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
 import io.ktor.client.request.get
@@ -88,7 +88,7 @@ import kotlin.js.JsName
 class EpubContentPresenter(context: Any,
                            args: Map<String, String>,
                            private val epubContentView: EpubContentView,
-                           private val mountHandler: MountedContainerHandler)
+                           private val mountHandler: ContainerMounter)
     : UstadBaseController<EpubContentView>(context, args, epubContentView) {
 
     private var ocf: OcfDocument? = null

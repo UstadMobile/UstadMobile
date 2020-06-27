@@ -22,14 +22,12 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.EpubContentView
-import com.ustadmobile.core.view.MountedContainerHandler
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.appbar_material_with_progress.view.*
 import kotlinx.coroutines.CompletableDeferred
-import org.jetbrains.annotations.TestOnly
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnItemClickListener, TocListView.OnItemClickListener {
 
@@ -230,7 +228,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         super.onBleNetworkServiceBound(networkManagerBle)
         mPresenter = EpubContentPresenter(this,
                 bundleToMap(intent.extras), this@EpubContentActivity,
-                networkManagerBle.httpd as MountedContainerHandler)
+                networkManagerBle.httpd as ContainerMounter)
         mPresenter?.onCreate(mSavedInstanceState.toStringMap())
     }
 
