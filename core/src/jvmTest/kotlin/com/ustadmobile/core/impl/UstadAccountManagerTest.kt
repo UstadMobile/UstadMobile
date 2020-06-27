@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
+import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_PREFKEY
 import com.ustadmobile.core.db.UmAppDatabase
@@ -158,14 +159,45 @@ class UstadAccountManagerTest {
     }
 
 
+    @Test
     fun givenInvalidLoginCredentials_whenLoginCalled_thenShouldThrowException() {
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
 
+        mockWebServer.enqueue(MockResponse()
+                .setResponseCode(403))
+
+        var exception: Exception? = null
+        try {
+            runBlocking {
+                accountManager.login("bob", "wrong", mockServerUrl)
+            }
+        }catch(e: Exception) {
+            exception = e
+        }
+
+        Assert.assertTrue("Got UnauthorizedException when providing invalid login credentials",
+            exception is UnauthorizedException)
     }
 
+    @Test
     fun givenUnreachableServer_whenLoginCalled_thenShouldThrowException() {
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
 
+        var exception: Exception? = null
+
+        try {
+            runBlocking {
+                accountManager.login("bob", "password", "http://inaccessible/")
+            }
+        }catch(e: Exception) {
+            exception = e
+        }
+
+        Assert.assertNotNull("Got exception when attempting to login to an inaccessible server",
+            exception)
     }
 
+    @Test
     fun givenValidAccountLoggedIn_whenSwitchAccountCalled_thenActiveAccountShouldChangeAndAllRemainInStoredAccounts() {
 
     }
