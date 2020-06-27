@@ -58,8 +58,6 @@ class XapiPackageContentFragmentTest {
     @Rule
     val adbScreenRecordRule = AdbScreenRecordRule()
 
-    private lateinit var testFile: File
-
     private var contentEntry: ContentEntry? = null
 
     private var container: Container? = null
@@ -81,7 +79,7 @@ class XapiPackageContentFragmentTest {
             containerUid = dbRule.db.containerDao.insert(this)
         }
         containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
-        testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
+        val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip")
         testFile.outputStream().use { input?.copyTo(it) }
 
