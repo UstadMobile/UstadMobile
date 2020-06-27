@@ -22,6 +22,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.clickOptionMenu
@@ -121,7 +122,7 @@ class ContentEntryEdit2FragmentTest  {
 
 
     @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects non zipped file, should save to database")
-    //@Test
+    @Test
     fun givenNoEntryYet_whenFormFilledNonZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase (){
         createEntryFromFile("video.mp4", false)
         assertTrue("Container for an entry was created from a non zipped file",
@@ -131,9 +132,8 @@ class ContentEntryEdit2FragmentTest  {
 
 
     private fun createEntryFromFile(fileName: String, isZipped: Boolean = true){
-        val containerTmpDir = File(context.cacheDir, "containerTmpDir/")
-        containerTmpDir.mkdir()
-        val testFile = File.createTempFile("contentEntryEdit", fileName, context.cacheDir)
+        val containerTmpDir = UmFileUtilSe.makeTempDir("containerTmpDir","${System.currentTimeMillis()}")
+        val testFile = File.createTempFile("contentEntryEdit", fileName, containerTmpDir)
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/$fileName")
         testFile.outputStream().use { input?.copyTo(it) }
         val expectedUri = Uri.fromFile(testFile)
@@ -153,21 +153,18 @@ class ContentEntryEdit2FragmentTest  {
                 fragmentArgs = bundleOf(ARG_LEAF to true.toString(),
                         ARG_PARENT_ENTRY_UID to 10000L.toString()), themeResId = R.style.UmTheme_App) {
             ContentEntryEdit2Fragment(registry).also {
-                it.loading = true
                 it.installNavController(systemImplNavRule.navController)
-            } }) { onFragment { fragment ->
-            fragment.handleFileSelection()
-        }
+            } }) { onFragment { fragment -> fragment.handleFileSelection()}
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
-        if(!isZipped){
-            onView(withId(R.id.entry_title_text)).perform(clearText(), typeText("Dummy Title"))
-        }
 
         onView(withId(R.id.content_entry_select_file)).check(matches(isDisplayed()))
 
         onView(withId(R.id.container_storage_option)).check(matches(isDisplayed()))
+
+        if(!isZipped){
+            onView(withId(R.id.entry_title_text)).perform(clearText(), typeText("Dummy Title"))
+        }
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
@@ -181,7 +178,7 @@ class ContentEntryEdit2FragmentTest  {
         assertTrue("Entry's data set and is a leaf", entries.first().title != null && entries.first().leaf)
 
         containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
-        testFile.deleteOnExit()
-        containerTmpDir.deleteOnExit()
+
+        containerTmpDir.deleteRecursively()
     }
 }

@@ -189,12 +189,13 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         val container =  if(file != null && isZipped != null){
             importContainerFromFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo, isZipped)
         }else null
-        loading = false
+        loading = true
         return container
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
+        loading = true
         mBinding = FragmentContentEntryEdit2Binding.inflate(inflater, container, false).also {
             rootView = it.root
             it.fileImportInfoVisibility = View.GONE
