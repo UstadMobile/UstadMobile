@@ -21,7 +21,6 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.clickOptionMenu
@@ -33,6 +32,7 @@ import org.hamcrest.CoreMatchers.containsString
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import java.io.File
 
@@ -61,6 +61,10 @@ class EpubContentActivityTest {
 
     private lateinit var containerTmpDir: File
 
+    @JvmField
+    @Rule
+    val tempFileRule = TemporaryFolder()
+
     private val context: Application = ApplicationProvider.getApplicationContext()
 
     @Before
@@ -75,12 +79,13 @@ class EpubContentActivityTest {
             containerUid  = 1000
             dbRule.db.containerDao.insert(this)
         }
-        containerTmpDir = UmFileUtilSe.makeTempDir("epubcontent", "${System.currentTimeMillis()}")
-        val testFile = File.createTempFile("epubcontent", "epubfile", containerTmpDir)
+        containerTmpDir = tempFileRule.newFolder("epubContent${System.currentTimeMillis()}")
+        val testFile = tempFileRule.newFile("test${System.currentTimeMillis()}.epub")
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test.epub")
         testFile.outputStream().use { input?.copyTo(it) }
 
-        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,containerTmpDir.absolutePath)
+        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,
+                containerTmpDir.absolutePath)
         addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
     }
 
@@ -99,6 +104,5 @@ class EpubContentActivityTest {
         onWebView(allOf(isDisplayed(), isJavascriptEnabled()))
                 .withElement(findElement(Locator.CLASS_NAME, "authors"))
                 .check(webMatches(getText(), containsString("Rukmini Banerji")))
-        containerTmpDir.deleteRecursively()
     }
 }

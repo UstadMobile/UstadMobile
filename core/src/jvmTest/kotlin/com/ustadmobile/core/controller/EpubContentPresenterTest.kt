@@ -1,9 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.anyArray
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verifyBlocking
+import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
@@ -20,10 +17,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
+import org.junit.rules.TemporaryFolder
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.timeout
@@ -41,7 +36,11 @@ class EpubContentPresenterTest {
 
     private lateinit var repo: UmAppDatabase
 
-    private var epubTmpFile: File? = null
+    private lateinit var epubTmpFile: File
+
+    @Rule
+    @JvmField
+    val tmpFileRule = TemporaryFolder()
 
     private var containerDirTmp: File? = null
 
@@ -65,12 +64,12 @@ class EpubContentPresenterTest {
         epubContainer = Container()
         epubContainer!!.containerUid = repo.containerDao.insert(epubContainer!!)
 
-        epubTmpFile = File.createTempFile("testepubcontentpresenter", "epubTmpFile")
+        epubTmpFile = tmpFileRule.newFile("epubTmpFile")
 
         UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/epub/test.epub",
                 epubTmpFile!!)
 
-        containerDirTmp = UmFileUtilSe.makeTempDir("testpubcontentpresenter", "containerDirTmp")
+        containerDirTmp = tmpFileRule.newFolder("containerDirTmp")
         val containerManager = ContainerManager(epubContainer!!, db, repo,
                 containerDirTmp!!.absolutePath)
 
@@ -104,12 +103,8 @@ class EpubContentPresenterTest {
         opfIn.close()
     }
 
-    @After
-    fun tearDown() {
-        epubTmpFile!!.delete()
-        UmFileUtilSe.deleteRecursively(containerDirTmp!!)
-    }
 
+    @Suppress("UNCHECKED_CAST")
     @Test
     @Throws(IOException::class)
     fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefs() {
@@ -118,10 +113,10 @@ class EpubContentPresenterTest {
 
         val hrefListReference = AtomicReference<Any>()
 
-        doAnswer {
+        whenever(mockEpubView.setSpineUrls(anyArray(), eq(0))).thenAnswer {
             hrefListReference.set(it.getArgument(0))
             Unit
-        }.`when`(mockEpubView)?.setSpineUrls(anyArray(), eq(0))
+        }
 
         val presenter = EpubContentPresenter(Any(),
                 args, mockEpubView, mockHandler)
@@ -149,7 +144,6 @@ class EpubContentPresenterTest {
                         responseStatusCode)
             }
         }
-        epubTmpFile?.deleteOnExit()
         client.close()
     }
 
