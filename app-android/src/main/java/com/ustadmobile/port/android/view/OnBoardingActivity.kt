@@ -109,15 +109,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
             startActivity(Intent(this, MainActivity::class.java))
         }
 
-        val isRtl = TextUtilsCompat.getLayoutDirectionFromLocale(resources.configuration.locale) == ViewCompat.LAYOUT_DIRECTION_RTL
-        var firstScreenIndex = 0
-        screenList = when (isRtl) {
-            true -> {
-                firstScreenIndex = OnBoardScreen.values().size - 1
-                OnBoardScreen.values().reversed()
-            }
-            else -> OnBoardScreen.values().toList()
-        }
+        screenList =  OnBoardScreen.values().toList()
         pageIndicatorView?.count = screenList.size
 
         if (Build.VERSION.SDK_INT <= 19) {
@@ -127,8 +119,6 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         }
 
         viewPager.adapter = OnBoardingPagerAdapter(this)
-        viewPager.currentItem = firstScreenIndex
-
 
         if (pageIndicatorView != null) {
             viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
