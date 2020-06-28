@@ -47,7 +47,7 @@ fun ImageView.setPersonPicture(personPicturePersonUid: Long?, personPictureVisib
                         .into(this@setPersonPicture)
             }
             personPictureVisibilityGoneIfNoPicture == true -> visibility = View.GONE
-            else -> setImageResource(R.drawable.ic_person_black_new_24dp)
+            else -> setImageResource(R.drawable.ic_person_black_24dp)
         }
 
         setTag(R.id.tag_imageloadjob, null)
