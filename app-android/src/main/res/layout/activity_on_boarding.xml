@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,7 +7,7 @@
     xmlns:attrs="http://schemas.android.com/apk/res-auto"
     tools:context="com.ustadmobile.port.android.view.OnBoardingActivity">
 
-    <androidx.viewpager.widget.ViewPager
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/onBoardPagerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
@@ -16,6 +16,8 @@
         android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_width="@dimen/dimen_90dp"
         android:layout_height="@dimen/dimen_90dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="@dimen/dimen_16dp"
         app:srcCompat="@drawable/expo2020_logo"/>
@@ -25,7 +27,8 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         android:hint="@string/language"
         android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_marginStart="@dimen/dimen_16dp"
@@ -49,8 +52,9 @@
         android:id="@+id/get_started_btn"
         android:text="@string/onboarding_get_started_label"
         android:layout_marginBottom="@dimen/dimen_24dp"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/pageIndicatorView"
+        app:layout_constraintBottom_toTopOf="@+id/pageIndicatorView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
@@ -59,8 +63,9 @@
         android:id="@+id/pageIndicatorView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:piv_animationType="scale"
         app:piv_dynamicCount="true"
         app:piv_interactiveAnimation="true"
@@ -70,4 +75,4 @@
         attrs:piv_padding="@dimen/dimen_10dp"
         attrs:piv_radius="@dimen/dimen_4dp" />
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

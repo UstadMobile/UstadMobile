@@ -13,8 +13,8 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.text.TextUtilsCompat
 import androidx.core.view.ViewCompat
-import androidx.viewpager.widget.PagerAdapter
-import androidx.viewpager.widget.ViewPager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.rd.PageIndicatorView
 import com.rd.animation.type.AnimationType
 import com.toughra.ustadmobile.R
@@ -35,7 +35,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
     private lateinit var languageOptions: AutoCompleteTextView
 
-    private lateinit var viewPager: ViewPager
+    private lateinit var viewPager: ViewPager2
 
     private var getStartedBtn: Button? = null
 
@@ -61,33 +61,36 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
     /**
      * Custom pager adapter for the screen
      */
-    private inner class OnBoardingPagerAdapter internal constructor(private val context: Context) : PagerAdapter() {
+    private inner class OnBoardingPagerAdapter internal constructor(private val context: Context)
+        : RecyclerView.Adapter<OnBoardingPagerAdapter.BoardScreenHolder>() {
 
-        override fun instantiateItem(collection: ViewGroup, position: Int): Any {
-            val onBoardScreen = screenList[position]
-            val inflater = LayoutInflater.from(context)
-            val layout = inflater.inflate(onBoardScreen.layoutResId,
-                    collection, false) as ViewGroup
-            (layout.findViewById<View>(R.id.heading) as TextView).text = context.getString(onBoardScreen.headlineStringResId)
-            (layout.findViewById<View>(R.id.sub_heading) as TextView).text = context.getString(onBoardScreen.subHeadlineStringResId)
-            (layout.findViewById<View>(R.id.drawable_res) as ImageView)
-                    .setImageResource(onBoardScreen.drawableResId)
-            collection.addView(layout)
-            return layout
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoardScreenHolder {
+            return BoardScreenHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
         }
 
-        override fun destroyItem(collection: ViewGroup, position: Int, view: Any) {
-            collection.removeView(view as View)
+        override fun getItemViewType(position: Int): Int {
+            return screenList[position].layoutResId
         }
 
-        override fun getCount(): Int {
+        override fun getItemCount(): Int {
             return screenList.size
         }
 
-        override fun isViewFromObject(view: View, `object`: Any): Boolean {
-            return view === `object`
+        override fun onBindViewHolder(holder: BoardScreenHolder, position: Int) {
+            holder.bind(screenList[position])
         }
 
+        inner class BoardScreenHolder internal constructor(val view: View) :
+                RecyclerView.ViewHolder(view) {
+
+            internal fun bind(screen: OnBoardScreen) {
+                (view.findViewById<View>(R.id.heading) as TextView).text = context.getString(screen.headlineStringResId)
+                (view.findViewById<View>(R.id.sub_heading) as TextView).text = context.getString(screen.subHeadlineStringResId)
+                (view.findViewById<View>(R.id.drawable_res) as ImageView)
+                        .setImageResource(screen.drawableResId)
+            }
+
+        }
     }
 
     //We target lower than SDK 19, this check is a false flag when the devMinApi21Debug variant is selected
@@ -101,6 +104,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         languageOptions = findViewById(R.id.language_options_autocomplete_textview)
 
         pageIndicatorView?.setAnimationType(AnimationType.WORM)
+
         getStartedBtn?.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
         }
@@ -114,6 +118,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
             }
             else -> OnBoardScreen.values().toList()
         }
+        pageIndicatorView?.count = screenList.size
 
         if (Build.VERSION.SDK_INT <= 19) {
             getStartedBtn?.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)
@@ -126,7 +131,8 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
 
         if (pageIndicatorView != null) {
-            viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+
                 override fun onPageScrolled(position: Int, positionOffset: Float,
                                             positionOffsetPixels: Int) {
                 }
