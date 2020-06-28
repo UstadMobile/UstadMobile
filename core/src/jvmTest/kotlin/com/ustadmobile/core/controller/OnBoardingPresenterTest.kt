@@ -32,7 +32,7 @@ class OnBoardingPresenterTest {
     @Test
     fun givenListOfUiSupportedLanguages_whenAppStarts_shouldBeDisplayed() {
         presenter.onCreate(mapOf())
-        verify(view).setLanguageOptions(eq(listOf("sys default", "English", "Arabic")))
+        verify(view).setLanguageOptions(eq(listOf("sys default", "English", "Arabic")),"sys default")
     }
 
     @Test

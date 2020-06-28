@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -21,9 +22,11 @@ import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.*
 
 
 @RunWith(AndroidJUnit4::class)
@@ -60,11 +63,15 @@ class OnBoardingActivityTest {
 
         onView(withId(R.id.language_options_autocomplete_textview)).check(matches(isDisplayed())).perform(click())
 
+        Assert.assertEquals("device lang is english", "en", Locale.getDefault().language.substring(0, 2))
+
         onView(withText("العربية"))
                 .inRoot(RootMatchers.isPlatformPopup())
                 .perform(click())
 
         onView(withText("العربية")).check(matches(isDisplayed()))
+
+        Assert.assertEquals("app lang changed to arabic", "ar", systemImplNavRule.impl.getLocale(ApplicationProvider.getApplicationContext()))
 
     }
 
@@ -82,7 +89,6 @@ class OnBoardingActivityTest {
 
         Intents.release()
     }
-
 
 
 }
