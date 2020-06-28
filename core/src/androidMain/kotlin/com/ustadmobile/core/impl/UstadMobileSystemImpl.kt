@@ -485,7 +485,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
         if (appConfig == null) {
             val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    "/com/ustadmobile/core/appconfig.properties", context)
+                    "com/ustadmobile/core/appconfig.properties", context)
             appConfig = Properties()
             var prefIn: InputStream? = null
 
