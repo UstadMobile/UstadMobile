@@ -637,4 +637,36 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="nothing_here">Nothing here</string>
 
+    <string name="clazz_work">Class work</string>
+    <string name="marked">marked</string>
+    <string name="submitted">submitted</string>
+    <string name="not_submitted">not submitted</string>
+    <string name="visible_from_date">Visible from date</string>
+    <string name="submission_type">Submission type</string>
+    <string name="no_submission_required">No submission required</string>
+    <string name="short_text">Short text</string>
+    <string name="attachment">Attachment</string>
+    <string name="quiz">Quiz</string>
+    <string name="allow_private_comments_from_students">Allow private comments from students</string>
+    <string name="deadline">Deadline</string>
+    <string name="class_timezone">Class timezone</string>
+    <string name="maximum_score">Maximum score</string>
+    <string name="quiz_questions">Quiz questions</string>
+    <string name="time">Time</string>
+    <string name="submission">Submission</string>
+    <string name="public_comments">Public comments</string>
+    <string name="private_comments">Private comments</string>
+    <string name="submit_your_answer">Submit your answer</string>
+    <string name="add_class_comment">Add a class comment</string>
+    <string name="add_private_comment">Add a private comment</string>
+    <string name="class_comments">Class comments</string>
+    <string name="submit">Submit</string>
+
+    <!-- Used to show three quantities and names e.g. "5 oranges, 2 apples, 3 pears". %1$d etc
+    will be replaced with the number and %2$s will be replaced with the name of the item-->
+    <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
+    <string name="marking">Marking</string>
+    <string name="return_and_mark_next">Return and mark next</string>
+    <string name="return_only">Return and finish</string>
+
 </resources>
