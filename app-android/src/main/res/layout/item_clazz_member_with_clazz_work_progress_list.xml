@@ -15,7 +15,9 @@
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.ClazzWorkDetailProgressListPresenter" />
-
+        <variable
+            name="hasContent"
+            type="Boolean" />
         <variable
             name="selectablePagedListAdapter"
             type="ClazzMemberWithClazzWorkProgressListRecyclerAdapter" />
@@ -62,8 +64,8 @@
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="0dp"
             android:layout_height="3dp"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
+            android:visibility="@{hasContent?View.VISIBLE:View.GONE}"
             android:progress="@{Math.round(clazzMemberWithClazzWorkProgress.mProgress)}"
             app:layout_constraintEnd_toEndOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_progress_member_pic"

@@ -26,7 +26,7 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWithClazzWorkProgress,
         ClazzMemberWithClazzWorkProgress>(), ClazzWorkDetailProgressListView,
-        MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+        MessageIdSpinner.OnMessageIdOptionSelectedListener{
 
     private var mPresenter: ClazzWorkDetailProgressListPresenter? = null
 
@@ -44,7 +44,6 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
             set(value) {
                 if(field == value)
                     return
-
                 field = value
             }
 
@@ -89,9 +88,17 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
         : ItemClazzMemberWithClazzWorkProgressListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
     class ClazzMemberWithClazzWorkProgressListRecyclerAdapter(
-            var presenter: ClazzWorkDetailProgressListPresenter?)
+            var presenter: ClazzWorkDetailProgressListPresenter?, hasContent: Boolean? = false)
         : SelectablePagedListAdapter<ClazzMemberWithClazzWorkProgress,
             ClazzMemberWithClazzWorkProgressListViewHolder>(DIFF_CALLBACK) {
+
+        var hasContent: Boolean? = hasContent
+            set(value) {
+                if(value == null){
+                    field = false
+                }
+                field = value
+            }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
                 : ClazzMemberWithClazzWorkProgressListViewHolder {
@@ -99,6 +106,7 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
                     LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
+            itemBinding.hasContent = hasContent
             return ClazzMemberWithClazzWorkProgressListViewHolder(itemBinding)
         }
 
@@ -108,6 +116,7 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
             holder.itemBinding.clazzMemberWithClazzWorkProgress = item
             holder.itemView.tag = item?.mClazzMember?.clazzMemberUid?:0L
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
+            holder.itemBinding.hasContent = hasContent
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -127,7 +136,8 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
                 UmAccountManager.activeAccountLiveData)
 
         metricsRecyclerAdapter = ClazzWorkProgressRecyclerAdapter(clazzWorkWithMetricsFlat, false)
-        mDataRecyclerViewAdapter = ClazzMemberWithClazzWorkProgressListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ClazzMemberWithClazzWorkProgressListRecyclerAdapter(mPresenter,
+                hasContent)
 
         mMergeRecyclerViewAdapter = MergeAdapter(metricsRecyclerAdapter,
                 mDataRecyclerViewAdapter)
@@ -140,16 +150,6 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(R.string.student_progress)
-    }
-
-    /**
-     * OnClick function that will handle when the user clicks to create a new item
-     */
-    override fun onClick(view: View?) {
-        //TODO: Check if we need this or its been sent to Presenter
-//        if(view?.id == R.id.item_createnew_layout)
-//            navigateToEditEntity(null, R.id.clazzmemberwithclazzworkprogress_edit_dest,
-//                    ClazzMemberWithClazzWorkProgress::class.java)
     }
 
     override fun onDestroyView() {
@@ -205,6 +205,14 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
         set(value) {
             metricsRecyclerAdapter?.submitList(listOf(value))
             metricsRecyclerAdapter?.visible = true
+        }
+
+    override var hasContent: Boolean? = false
+        get() = field
+        set(value) {
+            field= value
+            (mDataRecyclerViewAdapter as ClazzMemberWithClazzWorkProgressListRecyclerAdapter).hasContent = value
+            mDataRecyclerViewAdapter?.notifyDataSetChanged()
         }
 
 }

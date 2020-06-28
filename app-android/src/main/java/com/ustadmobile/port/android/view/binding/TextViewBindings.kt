@@ -223,7 +223,7 @@ fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMembe
     }
 
     if(clazzMemberWithClazzWorkAndProgress.mProgress >= 0){
-        line2Bit2 = " - " + completed + " " + clazzMemberWithClazzWorkAndProgress.mProgress +
+        line2Bit2 = " - " + completed + " " + clazzMemberWithClazzWorkAndProgress.mProgress.toInt() +
                 "% " + ofContent
     }
     val line2 = line2Bit1 + line2Bit2

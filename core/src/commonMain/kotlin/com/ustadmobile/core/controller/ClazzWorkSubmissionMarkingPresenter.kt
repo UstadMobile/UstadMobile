@@ -68,7 +68,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         unmarkedMembers = withTimeoutOrNull(2000){
             db.clazzWorkSubmissionDao.findCompletedUnMarkedSubmissionsByClazzWorkUid(filterByClazzWorkUid)
         }?: listOf()
-        view.markingLeft = unmarkedMembers.isNotEmpty()
+        view.markingLeft = unmarkedMembers.size > 1
 
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
             db.clazzMemberDao.findByUid(filterByClazzMemberUid)

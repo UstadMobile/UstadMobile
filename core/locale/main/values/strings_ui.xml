@@ -927,6 +927,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="not_answered">Not answered</string>
 
     <string name="return_and_mark_next">Return and mark next</string>
-    <string name="return_only">Return</string>
+    <string name="return_only">Return and finish</string>
 
 </resources>

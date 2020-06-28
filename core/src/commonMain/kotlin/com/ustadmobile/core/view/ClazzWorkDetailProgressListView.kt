@@ -12,6 +12,8 @@ interface ClazzWorkDetailProgressListView: UstadListView<ClazzMemberWithClazzWor
 
     var clazzWorkWithMetricsFlat : ClazzWorkWithMetrics?
 
+    var hasContent: Boolean?
+
     companion object {
         const val VIEW_NAME = "ClazzMemberWithClazzWorkProgressListView"
     }

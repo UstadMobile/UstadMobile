@@ -47,8 +47,11 @@ class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzWorkWithSubmis
 
         if(currentList.size > 0){
             holder.itemBinding.clazzWorkWithSubmission = getItem(0)
+            holder.itemView.tag = getItem(0).clazzWorkSubmission?.clazzWorkSubmissionUid?:0L
         }else {
             holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
+            holder.itemView.tag = clazzWorkVal?.clazzWorkSubmission?.clazzWorkSubmissionUid?:0L
         }
+
     }
 }

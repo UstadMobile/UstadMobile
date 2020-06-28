@@ -51,13 +51,18 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     private fun updateListOnView() {
 
         GlobalScope.launch {
-        val clazzWorkWithMetrics =
+            val clazzWorkWithMetrics =
                 repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUidAsync(
                         filterByClazzWorkUid)
 
+            val contentList = repo.clazzWorkContentJoinDao.findAllContentByClazzWorkUid(
+                    filterByClazzWorkUid, mLoggedInPersonUid)
+
             view.runOnUiThread(Runnable {
                 view.clazzWorkWithMetricsFlat = clazzWorkWithMetrics
+                view.hasContent = !contentList.isEmpty()
             })
+
         }
 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(

@@ -67,9 +67,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
     private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
     private var submitWithMetricsRecyclerAdapter: ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter ? = null
-    private val submitWithMetricsObserver = Observer<List<ClazzWorkWithSubmission>>{
-        t -> submissionFreeTextRecyclerAdapter?.submitList(t)
-    }
 
     private var detailMergerRecyclerAdapter: MergeAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
