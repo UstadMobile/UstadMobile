@@ -12,11 +12,11 @@
 
    <androidx.appcompat.widget.AppCompatImageView
        android:id="@+id/organisation_icon"
-       android:layout_width="180dp"
-       android:layout_height="180dp"
+       android:layout_width="280dp"
+       android:layout_height="280dp"
        android:layout_centerHorizontal="true"
        android:layout_centerVertical="true"
-       app:srcCompat="@drawable/ic_launcher_icon"
+       app:srcCompat="@drawable/ic_ustad_logo"
        app:layout_constraintBottom_toBottomOf="parent"
        app:layout_constraintLeft_toLeftOf="parent"
        app:layout_constraintRight_toRightOf="parent"

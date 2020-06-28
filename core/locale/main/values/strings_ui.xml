@@ -131,6 +131,7 @@
 
     <string name="also_available_in">Also available in</string>
 
+    <string name="created_partnership">Created in partnership with:</string>
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
     <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>

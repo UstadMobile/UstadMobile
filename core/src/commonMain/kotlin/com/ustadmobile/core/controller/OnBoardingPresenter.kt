@@ -21,7 +21,7 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: On
     fun handleLanguageSelected(position: Int){
         val newLocaleCode = languageOptions[position].first
         val newLocaleToDisplay = if(newLocaleCode == LOCALE_USE_SYSTEM) {
-            impl.getDisplayedLocale(context).substring(0, 2)
+            impl.getSystemLocale(context).substring(0, 2)
         }else {
             newLocaleCode
         }
