@@ -224,7 +224,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
             submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkWithMetricsFlat))
             submitWithMetricsRecyclerAdapter?.visible = true
-            submissionFreeTextRecyclerAdapter?.modeEdit = markingLeft
+            submitWithMetricsRecyclerAdapter?.showNext = markingLeft
             submitWithMetricsRecyclerAdapter?.passThis = entity
 
 
@@ -261,7 +261,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
             field = value
             submitWithMetricsRecyclerAdapter?.visible = true
-            submissionFreeTextRecyclerAdapter?.modeEdit = markingLeft
+            submitWithMetricsRecyclerAdapter?.showNext = markingLeft
             submitWithMetricsRecyclerAdapter?.passThis = entity
             submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkWithMetricsFlat))
 

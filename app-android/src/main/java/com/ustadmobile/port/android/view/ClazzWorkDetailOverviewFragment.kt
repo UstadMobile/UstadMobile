@@ -144,6 +144,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         var modeEdit: Boolean = editMode
             set(value){
+                field = value
                 viewHolder?.itemBinding?.editMode = value
             }
 
@@ -178,6 +179,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }else {
                 holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
             }
+            holder.itemBinding.editMode = modeEdit
         }
     }
 

@@ -109,6 +109,41 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         return testClazzWork
     }
 
+    private fun createQuizDbScenarioWith2Submissions(): TestClazzWork{
+        val clazzWork = ClazzWork().apply {
+            clazzWorkTitle = "Test ClazzWork A"
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+            clazzWorkInstructions = "Pass espresso test for ClazzWork"
+            clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+            clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+            clazzWorkCommentsEnabled = true
+            clazzWorkMaximumScore = 120
+            clazzWorkActive = true
+        }
+
+        val dateNow: Long = UMCalendarUtil.getDateInMilliPlusDays(0)
+
+        val testClazzWork = runBlocking {
+            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                    clazzWork, true, -1,
+                    true,0, submitted = true,
+                    isStudentToClazz = true, dateNow = dateNow, marked = false,
+                    multipleSubmissions = true)
+        }
+
+        //Add content
+        runBlocking {
+            dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+        }
+
+        val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
+        dbRule.account.personUid = teacherMember.clazzMemberPersonUid
+
+
+        return testClazzWork
+    }
+
+
     private fun createQuizDbPartialScenario(): TestClazzWork{
         val clazzWork = ClazzWork().apply {
             clazzWorkTitle = "Test ClazzWork A"
@@ -235,6 +270,25 @@ class ClazzWorkSubmissionMarkingFragmentTest {
 
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForQuiz_whenFilledInAndReturnAndMarkNextClicked_thenShouldSaveToDatabaseAndLoadNextInQueue() {
+
+        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+        val testClazzWork = createQuizDbScenarioWith2Submissions()
+        val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
+        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
+
+        val fragmentScenario = reloadFragment(clazzWorkUid, clazzMemberUid)
+
+        fragmentScenario.onFragment {
+            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkSubmissionMarkingRv
+        }
+
+        Thread.sleep(1000)
+        //TODO1. Go to
+
+    }
+
+    @Test
+    fun givenNoClazzWorkSubmissionMarkingPresentYetForQuizAndNoMoreSubmission_whenFilledInAndReturnAndMarkNextClicked_thenShouldSaveToDatabaseAndFinishView() {
 
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
         val testClazzWork = createQuizDbScenario()
