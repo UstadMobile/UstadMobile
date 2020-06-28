@@ -4,8 +4,6 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
-
-import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
@@ -36,8 +34,8 @@ class TestRoomMigration {
             close()
         }
 
-//        helper.runMigrationsAndValidate(TEST_DB, 29, true,
-//                UmAppDatabase.MIGRATION_28_29)
+        helper.runMigrationsAndValidate(TEST_DB, 29, true,
+                UmAppDatabase.MIGRATION_28_29)
     }
 
     @Test
@@ -68,6 +66,37 @@ class TestRoomMigration {
 
         helper.runMigrationsAndValidate(TEST_DB, 32, true,
                 UmAppDatabase.MIGRATION_31_32)
+    }
+
+
+    @Test
+    fun migrate32to33() {
+        helper.createDatabase(TEST_DB, 32).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 33, true,
+                UmAppDatabase.MIGRATION_32_33)
+    }
+
+    @Test
+    fun migrate33to34() {
+        helper.createDatabase(TEST_DB, 33).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 34, true,
+                UmAppDatabase.MIGRATION_33_34)
+    }
+
+    @Test
+    fun migrate34to35() {
+        helper.createDatabase(TEST_DB, 34).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 35, true,
+                UmAppDatabase.MIGRATION_34_35)
     }
 
 
