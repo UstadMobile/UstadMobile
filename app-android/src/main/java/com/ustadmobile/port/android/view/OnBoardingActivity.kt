@@ -48,7 +48,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
      * Model for the the onboarding screen
      */
     private enum class OnBoardScreen(val headlineStringResId: Int, val subHeadlineStringResId: Int,
-                                     val layoutResId: Int, val drawableResId: Int){
+                                     val layoutResId: Int, val drawableResId: Int) {
         SCREEN_1(R.string.onboarding_no_internet_headline,
                 R.string.onboarding_no_internet_subheadline,
                 R.layout.onboard_screen_view, R.drawable.downloading_data),
@@ -107,7 +107,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
         val isRtl = TextUtilsCompat.getLayoutDirectionFromLocale(resources.configuration.locale) == ViewCompat.LAYOUT_DIRECTION_RTL
         var firstScreenIndex = 0
-        screenList = when(isRtl) {
+        screenList = when (isRtl) {
             true -> {
                 firstScreenIndex = OnBoardScreen.values().size - 1
                 OnBoardScreen.values().reversed()
@@ -115,7 +115,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
             else -> OnBoardScreen.values().toList()
         }
 
-        if(Build.VERSION.SDK_INT <= 19) {
+        if (Build.VERSION.SDK_INT <= 19) {
             getStartedBtn?.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)
             getStartedBtn?.setTextColor(ContextCompat.getColor(this,
                     R.color.pre_lollipop_btn_selector_txt_onboarding))
@@ -153,11 +153,11 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         }, 5000)
     }
 
-    override fun setLanguageOptions(languages: List<String>, currentSelection: Int) {
+    override fun setLanguageOptions(languages: List<String>, currentSelection: String) {
         val adapter = ArrayAdapter(this, R.layout.autocomplete_list_item, languages)
         languageOptions.setAdapter(adapter)
+        languageOptions.setText(currentSelection, false)
         languageOptions.onItemClickListener = this
-
     }
 
     override fun restartUI() {

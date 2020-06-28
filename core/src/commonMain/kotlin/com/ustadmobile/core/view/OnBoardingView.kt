@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 interface OnBoardingView : UstadView {
 
-    fun setLanguageOptions(languages: List<String>, currentSelection: Int)
+    fun setLanguageOptions(languages: List<String>, currentSelection: String)
 
     fun restartUI()
 

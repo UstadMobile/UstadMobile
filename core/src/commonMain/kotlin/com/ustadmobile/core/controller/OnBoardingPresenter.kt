@@ -15,7 +15,7 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: On
 
         impl.setAppPref(PREF_TAG, true.toString(), view.viewContext)
         val selectedLocaleIndex = languageOptions.indexOfFirst { it.first == impl.getLocale(context) }
-        view.setLanguageOptions(languageOptions.map { it.second }, selectedLocaleIndex)
+        view.setLanguageOptions(languageOptions.map { it.second }, languageOptions[selectedLocaleIndex].second)
     }
 
     fun handleLanguageSelected(position: Int){
