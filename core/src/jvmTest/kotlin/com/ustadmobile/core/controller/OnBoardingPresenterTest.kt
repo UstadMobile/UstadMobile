@@ -26,19 +26,21 @@ class OnBoardingPresenterTest {
         whenever(impl.getAllUiLanguagesList(any())).thenReturn(listOf("" to "sys default", "en" to "English",
                 "ar" to "Arabic"))
 
+        whenever(impl.getLocale(any())).thenReturn("")
+
         presenter = OnBoardingPresenter(context, mapOf(),view,impl)
     }
 
     @Test
     fun givenListOfUiSupportedLanguages_whenAppStarts_shouldBeDisplayed() {
+
         presenter.onCreate(mapOf())
-        verify(view).setLanguageOptions(eq(listOf("sys default", "English", "Arabic")))
+        verify(view).setLanguageOptions(eq(listOf("sys default", "English", "Arabic")),eq("sys default"))
     }
 
     @Test
     fun givenListOfUiSupportedLanguages_whenDifferentDisplayLanguageIsSelected_shouldSetDefaultLocale() {
         presenter.onCreate(mapOf())
-
         presenter.handleLanguageSelected(2)
         verify(impl).setLocale("ar", context)
     }

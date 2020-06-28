@@ -7,19 +7,14 @@
         <item name="colorPrimaryVariant">@color/primaryVariantColor</item>
         <item name="colorSecondary">?colorPrimary</item>
         <item name="colorSecondaryVariant">?colorPrimary</item>
-        <item name="android:colorBackground">?colorPrimary</item>
+        <item name="android:colorBackground">@android:color/white</item>
         <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
     </style>
 
     <style name="UmTheme.App.OnBoarding" parent="UmTheme.MaterialComponents">
-        <item name="colorPrimary">@color/primaryTextColor</item>
-        <item name="colorPrimaryVariant">@color/primaryTextColor</item>
-        <item name="colorSecondary">@color/primaryTextColor</item>
-        <item name="colorSecondaryVariant">@color/primaryTextColor</item>
-        <item name="android:colorBackground">@color/primaryTextColor</item>
-        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>
-        <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
+        <item name="android:statusBarColor" tools:ignore="NewApi">@color/primaryTextColor</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">@color/secondaryTextColor</item>
     </style>
 
     <!--Shared theme for both Night and Light themes -->
