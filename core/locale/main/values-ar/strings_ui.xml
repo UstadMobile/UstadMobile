@@ -4,7 +4,7 @@
     <string name="location_permission_title">مطلوب اذن للحصول على الموقع</string>
     <!--Content editor-->
     <string name="content_type_multimedia">وسائط متعددة (صوت و صورة)</string>
-    <string name="content_type_multiple_choice">متعدد الخيارات</string>
+    <string name="multiple_choice">متعدد الخيارات</string>
     <string name="content_type_fill_the_blanks">إملأ الفراغات</string>
     <string name="content_type_link">ربط</string>
     <string name="content_format_text">نص</string>

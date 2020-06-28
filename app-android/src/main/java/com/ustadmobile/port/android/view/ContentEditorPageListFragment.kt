@@ -291,8 +291,7 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
                 null, false)
 
         val titleWrapper :TextInputLayout = dialogView.findViewById(R.id.titleWrapper)
-        titleWrapper.hint = impl.getString(MessageID.content_editor_page_view_hint,
-                activity!!)
+        titleWrapper.hint = impl.getString(MessageID.title, activity!!)
 
         val titleView:TextInputEditText = dialogView.findViewById(R.id.title)
         titleView.setText(titleToUpdateFrom)

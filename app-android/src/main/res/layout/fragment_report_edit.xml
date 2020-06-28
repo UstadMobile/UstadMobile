@@ -194,7 +194,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
-                android:hint="@string/toC"
+                android:hint="@string/to"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/activity_report_edit_fromDate_textinputlayout"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_subgroup_textinputlayout">

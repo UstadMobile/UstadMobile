@@ -63,7 +63,7 @@
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
     <string name='contents'>Contents</string>
-    <string name='students'>Account</string>
+    <string name='students'>Students</string>
     <string name='forgot_password'>Forgot password</string>
     <string name='notifications'>Notifications</string>
     <string name='account'>Account</string>
@@ -171,18 +171,17 @@
     <string name="entry_details_author">Author</string>
     <string name="entry_details_publisher">Publisher</string>
     <string name="entry_details_license">License: </string>
-    <string name="entry_details_description">Description</string>
     <string name="library_reading_level">Reading Level</string>
     <string name="file_not_found">File Not Found</string>
-
+    <string name="multiple_choice">Multiple choice</string>
+    <string name="preview">Preview</string>
 
     <!--Content editor -->
     <string name="content_type_multimedia">Multimedia</string>
     <string name="content_type">Content type </string>
-    <string name="content_type_multiple_choice">Multiple choice</string>
+
     <string name="content_type_fill_the_blanks">Fill in the blanks</string>
     <string name="content_type_link">Link</string>
-    <string name="content_format_text">TEXT</string>
     <string name="content_format_paragraph">PARAGRAPH</string>
     <string name="content_direction_ltr">Left To Right</string>
     <string name="content_direction_rtl">Right To Left</string>
@@ -213,7 +212,6 @@
     <string name="content_update_page_title">Update page</string>
     <string name="content_update_document_title">Update document</string>
     <string name="content_action_page_remove">Remove page</string>
-    <string name="content_editor_page_view_hint">Title</string>
     <string name="content_editor_page_delete_failure_message">Sorry you can not delete this page</string>
     <string name="content_editor_directionality">Directionality</string>
     <string name='content_editor_menu_undo'>Undo</string>
@@ -234,7 +232,6 @@
     <string name='content_editor_menu_align_right'>Right</string>
     <string name='content_editor_menu_superscript'>Superscript</string>
     <string name='content_editor_menu_subscript'>Subscript</string>
-    <string name='content_editor_preview'>Preview</string>
     <string name='content_editor_link_text'>Link text</string>
     <string name='content_editor_link_url'>Link Url</string>
     <string name='content_editor_link_error'>Link text or url can not be empty, try again</string>
@@ -242,14 +239,11 @@
     <string name='content_editor_link_remove'>Remove Link</string>
     <string name="permission_camera_title">Camera and File Permission Required</string>
     <string name="permission_camera_message">This app requires both camera and file permissions to take photos and record videos</string>
-    <string name="content_editor_create_new">Add new</string>
     <string name="content_editor_create_new_import">Import file</string>
     <string name="content_editor_create_new_import_link">Import link</string>
     <string name="content_editor_create_new_content">Create new content</string>
     <string name="content_editor_create_new_category">New folder</string>
-    <string name="content_editor_edit_category">Edit</string>
     <string name="content_editor_create_new_title">Add content</string>
-    <string name="content_editor_action_done">Done</string>
     <string name="content_creation_storage_option_title">Storage option</string>
     <string name="file_required_prompt">File to be imported is not selected, try again</string>
     <string name="content_creation_folder_new_message">New folder was successfully added</string>
@@ -282,10 +276,7 @@
     <string name="xapi_month" value="302">Month</string>
     <string name="xapi_custom_date" value="303">Custom Date</string>
     <string name="xapi_content_entry" value="304">Content Entry</string>
-    <string name="xapi_location" value="305">Location</string>
-    <string name="xapi_gender" value="306">Gender</string>
     <string name="xapi_clear" >Clear</string>
-    <string name="xapi_today" >Today</string>
 
 
     <string name="from">From</string>
@@ -317,7 +308,6 @@
 
 
 
-    <string name="activity_preview_xapi">Preview</string>
     <string name="dashboard">Dashboard</string>
     <string name="activity_import_link">Import Link</string>
 
@@ -329,7 +319,6 @@
     <string name="xapi_result_header">Result</string>
 
     <string name="xapi_score">Score (%)</string>
-    <string name="import_link_video">Title</string>
     <string name="import_title_not_entered">Title not entered</string>
 
 
@@ -355,21 +344,26 @@
     <string name="repo_loading_status_failed_noconnection">No connection or peer</string>
     <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
+    <!-- The Creative Commons CC BY license as per https://creativecommons.org/licenses/ -->
     <string name="licence_type_cc_by">CC BY</string>
+    <!-- The Creative Commons CC BY SA license as per https://creativecommons.org/licenses/ -->
     <string name="licence_type_cc_by_sa">CC BY SA</string>
+    <!-- The Creative Commons CC BY SA NC license as per https://creativecommons.org/licenses/ -->
     <string name="licence_type_cc_by_sa_nc">CC BY SA NC</string>
+    <!-- The Creative Commons CC BY NC license as per https://creativecommons.org/licenses/ -->
     <string name="licence_type_cc_by_nc">CC BY NC</string>
+    <!-- The Creative Commons CC BY NC SA license as per https://creativecommons.org/licenses/ -->
     <string name="licence_type_cc_by_nc_sa">CC BY NC SA</string>
+    <!-- Public domain license e.g. the copyright has effectively been waived -->
     <string name="licence_type_public_domain">Public Domain</string>
+    <!-- All rights reserved license -->
     <string name="licence_type_all_rights">All Rights Reserved</string>
-    <string name="licence_type_other">Other</string>
 
     <string name="syncing">Syncing..</string>
     <string name="node_title_list">Node List</string>
     <string name="feed">Feed</string>
     <string name="people">People</string>
     <string name="record_attendance">Record attendance</string>
-    <string name="students_literal">Students</string>
     <string name="last_recorded">last recorded</string>
     <string name="today">Today</string>
     <string name="sort_by">sort_by</string>
@@ -414,25 +408,9 @@
     <string name="student_image">Student image</string>
     <string name="enroll_new_student">Enroll new student</string>
 
-    <!--Social Emotional Learning (SEL)-->
-    <string name="sel">SEL</string>
-
-    <!-- Allows the user to record Social Emotion Learning Nomination -->
-    <string name="record_sel">Record SEL</string>
-    <string name="current_sel">Current SEL answers by students</string>
-    <string name="social_nomination">Social Nomination</string>
-    <string name="please_select_student_sn">Please select the student who will be performing this</string>
-    <string name="explain_sn">1. Explain the terms of consent to the child.</string>
-    <string name="child_given_consent">Child has provided consent to participate</string>
-    <string name="start_selection">start selection</string>
-    <string name="recognition_title_desc_sn">Recognition: Please tap each of your classmates pictures, and select their name from the popup.</string>
     <string name="question">question</string>
-    <string name="sel_question_tell_student">1. Tell the student you would like them to choose for this question. </string>
-    <string name="sel_question_press_start">2. Press the "START SELECTION" button at the bottom to hide this instruction and allow the student to make their selection.</string>
     <string name="questions">Questions</string>
-    <string name="sel_question_description">This is the question that will be shown and explained to the student.</string>
     <string name="assign_to_all_classes">Assign to all classes</string>
-    <string name="allow_multiple_nominations">Allow multiple nominations</string>
     <string name="sel_new_question_title">Question</string>
     <string name="sel_recognition_student_recognizes">Student recognizes their classmates</string>
     <string name="add_person">Add Person</string>
@@ -472,8 +450,7 @@
     <string name="oct">October</string>
     <string name="nov">November</string>
     <string name="dec">December</string>
-    <string name="day">Day</string>
-    <string name="fromC">From</string>
+    <string name="day" value="300">Day</string>
     <string name="toC">To</string>
     <string name="this_month">This Month</string>
     <string name="last_year">Last Year</string>
@@ -493,7 +470,6 @@
     <string name="sort_by_name_asc">name (ascending)</string>
     <string name="sort_by_name_desc">name (descending)</string>
     <string name="sort_by_text">Sort by</string>
-    <string name="namesb">Name</string>
     <string name="attendance_high_to_low">Attendance (high to low)</string>
     <string name="attendance_low_to_high">Attendance (low to high)</string>
     <string name="teacher">Teacher</string>
@@ -570,9 +546,6 @@
     <string name="edit_question">Edit Question</string>
     <string name="question_text">Question text</string>
     <string name="question_type">Question type</string>
-    <string name="sel_question_type_nomination">Nomination</string>
-    <string name="sel_question_type_multiple_choise">Multiple choice</string>
-    <string name="sel_question_type_free_text">Free text</string>
     <string name="add_option">Add option</string>
     <string name="nomination">Nomination</string>
     <string name="active">Active</string>
@@ -583,8 +556,7 @@
     <string name="count_partial_days">Count of days partial</string>
     <string name="student_id">Student ID</string>
     <string name="class_id">Class ID</string>
-    <string name="other_not_set">Other</string>
-    <string name="gender_literal">Gender</string>
+    <string name="gender_literal" value="306">Gender</string>
     <string name="yes_literal">Yes</string>
     <string name="no_literal">No</string>
     <string name="not_set">Not set</string>
@@ -602,18 +574,7 @@
     <string name="view_class">View class</string>
     <string name="view_student">View student</string>
     <string name="sync">Sync</string>
-    <string name="force_sync">Refresh</string>
     <string name="not_recorded">Not recorded</string>
-    <string name="number_of_classes">Classes</string>
-    <string name="dropout_reason_other_ngo">Other NGO</string>
-    <string name="dropout_reason_move">Move</string>
-    <string name="dropout_reason_cry">Cry</string>
-    <string name="dropout_reason_sickness">Sickness</string>
-    <string name="dropout_reason_parents_refuse_permission">Parents refuse permission</string>
-    <string name="dropout_reason_public_school">Public school</string>
-    <string name="dropout_reason_transportation">Transportation</string>
-    <string name="dropout_reason_personal_issues">Personal issues</string>
-    <string name="dropout_reason_other">Other</string>
     <string name="groups">Groups</string>
     <string name="group_setting_desc">Add, remove or modify groups</string>
     <string name="roles">Roles</string>
@@ -688,7 +649,6 @@
     <string name="enroll_new_group_member">Enroll new group member</string>
     <string name="enroll_group_member">Enroll person</string>
     <string name="changed">changed</string>
-    <string name="sel_caps">SEL</string>
     <string name="update_username_password">Update username\/password</string>
     <string name="manage_access_for">Manage access for</string>
     <string name="passwords_dont_match">Passwords dont match. Please check and try again.</string>
@@ -737,11 +697,6 @@
     <string name="unable_to_update_username">Unable to check username. Please make sure you are online.</string>
     <string name="unable_to_update_username_error">Unable to check username. Please try again later.</string>
     <string name="last_synced_at">Last synced</string>
-    <string name="bottomnav_feed_title">Feed</string>
-    <string name="bottomnav_classes_title">Classes</string>
-    <string name="bottomnav_people_title">People</string>
-    <string name="bottomnav_reports_title">Reports</string>
-    <string name="bottomnav_content_title">Content</string>
     <string name="login_no_network_no_person">Person not found locally. Please get online for first login.</string>
     <string name="login_no_network_auth_fail">Person authentication failed offline.</string>
     <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>

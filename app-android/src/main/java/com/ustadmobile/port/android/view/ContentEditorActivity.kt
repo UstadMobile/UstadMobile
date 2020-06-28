@@ -521,7 +521,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             return contentFormattingTypeLabel.size
         }
 
-        internal var contentFormattingTypeLabel = arrayOf<String>(resources.getString(R.string.content_format_text),
+        internal var contentFormattingTypeLabel = arrayOf<String>(resources.getString(R.string.text),
                 resources.getString(R.string.content_format_paragraph))
 
 
