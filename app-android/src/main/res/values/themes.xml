@@ -7,7 +7,7 @@
         <item name="colorPrimaryVariant">@color/primaryVariantColor</item>
         <item name="colorSecondary">?colorPrimary</item>
         <item name="colorSecondaryVariant">?colorPrimary</item>
-        <item name="android:colorBackground">?colorPrimary</item>
+        <item name="android:colorBackground">@android:color/white</item>
         <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
     </style>

@@ -73,7 +73,7 @@ class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
 
         super.onCreate(savedInstanceState)
 
-        setTheme(R.style.UmTheme_App_Splash)
+        //setTheme(R.style.UmTheme_App_Splash)
         setContentView(R.layout.activity_splash_screen)
 
         GlobalScope.launch {
