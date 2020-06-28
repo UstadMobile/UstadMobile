@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.text.format.DateFormat
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
@@ -246,5 +247,14 @@ fun TextView.setResponseTextFilled(responseText: String?){
         text = context.getString(R.string.not_answered)
     }else{
         text = responseText
+    }
+}
+
+@BindingAdapter(value=["submissionButtonText"])
+fun Button.setSubmissionButtonText(more: Boolean){
+    if(more!= null && more){
+        text = context.getString(R.string.return_and_mark_next)
+    }else{
+        text = context.getString(R.string.return_only)
     }
 }

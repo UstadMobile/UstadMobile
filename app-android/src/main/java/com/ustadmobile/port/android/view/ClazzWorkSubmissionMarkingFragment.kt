@@ -66,6 +66,10 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
     private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
+    private var submitWithMetricsRecyclerAdapter: ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter ? = null
+    private val submitWithMetricsObserver = Observer<List<ClazzWorkWithSubmission>>{
+        t -> submissionFreeTextRecyclerAdapter?.submitList(t)
+    }
 
     private var detailMergerRecyclerAdapter: MergeAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
@@ -94,6 +98,10 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
                 ClazzWorkWithSubmission().generateWithClazzWorkAndClazzWorkSubmission(
                         entity?.clazzWork?: ClazzWork(), entity?.submission
                 )
+
+        submitWithMetricsRecyclerAdapter =
+                ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(
+                        clazzWorkWithMetricsFlat, entity, mPresenter,false, markingLeft)
         submissionResultRecyclerAdapter =
                 ClazzWorkDetailOverviewFragment.SubmissionResultRecyclerAdapter(
                         clazzWorkWithSubmission)
@@ -107,7 +115,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
                 ClazzWorkDetailOverviewFragment.SubmissionTextEntryWithResultRecyclerAdapter(
                         clazzWorkWithSubmission, visible = false, editMode = false)
         submissionFreeTextRecyclerAdapter?.visible = false
-
 
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
@@ -151,14 +158,14 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         detailMergerRecyclerAdapter = MergeAdapter(
                 submissionHeadingRecyclerAdapter, submissionFreeTextRecyclerAdapter,
                 quizQuestionsRecyclerAdapter, markingHeadingRecyclerAdapter,
-                markingEditRecyclerAdapter, privateCommentsMergerRecyclerAdapter
+                markingEditRecyclerAdapter, privateCommentsMergerRecyclerAdapter,
+                submitWithMetricsRecyclerAdapter
         )
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         return rootView
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -215,6 +222,12 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
                 submissionFreeTextRecyclerAdapter?.visible = false
             }
 
+            submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkWithMetricsFlat))
+            submitWithMetricsRecyclerAdapter?.visible = true
+            submissionFreeTextRecyclerAdapter?.modeEdit = markingLeft
+            submitWithMetricsRecyclerAdapter?.passThis = entity
+
+
         }
 
     override var privateCommentsToPerson: DataSource.Factory<Int, CommentsWithPerson>? = null
@@ -234,6 +247,24 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
             value?.observe(viewLifecycleOwner, quizQuestionAndResponseObserver)
+        }
+
+
+    override var markingLeft: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+        }
+    override var clazzWorkWithMetricsFlat: ClazzWorkWithMetrics? = null
+        get() = field
+        set(value) {
+
+            field = value
+            submitWithMetricsRecyclerAdapter?.visible = true
+            submissionFreeTextRecyclerAdapter?.modeEdit = markingLeft
+            submitWithMetricsRecyclerAdapter?.passThis = entity
+            submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkWithMetricsFlat))
+
         }
 
     override var fieldsEnabled: Boolean = true

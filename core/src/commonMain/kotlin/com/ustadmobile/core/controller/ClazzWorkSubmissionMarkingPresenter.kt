@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZMEMBER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZWORK_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -15,6 +16,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
@@ -34,6 +36,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
     var filterByClazzWorkUid: Long = -1
     var filterByClazzMemberUid: Long = -1
+    var unmarkedMembers: List<ClazzWorkSubmission> = listOf()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -61,9 +64,11 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                     filterByClazzMemberUid)
         }
 
-        val clazzWork = withTimeoutOrNull(2000){
-            db.clazzWorkDao.findByUidAsync(filterByClazzWorkUid)
-        }
+
+        unmarkedMembers = withTimeoutOrNull(2000){
+            db.clazzWorkSubmissionDao.findCompletedUnMarkedSubmissionsByClazzWorkUid(filterByClazzWorkUid)
+        }?: listOf()
+        view.markingLeft = unmarkedMembers.isNotEmpty()
 
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
             db.clazzMemberDao.findByUid(filterByClazzMemberUid)
@@ -131,6 +136,13 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         newCommentItemListener.entityId = clazzWorkWithSubmission.clazzWorkUid
 
 
+        val clazzWorkWithMetrics =
+                repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUidAsync(
+                        filterByClazzWorkUid)
+
+        view.runOnUiThread(Runnable {
+            view.clazzWorkWithMetricsFlat = clazzWorkWithMetrics
+        })
 
         return clazzMemberWithSubmission
     }
@@ -156,8 +168,27 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 entityVal)
     }
 
-    override fun handleClickSave(entity: ClazzMemberAndClazzWorkWithSubmission) {
+    fun handleClickSaveAndMarkNext(entity: ClazzMemberAndClazzWorkWithSubmission?, showNext: Boolean?){
 
+        val next = showNext ?: true
+
+        if (entity != null) {
+            handleClickSaveWithMovement(entity, !next)
+        }
+
+        //unmarkedMembers
+        if(next) {
+            val nextClazzMemberUid = unmarkedMembers.get(0).clazzWorkSubmissionClazzMemberUid
+
+            systemImpl.go(ClazzWorkSubmissionMarkingView.VIEW_NAME,
+                    mapOf(ARG_CLAZZWORK_UID to filterByClazzWorkUid.toString(),
+                            ARG_CLAZZMEMBER_UID to nextClazzMemberUid.toString()),
+                    context)
+
+        }
+    }
+
+    private fun handleClickSaveWithMovement(entity: ClazzMemberAndClazzWorkWithSubmission, leave: Boolean){
         GlobalScope.launch(doorMainDispatcher()) {
             val submission = entity.submission
             //If submission exists
@@ -170,7 +201,13 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 }
             }
 
-            view.finishWithResult(listOf(entity))
+            if(leave) {
+                view.finishWithResult(listOf(entity))
+            }
         }
+    }
+
+    override fun handleClickSave(entity: ClazzMemberAndClazzWorkWithSubmission) {
+        handleClickSaveWithMovement(entity, true)
     }
 }

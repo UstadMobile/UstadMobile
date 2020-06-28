@@ -232,4 +232,24 @@ class ClazzWorkSubmissionMarkingFragmentTest {
 
     }
 
+
+    @Test
+    fun givenNoClazzWorkSubmissionMarkingPresentYetForQuiz_whenFilledInAndReturnAndMarkNextClicked_thenShouldSaveToDatabaseAndLoadNextInQueue() {
+
+        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+        val testClazzWork = createQuizDbScenario()
+        val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
+        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
+
+        val fragmentScenario = reloadFragment(clazzWorkUid, clazzMemberUid)
+
+        fragmentScenario.onFragment {
+            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkSubmissionMarkingRv
+        }
+
+        Thread.sleep(1000)
+        //TODO1. Go to
+
+    }
+
 }
