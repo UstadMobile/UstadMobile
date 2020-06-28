@@ -154,9 +154,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        Handler().postDelayed(Runnable {
-            presenter?.handleLanguageSelected(position)
-        }, 5000)
+        presenter?.handleLanguageSelected(position)
     }
 
     override fun setLanguageOptions(languages: List<String>, currentSelection: String) {
