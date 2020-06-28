@@ -166,7 +166,7 @@ class ContentEntryEdit2FragmentTest  {
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-        val entries = dbRule.db.contentEntryDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
+        val entries = dbRule.db.contentEntryDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario, 15000) {
             it.isNotEmpty()
         }
 

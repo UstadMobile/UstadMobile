@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "2b4df809fa5dfce1b3d72e56a1bead6e",
+    "identityHash": "bb4a9074c381aa1c5a9966d5cb53da34",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -2787,7 +2787,7 @@
       },
       {
         "tableName": "ScrapeQueueItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sqiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sqiContentEntryParentUid` INTEGER NOT NULL, `destDir` TEXT, `scrapeUrl` TEXT, `status` INTEGER NOT NULL, `runId` INTEGER NOT NULL, `itemType` INTEGER NOT NULL, `contentType` TEXT, `timeAdded` INTEGER NOT NULL, `timeStarted` INTEGER NOT NULL, `timeFinished` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sqiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sqiContentEntryParentUid` INTEGER NOT NULL, `destDir` TEXT, `scrapeUrl` TEXT, `status` INTEGER NOT NULL, `runId` INTEGER NOT NULL, `itemType` INTEGER NOT NULL, `errorCode` INTEGER NOT NULL, `contentType` TEXT, `timeAdded` INTEGER NOT NULL, `timeStarted` INTEGER NOT NULL, `timeFinished` INTEGER NOT NULL, `priority` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "sqiUid",
@@ -2832,6 +2832,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "errorCode",
+            "columnName": "errorCode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "contentType",
             "columnName": "contentType",
             "affinity": "TEXT",
@@ -2852,6 +2858,12 @@
           {
             "fieldPath": "timeFinished",
             "columnName": "timeFinished",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -7314,7 +7326,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2b4df809fa5dfce1b3d72e56a1bead6e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bb4a9074c381aa1c5a9966d5cb53da34')"
     ]
   }
 }

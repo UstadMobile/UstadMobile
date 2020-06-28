@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 33,
-    "identityHash": "e4d97a9f0541c65ea13b74d7264dcbfe",
+    "identityHash": "95b6c6ae9abf0e1ac8320d91fcdcd9f5",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -100,7 +100,7 @@
             "columnNames": [
               "bluetoothMacAddress"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_NetworkNode_bluetoothMacAddress` ON `${TABLE_NAME}` (`bluetoothMacAddress`)"
+            "createSql": "CREATE  INDEX `index_NetworkNode_bluetoothMacAddress` ON `${TABLE_NAME}` (`bluetoothMacAddress`)"
           },
           {
             "name": "index_NetworkNode_lastUpdateTimeStamp",
@@ -108,7 +108,7 @@
             "columnNames": [
               "lastUpdateTimeStamp"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_NetworkNode_lastUpdateTimeStamp` ON `${TABLE_NAME}` (`lastUpdateTimeStamp`)"
+            "createSql": "CREATE  INDEX `index_NetworkNode_lastUpdateTimeStamp` ON `${TABLE_NAME}` (`lastUpdateTimeStamp`)"
           }
         ],
         "foreignKeys": []
@@ -175,1660 +175,6 @@
         "primaryKey": {
           "columnNames": [
             "id"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ClazzLog",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzLogUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzLogClazzUid` INTEGER NOT NULL, `logDate` INTEGER NOT NULL, `timeRecorded` INTEGER NOT NULL, `clazzLogDone` INTEGER NOT NULL, `clazzLogCancelled` INTEGER NOT NULL, `clazzLogNumPresent` INTEGER NOT NULL, `clazzLogNumAbsent` INTEGER NOT NULL, `clazzLogNumPartial` INTEGER NOT NULL, `clazzLogScheduleUid` INTEGER NOT NULL, `clazzLogMSQN` INTEGER NOT NULL, `clazzLogLCSN` INTEGER NOT NULL, `clazzLogLCB` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "clazzLogUid",
-            "columnName": "clazzLogUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogClazzUid",
-            "columnName": "clazzLogClazzUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "logDate",
-            "columnName": "logDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "timeRecorded",
-            "columnName": "timeRecorded",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogDone",
-            "columnName": "clazzLogDone",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogCancelled",
-            "columnName": "clazzLogCancelled",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogNumPresent",
-            "columnName": "clazzLogNumPresent",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogNumAbsent",
-            "columnName": "clazzLogNumAbsent",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogNumPartial",
-            "columnName": "clazzLogNumPartial",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogScheduleUid",
-            "columnName": "clazzLogScheduleUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogMSQN",
-            "columnName": "clazzLogMSQN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogLCSN",
-            "columnName": "clazzLogLCSN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogLCB",
-            "columnName": "clazzLogLCB",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "clazzLogUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ClazzLogAttendanceRecord",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzLogAttendanceRecordUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzLogAttendanceRecordClazzLogUid` INTEGER NOT NULL, `clazzLogAttendanceRecordClazzMemberUid` INTEGER NOT NULL, `attendanceStatus` INTEGER NOT NULL, `clazzLogAttendanceRecordMasterChangeSeqNum` INTEGER NOT NULL, `clazzLogAttendanceRecordLocalChangeSeqNum` INTEGER NOT NULL, `clazzLogAttendanceRecordLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "clazzLogAttendanceRecordUid",
-            "columnName": "clazzLogAttendanceRecordUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogAttendanceRecordClazzLogUid",
-            "columnName": "clazzLogAttendanceRecordClazzLogUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogAttendanceRecordClazzMemberUid",
-            "columnName": "clazzLogAttendanceRecordClazzMemberUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "attendanceStatus",
-            "columnName": "attendanceStatus",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogAttendanceRecordMasterChangeSeqNum",
-            "columnName": "clazzLogAttendanceRecordMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogAttendanceRecordLocalChangeSeqNum",
-            "columnName": "clazzLogAttendanceRecordLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLogAttendanceRecordLastChangedBy",
-            "columnName": "clazzLogAttendanceRecordLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "clazzLogAttendanceRecordUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "FeedEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedEntryUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `feedEntryPersonUid` INTEGER NOT NULL, `title` TEXT, `description` TEXT, `link` TEXT, `feedEntryClazzName` TEXT, `deadline` INTEGER NOT NULL, `feedEntryHash` INTEGER NOT NULL, `feedEntryDone` INTEGER NOT NULL, `feedEntryClazzLogUid` INTEGER NOT NULL, `dateCreated` INTEGER NOT NULL, `feedEntryCheckType` INTEGER NOT NULL, `feedEntryLocalChangeSeqNum` INTEGER NOT NULL, `feedEntryMasterChangeSeqNum` INTEGER NOT NULL, `feedEntryLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "feedEntryUid",
-            "columnName": "feedEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedEntryPersonUid",
-            "columnName": "feedEntryPersonUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "title",
-            "columnName": "title",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "description",
-            "columnName": "description",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "link",
-            "columnName": "link",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "feedEntryClazzName",
-            "columnName": "feedEntryClazzName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "deadline",
-            "columnName": "deadline",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedEntryHash",
-            "columnName": "feedEntryHash",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedEntryDone",
-            "columnName": "feedEntryDone",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedEntryClazzLogUid",
-            "columnName": "feedEntryClazzLogUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dateCreated",
-            "columnName": "dateCreated",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedEntryCheckType",
-            "columnName": "feedEntryCheckType",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedEntryLocalChangeSeqNum",
-            "columnName": "feedEntryLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedEntryMasterChangeSeqNum",
-            "columnName": "feedEntryMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedEntryLastChangedBy",
-            "columnName": "feedEntryLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "feedEntryUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonField",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personCustomFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fieldName` TEXT, `labelMessageId` INTEGER NOT NULL, `fieldIcon` TEXT, `personFieldMasterChangeSeqNum` INTEGER NOT NULL, `personFieldLocalChangeSeqNum` INTEGER NOT NULL, `personFieldLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "personCustomFieldUid",
-            "columnName": "personCustomFieldUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fieldName",
-            "columnName": "fieldName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "labelMessageId",
-            "columnName": "labelMessageId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fieldIcon",
-            "columnName": "fieldIcon",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "personFieldMasterChangeSeqNum",
-            "columnName": "personFieldMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personFieldLocalChangeSeqNum",
-            "columnName": "personFieldLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personFieldLastChangedBy",
-            "columnName": "personFieldLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "personCustomFieldUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonDetailPresenterField",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personDetailPresenterFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fieldUid` INTEGER NOT NULL, `fieldType` INTEGER NOT NULL, `fieldIndex` INTEGER NOT NULL, `labelMessageId` INTEGER NOT NULL, `fieldIcon` TEXT, `headerMessageId` INTEGER NOT NULL, `viewModeVisible` INTEGER NOT NULL, `editModeVisible` INTEGER NOT NULL, `isReadyOnly` INTEGER NOT NULL, `personDetailPresenterFieldMasterChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLocalChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "personDetailPresenterFieldUid",
-            "columnName": "personDetailPresenterFieldUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fieldUid",
-            "columnName": "fieldUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fieldType",
-            "columnName": "fieldType",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fieldIndex",
-            "columnName": "fieldIndex",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "labelMessageId",
-            "columnName": "labelMessageId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fieldIcon",
-            "columnName": "fieldIcon",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "headerMessageId",
-            "columnName": "headerMessageId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "viewModeVisible",
-            "columnName": "viewModeVisible",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "editModeVisible",
-            "columnName": "editModeVisible",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isReadyOnly",
-            "columnName": "isReadyOnly",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personDetailPresenterFieldMasterChangeSeqNum",
-            "columnName": "personDetailPresenterFieldMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personDetailPresenterFieldLocalChangeSeqNum",
-            "columnName": "personDetailPresenterFieldLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personDetailPresenterFieldLastChangedBy",
-            "columnName": "personDetailPresenterFieldLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "personDetailPresenterFieldUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestion",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`selQuestionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `questionText` TEXT, `selQuestionSelQuestionSetUid` INTEGER NOT NULL, `questionIndex` INTEGER NOT NULL, `assignToAllClasses` INTEGER NOT NULL, `multiNominations` INTEGER NOT NULL, `questionType` INTEGER NOT NULL, `questionActive` INTEGER NOT NULL, `selQuestionMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "selQuestionUid",
-            "columnName": "selQuestionUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "questionText",
-            "columnName": "questionText",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "selQuestionSelQuestionSetUid",
-            "columnName": "selQuestionSelQuestionSetUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "questionIndex",
-            "columnName": "questionIndex",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "assignToAllClasses",
-            "columnName": "assignToAllClasses",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "multiNominations",
-            "columnName": "multiNominations",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "questionType",
-            "columnName": "questionType",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "questionActive",
-            "columnName": "questionActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionMasterChangeSeqNum",
-            "columnName": "selQuestionMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionLocalChangeSeqNum",
-            "columnName": "selQuestionLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionLastChangedBy",
-            "columnName": "selQuestionLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "selQuestionUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionResponse",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`selQuestionResponseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `selQuestionResponseSelQuestionSetResponseUid` INTEGER NOT NULL, `selQuestionResponseSelQuestionUid` INTEGER NOT NULL, `selQuestionResponseMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionResponseLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionResponseLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "selQuestionResponseUid",
-            "columnName": "selQuestionResponseUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionResponseSelQuestionSetResponseUid",
-            "columnName": "selQuestionResponseSelQuestionSetResponseUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionResponseSelQuestionUid",
-            "columnName": "selQuestionResponseSelQuestionUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionResponseMasterChangeSeqNum",
-            "columnName": "selQuestionResponseMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionResponseLocalChangeSeqNum",
-            "columnName": "selQuestionResponseLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionResponseLastChangedBy",
-            "columnName": "selQuestionResponseLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "selQuestionResponseUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionResponseNomination",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`selqrnUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `selqrnClazzMemberUid` INTEGER NOT NULL, `selqrnSelQuestionResponseUId` INTEGER NOT NULL, `nominationActive` INTEGER NOT NULL, `selqrnMCSN` INTEGER NOT NULL, `selqrnMCSNLCSN` INTEGER NOT NULL, `selqrnMCSNLCB` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "selqrnUid",
-            "columnName": "selqrnUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selqrnClazzMemberUid",
-            "columnName": "selqrnClazzMemberUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selqrnSelQuestionResponseUId",
-            "columnName": "selqrnSelQuestionResponseUId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "nominationActive",
-            "columnName": "nominationActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selqrnMCSN",
-            "columnName": "selqrnMCSN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selqrnMCSNLCSN",
-            "columnName": "selqrnMCSNLCSN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selqrnMCSNLCB",
-            "columnName": "selqrnMCSNLCB",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "selqrnUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionSet",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`selQuestionSetUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `selQuestionSetMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionSetLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionSetLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "selQuestionSetUid",
-            "columnName": "selQuestionSetUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "title",
-            "columnName": "title",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "selQuestionSetMasterChangeSeqNum",
-            "columnName": "selQuestionSetMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetLocalChangeSeqNum",
-            "columnName": "selQuestionSetLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetLastChangedBy",
-            "columnName": "selQuestionSetLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "selQuestionSetUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionSetRecognition",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`selQuestionSetRecognitionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `selqsrSelQuestionSetResponseUid` INTEGER NOT NULL, `selQuestionSetRecognitionClazzMemberUid` INTEGER NOT NULL, `isSelQuestionSetRecognitionRecognized` INTEGER NOT NULL, `selQuestionSetRecognitionMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionSetRecognitionLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionSetRecognitionLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "selQuestionSetRecognitionUid",
-            "columnName": "selQuestionSetRecognitionUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selqsrSelQuestionSetResponseUid",
-            "columnName": "selqsrSelQuestionSetResponseUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetRecognitionClazzMemberUid",
-            "columnName": "selQuestionSetRecognitionClazzMemberUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isSelQuestionSetRecognitionRecognized",
-            "columnName": "isSelQuestionSetRecognitionRecognized",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetRecognitionMasterChangeSeqNum",
-            "columnName": "selQuestionSetRecognitionMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetRecognitionLocalChangeSeqNum",
-            "columnName": "selQuestionSetRecognitionLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetRecognitionLastChangedBy",
-            "columnName": "selQuestionSetRecognitionLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "selQuestionSetRecognitionUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionSetResponse",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`selQuestionSetResposeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `selQuestionSetResponseSelQuestionSetUid` INTEGER NOT NULL, `selQuestionSetResponseClazzMemberUid` INTEGER NOT NULL, `selQuestionSetResponseStartTime` INTEGER NOT NULL, `selQuestionSetResponseFinishTime` INTEGER NOT NULL, `selQuestionSetResponseRecognitionPercentage` REAL NOT NULL, `selQuestionSetResponseMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionSetResponseLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionSetResponseLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "selQuestionSetResposeUid",
-            "columnName": "selQuestionSetResposeUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetResponseSelQuestionSetUid",
-            "columnName": "selQuestionSetResponseSelQuestionSetUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetResponseClazzMemberUid",
-            "columnName": "selQuestionSetResponseClazzMemberUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetResponseStartTime",
-            "columnName": "selQuestionSetResponseStartTime",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetResponseFinishTime",
-            "columnName": "selQuestionSetResponseFinishTime",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetResponseRecognitionPercentage",
-            "columnName": "selQuestionSetResponseRecognitionPercentage",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetResponseMasterChangeSeqNum",
-            "columnName": "selQuestionSetResponseMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetResponseLocalChangeSeqNum",
-            "columnName": "selQuestionSetResponseLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionSetResponseLastChangedBy",
-            "columnName": "selQuestionSetResponseLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "selQuestionSetResposeUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "Schedule",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scheduleUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sceduleStartTime` INTEGER NOT NULL, `scheduleEndTime` INTEGER NOT NULL, `scheduleDay` INTEGER NOT NULL, `scheduleMonth` INTEGER NOT NULL, `scheduleFrequency` INTEGER NOT NULL, `umCalendarUid` INTEGER NOT NULL, `scheduleClazzUid` INTEGER NOT NULL, `scheduleMasterChangeSeqNum` INTEGER NOT NULL, `scheduleLocalChangeSeqNum` INTEGER NOT NULL, `scheduleLastChangedBy` INTEGER NOT NULL, `scheduleActive` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "scheduleUid",
-            "columnName": "scheduleUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sceduleStartTime",
-            "columnName": "sceduleStartTime",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduleEndTime",
-            "columnName": "scheduleEndTime",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduleDay",
-            "columnName": "scheduleDay",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduleMonth",
-            "columnName": "scheduleMonth",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduleFrequency",
-            "columnName": "scheduleFrequency",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "umCalendarUid",
-            "columnName": "umCalendarUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduleClazzUid",
-            "columnName": "scheduleClazzUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduleMasterChangeSeqNum",
-            "columnName": "scheduleMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduleLocalChangeSeqNum",
-            "columnName": "scheduleLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduleLastChangedBy",
-            "columnName": "scheduleLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduleActive",
-            "columnName": "scheduleActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "scheduleUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "DateRange",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`dateRangeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dateRangeLocalChangeSeqNum` INTEGER NOT NULL, `dateRangeMasterChangeSeqNum` INTEGER NOT NULL, `dateRangLastChangedBy` INTEGER NOT NULL, `dateRangeFromDate` INTEGER NOT NULL, `dateRangeToDate` INTEGER NOT NULL, `dateRangeUMCalendarUid` INTEGER NOT NULL, `dateRangeName` TEXT, `dateRangeDesc` TEXT, `dateRangeActive` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "dateRangeUid",
-            "columnName": "dateRangeUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dateRangeLocalChangeSeqNum",
-            "columnName": "dateRangeLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dateRangeMasterChangeSeqNum",
-            "columnName": "dateRangeMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dateRangLastChangedBy",
-            "columnName": "dateRangLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dateRangeFromDate",
-            "columnName": "dateRangeFromDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dateRangeToDate",
-            "columnName": "dateRangeToDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dateRangeUMCalendarUid",
-            "columnName": "dateRangeUMCalendarUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "dateRangeName",
-            "columnName": "dateRangeName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "dateRangeDesc",
-            "columnName": "dateRangeDesc",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "dateRangeActive",
-            "columnName": "dateRangeActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "dateRangeUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "UMCalendar",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`umCalendarUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `umCalendarName` TEXT, `umCalendarCategory` INTEGER NOT NULL, `umCalendarActive` INTEGER NOT NULL, `isUmCalendarFlag` INTEGER NOT NULL, `umCalendarMasterChangeSeqNum` INTEGER NOT NULL, `umCalendarLocalChangeSeqNum` INTEGER NOT NULL, `umCalendarLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "umCalendarUid",
-            "columnName": "umCalendarUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "umCalendarName",
-            "columnName": "umCalendarName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "umCalendarCategory",
-            "columnName": "umCalendarCategory",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "umCalendarActive",
-            "columnName": "umCalendarActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isUmCalendarFlag",
-            "columnName": "isUmCalendarFlag",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "umCalendarMasterChangeSeqNum",
-            "columnName": "umCalendarMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "umCalendarLocalChangeSeqNum",
-            "columnName": "umCalendarLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "umCalendarLastChangedBy",
-            "columnName": "umCalendarLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "umCalendarUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ClazzActivity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzActivityUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzActivityClazzActivityChangeUid` INTEGER NOT NULL, `isClazzActivityGoodFeedback` INTEGER NOT NULL, `clazzActivityNotes` TEXT, `clazzActivityLogDate` INTEGER NOT NULL, `clazzActivityClazzUid` INTEGER NOT NULL, `clazzActivityDone` INTEGER NOT NULL, `clazzActivityQuantity` INTEGER NOT NULL, `clazzActivityMasterChangeSeqNum` INTEGER NOT NULL, `clazzActivityLocalChangeSeqNum` INTEGER NOT NULL, `clazzActivityLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "clazzActivityUid",
-            "columnName": "clazzActivityUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityClazzActivityChangeUid",
-            "columnName": "clazzActivityClazzActivityChangeUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isClazzActivityGoodFeedback",
-            "columnName": "isClazzActivityGoodFeedback",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityNotes",
-            "columnName": "clazzActivityNotes",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "clazzActivityLogDate",
-            "columnName": "clazzActivityLogDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityClazzUid",
-            "columnName": "clazzActivityClazzUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityDone",
-            "columnName": "clazzActivityDone",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityQuantity",
-            "columnName": "clazzActivityQuantity",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityMasterChangeSeqNum",
-            "columnName": "clazzActivityMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityLocalChangeSeqNum",
-            "columnName": "clazzActivityLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityLastChangedBy",
-            "columnName": "clazzActivityLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "clazzActivityUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ClazzActivityChange",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzActivityChangeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzActivityChangeTitle` TEXT, `clazzActivityDesc` TEXT, `clazzActivityUnitOfMeasure` INTEGER NOT NULL, `isClazzActivityChangeActive` INTEGER NOT NULL, `clazzActivityChangeLastChangedBy` INTEGER NOT NULL, `clazzActivityChangeMasterChangeSeqNum` INTEGER NOT NULL, `clazzActivityChangeLocalChangeSeqNum` INTEGER NOT NULL, `clazzActivityLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "clazzActivityChangeUid",
-            "columnName": "clazzActivityChangeUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityChangeTitle",
-            "columnName": "clazzActivityChangeTitle",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "clazzActivityDesc",
-            "columnName": "clazzActivityDesc",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "clazzActivityUnitOfMeasure",
-            "columnName": "clazzActivityUnitOfMeasure",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isClazzActivityChangeActive",
-            "columnName": "isClazzActivityChangeActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityChangeLastChangedBy",
-            "columnName": "clazzActivityChangeLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityChangeMasterChangeSeqNum",
-            "columnName": "clazzActivityChangeMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityChangeLocalChangeSeqNum",
-            "columnName": "clazzActivityChangeLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzActivityLastChangedBy",
-            "columnName": "clazzActivityLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "clazzActivityChangeUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionOption",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`selQuestionOptionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `optionText` TEXT, `selQuestionOptionQuestionUid` INTEGER NOT NULL, `selQuestionOptionMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionOptionLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionOptionLastChangedBy` INTEGER NOT NULL, `optionActive` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "selQuestionOptionUid",
-            "columnName": "selQuestionOptionUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "optionText",
-            "columnName": "optionText",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "selQuestionOptionQuestionUid",
-            "columnName": "selQuestionOptionQuestionUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionOptionMasterChangeSeqNum",
-            "columnName": "selQuestionOptionMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionOptionLocalChangeSeqNum",
-            "columnName": "selQuestionOptionLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "selQuestionOptionLastChangedBy",
-            "columnName": "selQuestionOptionLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "optionActive",
-            "columnName": "optionActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "selQuestionOptionUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ScheduledCheck",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scheduledCheckUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `checkTime` INTEGER NOT NULL, `checkType` INTEGER NOT NULL, `checkUuid` TEXT, `checkParameters` TEXT, `scClazzLogUid` INTEGER NOT NULL, `scheduledCheckMasterCsn` INTEGER NOT NULL, `scheduledCheckLocalCsn` INTEGER NOT NULL, `scheduledCheckLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "scheduledCheckUid",
-            "columnName": "scheduledCheckUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "checkTime",
-            "columnName": "checkTime",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "checkType",
-            "columnName": "checkType",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "checkUuid",
-            "columnName": "checkUuid",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "checkParameters",
-            "columnName": "checkParameters",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "scClazzLogUid",
-            "columnName": "scClazzLogUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduledCheckMasterCsn",
-            "columnName": "scheduledCheckMasterCsn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduledCheckLocalCsn",
-            "columnName": "scheduledCheckLocalCsn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "scheduledCheckLastChangedBy",
-            "columnName": "scheduledCheckLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "scheduledCheckUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "AuditLog",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`auditLogUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `auditLogMasterChangeSeqNum` INTEGER NOT NULL, `auditLogLocalChangeSeqNum` INTEGER NOT NULL, `auditLogLastChangedBy` INTEGER NOT NULL, `auditLogActorPersonUid` INTEGER NOT NULL, `auditLogTableUid` INTEGER NOT NULL, `auditLogEntityUid` INTEGER NOT NULL, `auditLogDate` INTEGER NOT NULL, `notes` TEXT)",
-        "fields": [
-          {
-            "fieldPath": "auditLogUid",
-            "columnName": "auditLogUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "auditLogMasterChangeSeqNum",
-            "columnName": "auditLogMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "auditLogLocalChangeSeqNum",
-            "columnName": "auditLogLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "auditLogLastChangedBy",
-            "columnName": "auditLogLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "auditLogActorPersonUid",
-            "columnName": "auditLogActorPersonUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "auditLogTableUid",
-            "columnName": "auditLogTableUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "auditLogEntityUid",
-            "columnName": "auditLogEntityUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "auditLogDate",
-            "columnName": "auditLogDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "notes",
-            "columnName": "notes",
-            "affinity": "TEXT",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "auditLogUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "CustomField",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldName` TEXT, `customFieldNameAlt` TEXT, `customFieldLabelMessageID` INTEGER NOT NULL, `customFieldIcon` TEXT, `customFieldType` INTEGER NOT NULL, `customFieldEntityType` INTEGER NOT NULL, `customFieldActive` INTEGER NOT NULL, `customFieldDefaultValue` TEXT, `customFieldMCSN` INTEGER NOT NULL, `customFieldLCSN` INTEGER NOT NULL, `customFieldLCB` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "customFieldUid",
-            "columnName": "customFieldUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldName",
-            "columnName": "customFieldName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "customFieldNameAlt",
-            "columnName": "customFieldNameAlt",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "customFieldLabelMessageID",
-            "columnName": "customFieldLabelMessageID",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldIcon",
-            "columnName": "customFieldIcon",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "customFieldType",
-            "columnName": "customFieldType",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldEntityType",
-            "columnName": "customFieldEntityType",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldActive",
-            "columnName": "customFieldActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldDefaultValue",
-            "columnName": "customFieldDefaultValue",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "customFieldMCSN",
-            "columnName": "customFieldMCSN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldLCSN",
-            "columnName": "customFieldLCSN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldLCB",
-            "columnName": "customFieldLCB",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "customFieldUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "CustomFieldValue",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customFieldValueUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldValueFieldUid` INTEGER NOT NULL, `customFieldValueEntityUid` INTEGER NOT NULL, `customFieldValueValue` TEXT, `customFieldValueMCSN` INTEGER NOT NULL, `customFieldValueLCSN` INTEGER NOT NULL, `customFieldValueLCB` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "customFieldValueUid",
-            "columnName": "customFieldValueUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueFieldUid",
-            "columnName": "customFieldValueFieldUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueEntityUid",
-            "columnName": "customFieldValueEntityUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueValue",
-            "columnName": "customFieldValueValue",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "customFieldValueMCSN",
-            "columnName": "customFieldValueMCSN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueLCSN",
-            "columnName": "customFieldValueLCSN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueLCB",
-            "columnName": "customFieldValueLCB",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "customFieldValueUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "CustomFieldValueOption",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customFieldValueOptionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldValueOptionName` TEXT, `customFieldValueOptionFieldUid` INTEGER NOT NULL, `customFieldValueOptionIcon` TEXT, `customFieldValueOptionMessageId` INTEGER NOT NULL, `customFieldValueOptionActive` INTEGER NOT NULL, `customFieldValueOptionMCSN` INTEGER NOT NULL, `customFieldValueOptionLCSN` INTEGER NOT NULL, `customFieldValueOptionLCB` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "customFieldValueOptionUid",
-            "columnName": "customFieldValueOptionUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueOptionName",
-            "columnName": "customFieldValueOptionName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "customFieldValueOptionFieldUid",
-            "columnName": "customFieldValueOptionFieldUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueOptionIcon",
-            "columnName": "customFieldValueOptionIcon",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "customFieldValueOptionMessageId",
-            "columnName": "customFieldValueOptionMessageId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueOptionActive",
-            "columnName": "customFieldValueOptionActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueOptionMCSN",
-            "columnName": "customFieldValueOptionMCSN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueOptionLCSN",
-            "columnName": "customFieldValueOptionLCSN",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "customFieldValueOptionLCB",
-            "columnName": "customFieldValueOptionLCB",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "customFieldValueOptionUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "personUid",
-            "columnName": "personUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "username",
-            "columnName": "username",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "firstNames",
-            "columnName": "firstNames",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "lastName",
-            "columnName": "lastName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "emailAddr",
-            "columnName": "emailAddr",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "phoneNum",
-            "columnName": "phoneNum",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "gender",
-            "columnName": "gender",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "active",
-            "columnName": "active",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "admin",
-            "columnName": "admin",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personNotes",
-            "columnName": "personNotes",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "fatherName",
-            "columnName": "fatherName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "fatherNumber",
-            "columnName": "fatherNumber",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "motherName",
-            "columnName": "motherName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "motherNum",
-            "columnName": "motherNum",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "dateOfBirth",
-            "columnName": "dateOfBirth",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personAddress",
-            "columnName": "personAddress",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "personMasterChangeSeqNum",
-            "columnName": "personMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personLocalChangeSeqNum",
-            "columnName": "personLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personLastChangedBy",
-            "columnName": "personLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "personUid"
           ],
           "autoGenerate": true
         },
@@ -2011,7 +357,7 @@
             "columnNames": [
               "timeStarted"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_DownloadJobItem_timeStarted` ON `${TABLE_NAME}` (`timeStarted`)"
+            "createSql": "CREATE  INDEX `index_DownloadJobItem_timeStarted` ON `${TABLE_NAME}` (`timeStarted`)"
           },
           {
             "name": "index_DownloadJobItem_djiStatus",
@@ -2019,7 +365,7 @@
             "columnNames": [
               "djiStatus"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_DownloadJobItem_djiStatus` ON `${TABLE_NAME}` (`djiStatus`)"
+            "createSql": "CREATE  INDEX `index_DownloadJobItem_djiStatus` ON `${TABLE_NAME}` (`djiStatus`)"
           }
         ],
         "foreignKeys": []
@@ -2063,8 +409,94 @@
         "foreignKeys": []
       },
       {
+        "tableName": "Person",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "personUid",
+            "columnName": "personUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "firstNames",
+            "columnName": "firstNames",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "emailAddr",
+            "columnName": "emailAddr",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "phoneNum",
+            "columnName": "phoneNum",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "gender",
+            "columnName": "gender",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "admin",
+            "columnName": "admin",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "personMasterChangeSeqNum",
+            "columnName": "personMasterChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "personLocalChangeSeqNum",
+            "columnName": "personLocalChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "personLastChangedBy",
+            "columnName": "personLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "personUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "Clazz",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `isAttendanceFeature` INTEGER NOT NULL, `isActivityFeature` INTEGER NOT NULL, `isSelFeature` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `attendanceAverage` REAL NOT NULL, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "clazzUid",
@@ -2079,69 +511,9 @@
             "notNull": false
           },
           {
-            "fieldPath": "clazzDesc",
-            "columnName": "clazzDesc",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
             "fieldPath": "attendanceAverage",
             "columnName": "attendanceAverage",
             "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzHolidayUMCalendarUid",
-            "columnName": "clazzHolidayUMCalendarUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzScheuleUMCalendarUid",
-            "columnName": "clazzScheuleUMCalendarUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isClazzActive",
-            "columnName": "isClazzActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzLocationUid",
-            "columnName": "clazzLocationUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isAttendanceFeature",
-            "columnName": "isAttendanceFeature",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isActivityFeature",
-            "columnName": "isActivityFeature",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isSelFeature",
-            "columnName": "isSelFeature",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzStartTime",
-            "columnName": "clazzStartTime",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzEndTime",
-            "columnName": "clazzEndTime",
-            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -2161,6 +533,12 @@
             "columnName": "clazzLastChangedBy",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "clazzLocationUid",
+            "columnName": "clazzLocationUid",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -2174,7 +552,7 @@
       },
       {
         "tableName": "ClazzMember",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzMemberPersonUid` INTEGER NOT NULL, `clazzMemberClazzUid` INTEGER NOT NULL, `clazzMemberDateJoined` INTEGER NOT NULL, `clazzMemberDateLeft` INTEGER NOT NULL, `clazzMemberRole` INTEGER NOT NULL, `clazzMemberAttendancePercentage` REAL NOT NULL, `clazzMemberActive` INTEGER NOT NULL, `clazzMemberLocalChangeSeqNum` INTEGER NOT NULL, `clazzMemberMasterChangeSeqNum` INTEGER NOT NULL, `clazzMemberLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzMemberPersonUid` INTEGER NOT NULL, `clazzMemberClazzUid` INTEGER NOT NULL, `dateJoined` INTEGER NOT NULL, `dateLeft` INTEGER NOT NULL, `role` INTEGER NOT NULL, `clazzMemberLocalChangeSeqNum` INTEGER NOT NULL, `clazzMemberMasterChangeSeqNum` INTEGER NOT NULL, `clazzMemberLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "clazzMemberUid",
@@ -2195,32 +573,20 @@
             "notNull": true
           },
           {
-            "fieldPath": "clazzMemberDateJoined",
-            "columnName": "clazzMemberDateJoined",
+            "fieldPath": "dateJoined",
+            "columnName": "dateJoined",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "clazzMemberDateLeft",
-            "columnName": "clazzMemberDateLeft",
+            "fieldPath": "dateLeft",
+            "columnName": "dateLeft",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "clazzMemberRole",
-            "columnName": "clazzMemberRole",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzMemberAttendancePercentage",
-            "columnName": "clazzMemberAttendancePercentage",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clazzMemberActive",
-            "columnName": "clazzMemberActive",
+            "fieldPath": "role",
+            "columnName": "role",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2256,7 +622,7 @@
             "columnNames": [
               "clazzMemberPersonUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzMember_clazzMemberPersonUid` ON `${TABLE_NAME}` (`clazzMemberPersonUid`)"
+            "createSql": "CREATE  INDEX `index_ClazzMember_clazzMemberPersonUid` ON `${TABLE_NAME}` (`clazzMemberPersonUid`)"
           },
           {
             "name": "index_ClazzMember_clazzMemberClazzUid",
@@ -2264,14 +630,52 @@
             "columnNames": [
               "clazzMemberClazzUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzMember_clazzMemberClazzUid` ON `${TABLE_NAME}` (`clazzMemberClazzUid`)"
+            "createSql": "CREATE  INDEX `index_ClazzMember_clazzMemberClazzUid` ON `${TABLE_NAME}` (`clazzMemberClazzUid`)"
           }
         ],
         "foreignKeys": []
       },
       {
+        "tableName": "PersonCustomField",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personCustomFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fieldName` TEXT, `labelMessageCode` INTEGER NOT NULL, `fieldIcon` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "personCustomFieldUid",
+            "columnName": "personCustomFieldUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fieldName",
+            "columnName": "fieldName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "labelMessageCode",
+            "columnName": "labelMessageCode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fieldIcon",
+            "columnName": "fieldIcon",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "personCustomFieldUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "PersonCustomFieldValue",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personCustomFieldValueUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personCustomFieldValuePersonCustomFieldUid` INTEGER NOT NULL, `personCustomFieldValuePersonUid` INTEGER NOT NULL, `fieldValue` TEXT, `personCustomFieldValueMasterChangeSeqNum` INTEGER NOT NULL, `personCustomFieldValueLocalChangeSeqNum` INTEGER NOT NULL, `personCustomFieldValueLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personCustomFieldValueUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personCustomFieldValuePersonCustomFieldUid` INTEGER NOT NULL, `personCustomFieldValuePersonUid` INTEGER NOT NULL, `fieldValue` TEXT)",
         "fields": [
           {
             "fieldPath": "personCustomFieldValueUid",
@@ -2296,24 +700,6 @@
             "columnName": "fieldValue",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "personCustomFieldValueMasterChangeSeqNum",
-            "columnName": "personCustomFieldValueMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personCustomFieldValueLocalChangeSeqNum",
-            "columnName": "personCustomFieldValueLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personCustomFieldValueLastChangedBy",
-            "columnName": "personCustomFieldValueLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -2475,7 +861,7 @@
             "columnNames": [
               "primaryLanguageUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntry_primaryLanguageUid` ON `${TABLE_NAME}` (`primaryLanguageUid`)"
+            "createSql": "CREATE  INDEX `index_ContentEntry_primaryLanguageUid` ON `${TABLE_NAME}` (`primaryLanguageUid`)"
           }
         ],
         "foreignKeys": []
@@ -2534,7 +920,7 @@
             "columnNames": [
               "ceccjContentEntryUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoin_ceccjContentEntryUid` ON `${TABLE_NAME}` (`ceccjContentEntryUid`)"
+            "createSql": "CREATE  INDEX `index_ContentEntryContentCategoryJoin_ceccjContentEntryUid` ON `${TABLE_NAME}` (`ceccjContentEntryUid`)"
           }
         ],
         "foreignKeys": []
@@ -2600,7 +986,7 @@
               "cepcjChildContentEntryUid",
               "cepcjParentContentEntryUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `parent_child` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`, `cepcjParentContentEntryUid`)"
+            "createSql": "CREATE  INDEX `parent_child` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`, `cepcjParentContentEntryUid`)"
           },
           {
             "name": "index_ContentEntryParentChildJoin_cepcjChildContentEntryUid",
@@ -2608,7 +994,7 @@
             "columnNames": [
               "cepcjChildContentEntryUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjChildContentEntryUid` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`)"
+            "createSql": "CREATE  INDEX `index_ContentEntryParentChildJoin_cepcjChildContentEntryUid` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`)"
           },
           {
             "name": "index_ContentEntryParentChildJoin_cepcjParentContentEntryUid",
@@ -2616,7 +1002,7 @@
             "columnNames": [
               "cepcjParentContentEntryUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjParentContentEntryUid` ON `${TABLE_NAME}` (`cepcjParentContentEntryUid`)"
+            "createSql": "CREATE  INDEX `index_ContentEntryParentChildJoin_cepcjParentContentEntryUid` ON `${TABLE_NAME}` (`cepcjParentContentEntryUid`)"
           }
         ],
         "foreignKeys": []
@@ -2941,7 +1327,7 @@
       },
       {
         "tableName": "PersonAuth",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personAuthUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `passwordHash` TEXT, `personAuthStatus` INTEGER NOT NULL, `personAuthLocalChangeSeqNum` INTEGER NOT NULL, `personAuthMasterChangeSeqNum` INTEGER NOT NULL, `lastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personAuthUid` INTEGER NOT NULL, `passwordHash` TEXT, PRIMARY KEY(`personAuthUid`))",
         "fields": [
           {
             "fieldPath": "personAuthUid",
@@ -2954,44 +1340,20 @@
             "columnName": "passwordHash",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "personAuthStatus",
-            "columnName": "personAuthStatus",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personAuthLocalChangeSeqNum",
-            "columnName": "personAuthLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personAuthMasterChangeSeqNum",
-            "columnName": "personAuthMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "lastChangedBy",
-            "columnName": "lastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
             "personAuthUid"
           ],
-          "autoGenerate": true
+          "autoGenerate": false
         },
         "indices": [],
         "foreignKeys": []
       },
       {
         "tableName": "Role",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`roleUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `roleName` TEXT, `roleActive` INTEGER NOT NULL, `roleMasterCsn` INTEGER NOT NULL, `roleLocalCsn` INTEGER NOT NULL, `roleLastChangedBy` INTEGER NOT NULL, `rolePermissions` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`roleUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `roleName` TEXT, `roleMasterCsn` INTEGER NOT NULL, `roleLocalCsn` INTEGER NOT NULL, `roleLastChangedBy` INTEGER NOT NULL, `rolePermissions` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "roleUid",
@@ -3004,12 +1366,6 @@
             "columnName": "roleName",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "roleActive",
-            "columnName": "roleActive",
-            "affinity": "INTEGER",
-            "notNull": true
           },
           {
             "fieldPath": "roleMasterCsn",
@@ -3047,7 +1403,7 @@
       },
       {
         "tableName": "EntityRole",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`erUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `erMasterCsn` INTEGER NOT NULL, `erLocalCsn` INTEGER NOT NULL, `erLastChangedBy` INTEGER NOT NULL, `erTableId` INTEGER NOT NULL, `erEntityUid` INTEGER NOT NULL, `erGroupUid` INTEGER NOT NULL, `erRoleUid` INTEGER NOT NULL, `erActive` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`erUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `erMasterCsn` INTEGER NOT NULL, `erLocalCsn` INTEGER NOT NULL, `erLastChangedBy` INTEGER NOT NULL, `erTableId` INTEGER NOT NULL, `erEntityUid` INTEGER NOT NULL, `erGroupUid` INTEGER NOT NULL, `erRoleUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "erUid",
@@ -3096,12 +1452,6 @@
             "columnName": "erRoleUid",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "erActive",
-            "columnName": "erActive",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -3117,7 +1467,7 @@
             "columnNames": [
               "erTableId"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_erTableId` ON `${TABLE_NAME}` (`erTableId`)"
+            "createSql": "CREATE  INDEX `index_EntityRole_erTableId` ON `${TABLE_NAME}` (`erTableId`)"
           },
           {
             "name": "index_EntityRole_erEntityUid",
@@ -3125,7 +1475,7 @@
             "columnNames": [
               "erEntityUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_erEntityUid` ON `${TABLE_NAME}` (`erEntityUid`)"
+            "createSql": "CREATE  INDEX `index_EntityRole_erEntityUid` ON `${TABLE_NAME}` (`erEntityUid`)"
           },
           {
             "name": "index_EntityRole_erGroupUid",
@@ -3133,7 +1483,7 @@
             "columnNames": [
               "erGroupUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_erGroupUid` ON `${TABLE_NAME}` (`erGroupUid`)"
+            "createSql": "CREATE  INDEX `index_EntityRole_erGroupUid` ON `${TABLE_NAME}` (`erGroupUid`)"
           },
           {
             "name": "index_EntityRole_erRoleUid",
@@ -3141,14 +1491,14 @@
             "columnNames": [
               "erRoleUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_erRoleUid` ON `${TABLE_NAME}` (`erRoleUid`)"
+            "createSql": "CREATE  INDEX `index_EntityRole_erRoleUid` ON `${TABLE_NAME}` (`erRoleUid`)"
           }
         ],
         "foreignKeys": []
       },
       {
         "tableName": "PersonGroup",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMasterCsn` INTEGER NOT NULL, `groupLocalCsn` INTEGER NOT NULL, `groupLastChangedBy` INTEGER NOT NULL, `groupName` TEXT, `groupActive` INTEGER NOT NULL, `groupPersonUid` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMasterCsn` INTEGER NOT NULL, `groupLocalCsn` INTEGER NOT NULL, `groupLastChangedBy` INTEGER NOT NULL, `groupName` TEXT, `groupPersonUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "groupUid",
@@ -3181,12 +1531,6 @@
             "notNull": false
           },
           {
-            "fieldPath": "groupActive",
-            "columnName": "groupActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "groupPersonUid",
             "columnName": "groupPersonUid",
             "affinity": "INTEGER",
@@ -3204,17 +1548,11 @@
       },
       {
         "tableName": "PersonGroupMember",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMemberActive` INTEGER NOT NULL, `groupMemberPersonUid` INTEGER NOT NULL, `groupMemberGroupUid` INTEGER NOT NULL, `groupMemberMasterCsn` INTEGER NOT NULL, `groupMemberLocalCsn` INTEGER NOT NULL, `groupMemberLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMemberPersonUid` INTEGER NOT NULL, `groupMemberGroupUid` INTEGER NOT NULL, `groupMemberMasterCsn` INTEGER NOT NULL, `groupMemberLocalCsn` INTEGER NOT NULL, `groupMemberLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "groupMemberUid",
             "columnName": "groupMemberUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "groupMemberActive",
-            "columnName": "groupMemberActive",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -3262,7 +1600,7 @@
             "columnNames": [
               "groupMemberPersonUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMember_groupMemberPersonUid` ON `${TABLE_NAME}` (`groupMemberPersonUid`)"
+            "createSql": "CREATE  INDEX `index_PersonGroupMember_groupMemberPersonUid` ON `${TABLE_NAME}` (`groupMemberPersonUid`)"
           },
           {
             "name": "index_PersonGroupMember_groupMemberGroupUid",
@@ -3270,14 +1608,14 @@
             "columnNames": [
               "groupMemberGroupUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMember_groupMemberGroupUid` ON `${TABLE_NAME}` (`groupMemberGroupUid`)"
+            "createSql": "CREATE  INDEX `index_PersonGroupMember_groupMemberGroupUid` ON `${TABLE_NAME}` (`groupMemberGroupUid`)"
           }
         ],
         "foreignKeys": []
       },
       {
         "tableName": "Location",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`locationUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `description` TEXT, `lng` TEXT, `lat` TEXT, `parentLocationUid` INTEGER NOT NULL, `locationLocalChangeSeqNum` INTEGER NOT NULL, `locationMasterChangeSeqNum` INTEGER NOT NULL, `locationLastChangedBy` INTEGER NOT NULL, `timeZone` TEXT, `locationActive` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`locationUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `description` TEXT, `lng` TEXT, `lat` TEXT, `parentLocationUid` INTEGER NOT NULL, `locationActive` INTEGER NOT NULL, `locationLocalChangeSeqNum` INTEGER NOT NULL, `locationMasterChangeSeqNum` INTEGER NOT NULL, `locationLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "locationUid",
@@ -3316,6 +1654,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "locationActive",
+            "columnName": "locationActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "locationLocalChangeSeqNum",
             "columnName": "locationLocalChangeSeqNum",
             "affinity": "INTEGER",
@@ -3330,18 +1674,6 @@
           {
             "fieldPath": "locationLastChangedBy",
             "columnName": "locationLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "timeZone",
-            "columnName": "timeZone",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "locationActive",
-            "columnName": "locationActive",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -3501,7 +1833,7 @@
       },
       {
         "tableName": "ScrapeQueueItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sqiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sqiContentEntryParentUid` INTEGER NOT NULL, `destDir` TEXT, `scrapeUrl` TEXT, `status` INTEGER NOT NULL, `runId` INTEGER NOT NULL, `itemType` INTEGER NOT NULL, `contentType` TEXT, `timeAdded` INTEGER NOT NULL, `timeStarted` INTEGER NOT NULL, `timeFinished` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sqiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sqiContentEntryParentUid` INTEGER NOT NULL, `destDir` TEXT, `scrapeUrl` TEXT, `status` INTEGER NOT NULL, `runId` INTEGER NOT NULL, `itemType` INTEGER NOT NULL, `errorCode` INTEGER NOT NULL, `contentType` TEXT, `timeAdded` INTEGER NOT NULL, `timeStarted` INTEGER NOT NULL, `timeFinished` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "sqiUid",
@@ -3542,6 +1874,12 @@
           {
             "fieldPath": "itemType",
             "columnName": "itemType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "errorCode",
+            "columnName": "errorCode",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -3796,7 +2134,7 @@
               "containerContentEntryUid",
               "cntLastModified"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `cnt_uid_to_most_recent` ON `${TABLE_NAME}` (`containerContentEntryUid`, `cntLastModified`)"
+            "createSql": "CREATE  INDEX `cnt_uid_to_most_recent` ON `${TABLE_NAME}` (`containerContentEntryUid`, `cntLastModified`)"
           },
           {
             "name": "index_Container_cntLastModified",
@@ -3804,7 +2142,7 @@
             "columnNames": [
               "cntLastModified"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Container_cntLastModified` ON `${TABLE_NAME}` (`cntLastModified`)"
+            "createSql": "CREATE  INDEX `index_Container_cntLastModified` ON `${TABLE_NAME}` (`cntLastModified`)"
           }
         ],
         "foreignKeys": []
@@ -3851,7 +2189,7 @@
             "columnNames": [
               "ceContainerUid"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContainerEntry_ceContainerUid` ON `${TABLE_NAME}` (`ceContainerUid`)"
+            "createSql": "CREATE  INDEX `index_ContainerEntry_ceContainerUid` ON `${TABLE_NAME}` (`ceContainerUid`)"
           }
         ],
         "foreignKeys": []
@@ -3916,7 +2254,7 @@
             "columnNames": [
               "cefMd5"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContainerEntryFile_cefMd5` ON `${TABLE_NAME}` (`cefMd5`)"
+            "createSql": "CREATE  INDEX `index_ContainerEntryFile_cefMd5` ON `${TABLE_NAME}` (`cefMd5`)"
           }
         ],
         "foreignKeys": []
@@ -4702,1582 +3040,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "School",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "schoolUid",
-            "columnName": "schoolUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolName",
-            "columnName": "schoolName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "schoolDesc",
-            "columnName": "schoolDesc",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "schoolAddress",
-            "columnName": "schoolAddress",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "schoolActive",
-            "columnName": "schoolActive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolFeatures",
-            "columnName": "schoolFeatures",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolLocationLong",
-            "columnName": "schoolLocationLong",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolLocationLatt",
-            "columnName": "schoolLocationLatt",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolMasterChangeSeqNum",
-            "columnName": "schoolMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolLocalChangeSeqNum",
-            "columnName": "schoolLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolLastChangedBy",
-            "columnName": "schoolLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "schoolUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ClazzLog_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ClazzLog_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLog_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ClazzLogAttendanceRecord_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "FeedEntry_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_FeedEntry_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_FeedEntry_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonField_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_PersonField_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonField_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonDetailPresenterField_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_PersonDetailPresenterField_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonDetailPresenterField_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestion_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_SelQuestion_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SelQuestion_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionResponse_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_SelQuestionResponse_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SelQuestionResponse_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionResponseNomination_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_SelQuestionResponseNomination_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SelQuestionResponseNomination_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionSet_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_SelQuestionSet_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SelQuestionSet_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionSetRecognition_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_SelQuestionSetRecognition_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SelQuestionSetRecognition_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionSetResponse_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_SelQuestionSetResponse_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SelQuestionSetResponse_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "Schedule_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_Schedule_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Schedule_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "DateRange_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_DateRange_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_DateRange_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "UMCalendar_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_UMCalendar_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_UMCalendar_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ClazzActivity_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ClazzActivity_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzActivity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ClazzActivityChange_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ClazzActivityChange_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzActivityChange_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "SelQuestionOption_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_SelQuestionOption_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SelQuestionOption_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ScheduledCheck_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ScheduledCheck_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScheduledCheck_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "AuditLog_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_AuditLog_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_AuditLog_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "CustomField_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_CustomField_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomField_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "CustomFieldValue_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_CustomFieldValue_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomFieldValue_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "CustomFieldValueOption_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_CustomFieldValueOption_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomFieldValueOption_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
         "tableName": "Person_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -6340,7 +3102,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Person_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_Person_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -6408,7 +3170,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Clazz_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_Clazz_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -6476,75 +3238,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzMember_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonCustomFieldValue_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_PersonCustomFieldValue_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonCustomFieldValue_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_ClazzMember_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -6612,7 +3306,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntry_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_ContentEntry_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -6680,7 +3374,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_ContentEntryContentCategoryJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -6748,7 +3442,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_ContentEntryParentChildJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -6816,7 +3510,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryRelatedEntryJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_ContentEntryRelatedEntryJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -6884,7 +3578,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategorySchema_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_ContentCategorySchema_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -6952,7 +3646,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategory_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_ContentCategory_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7020,7 +3714,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Language_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_Language_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7088,7 +3782,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LanguageVariant_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_LanguageVariant_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7156,7 +3850,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Role_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_Role_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7224,7 +3918,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_EntityRole_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7292,7 +3986,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroup_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_PersonGroup_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7360,7 +4054,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMember_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_PersonGroupMember_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7428,7 +4122,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Location_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_Location_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7496,7 +4190,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonLocationJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_PersonLocationJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7564,7 +4258,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonPicture_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_PersonPicture_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7632,7 +4326,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Container_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_Container_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7700,7 +4394,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_VerbEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_VerbEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7768,7 +4462,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_XObjectEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_XObjectEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7836,7 +4530,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StatementEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_StatementEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7904,7 +4598,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -7972,7 +4666,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_AgentEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_AgentEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -8040,7 +4734,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_StateEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -8108,7 +4802,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateContentEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_StateContentEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -8176,75 +4870,7 @@
               "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "School_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_School_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_School_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE  INDEX `index_XLangMapEntry_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
           }
         ],
         "foreignKeys": []
@@ -8253,7 +4879,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e4d97a9f0541c65ea13b74d7264dcbfe')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '95b6c6ae9abf0e1ac8320d91fcdcd9f5')"
     ]
   }
 }
