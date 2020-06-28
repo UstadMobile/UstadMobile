@@ -1,5 +1,17 @@
 ## Coding style
 
+Avoid terms that could be considered racist and/or discriminatory
+
+e.g. use:
+```
+primary, replica, allowlist, blocklist
+```
+
+Do not use:
+```
+master, slave, whitelist, blacklist
+```
+
 The app fundamentally follows a Model-View-Presenter (MVP) design. E.g.
 
 ```
