@@ -2,8 +2,10 @@ package com.ustadmobile.port.android.view
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +25,7 @@ import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.CompletableDeferred
 
-class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemSelectedListener {
+class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemClickListener {
 
     private var pageIndicatorView: PageIndicatorView? = null
 
@@ -31,7 +33,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
     private var presenter: OnBoardingPresenter? = null
 
-    private lateinit var languageOptions: Spinner
+    private lateinit var languageOptions: AutoCompleteTextView
 
     private lateinit var viewPager: ViewPager
 
@@ -96,11 +98,12 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         viewPager = findViewById(R.id.onBoardPagerView)
         getStartedBtn = findViewById(R.id.get_started_btn)
         pageIndicatorView = findViewById(R.id.pageIndicatorView)
-        languageOptions = findViewById(R.id.language_option)
+        languageOptions = findViewById(R.id.language_options_autocomplete_textview)
 
         pageIndicatorView?.setAnimationType(AnimationType.WORM)
-        getStartedBtn?.setOnClickListener { presenter?.handleClickGetStarted() }
-
+        getStartedBtn?.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
 
         val isRtl = TextUtilsCompat.getLayoutDirectionFromLocale(resources.configuration.locale) == ViewCompat.LAYOUT_DIRECTION_RTL
         var firstScreenIndex = 0
@@ -144,22 +147,21 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         presenter?.onCreate(bundleToMap(savedInstanceState))
     }
 
-    override fun setLanguageOptions(languages: List<String>) {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        languageOptions.adapter = adapter
-
-        languageOptions.onItemSelectedListener = this
+    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        Handler().postDelayed(Runnable {
+            presenter?.handleLanguageSelected(position)
+        }, 5000)
     }
 
-    override fun onNothingSelected(parent: AdapterView<*>?) {}
+    override fun setLanguageOptions(languages: List<String>, currentSelection: Int) {
+        val adapter = ArrayAdapter(this, R.layout.autocomplete_list_item, languages)
+        languageOptions.setAdapter(adapter)
+        languageOptions.onItemClickListener = this
 
-    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        presenter?.handleLanguageSelected(position)
     }
 
     override fun restartUI() {
-        onResume()
+        recreate()
     }
 
 }
