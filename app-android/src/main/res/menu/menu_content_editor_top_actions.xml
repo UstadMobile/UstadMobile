@@ -60,7 +60,7 @@
         android:orderInCategory="8"
         app:showAsAction="always"
         android:id="@+id/content_action_preview"
-        android:title="@string/content_editor_preview"
+        android:title="@string/preview"
         android:icon="@drawable/ic_document_preview"
         />
 

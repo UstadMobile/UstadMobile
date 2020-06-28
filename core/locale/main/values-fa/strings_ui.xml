@@ -135,7 +135,7 @@
     <string name="library_reading_level">سطح خواندن</string>
     <string name="file_not_found">فایل دریافت نگردید</string>
     <string name="content_type_multimedia">چند رسانه</string>
-    <string name="content_type_multiple_choice">چند گزینه ای</string>
+    <string name="multiple_choice">چند گزینه ای</string>
     <string name="content_type_fill_the_blanks">جاهای خالی را پر نمائید</string>
     <string name="content_type_link">پیوند</string>
     <string name="content_format_text">متن</string>

@@ -134,7 +134,7 @@
     <string name="library_reading_level">Сатҳи хониш</string>
     <string name="file_not_found">Файл ёфт нашуд</string>
     <string name="content_type_multimedia">Мултимедиа</string>
-    <string name="content_type_multiple_choice">Интихобҳои чандгона</string>
+    <string name="multiple_choice">Интихобҳои чандгона</string>
     <string name="content_type_link">Пайванд</string>
     <string name="content_format_text">Матн</string>
     <string name="content_format_paragraph">Банд</string>
