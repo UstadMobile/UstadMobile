@@ -15,7 +15,7 @@
 
     <style name="UmTheme.App" parent="UmTheme.MaterialComponents">
 
-        <!--Material color attributes (Night Mode) -->
+        <!--Material color attributes (Night Mode) as per https://material.io/design/color/dark-theme.html#anatomy-->
         <item name="colorPrimary">@color/primaryLightColor</item>
         <item name="colorPrimaryVariant">@color/primaryVariantColor</item>
         <item name="colorPrimaryDark">@color/primaryVariantColor</item>
@@ -39,6 +39,14 @@
         <item name="colorTabText" >@color/onPrimaryColor</item>
         <item name="colorSelectedTabText">@color/primaryColor</item>
         <item name="colorPrimaryBackground">@android:color/transparent</item>
+        <item name="colorPrimarySurface">?colorSurface</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">?colorSurface</item>
+        <item name="toolbarStyle">@style/UmTheme.Widget.Toolbar</item>
     </style>
+
+    <!--Toolbar-->
+    <style name="UmTheme.Widget.Toolbar" parent="Widget.MaterialComponents.Toolbar.PrimarySurface">
+        <item name="android:elevation" >@dimen/dimen_4dp</item>
+    </style>
+
 </resources>
