@@ -110,24 +110,24 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
 
             holder.pageTitle.setTextColor(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.secondaryTextColor
+                        R.color.onBackgroundColor
                     else
                         R.color.iconTintColor))
             holder.pageOptionHandle.setColorFilter(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.secondaryTextColor
+                        R.color.onBackgroundColor
                     else
                         R.color.iconTintColor))
             holder.pageReorderHandle.setColorFilter(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.secondaryTextColor
+                        R.color.onBackgroundColor
                     else
                         R.color.iconTintColor))
             holder.itemHolder.setBackgroundColor(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
                         R.color.iconTintColor
                     else
-                        R.color.primaryTextColor))
+                        R.color.onPrimaryColor))
 
             holder.pageOptionHandle.setOnClickListener { showPopUpMenu(holder.itemView.context,
                     holder.pageOptionHandle, pageItem) }

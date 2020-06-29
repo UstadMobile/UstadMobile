@@ -34,7 +34,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
+                style="@style/UmTheme.ShapeAppearance.SmallComponent"
                 android:enabled="false"
                 android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                 android:textStyle="bold"
