@@ -24,6 +24,7 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -264,7 +265,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         detailRecyclerAdapter = ClazzWorkBasicDetailsRecyclerAdapter(entity)
         detailRecyclerAdapter?.visible = false
 
-        contentRecyclerAdapter = ContentEntryList2Fragment.ContentEntryListRecyclerAdapter(null)
+        contentRecyclerAdapter =
+                ContentEntryList2Fragment.ContentEntryListRecyclerAdapter(null,
+                        ListViewMode.BROWSER.toString())
 
         quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
                 studentMode)

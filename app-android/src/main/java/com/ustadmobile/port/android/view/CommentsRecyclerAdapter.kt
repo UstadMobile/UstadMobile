@@ -22,6 +22,7 @@ class CommentsRecyclerAdapter()
     override fun onBindViewHolder(holder: CommentsWithPersonViewHolder, position: Int) {
         if(itemCount > 0 ) {
             holder.binding.commentwithperson = getItem(position)
+            holder.itemView.tag = getItem(position)?.commentsUid
         }
     }
 

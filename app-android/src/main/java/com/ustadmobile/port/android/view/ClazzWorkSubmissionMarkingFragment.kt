@@ -144,10 +144,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
-            privateCommentsObserver = PagedListSubmitObserver(it)
-        }
-
         privateCommentsMergerRecyclerAdapter = MergeAdapter(
                 privateCommentsHeadingRecyclerAdapter, privateCommentsRecyclerAdapter,
                 newPrivateCommentRecyclerAdapter)

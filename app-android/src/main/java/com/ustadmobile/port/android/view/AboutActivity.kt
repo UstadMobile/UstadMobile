@@ -9,6 +9,8 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.AboutPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.AboutView
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.CompletableDeferred
 
 class AboutActivity : UstadBaseActivity(), AboutView {
 
@@ -49,4 +51,6 @@ class AboutActivity : UstadBaseActivity(), AboutView {
 
         return super.onOptionsItemSelected(item)
     }
+
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 }

@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
+import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -83,7 +83,7 @@ fun Route.ContainerMountRoute(db: UmAppDatabase) {
                 srtLangList.add(0, UstadMobileSystemImpl.instance.getString(MessageID.no_subtitle, context))
                 if (defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
-                call.respond(HttpStatusCode.OK, VideoPlayerPresenterCommon.VideoParams(videoPath, audioEntry, srtLangList, srtMap))
+                call.respond(HttpStatusCode.OK, VideoContentPresenterCommon.VideoParams(videoPath, audioEntry, srtLangList, srtMap))
 
             }else{
                 call.respond(HttpStatusCode.NotFound, "No such container: $containerUid")

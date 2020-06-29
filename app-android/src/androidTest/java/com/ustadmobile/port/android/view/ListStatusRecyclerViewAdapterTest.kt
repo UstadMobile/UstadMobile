@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,15 +32,14 @@ import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_WITHDAT
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
-import com.ustadmobile.test.rules.SystemImplTestNavHostRule
-import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.rules.*
 import org.hamcrest.Matchers.equalTo
+import org.junit.Assume
 import org.junit.Rule
 import org.junit.Test
 
-class ListStatusRecyclerViewAdapterTestFragment: Fragment() {
+class ListStatusRecyclerViewAdapterTestFragment : Fragment() {
 
     var mergeAdapter: MergeAdapter? = null
 
@@ -49,13 +49,13 @@ class ListStatusRecyclerViewAdapterTestFragment: Fragment() {
 
     var binding: FragmentListBinding? = null
 
-    class SimplePageListAdapter: PagedListAdapter<PersonWithDisplayDetails, SimplePageListAdapter.SimplePageListViewHolder>(SIMPLE_DIFF_UTIL) {
+    class SimplePageListAdapter : PagedListAdapter<PersonWithDisplayDetails, SimplePageListAdapter.SimplePageListViewHolder>(SIMPLE_DIFF_UTIL) {
 
-        class SimplePageListViewHolder(val binding: ItemSimplepersonBinding): RecyclerView.ViewHolder(binding.root)
+        class SimplePageListViewHolder(val binding: ItemSimplepersonBinding) : RecyclerView.ViewHolder(binding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimplePageListViewHolder {
             return SimplePageListViewHolder(ItemSimplepersonBinding.inflate(LayoutInflater.from(parent.context),
-                parent, false))
+                    parent, false))
         }
 
         override fun onBindViewHolder(holder: SimplePageListViewHolder, position: Int) {
@@ -85,7 +85,7 @@ class ListStatusRecyclerViewAdapterTestFragment: Fragment() {
     }
 
     companion object {
-        val SIMPLE_DIFF_UTIL = object: DiffUtil.ItemCallback<PersonWithDisplayDetails>() {
+        val SIMPLE_DIFF_UTIL = object : DiffUtil.ItemCallback<PersonWithDisplayDetails>() {
             override fun areItemsTheSame(oldItem: PersonWithDisplayDetails, newItem: PersonWithDisplayDetails): Boolean {
                 return oldItem.firstNames == newItem.firstNames && oldItem.lastName == newItem.lastName
             }
@@ -105,27 +105,27 @@ class ListStatusRecyclerViewAdapterTest {
 
     @JvmField
     @Rule
-    val dataBindingRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
 
     @JvmField
     @Rule
     val systemImplRule = SystemImplTestNavHostRule()
 
     data class ListStatusScenario(val fragmentScenario: FragmentScenario<ListStatusRecyclerViewAdapterTestFragment>,
-        val recyclerViewIdlingResource: RecyclerViewIdlingResource,
-        val loadingStatusLiveData: MutableLiveData<RepositoryLoadHelper.RepoLoadStatus>)
+                                  val recyclerViewIdlingResource: RecyclerViewIdlingResource,
+                                  val loadingStatusLiveData: MutableLiveData<RepositoryLoadHelper.RepoLoadStatus>)
 
     private fun createScenario(
             loadingStatus: RepositoryLoadHelper.RepoLoadStatus = RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA)): ListStatusScenario {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
             ListStatusRecyclerViewAdapterTestFragment()
-        }.withDataBindingIdlingResource(dataBindingRule)
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
 
         lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
         val loadingStatusLiveData = MutableLiveData(loadingStatus)
-        fragmentScenario.onFragment {fragment ->
-            val dataSource = dbRule.db.personDao.findAllPeopleWithDisplayDetailsSortNameDesc(0, 0, 0)
+        fragmentScenario.onFragment { fragment ->
+            val dataSource = dbRule.db.personDao.findAllPeopleWithDisplayDetailsSortNameDesc(0, 0, 0, listOf())
             val livePagedList = LivePagedListBuilder(dataSource, 20).build()
             fragment.listStatusAdapter?.pagedListLiveData = livePagedList
             livePagedList.observe(fragment.viewLifecycleOwner, Observer {
@@ -151,6 +151,8 @@ class ListStatusRecyclerViewAdapterTest {
 
     @Test
     fun givenRepoLoading_whenDisplayed_thenShouldShowFirstItemAndLoading() {
+        Assume.assumeTrue("Display of progress indicator test requires SDK > 24",
+                Build.VERSION.SDK_INT > 24)
         val person = Person().apply {
             firstNames = "Test Entity"
             lastName = "McLast"
@@ -158,7 +160,7 @@ class ListStatusRecyclerViewAdapterTest {
         }
 
         val (scenario, recyclerViewIdlingResource, repoLiveData) = createScenario(
-            RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADING_CLOUD))
+                RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADING_CLOUD))
 
         onView(withText(R.string.repo_loading_status_loading_cloud)).check(matches(isDisplayed()))
         onView(withId(R.id.fragment_list_recyclerview)).perform(

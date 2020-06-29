@@ -580,7 +580,7 @@ class ClazzWorkDetailOverviewFragmentTest {
         }
     }
 
-    private fun withTagInSimpleHeading(title: String): Matcher<RecyclerView.ViewHolder?>? {
+    fun withTagInSimpleHeading(title: String): Matcher<RecyclerView.ViewHolder?>? {
         return object : BoundedMatcher<RecyclerView.ViewHolder?,
                 SimpleHeadingRecyclerAdapter.SimpleHeadingViewHolder>(SimpleHeadingRecyclerAdapter.SimpleHeadingViewHolder::class.java) {
             override fun matchesSafely(item: SimpleHeadingRecyclerAdapter.SimpleHeadingViewHolder): Boolean {

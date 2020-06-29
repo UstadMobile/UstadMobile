@@ -14,13 +14,12 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
-import com.ustadmobile.test.rules.SystemImplTestNavHostRule
-import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
 import junit.framework.Assert
 import junit.framework.Assert.assertEquals
@@ -41,13 +40,16 @@ class ContentEntry2DetailFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+
 
     @JvmField
     @Rule
     val adbScreenRecordRule = AdbScreenRecordRule()
-
-    private lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
     @AdbScreenRecord("Given content entry exists should show user selected content entry")
     @Test
@@ -60,19 +62,15 @@ class ContentEntry2DetailFragmentTest {
             contentEntryUid = dbRule.db.contentEntryDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
             ContentEntry2DetailFragment().also {fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
-                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragment).also {
-                    IdlingRegistry.getInstance().register(it)
-                }
             }
-        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         onView(withText(entryTitle)).check(matches(isDisplayed()))
-
-        IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
     }
 
 
@@ -86,23 +84,19 @@ class ContentEntry2DetailFragmentTest {
             dbRule.db.insertContentEntryWithTranslations(totalTranslations,parentUid)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
             ContentEntry2DetailFragment().also {fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
-                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragment).also {
-                    IdlingRegistry.getInstance().register(it)
-                }
             }
-        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         onView(withText(testEntry.title)).check(matches(isDisplayed()))
 
         onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
 
         onView(withId(R.id.availableTranslationView)).check(matches(hasChildCount(totalTranslations)))
-
-        IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
     }
 
 
@@ -115,17 +109,13 @@ class ContentEntry2DetailFragmentTest {
             dbRule.db.insertContentEntryWithTranslations(totalTranslations,parentUid)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
             ContentEntry2DetailFragment().also {fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
-                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragment).also {
-                    IdlingRegistry.getInstance().register(it)
-                }
             }
-        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
-
-        sleep(1000)
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
 
@@ -137,7 +127,6 @@ class ContentEntry2DetailFragmentTest {
         assertEquals("After clicking on item, it navigates to translated detail view",
                 R.id.content_entry_details_dest, systemImplNavRule.navController.currentDestination?.id)
 
-        IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
     }
 
 

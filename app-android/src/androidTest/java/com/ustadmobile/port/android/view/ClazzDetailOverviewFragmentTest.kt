@@ -2,23 +2,24 @@ package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.port.android.util.letOnFragment
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,7 +36,11 @@ class ClazzDetailOverviewFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
@@ -59,7 +64,8 @@ class ClazzDetailOverviewFragmentTest {
                 fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(it)
                 IdlingRegistry.getInstance().register(fragmentIdlingResource)
             }
-        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
 
         onView(withText("Test Description")).check(matches(isDisplayed()))

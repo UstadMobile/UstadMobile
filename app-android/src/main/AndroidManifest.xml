@@ -28,7 +28,8 @@
         android:supportsRtl="true"
         android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.MainActivity">
+        <activity android:name="com.ustadmobile.port.android.view.MainActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -55,24 +56,13 @@
             android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.XapiPackageContentActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="" />
+
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
-            android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="" />
-        <activity
             android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.VideoPlayerActivity"
-            android:configChanges="keyboardHidden|keyboard|screenSize"
             android:label="" />
 
 

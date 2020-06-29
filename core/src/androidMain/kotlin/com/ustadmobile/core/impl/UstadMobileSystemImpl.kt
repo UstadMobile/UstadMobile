@@ -102,8 +102,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             LoginView.VIEW_NAME to "${PACKAGE_NAME}LoginActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
-            XapiPackageContentView.VIEW_NAME to "${PACKAGE_NAME}XapiPackageContentActivity",
-            ScormPackageView.VIEW_NAME to "${PACKAGE_NAME}ScormPackageActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             ContentEntryExportView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryExportFragmentDialog",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
@@ -485,7 +483,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
         if (appConfig == null) {
             val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    "/com/ustadmobile/core/appconfig.properties", context)
+                    "com/ustadmobile/core/appconfig.properties", context)
             appConfig = Properties()
             var prefIn: InputStream? = null
 

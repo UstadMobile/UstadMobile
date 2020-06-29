@@ -10,13 +10,29 @@ import com.ustadmobile.lib.database.annotation.*
 import com.ustadmobile.lib.db.entities.VerbEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
+@Serializable
+class VerbDisplay {
+
+    var verbUid: Long = 0
+    var urlId: String? = null
+    var display: String? = null
+}
+
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
-class VerbEntity(
-        @PrimaryKey(autoGenerate = true)
-        var verbUid: Long = 0,
-        var urlId: String? = null) {
+class VerbEntity() {
+
+    constructor(uid: Long, url: String?) : this(){
+        verbUid = uid
+        urlId = url
+    }
+
+    @PrimaryKey(autoGenerate = true)
+    var verbUid: Long = 0
+
+    var urlId: String? = null
+
 
     @MasterChangeSeqNum
     var verbMasterChangeSeqNum: Long = 0
@@ -43,4 +59,5 @@ class VerbEntity(
                 VERB_COMPLETED_URL to VERB_COMPLETED_UID)
 
     }
+
 }

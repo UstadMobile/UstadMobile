@@ -18,7 +18,7 @@
             app:icon="@drawable/ic_arrow_back_white_24dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            style="@style/UmTheme.Widget.OutlinedButton.IconOnly"
             />
 
         <androidx.viewpager2.widget.ViewPager2
@@ -38,7 +38,7 @@
             app:icon="@drawable/ic_arrow_forward_white_24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            style="@style/UmTheme.Widget.OutlinedButton.IconOnly"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

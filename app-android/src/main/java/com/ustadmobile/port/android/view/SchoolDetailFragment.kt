@@ -66,7 +66,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         }
         mPager = mBinding?.fragmentSchoolDetailViewpager
 
-        mPresenter = SchoolDetailPresenter(requireContext(), arguments.toStringMap(), this,
+        mPresenter = SchoolDetailPresenter(requireContext(),arguments.toStringMap(), this,
                 this, UstadMobileSystemImpl.instance,
                 UmAccountManager.getActiveDatabase(requireContext()),
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),

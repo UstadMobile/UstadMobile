@@ -27,7 +27,7 @@ class TocItemView : LinearLayout, View.OnClickListener {
     var isExpanded = false
         set(expanded) {
             field = expanded
-            mDropDownImageView!!.setImageResource(if (expanded)
+            mDropDownImageView?.setImageResource(if (expanded)
                 R.drawable.ic_arrow_drop_up_black_24dp
             else
                 R.drawable.ic_arrow_drop_down_black_24dp)
@@ -40,7 +40,8 @@ class TocItemView : LinearLayout, View.OnClickListener {
      */
     var isExpandable = false
         set(expandable) {
-            mDropDownImageView!!.visibility = if (expandable) View.VISIBLE else View.INVISIBLE
+            mDropDownImageView?.visibility = if (expandable) View.VISIBLE else View.INVISIBLE
+            field = expandable
         }
 
     private var mDropDownImageView: ImageView? = null
@@ -74,7 +75,7 @@ class TocItemView : LinearLayout, View.OnClickListener {
         View.inflate(context, R.layout.item_toclistview_itemcontainer, this)
         itemViewLayout = findViewById(R.id.item_toclistview_itemcontainer_frame_layout)
         mDropDownImageView = findViewById(R.id.item_toclistview_expand_img)
-        mDropDownImageView!!.setOnClickListener(this)
+        mDropDownImageView?.setOnClickListener(this)
     }
 
     /**
@@ -83,8 +84,8 @@ class TocItemView : LinearLayout, View.OnClickListener {
      * @param view
      */
     fun setItemView(view: View) {
-        itemViewLayout!!.removeAllViews()
-        itemViewLayout!!.addView(view)
+        itemViewLayout?.removeAllViews()
+        itemViewLayout?.addView(view)
     }
 
     fun setOnClickExpandListener(clickExpandListener: OnClickExpandListener) {
@@ -93,6 +94,6 @@ class TocItemView : LinearLayout, View.OnClickListener {
 
     override fun onClick(view: View) {
         if (clickExpandListener != null)
-            clickExpandListener!!.onClickExpand(this)
+            clickExpandListener?.onClickExpand(this)
     }
 }

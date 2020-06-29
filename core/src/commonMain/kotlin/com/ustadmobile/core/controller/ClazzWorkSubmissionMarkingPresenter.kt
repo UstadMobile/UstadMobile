@@ -51,14 +51,6 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzMemberAndClazzWorkWithSubmission? {
         val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
 
-        GlobalScope.launch {
-            val clazzMemberWithSubmission2 =
-                    db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,
-                            filterByClazzMemberUid)
-            val c = clazzMemberWithSubmission2?.clazzMemberActive
-
-        }
-
         val clazzMemberWithSubmission = withTimeoutOrNull(2000){
             db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,
                     filterByClazzMemberUid)
@@ -68,7 +60,17 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         unmarkedMembers = withTimeoutOrNull(2000){
             db.clazzWorkSubmissionDao.findCompletedUnMarkedSubmissionsByClazzWorkUid(filterByClazzWorkUid)
         }?: listOf()
-        view.markingLeft = unmarkedMembers.size > 1
+
+        if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid ==
+                clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid ){
+            view.markingLeft == false
+        }else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
+                clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid){
+            view.markingLeft = true
+        }else {
+
+            view.markingLeft = unmarkedMembers.size > 1
+        }
 
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
             db.clazzMemberDao.findByUid(filterByClazzMemberUid)
@@ -120,7 +122,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         val privateComments = withTimeoutOrNull(2000) {
             db.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
                     ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
-                    loggedInPersonUid, clazzMember?.clazzMemberPersonUid?:0L)
+                    clazzMember?.clazzMemberPersonUid?:0L, loggedInPersonUid)
         }
         view.privateCommentsToPerson = privateComments
 
@@ -170,15 +172,18 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
     fun handleClickSaveAndMarkNext(entity: ClazzMemberAndClazzWorkWithSubmission?, showNext: Boolean?){
 
+        val entityFromView = view.entity
         val next = showNext ?: true
 
-        if (entity != null) {
-            handleClickSaveWithMovement(entity, !next)
+        if (entityFromView != null) {
+            handleClickSaveWithMovement(entityFromView, !next)
         }
 
         //unmarkedMembers
         if(next) {
             val nextClazzMemberUid = unmarkedMembers.get(0).clazzWorkSubmissionClazzMemberUid
+
+
 
             systemImpl.go(ClazzWorkSubmissionMarkingView.VIEW_NAME,
                     mapOf(ARG_CLAZZWORK_UID to filterByClazzWorkUid.toString(),
@@ -193,7 +198,8 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             val submission = entity.submission
             //If submission exists
             if(submission  != null) {
-                submission.clazzWorkSubmissionDateTimeMarked = UMCalendarUtil.getDateInMilliPlusDays(0)
+                submission.clazzWorkSubmissionDateTimeMarked =
+                        UMCalendarUtil.getDateInMilliPlusDays(0)
                 if(submission.clazzWorkSubmissionUid != 0L) {
                     repo.clazzWorkSubmissionDao.updateAsync(submission)
                 }else{

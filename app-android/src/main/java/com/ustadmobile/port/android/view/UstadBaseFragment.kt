@@ -21,6 +21,14 @@ open class UstadBaseFragment : Fragment(), UstadView {
 
     protected var fabManager: FabManagerLifecycleObserver? = null
 
+    override var loading: Boolean = false
+        get() = field
+        set(value) {
+            //TODO: set this on the main activity
+            field = value
+        }
+
+
     /**
      * If enabled, the fab will be managed by this fragment when its view is active.
      */

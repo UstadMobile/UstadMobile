@@ -21,14 +21,16 @@ import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
+import kotlinx.coroutines.CompletableDeferred
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         NavController.OnDestinationChangedListener {
 
-    private lateinit var appBarConfiguration : AppBarConfiguration
+    private lateinit var appBarConfiguration: AppBarConfiguration
 
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
         get() = activity_listfragmelayout_behaviornt_fab
@@ -71,7 +73,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         menuInflater.inflate(R.menu.menu_main, menu)
 
         val currentFrag =
-                findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id?:0
+                findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id ?: 0
         menu.findItem(R.id.menu_main_settings).isVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         return super.onCreateOptionsMenu(menu)
     }
@@ -85,6 +87,16 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                 || super.onOptionsItemSelected(item)
     }
 
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
+
+    override fun onBackPressed() {
+        val fragment = supportFragmentManager.primaryNavigationFragment?.
+        childFragmentManager?.fragments?.get(0)
+        if((fragment as? FragmentBackHandler)?.onHostBackPressed() != true){
+            super.onBackPressed()
+        }
+    }
+
     override val viewContext: Any
         get() = this
 
@@ -95,7 +107,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         UstadMobileSystemImpl.instance.go(SettingsView.VIEW_NAME, mapOf(), this)
     }
 
-    companion object{
-        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest,R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest)
+    companion object {
+        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest, R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
     }
 }

@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:background="?colorPrimaryBackground"
         app:elevation="@dimen/dimen_4dp"
+        app:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
         app:layout_scrollFlags="scroll|enterAlways"
         android:minHeight="?actionBarSize"/>
     <ProgressBar

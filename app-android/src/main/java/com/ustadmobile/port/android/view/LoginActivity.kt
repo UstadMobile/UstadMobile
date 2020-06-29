@@ -14,6 +14,8 @@ import com.ustadmobile.core.view.LoginView
 import android.widget.LinearLayout
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.CompletableDeferred
 
 
 class LoginActivity : UstadBaseActivity(), LoginView {
@@ -101,6 +103,8 @@ class LoginActivity : UstadBaseActivity(), LoginView {
 
         return super.onOptionsItemSelected(item)
     }
+
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     override fun showRegisterCodeDialog(title: String, okButtonText: String, cancelButtonText: String) {
 

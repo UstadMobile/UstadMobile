@@ -16,9 +16,9 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.HolidayCalendar
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
-import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.rules.*
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
@@ -39,7 +39,11 @@ class ClazzEndToEndTests {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @AdbScreenRecord("Given an empty class list, when the user clicks add class and fills in form, then the new class is shown in list")
     @Test
@@ -49,7 +53,8 @@ class ClazzEndToEndTests {
         })
 
         val activityScenario = launchActivity<MainActivity>()
-                .withDataBindingIdlingResource(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         onView(withId(R.id.home_clazzlist_dest)).perform(click())
         onView(withText(R.string.clazz)).perform(click())
@@ -57,7 +62,11 @@ class ClazzEndToEndTests {
         closeSoftKeyboard()
 
         //select holiday calendar
-        onView(withId(R.id.activity_clazz_edit_holiday_calendar_text)).perform(click())
+        /*
+         * Weird issue: if you specify the EditText itself, instead of the TextInputLayout, Android 5
+         * will click ON 'SCHOOL' THE BOTTOM NAVIGATION instead!
+         */
+        onView(withId(R.id.activity_clazz_edit_holiday_calendar_selected)).perform(click())
         onView(withId(R.id.fragment_list_recyclerview)).perform(
                 RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(
                         withTagValue(equalTo(calendarUid)),

@@ -33,7 +33,7 @@ class EpubContentPageFragment : Fragment() {
     /**
      * The webView for the given URL
      */
-    private lateinit var webView: WebView
+    private var webView: WebView? = null
 
     /**
      * Main root view here
@@ -47,10 +47,10 @@ class EpubContentPageFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mUrl = if (arguments != null)
-            arguments!!.getString(ARG_PAGE_URL, "about:blank")
+            arguments?.getString(ARG_PAGE_URL, "about:blank")
         else
             "about:blank"
-        mPageIndex = if (arguments != null) arguments!!.getInt(ARG_PAGE_INDEX) else 0
+        mPageIndex = arguments?.getInt(ARG_PAGE_INDEX)?: 0
     }
 
     @SuppressLint("SetJavaScriptEnabled", "ObsoleteSdkInt", "ClickableViewAccessibility")
@@ -59,35 +59,35 @@ class EpubContentPageFragment : Fragment() {
         // Inflate the layout for this fragment
         if (viewGroup == null) {
             viewGroup = inflater.inflate(R.layout.fragment_epubcontent_page,
-                    container, false) as RelativeLayout
-            webView = viewGroup!!.findViewById(R.id.fragment_container_page_webview)
+                    container, false) as WebView
+            webView = viewGroup?.findViewById(R.id.fragment_container_page_webview)
         } else {
             UMLog.l(UMLog.DEBUG, 517, "Containerpage: recycled onCreateView")
         }
 
-        webView.tag = mPageIndex
+        webView?.tag = mPageIndex
 
         //Android after Version 17 (4.4) by default requires a gesture before any media playback happens
         if (Build.VERSION.SDK_INT >= 17) {
-            webView.settings.mediaPlaybackRequiresUserGesture = false
+            webView?.settings?.mediaPlaybackRequiresUserGesture = false
         }
 
-        webView.settings.javaScriptEnabled = true
-        webView.settings.domStorageEnabled = true
-        webView.settings.cacheMode = WebSettings.LOAD_DEFAULT
-        webView.webViewClient = WebViewClient()
-        webView.webChromeClient = WebChromeClient()
-        webView.loadUrl(mUrl)
-        webView.setDownloadListener { url, _, _, _, _ ->
+        webView?.settings?.javaScriptEnabled = true
+        webView?.settings?.domStorageEnabled = true
+        webView?.settings?.cacheMode = WebSettings.LOAD_DEFAULT
+        webView?.webViewClient = WebViewClient()
+        webView?.webChromeClient = WebChromeClient()
+        webView?.loadUrl(mUrl)
+        webView?.setDownloadListener { url, _, _, _, _ ->
             val request = DownloadManager.Request(Uri.parse(url))
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
                     UMFileUtil.getFilename(url))
-            val downloadManager = context!!.getSystemService(
+            val downloadManager = requireContext().getSystemService(
                     Context.DOWNLOAD_SERVICE) as DownloadManager
             downloadManager.enqueue(request)
         }
 
-        gestureDetector = GestureDetectorCompat(webView.context,
+        gestureDetector = GestureDetectorCompat(webView?.context,
                 object : GestureDetector.SimpleOnGestureListener() {
                     override fun onSingleTapUp(e: MotionEvent): Boolean {
                         webViewTouchHandler.sendEmptyMessageDelayed(HANDLER_CLICK_ON_VIEW, 200)
@@ -95,14 +95,22 @@ class EpubContentPageFragment : Fragment() {
                     }
                 })
 
-        webView.setOnTouchListener { _, motionEvent -> gestureDetector!!.onTouchEvent(motionEvent) }
+        webView?.setOnTouchListener { _, motionEvent -> gestureDetector?.onTouchEvent(motionEvent)?:false}
 
         return viewGroup
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mUrl = null
+        webView = null
+        viewGroup = null
+        gestureDetector = null
+    }
+
     override fun onPause() {
-        if(::webView.isInitialized){
-            webView.onPause()
+        if(webView != null){
+            webView?.onPause()
         }
 
         super.onPause()
@@ -110,8 +118,8 @@ class EpubContentPageFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (::webView.isInitialized) {
-            webView.onResume()
+        if (webView != null) {
+            webView?.onResume()
         }
     }
 
@@ -126,8 +134,6 @@ class EpubContentPageFragment : Fragment() {
          * Page index argument: used to tag the webview so it can be specified during testing
          */
         const val ARG_PAGE_INDEX = "pg_index"
-
-        val HANDLER_CLICK_ON_LINK = 1
 
         const val HANDLER_CLICK_ON_VIEW = 2
 

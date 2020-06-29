@@ -2,10 +2,10 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS_LIST
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -28,6 +28,8 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     private var filterExcludeMemberOfSchool: Long = 0
 
+    private var filterAlreadySelectedList = listOf<Long>()
+
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
@@ -39,6 +41,8 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         super.onCreate(savedState)
         filterExcludeMembersOfClazz = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
         filterExcludeMemberOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
+        filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() } ?: listOf()
+
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { PersonListSortOption(it, context) }
     }
@@ -53,10 +57,10 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         view.list = when(currentSortOrder) {
             SortOrder.ORDER_NAME_ASC -> repo.personDao
                     .findAllPeopleWithDisplayDetailsSortNameAsc(timestamp,
-                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool)
+                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool, filterAlreadySelectedList)
             SortOrder.ORDER_NAME_DSC -> repo.personDao
                     .findAllPeopleWithDisplayDetailsSortNameDesc(timestamp,
-                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool)
+                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool, filterAlreadySelectedList)
         }
     }
 

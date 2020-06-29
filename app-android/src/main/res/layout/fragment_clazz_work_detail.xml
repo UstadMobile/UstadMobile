@@ -45,10 +45,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/fragment_clazzwork_detail_tablayout"
-            android:background="?attr/colorPrimary"
+            app:tabTextColor="?colorTabText"
+            android:fitsSystemWindows="true"
+            app:tabSelectedTextColor="?colorSelectedTabText"
+            app:tabIndicatorColor="?colorTabIndicator"
+            android:background="?colorPrimaryBackground"
+            android:elevation="@dimen/dimen_4dp"
+            app:tabMode="fixed"
             />
 
     </com.google.android.material.appbar.AppBarLayout>
+
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/fragment_clazzwork_detail_viewpager"

@@ -14,9 +14,13 @@ import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.WebChunkView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.CompletableDeferred
 
 @ExperimentalStdlibApi
 class WebChunkActivity : UstadBaseActivity(), WebChunkView {
+
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     private var mPresenter: WebChunkPresenter? = null
 

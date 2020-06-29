@@ -54,7 +54,8 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
         AND CAST(Comments.commentsFlagged AS INTEGER) = 0
         AND CAST(Comments.commentsInActive AS INTEGER) = 0
         AND CAST(Comments.commentsPublic AS INTEGER) = 0
-        AND Comments.commentsPersonUid = :personFrom AND Comments.commentsToPersonUid = :personTo
+        AND Comments.commentsPersonUid = :personFrom 
+        OR (:personTo = 0 OR Comments.commentsToPersonUid = :personFrom)
         ORDER BY Comments.commentsDateTimeAdded DESC 
     """)
     abstract fun findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
@@ -69,7 +70,8 @@ abstract class CommentsDao : BaseDao<Comments>, OneToManyJoinDao<Comments> {
         AND CAST(Comments.commentsFlagged AS INTEGER) = 0
         AND CAST(Comments.commentsInActive AS INTEGER) = 0
         AND CAST(Comments.commentsPublic AS INTEGER) = 0
-        AND Comments.commentsPersonUid = :personFrom AND Comments.commentsToPersonUid = :personTo
+        AND Comments.commentsPersonUid = :personFrom 
+        OR (:personTo = 0 OR Comments.commentsToPersonUid = :personFrom)
         ORDER BY Comments.commentsDateTimeAdded DESC 
     """)
     abstract fun findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToTest(

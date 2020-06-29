@@ -2,45 +2,40 @@ package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.NavController
-import androidx.navigation.Navigation
-import androidx.navigation.testing.TestNavHostController
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
-import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.lib.db.entities.Comments
+import com.ustadmobile.lib.db.entities.ContentEntryProgress
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.createTestContentEntriesAndJoinToClazzWork
-import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
 import com.ustadmobile.util.test.ext.insertTestClazzWorkAndQuestionsAndOptionsWithResponse
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matchers.equalTo
-import org.junit.*
-import org.junit.runner.RunWith
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 
-@RunWith(AndroidJUnit4::class)
 class ClazzWorkDetailProgressListFragmentTest  {
 
     lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
-
-    lateinit var navController: NavController
-
-    private lateinit var db: UmAppDatabase
 
     @JvmField
     @Rule
@@ -52,21 +47,19 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
     @JvmField
     @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
     val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @Before
     fun setup() {
-        recyclerViewIdlingResource = RecyclerViewIdlingResource(null)
-        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
-        UstadMobileSystemImpl.instance.navController = navController
-
-        val activeAccount = UmAccount(7L, "bond", "",
-                "http://localhost")
-        UmAccountManager.setActiveAccount(activeAccount,
-                ApplicationProvider.getApplicationContext())
-
-        db = UmAccountManager.getActiveDatabase(ApplicationProvider.getApplicationContext())
-        db.clearAllTables()
+        recyclerViewIdlingResource = RecyclerViewIdlingResource(null, 3)
     }
 
     @After
@@ -76,26 +69,26 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
     private fun reloadFragment(clazzWork: ClazzWork){
 
-        val teacherScenario = launchFragmentInContainer(
-                bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString()),
+        val fragmentScenario = launchFragmentInContainer(
+                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString()),
                 themeResId = R.style.UmTheme_App) {
-            ClazzWorkDetailProgressListFragment().also{
+            ClazzWorkDetailProgressListFragment(). also {
                 it.installNavController(systemImplNavRule.navController)
+                it.arguments = bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString())
             }
-        }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        teacherScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), navController)
-            recyclerViewIdlingResource.recyclerView = it.mDataBinding!!.fragmentListRecyclerview
+        fragmentScenario.onFragment {
+            recyclerViewIdlingResource.recyclerView =
+                    it.mDataBinding!!.fragmentListRecyclerview
         }
-        Thread.sleep(2000)
     }
 
     @Test
     fun givenValidClazzWorkUid_whenStudentsPresentInClazzWithComments_thenShouldUpdateView() {
 
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
-        navController.setGraph(R.navigation.mobile_navigation)
 
         val clazzWork = ClazzWork().apply {
             clazzWorkTitle = "Test ClazzWork A"
@@ -108,13 +101,13 @@ class ClazzWorkDetailProgressListFragmentTest  {
         }
 
         val testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                     true,0,false, true)
         }
 
         val contentEntriesWithJoin = runBlocking {
-            db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+            dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
         }
         val contentList = contentEntriesWithJoin.contentList
 
@@ -140,7 +133,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = student1.clazzMemberPersonUid
-                commentsUid = db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
             }
             Comments().apply {
                 commentsText = "Student 3 private comment"
@@ -149,7 +142,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = student3.clazzMemberPersonUid
-                commentsUid = db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
             }
 
         }
@@ -165,7 +158,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
     fun givenValidClazzWorkUidWithoutContent_whenStudentsPresentInClazzWithComments_thenShouldUpdateView() {
 
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
-        navController.setGraph(R.navigation.mobile_navigation)
 
         val clazzWork = ClazzWork().apply {
             clazzWorkTitle = "Test ClazzWork A"
@@ -178,7 +170,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
         }
 
         val testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                     true,0,false, true)
         }
@@ -205,7 +197,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = student1.clazzMemberPersonUid
-                commentsUid = db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
             }
             Comments().apply {
                 commentsText = "Student 3 private comment"
@@ -214,7 +206,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = student3.clazzMemberPersonUid
-                commentsUid = db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
             }
 
         }
@@ -230,7 +222,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
     fun givenValidClazzWorkUid_whenStudentSubmittedAndContentProgressed_thenShouldUpdateView() {
 
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
-        navController.setGraph(R.navigation.mobile_navigation)
 
         val clazzWork = ClazzWork().apply {
             clazzWorkTitle = "Test ClazzWork A"
@@ -243,13 +234,13 @@ class ClazzWorkDetailProgressListFragmentTest  {
         }
 
         val testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                     true,0,true, true)
         }
 
         val contentEntriesWithJoin = runBlocking {
-            db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+            dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
         }
         val contentList = contentEntriesWithJoin.contentList
 
@@ -271,7 +262,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = student1.clazzMemberPersonUid
-                commentsUid = db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
             }
             Comments().apply {
                 commentsText = "Student 3 private comment"
@@ -280,7 +271,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = student3.clazzMemberPersonUid
-                commentsUid = db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
             }
 
         }
@@ -293,7 +284,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                     contentEntryProgressPersonUid = student1.clazzMemberPersonUid
                     contentEntryProgressProgress = 42.0F
                     contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
-                    contentEntryProgressUid = db.contentEntryProgressDao.insertAsync(this)
+                    contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
                 }
 
                 ContentEntryProgress().apply {
@@ -302,7 +293,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                     contentEntryProgressPersonUid = student3.clazzMemberPersonUid
                     contentEntryProgressProgress = 24.0F
                     contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
-                    contentEntryProgressUid = db.contentEntryProgressDao.insertAsync(this)
+                    contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
                 }
 
                 ContentEntryProgress().apply {
@@ -311,7 +302,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                     contentEntryProgressPersonUid = student4.clazzMemberPersonUid
                     contentEntryProgressProgress = 100.0F
                     contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
-                    contentEntryProgressUid = db.contentEntryProgressDao.insertAsync(this)
+                    contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
                 }
             }
         }
@@ -328,7 +319,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
     fun givenValidClazzWorkUid_whenTeacherSeesStudentListedAndClicked_thenShouldGoToMarking() {
 
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
-        navController.setGraph(R.navigation.mobile_navigation)
 
         val clazzWork = ClazzWork().apply {
             clazzWorkTitle = "Test ClazzWork A"
@@ -341,13 +331,13 @@ class ClazzWorkDetailProgressListFragmentTest  {
         }
 
         val testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                     true,0,true, true)
         }
 
         val contentEntriesWithJoin = runBlocking {
-            db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+            dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
         }
         val contentList = contentEntriesWithJoin.contentList
 
@@ -369,7 +359,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = student1.clazzMemberPersonUid
-                commentsUid = db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
             }
             Comments().apply {
                 commentsText = "Student 3 private comment"
@@ -378,7 +368,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = student3.clazzMemberPersonUid
-                commentsUid = db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
             }
 
         }
@@ -386,7 +376,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
         //Make submissions Student 1 and Student 4
         val student4 = testClazzWork.clazzAndMembers.studentList.get(3)
-
 
         reloadFragment(testClazzWork.clazzWork)
 

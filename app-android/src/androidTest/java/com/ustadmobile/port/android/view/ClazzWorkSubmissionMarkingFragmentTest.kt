@@ -3,40 +3,38 @@ package com.ustadmobile.port.android.view
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.NavController
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.testing.TestNavHostController
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.RecyclerViewActions.scrollToHolder
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.lib.db.entities.Comments
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.port.android.util.setDateField
-import com.ustadmobile.test.rules.DataBindingIdlingResourceRule
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withDataBindingIdlingResource
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.TestClazzWork
 import com.ustadmobile.util.test.ext.createTestContentEntriesAndJoinToClazzWork
 import com.ustadmobile.util.test.ext.insertTestClazzWorkAndQuestionsAndOptionsWithResponse
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers
 import org.junit.*
 
 class ClazzWorkSubmissionMarkingFragmentTest {
@@ -53,11 +51,15 @@ class ClazzWorkSubmissionMarkingFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = DataBindingIdlingResourceRule()
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
 
     @JvmField
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @Before
     fun setup() {
@@ -67,27 +69,6 @@ class ClazzWorkSubmissionMarkingFragmentTest {
     @After
     fun tearDown(){
         UstadMobileSystemImpl.instance.navController = null
-    }
-
-    private fun reloadFragment(clazzWorkUid: Long, clazzMemberUid: Long)
-            : FragmentScenario<ClazzWorkSubmissionMarkingFragment>{
-
-        val fragmentScenario = launchFragmentInContainer(
-                fragmentArgs = bundleOf(UstadView.ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
-                        UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString()),
-                themeResId = R.style.UmTheme_App) {
-            ClazzWorkSubmissionMarkingFragment(). also {
-                it.installNavController(systemImplNavRule.navController)
-                it.arguments = bundleOf(UstadView.ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
-                        UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString())
-            }
-        }.withDataBindingIdlingResource(dataBindingIdlingResourceRule)
-
-        fragmentScenario.onFragment {
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkSubmissionMarkingRv
-        }
-
-        return fragmentScenario
     }
 
     private fun createQuizDbScenario(): TestClazzWork{
@@ -223,6 +204,29 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         return testClazzWork
     }
 
+    private fun reloadFragment(clazzWorkUid: Long, clazzMemberUid: Long)
+            : FragmentScenario<ClazzWorkSubmissionMarkingFragment>{
+
+        val fragmentScenario = launchFragmentInContainer(
+                fragmentArgs = bundleOf(UstadView.ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
+                        UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString()),
+                themeResId = R.style.UmTheme_App) {
+            ClazzWorkSubmissionMarkingFragment(). also {
+                it.installNavController(systemImplNavRule.navController)
+                it.arguments = bundleOf(UstadView.ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
+                        UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString())
+            }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+
+        fragmentScenario.onFragment {
+            recyclerViewIdlingResource.recyclerView =
+                    it.mBinding!!.fragmentClazzWorkSubmissionMarkingRv
+        }
+
+        return fragmentScenario
+    }
+
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForQuiz_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
@@ -231,11 +235,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
         val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
 
-        val fragmentScenario = reloadFragment(clazzWorkUid, clazzMemberUid)
-
-        fragmentScenario.onFragment {
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkSubmissionMarkingRv
-        }
+        reloadFragment(clazzWorkUid, clazzMemberUid)
 
         fillMarkingAndReturn(testClazzWork)
 
@@ -248,59 +248,6 @@ class ClazzWorkSubmissionMarkingFragmentTest {
                 submissionPostSubmit?.clazzWorkSubmissionScore)
     }
 
-    private fun fillMarkingAndReturn(testClazzWork: TestClazzWork, hitReturn: Boolean = true){
-        //Scroll to Marking
-        Espresso.onView(ViewMatchers.withId(R.id.fragment_clazz_work_submission_marking_rv)).perform(
-                RecyclerViewActions.scrollToHolder(withTagInMarking(
-                        testClazzWork.submissions!!.get(0).clazzWorkSubmissionUid)))
-
-        //Type marking value
-        Espresso.onView(ViewMatchers.withId(R.id.item_clazzwork_submission_score_edit_et))
-                .perform(ViewActions.clearText(), ViewActions.typeText("42"),
-                        ViewActions.closeSoftKeyboard())
-
-        //Scroll to Return
-        Espresso.onView(ViewMatchers.withId(R.id.fragment_clazz_work_submission_marking_rv)).perform(
-                RecyclerViewActions.scrollToHolder(withTagInMarkingSubmit(
-                        testClazzWork.clazzWork.clazzWorkUid)))
-
-        if(hitReturn) {
-            //Click return button
-            Espresso.onView(ViewMatchers.withId(
-                    R.id.item_clazzworksubmission_marking_button_with_extra_button)).perform(click())
-        }
-    }
-
-    private fun withTagInMarking(quid: Long): Matcher<RecyclerView.ViewHolder?>? {
-        return object : BoundedMatcher<RecyclerView.ViewHolder?,
-            ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder>(
-                ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder::class.java) {
-            override fun matchesSafely(
-                    item: ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder): Boolean {
-                return item.itemView.tag.equals(quid)
-            }
-
-            override fun describeTo(description: Description) {
-                description.appendText("view holder with title: $quid")
-            }
-        }
-    }
-
-    private fun withTagInMarkingSubmit(clazzWorkUid: Long): Matcher<RecyclerView.ViewHolder?>? {
-        return object : BoundedMatcher<RecyclerView.ViewHolder?,
-                ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter.ClazzWorkProgressViewHolder>(
-                ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter.ClazzWorkProgressViewHolder::class.java) {
-            override fun matchesSafely(
-                    item: ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter.ClazzWorkProgressViewHolder): Boolean {
-                return item.itemView.tag.equals(clazzWorkUid)
-            }
-
-            override fun describeTo(description: Description) {
-                description.appendText("view holder with title: $clazzWorkUid")
-            }
-        }
-    }
-
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForPartiallyFilledQuiz_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
@@ -309,11 +256,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
         val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
 
-        val fragmentScenario = reloadFragment(clazzWorkUid, clazzMemberUid)
-
-        fragmentScenario.onFragment {
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkSubmissionMarkingRv
-        }
+        reloadFragment(clazzWorkUid, clazzMemberUid)
 
         fillMarkingAndReturn(testClazzWork)
 
@@ -335,12 +278,9 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
         val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
 
-        val fragmentScenario = reloadFragment(clazzWorkUid, clazzMemberUid)
-
-        fragmentScenario.onFragment {
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkSubmissionMarkingRv
-        }
-
+        reloadFragment(clazzWorkUid, clazzMemberUid)
+        //TODO: Check why it fails to see one et
+        Thread.sleep(1000)
         fillMarkingAndReturn(testClazzWork)
 
         //Check database
@@ -362,15 +302,16 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
         val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
 
-        val fragmentScenario = reloadFragment(clazzWorkUid, clazzMemberUid)
+        reloadFragment(clazzWorkUid, clazzMemberUid)
 
-        fragmentScenario.onFragment {
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkSubmissionMarkingRv
-        }
+        fillMarkingAndReturn(testClazzWork, false)
 
-        fillMarkingAndReturn(testClazzWork)
+        //Verify button
+        onView(withText("Return and mark next")).check(matches(isDisplayed()))
 
-        //TODO: Check if navController has the right arguments
+        //Click return button
+        Espresso.onView(ViewMatchers.withId(
+                R.id.item_clazzworksubmission_marking_button_with_extra_button)).perform(click())
 
         Assert.assertEquals("After clicking on return and mark next," +
                 " fragment goes to marking for next submission",
@@ -385,8 +326,6 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         Assert.assertEquals("Marked OK", 42,
                 submissionPostSubmit?.clazzWorkSubmissionScore)
 
-        //TODO: Add that next submission loaded.
-
     }
 
     @Test
@@ -397,66 +336,188 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
         val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
 
-        val fragmentScenario = reloadFragment(clazzWorkUid, clazzMemberUid)
+        reloadFragment(clazzWorkUid, clazzMemberUid)
 
-        fragmentScenario.onFragment {
-            recyclerViewIdlingResource.recyclerView = it.mBinding!!.fragmentClazzWorkSubmissionMarkingRv
-        }
+        fillMarkingAndReturn(testClazzWork, false)
+
+        //Verify button
+        onView(withText("Return and finish")).check(matches(isDisplayed()))
+
+        //Click return button
+        onView(ViewMatchers.withId(
+                R.id.item_clazzworksubmission_marking_button_with_extra_button)).perform(click())
 
         //Check database
         val submissionPostSubmit = runBlocking {
             dbRule.db.clazzWorkSubmissionDao.findByUidAsync(
                     testClazzWork.submissions!!.get(0).clazzWorkSubmissionUid)
         }
+
         Assert.assertEquals("Marked OK", 42,
                 submissionPostSubmit?.clazzWorkSubmissionScore)
 
-        //TODO: Check view.finish called 
     }
 
-    companion object {
-        fun fillFields(fragmentScenario: FragmentScenario<ClazzWorkSubmissionMarkingFragment>,
-                       clazz: ClazzWithHolidayCalendarAndSchool,
-                       clazzOnForm: ClazzWithHolidayCalendarAndSchool?,
-                       schedules: List<Schedule> = listOf(),
-                       schedulesOnForm: List<Schedule>? = null,
-                       setFieldsRequiringNavigation: Boolean = true) {
 
-            clazz.clazzName?.takeIf { it != clazzOnForm?.clazzName }?.also {
-                Espresso.onView(ViewMatchers.withId(R.id.activity_clazz_edit_name_text)).perform(ViewActions.clearText(), ViewActions.typeText(it))
+    @Test
+    fun givenNoClazzWorkSubmissionMarkingPresentForQuiz_whenTeacherComments_thenShouldSaveToDatabaseAndUpdateView() {
+
+        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+        val testClazzWork = createQuizDbScenario()
+        val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
+        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
+
+        //Add a private comment by the student
+        val studentComment = runBlocking {
+            Comments().apply {
+                commentsText = "Can we get help from parents?"
+                commentsPersonUid = testClazzWork.submissions!!.get(0).clazzWorkSubmissionPersonUid
+                commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
+                commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
+                commentsPublic = false
+                commentsDateTimeAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
             }
 
-            clazz.clazzDesc?.takeIf { it != clazzOnForm?.clazzDesc }?.also {
-                Espresso.onView(ViewMatchers.withId(R.id.activity_clazz_edit_desc_text)).perform(ViewActions.clearText(), ViewActions.typeText(it))
+        }
+
+        reloadFragment(clazzWorkUid, clazzMemberUid)
+
+        //Scroll to Comment
+        Espresso.onView(ViewMatchers.withId(R.id.fragment_clazz_work_submission_marking_rv)).perform(
+                scrollToHolder(withTagInComment(studentComment.commentsUid)))
+
+        //Check it is displayed OK
+        onView(withText(studentComment.commentsText)).check(matches(isDisplayed()))
+
+
+        val teacherComment = "Private comment to the student from teacher 1"
+        fillMarkingAndReturn(testClazzWork, false)
+
+        addPrivateComment(teacherComment, true)
+
+        //Check database
+        val commentPosted = runBlocking {
+            dbRule.db.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToTest(
+                    ClazzWork.CLAZZ_WORK_TABLE_ID, testClazzWork.clazzWork.clazzWorkUid,
+                    dbRule.account.personUid,
+                    testClazzWork.submissions!!.get(0).clazzWorkSubmissionPersonUid
+            )
+        }
+
+        Assert.assertTrue("Comments db not empty", commentPosted.isNotEmpty())
+
+        val latestComment = commentPosted[0]
+
+        Assert.assertEquals("Comment in DB OK", teacherComment, latestComment.commentsText)
+
+        //Scroll to Comment
+        Espresso.onView(ViewMatchers.withId(R.id.fragment_clazz_work_submission_marking_rv)).perform(
+                scrollToHolder(withTagInComment(latestComment.commentsUid)))
+
+        //Check it is displayed OK
+        onView(withText(teacherComment)).check(matches(isDisplayed()))
+
+    }
+
+    private fun fillMarkingAndReturn(testClazzWork: TestClazzWork, hitReturn: Boolean = true){
+        //Scroll to Marking
+        Espresso.onView(ViewMatchers.withId(R.id.fragment_clazz_work_submission_marking_rv)).perform(
+                scrollToHolder(withTagInMarking(
+                        testClazzWork.submissions!!.get(0).clazzWorkSubmissionUid)))
+
+        //Type marking value
+        Espresso.onView(ViewMatchers.withId(R.id.item_clazzwork_submission_score_edit_et))
+                .perform(ViewActions.clearText(), ViewActions.typeText("42"),
+                        ViewActions.closeSoftKeyboard())
+
+        //Scroll to Return
+        Espresso.onView(ViewMatchers.withId(R.id.fragment_clazz_work_submission_marking_rv)).perform(
+                scrollToHolder(withTagInMarkingSubmit(
+                        testClazzWork.clazzWork.clazzWorkUid)))
+
+        if(hitReturn) {
+            //Click return button
+            Espresso.onView(ViewMatchers.withId(
+                    R.id.item_clazzworksubmission_marking_button_with_extra_button)).perform(click())
+        }
+    }
+
+    private fun addPrivateComment(comment: String, hitReturn: Boolean = true){
+
+        //Scroll to Private comments
+        onView(ViewMatchers.withId(R.id.fragment_clazz_work_submission_marking_rv)).perform(
+                scrollToHolder(withTagInSimpleHeading("Private comments")))
+        onView(withText("Private comments")).check(matches(ViewMatchers.isEnabled()))
+
+
+        //Type marking value
+        Espresso.onView(ViewMatchers.withId(R.id.item_comment_new_comment_et))
+                .perform(ViewActions.clearText(), ViewActions.typeText(
+                        comment),
+                        ViewActions.closeSoftKeyboard())
+        if(hitReturn) {
+            //Click return button
+            Espresso.onView(ViewMatchers.withId(
+                    R.id.item_comment_new_send_ib)).perform(click())
+        }
+    }
+
+    private fun withTagInMarking(quid: Long): Matcher<RecyclerView.ViewHolder?>? {
+        return object : BoundedMatcher<RecyclerView.ViewHolder?,
+                ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder>(
+                ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder::class.java) {
+            override fun matchesSafely(
+                    item: ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder): Boolean {
+                return item.itemView.tag.equals(quid)
             }
 
-            clazz.clazzStartTime.takeIf { it != clazzOnForm?.clazzStartTime }?.also {
-                setDateField(R.id.activity_clazz_edit_start_date_edittext, it)
+            override fun describeTo(description: Description) {
+                description.appendText("view holder with title: $quid")
             }
-            clazz.clazzEndTime.takeIf { it != clazzOnForm?.clazzEndTime }?.also {
-                setDateField(R.id.activity_clazz_edit_end_date_edittext, it)
-            }
+        }
+    }
 
-
-            if (!setFieldsRequiringNavigation) {
-                return
-            }
-
-
-            schedules.filter { schedulesOnForm == null || it !in schedulesOnForm }.forEach { schedule ->
-                fragmentScenario.onFragment {
-                    it.findNavController().currentBackStackEntry?.savedStateHandle
-                            ?.set("Schedule", defaultGson().toJson(listOf(schedule)))
-                }
-                Espresso.onIdle()
+    fun withTagInSimpleHeading(title: String): Matcher<RecyclerView.ViewHolder?>? {
+        return object : BoundedMatcher<RecyclerView.ViewHolder?,
+                SimpleHeadingRecyclerAdapter.SimpleHeadingViewHolder>(SimpleHeadingRecyclerAdapter.SimpleHeadingViewHolder::class.java) {
+            override fun matchesSafely(item: SimpleHeadingRecyclerAdapter.SimpleHeadingViewHolder): Boolean {
+                return item.itemView.tag.equals(title)
             }
 
-            fragmentScenario.onFragment { fragment ->
-                fragment.takeIf { clazz.holidayCalendar != clazzOnForm?.holidayCalendar }
-                        ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                        ?.set("HolidayCalendar", defaultGson().toJson(listOf(clazz.holidayCalendar)))
+            override fun describeTo(description: Description) {
+                description.appendText("view holder with title: $title")
+            }
+        }
+    }
+
+    private fun withTagInMarkingSubmit(clazzWorkUid: Long): Matcher<RecyclerView.ViewHolder?>? {
+        return object : BoundedMatcher<RecyclerView.ViewHolder?,
+                ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter.ClazzWorkProgressViewHolder>(
+                ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter.ClazzWorkProgressViewHolder::class.java) {
+            override fun matchesSafely(
+                    item: ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter.ClazzWorkProgressViewHolder): Boolean {
+                return item.itemView.tag.equals(clazzWorkUid)
             }
 
+            override fun describeTo(description: Description) {
+                description.appendText("view holder with title: $clazzWorkUid")
+            }
+        }
+    }
+
+    private fun withTagInComment(commentUid: Long): Matcher<RecyclerView.ViewHolder?>? {
+        return object : BoundedMatcher<RecyclerView.ViewHolder?,
+                CommentsRecyclerAdapter.CommentsWithPersonViewHolder>(
+                CommentsRecyclerAdapter.CommentsWithPersonViewHolder::class.java) {
+            override fun matchesSafely(
+                    item: CommentsRecyclerAdapter.CommentsWithPersonViewHolder): Boolean {
+                return item.itemView.tag.equals(commentUid)
+            }
+
+            override fun describeTo(description: Description) {
+                description.appendText("view holder with comment uid: $commentUid")
+            }
         }
     }
 
