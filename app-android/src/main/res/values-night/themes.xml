@@ -15,7 +15,7 @@
 
     <style name="UmTheme.App" parent="UmTheme.MaterialComponents">
 
-        <!--Material color attributes (Night Mode) -->
+        <!--Material color attributes (Night Mode) https://material.io/design/color/dark-theme.html#anatomy -->
         <item name="colorPrimary">@color/primaryLightColor</item>
         <item name="colorPrimaryVariant">@color/primaryVariantColor</item>
         <item name="colorPrimaryDark">@color/primaryVariantColor</item>

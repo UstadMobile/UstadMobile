@@ -15,7 +15,7 @@
         android:background="?colorPrimaryBackground"
         app:elevation="@dimen/dimen_0dp"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:theme="@style/ThemeOverlay.MaterialComponents.Light"
+        app:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
         android:minHeight="?actionBarSize"
         app:contentScrim="?colorPrimaryBackground"
         app:expandedTitleMarginStart="@dimen/dimen_0dp"
