@@ -16,6 +16,7 @@
         />
 
     <androidx.appcompat.widget.AppCompatImageView
+        android:visibility="gone"
         android:id="@+id/supported_by_logo"
         android:layout_marginTop="@dimen/dimen_16dp"
         android:layout_width="@dimen/dimen_90dp"
@@ -57,8 +58,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
-        app:backgroundTint="?attr/colorSecondary"
-        android:textColor="?attr/colorOnSecondary"
+        style="@style/UmTheme.ShapeAppearance.SmallComponent"
         android:elevation="@dimen/dimen_2dp"
         android:paddingStart="@dimen/dimen_20dp"
         android:paddingEnd="@dimen/dimen_20dp"
@@ -99,10 +99,11 @@
         />
 
     <TextView
+        android:visibility="gone"
         android:id="@+id/in_partnership_with_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+        android:textAppearance="@style/UmTheme.TextAppearance.Caption"
         app:layout_constraintBottom_toTopOf="@+id/irc_logo"
         android:text="@string/created_partnership"
         app:layout_constraintStart_toEndOf="@+id/get_started_btn"
@@ -112,6 +113,7 @@
         />
 
     <androidx.appcompat.widget.AppCompatImageView
+        android:visibility="gone"
         android:id="@id/irc_logo"
         android:layout_marginBottom="@dimen/dimen_16dp"
         android:layout_width="53dp"

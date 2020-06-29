@@ -79,7 +79,7 @@ class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
         GlobalScope.launch {
             delay(DEFAULT_DELAY)
             val systemImpl = UstadMobileSystemImpl.instance
-            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false",
+            val activityClass = if(systemImpl.getAppPref("OnBoardingView.PREF_TAG", "false",
                             this@SplashScreenActivity).toBoolean()) {
                 MainActivity::class.java
             }else {

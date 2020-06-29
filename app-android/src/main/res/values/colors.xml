@@ -2,35 +2,23 @@
 <resources>
 
     <!-- Color scheme as per https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=02a9f4&secondary.color=7B1FA2 -->
-    <color name="primaryColor">#02a9f4</color>
-    <color name="primaryLightColor">#67daff</color>
-    <color name="primaryDarkColor">#007ac1</color>
-    <color name="secondaryColor">#7b1fa2</color>
-    <color name="secondaryLightColor">#ae52d4</color>
-    <color name="secondaryDarkColor">#4a0072</color>
-    <color name="primaryTextColor">#000000</color>
-    <color name="secondaryTextColor">#ffffff</color>
-
+    <color name="primaryLightColor">#48a999</color> <!--@200 Intensity-->
     <color name="primaryLightVariantColor">#C2FFF5</color>
+    <color name="primaryColor">#00796b</color> <!--@500 Intensity-->
+    <color name="primaryVariantColor">#005E55</color> <!--@600 Intensity-->
+    <color name="primaryDarkColor">#004c40</color> <!--@700 Intensity-->
 
-<!--    <color name="primaryLightColor">#48a999</color> &lt;!&ndash;@200 Intensity&ndash;&gt;-->
-<!--    <color name="primaryLightVariantColor">#C2FFF5</color>-->
-<!--    <color name="primaryColor">#00796b</color> &lt;!&ndash;@500 Intensity&ndash;&gt;-->
-    <color name="primaryVariantColor">#039BE5</color> <!--@600 Intensity-->
-<!--    <color name="primaryDarkColor">#004c40</color> &lt;!&ndash;@700 Intensity&ndash;&gt;-->
-
-<!--    <color name="secondaryColor">#ff9800</color> &lt;!&ndash;@500 Intensity&ndash;&gt;-->
-<!--    <color name="secondaryDarkColor">#c66900</color> &lt;!&ndash;@700 Intensity&ndash;&gt;-->
+    <color name="secondaryColor">#ff9800</color> <!--@500 Intensity-->
+    <color name="secondaryDarkColor">#c66900</color> <!--@700 Intensity-->
 
     <color name="errorLightColor">#cf6679</color> <!--@200 Intensity-->
     <color name="errorColor">#b00020</color> <!--@500 Intensity-->
 
-<!--    <color name="primaryTextColor">#ffffff</color>-->
-<!--    <color name="primaryTextColorLight">#E8EAED</color>-->
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="primaryTextColorLight">#E8EAED</color>
 
     <color name="secondaryVariantTextColor">#121212</color>
-<!--    <color name="secondaryTextColor">#000000</color>-->
+    <color name="secondaryTextColor">#000000</color>
     <color name="iconTintColor">#727272</color>
     <color name="successColor">#4CAF50</color>
-
 </resources>

@@ -39,6 +39,7 @@
         <item name="colorTabText" >@color/primaryTextColor</item>
         <item name="colorSelectedTabText">@color/primaryColor</item>
         <item name="colorPrimaryBackground">@android:color/transparent</item>
+        <item name="colorOnOrganisationText">@color/primaryTextColor</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">?colorSurface</item>
     </style>
 </resources>

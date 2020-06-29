@@ -44,6 +44,7 @@
         <item name="colorTabText" >@color/primaryLightVariantColor</item>
         <item name="colorSelectedTabText">@color/primaryTextColor</item>
         <item name="colorPrimaryBackground">@color/primaryColor</item>
+        <item name="colorOnOrganisationText">@color/primaryColor</item>
         <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
 

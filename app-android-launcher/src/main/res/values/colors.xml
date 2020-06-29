@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="primaryLightColor">#67daff</color> <!--@200 Intensity-->
+    <color name="primaryLightVariantColor">#C2FFF5</color>
+    <color name="primaryColor">#02a9f4</color> <!--@500 Intensity-->
+    <color name="primaryVariantColor">#1e88e5</color> <!--@600 Intensity-->
+    <color name="primaryDarkColor">#007ac1</color> <!--@700 Intensity-->
+
+    <color name="secondaryColor">#ae52d4</color> <!--@500 Intensity-->
+    <color name="secondaryDarkColor">#4a0072</color> <!--@700 Intensity-->
+
+    <color name="errorLightColor">#cf6679</color> <!--@200 Intensity-->
+    <color name="errorColor">#b00020</color> <!--@500 Intensity-->
+
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="primaryTextColorLight">#E8EAED</color>
+
+    <color name="secondaryVariantTextColor">#121212</color>
+    <color name="secondaryTextColor">#000000</color>
+    <color name="iconTintColor">#727272</color>
+    <color name="successColor">#4CAF50</color>
+
 </resources>
