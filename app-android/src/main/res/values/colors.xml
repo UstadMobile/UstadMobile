@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Color scheme as per https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=02a9f4&secondary.color=7B1FA2 -->
     <color name="primaryLightColor">#48a999</color> <!--@200 Intensity-->
     <color name="primaryLightVariantColor">#C2FFF5</color>
     <color name="primaryColor">#00796b</color> <!--@500 Intensity-->

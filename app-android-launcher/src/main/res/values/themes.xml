@@ -15,6 +15,8 @@
     <style name="UmTheme.App.OnBoarding" parent="UmTheme.MaterialComponents">
         <item name="android:statusBarColor" tools:ignore="NewApi">@color/onPrimaryColor</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">@color/navigationBarColor</item>
+        <item name="colorSecondary">@color/secondaryColor</item>
+        <item name="colorOnSecondary">@color/onSecondaryColor</item>
     </style>
 
     <!--Shared theme for both Night and Light themes -->
@@ -24,8 +26,8 @@
         <item name="colorPrimaryDark">@color/primaryVariantColor</item>
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
-        <item name="android:colorBackground">@color/onPrimaryColor</item>
-        <item name="colorSurface">@color/onPrimaryColor</item>
+        <item name="android:colorBackground">@color/backgroundColor</item>
+        <item name="colorSurface">@color/surfaceColor</item>
         <item name="colorError">@color/errorColor</item>
         <item name="colorOnPrimary">@color/onPrimaryColor</item>
         <item name="colorOnSecondary">@color/onSecondaryColor</item>
@@ -36,7 +38,7 @@
         <item name="colorOnIconTint">@color/iconTintColor</item>
         <item name="colorOnTintPrimary">?colorPrimary</item>
         <item name="colorTabIndicator">@color/onPrimaryColor</item>
-        <item name="colorTabText" >@color/primaryLightVariantColor</item>
+        <item name="colorTabText" >@color/onBackgroundColor</item>
         <item name="colorOnOrganisationText">@color/primaryColor</item>
         <item name="colorSelectedTabText">@color/onPrimaryColor</item>
         <item name="colorPrimaryBackground">@color/primaryColor</item>
