@@ -68,7 +68,7 @@
                 android:id="@+id/present_button"
                 android:contentDescription="@string/present"
                 style="@style/UmTheme.Widget.OutlinedButton.IconOnly"
-                app:icon="@drawable/ic_check_black_24dp"
+                app:icon="@drawable/ic_done_white_24dp"
                 app:iconTint="?colorOnIconTint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
