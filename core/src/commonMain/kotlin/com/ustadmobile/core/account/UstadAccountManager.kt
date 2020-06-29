@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -24,7 +25,9 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Serializable
-data class UstadAccounts(var currentAccount: String, val storedAccounts: List<UmAccount>)
+data class UstadAccounts(var currentAccount: String,
+                         val storedAccounts: List<UmAccount>,
+                         val lastUsed: Map<String, Long> = mapOf())
 
 class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext: Any,
                           val dbOpener: DbOpener = DefaultDbOpener(),
@@ -59,12 +62,13 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     private val dbs: MutableMap<String, DbPair> = mutableMapOf()
 
+    private var accountLastUsedTimeMap = mutableMapOf<String, Long>()
+
     init {
         val accounts: UstadAccounts = systemImpl.getAppPref(ACCOUNTS_PREFKEY, appContext)?.let {
             Json.parse(UstadAccounts.serializer(), it)
-        } ?: (systemImpl.getManifestPreference(MANIFEST_DEFAULT_SERVER, appContext) ?: MANIFEST_URL_FALLBACK).let { apiUrl ->
-            UstadAccounts("guest@$apiUrl",
-                    listOf(UmAccount(0L, "guest", "", apiUrl)))
+        } ?: defaultAccount.let { defAccount ->
+            UstadAccounts(defaultAccount.userAtServer, listOf(defAccount))
         }
 
         _storedAccounts = copyOnWriteListOf(*accounts.storedAccounts.toTypedArray())
@@ -78,10 +82,29 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             val db = dbOpener.openDb(appContext, dbName)
             dbs[dbName] = db.toDbAndRepoPair(endpointUrl)
         }
+
+        accountLastUsedTimeMap.putAll(accounts.lastUsed)
     }
 
-    val activeAccount: UmAccount
+    private val defaultAccount: UmAccount
+        get() = UmAccount(0L, "guest", "",
+                (systemImpl.getManifestPreference(MANIFEST_DEFAULT_SERVER, appContext) ?: MANIFEST_URL_FALLBACK))
+
+
+
+    var activeAccount: UmAccount
         get() = _activeAccount.value
+
+        @Synchronized
+        set(value) {
+            val activeUserAtServer = value.userAtServer
+            if(!_storedAccounts.any { it. userAtServer == activeUserAtServer}) {
+                addAccount(value)
+            }
+
+            _activeAccount.value = value
+            _activeAccountLive.sendValue(value)
+        }
 
     val activeAccountLive: DoorLiveData<UmAccount>
         get() = _activeAccountLive
@@ -95,16 +118,36 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     val storedDatabases: Map<String, DbPair>
         get() = dbs.entries.map { it.key to DbPair(it.value.db, it.value.repo) }.toMap()
 
-    fun getActiveDatabase(context: Any) {
+    fun getActiveDatabase(context: Any) = dbs[activeAccount.endpointUrl]?.db ?: throw IllegalStateException("No database for active account")
 
-    }
+    fun getActiveRepository(context: Any) = dbs[activeAccount.endpointUrl]?.repo ?: throw IllegalStateException("No repo for active account")
 
-    fun getActiveRepository(context: Any) {
+    suspend fun register(person: Person, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
+        val httpStmt = httpClient.post<HttpStatement>() {
+            url("${endpointUrl.removeSuffix("/")}/auth/register")
+            parameter("person", Json.stringify(Person.serializer(), person))
+            parameter("password", password)
+        }
 
-    }
+        val (account: UmAccount?, status: Int) = httpStmt.execute { response ->
+            if(response.status.value == 200) {
+                Pair(response.receive<UmAccount>(), 200)
+            }else {
+                Pair(null, response.status.value)
+            }
+        }
 
-    suspend fun register() {
 
+
+        if(status == 200 && account != null) {
+            addAccount(account)
+
+            return account
+        }else if(status == 409){
+            throw IllegalArgumentException("Conflict: username already taken")
+        }else {
+            throw IllegalStateException("register request: non-OK status code: $status")
+        }
     }
 
     @Synchronized
@@ -121,10 +164,20 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     }
 
     @Synchronized
-    private fun removeAccount(account: UmAccount) {
+    fun removeAccount(account: UmAccount, autoFallback: Boolean = true) {
         _storedAccounts.removeAll { it.userAtServer == account.userAtServer }
+
+        if(autoFallback && activeAccount.userAtServer == account.userAtServer) {
+            val nextAccount = accountLastUsedTimeMap.entries.sortedBy { it.value }.lastOrNull()?.let {lastUsedUserAtServer ->
+                _storedAccounts.firstOrNull { it.userAtServer == lastUsedUserAtServer.key }
+            } ?: defaultAccount
+
+            activeAccount = nextAccount
+        }
+
         _storedAccountsLive.sendValue(_storedAccounts.toList())
     }
+
 
     suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
         val httpStmt = httpClient.post<HttpStatement> {
@@ -156,19 +209,13 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         addAccount(responseAccount)
 
         if(replaceActiveAccount) {
-            removeAccount(activeAccount)
+            removeAccount(activeAccount, autoFallback = false)
         }
 
-        _activeAccount.value = responseAccount
-        _activeAccountLive.sendValue(responseAccount)
+        activeAccount = responseAccount
 
         return responseAccount
     }
-
-    suspend fun logout(account: UmAccount) {
-
-    }
-
 
 
     companion object {

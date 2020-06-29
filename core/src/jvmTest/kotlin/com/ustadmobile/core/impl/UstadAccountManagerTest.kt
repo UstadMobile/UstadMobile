@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.account.UstadAccountManager.Companion.MANIFEST_DEFAULT_SERVER
 import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.util.ext.userAtServer
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
@@ -198,13 +199,89 @@ class UstadAccountManagerTest {
     }
 
     @Test
-    fun givenValidAccountLoggedIn_whenSwitchAccountCalled_thenActiveAccountShouldChangeAndAllRemainInStoredAccounts() {
+    fun givenTwoStoredAccounts_whenSetActiveAccountCalled_thenActiveAccountShouldChangeAndAllRemainInStoredAccounts() {
+        val storedAccounts = UstadAccounts("bob@$mockServerUrl",
+                listOf(UmAccount(1, "bob", "", mockServerUrl),
+                        UmAccount(2, "joe", "", mockServerUrl)))
+        whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
+                Json.stringify(UstadAccounts.serializer(), storedAccounts))
+
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+
+        accountManager.activeAccount = storedAccounts.storedAccounts[1]
+
+        Assert.assertEquals("Active account is updated when calling setActiveAccount",
+                "joe@$mockServerUrl", accountManager.activeAccount.userAtServer)
+        Assert.assertEquals("AccountManager still has both accounts stored", 2,
+            accountManager.storedAccounts.size)
+    }
+
+    @Test
+    fun givenMultipleStoredAccounts_whenActiveAccountRemoved_thenLastUsedAccountShouldBeActive() {
+        val timeNow = System.currentTimeMillis()
+        val storedAccounts = UstadAccounts("bob@$mockServerUrl",
+                listOf(UmAccount(1, "bob", "", mockServerUrl),
+                        UmAccount(2, "joe", "", mockServerUrl),
+                        UmAccount(3, "harry", "", mockServerUrl)),
+                mapOf("bob@$mockServerUrl" to timeNow - 5000,
+                    "joe@$mockServerUrl" to timeNow - 15000,
+                    "harry@$mockServerUrl" to timeNow - 5000))
+        whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
+                Json.stringify(UstadAccounts.serializer(), storedAccounts))
+
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+
+        accountManager.removeAccount(storedAccounts.storedAccounts[0])
+
+        Assert.assertEquals("Most recently used account after account that was removed is now active",
+            "harry@$mockServerUrl", accountManager.activeAccount.userAtServer)
+    }
+
+    @Test
+    fun givenOneStoredAccount_whenActiveAccountRemoved_thenDefaultAccountShouldBeActive() {
+        val timeNow = System.currentTimeMillis()
+        val storedAccounts = UstadAccounts("bob@$mockServerUrl",
+                listOf(UmAccount(1, "bob", "", mockServerUrl)),
+                mapOf("bob@$mockServerUrl" to timeNow - 5000))
+        whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
+                Json.stringify(UstadAccounts.serializer(), storedAccounts))
+
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+
+        accountManager.removeAccount(storedAccounts.storedAccounts[0])
+
+        Assert.assertEquals("After removing the only stored account, the default account is now active",
+            "guest@http://app.ustadmobile.com/", accountManager.activeAccount.userAtServer)
+    }
+
+    @Test
+    fun givenValidRegistrationRequest_whenNewAccountRequested_thenShouldBeRequestedOnServerAndActive() {
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+
+        val personToRegister = Person().apply {
+            firstNames = "Mary"
+            lastName = "Poppins"
+            phoneNum = "1234567"
+            emailAddr = "mary@email.com"
+            username = "mary"
+        }
+
+        val accountResponse = UmAccount(42L, "mary", "", null)
+        mockWebServer.enqueue(MockResponse()
+                .setBody(Json.stringify(UmAccount.serializer(), accountResponse))
+                .addHeader("Content-Type", "application/json; charset=utf-8"))
+
+        val accountRegistered = runBlocking {
+            accountManager.register(personToRegister, "password", mockServerUrl)
+        }
+
+        Assert.assertEquals("Active account is the account registered",
+                "mary@$mockServerUrl", accountManager.activeAccount.userAtServer)
 
     }
 
+    fun givenInvalidRegistrationRequest_whenNewAccountRequested_thenShouldThrowException() {
 
-
-
-
+    }
 
 }
