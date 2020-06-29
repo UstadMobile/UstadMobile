@@ -4,10 +4,6 @@
     <!--For buttons,chips,FABs and text fields-->
     <style name="UmTheme.ShapeAppearance.SmallComponent" parent="ShapeAppearance.MaterialComponents.SmallComponent">
         <!--Your custom shape here-->
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:backgroundTint">?attr/colorSecondary</item>
-
-        ="?attr/colorSecondary"
     </style>
 
     <!--For cards, alert dialogs-->

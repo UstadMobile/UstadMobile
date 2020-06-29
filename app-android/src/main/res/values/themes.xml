@@ -7,14 +7,14 @@
         <item name="colorPrimaryVariant">@color/primaryVariantColor</item>
         <item name="colorSecondary">?colorPrimary</item>
         <item name="colorSecondaryVariant">?colorPrimary</item>
-        <item name="android:colorBackground">@android:color/white</item>
+        <item name="android:colorBackground">@color/onPrimaryColor</item>
         <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
     </style>
 
     <style name="UmTheme.App.OnBoarding" parent="UmTheme.MaterialComponents">
-        <item name="android:statusBarColor" tools:ignore="NewApi">@color/primaryTextColor</item>
-        <item name="android:navigationBarColor" tools:ignore="NewApi">@color/secondaryTextColor</item>
+        <item name="android:statusBarColor" tools:ignore="NewApi">@color/onPrimaryColor</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">@color/navigationBarColor</item>
     </style>
 
     <!--Shared theme for both Night and Light themes -->
@@ -24,21 +24,21 @@
         <item name="colorPrimaryDark">@color/primaryVariantColor</item>
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
-        <item name="android:colorBackground">@color/primaryTextColor</item>
-        <item name="colorSurface">@color/primaryTextColor</item>
+        <item name="android:colorBackground">@color/onPrimaryColor</item>
+        <item name="colorSurface">@color/onPrimaryColor</item>
         <item name="colorError">@color/errorColor</item>
-        <item name="colorOnPrimary">@color/primaryTextColor</item>
-        <item name="colorOnSecondary">@color/secondaryTextColor</item>
-        <item name="colorOnBackground">@color/secondaryTextColor</item>
-        <item name="colorOnSurface">@color/secondaryTextColor</item>
-        <item name="colorOnError">@color/primaryTextColor</item>
+        <item name="colorOnPrimary">@color/onPrimaryColor</item>
+        <item name="colorOnSecondary">@color/onSecondaryColor</item>
+        <item name="colorOnBackground">@color/onBackgroundColor</item>
+        <item name="colorOnSurface">@color/onSurfaceColor</item>
+        <item name="colorOnError">@color/onErrorColor</item>
         <item name="colorOnSecondaryText">@color/iconTintColor</item>
         <item name="colorOnIconTint">@color/iconTintColor</item>
         <item name="colorOnTintPrimary">?colorPrimary</item>
-        <item name="colorTabIndicator">@color/primaryTextColor</item>
+        <item name="colorTabIndicator">@color/onPrimaryColor</item>
         <item name="colorTabText" >@color/primaryLightVariantColor</item>
-        <item name="colorSelectedTabText">@color/primaryTextColor</item>
-        <item name="colorOnOrganisationText">@color/colorPrimary</item>
+        <item name="colorOnOrganisationText">@color/onSurfaceColor</item>
+        <item name="colorSelectedTabText">@color/onPrimaryColor</item>
         <item name="colorPrimaryBackground">@color/primaryColor</item>
         <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>

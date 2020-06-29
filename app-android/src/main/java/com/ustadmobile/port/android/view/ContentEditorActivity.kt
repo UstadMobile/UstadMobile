@@ -606,9 +606,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             private fun changeState(imageIcon: ImageView, iconHolder: RelativeLayout,
                                     isActivated: Boolean) {
                 imageIcon.setColorFilter(ContextCompat.getColor(context!!,
-                        if (isActivated) R.color.primaryTextColor else R.color.secondaryTextColor))
+                        if (isActivated) R.color.onPrimaryColor else R.color.onBackgroundColor))
                 iconHolder.setBackgroundColor(ContextCompat.getColor(context!!,
-                        if (isActivated) R.color.iconTintColor else R.color.primaryTextColor))
+                        if (isActivated) R.color.iconTintColor else R.color.onPrimaryColor))
             }
 
             internal inner class FormatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

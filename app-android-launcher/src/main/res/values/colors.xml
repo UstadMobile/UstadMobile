@@ -7,17 +7,20 @@
     <color name="primaryVariantColor">#1e88e5</color> <!--@600 Intensity-->
     <color name="primaryDarkColor">#007ac1</color> <!--@700 Intensity-->
 
-    <color name="secondaryColor">#ae52d4</color> <!--@500 Intensity-->
+    <color name="secondaryColor">#7b1fa2</color> <!--@500 Intensity-->
     <color name="secondaryDarkColor">#4a0072</color> <!--@700 Intensity-->
 
     <color name="errorLightColor">#cf6679</color> <!--@200 Intensity-->
     <color name="errorColor">#b00020</color> <!--@500 Intensity-->
 
-    <color name="primaryTextColor">#ffffff</color>
-    <color name="primaryTextColorLight">#E8EAED</color>
+    <color name="onPrimaryColor">#ffffff</color>
+    <color name="onSecondaryColor">#000000</color>
+    <color name="onSurfaceColor">#000000</color>
+    <color name="onBackgroundColor">#121212</color>
+    <color name="onPrimaryColorLight">#E8EAED</color>
+    <color name="onErrorColor">#ffffff</color>
 
-    <color name="secondaryVariantTextColor">#121212</color>
-    <color name="secondaryTextColor">#000000</color>
+    <color name="navigationBarColor">#000000</color>
     <color name="iconTintColor">#727272</color>
     <color name="successColor">#4CAF50</color>
 

@@ -11,6 +11,7 @@
     android:paddingBottom="@dimen/dimen_10dp"
     android:orientation="vertical"
     android:elevation="@dimen/dimen_16dp"
+    style="@style/UmTheme.ShapeAppearance.MediumComponent"
     android:paddingTop="@dimen/dimen_10dp"
     app:layout_behavior="@string/bottom_sheet_behavior">
 
