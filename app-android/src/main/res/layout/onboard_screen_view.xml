@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/dimen_20dp"
     android:paddingStart="@dimen/dimen_20dp"
     android:paddingEnd="@dimen/dimen_20dp">
 
@@ -30,7 +31,6 @@
         android:layout_above="@+id/sub_heading"
         android:layout_marginVertical="@dimen/dimen_8dp"
         android:gravity="center"
-        android:minHeight="@dimen/dimen_30dp"
         android:textAppearance="@style/UmTheme.TextAppearance.Headline6"
         app:layout_constraintBottom_toTopOf="@+id/sub_heading"
         app:layout_constraintTop_toBottomOf="@+id/drawable_res"
