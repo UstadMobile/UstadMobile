@@ -25,7 +25,7 @@
         <item name="colorSurface">@color/onBackgroundColor</item>
         <item name="colorError">@color/errorLightColor</item>
         <item name="colorOnPrimary">@color/navigationBarColor</item>
-        <item name="colorOnSecondary">@color/navigationBarColor</item>
+        <item name="colorOnSecondary">@color/onPrimaryColor</item>
         <item name="colorOnBackground">@color/onPrimaryColor</item>
         <item name="colorOnSurface">@color/onPrimaryColor</item>
         <item name="colorOnSecondaryText">?colorOnSurface</item>
@@ -33,7 +33,7 @@
         <item name="colorOnIconTint">?colorOnSurface</item>
         <item name="colorOnTintPrimary">?colorOnSurface</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
-        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorOnPrimary</item>
+        <item name="android:statusBarColor" tools:ignore="NewApi">@color/navigationBarColor</item>
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
         <item name="colorTabIndicator">@color/primaryColor</item>
         <item name="colorTabText" >@color/onPrimaryColor</item>
