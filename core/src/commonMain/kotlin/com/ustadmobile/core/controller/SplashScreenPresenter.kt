@@ -14,7 +14,7 @@ class SplashScreenPresenter(context: Any, arguments: Map<String, String>, view: 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        val onboardingShown = impl.getAppPref(OnBoardingView.PREF_TAG, "false",context).toBoolean()
+        val onboardingShown = impl.getAppPref(OnBoardingView.PREF_TAG, "false" ,context).toBoolean()
 
         GlobalScope.launch {
             delay(delay)

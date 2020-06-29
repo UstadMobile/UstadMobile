@@ -259,7 +259,7 @@ kotlin {
         androidMain {
             dependencies {
                 implementation "com.github.aakira:napier-android:$version_napier"
-                implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
+                implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
                 implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy"
 
                 //Seems to fix things when we put a specific dependency here

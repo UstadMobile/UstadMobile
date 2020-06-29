@@ -18,11 +18,15 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.Register2View
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.CompletableDeferred
 import java.util.*
 
 
 class Register2Activity : UstadBaseActivity(), Register2View {
 
+
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     private var errorMessageView: TextView? = null
 

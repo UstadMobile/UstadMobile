@@ -8,6 +8,7 @@
         android:id="@+id/expandedListItem"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:paddingStart="?android:attr/expandableListPreferredChildPaddingLeft"
         android:paddingEnd="?android:attr/expandableListPreferredChildPaddingLeft"
         android:paddingTop="@dimen/dimen_10dp"

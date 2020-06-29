@@ -213,7 +213,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
 
     var khanclass1 = ContentEntry()
-    khanclass1.title = "Class 1"
+    khanclass1.title = "Content 1"
     khanclass1.contentEntryUid = 400
     entryDao.insert(khanclass1)
 
@@ -223,7 +223,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     khanclassJoin.cepcjUid = entryJoinDao.insert(khanclassJoin)
 
     var khanclass2 = ContentEntry()
-    khanclass2.title = "Class 2"
+    khanclass2.title = "Content 2"
     khanclass2.contentEntryUid = entryDao.insert(khanclass2)
 
     var khanclass2Join = ContentEntryParentChildJoin()
@@ -237,7 +237,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     firstObject.xObjectUid = 300
     objectDao.insert(firstObject)
 
-    var firstObjectLangMap = XLangMapEntry(0, firstObject.xObjectUid, 0, 0, "Answer")
+    var firstObjectLangMap = XLangMapEntry(0, firstObject.xObjectUid, 0, 0, khanclass1.title!!)
     firstObjectLangMap.languageLangMapUid = entryLangMap.insert(firstObjectLangMap)
 
     var secondObject = XObjectEntity()
@@ -246,7 +246,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     secondObject.xObjectUid = 301
     objectDao.insert(secondObject)
 
-    var secondObjectLangMap = XLangMapEntry(0, secondObject.xObjectUid, 0, 0, "Me")
+    var secondObjectLangMap = XLangMapEntry(0, secondObject.xObjectUid, 0, 0, khanclass2.title!!)
     secondObjectLangMap.languageLangMapUid = entryLangMap.insert(secondObjectLangMap)
 
     var thirdObject = XObjectEntity()
@@ -255,7 +255,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     thirdObject.xObjectUid = 302
     objectDao.insert(thirdObject)
 
-    var thirdObjectLangMap = XLangMapEntry(0, thirdObject.xObjectUid, 0, 0, "Now")
+    var thirdObjectLangMap = XLangMapEntry(0, thirdObject.xObjectUid, 0, 0, khanclass1.title!!)
     thirdObjectLangMap.languageLangMapUid = entryLangMap.insert(thirdObjectLangMap)
 
 

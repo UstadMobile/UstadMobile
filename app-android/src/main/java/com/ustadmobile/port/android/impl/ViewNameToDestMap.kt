@@ -33,6 +33,7 @@ class ViewNameToDestMap: DestinationProvider {
             ContentEntry2DetailView.VIEW_NAME to UstadDestination(R.id.content_entry_details_dest, true),
             ClazzLogEditAttendanceView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest, false),
             VideoPlayerView.VIEW_NAME to UstadDestination(R.id.video_content, false),
+            XapiPackageContentView.VIEW_NAME to UstadDestination(R.id.content_xapi_dest, false),
             ReportListView.VIEW_NAME to UstadDestination(R.id.report_list_dest, true),
             ReportEditView.VIEW_NAME to UstadDestination(R.id.report_edit_dest, false),
             ReportDetailView.VIEW_NAME to UstadDestination(R.id.report_detail_dest, true)

@@ -58,7 +58,7 @@
             android:layout_width="match_parent"
             android:inputType="text"
             android:layout_height="wrap_content"
-            android:hint="@string/import_link_video" />
+            android:hint="@string/title" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -68,7 +68,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_16dp"
-        android:text="@string/content_editor_preview"
+        android:text="@string/preview"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/entry_import_link_titleInput" />
 

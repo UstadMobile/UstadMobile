@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,10 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
-import androidx.core.text.TextUtilsCompat
-import androidx.core.view.ViewCompat
-import androidx.viewpager.widget.PagerAdapter
-import androidx.viewpager.widget.ViewPager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.rd.PageIndicatorView
 import com.rd.animation.type.AnimationType
 import com.toughra.ustadmobile.R
@@ -20,16 +19,20 @@ import com.ustadmobile.core.controller.OnBoardingPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.CompletableDeferred
 
-class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemSelectedListener {
+class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemClickListener {
 
     private var pageIndicatorView: PageIndicatorView? = null
 
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
+
     private var presenter: OnBoardingPresenter? = null
 
-    private lateinit var languageOptions: Spinner
+    private lateinit var languageOptions: AutoCompleteTextView
 
-    private lateinit var viewPager: ViewPager
+    private lateinit var viewPager: ViewPager2
 
     private var getStartedBtn: Button? = null
 
@@ -42,7 +45,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
      * Model for the the onboarding screen
      */
     private enum class OnBoardScreen(val headlineStringResId: Int, val subHeadlineStringResId: Int,
-                                     val layoutResId: Int, val drawableResId: Int){
+                                     val layoutResId: Int, val drawableResId: Int) {
         SCREEN_1(R.string.onboarding_no_internet_headline,
                 R.string.onboarding_no_internet_subheadline,
                 R.layout.onboard_screen_view, R.drawable.downloading_data),
@@ -55,33 +58,36 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
     /**
      * Custom pager adapter for the screen
      */
-    private inner class OnBoardingPagerAdapter internal constructor(private val context: Context) : PagerAdapter() {
+    private inner class OnBoardingPagerAdapter internal constructor(private val context: Context)
+        : RecyclerView.Adapter<OnBoardingPagerAdapter.BoardScreenHolder>() {
 
-        override fun instantiateItem(collection: ViewGroup, position: Int): Any {
-            val onBoardScreen = screenList[position]
-            val inflater = LayoutInflater.from(context)
-            val layout = inflater.inflate(onBoardScreen.layoutResId,
-                    collection, false) as ViewGroup
-            (layout.findViewById<View>(R.id.heading) as TextView).text = context.getString(onBoardScreen.headlineStringResId)
-            (layout.findViewById<View>(R.id.sub_heading) as TextView).text = context.getString(onBoardScreen.subHeadlineStringResId)
-            (layout.findViewById<View>(R.id.drawable_res) as ImageView)
-                    .setImageResource(onBoardScreen.drawableResId)
-            collection.addView(layout)
-            return layout
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoardScreenHolder {
+            return BoardScreenHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
         }
 
-        override fun destroyItem(collection: ViewGroup, position: Int, view: Any) {
-            collection.removeView(view as View)
+        override fun getItemViewType(position: Int): Int {
+            return screenList[position].layoutResId
         }
 
-        override fun getCount(): Int {
+        override fun getItemCount(): Int {
             return screenList.size
         }
 
-        override fun isViewFromObject(view: View, `object`: Any): Boolean {
-            return view === `object`
+        override fun onBindViewHolder(holder: BoardScreenHolder, position: Int) {
+            holder.bind(screenList[position])
         }
 
+        inner class BoardScreenHolder internal constructor(val view: View) :
+                RecyclerView.ViewHolder(view) {
+
+            internal fun bind(screen: OnBoardScreen) {
+                (view.findViewById<View>(R.id.heading) as TextView).text = context.getString(screen.headlineStringResId)
+                (view.findViewById<View>(R.id.sub_heading) as TextView).text = context.getString(screen.subHeadlineStringResId)
+                (view.findViewById<View>(R.id.drawable_res) as ImageView)
+                        .setImageResource(screen.drawableResId)
+            }
+
+        }
     }
 
     //We target lower than SDK 19, this check is a false flag when the devMinApi21Debug variant is selected
@@ -92,34 +98,28 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         viewPager = findViewById(R.id.onBoardPagerView)
         getStartedBtn = findViewById(R.id.get_started_btn)
         pageIndicatorView = findViewById(R.id.pageIndicatorView)
-        languageOptions = findViewById(R.id.language_option)
+        languageOptions = findViewById(R.id.language_options_autocomplete_textview)
 
         pageIndicatorView?.setAnimationType(AnimationType.WORM)
-        getStartedBtn?.setOnClickListener { presenter?.handleClickGetStarted() }
 
-
-        val isRtl = TextUtilsCompat.getLayoutDirectionFromLocale(resources.configuration.locale) == ViewCompat.LAYOUT_DIRECTION_RTL
-        var firstScreenIndex = 0
-        screenList = when(isRtl) {
-            true -> {
-                firstScreenIndex = OnBoardScreen.values().size - 1
-                OnBoardScreen.values().reversed()
-            }
-            else -> OnBoardScreen.values().toList()
+        getStartedBtn?.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
         }
 
-        if(Build.VERSION.SDK_INT <= 19) {
+        screenList =  OnBoardScreen.values().toList()
+        pageIndicatorView?.count = screenList.size
+
+        if (Build.VERSION.SDK_INT <= 19) {
             getStartedBtn?.setBackgroundResource(R.drawable.pre_lollipop_btn_selector_bg_onboarding)
             getStartedBtn?.setTextColor(ContextCompat.getColor(this,
                     R.color.pre_lollipop_btn_selector_txt_onboarding))
         }
 
         viewPager.adapter = OnBoardingPagerAdapter(this)
-        viewPager.currentItem = firstScreenIndex
-
 
         if (pageIndicatorView != null) {
-            viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+
                 override fun onPageScrolled(position: Int, positionOffset: Float,
                                             positionOffsetPixels: Int) {
                 }
@@ -140,22 +140,19 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         presenter?.onCreate(bundleToMap(savedInstanceState))
     }
 
-    override fun setLanguageOptions(languages: List<String>) {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        languageOptions.adapter = adapter
-
-        languageOptions.onItemSelectedListener = this
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>?) {}
-
-    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         presenter?.handleLanguageSelected(position)
     }
 
+    override fun setLanguageOptions(languages: List<String>, currentSelection: String) {
+        val adapter = ArrayAdapter(this, R.layout.autocomplete_list_item, languages)
+        languageOptions.setAdapter(adapter)
+        languageOptions.setText(currentSelection, false)
+        languageOptions.onItemClickListener = this
+    }
+
     override fun restartUI() {
-        onResume()
+        recreate()
     }
 
 }

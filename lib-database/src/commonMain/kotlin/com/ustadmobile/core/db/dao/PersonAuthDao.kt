@@ -44,7 +44,7 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
     @Repository(methodType = METHOD_DELEGATE_TO_WEB)
     open suspend fun resetPassword(personUid: Long, password: String, loggedInPersonUid: Long): Int {
-
+        println("hello")
         val passwordHash = ENCRYPTED_PASS_PREFIX + encryptPassword(password)
 
         println("Resetting password .. " )

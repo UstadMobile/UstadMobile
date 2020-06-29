@@ -109,21 +109,28 @@ class TocListView : LinearLayout, View.OnClickListener, TocItemView.OnClickExpan
      * @param depth depth of the node to add from
      */
     protected fun addChildren(node: Any?, startPos: Int, depth: Int) {
-        val children = adapter!!.getChildren(node)
-        var child: Any
-        for (i in children!!.indices) {
-            val itemView = TocItemView(context)
-            child = children[i]!!
+        val children = adapter?.getChildren(node)
+        if(children != null){
+            for (i in children.indices) {
+                val itemView = TocItemView(context)
+                val child = children[i]
 
-            val childView = adapter!!.getNodeView(child, null, depth)
-            itemView.setItemView(childView)
-            itemView.setOnClickExpandListener(this)
-            itemView.isExpandable = adapter!!.getNumChildren(child) > 0
-            itemView.setOnClickListener(this)
+                if(child != null){
+                    val childView = adapter?.getNodeView(child, null, depth)
+                    if(childView != null){
+                        itemView.setItemView(childView)
+                        itemView.setOnClickExpandListener(this)
+                        val childIndex = adapter?.getNumChildren(child)
+                        itemView.isExpandable = childIndex != null && childIndex > 0
+                        itemView.setOnClickListener(this)
+                        addView(itemView, startPos + i)
+                        viewToNodeMap[itemView] = child
+                    }
+                }
 
-            addView(itemView, startPos + i)
-            viewToNodeMap[itemView] = child
+            }
         }
+
     }
 
     /**
@@ -133,30 +140,32 @@ class TocListView : LinearLayout, View.OnClickListener, TocItemView.OnClickExpan
      * @param startPos The position of the node from which to remove from
      */
     protected fun removeChildren(node: Any?, startPos: Int) {
-        val children = adapter!!.getChildren(node)
+        val children = adapter?.getChildren(node)
         var itemView: TocItemView
-        for (i in children!!.indices) {
-            itemView = getChildAt(startPos) as TocItemView
-            if (itemView.isExpanded) {
-                //remove it's child views
-                removeChildren(children[i], startPos + 1)
+        if(children != null){
+            for (i in children.indices) {
+                itemView = getChildAt(startPos) as TocItemView
+                if (itemView.isExpanded) {
+                    //remove it's child views
+                    removeChildren(children[i], startPos + 1)
+                }
+                removeView(itemView)
+                viewToNodeMap.remove(itemView)
             }
-
-            removeView(itemView)
-            viewToNodeMap.remove(itemView)
         }
     }
 
     override fun onClick(view: View) {
         val node = viewToNodeMap[view]
         if (onItemClickListener != null) {
-            onItemClickListener!!.onClick(node, view)
+            onItemClickListener?.onClick(node, view)
         }
     }
 
     override fun onClickExpand(itemView: TocItemView) {
         val node = viewToNodeMap[itemView]
-        if (adapter!!.getNumChildren(node) > 0) {
+        val childIndex = adapter?.getNumChildren(node)
+        if (childIndex != null && childIndex > 0) {
             val startPos = indexOfChild(itemView) + 1
             if (!itemView.isExpanded) {
                 addChildren(node, startPos, 0)

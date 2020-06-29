@@ -30,17 +30,13 @@
         android:usesCleartextTraffic="true">
         <activity android:name="com.ustadmobile.port.android.view.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
+        <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding"  -->
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
             android:noHistory="true"
-            android:theme="@style/UmTheme.App.OnBoarding" />
+            />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -56,17 +52,10 @@
             android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.XapiPackageContentActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="" />
+
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.WebChunkActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
@@ -96,13 +85,12 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/app_name"
             android:noHistory="true">
-            <!--
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            -->
+
         </activity>
     </application>
 

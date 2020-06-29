@@ -1,28 +1,21 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.*
-import android.content.pm.PackageManager
 import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
-import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.webkit.WebView
-import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -59,7 +52,7 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadView, ShakeDetector.Listener, UstadViewWithProgress {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadView, ShakeDetector.Listener, UstadViewWithProgress, BleNetworkManagerProvider {
 
     private var baseController: UstadBaseController<*>? = null
 
@@ -192,12 +185,16 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             serviceVal.runWhenNetworkManagerReady {
                 UMLog.l(UMLog.DEBUG, 0, "BleService Connection: service = $serviceVal")
 
-                val networkManagerBleVal = serviceVal.networkManagerBle!!
-                //this runs after service is ready
-                networkManagerBle.complete(networkManagerBleVal)
-                //networkManagerBle = serviceVal.networkManagerBle
-                bleServiceBound = true
-                onBleNetworkServiceBound(serviceVal.networkManagerBle!!)
+                val networkManagerBleVal = serviceVal.networkManagerBle
+                networkManager = networkManagerBle
+
+                if(networkManagerBleVal != null){
+                    //this runs after service is ready
+                    networkManagerBle.complete(networkManagerBleVal)
+                    //networkManagerBle = serviceVal.networkManagerBle
+                    bleServiceBound = true
+                    onBleNetworkServiceBound(networkManagerBleVal)
+                }
                 runWhenServiceConnectedQueue.setReady(true)
 
 //                //TODO: this is being used for testing purposes only and should be removed

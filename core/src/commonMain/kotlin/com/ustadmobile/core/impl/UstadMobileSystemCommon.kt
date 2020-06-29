@@ -159,7 +159,6 @@ abstract class UstadMobileSystemCommon {
     fun setLocale(locale: String, context: Any) = setAppPref(PREFKEY_LOCALE, locale, context)
 
 
-
     /**
      * Get a preference for the app
      *
@@ -212,7 +211,7 @@ abstract class UstadMobileSystemCommon {
         if (locale == LOCALE_USE_SYSTEM)
             locale = getSystemLocale(context)
 
-        return locale
+        return locale.substring(0, 2)
     }
 
     /**
@@ -226,10 +225,10 @@ abstract class UstadMobileSystemCommon {
      */
     @JsName("getAllUiLanguage")
     @Deprecated("Use getAllUiLanguagesList instead")
-    open fun getAllUiLanguage(context: Any): Map<String,String>{
+    open fun getAllUiLanguage(context: Any): Map<String, String> {
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
-                "",context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
-        val languageList =languagesConfigVal.split(",")
+                "", context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
+        val languageList = languagesConfigVal.split(",")
         return languageList.map { it to (LANGUAGE_NAMES[it] ?: it) }.toMap()
     }
 
@@ -243,7 +242,7 @@ abstract class UstadMobileSystemCommon {
     @JsName("getAllUiLanguagesList")
     open fun getAllUiLanguagesList(context: Any): List<Pair<String, String>> {
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
-                "",context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
+                "", context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
         val availableLangs = languagesConfigVal.split(",").sorted()
 
 
@@ -264,6 +263,7 @@ abstract class UstadMobileSystemCommon {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
         }
     }
+
     /**
      * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
      * method in the implementation instead of using the factory API because
@@ -339,7 +339,6 @@ abstract class UstadMobileSystemCommon {
         } else null
 
     }
-
 
 
     /**

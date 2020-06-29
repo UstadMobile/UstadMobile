@@ -80,6 +80,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import id.zelory.compressor.Compressor
 import id.zelory.compressor.constraint.quality
 import id.zelory.compressor.constraint.format
+import kotlinx.coroutines.CompletableDeferred
 
 open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback,
@@ -520,7 +521,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             return contentFormattingTypeLabel.size
         }
 
-        internal var contentFormattingTypeLabel = arrayOf<String>(resources.getString(R.string.content_format_text),
+        internal var contentFormattingTypeLabel = arrayOf<String>(resources.getString(R.string.text),
                 resources.getString(R.string.content_format_paragraph))
 
 
@@ -902,6 +903,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
        }
     }
 
+    override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     override fun showErrorMessage(message: String) {
         showBaseMessage(message)

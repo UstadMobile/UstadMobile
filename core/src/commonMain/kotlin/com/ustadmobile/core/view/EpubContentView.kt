@@ -41,28 +41,24 @@ import kotlin.js.JsName
 interface EpubContentView : UstadView {
 
     @JsName("setContainerTitle")
-    fun setContainerTitle(containerTitle: String)
+    var containerTitle: String?
 
     @JsName("setSpineUrls")
     fun setSpineUrls(urls: Array<String>?, index :Int)
 
     @JsName("setPageTitle")
-    fun setPageTitle(pageTitle: String?)
+    var pageTitle: String?
+
 
     @JsName("setTableOfContents")
-    fun setTableOfContents(tocNavItem: EpubNavItem)
+    var tableOfContents: EpubNavItem?
 
     @JsName("setCoverImage")
-    fun setCoverImage(imageUrl: String)
+    var coverImageUrl: String?
 
     @JsName("setAuthorName")
-    fun setAuthorName(authorName: String)
+    var authorName: String
 
-    @JsName("mountContainer")
-    fun mountContainer(containerUid: Long, callback: UmCallback<String>?)
-
-    @JsName("unmountContainer")
-    fun unmountContainer(mountedUrl: String?)
 
     /**
      * Set if the progress bar is visible or not
@@ -71,7 +67,7 @@ interface EpubContentView : UstadView {
      * false otherwise.
      */
     @JsName("setProgressBarVisible")
-    fun setProgressBarVisible(progressVisible: Boolean)
+    var progressVisible: Boolean
 
     /**
      * Set the progress bar progress percentage to show. -1 for indeterminate, 0-100 for a percentage
@@ -81,21 +77,20 @@ interface EpubContentView : UstadView {
      * @return
      */
     @JsName("setProgressBarProgress")
-    fun setProgressBarProgress(progress: Int)
+    var progressValue: Int
 
     /**
      *
      * @param spinePos
      */
     @JsName("goToLinearSpinePosition")
-    fun goToLinearSpinePosition(spinePos: Int)
+    var spinePosition: Int
 
     companion object {
 
         const val VIEW_NAME = "EpubContent"
 
         const val ARG_INITIAL_PAGE_HREF = "initialPageHref"
-
 
     }
 }
