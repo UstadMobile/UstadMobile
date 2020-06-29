@@ -22,7 +22,7 @@
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
         <item name="android:colorBackground">@color/navigationBarColor</item>
-        <item name="colorSurface">@color/onBackgroundColor</item>
+        <item name="colorSurface">@color/navigationBarColor</item>
         <item name="colorError">@color/errorLightColor</item>
         <item name="colorOnPrimary">@color/navigationBarColor</item>
         <item name="colorOnSecondary">@color/navigationBarColor</item>

@@ -24,8 +24,8 @@
         <item name="colorPrimaryDark">@color/primaryVariantColor</item>
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
-        <item name="android:colorBackground">@color/onPrimaryColor</item>
-        <item name="colorSurface">@color/onPrimaryColor</item>
+        <item name="android:colorBackground">@color/backgroundColor</item>
+        <item name="colorSurface">@color/surfaceColor</item>
         <item name="colorError">@color/errorColor</item>
         <item name="colorOnPrimary">@color/onPrimaryColor</item>
         <item name="colorOnSecondary">@color/onSecondaryColor</item>
