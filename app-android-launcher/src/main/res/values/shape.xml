@@ -1,5 +1,5 @@
 <!--This will be used for some additional custom styling of the app's components-->
-<resources>
+<resources >
 
     <!--For buttons,chips,FABs and text fields-->
     <style name="UmTheme.ShapeAppearance.SmallComponent" parent="ShapeAppearance.MaterialComponents.SmallComponent">

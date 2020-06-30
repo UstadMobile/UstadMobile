@@ -39,6 +39,7 @@
         <item name="colorOnTintPrimary">?colorPrimary</item>
         <item name="colorTabIndicator">@color/onPrimaryColor</item>
         <item name="colorTabText" >@color/primaryLightVariantColor</item>
+        <item name="colorOnOrganisationText">@color/onSurfaceColor</item>
         <item name="colorSelectedTabText">@color/onPrimaryColor</item>
         <item name="colorPrimaryBackground">@color/primaryColor</item>
         <item name="colorPrimarySurface">@color/primaryColor</item>
