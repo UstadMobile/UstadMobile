@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.ext.userAtServer
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
@@ -13,6 +14,7 @@ import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
@@ -138,9 +140,9 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         }
 
 
-
         if(status == 200 && account != null) {
-            addAccount(account)
+            account.endpointUrl = endpointUrl
+            activeAccount = account
 
             return account
         }else if(status == 409){
@@ -155,12 +157,16 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         _storedAccounts += account
 
         val endpointUrl = account.endpointUrl ?: throw IllegalArgumentException("addAccount account must have endpointurl")
+        addEndpointDb(endpointUrl)
+
+        _storedAccountsLive.sendValue(_storedAccounts.toList())
+    }
+
+    private fun addEndpointDb(endpointUrl: String) {
         val dbName = sanitizeDbNameFromUrl(endpointUrl)
         if(!dbs.containsKey(dbName)) {
             dbs[dbName] = dbOpener.openDb(appContext, dbName).toDbAndRepoPair(endpointUrl)
         }
-
-        _storedAccountsLive.sendValue(_storedAccounts.toList())
     }
 
     @Synchronized
@@ -180,10 +186,15 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
 
     suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
+        addEndpointDb(endpointUrl)
+        val nodeId = (dbs[sanitizeDbNameFromUrl(endpointUrl)]?.repo as? DoorDatabaseSyncRepository)?.clientId
+                ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
+
         val httpStmt = httpClient.post<HttpStatement> {
             url("${endpointUrl.removeSuffix("/")}/auth/login")
             parameter("username", username)
             parameter("password", password)
+            header("X-nid", nodeId)
         }
 
 
