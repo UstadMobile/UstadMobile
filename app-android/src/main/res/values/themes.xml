@@ -15,6 +15,8 @@
     <style name="UmTheme.App.OnBoarding" parent="UmTheme.MaterialComponents">
         <item name="android:statusBarColor" tools:ignore="NewApi">@color/onPrimaryColor</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">@color/navigationBarColor</item>
+        <item name="colorSecondary">@color/secondaryColor</item>
+        <item name="colorOnSecondary">@color/onSecondaryColor</item>
     </style>
 
     <!--Shared theme for both Night and Light themes -->
