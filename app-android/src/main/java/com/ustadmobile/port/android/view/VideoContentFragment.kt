@@ -95,8 +95,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
         mPresenter = VideoContentPresenter(viewContext,
                 arguments.toStringMap(), this,
-                UmAccountManager.getActiveDatabase(this),
-                UmAccountManager.getRepositoryForActiveAccount(this))
+                UmAccountManager.getActiveDatabase(requireContext()),
+                UmAccountManager.getRepositoryForActiveAccount(requireContext()))
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
