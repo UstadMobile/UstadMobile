@@ -15,6 +15,8 @@
     <style name="UmTheme.App.OnBoarding" parent="UmTheme.MaterialComponents">
         <item name="android:statusBarColor" tools:ignore="NewApi">@color/onPrimaryColor</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">@color/navigationBarColor</item>
+        <item name="colorSecondary">@color/secondaryColor</item>
+        <item name="colorOnSecondary">@color/onSecondaryColor</item>
     </style>
 
     <!--Shared theme for both Night and Light themes -->
@@ -24,14 +26,14 @@
         <item name="colorPrimaryDark">@color/primaryVariantColor</item>
         <item name="colorSecondary">@color/secondaryColor</item>
         <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
-        <item name="android:colorBackground">@color/onPrimaryColor</item>
-        <item name="colorSurface">@color/onPrimaryColor</item>
+        <item name="android:colorBackground">@color/backgroundColor</item>
+        <item name="colorSurface">@color/surfaceColor</item>
         <item name="colorError">@color/errorColor</item>
         <item name="colorOnPrimary">@color/onPrimaryColor</item>
         <item name="colorOnSecondary">@color/onSecondaryColor</item>
         <item name="colorOnBackground">@color/onBackgroundColor</item>
-        <item name="colorOnSurface">@color/onBackgroundColor</item>
-        <item name="colorOnError">@color/onPrimaryColor</item>
+        <item name="colorOnSurface">@color/onSurfaceColor</item>
+        <item name="colorOnError">@color/onErrorColor</item>
         <item name="colorOnSecondaryText">@color/iconTintColor</item>
         <item name="colorOnIconTint">@color/iconTintColor</item>
         <item name="colorOnTintPrimary">?colorPrimary</item>
@@ -39,6 +41,7 @@
         <item name="colorTabText" >@color/primaryLightVariantColor</item>
         <item name="colorSelectedTabText">@color/onPrimaryColor</item>
         <item name="colorPrimaryBackground">@color/primaryColor</item>
+        <item name="colorPrimarySurface">@color/primaryColor</item>
         <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryVariant</item>
         <item name="android:navigationBarColor" tools:ignore="NewApi">?colorOnBackground</item>
 
@@ -66,7 +69,7 @@
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.MaterialComponents.Dialog.Alert</item>
         <item name="bottomSheetDialogTheme">@style/UmTheme.ThemeOverlay.BottomSheetDialog</item>
         <item name="navigationViewStyle">@style/UmTheme.Widget.NavigationView</item>
-        <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.PrimarySurface</item>
+        <item name="toolbarStyle">@style/UmTheme.Widget.Toolbar</item>
     </style>
 
 
@@ -79,5 +82,10 @@
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>
         <item name="android:navigationBarDividerColor" tools:ignore="NewApi">?attr/colorControlHighlight</item>
         <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
+    </style>
+
+    <!--Toolbar-->
+    <style name="UmTheme.Widget.Toolbar" parent="Widget.MaterialComponents.Toolbar.PrimarySurface">
+        <item name="android:elevation" >@dimen/dimen_4dp</item>
     </style>
 </resources>
