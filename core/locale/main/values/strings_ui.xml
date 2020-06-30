@@ -128,6 +128,7 @@
 
     <string name="created_partnership">Created in partnership with:</string>
     <string name="onboarding_get_started_label">Get Started</string>
+    <string name="lets_get_started_label">Let\'s get started</string>
     <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
     <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
     <string name="onboarding_offline_sharing">Share offline</string>
@@ -669,5 +670,12 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="marking">Marking</string>
     <string name="return_and_mark_next">Return and mark next</string>
     <string name="return_only">Return and finish</string>
+    <string name="workspace">Workspace</string>
+    <string name="use_public_library">Use public library</string>
+    <string name="access_open_education">Access thousands of open education resources personally</string>
+    <string name="join_existing_workspace">Join existing organization workspace</string>
+    <string name="existing_organisation">Your organization is already using Ustad Mobile</string>
+    <string name="create_organisation">Create new organization workspace</string>
+    <string name="create_workspace_organisation">Create a new workspace for your organization's students and teachers on Ustad Mobile</string>
 
 </resources>

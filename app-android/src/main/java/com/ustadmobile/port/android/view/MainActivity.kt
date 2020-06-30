@@ -19,7 +19,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.SettingsView
+import com.ustadmobile.core.view.AccountGetStartedView
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
@@ -104,7 +104,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
      * When settings gear clicked in the menu options - Goes to the settings activity.
      */
     private fun handleClickSettings() {
-        UstadMobileSystemImpl.instance.go(SettingsView.VIEW_NAME, mapOf(), this)
+        UstadMobileSystemImpl.instance.go(AccountGetStartedView.VIEW_NAME, mapOf(), this)
     }
 
     companion object {

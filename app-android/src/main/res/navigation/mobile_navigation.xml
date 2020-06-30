@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/home_content_dest">
+    app:startDestination="@id/account_get_started_dest">
 
     <fragment
         android:id="@+id/home_clazzlist_dest"
@@ -167,6 +167,18 @@
         android:id="@+id/video_content"
         android:name="com.ustadmobile.port.android.view.VideoContentFragment"
         android:label="" />
+
+    <fragment
+        android:id="@+id/account_get_started_dest"
+        android:name="com.ustadmobile.port.android.view.GetStartedFragment"
+        android:label="@string/lets_get_started_label"
+        />
+
+    <fragment
+        android:id="@+id/workspace_enterlink_dest"
+        android:name="com.ustadmobile.port.android.view.WorkspaceEnterLinkFragment"
+        android:label="@string/workspace"
+        />
 
 
 </navigation>

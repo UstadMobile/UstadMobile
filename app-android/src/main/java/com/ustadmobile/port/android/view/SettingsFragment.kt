@@ -9,9 +9,9 @@ import com.ustadmobile.core.controller.SettingsPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.SettingsView
+import com.ustadmobile.core.view.AccountGetStartedView
 
-class SettingsFragment : UstadBaseFragment(), SettingsView {
+class SettingsFragment : UstadBaseFragment(), AccountGetStartedView {
 
     internal lateinit var mPresenter: SettingsPresenter
 
