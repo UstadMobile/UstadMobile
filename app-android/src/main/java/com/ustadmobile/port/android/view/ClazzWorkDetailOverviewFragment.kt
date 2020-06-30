@@ -102,12 +102,26 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             : RecyclerView.ViewHolder(itemBinding.root)
 
         private var viewHolder: SubmissionResultViewHolder? = null
-        private var clazzWorkVal : ClazzWorkWithSubmission? = clazzWork
+
+        var _clazzWork : ClazzWorkWithSubmission? = clazzWork
+            get() = field
+            set(value){
+                if(field == value)
+                    return
+                notifyDataSetChanged()
+                viewHolder?.itemBinding?.clazzWorkWithSubmission = value
+                viewHolder?.itemView?.tag = value?.clazzWorkSubmission?.clazzWorkSubmissionUid?:0L
+                notifyDataSetChanged()
+                field = value
+            }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionResultViewHolder {
             return SubmissionResultViewHolder(
                     ItemClazzworkSubmissionResultBinding.inflate(LayoutInflater.from(parent.context),
                             parent, false).also {
+                        it.clazzWorkWithSubmission = _clazzWork
+                        viewHolder?.itemView?.tag = _clazzWork?.clazzWorkSubmission?.clazzWorkSubmissionUid
+
                     })
         }
 
@@ -121,12 +135,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
         override fun onBindViewHolder(holder: SubmissionResultViewHolder, position: Int) {
-
-            if(currentList.size > 0){
-                holder.itemBinding.clazzWorkWithSubmission = getItem(0)
-            }else {
-                holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
-            }
         }
     }
 
@@ -153,12 +161,24 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             : RecyclerView.ViewHolder(itemBinding.root)
 
         private var viewHolder: SubmissionTextEntryWithResultViewHolder? = null
-        private var clazzWorkVal : ClazzWorkWithSubmission? = clazzWork
+
+        public var _clazzWork : ClazzWorkWithSubmission? = clazzWork
+            get() = field
+            set(value){
+                if(field == value)
+                    return
+                notifyDataSetChanged()
+                viewHolder?.itemBinding?.clazzWorkWithSubmission = value
+                viewHolder?.itemView?.tag = value?.clazzWorkUid?:0L
+                notifyDataSetChanged()
+                field = value
+            }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionTextEntryWithResultViewHolder {
             return SubmissionTextEntryWithResultViewHolder(
                     ItemClazzworkSubmissionTextEntryBinding.inflate(LayoutInflater.from(parent.context),
                             parent, false).also {
+                        it.clazzWorkWithSubmission = _clazzWork
                         it.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
                         it.editMode = modeEdit
                     })
@@ -174,13 +194,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
         override fun onBindViewHolder(holder: SubmissionTextEntryWithResultViewHolder, position: Int) {
-
-            if(currentList.size > 0){
-                holder.itemBinding.clazzWorkWithSubmission = getItem(0)
-            }else {
-                holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
-            }
-            holder.itemBinding.editMode = modeEdit
         }
     }
 
@@ -202,12 +215,25 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             : RecyclerView.ViewHolder(itemBinding.root)
 
         private var viewHolder: ClazzWorkDetailViewHolder? = null
-        private var clazzWorkVal : ClazzWorkWithSubmission? = clazzWork
+
+        var _clazzWork: ClazzWorkWithSubmission? = clazzWork
+            get() = field
+            set(value){
+                if(field == value)
+                    return
+                notifyDataSetChanged()
+                viewHolder?.itemBinding?.clazzWorkWithSubmission = value
+                viewHolder?.itemView?.tag = value?.clazzWorkUid?:0L
+                notifyDataSetChanged()
+                field = value
+            }
+
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkDetailViewHolder {
             return ClazzWorkDetailViewHolder(
                     ItemClazzworkDetailDescriptionBinding.inflate(LayoutInflater.from(parent.context),
                             parent, false).also {
+                        it.clazzWorkWithSubmission = _clazzWork
                     })
         }
 
@@ -221,14 +247,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
         override fun onBindViewHolder(holder: ClazzWorkDetailViewHolder, position: Int) {
-
-            holder.itemView.tag = clazzWorkVal?.clazzWorkUid?:0L
-            if(currentList.size > 0){
-                holder.itemBinding.clazzWorkWithSubmission = getItem(0)
-                holder.itemView.tag = getItem(position).clazzWorkUid
-            }else {
-                holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
-            }
         }
     }
 
@@ -291,7 +309,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         privateCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.private_comments).toString()
         )
-        privateCommentsHeadingRecyclerAdapter?.visible = true
+        privateCommentsHeadingRecyclerAdapter?.visible = false
 
         submissionResultRecyclerAdapter = SubmissionResultRecyclerAdapter(entity)
         submissionResultRecyclerAdapter?.visible = false
@@ -376,8 +394,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         set(value) {
             field = value
             newPrivateCommentRecyclerAdapter?.visible = value
-            privateCommentsHeadingRecyclerAdapter?.visible = value
-
             submissionButtonRecyclerAdapter?.visible = value
             quizQuestionsRecyclerAdapter?.studentMode = value
             submissionFreeTextRecyclerAdapter?.visible = value
@@ -392,6 +408,13 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 questionsHeadingRecyclerAdapter?.visible = true
             }
 
+            submissionButtonRecyclerAdapter?.visible = studentMode &&
+                    entity?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L &&
+                    entity?.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+
+            submissionHeadingRecyclerAdapter?.visible =
+                    submissionButtonRecyclerAdapter?.visible?:false
+
         }
 
     override var entity: ClazzWorkWithSubmission? = null
@@ -399,14 +422,18 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         set(value) {
             field = value
             mBinding?.clazzWorkWithSubmission = value
-            detailRecyclerAdapter?.submitList(listOf(entity))
+            detailRecyclerAdapter?._clazzWork = entity
             detailRecyclerAdapter?.visible = true
 
-            submissionResultRecyclerAdapter?.submitList(listOf(entity))
+            submissionFreeTextRecyclerAdapter?._clazzWork = entity
+
+
+            submissionResultRecyclerAdapter?._clazzWork = entity
+            submissionResultRecyclerAdapter?.visible = true
+
 
             if(value?.clazzWorkSubmissionType ==
                     ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT && studentMode){
-                submissionFreeTextRecyclerAdapter?.submitList(listOf(entity))
                 submissionFreeTextRecyclerAdapter?.visible = true
             }else{
                 submissionFreeTextRecyclerAdapter?.visible = false

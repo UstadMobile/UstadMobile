@@ -223,7 +223,7 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
     ):TestClazzWork {
     val clazzAndMembers = insertTestClazzAndMembers(5, 2)
     clazzWork.apply{
-        clazzWorkTitle = "Clazz Work A"
+        clazzWorkTitle = "Espresso Clazz Work A"
         clazzWorkClazzUid = clazzAndMembers.clazz.clazzUid
         if(submissionType < 0){
             clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
@@ -236,6 +236,9 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
         }else {
             clazzWorkUid = clazzWorkDao.insertAsync(this)
         }
+
+        clazzWorkInstructions = "Pass espresso test for ClazzWork"
+        clazzWorkCommentsEnabled = true
     }
 
     //Getting member

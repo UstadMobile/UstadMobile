@@ -13,6 +13,7 @@ class SimpleHeadingRecyclerAdapter(heading: String)
         set(value) {
             field = value
             viewHolder?.itemBinding?.headingText = value
+            viewHolder?.itemView?.tag = headingText
         }
 
     class SimpleHeadingViewHolder(var itemBinding: ItemSimpleHeadingBinding)

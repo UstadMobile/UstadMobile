@@ -29,14 +29,19 @@
             android:layout_marginStart="20dp"
             android:layout_marginEnd="@dimen/dimen_16dp"
             android:contentDescription="@string/score"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
             android:text="@{`` + clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionScore + '/'+ clazzWorkWithSubmission.clazzWorkMaximumScore}"
             android:textSize="30sp"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="42/100" />
+
+        <!--
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
+
+-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

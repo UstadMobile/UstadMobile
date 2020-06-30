@@ -61,15 +61,6 @@
             app:layout_constraintStart_toStartOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/item_clazzworkquestionandoptionswithresponse_quiz_options_rv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginHorizontal="64dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/item_clazzworkquestionandoptionswithresponse_answer_et"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_answer_et" />
 
         <RadioGroup
             android:id="@+id/activity_role_assignment_detail_radio_options"
@@ -81,7 +72,7 @@
             android:visibility="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == quizType)?View.VISIBLE:View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv"
-            app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_quiz_options_rv"
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_answer_et"
             app:radioGroupOptions="@{clazzWorkQuestionAndOptionsWithResponse.options}"
             app:radioGroupStudentMode="@{studentMode}"
             app:radioGroupOptionsResponse="@={clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected}"

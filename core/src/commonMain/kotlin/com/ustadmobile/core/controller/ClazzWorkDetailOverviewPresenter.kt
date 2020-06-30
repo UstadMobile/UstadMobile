@@ -91,8 +91,12 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                     questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
                             .map {
                                 val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
-                                val qResponse = db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
-                                        questionUid, clazzMember?.clazzMemberUid?:0L).toMutableList()
+                                val qResponse: MutableList<ClazzWorkQuestionResponse> =
+                                    withTimeoutOrNull(2000) {
+                                        db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
+                                                questionUid, clazzMember?.clazzMemberUid
+                                                ?: 0L).toMutableList()
+                                    }?: mutableListOf()
                                 if (qResponse.isEmpty()) {
                                     qResponse.add(ClazzWorkQuestionResponse().apply {
                                         clazzWorkQuestionResponseQuestionUid = questionUid
@@ -127,7 +131,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         if(clazzWorkWithSubmission.clazzWorkCommentsEnabled && view.studentMode) {
             val privateComments = withTimeoutOrNull(2000) {
-                db.commentsDao.findPrivateByEntityTypeAndUidAndPersonLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
+                db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
                         clazzWorkWithSubmission.clazzWorkUid, loggedInPersonUid)
             }
             view.clazzWorkPrivateComments = privateComments
