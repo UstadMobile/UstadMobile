@@ -140,9 +140,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                         AND CAST(clazzWorkContentJoinInactive AS INTEGER) = 0
                     )
     
-                ) as mProgress, 
-                   
-                -1.0 as mProgress, 
+                ) as mProgress,
             cm.*
             FROM ClazzMember
                 LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid

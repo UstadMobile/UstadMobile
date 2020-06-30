@@ -115,6 +115,9 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
             val item = getItem(position)
             holder.itemBinding.clazzMemberWithClazzWorkProgress = item
             holder.itemView.tag = item?.mClazzMember?.clazzMemberUid?:0L
+            holder.itemBinding.progressBar2.tag = item?.mClazzMember?.clazzMemberUid?:0L
+            holder.itemBinding.itemPersonLine2Text.tag = item?.mClazzMember?.clazzMemberUid?:0L
+            holder.itemBinding.itemClazzworkProgressMemberName.tag = item?.mClazzMember?.clazzMemberUid?:0L
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
             holder.itemBinding.hasContent = hasContent
         }

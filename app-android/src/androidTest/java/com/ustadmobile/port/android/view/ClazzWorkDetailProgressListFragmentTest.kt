@@ -1,23 +1,25 @@
 package com.ustadmobile.port.android.view
 
+import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.BoundedMatcher
+import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.Comments
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.binding.setClazzWorkMarking
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -25,13 +27,15 @@ import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import com.ustadmobile.util.test.ext.TestClazzWork
 import com.ustadmobile.util.test.ext.createTestContentEntriesAndJoinToClazzWork
 import com.ustadmobile.util.test.ext.insertTestClazzWorkAndQuestionsAndOptionsWithResponse
 import kotlinx.coroutines.runBlocking
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.allOf
+import org.hamcrest.Description
+import org.hamcrest.Matcher
+import org.junit.*
 
 class ClazzWorkDetailProgressListFragmentTest  {
 
@@ -85,6 +89,89 @@ class ClazzWorkDetailProgressListFragmentTest  {
         }
     }
 
+    private fun withTagInClazzMemberWithProgressList(clazzMemberUid: Long): Matcher<RecyclerView.ViewHolder?>? {
+        return object : BoundedMatcher<RecyclerView.ViewHolder?,
+                ClazzWorkDetailProgressListFragment.ClazzMemberWithClazzWorkProgressListViewHolder>(
+                ClazzWorkDetailProgressListFragment.ClazzMemberWithClazzWorkProgressListViewHolder::class.java) {
+            override fun matchesSafely(
+                    item: ClazzWorkDetailProgressListFragment.ClazzMemberWithClazzWorkProgressListViewHolder): Boolean {
+                return item.itemView.tag.equals(clazzMemberUid)
+            }
+
+            override fun describeTo(description: Description) {
+                description.appendText("view holder with member: $clazzMemberUid")
+            }
+        }
+    }
+
+    private fun checkProgressList(testClazzWork: TestClazzWork){
+        val list: List<ClazzMemberWithClazzWorkProgress> = runBlocking {
+            dbRule.db.clazzWorkDao.findStudentProgressByClazzWorkTest(
+                    testClazzWork.clazzWork.clazzWorkUid)
+        }
+        for(item in list){
+            //Scroll to Member
+            onView(withId(R.id.fragment_list_recyclerview)).perform(
+                    RecyclerViewActions.scrollToHolder(withTagInClazzMemberWithProgressList(
+                            item.mClazzMember!!.clazzMemberUid)))
+
+            //Check Name displayed OK
+            //onView(withText(item.fullName())).check(matches(isDisplayed()))
+            onView(allOf(withText(item.fullName()),
+                    withTagValue(`is`(item.mClazzMember!!.clazzMemberUid as Any)))).check(
+                    matches(isDisplayed()))
+
+
+            //Check submission line 2
+            val textView = TextView(ApplicationProvider.getApplicationContext())
+            textView.setClazzWorkMarking(item)
+            //onView(withText(textView.text.toString())).check(matches(isDisplayed()))
+            onView(allOf(withText(textView.text.toString()),
+                    withTagValue(`is`(item.mClazzMember!!.clazzMemberUid as Any)))).check(
+                    matches(isDisplayed()))
+
+            //Check comment if any
+            if(item.mLatestPrivateComment != null && item.mLatestPrivateComment!!.commentsText != null){
+                onView(withText(item.mLatestPrivateComment!!.commentsText)).check(matches(isDisplayed()))
+            }
+
+            val hasContent = runBlocking {
+                dbRule.db.clazzWorkContentJoinDao.findAllContentByClazzWorkUid(
+                        testClazzWork.clazzWork.clazzWorkUid, dbRule.account.personUid)
+            }
+
+            //Check progress visibility
+
+            onView(withId(R.id.fragment_list_recyclerview)).perform(
+                    RecyclerViewActions.scrollToHolder(withTagInClazzMemberWithProgressList(
+                            item.mClazzMember!!.clazzMemberUid)))
+
+            if(hasContent.isNotEmpty()){
+                onView(allOf(withId(R.id.progressBar2),
+                    withTagValue(`is`(item.mClazzMember!!.clazzMemberUid as Any)))).check(
+                        matches(isDisplayed()))
+            }else{
+                onView(allOf(withId(R.id.progressBar2),
+                        withTagValue(`is`(item.mClazzMember!!.clazzMemberUid as Any)))).check(
+                        matches(withEffectiveVisibility(Visibility.GONE)))
+            }
+        }
+    }
+
+    private fun clickStudent( studentToGo: ClazzMember){
+
+            //Scroll to Member
+            onView(withId(R.id.fragment_list_recyclerview)).perform(
+                    RecyclerViewActions.scrollToHolder(withTagInClazzMemberWithProgressList(
+                            studentToGo.clazzMemberUid)))
+
+            //Click it
+        onView(withId(R.id.fragment_list_recyclerview)).perform(
+                RecyclerViewActions.scrollToHolder(withTagInClazzMemberWithProgressList(
+                        studentToGo.clazzMemberUid))).perform(click())
+
+    }
+
     @Test
     fun givenValidClazzWorkUid_whenStudentsPresentInClazzWithComments_thenShouldUpdateView() {
 
@@ -114,13 +201,9 @@ class ClazzWorkDetailProgressListFragmentTest  {
         val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
         dbRule.account.personUid = teacherMember.clazzMemberPersonUid
 
-        val activeAccount = UmAccount(teacherMember.clazzMemberPersonUid, "bond", "", "http://localhost")
-        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
-
         reloadFragment(testClazzWork.clazzWork)
 
-        onView(withText("Marked")).check(matches(isDisplayed()))
-        //TODO: Test that it shows stuff ok
+        checkProgressList(testClazzWork)
 
         val student1 = testClazzWork.clazzAndMembers.studentList.get(0)
         val student3 = testClazzWork.clazzAndMembers.studentList.get(2)
@@ -148,9 +231,8 @@ class ClazzWorkDetailProgressListFragmentTest  {
         }
 
         reloadFragment(testClazzWork.clazzWork)
-        onView(withText("Marked")).check(matches(isDisplayed()))
-        //TODO: Test comments
 
+        checkProgressList(testClazzWork)
 
     }
 
@@ -178,13 +260,9 @@ class ClazzWorkDetailProgressListFragmentTest  {
         val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
         dbRule.account.personUid = teacherMember.clazzMemberPersonUid
 
-        val activeAccount = UmAccount(teacherMember.clazzMemberPersonUid, "bond", "", "http://localhost")
-        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
-
         reloadFragment(testClazzWork.clazzWork)
 
-        onView(withText("Marked")).check(matches(isDisplayed()))
-        //TODO: Test that it shows stuff ok
+        checkProgressList(testClazzWork)
 
         val student1 = testClazzWork.clazzAndMembers.studentList.get(0)
         val student3 = testClazzWork.clazzAndMembers.studentList.get(2)
@@ -212,9 +290,8 @@ class ClazzWorkDetailProgressListFragmentTest  {
         }
 
         reloadFragment(testClazzWork.clazzWork)
-        onView(withText("Marked")).check(matches(isDisplayed()))
-        //TODO: Test comments
 
+        checkProgressList(testClazzWork)
 
     }
 
@@ -246,9 +323,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
         val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
         dbRule.account.personUid = teacherMember.clazzMemberPersonUid
-
-        val activeAccount = UmAccount(teacherMember.clazzMemberPersonUid, "bond", "", "http://localhost")
-        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
 
         val student1 = testClazzWork.clazzAndMembers.studentList.get(0)
         val student3 = testClazzWork.clazzAndMembers.studentList.get(2)
@@ -308,10 +382,8 @@ class ClazzWorkDetailProgressListFragmentTest  {
         }
 
 
-        Thread.sleep(2000)
         reloadFragment(testClazzWork.clazzWork)
-        onView(withText("Marked")).check(matches(isDisplayed()))
-        //TODO: Test line2 and progress
+        checkProgressList(testClazzWork)
 
     }
 
@@ -344,9 +416,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
         val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
         dbRule.account.personUid = teacherMember.clazzMemberPersonUid
 
-        val activeAccount = UmAccount(teacherMember.clazzMemberPersonUid, "bond", "", "http://localhost")
-        UmAccountManager.setActiveAccount(activeAccount, ApplicationProvider.getApplicationContext())
-
 
         val student1 = testClazzWork.clazzAndMembers.studentList.get(0)
         val student3 = testClazzWork.clazzAndMembers.studentList.get(2)
@@ -378,12 +447,16 @@ class ClazzWorkDetailProgressListFragmentTest  {
         val student4 = testClazzWork.clazzAndMembers.studentList.get(3)
 
         reloadFragment(testClazzWork.clazzWork)
+        checkProgressList(testClazzWork)
+        clickStudent(student4)
 
-        Thread.sleep(2000)
+        //TODO: verify gone to marking
+        Assert.assertEquals("After clicking on student," +
+                " fragment goes to marking for that student",
+                systemImplNavRule.navController.currentDestination?.id,
+                R.id.clazzworksubmission_marking_edit)
 
-        Thread.sleep(1000)
-        onView(withText("Marked")).check(matches(isDisplayed()))
-        //TODO: Test clicking on one goes to Marking
+
 
     }
 
