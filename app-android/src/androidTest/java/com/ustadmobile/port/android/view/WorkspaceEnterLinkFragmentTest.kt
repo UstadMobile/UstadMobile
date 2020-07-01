@@ -58,8 +58,8 @@ class WorkspaceEnterLinkFragmentTest {
 
     }
 
-    //@AdbScreenRecord("given invalid workspace link when validation checked show disable button")
-    @Test
+    @AdbScreenRecord("given invalid workspace link when validation checked show disable button")
+    //@Test
     fun givenInValidWorkSpaceLink_whenValidationCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         val workSpacelink = "https://www.dummy.com/lms/hosting/"
 
