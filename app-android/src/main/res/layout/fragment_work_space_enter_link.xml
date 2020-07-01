@@ -56,7 +56,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@={workspaceLink}"
-                android:onTextChanged="@{(text, start, before, count) -> presenter.checkLinkValidity()}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
         </com.google.android.material.textfield.TextInputLayout>
 

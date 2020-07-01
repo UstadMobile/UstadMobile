@@ -3,19 +3,15 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.URLUtil
-import androidx.core.util.PatternsCompat
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentWorkSpaceEnterLinkBinding
 import com.ustadmobile.core.controller.WorkspaceEnterLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
-import java.net.URL
 
 class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
 
@@ -52,6 +48,14 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
 
         mPresenter = WorkspaceEnterLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
+
+        mBinding.organisationLink.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(url: CharSequence?, start: Int, before: Int, count: Int) {
+                mPresenter?.checkLinkValidity()
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
         return rootView
     }
