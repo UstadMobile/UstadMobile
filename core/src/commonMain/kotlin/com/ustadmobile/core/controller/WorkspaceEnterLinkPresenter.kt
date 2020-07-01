@@ -7,9 +7,7 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
 import io.ktor.client.request.get
-import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.takeFrom
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -51,5 +49,6 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
             }
         }
     }
+
 
 }

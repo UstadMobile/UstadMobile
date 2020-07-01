@@ -95,6 +95,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                     })
                 }
             }
+        }else{
+            view.inProgress = false
         }
     }
 

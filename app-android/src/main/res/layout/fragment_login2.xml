@@ -101,18 +101,9 @@
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/dimen_16dp"
-            app:layout_constraintTop_toBottomOf="@+id/organisation_icon">
-
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/login"
+            android:id="@+id/login_button"
             android:enabled="@{buttonEnabled}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -136,13 +127,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/dimen_16dp"
+            android:enabled="@{buttonEnabled}"
             android:layout_marginStart="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_8dp"
             android:contentDescription="@string/download"
             android:text="@string/create_account"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/login" />
+            app:layout_constraintTop_toBottomOf="@+id/login_button" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/connect_as_guest"
@@ -151,6 +143,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/dimen_16dp"
+            android:enabled="@{buttonEnabled}"
             android:layout_marginStart="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_8dp"

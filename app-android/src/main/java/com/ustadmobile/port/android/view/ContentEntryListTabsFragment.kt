@@ -16,7 +16,6 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_C
 import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
-import kotlinx.android.synthetic.main.fragment_contententry_tabs.view.*
 
 class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsView {
 

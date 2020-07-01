@@ -32,13 +32,13 @@ class GetStartedFragment : UstadBaseFragment(), GetStartedView {
         return rootView
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        mPresenter = null
-    }
-
     override fun createNewWorkSpace() {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.ustadmobile.com/lms/hosting/"))
         startActivity(intent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mPresenter = null
     }
 }

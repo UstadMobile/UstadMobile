@@ -109,7 +109,7 @@ class Login2PresenterTest {
     }
 
     @Test
-    fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenAccountCreationSection(){
+    fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection(){
         whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("true")
         presenter.onCreate(mapOf())
         presenter.handleConnectAsGuest()

@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,19 +26,23 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         set(value) {
             field = false
             mBinding.passwordView.isErrorEnabled = value
-            mBinding.passwordView.error = getString(R.string.field_required_prompt)
+            if(value){
+                mBinding.passwordView.error = getString(R.string.field_required_prompt)
+            }
         }
 
     override var isEmptyUsername: Boolean = false
         set(value) {
             field = false
             mBinding.usernameView.isErrorEnabled = value
-            mBinding.usernameView.error = getString(R.string.field_required_prompt)
+            if(value){
+               mBinding.usernameView.error = getString(R.string.field_required_prompt)
+            }
         }
 
     override var inProgress: Boolean = false
         set(value) {
-            mBinding.buttonEnabled = value
+            mBinding.buttonEnabled = !value
             mBinding.fieldsEnabled = !value
             field = value
         }
@@ -62,12 +68,15 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         val rootView: View
         mBinding = FragmentLogin2Binding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.buttonEnabled = false
+            it.buttonEnabled = true
+            it.fieldsEnabled = true
         }
 
         mPresenter = Login2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this,
                 personRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext()).personDao)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
+
+        mBinding.presenter = mPresenter
         return rootView
     }
 
