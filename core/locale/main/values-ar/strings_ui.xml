@@ -274,7 +274,7 @@
     <string name="import_title_not_entered">عنوان غير مدخل</string>
     <string name="no_account">ليس لديك حساب؟</string>
     <string name="enter_url">ادخل URL</string>
-    <string name="import_link_invalid_url">URL غير صالح</string>
+    <string name="invalid_url">URL غير صالح</string>
     <string name="import_link_content_not_supported">المحتوى غير مدعم</string>
     <string name="import_link_big_size">حجم الملف كبير</string>
     <string name="import_link_error">خطأ استيراد</string>

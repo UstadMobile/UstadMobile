@@ -248,7 +248,7 @@
     <string name="import_title_not_entered">عنوان داخل نشده</string>
     <string name="no_account">شما حساب/اکاونت ندارید؟</string>
     <string name="enter_url">Url را داخل نمائید</string>
-    <string name="import_link_invalid_url">Url درست نیست</string>
+    <string name="invalid_url">Url درست نیست</string>
     <string name="import_link_content_not_supported">محتوا قابل حمایت نیست</string>
     <string name="import_link_big_size">اندازه فایل بسیار زیاد است</string>
     <string name="import_link_error">اشتباه در وارد ساختن</string>

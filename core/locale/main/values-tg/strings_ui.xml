@@ -270,7 +270,7 @@
     <string name="import_link_video">Унвон</string>
     <string name="import_title_not_entered">Унвон ворид карда нашудааст</string>
     <string name="no_account">Шумо ҳисоб надоред\?</string>
-    <string name="import_link_invalid_url">URL-и беэътибор</string>
+    <string name="invalid_url">URL-и беэътибор</string>
     <string name="import_link_content_not_supported">Мундариҷа дастгирӣ намешавад</string>
     <string name="import_link_error">Хатогии воридот</string>
     <string name="error_not_found_status">404 !</string>

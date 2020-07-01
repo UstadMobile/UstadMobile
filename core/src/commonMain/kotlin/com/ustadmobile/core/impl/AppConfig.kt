@@ -39,6 +39,8 @@ object AppConfig {
 
     const val KEY_SHOW_CONNECT_AS_GUEST = "app.connect_as_guest"
 
+    const val KEY_VALID_WORKSPACE = "valid_workspace_host"
+
     const val BULK_UPLOAD_VISIBILITY = "bulk_upload_visibility"
 
     const val NAVIGATION_ITEMS = "navigation_items"

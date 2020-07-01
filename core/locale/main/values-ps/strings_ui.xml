@@ -250,7 +250,7 @@
     <string name="xapi_score">نمرې</string>
     <string name="import_link_video">سرلیک</string>
     <string name="import_title_not_entered">سرلیک دننه شوی نه دی</string>
-    <string name="import_link_invalid_url">ناسم Url</string>
+    <string name="invalid_url">ناسم Url</string>
     <string name="no_account">تاسو حساب/اکاونټ نلرئ؟</string>
     <string name="enter_url">Url دننه کړئ</string>
     <string name="import_link_content_not_supported">دمحتویاتو ملاتړ نشته</string>

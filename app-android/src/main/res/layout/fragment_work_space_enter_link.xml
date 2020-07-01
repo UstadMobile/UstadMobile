@@ -14,12 +14,26 @@
         <variable
             name="workspaceLink"
             type="String" />
+
+        <variable
+            name="enabledButton"
+            type="boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:paddingTop="@dimen/dimen_16dp"
         android:layout_height="wrap_content">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/progressBar"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_20dp"
+            app:layout_constraintTop_toTopOf="parent"
+            />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/workspace_link_view"
@@ -31,9 +45,10 @@
             app:errorEnabled="@{linkError}"
             app:errorTextColor="?colorError"
             app:hintEnabled="true"
+            android:layout_marginTop="@dimen/dimen_16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@+id/progressBar">
 
             <!-- android:inputType="textCapWords" -->
             <com.google.android.material.textfield.TextInputEditText
@@ -51,6 +66,7 @@
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginStart="@dimen/dimen_8dp"
             android:layout_marginEnd="@dimen/dimen_8dp"
+            android:enabled="@{enabledButton}"
             android:backgroundTint="?colorSecondary"
             android:textColor="?colorOnSecondary"
             android:onClick="@{() -> presenter.goToNext()}"

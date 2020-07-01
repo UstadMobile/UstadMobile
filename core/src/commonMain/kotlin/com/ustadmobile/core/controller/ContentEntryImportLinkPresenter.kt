@@ -121,7 +121,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 }
 
             } catch (e: Exception) {
-                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.invalid_url, context))
                 jobCount--
                 checkProgressBar()
                 return@launch
@@ -132,7 +132,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             contentType = -1
 
             if (headResponseVal.status != 200) {
-                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.invalid_url, context))
                 jobCount--
                 checkProgressBar()
                 return@launch
@@ -175,7 +175,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             val content = checkIfH5PValidAndReturnItsContent(url)
 
             if (content.isNullOrEmpty()) {
-                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                view.showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.invalid_url, context))
                 jobCount--
                 checkProgressBar()
                 return@launch
@@ -190,7 +190,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                 isDoneEnabled = true
                 view.checkDoneButton()
             } else {
-                view.showUrlStatus(isValid, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+                view.showUrlStatus(isValid, UstadMobileSystemImpl.instance.getString(MessageID.invalid_url, context))
             }
             jobCount--
             checkProgressBar()

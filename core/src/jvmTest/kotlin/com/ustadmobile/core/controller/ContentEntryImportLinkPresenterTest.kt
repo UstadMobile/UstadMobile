@@ -87,7 +87,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
     //@Test
     fun givenWhenHandleUrlTextUpdated_whenInvalidUrl_showInvalidUrlMessage() {
         presenter.handleUrlTextUpdated("hello")
-        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.invalid_url, context))
     }
 
     //@Test
@@ -97,7 +97,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         mockWebServer.start()
 
         presenter.handleUrlTextUpdated(mockWebServer.url("/nohp5here").toString())
-        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.invalid_url, context))
 
     }
 
@@ -148,7 +148,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
 
         presenter.handleUrlTextUpdated(url)
-        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.invalid_url, context))
 
 
     }
@@ -163,7 +163,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
 
 
         presenter.handleUrlTextUpdated(url)
-        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.invalid_url, context))
 
     }
 
@@ -177,7 +177,7 @@ class ContentEntryImportLinkPresenterTest : AbstractImportLinkTest() {
         val url = mockWebServer.url("/somehp5here").toString()
 
         presenter.handleUrlTextUpdated(url)
-        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.import_link_invalid_url, context))
+        verify(mockView, timeout(5000)).showUrlStatus(false, UstadMobileSystemImpl.instance.getString(MessageID.invalid_url, context))
 
     }
 
