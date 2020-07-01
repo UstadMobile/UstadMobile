@@ -15,7 +15,7 @@ import com.ustadmobile.core.view.GetStartedView
 
 class GetStartedFragment : UstadBaseFragment(), GetStartedView {
 
-    private lateinit var mBinding: FragmentGetStartedBinding
+    private var mBinding: FragmentGetStartedBinding? = null
 
     private var mPresenter: GetStartedPresenter? = null
 
@@ -28,7 +28,7 @@ class GetStartedFragment : UstadBaseFragment(), GetStartedView {
 
         mPresenter = GetStartedPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
-        mBinding.presenter = mPresenter
+        mBinding?.presenter = mPresenter
         return rootView
     }
 
@@ -40,5 +40,6 @@ class GetStartedFragment : UstadBaseFragment(), GetStartedView {
     override fun onDestroy() {
         super.onDestroy()
         mPresenter = null
+        mBinding = null
     }
 }
