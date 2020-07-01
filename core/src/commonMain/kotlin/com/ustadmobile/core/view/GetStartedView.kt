@@ -1,10 +1,10 @@
 package com.ustadmobile.core.view
 
-interface AccountGetStartedView : UstadView {
+interface GetStartedView : UstadView {
 
     fun createNewWorkSpace()
 
     companion object {
-        val VIEW_NAME = "AccountGetStartedView"
+        val VIEW_NAME = "GetStartedView"
     }
 }

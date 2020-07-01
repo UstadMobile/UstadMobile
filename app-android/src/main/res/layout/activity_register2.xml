@@ -47,7 +47,7 @@
                 android:id="@+id/activity_create_account_create_account_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/create_new_account" />
+                android:text="@string/create_account" />
 
         </LinearLayout>
 

@@ -3,7 +3,7 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.Login2View
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
@@ -258,7 +258,7 @@ abstract class UstadMobileSystemCommon {
         val activeAccount = UmAccountManager.getActiveAccount(context)
 
         if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context) && activeAccount == null) {
-            go(LoginView.VIEW_NAME, mapOf(), context)
+            go(Login2View.VIEW_NAME, mapOf(), context)
         } else {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
         }

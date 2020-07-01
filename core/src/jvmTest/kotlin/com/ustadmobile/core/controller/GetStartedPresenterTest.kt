@@ -2,15 +2,18 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AccountGetStartedView
+import com.ustadmobile.core.view.GetStartedView
+import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.OnBoardingView
+import com.ustadmobile.core.view.WorkspaceEnterLinkView
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
 
 class GetStartedPresenterTest {
 
-    private lateinit var mockedView: AccountGetStartedView
+    private lateinit var mockedView: GetStartedView
 
     private lateinit var impl: UstadMobileSystemImpl
 
@@ -32,13 +35,22 @@ class GetStartedPresenterTest {
         whenever(impl.getAppPref(eq(OnBoardingView.PREF_TAG), any(), any())).thenReturn("true")
         mPresenter.onCreate(null)
         mPresenter.goToPublicLibrary()
-        //verify(impl).go(any())
+        argumentCaptor<String>{
+            verify(impl).go(capture(), any(), any())
+            Assert.assertEquals("Login screen was opened",
+                    Login2View.VIEW_NAME, firstValue)
+        }
     }
 
     @Test
     fun givenGetStartedOptions_whenJoinExistingWorkSpaceIsClicked_thenShouldAllowToEnterWorkSpaceLink() {
         mPresenter.onCreate(null)
         mPresenter.joinExistingWorkSpace()
+        argumentCaptor<String>{
+            verify(impl).go(capture(), any(), any())
+            Assert.assertEquals("Enter link screen was opened",
+                    WorkspaceEnterLinkView.VIEW_NAME, firstValue)
+        }
     }
 
     @Test

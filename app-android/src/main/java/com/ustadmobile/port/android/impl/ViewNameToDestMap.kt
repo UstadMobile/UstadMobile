@@ -16,7 +16,7 @@ class ViewNameToDestMap: DestinationProvider {
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest, true),
             HolidayCalendarEditView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_edit_dest, false),
             TimeZoneEntityListView.VIEW_NAME to UstadDestination(R.id.timezoneentity_list_dest, false),
-            AccountGetStartedView.VIEW_NAME to UstadDestination(R.id.settings_list_dest, false),
+            SettingsView.VIEW_NAME to UstadDestination(R.id.settings_list_dest, false),
             RoleListView.VIEW_NAME to UstadDestination(R.id.role_list_dest, false),
             RoleEditView.VIEW_NAME to UstadDestination(R.id.role_edit_dest, false),
             PersonEditView.VIEW_NAME to UstadDestination(R.id.person_edit_dest, false),
@@ -36,7 +36,9 @@ class ViewNameToDestMap: DestinationProvider {
             XapiPackageContentView.VIEW_NAME to UstadDestination(R.id.content_xapi_dest, false),
             ReportListView.VIEW_NAME to UstadDestination(R.id.report_list_dest, true),
             ReportEditView.VIEW_NAME to UstadDestination(R.id.report_edit_dest, false),
-            ReportDetailView.VIEW_NAME to UstadDestination(R.id.report_detail_dest, true)
+            ReportDetailView.VIEW_NAME to UstadDestination(R.id.report_detail_dest, true),
+            WorkspaceEnterLinkView.VIEW_NAME to UstadDestination(R.id.workspace_enterlink_dest, false),
+            Login2View.VIEW_NAME to UstadDestination(R.id.login_dest, false)
     )
 
     override val navControllerViewId: Int

@@ -156,16 +156,17 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 android:id="@+id/textView6"
-                android:layout_width="wrap_content"
-                android:maxLines="2"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginStart="40dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginBottom="@dimen/dimen_8dp"
+                android:maxLines="2"
                 android:text="@string/create_workspace_organisation"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageView3"
                 app:layout_constraintTop_toBottomOf="@+id/textView5" />
         </androidx.constraintlayout.widget.ConstraintLayout>

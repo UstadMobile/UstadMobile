@@ -76,7 +76,7 @@
     <string name="confirm_password">پټ نوم تائید کړئ</string>
     <string name="last_name">تخلص</string>
     <string name="first_name">اصلی نوم</string>
-    <string name="create_new_account">اوس نومکښنه کوی</string>
+    <string name="register_now">اوس نومکښنه کوی</string>
     <string name="other">بل</string>
     <string name="unset">برابر شوی ندی</string>
     <string name="send">استول</string>
@@ -127,7 +127,7 @@
     <string name="file_not_found">دوتنه و نه موندل شو</string>
     <string name="content_type_multimedia">ګڼرسنۍ</string>
     <string name="multiple_choice">ګڼ ځوابه</string>
-    <string name="content_type_link">پیوند</string>
+    <string name="link">پیوند</string>
     <string name="content_type_fill_the_blanks">تښ ځایونه ډک کړئ</string>
     <string name="content_format_text">متن</string>
     <string name="content_format_paragraph">پاراګراف</string>

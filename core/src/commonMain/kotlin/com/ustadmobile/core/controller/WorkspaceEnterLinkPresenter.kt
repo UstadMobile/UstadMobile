@@ -11,4 +11,8 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
         super.onCreate(savedState)
     }
 
+    fun goToNext(){
+
+    }
+
 }

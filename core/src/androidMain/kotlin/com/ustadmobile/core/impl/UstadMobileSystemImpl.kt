@@ -100,7 +100,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             Register2View.VIEW_NAME to "${PACKAGE_NAME}Register2Activity",
             SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
             OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
-            LoginView.VIEW_NAME to "${PACKAGE_NAME}LoginActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",

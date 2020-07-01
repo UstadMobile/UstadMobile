@@ -32,4 +32,11 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
         super.onDestroy()
         mPresenter = null
     }
+
+    override var workspaceLink: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding.workspaceLink = value
+        }
 }

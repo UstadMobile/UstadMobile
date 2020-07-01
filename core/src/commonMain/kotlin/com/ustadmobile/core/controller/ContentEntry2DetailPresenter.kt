@@ -13,7 +13,7 @@ import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -80,7 +80,7 @@ class ContentEntry2DetailPresenter(context: Any,
                     "false", context)!!.toBoolean()
             val account = UmAccountManager.getActiveAccount(context)
             if (loginFirst && (account == null || account.personUid == 0L)) {
-                systemImpl.go(LoginView.VIEW_NAME, arguments, context)
+                systemImpl.go(Login2View.VIEW_NAME, arguments, context)
             } else {
                 openContentEntry()
             }

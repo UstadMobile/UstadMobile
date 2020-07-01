@@ -19,7 +19,7 @@ class Register2Presenter(context: Any, arguments: Map<String, String>, view: Reg
     private var mNextDest: String? = null
 
     init {
-        mNextDest = arguments[LoginPresenter.ARG_NEXT] ?: UstadMobileSystemImpl.instance.getAppConfigString(
+        mNextDest = arguments[ARG_NEXT] ?: UstadMobileSystemImpl.instance.getAppConfigString(
                 AppConfig.KEY_FIRST_DEST, "Home", context) ?: "Home"
     }
 

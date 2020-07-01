@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,10 +10,10 @@ import com.toughra.ustadmobile.databinding.FragmentGetStartedBinding
 import com.ustadmobile.core.controller.GetStartedPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.AccountGetStartedView
+import com.ustadmobile.core.view.GetStartedView
 
 
-class GetStartedFragment : UstadBaseFragment(), AccountGetStartedView {
+class GetStartedFragment : UstadBaseFragment(), GetStartedView {
 
     private lateinit var mBinding: FragmentGetStartedBinding
 
@@ -26,6 +28,7 @@ class GetStartedFragment : UstadBaseFragment(), AccountGetStartedView {
 
         mPresenter = GetStartedPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
+        mBinding.presenter = mPresenter
         return rootView
     }
 
@@ -35,6 +38,7 @@ class GetStartedFragment : UstadBaseFragment(), AccountGetStartedView {
     }
 
     override fun createNewWorkSpace() {
-
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.ustadmobile.com/lms/hosting/"))
+        startActivity(intent)
     }
 }
