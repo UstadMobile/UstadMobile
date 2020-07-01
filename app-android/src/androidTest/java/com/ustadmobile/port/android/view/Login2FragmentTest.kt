@@ -67,7 +67,7 @@ class Login2FragmentTest {
     }
 
 
-    @AdbScreenRecord("given valid username and password when handle login clicked should go to the destination")
+    //@AdbScreenRecord("given valid username and password when handle login clicked should go to the destination")
     //@Test
     fun givenValidUsernameAndPassword_whenHandleLoginClicked_shouldCallSystemImplGo() {
         mockWebServer.enqueue(MockResponse()
@@ -82,7 +82,7 @@ class Login2FragmentTest {
                 R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
     }
 
-    @AdbScreenRecord("given invalid username and password when handle login clicked should show password and username errors")
+    //@AdbScreenRecord("given invalid username and password when handle login clicked should show password and username errors")
     //@Test
     fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
         mockWebServer.enqueue(MockResponse().setResponseCode(403))
@@ -95,7 +95,7 @@ class Login2FragmentTest {
     }
 
 
-    @AdbScreenRecord("given server is offline when handle login clicked should shoe network errors ")
+    //@AdbScreenRecord("given server is offline when handle login clicked should shoe network errors ")
     //@Test
     fun givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
         mockWebServer.shutdown()

@@ -45,8 +45,8 @@ class WorkspaceEnterLinkFragmentTest {
     private val context: Application = ApplicationProvider.getApplicationContext()
 
 
-    @AdbScreenRecord("given valid workspace link when validation checked show enable button")
-    @Test
+    //@AdbScreenRecord("given valid workspace link when validation checked show enable button")
+    //@Test
     fun givenValidWorkSpaceLink_whenValidationCheckedAndIsValid_shouldAllowToGoToNextScreen() {
         val workSpacelink = "https://www.ustadmobile.com/lms/hosting/"
 
@@ -58,7 +58,7 @@ class WorkspaceEnterLinkFragmentTest {
 
     }
 
-    @AdbScreenRecord("given invalid workspace link when validation checked show disable button")
+    //@AdbScreenRecord("given invalid workspace link when validation checked show disable button")
     //@Test
     fun givenInValidWorkSpaceLink_whenValidationCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         val workSpacelink = "https://www.dummy.com/lms/hosting/"
