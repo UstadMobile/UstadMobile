@@ -46,7 +46,7 @@
     <string name="username">номи корбар</string>
     <string name="last_name">Номи падар</string>
     <string name="first_name">Ном</string>
-    <string name="register_now">Ҳозир сабти ном кунед</string>
+    <string name="create_new_account">Ҳозир сабти ном кунед</string>
     <string name="new_password">Пароли нав</string>
     <string name="phone_memory">Ҳофизаи телефон</string>
     <string name="login_no_network_auth_fail">Муайянсозии шахсият офлайн имконпазир аст.</string>
@@ -135,7 +135,7 @@
     <string name="file_not_found">Файл ёфт нашуд</string>
     <string name="content_type_multimedia">Мултимедиа</string>
     <string name="multiple_choice">Интихобҳои чандгона</string>
-    <string name="link">Пайванд</string>
+    <string name="content_type_link">Пайванд</string>
     <string name="content_format_text">Матн</string>
     <string name="content_format_paragraph">Банд</string>
     <string name="content_direction_ltr">Аз чап ба рост</string>
@@ -270,7 +270,7 @@
     <string name="import_link_video">Унвон</string>
     <string name="import_title_not_entered">Унвон ворид карда нашудааст</string>
     <string name="no_account">Шумо ҳисоб надоред\?</string>
-    <string name="invalid_url">URL-и беэътибор</string>
+    <string name="import_link_invalid_url">URL-и беэътибор</string>
     <string name="import_link_content_not_supported">Мундариҷа дастгирӣ намешавад</string>
     <string name="import_link_error">Хатогии воридот</string>
     <string name="error_not_found_status">404 !</string>

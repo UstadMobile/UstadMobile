@@ -137,7 +137,7 @@
     <string name="content_type_multimedia">چند رسانه</string>
     <string name="multiple_choice">چند گزینه ای</string>
     <string name="content_type_fill_the_blanks">جاهای خالی را پر نمائید</string>
-    <string name="link">پیوند</string>
+    <string name="content_type_link">پیوند</string>
     <string name="content_format_text">متن</string>
     <string name="content_format_paragraph">پاراگراف</string>
     <string name="content_direction_ltr">از چپ به راست</string>
@@ -148,7 +148,7 @@
     <string name="content_font_14">اندازه متن 14</string>
     <string name="content_font_18">اندازه متن 18</string>
     <string name="confirm">تأیید کردن</string>
-    <string name="register_now">ثبت نام</string>
+    <string name="create_new_account">ثبت نام</string>
     <string name="field_password_min">حد اقل پنج حرف</string>
     <string name="entry_details_license">مجوز</string>
     <string name="content_font_24">اندازه متن 24</string>
@@ -248,7 +248,7 @@
     <string name="import_title_not_entered">عنوان داخل نشده</string>
     <string name="no_account">شما حساب/اکاونت ندارید؟</string>
     <string name="enter_url">Url را داخل نمائید</string>
-    <string name="invalid_url">Url درست نیست</string>
+    <string name="import_link_invalid_url">Url درست نیست</string>
     <string name="import_link_content_not_supported">محتوا قابل حمایت نیست</string>
     <string name="import_link_big_size">اندازه فایل بسیار زیاد است</string>
     <string name="import_link_error">اشتباه در وارد ساختن</string>

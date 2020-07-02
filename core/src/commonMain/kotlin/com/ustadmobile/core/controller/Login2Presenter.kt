@@ -1,11 +1,11 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView
@@ -57,7 +57,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
             GlobalScope.launch {
                 try {
-                    defaultHttpClient().get<HttpStatement> {
+                    UstadAccountManager.getInstance(impl,context).httpClient.get<HttpStatement> {
                         url {
                             takeFrom(serverUrl)
                             encodedPath = "${encodedPath}Login/login"

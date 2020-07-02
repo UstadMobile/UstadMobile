@@ -6,7 +6,7 @@
     <string name="content_type_multimedia">وسائط متعددة (صوت و صورة)</string>
     <string name="multiple_choice">متعدد الخيارات</string>
     <string name="content_type_fill_the_blanks">إملأ الفراغات</string>
-    <string name="link">ربط</string>
+    <string name="content_type_link">ربط</string>
     <string name="content_format_text">نص</string>
     <string name="content_format_paragraph">فقرة</string>
     <string name="content_direction_ltr">من اليسار إلى اليمين</string>
@@ -105,7 +105,7 @@
     <string name="username">اسم المستخدم</string>
     <string name="confirm_password">تأكيد كلمة السر</string>
     <string name="last_name">اسم العائلة</string>
-    <string name="register_now">سجل الآن</string>
+    <string name="create_new_account">سجل الآن</string>
     <string name="phone_memory">ذاكرة الهاتف</string>
     <string name="memory_card">كرت الذاكرة</string>
     <string name="device">جهاز</string>
@@ -274,7 +274,7 @@
     <string name="import_title_not_entered">عنوان غير مدخل</string>
     <string name="no_account">ليس لديك حساب؟</string>
     <string name="enter_url">ادخل URL</string>
-    <string name="invalid_url">URL غير صالح</string>
+    <string name="import_link_invalid_url">URL غير صالح</string>
     <string name="import_link_content_not_supported">المحتوى غير مدعم</string>
     <string name="import_link_big_size">حجم الملف كبير</string>
     <string name="import_link_error">خطأ استيراد</string>

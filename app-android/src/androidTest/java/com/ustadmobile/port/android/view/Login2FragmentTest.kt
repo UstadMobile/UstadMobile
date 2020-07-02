@@ -1,8 +1,10 @@
 package com.ustadmobile.port.android.view
 
+import android.app.Application
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
@@ -57,7 +59,7 @@ class Login2FragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    private val context = getInstrumentation().targetContext
+    private val context = ApplicationProvider.getApplicationContext<Application>()
 
     private lateinit var mockWebServer: MockWebServer
 

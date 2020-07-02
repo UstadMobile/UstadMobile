@@ -89,7 +89,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0"
-                app:srcCompat="@drawable/library_books_24px" />
+                app:srcCompat="@drawable/workspace_join_24px" />
 
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
@@ -142,7 +142,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0"
-                app:srcCompat="@drawable/library_books_24px" />
+                app:srcCompat="@drawable/ic_workspace_add" />
 
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
