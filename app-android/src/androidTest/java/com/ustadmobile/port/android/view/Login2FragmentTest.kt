@@ -127,6 +127,7 @@ class Login2FragmentTest {
         mockWebServer.shutdown()
         val httpUrl = mockWebServer.url("/").toString()
         launchFragment(httpUrl, fillAllFields = true)
+
         onView(allOf(withId(R.id.login_error_text),
                 withText(context.getString(R.string.login_network_error))))
                 .check(matches(isDisplayed()))
