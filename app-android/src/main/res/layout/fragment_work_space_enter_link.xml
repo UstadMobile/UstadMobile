@@ -3,6 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.ustadmobile.port.android.view.WorkSpaceCreateFragment">
     <data>
+        <import type="android.view.View"/>
+
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.WorkspaceEnterLinkPresenter" />
@@ -16,22 +18,33 @@
             type="String" />
 
         <variable
-            name="enabledButton"
+            name="showButton"
             type="boolean" />
+
+        <variable
+            name="showProgress"
+            type="boolean" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ProgressBar
-            style="?android:attr/progressBarStyleHorizontal"
+        <com.google.android.material.progressindicator.ProgressIndicator
             android:id="@+id/progressBar"
+            android:layout_marginTop="@dimen/dimen_20dp"
+            style="@style/Widget.MaterialComponents.ProgressIndicator.Linear.Indeterminate"
+            app:indicatorColor="?colorPrimary"
+            app:trackColor="@color/primaryLightVariantColor"
             android:layout_marginStart="@dimen/dimen_8dp"
             android:layout_marginEnd="@dimen/dimen_8dp"
-            android:visibility="gone"
+            android:visibility="@{showProgress ? View.VISIBLE: View.GONE}"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dimen_20dp"
+            android:layout_height="wrap_content"
+            android:indeterminateOnly="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             />
 
@@ -66,7 +79,7 @@
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginStart="@dimen/dimen_8dp"
             android:layout_marginEnd="@dimen/dimen_8dp"
-            android:enabled="@{enabledButton}"
+            android:visibility="@{showButton ? View.VISIBLE: View.GONE}"
             android:backgroundTint="?colorSecondary"
             android:textColor="?colorOnSecondary"
             android:onClick="@{() -> presenter.goToNext()}"

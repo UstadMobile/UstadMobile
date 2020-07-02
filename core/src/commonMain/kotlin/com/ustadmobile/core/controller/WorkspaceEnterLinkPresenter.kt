@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.Login2View
@@ -16,20 +15,12 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
                                   val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
         UstadBaseController<WorkspaceEnterLinkView>(context, arguments, view) {
 
-    private lateinit var validWorkspaceHost: String
-
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-        validWorkspaceHost = impl.getAppConfigString(AppConfig.KEY_VALID_WORKSPACE,
-                "ustadmobile.com", context) ?: ""
-    }
 
     fun goToNext(){
         impl.go(Login2View.VIEW_NAME, mapOf(ARG_SERVER_URL to view.workspaceLink), context)
     }
 
     fun checkLinkValidity(){
-        view.progressVisible = true
         val link = view.workspaceLink
         if(link != null){
             GlobalScope.launch {
@@ -37,8 +28,7 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
                     val response = defaultHttpClient().get<HttpStatusCode>(link)
                     view.runOnUiThread(Runnable {
                         view.progressVisible = false
-                        view.validLink = link.contains(validWorkspaceHost)
-                                && response == HttpStatusCode.OK
+                        view.validLink = response == HttpStatusCode.OK
                     })
                 }catch (e: Exception) {
                     view.runOnUiThread(Runnable {
@@ -49,6 +39,5 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
             }
         }
     }
-
 
 }

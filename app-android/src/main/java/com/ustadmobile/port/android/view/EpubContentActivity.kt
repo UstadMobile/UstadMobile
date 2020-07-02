@@ -230,6 +230,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
                 bundleToMap(intent.extras), this@EpubContentActivity,
                 networkManagerBle.httpd as ContainerMounter)
         mPresenter?.onCreate(mSavedInstanceState.toStringMap())
+        loading = true
     }
 
 
