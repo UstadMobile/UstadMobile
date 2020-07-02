@@ -168,7 +168,7 @@ class Login2PresenterTest {
         val expectedErrorMsg = impl.getString(
                 MessageID.wrong_user_pass_combo, context)
 
-        verify(view, timeout(defaultTimeout)).showSnackBar(expectedErrorMsg)
+        verify(view, timeout(defaultTimeout)).errorMessage = expectedErrorMsg
         verify(impl, timeout(defaultTimeout).atLeastOnce()).getString(MessageID.wrong_user_pass_combo, context)
         verify(view, timeout(defaultTimeout)).clearFields()
 
@@ -190,7 +190,7 @@ class Login2PresenterTest {
 
         val expectedErrorMsg = impl.getString(
                 MessageID.login_network_error, Any())
-        verify(view, timeout(defaultTimeout)).showSnackBar(expectedErrorMsg)
+        verify(view, timeout(defaultTimeout)).errorMessage = expectedErrorMsg
         verify(impl, timeout(defaultTimeout)).getString(MessageID.login_network_error, context)
     }
 
