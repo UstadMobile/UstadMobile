@@ -14,6 +14,8 @@ interface Login2View : UstadView {
 
     fun clearFields()
 
+    var errorMessage: String
+
     companion object {
 
         const val VIEW_NAME = "Login2View"

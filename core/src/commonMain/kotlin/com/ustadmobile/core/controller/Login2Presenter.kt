@@ -70,18 +70,18 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                             account.endpointUrl = serverUrl
 
                             personRepo.findByUid(account.personUid)
-                            view.runOnUiThread(Runnable { view.inProgress = false })
                             UmAccountManager.setActiveAccount(account, context)
 
                             val activeRepository = UmAccountManager.getRepositoryForActiveAccount(context)
                             if(activeRepository is DoorDatabaseRepository) {
                                 activeRepository.connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
                             }
+                            view.runOnUiThread(Runnable { view.inProgress = false })
                             impl.go(nextDestination, context)
                         } else {
                             view.runOnUiThread(Runnable {
-                                view.showSnackBar(impl.getString(MessageID.wrong_user_pass_combo,
-                                        context))
+                                view.errorMessage = impl.getString(MessageID.wrong_user_pass_combo,
+                                        context)
                                 view.clearFields()
                                 view.inProgress = false
                             })
@@ -89,8 +89,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                     }
                 } catch (e: Exception) {
                     view.runOnUiThread(Runnable {
-                        view.showSnackBar(impl.getString(
-                                MessageID.login_network_error, context))
+                        view.errorMessage = impl.getString(
+                                MessageID.login_network_error, context)
                         view.inProgress = false
                     })
                 }

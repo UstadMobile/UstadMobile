@@ -28,6 +28,13 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
             }
         }
 
+    override var errorMessage: String = ""
+        set(value) {
+            field = value
+            mBinding?.loginErrorText?.visibility = View.VISIBLE
+            mBinding?.loginErrorText?.text = value
+        }
+
     override var isEmptyUsername: Boolean = false
         set(value) {
             field = false
@@ -41,8 +48,14 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         set(value) {
             mBinding?.buttonEnabled = !value
             mBinding?.fieldsEnabled = !value
+            mBinding?.passwordView?.isErrorEnabled = !value
             field = value
+            loading = inProgress
+            if(value){
+                mBinding?.loginErrorText?.visibility = View.GONE
+            }
         }
+
     override var createAccountVisible: Boolean = false
         set(value) {
             field = value
@@ -59,6 +72,7 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         mBinding?.password = ""
         mBinding?.username = ""
     }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {

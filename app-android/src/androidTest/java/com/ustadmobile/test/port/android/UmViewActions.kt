@@ -6,10 +6,12 @@ import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.MotionEvents
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import com.google.android.material.textfield.TextInputLayout
 import org.hamcrest.BaseMatcher
 import org.hamcrest.CoreMatchers.isA
 import org.hamcrest.Description
 import org.hamcrest.Matcher
+import org.hamcrest.TypeSafeMatcher
 
 object UmViewActions {
 
@@ -60,6 +62,16 @@ object UmViewActions {
                 uiController.loopMainThreadForAtLeast(200)
                 MotionEvents.sendUp(uiController, down, coordinates)
             }
+        }
+    }
+
+    fun hasInputLayoutError(expectedErrorText: String): Matcher<View> = object : TypeSafeMatcher<View>() {
+        override fun describeTo(description: Description?) { }
+
+        override fun matchesSafely(item: View?): Boolean {
+            if (item !is TextInputLayout) return false
+            val error = item.error ?: ""
+            return expectedErrorText == error
         }
     }
 

@@ -101,6 +101,19 @@
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:textColor="?colorError"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:id="@+id/login_error_text"
+            android:gravity="center_horizontal"
+            android:layout_width="match_parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/password_view"
+            tools:text="@string/wrong_user_pass_combo"
+            android:layout_height="wrap_content"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/login_button"
@@ -117,7 +130,7 @@
             android:textColor="?colorOnSecondary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/password_view"
+            app:layout_constraintTop_toBottomOf="@+id/login_error_text"
             tools:text="@string/login" />
 
         <com.google.android.material.button.MaterialButton

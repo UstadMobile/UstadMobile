@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.Espresso.onView
@@ -8,6 +9,7 @@ import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -18,6 +20,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -25,10 +28,14 @@ import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import junit.framework.Assert.assertEquals
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import org.hamcrest.Description
+import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
+import org.hamcrest.TypeSafeMatcher
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 
 
 @AdbScreenRecord("Login screen Test")
@@ -66,9 +73,28 @@ class Login2FragmentTest {
         mockWebServer.shutdown()
     }
 
+    @AdbScreenRecord("given create account button is visible when clicked should go to account creation screen")
+    @Test
+    fun givenCreateAccountIsVisible_whenClicked_shouldOpenAccountCreationSection(){
+        launchFragment()
+        onView(withId(R.id.create_account)).perform(click())
+        assertEquals("It navigated to account creation screen",
+                R.id.person_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+    }
 
-    //@AdbScreenRecord("given valid username and password when handle login clicked should go to the destination")
-    //@Test
+    @AdbScreenRecord("given connect as guest button is visible when clicked should go to content screen")
+    @Test
+    fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection(){
+        launchFragment()
+        onView(withId(R.id.connect_as_guest)).perform(click())
+        assertEquals("It navigated to account creation screen",
+                R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+
+    }
+
+
+    @AdbScreenRecord("given valid username and password when handle login clicked should go to the destination")
+    @Test
     fun givenValidUsernameAndPassword_whenHandleLoginClicked_shouldCallSystemImplGo() {
         mockWebServer.enqueue(MockResponse()
                 .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", null)))
@@ -82,29 +108,44 @@ class Login2FragmentTest {
                 R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
     }
 
-    //@AdbScreenRecord("given invalid username and password when handle login clicked should show password and username errors")
-    //@Test
+    @AdbScreenRecord("given invalid username and password when handle login clicked should show password and username errors")
+    @Test
     fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
         mockWebServer.enqueue(MockResponse().setResponseCode(403))
         val httpUrl = mockWebServer.url("/").toString()
         launchFragment(httpUrl, fillAllFields = true)
 
-        onView(allOf(withId(R.id.snackbar_text), withText(
+        onView(allOf(withId(R.id.login_error_text), withText(
                 context.getString(R.string.wrong_user_pass_combo))))
                 .check(matches(isDisplayed()))
     }
 
 
-    //@AdbScreenRecord("given server is offline when handle login clicked should shoe network errors ")
-    //@Test
+    @AdbScreenRecord("given server is offline when handle login clicked should shoe network errors ")
+    @Test
     fun givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
         mockWebServer.shutdown()
         val httpUrl = mockWebServer.url("/").toString()
         launchFragment(httpUrl, fillAllFields = true)
-        onView(allOf(withId(R.id.snackbar_text), withText(
-                context.getString(R.string.login_network_error))))
+        onView(allOf(withId(R.id.login_error_text),
+                withText(context.getString(R.string.login_network_error))))
                 .check(matches(isDisplayed()))
     }
+
+    @AdbScreenRecord("given login form without filling it when clicked should show required fields errors")
+    @Test
+    fun givenFieldsAreNotFilled_whenHandleLoginCalled_thenShouldShowErrors() {
+        mockWebServer.shutdown()
+        val httpUrl = mockWebServer.url("/").toString()
+        launchFragment(httpUrl, fillAllFields = false)
+
+        onView(withId(R.id.username_view)).check(matches(
+                hasInputLayoutError(context.getString(R.string.field_required_prompt))))
+
+        onView(withId(R.id.password_view)).check(matches(
+                hasInputLayoutError(context.getString(R.string.field_required_prompt))))
+    }
+
 
     private fun launchFragment(serverUrl: String? = null, fillAllFields: Boolean = false){
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
