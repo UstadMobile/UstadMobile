@@ -40,4 +40,8 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
         }
     }
 
+    companion object{
+        const val VALID_WORKSPACE_DOMAIN = "ustadmobile.com/lms/"
+    }
+
 }

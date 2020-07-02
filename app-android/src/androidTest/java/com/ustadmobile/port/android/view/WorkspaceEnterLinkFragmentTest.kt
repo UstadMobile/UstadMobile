@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
+import android.app.Application
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -12,6 +14,7 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -41,19 +44,28 @@ class WorkspaceEnterLinkFragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
+    private val context = ApplicationProvider.getApplicationContext<Application>()
+
     @AdbScreenRecord("given valid workspace link when checked should show enable button")
     @Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
         launchFragment("https://www.ustadmobile.com/lms/hosting/")
+
         onView(withId(R.id.next_button)).check(matches(isDisplayed()))
 
+        onView(withId(R.id.workspace_link_view)).check(matches(
+                not(hasInputLayoutError(context.getString(R.string.invalid_url)))))
     }
 
     @AdbScreenRecord("given invalid workspace link when checked should not show next button")
     @Test
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         launchFragment("https://dummy.com")
+
         onView(withId(R.id.next_button)).check(matches(not(isDisplayed())))
+
+        onView(withId(R.id.workspace_link_view)).check(matches(
+                hasInputLayoutError(context.getString(R.string.invalid_url))))
     }
 
 

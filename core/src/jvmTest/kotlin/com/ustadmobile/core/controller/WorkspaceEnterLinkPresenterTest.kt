@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
 import okhttp3.mockwebserver.MockResponse
@@ -48,14 +47,11 @@ class WorkspaceEnterLinkPresenterTest {
 
 
     @Test
-    fun givenValidWorkSpaceLink_whenValidationCheckedAndIsValid_shouldAllowToGoToNextScreen() {
+    fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
         mockWebServer.enqueue(MockResponse().setResponseCode(200))
         val workSpacelink = "${mockWebServer.url("/")}workspace"
 
         whenever(view.workspaceLink).thenReturn(workSpacelink)
-
-        whenever(impl.getAppConfigString(eq(AppConfig.KEY_VALID_WORKSPACE), any(),
-                any())).thenReturn(workSpacelink)
 
         val presenter = WorkspaceEnterLinkPresenter(context,
                 mapOf(), view, impl)
@@ -65,14 +61,11 @@ class WorkspaceEnterLinkPresenterTest {
     }
 
     @Test
-    fun givenInValidWorkSpaceLink_whenValidationCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
+    fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         mockWebServer.enqueue(MockResponse().setResponseCode(404))
         val workSpacelink = "${mockWebServer.url("/")}workspace"
 
         whenever(view.workspaceLink).thenReturn(workSpacelink)
-
-        whenever(impl.getAppConfigString(eq(AppConfig.KEY_VALID_WORKSPACE), any(),
-                any())).thenReturn(workSpacelink)
 
         val presenter = WorkspaceEnterLinkPresenter(context,
                 mapOf(), view, impl)

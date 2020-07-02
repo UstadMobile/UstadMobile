@@ -8,12 +8,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
+import androidx.core.util.PatternsCompat
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentWorkSpaceEnterLinkBinding
 import com.ustadmobile.core.controller.WorkspaceEnterLinkPresenter
+import com.ustadmobile.core.controller.WorkspaceEnterLinkPresenter.Companion.VALID_WORKSPACE_DOMAIN
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
+import org.jetbrains.annotations.TestOnly
 
 
 class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
@@ -43,11 +46,7 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
 
     override var validLink: Boolean = false
         set(value) {
-            if(!value){
-                mBinding?.workspaceLinkView?.isErrorEnabled = true
-                mBinding?.workspaceLinkView?.error = getString(R.string.invalid_url)
-            }
-
+            handleError(!value)
             loading = false
             mBinding?.showButton = value
             field = value
@@ -58,6 +57,19 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
             field = value
             mBinding?.showProgress = value
         }
+
+    private fun handleError(isError: Boolean){
+        mBinding?.workspaceLinkView?.isErrorEnabled = isError
+        mBinding?.workspaceLinkView?.error = if(isError) getString(R.string.invalid_url) else null
+    }
+
+    @TestOnly
+    private fun handleIdling(){
+        if(!isIdle){
+            isIdle = true
+            loading = isIdle
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -77,14 +89,13 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
             override fun afterTextChanged(s: Editable?) {
                 val typedText = s.toString()
                 progressVisible = typedText.isNotEmpty()
-                if (typedText.contains(VALID_WORKSPACE_DOMAIN)) {
-                    lastInputTime = System.currentTimeMillis()
-                    inputCheckHandler.postDelayed(inputCheckerCallback, inputCheckDelay)
-                    if(!isIdle){
-                        isIdle = true
-                        loading = isIdle
-                    }
-                }
+                val canValidate = PatternsCompat.WEB_URL.matcher(typedText).find()
+                        && typedText.contains(VALID_WORKSPACE_DOMAIN)
+                handleError(!canValidate)
+                if(!canValidate) return
+                handleIdling()
+                lastInputTime = System.currentTimeMillis()
+                inputCheckHandler.postDelayed(inputCheckerCallback, inputCheckDelay)
             }
         })
 
@@ -96,9 +107,5 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
         mPresenter = null
         workspaceLink = null
         mBinding = null
-    }
-
-    companion object{
-        const val VALID_WORKSPACE_DOMAIN = "ustadmobile.com/lms/"
     }
 }
