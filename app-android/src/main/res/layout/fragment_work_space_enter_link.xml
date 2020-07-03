@@ -82,7 +82,7 @@
             android:visibility="@{showButton ? View.VISIBLE: View.GONE}"
             android:backgroundTint="?colorSecondary"
             android:textColor="?colorOnSecondary"
-            android:onClick="@{() -> presenter.goToNext()}"
+            android:onClick="@{() -> presenter.handleClickNext()}"
             android:padding="@dimen/dimen_20dp"
             android:text="@string/next"
             app:layout_constraintEnd_toEndOf="parent"
