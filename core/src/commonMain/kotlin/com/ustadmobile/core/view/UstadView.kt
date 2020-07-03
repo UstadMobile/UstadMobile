@@ -111,6 +111,8 @@ interface UstadView {
 
         const val ARG_NEXT = "next"
 
+        const val ARG_WORKSPACE = "workspace"
+
         const val ARG_SERVER_URL = "serverUrl"
 
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
