@@ -6,9 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentLogin2Binding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.Login2View
 
@@ -84,7 +85,7 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         }
 
         mPresenter = Login2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this,
-                personRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext()).personDao)
+                accountManager = UstadAccountManager.getInstance(UstadMobileSystemImpl.instance, requireActivity()))
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return rootView

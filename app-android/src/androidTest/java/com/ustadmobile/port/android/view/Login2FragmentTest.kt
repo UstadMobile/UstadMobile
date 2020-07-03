@@ -1,8 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.app.Application
-import android.view.View
-import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
@@ -10,16 +8,16 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
@@ -28,12 +26,11 @@ import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import junit.framework.Assert.assertEquals
+import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.hamcrest.Description
-import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
-import org.hamcrest.TypeSafeMatcher
+import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -63,7 +60,6 @@ class Login2FragmentTest {
 
     private lateinit var mockWebServer: MockWebServer
 
-
     @Before
     fun setUp(){
         mockWebServer = MockWebServer()
@@ -75,10 +71,42 @@ class Login2FragmentTest {
         mockWebServer.shutdown()
     }
 
+    @AdbScreenRecord("given registration is allowed when logging in then should show create account button")
+    @Test
+    fun givenRegistrationIsAllowed_whenLogin_shouldShowRegisterButton(){
+        launchFragment(registration = true)
+        onView(withId(R.id.create_account)).check(matches(isDisplayed()))
+    }
+
+
+    @AdbScreenRecord("given registration is not allowed when logging in then should hide create account button")
+    @Test
+    fun givenRegistrationIsNotAllowed_whenLogin_shouldNotShowRegisterButton(){
+        launchFragment(registration = false)
+        onView(withId(R.id.create_account)).check(matches(not(isDisplayed())))
+    }
+
+
+    @AdbScreenRecord("given connect as guest is allowed when logging in then should show connect as guest button")
+    @Test
+    fun givenGuestConnectionIsAllowed_whenLogin_shouldShowConnectAsGuestButton(){
+        launchFragment(guestConnection = true)
+        onView(withId(R.id.connect_as_guest)).check(matches(isDisplayed()))
+    }
+
+
+    @AdbScreenRecord("given connect as guest is not allowed when logging in then should hide connect as guest button")
+    @Test
+    fun givenGuestConnectionIsNotAllowed__whenLogin_shouldNotShowConnectAsGuestButton(){
+        launchFragment(guestConnection = false)
+        onView(withId(R.id.connect_as_guest)).check(matches(not(isDisplayed())))
+    }
+
+
     @AdbScreenRecord("given create account button is visible when clicked should go to account creation screen")
     @Test
     fun givenCreateAccountIsVisible_whenClicked_shouldOpenAccountCreationSection(){
-        launchFragment()
+        launchFragment(registration = true)
         onView(withId(R.id.create_account)).perform(click())
         assertEquals("It navigated to account creation screen",
                 R.id.person_edit_dest, systemImplNavRule.navController.currentDestination?.id)
@@ -87,7 +115,7 @@ class Login2FragmentTest {
     @AdbScreenRecord("given connect as guest button is visible when clicked should go to content screen")
     @Test
     fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection(){
-        launchFragment()
+        launchFragment(guestConnection = true)
         onView(withId(R.id.connect_as_guest)).perform(click())
         assertEquals("It navigated to account creation screen",
                 R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
@@ -150,10 +178,20 @@ class Login2FragmentTest {
     }
 
 
-    private fun launchFragment(serverUrl: String? = null, fillAllFields: Boolean = false){
+    private fun launchFragment(serverUrl: String? = null, fillAllFields: Boolean = false,
+                               registration:Boolean = false, guestConnection:Boolean = false){
+
+        val workspace = WorkSpace().apply {
+            name = ""
+            guestLogin = guestConnection
+            registrationAllowed = registration
+        }
+        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), workspace))
+        val bundle = args.plus(mapOf(UstadView.ARG_SERVER_URL to serverUrl,
+                ARG_NEXT to ContentEntryListTabsView.VIEW_NAME) as Map<String, String>).toBundle()
+
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_SERVER_URL to serverUrl,
-                        ARG_NEXT to ContentEntryListTabsView.VIEW_NAME)) {
+                fragmentArgs = bundle) {
             Login2Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }

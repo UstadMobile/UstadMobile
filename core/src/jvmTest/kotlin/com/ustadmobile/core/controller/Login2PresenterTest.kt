@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.UnauthorizedException
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
@@ -11,8 +13,11 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
+import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.util.test.ext.bindJndiForActiveEndpoint
+import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -29,13 +34,14 @@ class Login2PresenterTest {
 
     private lateinit var view: Login2View
 
-    private lateinit var presenter:Login2Presenter
 
     private val context = Any()
 
     private lateinit var mockWebServer: MockWebServer
 
     private lateinit var mockPersonDao: PersonDao
+
+    private lateinit var accountManager: UstadAccountManager
 
     private val defaultTimeout: Long = 5000
 
@@ -48,13 +54,10 @@ class Login2PresenterTest {
             }
         }
         impl = mock ()
+        accountManager = mock{}
         mockPersonDao = mock {}
-        presenter = Login2Presenter(context, mapOf(), view, impl, mockPersonDao)
         mockWebServer = MockWebServer()
         mockWebServer.start()
-
-
-
     }
 
     @After
@@ -62,34 +65,50 @@ class Login2PresenterTest {
         mockWebServer.shutdown()
     }
 
+    private fun createParams(registration:Boolean = false, guestConnection:Boolean = false,
+                             extraParam: Map<String, String> = mapOf()): Map<String,String>{
+        val workspace = WorkSpace().apply {
+            name = ""
+            guestLogin = guestConnection
+            registrationAllowed = registration
+        }
+        var args = mapOf(ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), workspace))
+        args = args.plus(extraParam)
+        return args
+    }
+
 
     @Test
-    fun givenAppPrefCreateAccountVisibilityIsSetToTrue_whenLogin_shouldShowRegisterLabel(){
-        whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("true")
+    fun givenRegistrationIsAllowed_whenLogin_shouldShowRegisterButton(){
+        val presenter = Login2Presenter(context, createParams(registration = true), view, impl,
+                accountManager)
         presenter.onCreate(mapOf())
         verify(view).createAccountVisible = eq(true)
     }
 
 
     @Test
-    fun givenAppPrefCreateAccountVisibilityIsSetToFalse_whenLogin_shouldNotShowRegisterLabel(){
-        whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("false")
+    fun givenRegistrationIsNotAllowed_whenLogin_shouldNotShowRegisterButton(){
+        val presenter = Login2Presenter(context,createParams(registration = false), view, impl,
+                accountManager)
         presenter.onCreate(mapOf())
         verify(view).createAccountVisible = eq(false)
     }
 
 
     @Test
-    fun givenAppPrefConnectAsGuestVisibilityIsSetToTrue_whenLogin_shouldShowRegisterLabel(){
-        whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("true")
+    fun givenGuestConnectionIsAllowed_whenLogin_shouldShowConnectAsGuestButton(){
+        val presenter = Login2Presenter(context,createParams(guestConnection = true), view, impl,
+                accountManager)
         presenter.onCreate(mapOf())
         verify(view).connectAsGuestVisible = eq(true)
     }
 
 
     @Test
-    fun givenAppPrefConnectAsGuestVisibilityIsSetToFalse_whenLogin_shouldNotShowRegisterLabel(){
-        whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("false")
+    fun givenGuestConnectionIsNotAllowed__whenLogin_shouldNotShowConnectAsGuestButton(){
+        val presenter = Login2Presenter(context,createParams(guestConnection = false), view, impl,
+                accountManager)
         presenter.onCreate(mapOf())
         verify(view).connectAsGuestVisible = eq(false)
     }
@@ -98,6 +117,7 @@ class Login2PresenterTest {
     @Test
     fun givenCreateAccountIsVisible_whenClicked_shouldOpenAccountCreationSection(){
         whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("true")
+        val presenter = Login2Presenter(context, createParams(registration = true), view, impl, accountManager)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()
         argumentCaptor<String>{
@@ -111,6 +131,7 @@ class Login2PresenterTest {
     @Test
     fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection(){
         whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("true")
+        val presenter = Login2Presenter(context, createParams(guestConnection = true), view, impl, accountManager)
         presenter.onCreate(mapOf())
         presenter.handleConnectAsGuest()
         argumentCaptor<String>{
@@ -133,8 +154,8 @@ class Login2PresenterTest {
         InitialContext().bindJndiForActiveEndpoint(httpUrl)
 
         val presenter = Login2Presenter(context,
-                mapOf(ARG_SERVER_URL to httpUrl,
-                        ARG_NEXT to destination), view, impl, mockPersonDao)
+                createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl,
+                        ARG_NEXT to destination)), view, impl, accountManager)
         presenter.onCreate(null)
 
         presenter.handleLogin(VALID_USER, VALID_PASS)
@@ -145,22 +166,20 @@ class Login2PresenterTest {
                     destination, firstValue)
         }
 
-        val activeAccount = UmAccountManager.getActiveAccount(context)
-        Assert.assertNotNull(activeAccount)
-
-        val requestMade = mockWebServer.takeRequest()
-        Assert.assertEquals("/Login/login?username=$VALID_USER&password=$VALID_PASS",
-                requestMade.path)
-
-        verifyBlocking(mockPersonDao) { findByUid(activeAccount!!.personUid) }
+        verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
     }
 
     @Test
     fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
+        accountManager = mock{
+            onBlocking{login(any(), any(), any(), any())}.then{
+                throw UnauthorizedException("Access denied")
+            }
+        }
         mockWebServer.enqueue(MockResponse().setResponseCode(403))
         val httpUrl = mockWebServer.url("/").toString()
-        val presenter = Login2Presenter(context,
-                mapOf(ARG_SERVER_URL to httpUrl), view, impl, mockPersonDao)
+        val presenter = Login2Presenter(context, createParams(extraParam =
+        mapOf(ARG_SERVER_URL to httpUrl)), view, impl, accountManager)
         presenter.onCreate(null)
 
         presenter.handleLogin(VALID_USER, "wrongpassword")
@@ -171,19 +190,20 @@ class Login2PresenterTest {
         verify(view, timeout(defaultTimeout)).errorMessage = expectedErrorMsg
         verify(impl, timeout(defaultTimeout).atLeastOnce()).getString(MessageID.wrong_user_pass_combo, context)
         verify(view, timeout(defaultTimeout)).clearFields()
-
-        val requestMade = mockWebServer.takeRequest()
-        Assert.assertEquals("/Login/login?username=$VALID_USER&password=wrongpassword",
-                requestMade.path)
     }
 
 
     @Test
     fun givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
+        accountManager = mock{
+            onBlocking{login(any(), any(), any(), any())}.then{
+                throw throw IllegalStateException("Server error")
+            }
+        }
         mockWebServer.shutdown()
         val httpUrl = mockWebServer.url("/").toString()
         val presenter = Login2Presenter(context,
-                mapOf(ARG_SERVER_URL to httpUrl), view, impl, mockPersonDao)
+                createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl)), view, impl, accountManager)
         presenter.onCreate(null)
 
         presenter.handleLogin(VALID_USER, VALID_PASS)
