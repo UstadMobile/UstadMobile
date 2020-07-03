@@ -66,6 +66,7 @@
     <string name='forgot_password'>Forgot password</string>
     <string name='notifications'>Notifications</string>
     <string name='account'>Account</string>
+    <string name='accounts'>Accounts</string>
     <string name="share_application">Share App</string>
     <string name="share">Share</string>
     <string name="send">Send</string>
@@ -680,5 +681,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="create_workspace_organisation">Create a new workspace for your organization\'s students and teachers on Ustad Mobile</string>
     <string name="connect_as_guest">Connect as guest</string>
     <string name="create_account">Create account</string>
+    <string name="my">My %1$s</string>
+    <string name="add_another">Add another %1$s </string>
 
 </resources>

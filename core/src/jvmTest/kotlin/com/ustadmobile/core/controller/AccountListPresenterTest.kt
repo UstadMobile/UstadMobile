@@ -6,8 +6,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertTrue
@@ -20,8 +19,6 @@ class AccountListPresenterTest {
     private lateinit var mockView: AccountListView
 
     private lateinit var context: Any
-
-    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
     private lateinit var accountManager: UstadAccountManager
 
@@ -43,43 +40,40 @@ class AccountListPresenterTest {
             on{storedAccountsLive}.thenReturn(storedAccountsLiveData)
             on{activeAccountLive}.thenReturn(activeAccountLiveData)
         }
-        mockLifecycleOwner = mock {
-            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
-        }
         context = Any()
     }
 
     @Test
     fun givenStoreAccounts_whenLaunched_thenShouldShowAllAccounts(){
-       val presenter = AccountListPresenter(context, mapOf(), mockView, impl,mockLifecycleOwner,
+       val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
                 accountManager)
 
         presenter.onCreate(null)
 
         storedAccountsLiveData.sendValue(listOf(UmAccount(1,"dummy",null,null)))
-        nullableArgumentCaptor<List<UmAccount>>().apply {
-            verify(mockView, timeout(defaultTimeout).atLeastOnce()).storedAccounts = capture()
-            lastValue?.isNotEmpty()?.let { Assert.assertTrue("Account list was displayed to the view", it) }
+        nullableArgumentCaptor<DoorLiveData<List<UmAccount>>>().apply {
+            verify(mockView, timeout(defaultTimeout).atLeastOnce()).accountListLiveData = capture()
+            Assert.assertTrue("Account list was displayed to the view", firstValue != null)
         }
     }
 
     @Test
     fun givenActiveAccountExists_whenLaunched_thenShouldShowIt(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,mockLifecycleOwner,
+        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
                 accountManager)
 
         presenter.onCreate(null)
 
         activeAccountLiveData.sendValue(UmAccount(1,"dummy",null,null))
-        nullableArgumentCaptor<UmAccount>().apply {
-            verify(mockView, timeout(defaultTimeout).atLeastOnce()).activeAccount = capture()
+        nullableArgumentCaptor<DoorLiveData<UmAccount>>().apply {
+            verify(mockView, timeout(defaultTimeout).atLeastOnce()).activeAccountLive = capture()
             Assert.assertTrue("Active account was displayed to the view", lastValue != null)
         }
     }
 
     @Test
     fun givenAddAccountButton_whenClicked_thenShouldOpenGetStarted(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,mockLifecycleOwner,
+        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
                 accountManager)
 
         presenter.onCreate(null)
@@ -94,7 +88,7 @@ class AccountListPresenterTest {
 
     @Test
     fun givenDeleteAccountButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,mockLifecycleOwner,
+        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
                 accountManager)
 
         val account = UmAccount(1,"dummy", null,null)
@@ -111,15 +105,15 @@ class AccountListPresenterTest {
 
     @Test
     fun givenLogoutButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,mockLifecycleOwner,
+        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
                 accountManager)
 
         val account = UmAccount(1,"dummy", null,null)
         presenter.onCreate(null)
 
-        activeAccountLiveData.sendValue(UmAccount(1,"dummy",null,null))
+        activeAccountLiveData.sendValue(account)
 
-        presenter.handleClickLogout()
+        presenter.handleClickLogout(account)
         argumentCaptor<UmAccount>{
             verify(accountManager).removeAccount(capture(), any())
             assertTrue("Expected account was removed from the device",
@@ -131,7 +125,7 @@ class AccountListPresenterTest {
     @Test
     fun givenProfileButton_whenClicked_thenShouldGoToProfileView(){
 
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,mockLifecycleOwner,
+        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
                 accountManager)
 
         val account = UmAccount(1,"dummy", null,null)
@@ -148,7 +142,7 @@ class AccountListPresenterTest {
 
     @Test
     fun givenAboutButton_whenClicked_thenShouldGoToAboutView(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,mockLifecycleOwner,
+        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
                 accountManager)
 
         presenter.onCreate(null)

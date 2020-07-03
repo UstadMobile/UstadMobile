@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools">
+
+<data>
+    <import type="com.ustadmobile.lib.db.entities.UmAccount"/>
+    <import type="android.view.View"/>
+
+    <variable
+        name="account"
+        type="UmAccount" />
+
+    <variable
+        name="presenter"
+        type="com.ustadmobile.core.controller.AccountListPresenter" />
+</data>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:visibility="@{account == null ? View.GONE:View.VISIBLE}"
+    android:layout_height="wrap_content"
+    android:id="@+id/item_clazz_log_attendance_list"
+    app:backgroundIfAnimationEnabled="@{@drawable/bg_listitem}">
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/person_profile_icon"
+        app:personPicturePersonUid="@{account.personUid}"
+        android:layout_width="@dimen/dimen_48dp"
+        android:layout_height="@dimen/dimen_48dp"
+        android:layout_margin="@dimen/dimen_16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:src="@drawable/ic_person_black_24dp"
+        />
+
+    <TextView
+        android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+        android:id="@+id/person_full_name"
+        app:personNamePersonUid="@{account.personUid}"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="@dimen/dimen_70dp"
+        android:layout_marginTop="@dimen/dimen_16dp"
+        android:layout_marginBottom="@dimen/dimen_16dp"
+        tools:text="Person full name"
+        />
+
+    <!-- Line 2-->
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/account_user_icon"
+        android:layout_width="@dimen/dimen_16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:src="@drawable/ic_delete_black_24dp"
+        android:tint="?colorOnIconTint"
+        app:layout_constraintStart_toStartOf="@+id/person_full_name"
+        app:layout_constraintTop_toBottomOf="@+id/person_full_name"
+        android:layout_marginEnd="@dimen/dimen_16dp"/>
+
+    <TextView
+        android:layout_marginStart="@dimen/dimen_10dp"
+        android:layout_marginTop="@dimen/dimen_8dp"
+        android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+        android:id="@+id/person_username"
+        android:layout_width="wrap_content"
+        android:text="@{account.username}"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/account_user_icon"
+        app:layout_constraintTop_toBottomOf="@+id/person_full_name"
+        tools:text="Username"
+        />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/account_link_icon"
+        android:layout_width="@dimen/dimen_16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:src="@drawable/link"
+        android:tint="?colorOnIconTint"
+        app:layout_constraintStart_toEndOf="@+id/person_username"
+        app:layout_constraintTop_toBottomOf="@+id/person_full_name"
+        android:layout_marginStart="@dimen/dimen_16dp"/>
+
+
+    <TextView
+        android:layout_marginStart="@dimen/dimen_10dp"
+        android:layout_marginTop="@dimen/dimen_8dp"
+        android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+        android:id="@+id/person_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@{account.endpointUrl}"
+        android:layout_marginEnd="@dimen/dimen_16dp"
+        app:layout_constraintStart_toEndOf="@+id/account_link_icon"
+        app:layout_constraintTop_toBottomOf="@+id/person_full_name"
+        tools:text="https://example.com"
+        />
+
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/person_profile"
+        style="@style/UmTheme.Widget.OutlinedButton"
+        android:onClick="@{() -> presenter.handleClickProfile(account.personUid)}"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_16dp"
+        android:padding="@dimen/dimen_8dp"
+        android:layout_marginBottom="@dimen/dimen_16dp"
+        android:contentDescription="@string/profile"
+        android:text="@{String.format(@string/my,@string/profile)}"
+        app:layout_constraintStart_toEndOf="@+id/account_user_icon"
+        app:layout_constraintTop_toBottomOf="@+id/account_user_icon"
+        app:layout_constraintBottom_toTopOf="@+id/divider" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/account_logout"
+        style="@style/UmTheme.Widget.OutlinedButton"
+        android:onClick="@{() -> presenter.handleClickLogout(account)}"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen_16dp"
+        android:layout_marginStart="@dimen/dimen_16dp"
+        android:padding="@dimen/dimen_8dp"
+        android:layout_marginBottom="@dimen/dimen_16dp"
+        android:contentDescription="@string/profile"
+        android:text="@string/logout"
+        app:layout_constraintStart_toEndOf="@+id/person_profile"
+        app:layout_constraintTop_toBottomOf="@+id/account_user_icon"
+        app:layout_constraintBottom_toTopOf="@+id/divider" />
+    <VideoView
+        android:id="@+id/divider"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="parent"
+        android:layout_width="match_parent"
+        android:background="?android:listDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="0.6dp"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

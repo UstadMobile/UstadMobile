@@ -5,14 +5,17 @@ import android.text.format.DateFormat
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
-import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.lib.db.entities.*
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMFileUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 
@@ -200,4 +203,19 @@ fun TextView.setHtmlText(htmlText: String?) {
 @BindingAdapter("fileSize")
 fun TextView.setFileSize(fileSize: Long) {
     text = UMFileUtil.formatFileSize(fileSize)
+}
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter("personNamePersonUid")
+fun TextView.setPersonFullName(personFullNamePersonUid: Long?){
+    val personUid = personFullNamePersonUid ?: 0L
+
+    GlobalScope.async(Dispatchers.Main) {
+        val personDao = UmAccountManager.getActiveDatabase(context).personDao
+        val person = personDao.findByUidAsync(personUid)
+        if(person != null){
+            text = "${person.firstNames} ${person.lastName}"
+        }
+        setTag(R.id.tag_imageloadjob, null)
+    }
 }
