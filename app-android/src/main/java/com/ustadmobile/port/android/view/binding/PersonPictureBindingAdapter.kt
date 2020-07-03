@@ -1,7 +1,12 @@
 package com.ustadmobile.port.android.view.binding
 
+import android.content.res.ColorStateList
+import android.content.res.Resources
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.databinding.BindingAdapter
 import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.Picasso
@@ -12,6 +17,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import java.io.File
+
 
 @BindingAdapter(value=["personPicturePersonUid", "personPictureVisibilityGoneIfNoPicture"], requireAll = false)
 fun ImageView.setPersonPicture(personPicturePersonUid: Long?, personPictureVisibilityGoneIfNoPicture: Boolean?){
@@ -47,7 +53,15 @@ fun ImageView.setPersonPicture(personPicturePersonUid: Long?, personPictureVisib
                         .into(this@setPersonPicture)
             }
             personPictureVisibilityGoneIfNoPicture == true -> visibility = View.GONE
-            else -> setImageResource(R.drawable.ic_person_black_24dp)
+            else -> {
+                setImageResource(R.drawable.ic_person_black_24dp)
+
+                //support for Dark mode
+                val typedValue = TypedValue()
+                val theme: Resources.Theme = context.theme
+                theme.resolveAttribute(R.attr.colorOnIconTint, typedValue, true)
+                setColorFilter(typedValue.data)
+            }
         }
 
         setTag(R.id.tag_imageloadjob, null)
