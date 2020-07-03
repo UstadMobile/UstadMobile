@@ -8,7 +8,9 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.UmAccount
+import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.Assert
 import org.junit.Before
@@ -26,9 +28,15 @@ class AccountListPresenterTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
-    private val  storedAccountsLiveData = DoorMutableLiveData<List<UmAccount>>()
+    private val  accountListLive = DoorMutableLiveData<List<UmAccount>>()
 
-    private val  activeAccountLiveData = DoorMutableLiveData<UmAccount>()
+    private val  activeAccountLive = DoorMutableLiveData<UmAccount>()
+
+    private lateinit var mockedAccountListObserver:DoorObserver<List<UmAccount>>
+
+    private lateinit var mockedAccountObserver:DoorObserver<UmAccount>
+
+    private val accountList = listOf(UmAccount(1,"dummy",null,null))
 
     @Before
     fun setup() {
@@ -37,10 +45,18 @@ class AccountListPresenterTest {
         impl = mock{}
 
         accountManager = mock{
-            on{storedAccountsLive}.thenReturn(storedAccountsLiveData)
-            on{activeAccountLive}.thenReturn(activeAccountLiveData)
+            on{storedAccountsLive}.thenReturn(accountListLive)
+            on{activeAccountLive}.thenReturn(activeAccountLive)
         }
         context = Any()
+
+        mockedAccountListObserver = mock{
+            on{ onChanged(any()) }.thenAnswer{ accountList }
+        }
+
+        mockedAccountObserver = mock{
+            on{ onChanged(any()) }.thenAnswer{ accountList[0] }
+        }
     }
 
     @Test
@@ -49,11 +65,11 @@ class AccountListPresenterTest {
                 accountManager)
 
         presenter.onCreate(null)
-
-        storedAccountsLiveData.sendValue(listOf(UmAccount(1,"dummy",null,null)))
-        nullableArgumentCaptor<DoorLiveData<List<UmAccount>>>().apply {
-            verify(mockView, timeout(defaultTimeout).atLeastOnce()).accountListLiveData = capture()
-            Assert.assertTrue("Account list was displayed to the view", firstValue != null)
+        accountListLive.observeForever(mockedAccountListObserver)
+        accountListLive.sendValue(accountList)
+        argumentCaptor<List<UmAccount>>{
+            verify(mockedAccountListObserver, timeout(defaultTimeout).atLeastOnce()).onChanged(capture())
+            assertTrue("Account list was displayed", accountList.containsAll(lastValue))
         }
     }
 
@@ -64,10 +80,11 @@ class AccountListPresenterTest {
 
         presenter.onCreate(null)
 
-        activeAccountLiveData.sendValue(UmAccount(1,"dummy",null,null))
-        nullableArgumentCaptor<DoorLiveData<UmAccount>>().apply {
-            verify(mockView, timeout(defaultTimeout).atLeastOnce()).activeAccountLive = capture()
-            Assert.assertTrue("Active account was displayed to the view", lastValue != null)
+        activeAccountLive.observeForever(mockedAccountObserver)
+        activeAccountLive.sendValue(accountList[0])
+        argumentCaptor<UmAccount>{
+            verify(mockedAccountObserver, timeout(defaultTimeout).atLeastOnce()).onChanged(capture())
+            assertEquals("Active account was displayed", accountList[0], lastValue)
         }
     }
 
@@ -111,7 +128,7 @@ class AccountListPresenterTest {
         val account = UmAccount(1,"dummy", null,null)
         presenter.onCreate(null)
 
-        activeAccountLiveData.sendValue(account)
+        activeAccountLive.sendValue(account)
 
         presenter.handleClickLogout(account)
         argumentCaptor<UmAccount>{
