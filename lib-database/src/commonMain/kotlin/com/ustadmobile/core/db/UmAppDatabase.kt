@@ -32,7 +32,7 @@ import kotlin.jvm.Volatile
     SyncResult::class, School::class,
     TimeZoneEntity::class,
     SchoolMember::class, Report::class, ReportFilter::class,
-    DeviceSession::class
+    DeviceSession::class, WorkSpace::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -221,6 +221,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("deviceSessionDao")
     abstract val deviceSessionDao: DeviceSessionDao
+    
+    @JsName("workSpaceDao")
+    abstract val workSpaceDao: WorkSpaceDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
