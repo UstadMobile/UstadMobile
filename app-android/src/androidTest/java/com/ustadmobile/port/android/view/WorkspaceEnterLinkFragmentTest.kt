@@ -49,7 +49,7 @@ class WorkspaceEnterLinkFragmentTest {
     @AdbScreenRecord("given valid workspace link when checked should show enable button")
     @Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
-        launchFragment("https://www.ustadmobile.com/lms/hosting/")
+        launchFragment("ustadmobile.com/lms/hosting/")
 
         onView(withId(R.id.next_button)).check(matches(isDisplayed()))
 

@@ -114,6 +114,9 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     val storedAccounts: List<UmAccount>
         get() = _storedAccounts.toList()
 
+    val storedAccountsLive: DoorLiveData<List<UmAccount>>
+        get() = _storedAccountsLive
+
 
 
     //Provides an immutable map that prevents any possibility of other code changing the internal copy

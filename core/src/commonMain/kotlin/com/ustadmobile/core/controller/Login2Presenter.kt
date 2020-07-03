@@ -28,6 +28,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+
         nextDestination = arguments[ARG_NEXT] ?: impl.getAppConfigString(
                 AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context) ?: ContentEntryListTabsView.VIEW_NAME
         serverUrl = if (arguments.containsKey(ARG_SERVER_URL)) {
