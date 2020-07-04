@@ -154,7 +154,7 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     }
 
     private fun ProgressBar.isIdle(): Boolean {
-        return visibility == VISIBLE && (isIndeterminate || progress < max)
+        return visibility != VISIBLE || (!isIndeterminate && progress >= max)
     }
 
     private fun RecyclerView.isIdle() : Boolean{
