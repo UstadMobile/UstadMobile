@@ -19,7 +19,6 @@ import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -116,10 +115,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
 
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, kodein)
         clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this, mPresenter)
         clazzMemberNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
                 View.OnClickListener { onClickNewClazzMemberWithClazz() },

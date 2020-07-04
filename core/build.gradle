@@ -29,6 +29,12 @@ android {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
 }
 
 sourceCompatibility = '1.8'
@@ -136,7 +142,9 @@ kotlin {
         }
     }
 
-    android()
+    android {
+
+    }
 
     js("js") {
         nodejs()

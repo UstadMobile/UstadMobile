@@ -8,12 +8,11 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentHolidayEditBinding
 import com.ustadmobile.core.controller.HolidayEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.lib.db.entities.Holiday
+
 class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
 
     private var mBinding: FragmentHolidayEditBinding? = null
@@ -38,10 +37,7 @@ class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
         setEditFragmentTitle(R.string.holiday)
 
         mPresenter = HolidayEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, kodein)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 

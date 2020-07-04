@@ -10,7 +10,6 @@ import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.lib.db.entities.Clazz
@@ -30,10 +29,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
         val view = super.onCreateView(inflater, container, savedInstanceState)
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         mPresenter = ClazzListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, viewLifecycleOwner, kodein)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
             requireContext().getString(R.string.create_new,
                     requireContext().getString(R.string.clazz)))

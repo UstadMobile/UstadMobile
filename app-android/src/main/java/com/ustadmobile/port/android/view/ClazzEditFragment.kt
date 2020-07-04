@@ -154,12 +154,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
         scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-        mPresenter = kodein.direct.newInstance {
-            ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
-                viewLifecycleOwner, instance(),
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext())) }
-        //mPresenter =
+        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
+                viewLifecycleOwner, kodein)
         scheduleRecyclerAdapter?.presenter = mPresenter
         return rootView
     }

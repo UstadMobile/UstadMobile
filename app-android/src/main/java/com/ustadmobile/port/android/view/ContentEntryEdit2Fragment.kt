@@ -214,11 +214,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             val networkManagerBle = (activity as? MainActivity)?.networkManagerBle?.await()
             withContext(Dispatchers.Main){
                 mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), thisFrag,
-                        thisFrag, UstadMobileSystemImpl.instance,
-                        UmAccountManager.getActiveDatabase(requireContext()),
-                        UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                        networkManagerBle?.containerDownloadManager,
-                        UmAccountManager.activeAccountLiveData)
+                        thisFrag, kodein)
                 mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
                 navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
                         Language::class.java) {

@@ -57,10 +57,7 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
         val view = super.onCreateView(inflater, container, savedInstanceState)
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         mPresenter = PersonGroupListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, this, kodein)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
         mDataRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter)

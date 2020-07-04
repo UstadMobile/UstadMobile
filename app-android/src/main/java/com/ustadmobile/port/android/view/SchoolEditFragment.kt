@@ -17,8 +17,6 @@ import com.toughra.ustadmobile.databinding.FragmentSchoolEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzSimpleEditBinding
 import com.ustadmobile.core.controller.SchoolEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -102,10 +100,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
 
         mPresenter = SchoolEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, kodein)
 
         clazzRecyclerAdapter?.presenter = mPresenter
 

@@ -4,6 +4,6 @@
 
     <application
         android:supportsRtl="true"
-        android:name="com.ustadmobile.port.android.TestApp"/>
+        android:name="com.ustadmobile.port.android.impl.UstadApp"/>
 
 </manifest>

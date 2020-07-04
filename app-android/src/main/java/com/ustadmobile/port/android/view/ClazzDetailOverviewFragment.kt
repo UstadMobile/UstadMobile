@@ -86,9 +86,7 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
         repo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
         mPresenter = ClazzDetailOverviewPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()), UmAccountManager.activeAccountLiveData)
+                this, kodein)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView

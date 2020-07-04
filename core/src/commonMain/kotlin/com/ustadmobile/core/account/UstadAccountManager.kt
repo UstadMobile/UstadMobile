@@ -123,6 +123,12 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     val storedDatabases: Map<String, DbPair>
         get() = dbs.entries.map { it.key to DbPair(it.value.db, it.value.repo) }.toMap()
 
+    val activeDatabase: UmAppDatabase
+        get() = dbs[activeAccount.endpointUrl]?.db ?: throw IllegalStateException("No database for active account")
+
+    val activeRepository: UmAppDatabase
+        get() = dbs[activeAccount.endpointUrl]?.repo ?: throw IllegalStateException("No database for active account")
+
     fun getActiveDatabase(context: Any) = dbs[activeAccount.endpointUrl]?.db ?: throw IllegalStateException("No database for active account")
 
     fun getActiveRepository(context: Any) = dbs[activeAccount.endpointUrl]?.repo ?: throw IllegalStateException("No repo for active account")

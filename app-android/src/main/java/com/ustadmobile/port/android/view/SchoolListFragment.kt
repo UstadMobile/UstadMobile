@@ -11,8 +11,6 @@ import com.toughra.ustadmobile.databinding.ItemSchoolListItemBinding
 import com.ustadmobile.core.controller.SchoolListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SchoolListView
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
@@ -59,10 +57,7 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
                               savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = SchoolListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, this, kodein)
 
         mDataRecyclerViewAdapter = SchoolListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,

@@ -4,35 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemReportListBinding
 import com.ustadmobile.core.controller.ReportListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.lib.db.entities.Report
-
-import com.ustadmobile.core.view.GetResultMode
-import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.util.ReportGraphHelper
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import okhttp3.Dispatcher
 
 class ReportListFragment() : UstadListViewFragment<Report, Report>(),
         ReportListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
@@ -78,10 +66,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = ReportListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, this, kodein)
 
         mDataRecyclerViewAdapter = ReportListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,

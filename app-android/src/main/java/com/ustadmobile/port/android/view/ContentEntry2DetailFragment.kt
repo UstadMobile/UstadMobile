@@ -184,11 +184,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             val thisFrag = this@ContentEntry2DetailFragment
             withContext(Dispatchers.Main){
                 mPresenter = ContentEntry2DetailPresenter(requireContext(), arguments.toStringMap(), thisFrag,
-                        thisFrag.viewLifecycleOwner, UstadMobileSystemImpl.instance, true,
-                        UmAccountManager.getActiveDatabase(requireContext()),
-                        UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                        networkManagerBle?.containerDownloadManager,
-                        UmAccountManager.activeAccountLiveData, ::goToContentEntry)
+                        thisFrag.viewLifecycleOwner, kodein)
                 mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
                 val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
