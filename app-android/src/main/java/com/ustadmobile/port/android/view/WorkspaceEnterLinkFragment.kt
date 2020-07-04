@@ -26,8 +26,6 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
 
     private val inputCheckHandler: Handler = Handler()
 
-    private val atomicBoolean = AtomicBoolean(false)
-
     private val inputCheckerCallback = Runnable {
         val typedLink = workspaceLink
         if(typedLink != null){
@@ -44,7 +42,6 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
             handleError(!value)
             mBinding?.showButton = value
             field = value
-            atomicBoolean.set(value)
         }
 
     override var progressVisible: Boolean = false
@@ -69,17 +66,14 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
         mPresenter = WorkspaceEnterLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         mBinding?.organisationLink?.addTextChangedListener(object: TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                val typedUrl = s.toString()
-                progressVisible = typedUrl.isNotEmpty() && !validLink
-            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(url: CharSequence?, start: Int, before: Int, count: Int) {
                 inputCheckHandler.removeCallbacks(inputCheckerCallback)
             }
             override fun afterTextChanged(s: Editable?) {
+                progressVisible = true
                 inputCheckHandler.postDelayed(inputCheckerCallback, inputCheckDelay)
             }
-
         })
 
         return rootView
