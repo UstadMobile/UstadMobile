@@ -68,7 +68,6 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid){
             view.markingLeft = true
         }else {
-
             view.markingLeft = unmarkedMembers.size > 1
         }
 

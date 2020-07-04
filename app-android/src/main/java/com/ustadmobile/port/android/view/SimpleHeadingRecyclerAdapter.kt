@@ -26,6 +26,7 @@ class SimpleHeadingRecyclerAdapter(heading: String)
                 ItemSimpleHeadingBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.headingText = headingText
+                    viewHolder?.itemView?.tag = headingText
                 })
     }
 

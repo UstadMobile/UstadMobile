@@ -270,14 +270,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
         dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
 
+        //fragment_list_recyclerview
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
 
-        mPresenter = ClazzWorkDetailOverviewPresenter(requireContext(),
-                arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+
 
         //Main Merger:PP
         detailRecyclerAdapter = ClazzWorkBasicDetailsRecyclerAdapter(entity)
@@ -321,7 +317,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         //Public comments:
         newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_class_comment), true, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWorkUid?:0L, 0, UmAccountManager.getActivePersonUid(requireContext())
+                entity?.clazzWorkUid?:0L, 0,
+                UmAccountManager.getActivePersonUid(requireContext())
         )
         newPublicCommentRecyclerAdapter?.visible = true
 
@@ -335,9 +332,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         //Private comments section:
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWorkUid?:0L, 0, UmAccountManager.getActivePersonUid(requireContext())
+                entity?.clazzWorkUid?:0L, 0,
+                UmAccountManager.getActivePersonUid(requireContext())
         )
-        newPrivateCommentRecyclerAdapter?.visible = true
+        newPrivateCommentRecyclerAdapter?.visible = false
 
         privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
             privateCommentsObserver = PagedListSubmitObserver(it)
@@ -349,6 +347,14 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 getText(R.string.content).toString()
         )
         contentHeadingRecyclerAdapter?.visible = true
+
+
+        mPresenter = ClazzWorkDetailOverviewPresenter(requireContext(),
+                arguments.toStringMap(), this,
+                this, UstadMobileSystemImpl.instance,
+                UmAccountManager.getActiveDatabase(requireContext()),
+                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
+                UmAccountManager.activeAccountLiveData)
 
         detailMergerRecyclerAdapter = MergeAdapter(
                 detailRecyclerAdapter,
@@ -382,10 +388,23 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         mBinding = null
         mPresenter = null
         entity = null
-        contentRecyclerAdapter = null
-        quizQuestionsRecyclerAdapter = null
+        newPrivateCommentRecyclerAdapter = null
         publicCommentsRecyclerAdapter = null
         privateCommentsRecyclerAdapter = null
+        newPublicCommentRecyclerAdapter = null
+        detailRecyclerAdapter = null
+        contentHeadingRecyclerAdapter = null
+        contentRecyclerAdapter = null
+        submissionHeadingRecyclerAdapter = null
+        submissionResultRecyclerAdapter = null
+        submissionFreeTextRecyclerAdapter = null
+        questionsHeadingRecyclerAdapter = null
+        quizQuestionsRecyclerAdapter = null
+        submissionButtonRecyclerAdapter = null
+        publicCommentsHeadingRecyclerAdapter = null
+        publicCommentsMergerRecyclerAdapter = null
+        privateCommentsHeadingRecyclerAdapter = null
+        privateCommentsMergerRecyclerAdapter = null
 
     }
 
@@ -421,23 +440,16 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         get() = field
         set(value) {
             field = value
-            mBinding?.clazzWorkWithSubmission = value
             detailRecyclerAdapter?._clazzWork = entity
             detailRecyclerAdapter?.visible = true
 
             submissionFreeTextRecyclerAdapter?._clazzWork = entity
 
-
             submissionResultRecyclerAdapter?._clazzWork = entity
             submissionResultRecyclerAdapter?.visible = true
 
-
-            if(value?.clazzWorkSubmissionType ==
-                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT && studentMode){
-                submissionFreeTextRecyclerAdapter?.visible = true
-            }else{
-                submissionFreeTextRecyclerAdapter?.visible = false
-            }
+            submissionFreeTextRecyclerAdapter?.visible = value?.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT && studentMode
 
             if(value?.clazzWorkSubmissionType ==
                     ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ && !studentMode){
@@ -446,7 +458,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
             submissionButtonRecyclerAdapter?.visible = studentMode &&
                     value?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L &&
-                    value?.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+                    value.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
 
             submissionHeadingRecyclerAdapter?.visible =
                     submissionButtonRecyclerAdapter?.visible?:false
@@ -541,7 +553,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             : DiffUtil.ItemCallback<ClazzWorkQuestionAndOptionWithResponse>() {
             override fun areItemsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse,
                                          newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
-                return oldItem.clazzWorkQuestion.clazzWorkQuestionUid ===
+                return oldItem.clazzWorkQuestion.clazzWorkQuestionUid ==
                         newItem.clazzWorkQuestion.clazzWorkQuestionUid
             }
 

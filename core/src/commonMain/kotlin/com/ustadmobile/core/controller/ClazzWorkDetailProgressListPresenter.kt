@@ -34,8 +34,6 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
 
     private var filterByClazzWorkUid: Long = -1
 
-    class ClazzMemberWithClazzWorkProgressListSortOption(val sortOrder: SortOrder, context: Any)
-        : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -80,7 +78,6 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
                         UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString()),
                 context)
 
-        //super.handleClickEntry(entry)
     }
 
     override fun handleClickCreateNewFab() {
@@ -88,10 +85,6 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? ClazzMemberWithClazzWorkProgressListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
+        //No sort here
     }
 }

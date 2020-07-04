@@ -21,7 +21,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.view.binding.dateWithTimeFormat
 import com.ustadmobile.port.android.view.binding.dateWithTimeFormatWithPrepend
 import com.ustadmobile.test.core.impl.CrudIdlingResource
@@ -33,7 +32,6 @@ import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.*
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.CoreMatchers
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.*
@@ -108,17 +106,17 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     }
 
-    fun checkClazzWorkBasicDetailDisplayOk(clazzWork: ClazzWork, contentList: List<ContentEntry>,
-            teacher: Boolean = false){
-        Thread.sleep(500)
+    private fun checkClazzWorkBasicDetailDisplayOk(clazzWork: ClazzWork, contentList: List<ContentEntry>,
+                                                   teacher: Boolean = false){
         onView(withId(R.id.item_clazzwork_detail_description_cl)).check(matches(isDisplayed()))
         onView(withId(R.id.item_clazzwork_detail_description_title)).check(matches(isDisplayed()))
         onView(withText(clazzWork.clazzWorkInstructions)).check(matches(isDisplayed()))
 
-        val startDateString =  dateWithTimeFormat.format(
-                arrayOf(clazzWork.clazzWorkStartDateTime, scheduleTimeToDate(clazzWork.clazzWorkStartTime.toInt()), ""))
+        val startDateString =  dateWithTimeFormat.format(arrayOf(clazzWork.clazzWorkStartDateTime,
+                scheduleTimeToDate(clazzWork.clazzWorkStartTime.toInt()), ""))
         val dueDateString =  dateWithTimeFormatWithPrepend.format(
-                arrayOf("Due date", clazzWork.clazzWorkDueDateTime, scheduleTimeToDate(clazzWork.clazzWorkDueTime.toInt()), ""))
+                arrayOf("Due date", clazzWork.clazzWorkDueDateTime,
+                        scheduleTimeToDate(clazzWork.clazzWorkDueTime.toInt()), ""))
         onView(withText(startDateString)).check(matches(isDisplayed()))
         onView(withText(dueDateString)).check(matches(isDisplayed()))
         onView(withText("Content")).check(matches(isDisplayed()))
@@ -130,6 +128,7 @@ class ClazzWorkDetailOverviewFragmentTest {
         //Scroll to class comments
         onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(
                 scrollToHolder(withTagInSimpleHeading("Class comments")))
+
         onView(withText("Class comments")).check(matches(isDisplayed()))
 
         if(!teacher) {
@@ -143,10 +142,10 @@ class ClazzWorkDetailOverviewFragmentTest {
         }
     }
 
-    fun checkQuizQuestionsDisplayOk(
+    private fun checkQuizQuestionsDisplayOk(
             clazzWorkQuizStuff : TestClazzWorkWithQuestionAndOptionsAndResponse?,
             teacher: Boolean = false){
-        Thread.sleep(500)
+        //Thread.sleep(500)
 
         //Scroll to Submission
         if(teacher){
@@ -165,6 +164,7 @@ class ClazzWorkDetailOverviewFragmentTest {
         onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(
                 scrollToHolder(withTagInQuestion(q1uid!!)))
 
+        Thread.sleep(1000)
         onView(allOf(withText("Question 1"),
             withId(R.id.item_clazzworkquestionandoptionswithresponse_title_tv))).check(
                 matches(isDisplayed()))
@@ -520,8 +520,8 @@ class ClazzWorkDetailOverviewFragmentTest {
         dbRule.account.personUid = studentMember2.clazzMemberPersonUid
 
         reloadFragment(testClazzWork.clazzWork)
-        Thread.sleep(1000)
 
+        Thread.sleep(1000)
         onView(withText("Student 1 private comment")).check(doesNotExist())
         onView(withText("Student 2 private comment")).check(matches(isEnabled()))
 
@@ -545,7 +545,7 @@ class ClazzWorkDetailOverviewFragmentTest {
         return object : BoundedMatcher<RecyclerView.ViewHolder?,
                 SimpleHeadingRecyclerAdapter.SimpleHeadingViewHolder>(SimpleHeadingRecyclerAdapter.SimpleHeadingViewHolder::class.java) {
             override fun matchesSafely(item: SimpleHeadingRecyclerAdapter.SimpleHeadingViewHolder): Boolean {
-                return item.itemView.tag.equals(title)
+                return item.itemView.tag == title
             }
 
             override fun describeTo(description: Description) {

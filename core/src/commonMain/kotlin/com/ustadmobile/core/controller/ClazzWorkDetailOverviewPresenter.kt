@@ -34,10 +34,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-    }
-
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWorkWithSubmission? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
@@ -65,17 +61,18 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
             db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
-                    clazzWorkWithSubmission.clazzWorkClazzUid?:0L)
+                    clazzWorkWithSubmission.clazzWorkClazzUid)
         }
 
-        view.studentMode = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        view.studentMode = (clazzMember != null &&
+                clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
 
 
         if(clazzWorkWithSubmission.clazzWorkSubmission == null){
             clazzWorkWithSubmission.clazzWorkSubmission = ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
                 clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid?:0L
-                clazzWorkSubmissionPersonUid = loggedInPersonUid?:0L
+                clazzWorkSubmissionPersonUid = loggedInPersonUid
                 clazzWorkSubmissionInactive = false
                 clazzWorkSubmissionDateTimeStarted = UMCalendarUtil.getDateInMilliPlusDays(0)
             }
@@ -83,40 +80,40 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         if(clazzWorkWithSubmission.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
             val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
-                    withTimeoutOrNull(2000) {
-                        db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(entityUid)
-                    } ?: listOf()
+                withTimeoutOrNull(2000) {
+                    db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(
+                            entityUid)
+                } ?: listOf()
 
             val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
-                    questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
-                            .map {
-                                val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
-                                val qResponse: MutableList<ClazzWorkQuestionResponse> =
-                                    withTimeoutOrNull(2000) {
-                                        db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
-                                                questionUid, clazzMember?.clazzMemberUid
-                                                ?: 0L).toMutableList()
-                                    }?: mutableListOf()
-                                if (qResponse.isEmpty()) {
-                                    qResponse.add(ClazzWorkQuestionResponse().apply {
-                                        clazzWorkQuestionResponseQuestionUid = questionUid
-                                        clazzWorkQuestionResponsePersonUid = loggedInPersonUid
-                                        clazzWorkQuestionResponseClazzMemberUid = clazzMember?.clazzMemberUid
-                                                ?: 0L
-                                        clazzWorkQuestionResponseClazzWorkUid = entity?.clazzWorkUid
-                                                ?: 0L
+                questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
+                    .map {
+                        val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
+                        val qResponse: MutableList<ClazzWorkQuestionResponse> =
+                            withTimeoutOrNull(2000) {
+                                db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
+                                        questionUid, clazzMember?.clazzMemberUid
+                                        ?: 0L).toMutableList()
+                            }?: mutableListOf()
+                        if (qResponse.isEmpty()) {
+                            qResponse.add(ClazzWorkQuestionResponse().apply {
+                                clazzWorkQuestionResponseQuestionUid = questionUid
+                                clazzWorkQuestionResponsePersonUid = loggedInPersonUid
+                                clazzWorkQuestionResponseClazzMemberUid = clazzMember?.clazzMemberUid
+                                        ?: 0L
+                                clazzWorkQuestionResponseClazzWorkUid = entity?.clazzWorkUid
+                                        ?: 0L
 
-                                    })
-                                }
-                                ClazzWorkQuestionAndOptionWithResponse(
-                                        entity ?: ClazzWorkWithSubmission(),
-                                        it.key ?: ClazzWorkQuestion(),
-                                        it.value.map {
-                                            it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
-                                        },
-                                        qResponse.first())
-                            }
-
+                            })
+                        }
+                        ClazzWorkQuestionAndOptionWithResponse(
+                                entity ?: ClazzWorkWithSubmission(),
+                                it.key ?: ClazzWorkQuestion(),
+                                it.value.map {
+                                    it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
+                                },
+                                qResponse.first())
+                        }
 
             view.clazzWorkQuizQuestionsAndOptionsWithResponse =
                     DoorMutableLiveData(questionsAndOptionsWithResponseList)

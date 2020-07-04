@@ -271,6 +271,20 @@ class ClazzWorkSubmissionMarkingFragmentTest {
 
 
     @Test
+    fun givenVisible_whenPannedAndTyped_shouldShowSomeCode(){
+
+        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+        val cameraPaned = true
+        val typing = true
+        val typingReal = false
+
+        reloadFragment(0, 0)
+        //TODO: Make this code work.
+        Thread.sleep(2000)
+        //TODO: Note: You sleep too much.
+    }
+
+    @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForFreeText_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
@@ -292,7 +306,6 @@ class ClazzWorkSubmissionMarkingFragmentTest {
                 submissionPostSubmit?.clazzWorkSubmissionScore)
 
     }
-
 
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForQuiz_whenFilledInAndReturnAndMarkNextClicked_thenShouldSaveToDatabaseAndLoadNextInQueue() {

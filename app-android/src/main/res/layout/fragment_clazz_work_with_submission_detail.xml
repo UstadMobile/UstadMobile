@@ -3,58 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-        <import type="android.view.View"/>
-        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
-        <variable
-            name="clazzWorkWithSubmission"
-            type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
-
-        <variable
-            name="presenter"
-            type="com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter" />
-
-        <variable
-            name="loading"
-            type="boolean" />
-
-        <variable
-            name="fieldsEnabled"
-            type="boolean" />
-
-
-    </data>
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/activity_clazzworkwithsubmission_edit_scroll"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fragment_clazz_work_with_submission_detail_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:scrollbars="vertical"
+        android:clipToPadding="false"
+        android:paddingBottom="@{@dimen/dimen_54dp}"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:itemCount="8" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/activity_clazzworkwithsubmission_edit_edit_clx"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/fragment_clazz_work_with_submission_detail_rv"
-                android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:clipToPadding="false"
-                android:scrollbars="vertical"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:itemCount="8" />
-
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.core.widget.NestedScrollView>
 
 
 </layout>
