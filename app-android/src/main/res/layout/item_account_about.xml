@@ -22,9 +22,9 @@ xmlns:tools="http://schemas.android.com/tools">
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/item_clazz_log_attendance_list">
+    android:id="@+id/item_account_about">
 
-    <VideoView
+    <View
         android:id="@+id/divider"
         android:paddingTop="@dimen/dimen_16dp"
         app:layout_constraintStart_toEndOf="parent"
@@ -53,6 +53,7 @@ xmlns:tools="http://schemas.android.com/tools">
         />
 
     <TextView
+        android:id="@+id/account_about"
         android:onClick="@{() -> presenter.handleClickAbout()}"
         android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         app:backgroundIfAnimationEnabled="@{@drawable/bg_listitem}"

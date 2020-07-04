@@ -60,7 +60,7 @@ class AccountListPresenterTest {
     }
 
     @Test
-    fun givenStoreAccounts_whenLaunched_thenShouldShowAllAccounts(){
+    fun givenStoreAccounts_whenAppLaunched_thenShouldShowAllAccounts(){
        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
                 accountManager)
 
@@ -74,7 +74,7 @@ class AccountListPresenterTest {
     }
 
     @Test
-    fun givenActiveAccountExists_whenLaunched_thenShouldShowIt(){
+    fun givenActiveAccountExists_whenAppLaunched_thenShouldShowIt(){
         val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
                 accountManager)
 

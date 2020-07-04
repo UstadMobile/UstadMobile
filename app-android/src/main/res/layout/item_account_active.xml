@@ -20,7 +20,7 @@ xmlns:tools="http://schemas.android.com/tools">
     android:layout_width="match_parent"
     android:visibility="@{account == null ? View.GONE:View.VISIBLE}"
     android:layout_height="wrap_content"
-    android:id="@+id/item_clazz_log_attendance_list"
+    android:id="@+id/item_account_active"
     app:backgroundIfAnimationEnabled="@{@drawable/bg_listitem}">
 
 
@@ -105,7 +105,7 @@ xmlns:tools="http://schemas.android.com/tools">
 
     <com.google.android.material.button.MaterialButton
         android:layout_gravity="center_horizontal"
-        android:id="@+id/person_profile"
+        android:id="@+id/account_profile"
         style="@style/UmTheme.Widget.OutlinedButton"
         android:onClick="@{() -> presenter.handleClickProfile(account.personUid)}"
         android:layout_width="wrap_content"
@@ -129,12 +129,12 @@ xmlns:tools="http://schemas.android.com/tools">
         android:layout_marginStart="@dimen/dimen_16dp"
         android:padding="@dimen/dimen_8dp"
         android:layout_marginBottom="@dimen/dimen_16dp"
-        android:contentDescription="@string/profile"
+        android:contentDescription="@string/logout"
         android:text="@string/logout"
-        app:layout_constraintStart_toEndOf="@+id/person_profile"
+        app:layout_constraintStart_toEndOf="@+id/account_profile"
         app:layout_constraintTop_toBottomOf="@+id/account_user_icon"
         app:layout_constraintBottom_toTopOf="@+id/divider" />
-    <VideoView
+    <View
         android:id="@+id/divider"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintEnd_toStartOf="parent"
