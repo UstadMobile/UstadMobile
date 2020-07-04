@@ -595,12 +595,13 @@ object UMUtil {
      * http://example.com, www.example.com, example.com, http://example:90 etc
      * @param href : Url to be checked
      */
+    @JvmStatic
     fun isValidUrl(href: String): Boolean{
         val regex = Regex("^(http:\\/\\/|https:\\/\\/)?(www.)?([a-zA-Z0-9]+).[a-zA-Z0-9]*.[a-z]{3}.?([a-z]+)?\$")
         return regex.matches(href)
     }
 
-
+    @JvmStatic
     fun formatUrl(href: String): String{
         var formattedUrl = href
         if(!Regex("^\\w+://.*").matches(href))

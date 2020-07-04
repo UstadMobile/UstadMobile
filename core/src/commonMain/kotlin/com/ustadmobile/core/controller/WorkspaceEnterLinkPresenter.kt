@@ -27,7 +27,6 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     fun handleCheckLinkText(href: String){
-        //"handle validation after making a request"
         if(!UMUtil.isValidUrl(href)) return
         GlobalScope.launch {
             try {
