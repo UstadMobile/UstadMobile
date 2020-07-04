@@ -175,7 +175,7 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     }
 
     private fun View.flattenHierarchy(): List<View> = if (this is ViewGroup) {
-        listOf(this) + children.map { it.flattenHierarchy() }.flatten()
+        listOf(this) + children.filter { it.visibility == View.VISIBLE }.map { it.flattenHierarchy() }.flatten()
     } else {
         listOf(this)
     }

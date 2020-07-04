@@ -24,6 +24,7 @@ import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
 import junit.framework.Assert
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.lang.Thread.sleep
