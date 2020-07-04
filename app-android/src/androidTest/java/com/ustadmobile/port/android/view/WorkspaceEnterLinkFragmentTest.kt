@@ -91,12 +91,12 @@ class WorkspaceEnterLinkFragmentTest {
     @AdbScreenRecord("given invalid workspace link when checked should not show next button")
     @Test
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
-        /*launchFragment(mockWebServer.url("/").toString())
+        launchFragment(mockWebServer.url("/").toString())
 
         onView(withId(R.id.next_button)).check(matches(not(isDisplayed())))
 
         onView(withId(R.id.workspace_link_view)).check(matches(
-                hasInputLayoutError(context.getString(R.string.invalid_url))))*/
+                hasInputLayoutError(context.getString(R.string.invalid_url))))
     }
 
 
