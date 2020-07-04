@@ -25,17 +25,21 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
+import org.kodein.di.instanceOrNull
 
 
 class ContentEntryEdit2Presenter(context: Any,
                                  arguments: Map<String, String>, view: ContentEntryEdit2View,
                                  lifecycleOwner: DoorLifecycleOwner,
-                                 systemImpl: UstadMobileSystemImpl,
-                                 db: UmAppDatabase, repo: UmAppDatabase,
-                                 private val containerDownloadManager: ContainerDownloadManager?,
-                                 activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                                 di: DI)
+    //systemImpl: UstadMobileSystemImpl,
+//                                 db: UmAppDatabase, repo: UmAppDatabase,
+//                                 private val containerDownloadManager: ContainerDownloadManager?,
+//                                 activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData
+    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, lifecycleOwner, di) {
+
+    private val containerDownloadManager: ContainerDownloadManager? by instanceOrNull<ContainerDownloadManager>()
 
     enum class LicenceOptions(val optionVal: Int, val messageId: Int){
         LICENSE_TYPE_CC_BY(ContentEntry.LICENSE_TYPE_CC_BY, MessageID.licence_type_cc_by),
@@ -155,7 +159,7 @@ class ContentEntryEdit2Presenter(context: Any,
                         downloadJobItem.djiStatus = JobStatus.COMPLETE
                         downloadJobItem.downloadedSoFar = container.fileSize
 
-                        containerDownloadManager.handleDownloadJobItemUpdated(downloadJobItem)
+                        containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
                     }
                 }
                 view.finishWithResult(listOf(entity))

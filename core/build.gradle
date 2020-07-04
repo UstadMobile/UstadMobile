@@ -172,6 +172,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation project(':lib-door-runtime')
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')

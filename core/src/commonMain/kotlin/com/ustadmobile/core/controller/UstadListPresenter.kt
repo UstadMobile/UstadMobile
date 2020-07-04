@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -12,13 +13,14 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 
 abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>, view: V,
                                                     val lifecycleOwner: DoorLifecycleOwner,
-                                                    val systemImpl: UstadMobileSystemImpl,
-                                                    val db: UmAppDatabase, val repo: UmAppDatabase,
-                                                    val activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadBaseController<V>(context, arguments, view) {
+                                                    override val di: DI)
+    : UstadBaseController<V>(context, arguments, view), DIAware {
 
     protected var mListMode = ListViewMode.BROWSER
 
@@ -26,11 +28,19 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     protected var mSearchQuery: String = "%"
 
+    val systemImpl: UstadMobileSystemImpl by instance<UstadMobileSystemImpl>()
+
+    val db: UmAppDatabase by instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
+
+    val repo: UmAppDatabase by instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+
+    val accountManager: UstadAccountManager by instance<UstadAccountManager>()
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         mListMode = ListViewMode.valueOf(
                 arguments[UstadView.ARG_LISTMODE] ?: ListViewMode.BROWSER.toString())
-        activeAccount.observeWithLifecycleOwner(lifecycleOwner, this::onAccountChanged)
+        accountManager.activeAccountLive.observeWithLifecycleOwner(lifecycleOwner, this::onAccountChanged)
     }
 
     protected open fun onAccountChanged(account: UmAccount?) {

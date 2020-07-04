@@ -12,13 +12,11 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 
 class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: LanguageListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<LanguageListView, Language>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          lifecycleOwner: DoorLifecycleOwner, di: DI)
+    : UstadListPresenter<LanguageListView, Language>(context, arguments, view, lifecycleOwner, di) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

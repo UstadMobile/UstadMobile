@@ -1,25 +1,20 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.withTimeoutOrNull
+import org.kodein.di.DI
 
 
 class SchoolDetailPresenter(context: Any,
                           arguments: Map<String, String>, view: SchoolDetailView,
                           lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<SchoolDetailView, School>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          di: DI)
+    : UstadDetailPresenter<SchoolDetailView, School>(context, arguments, view, lifecycleOwner, di) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

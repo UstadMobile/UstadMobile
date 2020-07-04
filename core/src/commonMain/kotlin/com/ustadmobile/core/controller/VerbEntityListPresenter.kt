@@ -1,24 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.VerbEntityListView
 import com.ustadmobile.core.view.VerbEntityListView.Companion.ARG_EXCLUDE_VERBUIDS_LIST
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.VerbDisplay
+import org.kodein.di.DI
 
 class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view: VerbEntityListView,
-                              lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                              db: UmAppDatabase, repo: UmAppDatabase,
-                              activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<VerbEntityListView, VerbDisplay>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                              lifecycleOwner: DoorLifecycleOwner, di: DI)
+    : UstadListPresenter<VerbEntityListView, VerbDisplay>(context, arguments, view, lifecycleOwner, di) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

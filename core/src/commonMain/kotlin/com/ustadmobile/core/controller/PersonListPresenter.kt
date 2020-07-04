@@ -13,13 +13,11 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import org.kodein.di.DI
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<PersonListView, Person>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          lifecycleOwner: DoorLifecycleOwner, di: DI)
+    : UstadListPresenter<PersonListView, Person>(context, arguments, view, lifecycleOwner, di) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

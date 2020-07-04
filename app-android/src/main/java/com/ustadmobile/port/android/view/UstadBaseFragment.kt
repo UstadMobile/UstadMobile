@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
 import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
+import org.kodein.di.android.x.di
 import java.util.*
 
 /**
@@ -20,6 +21,8 @@ open class UstadBaseFragment : Fragment(), UstadView {
     protected var titleLifecycleObserver: TitleLifecycleObserver? = null
 
     protected var fabManager: FabManagerLifecycleObserver? = null
+
+    val kodein by di()
 
     override var loading: Boolean = false
         get() = field

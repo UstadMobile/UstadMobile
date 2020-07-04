@@ -1,22 +1,20 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.PersonGroupEditView
+import com.ustadmobile.core.view.PersonGroupListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.UmAccount
+import org.kodein.di.DI
 
 class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, view: PersonGroupListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<PersonGroupListView, PersonGroup>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          lifecycleOwner: DoorLifecycleOwner, di: DI)
+    : UstadListPresenter<PersonGroupListView, PersonGroup>(context, arguments, view, lifecycleOwner,
+        di) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

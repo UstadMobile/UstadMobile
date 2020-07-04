@@ -17,21 +17,14 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 
 class BitmaskEditPresenter(context: Any,
                           arguments: Map<String, String>, view: BitmaskEditView,
                           lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<BitmaskEditView, LongWrapper>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
-
-
-
-
-
+                          di: DI)
+    : UstadEditPresenter<BitmaskEditView, LongWrapper>(context, arguments, view, lifecycleOwner, di) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON

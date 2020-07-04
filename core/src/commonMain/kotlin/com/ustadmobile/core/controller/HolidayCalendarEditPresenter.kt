@@ -18,16 +18,14 @@ import kotlinx.serialization.builtins.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.Holiday
+import org.kodein.di.DI
 
 
 class HolidayCalendarEditPresenter(context: Any,
                           arguments: Map<String, String>, view: HolidayCalendarEditView,
                           lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<HolidayCalendarEditView, HolidayCalendar>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          di: DI)
+    : UstadEditPresenter<HolidayCalendarEditView, HolidayCalendar>(context, arguments, view, lifecycleOwner, di) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

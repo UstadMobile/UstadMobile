@@ -452,5 +452,8 @@ abstract class UstadMobileSystemCommon {
          * As per Android Intent.FLAG_CLEAR_TOP
          */
         const val GO_FLAG_CLEAR_TOP = 67108864
+
+        const val TAG_DOWNLOAD_ENABLED = "dlenabled"
+
     }
 }

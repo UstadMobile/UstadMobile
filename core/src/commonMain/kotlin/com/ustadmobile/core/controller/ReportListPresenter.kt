@@ -12,13 +12,11 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.UmAccount
+import org.kodein.di.DI
 
 class ReportListPresenter(context: Any, arguments: Map<String, String>, view: ReportListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<ReportListView, Report>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          lifecycleOwner: DoorLifecycleOwner, di: DI)
+    : UstadListPresenter<ReportListView, Report>(context, arguments, view, lifecycleOwner, di) {
 
     var loggedInPersonUid = 0L
 

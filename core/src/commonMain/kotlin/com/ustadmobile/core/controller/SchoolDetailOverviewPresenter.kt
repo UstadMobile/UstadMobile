@@ -1,29 +1,23 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.core.view.SchoolEditView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.withTimeoutOrNull
+import org.kodein.di.DI
 
 
 class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>,
                 view: SchoolDetailOverviewView, lifecycleOwner: DoorLifecycleOwner,
-                systemImpl: UstadMobileSystemImpl, db: UmAppDatabase, repo: UmAppDatabase,
-                activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
+                di: DI)
     : UstadDetailPresenter<SchoolDetailOverviewView, SchoolWithHolidayCalendar>(context, arguments,
-        view, lifecycleOwner, systemImpl,db, repo, activeAccount) {
+        view, lifecycleOwner, di) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

@@ -19,16 +19,15 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import org.kodein.di.DI
 
 
 class ClazzDetailOverviewPresenter(context: Any,
                           arguments: Map<String, String>, view: ClazzDetailOverviewView,
                           lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<ClazzDetailOverviewView, ClazzWithDisplayDetails>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          di: DI)
+    : UstadDetailPresenter<ClazzDetailOverviewView, ClazzWithDisplayDetails>(context, arguments, view,
+        lifecycleOwner, di) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.LIVEDATA

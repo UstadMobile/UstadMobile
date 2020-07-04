@@ -1,25 +1,20 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.UmAccount
+import org.kodein.di.DI
 
 class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
-                         lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                         db: UmAppDatabase, repo: UmAppDatabase,
-                         activeAccount: DoorLiveData<UmAccount?>,
+                         lifecycleOwner: DoorLifecycleOwner, di: DI,
                          private val clazzList2ItemListener:
-                          DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, systemImpl, context))
-    : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount), ClazzListItemListener by clazzList2ItemListener {
+                          DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, context, di))
+    : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view, lifecycleOwner, di), ClazzListItemListener by clazzList2ItemListener {
 
     var searchQuery: String = "%"
 

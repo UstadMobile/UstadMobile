@@ -24,16 +24,14 @@ import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.builtins.list
+import org.kodein.di.DI
 
 
 class ClazzEdit2Presenter(context: Any,
                           arguments: Map<String, String>, view: ClazzEdit2View,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchool>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          lifecycleOwner: DoorLifecycleOwner, di : DI)
+    : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchool>(context, arguments, view,
+        lifecycleOwner, di) {
 
     private val scheduleOneToManyJoinEditHelper
             = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,

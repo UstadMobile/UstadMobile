@@ -7,6 +7,7 @@ import org.junit.Test
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ClazzDetailView
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.SystemImplRule
 import com.ustadmobile.core.util.UmAppDatabaseClientRule
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -17,8 +18,11 @@ import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.coroutines.runBlocking
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import org.kodein.di.*
+import org.kodein.di.generic.factory
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -56,14 +60,28 @@ class ClazzEdit2PresenterTest {
         //TODO: insert any entities required for all tests
     }
 
+    fun DI.MainBuilder.installDb() {
+        bind<UmAppDatabase>(tag = "db") with singleton { clientDbRule.db }
+        bind<UmAppDatabase>(tag = "repo") with singleton { clientDbRule.repo }
+        bind<UstadMobileSystemImpl>() with singleton { systemImplRule.systemImpl }
+    }
+
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
         val presenterArgs = mapOf<String, String>()
 
-        val presenter = ClazzEdit2Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+        val di = DI {
+            import
+        }
+
+//        val presenter = ClazzEdit2Presenter(context,
+//                presenterArgs, mockView, mockLifecycleOwner,
+//                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
+//                clientDbRule.accountLiveData)
+        val presenter by di.newInstance { ClazzEdit2Presenter(context, presenterArgs, mockView,
+            mockLifecycleOwner, instance(), instance(tag = "db"), instance(tag = "repo"),
+            clientDbRule.accountLiveData) }
+
         presenter.onCreate(null)
 
         val initialEntity = mockView.captureLastEntityValue()!!

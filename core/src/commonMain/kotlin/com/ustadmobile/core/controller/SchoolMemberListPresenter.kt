@@ -1,8 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.ListViewMode
@@ -10,18 +8,15 @@ import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 
 class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, view: SchoolMemberListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<SchoolMemberListView, SchoolMember>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          lifecycleOwner: DoorLifecycleOwner, di: DI)
+    : UstadListPresenter<SchoolMemberListView, SchoolMember>(context, arguments, view, lifecycleOwner, di) {
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 

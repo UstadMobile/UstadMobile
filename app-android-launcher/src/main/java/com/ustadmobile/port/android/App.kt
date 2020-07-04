@@ -5,6 +5,7 @@ import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 
 import com.toughra.ustadmobile.launcher.BuildConfig
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -14,6 +15,7 @@ import org.acra.annotation.AcraCore
 import org.acra.annotation.AcraHttpSender
 import org.acra.data.StringFormat
 import org.acra.sender.HttpSender
+import org.kodein.di.*
 
 /**
  * Created by varuna on 8/23/2017.
@@ -27,7 +29,14 @@ import org.acra.sender.HttpSender
         basicAuthLogin = BuildConfig.ACRA_BASIC_LOGIN,
         basicAuthPassword = BuildConfig.ACRA_BASIC_PASS,
         httpMethod = HttpSender.Method.POST)
-class App : UmBaseApplication() {
+class App : UmBaseApplication(), DIAware {
+
+    override val di: DI by DI.lazy {
+        bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
+        bind<UstadAccountManager>() with singleton { UstadAccountManager.getInstance(instance(),
+                applicationContext) }
+    }
+
 
     override fun onCreate() {
         super.onCreate()

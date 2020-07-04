@@ -20,16 +20,14 @@ import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_PARTIAL
 import kotlinx.serialization.builtins.list
+import org.kodein.di.DI
 
 
 class ClazzLogEditAttendancePresenter(context: Any,
                           arguments: Map<String, String>, view: ClazzLogEditAttendanceView,
                           lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<ClazzLogEditAttendanceView, ClazzLog>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          di: DI)
+    : UstadEditPresenter<ClazzLogEditAttendanceView, ClazzLog>(context, arguments, view, lifecycleOwner, di) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

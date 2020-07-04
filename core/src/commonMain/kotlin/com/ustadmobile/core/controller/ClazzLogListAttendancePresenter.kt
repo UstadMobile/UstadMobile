@@ -2,9 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
@@ -17,17 +15,14 @@ import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzWithSchool
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.kodein.di.DI
 
 class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, String>, view: ClazzLogListAttendanceView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<ClazzLogListAttendanceView, ClazzLog>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          lifecycleOwner: DoorLifecycleOwner, di: DI)
+    : UstadListPresenter<ClazzLogListAttendanceView, ClazzLog>(context, arguments, view, lifecycleOwner, di) {
 
     //List of points to plot.
     data class AttendanceGraphData(val percentageAttendedSeries: List<Pair<Long, Float>>,

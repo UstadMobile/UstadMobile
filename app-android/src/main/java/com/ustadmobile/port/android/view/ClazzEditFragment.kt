@@ -26,6 +26,10 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
+import org.kodein.di.android.x.di
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.newInstance
 
 interface ClazzEdit2ActivityEventHandler {
 
@@ -150,10 +154,12 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         scheduleRecyclerView?.adapter = scheduleRecyclerAdapter
         scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-        mPresenter = ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
+        mPresenter = kodein.direct.newInstance {
+            ClazzEdit2Presenter(requireContext(), arguments.toStringMap(), this@ClazzEditFragment,
+                viewLifecycleOwner, instance(),
                 UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()))
+                UmAccountManager.getRepositoryForActiveAccount(requireContext())) }
+        //mPresenter =
         scheduleRecyclerAdapter?.presenter = mPresenter
         return rootView
     }

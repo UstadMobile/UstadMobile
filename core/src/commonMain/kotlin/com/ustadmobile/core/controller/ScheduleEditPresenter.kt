@@ -1,21 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: ScheduleEditView,
-lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl, db: UmAppDatabase,
-    repo: UmAppDatabase, activeAccount: DoorLiveData<UmAccount?>)
-    : UstadEditPresenter<ScheduleEditView, Schedule>(context, args, view, lifecycleOwner, systemImpl, db, repo, activeAccount) {
+lifecycleOwner: DoorLifecycleOwner, di: DI)
+    : UstadEditPresenter<ScheduleEditView, Schedule>(context, args, view, lifecycleOwner, di) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON

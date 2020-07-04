@@ -231,6 +231,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     companion object {
 
+        const val TAG_DB = 2
+
+        const val TAG_REPO = 4
+
+
         @Volatile
         private var instance: UmAppDatabase? = null
 

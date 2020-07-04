@@ -2,32 +2,34 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
 import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.doorMainDispatcher
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonPicture
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 
 class PersonEditPresenter(context: Any,
                           arguments: Map<String, String>, view: PersonEditView,
                           lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<PersonEditView, Person>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          di: DI)
+    : UstadEditPresenter<PersonEditView, Person>(context, arguments, view, lifecycleOwner, di) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

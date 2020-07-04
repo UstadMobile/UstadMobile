@@ -1,29 +1,25 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ReportGraphHelper
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ReportDetailView
+import com.ustadmobile.core.view.ReportEditView
+import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-
+import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.*
+import org.kodein.di.DI
 
 
 class ReportDetailPresenter(context: Any,
                             arguments: Map<String, String>, view: ReportDetailView,
                             lifecycleOwner: DoorLifecycleOwner,
-                            systemImpl: UstadMobileSystemImpl,
-                            db: UmAppDatabase, repo: UmAppDatabase,
-                            activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<ReportDetailView, ReportWithFilters>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                            di: DI)
+    : UstadDetailPresenter<ReportDetailView, ReportWithFilters>(context, arguments, view, lifecycleOwner, di) {
 
 
     private val graphHelper = ReportGraphHelper(context, systemImpl, repo)

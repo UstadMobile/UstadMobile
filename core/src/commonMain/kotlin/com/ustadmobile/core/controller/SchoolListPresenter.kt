@@ -11,14 +11,11 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.http.parseAndSortContentTypeHeader
+import org.kodein.di.DI
 
 class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: SchoolListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<SchoolListView, School>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
-
+                          lifecycleOwner: DoorLifecycleOwner, di: DI)
+    : UstadListPresenter<SchoolListView, School>(context, arguments, view, lifecycleOwner, di) {
 
     var searchQuery = "%%"
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

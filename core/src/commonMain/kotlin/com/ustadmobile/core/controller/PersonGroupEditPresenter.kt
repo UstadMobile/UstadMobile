@@ -1,35 +1,24 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.PersonGroupEditView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.PersonGroup
-
-import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.http.content.TextContent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import org.kodein.di.DI
 
 
 class PersonGroupEditPresenter(context: Any,
                           arguments: Map<String, String>, view: PersonGroupEditView,
                           lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<PersonGroupEditView, PersonGroup>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          di: DI)
+    : UstadEditPresenter<PersonGroupEditView, PersonGroup>(context, arguments, view, lifecycleOwner, di) {
 
     override val persistenceMode: PersistenceMode
         get() = TODO("PERSISTENCE_MODE.DB OR PERSISTENCE_MODE.JSON")
