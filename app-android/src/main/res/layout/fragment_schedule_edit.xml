@@ -117,7 +117,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
-                android:hint="@string/toC"
+                android:hint="@string/to"
                 >
 
                 <com.google.android.material.textfield.TextInputEditText

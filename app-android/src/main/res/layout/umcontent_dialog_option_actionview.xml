@@ -11,7 +11,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:id="@+id/titleWrapper"
         android:padding="@dimen/dimen_16dp"
-        android:hint="@string/content_editor_page_view_hint"
+        android:hint="@string/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <com.google.android.material.textfield.TextInputEditText

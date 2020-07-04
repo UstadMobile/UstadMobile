@@ -110,24 +110,24 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
 
             holder.pageTitle.setTextColor(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.secondaryTextColor
+                        R.color.onBackgroundColor
                     else
                         R.color.iconTintColor))
             holder.pageOptionHandle.setColorFilter(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.secondaryTextColor
+                        R.color.onBackgroundColor
                     else
                         R.color.iconTintColor))
             holder.pageReorderHandle.setColorFilter(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
-                        R.color.secondaryTextColor
+                        R.color.onBackgroundColor
                     else
                         R.color.iconTintColor))
             holder.itemHolder.setBackgroundColor(getColor(holder.itemView.context,
                     if (pageItem.href == currentSelectedPage)
                         R.color.iconTintColor
                     else
-                        R.color.primaryTextColor))
+                        R.color.onPrimaryColor))
 
             holder.pageOptionHandle.setOnClickListener { showPopUpMenu(holder.itemView.context,
                     holder.pageOptionHandle, pageItem) }
@@ -291,8 +291,7 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
                 null, false)
 
         val titleWrapper :TextInputLayout = dialogView.findViewById(R.id.titleWrapper)
-        titleWrapper.hint = impl.getString(MessageID.content_editor_page_view_hint,
-                activity!!)
+        titleWrapper.hint = impl.getString(MessageID.title, activity!!)
 
         val titleView:TextInputEditText = dialogView.findViewById(R.id.title)
         titleView.setText(titleToUpdateFrom)

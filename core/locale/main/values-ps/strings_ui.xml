@@ -126,7 +126,7 @@
     <string name="library_reading_level">د لوستلو کچه</string>
     <string name="file_not_found">دوتنه و نه موندل شو</string>
     <string name="content_type_multimedia">ګڼرسنۍ</string>
-    <string name="content_type_multiple_choice">ګڼ ځوابه</string>
+    <string name="multiple_choice">ګڼ ځوابه</string>
     <string name="content_type_link">پیوند</string>
     <string name="content_type_fill_the_blanks">تښ ځایونه ډک کړئ</string>
     <string name="content_format_text">متن</string>

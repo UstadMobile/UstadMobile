@@ -521,7 +521,7 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             return contentFormattingTypeLabel.size
         }
 
-        internal var contentFormattingTypeLabel = arrayOf<String>(resources.getString(R.string.content_format_text),
+        internal var contentFormattingTypeLabel = arrayOf<String>(resources.getString(R.string.text),
                 resources.getString(R.string.content_format_paragraph))
 
 
@@ -606,9 +606,9 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             private fun changeState(imageIcon: ImageView, iconHolder: RelativeLayout,
                                     isActivated: Boolean) {
                 imageIcon.setColorFilter(ContextCompat.getColor(context!!,
-                        if (isActivated) R.color.primaryTextColor else R.color.secondaryTextColor))
+                        if (isActivated) R.color.onPrimaryColor else R.color.onBackgroundColor))
                 iconHolder.setBackgroundColor(ContextCompat.getColor(context!!,
-                        if (isActivated) R.color.iconTintColor else R.color.primaryTextColor))
+                        if (isActivated) R.color.iconTintColor else R.color.onPrimaryColor))
             }
 
             internal inner class FormatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

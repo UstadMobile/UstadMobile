@@ -16,6 +16,7 @@ import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
@@ -37,6 +38,7 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.junit.*
 
+@AdbScreenRecord("ClazzWork (Assignments) Teacher Marking tests")
 class ClazzWorkSubmissionMarkingFragmentTest {
 
     lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
@@ -227,6 +229,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         return fragmentScenario
     }
 
+    @AdbScreenRecord("ClazzWorkSubmissionMarking: Should show marking (no Quiz) ")
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForQuiz_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
@@ -248,6 +251,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
                 submissionPostSubmit?.clazzWorkSubmissionScore)
     }
 
+    @AdbScreenRecord("ClazzWorkSubmissionMarking: Should show marking (partially filled Quiz) ")
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForPartiallyFilledQuiz_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
@@ -269,21 +273,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
                 submissionPostSubmit?.clazzWorkSubmissionScore)
     }
 
-
-    @Test
-    fun givenVisible_whenPannedAndTyped_shouldShowSomeCode(){
-
-        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
-        val cameraPaned = true
-        val typing = true
-        val typingReal = false
-
-        reloadFragment(0, 0)
-        //TODO: Make this code work.
-        Thread.sleep(2000)
-        //TODO: Note: You sleep too much.
-    }
-
+    @AdbScreenRecord("ClazzWorkSubmissionMarking: Should show marking (for Free Text Submission) ")
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForFreeText_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
@@ -307,6 +297,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
 
     }
 
+    @AdbScreenRecord("ClazzWorkSubmissionMarking: When marked should persist for Quiz 2 submissions should show NEXT")
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForQuiz_whenFilledInAndReturnAndMarkNextClicked_thenShouldSaveToDatabaseAndLoadNextInQueue() {
 
@@ -341,6 +332,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
 
     }
 
+    @AdbScreenRecord("ClazzWorkSubmissionMarking: When marked should persist for Quiz ( One submission) should Finish")
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForQuizAndNoMoreSubmission_whenFilledInAndReturnAndMarkNextClicked_thenShouldSaveToDatabaseAndFinishView() {
 
@@ -371,7 +363,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
 
     }
 
-
+    @AdbScreenRecord("ClazzWorkSubmissionMarking: When teacher comments should show OK")
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentForQuiz_whenTeacherComments_thenShouldSaveToDatabaseAndUpdateView() {
 

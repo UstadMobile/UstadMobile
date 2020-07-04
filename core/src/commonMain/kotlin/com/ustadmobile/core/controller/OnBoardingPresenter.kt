@@ -13,20 +13,15 @@ class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: On
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.setLanguageOptions(languageOptions.map { it.second })
-    }
-
-    fun handleClickGetStarted() {
-        val args: Map<String,String?> = arguments
         impl.setAppPref(PREF_TAG, true.toString(), view.viewContext)
-        //TODO: Change this to use navigation activity
-        impl.go("Home", args, context)
+        val selectedLocaleIndex = languageOptions.indexOfFirst { it.first == impl.getLocale(context) }
+        view.setLanguageOptions(languageOptions.map { it.second }, languageOptions[selectedLocaleIndex].second)
     }
 
     fun handleLanguageSelected(position: Int){
         val newLocaleCode = languageOptions[position].first
         val newLocaleToDisplay = if(newLocaleCode == LOCALE_USE_SYSTEM) {
-            impl.getDisplayedLocale(context).substring(0, 2)
+            impl.getSystemLocale(context).substring(0, 2)
         }else {
             newLocaleCode
         }

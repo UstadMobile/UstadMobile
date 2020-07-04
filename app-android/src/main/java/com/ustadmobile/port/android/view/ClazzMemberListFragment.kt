@@ -124,9 +124,9 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
             headerStringId = R.string.teachers_literal,
             headerLayoutId = R.layout.item_simple_list_header)
         val addStudentText = requireContext().getString(R.string.add_a,
-                requireContext().getString(R.string.students_literal))
+                requireContext().getString(R.string.students))
         mNewStudentListRecyclerViewAdapter = NewItemRecyclerViewAdapter(mOnClickAddStudent,
-                addStudentText, headerStringId = R.string.students_literal,
+                addStudentText, headerStringId = R.string.students,
                 headerLayoutId = R.layout.item_simple_list_header)
         mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
             mDataRecyclerViewAdapter, mNewStudentListRecyclerViewAdapter,

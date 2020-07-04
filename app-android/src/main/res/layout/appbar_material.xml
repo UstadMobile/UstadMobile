@@ -13,9 +13,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?colorPrimaryBackground"
         android:elevation="@dimen/dimen_4dp"
-        app:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        style="?toolbarStyle"
         app:layout_scrollFlags="scroll|enterAlways"
         android:minHeight="?actionBarSize"/>
 

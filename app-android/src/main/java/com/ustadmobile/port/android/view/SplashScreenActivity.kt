@@ -31,16 +31,19 @@
 
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.SplashScreenPresenter
-import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.SplashScreenView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
@@ -70,12 +73,27 @@ class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
 
         super.onCreate(savedInstanceState)
 
-        setTheme(R.style.UmTheme_App_Splash)
+        //setTheme(R.style.UmTheme_App_Splash)
         setContentView(R.layout.activity_splash_screen)
 
-        val presenter = SplashScreenPresenter(this, UMAndroidUtil.bundleToMap(intent.extras),
-                this, UstadMobileSystemImpl.instance)
-        presenter.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
+        GlobalScope.launch {
+            delay(DEFAULT_DELAY)
+            val systemImpl = UstadMobileSystemImpl.instance
+            val activityClass = if(systemImpl.getAppPref(OnBoardingView.PREF_TAG, "false",
+                            this@SplashScreenActivity).toBoolean()) {
+                MainActivity::class.java
+            }else {
+                OnBoardingActivity::class.java
+            }
+
+            startActivity(Intent(this@SplashScreenActivity, activityClass))
+        }
+    }
+
+    companion object {
+
+        const val DEFAULT_DELAY = 2000L
+
     }
 
 }

@@ -59,28 +59,16 @@ open class Clazz() {
      */
     var clazzTimeZone: String? = null
 
-    fun isAttendanceFeature() : Boolean{
-        return clazzFeatures and CLAZZ_FEATURE_ATTENDANCE > 0
-    }
-    fun isSelFeature() : Boolean{
-        return clazzFeatures and CLAZZ_FEATURE_SEL > 0
-    }
-    fun isActivityFeature() : Boolean{
-        return clazzFeatures and CLAZZ_FEATURE_ACTIVITY > 0
-    }
-
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or
-                CLAZZ_FEATURE_SEL or CLAZZ_FEATURE_ASSIGNMENT
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_ASSIGNMENT
         this.isClazzActive = true
     }
 
     constructor(clazzName: String, clazzLocationUid: Long) : this() {
         this.clazzName = clazzName
         this.clazzLocationUid = clazzLocationUid
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or
-                CLAZZ_FEATURE_SEL or CLAZZ_FEATURE_ASSIGNMENT
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_ASSIGNMENT
         this.isClazzActive = true
     }
 
@@ -88,7 +76,6 @@ open class Clazz() {
 
         const val TABLE_ID = 6
         const val CLAZZ_FEATURE_ATTENDANCE = 1L
-        const val CLAZZ_FEATURE_SEL = 2L
         const val CLAZZ_FEATURE_ACTIVITY = 4L
         const val CLAZZ_FEATURE_ASSIGNMENT = 8L
     }

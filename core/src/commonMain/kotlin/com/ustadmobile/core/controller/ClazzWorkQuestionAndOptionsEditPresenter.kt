@@ -33,7 +33,7 @@ class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
         FREE_TEXT(CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT,
                 MessageID.sel_question_type_free_text),
         MULTI_CHOICE(CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE,
-                MessageID.sel_question_type_multiple_choise)
+                MessageID.sel_question_type_multiple_choice)
     }
 
     class ClazzWorkQuestionOptionTypeMessageIdOption(day: ClazzWorkQuestionOptions, context: Any)

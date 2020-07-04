@@ -64,7 +64,7 @@ class ReportEditPresenter(context: Any,
 
     enum class XAxisOptions(val optionVal: Int, val messageId: Int) {
         DAY(Report.DAY,
-                MessageID.xapi_day),
+                MessageID.day),
         WEEK(Report.WEEK,
                 MessageID.xapi_week),
         MONTH(Report.MONTH,
@@ -72,7 +72,7 @@ class ReportEditPresenter(context: Any,
         CONTENT_ENTRY(Report.CONTENT_ENTRY,
                 MessageID.xapi_content_entry),
         GENDER(Report.GENDER,
-                MessageID.xapi_gender)
+                MessageID.gender_literal)
     }
 
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)

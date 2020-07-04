@@ -9,6 +9,7 @@
     android:clipToPadding="true"
     app:behavior_hideable="true"
     app:behavior_peekHeight="@dimen/dimen_0dp"
+    style="@style/UmTheme.ShapeAppearance.MediumComponent"
     app:layout_behavior="@string/bottom_sheet_behavior">
     <LinearLayout
         android:orientation="vertical"
@@ -60,7 +61,7 @@
                 android:layout_height="@dimen/dimen_20dp" />
 
             <TextView
-                android:text="@string/content_type_multiple_choice"
+                android:text="@string/multiple_choice"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_toEndOf="@+id/multiple_choice"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"

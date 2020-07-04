@@ -39,7 +39,7 @@ class CustomViewNameListFragmentPageAdapter(fm: FragmentManager, behavior: Int,
                 return f.getText(R.string.staff).toString()
             }
             2 -> {
-                return f.getText(R.string.students_literal).toString()
+                return f.getText(R.string.students).toString()
             }
         }
         return ""

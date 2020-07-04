@@ -141,8 +141,9 @@ class ClazzWorkSubmissionMarkingPresenterTest {
 
         member?.submission?.clazzWorkSubmissionScore = 42
         whenever(mockView.entity).thenReturn(member)
+        Thread.sleep(1000)
         presenter.handleClickSaveAndMarkNext(member, false)
-
+        Thread.sleep(1000)
         val memberPost = runBlocking {
             clientDbRule.db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid, clazzMemberUid)
         }

@@ -13,6 +13,7 @@ import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
@@ -36,6 +37,7 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.junit.*
 
+@AdbScreenRecord("ClazzWork (Assignments) Progress List Tests")
 class ClazzWorkDetailProgressListFragmentTest  {
 
     lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
@@ -171,6 +173,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
     }
 
+    @AdbScreenRecord("ClazzWorkDetailProgressList: Should show correct list when content/progress does NOT exist")
     @Test
     fun givenValidClazzWorkUid_whenStudentsPresentInClazzWithComments_thenShouldUpdateView() {
 
@@ -235,6 +238,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
     }
 
+    @AdbScreenRecord("ClazzWorkDetailProgressList: Should show correct list when content/progress exists")
     @Test
     fun givenValidClazzWorkUidWithoutContent_whenStudentsPresentInClazzWithComments_thenShouldUpdateView() {
 
@@ -294,6 +298,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
     }
 
+    @AdbScreenRecord("ClazzWorkDetailProgressList: Should show correct progress ")
     @Test
     fun givenValidClazzWorkUid_whenStudentSubmittedAndContentProgressed_thenShouldUpdateView() {
 
@@ -386,6 +391,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
     }
 
+    @AdbScreenRecord("ClazzWorkDetailProgressList: When clicked on a submission should go to marking ")
     @Test
     fun givenValidClazzWorkUid_whenTeacherSeesStudentListedAndClicked_thenShouldGoToMarking() {
 
@@ -441,7 +447,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
         }
 
-
         //Make submissions Student 1 and Student 4
         val student4 = testClazzWork.clazzAndMembers.studentList.get(3)
 
@@ -449,7 +454,6 @@ class ClazzWorkDetailProgressListFragmentTest  {
         checkProgressList(testClazzWork)
         clickStudent(student4)
 
-        //TODO: verify gone to marking
         Assert.assertEquals("After clicking on student," +
                 " fragment goes to marking for that student",
                 systemImplNavRule.navController.currentDestination?.id,

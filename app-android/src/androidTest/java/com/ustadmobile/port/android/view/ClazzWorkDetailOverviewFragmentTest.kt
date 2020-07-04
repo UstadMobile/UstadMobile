@@ -14,6 +14,7 @@ import androidx.test.espresso.contrib.RecyclerViewActions.scrollToHolder
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
@@ -41,7 +42,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.*
 
-//@AdbScreenRecord("ClazzWork (Assignments) Detail overview tests")
+@AdbScreenRecord("ClazzWork (Assignments) Detail overview tests")
 class ClazzWorkDetailOverviewFragmentTest {
 
     lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
@@ -208,7 +209,7 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     }
 
-    //@AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should show all fields")
+    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should show all fields")
     @Test
     fun givenValidClazzWorkUid_whenLoadedAsStudent_thenShouldShow() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
@@ -280,7 +281,7 @@ class ClazzWorkDetailOverviewFragmentTest {
         checkQuizQuestionsDisplayOk(clazzWorkQuizStuff)
     }
 
-    //@AdbScreenRecord("ClazzWorkDetailOverview: When logged in as teacher should show all relevant fields")
+    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as teacher should show all relevant fields")
     @Test
     fun givenValidClazzWorkUid_whenLoadedAsTeacher_thenShouldShow() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
@@ -342,7 +343,7 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     }
 
-    //@AdbScreenRecord("ClazzWorkDetailOverview: When student answers questions and hits submit, the view should be updated")
+    @AdbScreenRecord("ClazzWorkDetailOverview: When student answers questions and hits submit, the view should be updated")
     @Test
     fun givenValidClazzWorkUid_whenQuestionAnsweredAsStudentAndSubmitted_thenShouldUpdateView() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
@@ -424,7 +425,7 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     }
 
-    //@AdbScreenRecord("ClazzWorkDetailOverview: When teacher marks a submitted submission, the view should be updated accordingly.")
+    @AdbScreenRecord("ClazzWorkDetailOverview: When teacher marks a submitted submission, the view should be updated accordingly.")
     @Test
     fun givenValidClazzWorkUid_whenSubmissionMarkedByTeacherAndStudentLogsIn_thenShouldUpdateScore() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
@@ -459,7 +460,7 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     }
 
-    //@AdbScreenRecord("ClazzWorkDetailOverview: One student can make a private comment that is not seen by another student")
+    @AdbScreenRecord("ClazzWorkDetailOverview: One student can make a private comment that is not seen by another student")
     @Test
     fun givenLValidClazzWorkUid_whenPrivateCommentedByOneUser_thenOtherUsershallNotSee() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)

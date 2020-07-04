@@ -19,10 +19,14 @@ class SystemImplTestNavHostRule  : TestWatcher() {
     lateinit var navController: NavController
         private set
 
+    lateinit var impl: UstadMobileSystemImpl
+        private set
+
     override fun starting(description: Description?) {
         navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         (navController as TestNavHostController).setViewModelStore(ViewModelStore())
         navController.setGraph(R.navigation.mobile_navigation)
+        impl = UstadMobileSystemImpl.instance
         UstadMobileSystemImpl.instance.navController = navController
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
     }

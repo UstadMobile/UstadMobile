@@ -264,7 +264,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         get() = field
         set(value) {
             field = value
-            mBinding?.fieldsEnabled = value
         }
 
     override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
