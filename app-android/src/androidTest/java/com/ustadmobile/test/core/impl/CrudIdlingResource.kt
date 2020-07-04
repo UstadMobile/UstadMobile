@@ -142,7 +142,7 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
         //look for recyclerviews or progressbar
         if(this.view?.flattenHierarchy()?.filter { it.id !in excludedViewIds }?.any {
                     (it as? RecyclerView)?.isIdle() ?: (it as? ProgressBar)?.isIdle() == false
-                } == false) {
+                } == true) {
             return false
         }
 
