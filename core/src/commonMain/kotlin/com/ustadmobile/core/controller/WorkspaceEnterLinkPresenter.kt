@@ -27,10 +27,10 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     fun handleCheckLinkText(href: String){
-        if(!UMUtil.isValidUrl(href)) return
+        //if(!UMUtil.isValidUrl(href)) return
         GlobalScope.launch {
             try {
-                workSpace = defaultHttpClient().get<WorkSpace>(UMUtil.formatUrl(href))
+                workSpace = defaultHttpClient().get<WorkSpace>(href)
                 view.runOnUiThread(Runnable {
                     view.progressVisible = false
                     view.validLink = workSpace != null
