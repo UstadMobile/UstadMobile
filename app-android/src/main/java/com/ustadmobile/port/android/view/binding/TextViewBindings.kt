@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 
@@ -210,12 +211,11 @@ fun TextView.setFileSize(fileSize: Long) {
 fun TextView.setPersonFullName(personFullNamePersonUid: Long?){
     val personUid = personFullNamePersonUid ?: 0L
 
-    GlobalScope.async(Dispatchers.Main) {
+    GlobalScope.launch(Dispatchers.Main) {
         val personDao = UmAccountManager.getActiveDatabase(context).personDao
         val person = personDao.findByUidAsync(personUid)
         if(person != null){
             text = "${person.firstNames} ${person.lastName}"
         }
-        setTag(R.id.tag_imageloadjob, null)
     }
 }

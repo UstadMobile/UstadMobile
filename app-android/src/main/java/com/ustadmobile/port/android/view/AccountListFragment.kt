@@ -89,8 +89,8 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
         var activeAccount: UmAccount? = null
         set(value){
-            updateList()
             field = value
+            updateList()
         }
 
         private var storedAccounts: MutableList<UmAccount>? = null
@@ -114,8 +114,8 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             val umAccount = activeAccount
             if(umAccount != null){
                 storedAccounts?.remove(umAccount)
+                submitList(storedAccounts)
             }
-            submitList(storedAccounts)
         }
 
 
@@ -131,21 +131,21 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
     }
 
-
-    private val accountListObserver = Observer<List<UmAccount>?> {
-        t -> accountListAdapter?.submitList(t)
-    }
-
-    private var activeAccountListObserver = Observer<UmAccount?> {
+    private var activeAccountObserver = Observer<UmAccount?> {
         t -> accountListAdapter?.activeAccount = t
     }
+
+    private var accountListObserver = Observer<List<UmAccount>?> { _ -> loading = false }
 
 
     override var accountListLive: DoorLiveData<List<UmAccount>>? = null
         set(value) {
+            val observer = accountListAdapter ?:return
+            field?.removeObserver(observer)
             field?.removeObserver(accountListObserver)
             field = value
-            value?.observe(this, accountListObserver)
+            value?.observe(viewLifecycleOwner, observer)
+            value?.observe(viewLifecycleOwner, accountListObserver)
         }
 
 
@@ -153,10 +153,10 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         set(value) {
             val observer = activeAccountAdapter ?:return
             field?.removeObserver(observer)
-            field?.removeObserver(activeAccountListObserver)
+            field?.removeObserver(activeAccountObserver)
             field = value
             value?.observe(viewLifecycleOwner, observer)
-            value?.observe(viewLifecycleOwner, activeAccountListObserver)
+            value?.observe(viewLifecycleOwner, activeAccountObserver)
         }
 
 
