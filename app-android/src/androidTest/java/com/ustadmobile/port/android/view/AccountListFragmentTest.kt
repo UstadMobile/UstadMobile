@@ -94,7 +94,7 @@ class AccountListFragmentTest {
 
     @After
     fun destroy(){
-        mockWebServer.close()
+        mockWebServer.shutdown()
     }
 
     @AdbScreenRecord("given stored accounts exists when app launched should be displayed")
