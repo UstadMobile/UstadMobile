@@ -197,16 +197,17 @@ class AccountListFragmentTest {
     }
 
 
-    private suspend fun addAccounts(numberOfAccounts: Int = 1){
+    private fun addAccounts(numberOfAccounts: Int = 1){
         var usageMap = mapOf<String, Long>()
         val accounts:MutableList<UmAccount> = (1 .. (numberOfAccounts + 1)).map {
-            val person = Person("Person.$it","FirstName$it",
-                    "Lastname$it").apply {
-                emailAddr = "$username@$mockServerUrl"
-                personUid = dbRule.db.personDao.insertAsync(this)
+            val umAccount = UmAccount(it.toLong()).apply {
+                username = "Person.$it"
+                firstName = "FirstName$it"
+                lastName = "Lastname$it"
+                endpointUrl = mockServerUrl
             }
-            usageMap = usageMap.plus(Pair(person.username!!, System.currentTimeMillis() - it.toLong()))
-            UmAccount(person.personUid,person.username, null,mockServerUrl)
+            usageMap = usageMap.plus(Pair(umAccount.username!!, System.currentTimeMillis() - it.toLong()))
+            umAccount
         }.toMutableList()
 
         val storedAccounts = UstadAccounts("${accounts[0].username}@$mockServerUrl",accounts,

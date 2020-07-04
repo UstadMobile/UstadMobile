@@ -38,7 +38,7 @@ xmlns:tools="http://schemas.android.com/tools">
     <TextView
         android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         android:id="@+id/person_full_name"
-        app:personNamePersonUid="@{account.personUid}"
+        android:text="@{account.firstName +` `+account.lastName}"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"

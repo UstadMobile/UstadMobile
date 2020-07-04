@@ -205,17 +205,3 @@ fun TextView.setHtmlText(htmlText: String?) {
 fun TextView.setFileSize(fileSize: Long) {
     text = UMFileUtil.formatFileSize(fileSize)
 }
-
-@SuppressLint("SetTextI18n")
-@BindingAdapter("personNamePersonUid")
-fun TextView.setPersonFullName(personFullNamePersonUid: Long?){
-    val personUid = personFullNamePersonUid ?: 0L
-
-    GlobalScope.launch(Dispatchers.Main) {
-        val personDao = UmAccountManager.getActiveDatabase(context).personDao
-        val person = personDao.findByUidAsync(personUid)
-        if(person != null){
-            text = "${person.firstNames} ${person.lastName}"
-        }
-    }
-}
