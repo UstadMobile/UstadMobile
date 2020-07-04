@@ -1,14 +1,16 @@
 package com.ustadmobile.test.rules
 
-import android.content.Context
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.port.android.impl.BaseUstadApp
+import com.ustadmobile.port.android.impl.UstadApp
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.kodein.di.direct
+import org.kodein.di.instance
 import kotlin.random.Random
 
 class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "theanswer","", "http://localhost/"),
@@ -24,20 +26,19 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
     val repo: UmAppDatabase
         get() = (if(useDbAsRepo) db else repoInternal) ?: throw IllegalStateException("Rule not started!")
 
-    val accountLiveData: DoorMutableLiveData<UmAccount?> = DoorMutableLiveData(account)
-
 
     override fun starting(description: Description?) {
-        val context: Context = getApplicationContext()
-        UmAccountManager.setActiveAccount(account, context)
-        dbInternal = UmAccountManager.getActiveDatabase(context).apply {
+        val di = (getApplicationContext<BaseUstadApp>() as UstadApp).di
+        val accountManager = di.direct.instance<UstadAccountManager>()
+        accountManager.activeAccount = account
+
+        dbInternal = di.direct.instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).apply {
             clearAllTables()
             val _nodeId = Random.nextInt(1, Int.MAX_VALUE)
             syncNodeDao.replace(SyncNode(_nodeId, false))
         }
 
-
-        repoInternal = UmAccountManager.getRepositoryForActiveAccount(context)
+        repoInternal = di.direct.instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
     }
 
 

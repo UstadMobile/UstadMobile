@@ -124,14 +124,14 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = dbs.entries.map { it.key to DbPair(it.value.db, it.value.repo) }.toMap()
 
     val activeDatabase: UmAppDatabase
-        get() = dbs[activeAccount.endpointUrl]?.db ?: throw IllegalStateException("No database for active account")
+        get() = activeAccount.endpointUrl?.let { dbs[sanitizeDbNameFromUrl(it)]?.db } ?: throw IllegalStateException("No database for active account")
 
     val activeRepository: UmAppDatabase
-        get() = dbs[activeAccount.endpointUrl]?.repo ?: throw IllegalStateException("No database for active account")
+        get() = activeAccount.endpointUrl?.let { dbs[sanitizeDbNameFromUrl(it)]?.repo } ?: throw IllegalStateException("No database for active account")
 
-    fun getActiveDatabase(context: Any) = dbs[activeAccount.endpointUrl]?.db ?: throw IllegalStateException("No database for active account")
+    fun getActiveDatabase(context: Any) = activeDatabase
 
-    fun getActiveRepository(context: Any) = dbs[activeAccount.endpointUrl]?.repo ?: throw IllegalStateException("No repo for active account")
+    fun getActiveRepository(context: Any) = activeRepository
 
     suspend fun register(person: Person, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
         val httpStmt = httpClient.post<HttpStatement>() {
