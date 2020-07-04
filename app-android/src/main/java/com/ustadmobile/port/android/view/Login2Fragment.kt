@@ -91,8 +91,8 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         return rootView
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mPresenter = null
         mBinding = null
     }

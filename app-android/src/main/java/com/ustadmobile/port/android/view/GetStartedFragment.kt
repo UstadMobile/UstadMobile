@@ -37,8 +37,8 @@ class GetStartedFragment : UstadBaseFragment(), GetStartedView {
         startActivity(intent)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mPresenter = null
         mBinding = null
     }

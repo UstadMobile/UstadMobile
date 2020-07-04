@@ -210,8 +210,8 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
     }
 
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mBinding = null
         accountListAdapter = null
         activeAccountAdapter = null
