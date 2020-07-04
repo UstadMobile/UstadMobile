@@ -26,6 +26,11 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
 
     private lateinit var serverUrl: String
 
+    private var workSpace: WorkSpace = WorkSpace().apply {
+        registrationAllowed = true
+        guestLogin = true
+    }
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
@@ -37,10 +42,12 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
             impl.getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", context)?:""
         }
-        val workspace = Json.parse(WorkSpace.serializer(), arguments[ARG_WORKSPACE]?:"")
-
-        view.createAccountVisible = workspace.registrationAllowed
-        view.connectAsGuestVisible = workspace.guestLogin
+        val mWorkSpace = arguments[ARG_WORKSPACE]
+        if(mWorkSpace != null){
+            workSpace = Json.parse(WorkSpace.serializer(), mWorkSpace)
+        }
+        view.createAccountVisible = workSpace.registrationAllowed
+        view.connectAsGuestVisible = workSpace.guestLogin
     }
 
     fun handleLogin(username: String?, password:String?){

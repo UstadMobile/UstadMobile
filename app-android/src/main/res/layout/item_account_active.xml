@@ -38,7 +38,7 @@ xmlns:tools="http://schemas.android.com/tools">
     <TextView
         android:textAppearance="@style/UmTheme.TextAppearance.Body1"
         android:id="@+id/person_full_name"
-        app:personNamePersonUid="@{account.personUid}"
+        android:text="@{account.firstName +` `+account.lastName}"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
@@ -57,7 +57,7 @@ xmlns:tools="http://schemas.android.com/tools">
         android:layout_width="@dimen/dimen_16dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:src="@drawable/ic_delete_black_24dp"
+        android:src="@drawable/person_with_key"
         android:tint="?colorOnIconTint"
         app:layout_constraintStart_toStartOf="@+id/person_full_name"
         app:layout_constraintTop_toBottomOf="@+id/person_full_name"

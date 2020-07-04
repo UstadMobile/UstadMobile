@@ -49,7 +49,7 @@
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/person_full_name"
-            app:personNamePersonUid="@{umaccount.personUid}"
+            android:text="@{umaccount.firstName +` `+umaccount.lastName}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"

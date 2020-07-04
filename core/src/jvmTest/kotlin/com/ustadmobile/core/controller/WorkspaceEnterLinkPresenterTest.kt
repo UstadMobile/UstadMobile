@@ -54,20 +54,21 @@ class WorkspaceEnterLinkPresenterTest {
 
     @Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
-        val workSpace = Json.stringify(WorkSpace.serializer(),
-                WorkSpace().apply {
+        val workSpace = Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
                     name = "Dummy workspace"
                     registrationAllowed = true
                     guestLogin = true
                 })
+
         mockWebServer.enqueue(MockResponse()
                 .setHeader("Content-Type", "application/json")
                 .setBody(Buffer().write(workSpace.toByteArray())))
+
         val workSpacelink = "${mockWebServer.url("/")}workspace"
 
         val presenter = WorkspaceEnterLinkPresenter(context,
                 mapOf(), view, impl)
-        presenter.onCreate(null)
+
         presenter.handleCheckLinkText(workSpacelink)
         verify(view, timeout(defaultTimeout)).validLink = eq(true)
     }
@@ -78,7 +79,7 @@ class WorkspaceEnterLinkPresenterTest {
         val workSpacelink = "${mockWebServer.url("/")}workspace"
         val presenter = WorkspaceEnterLinkPresenter(context,
                 mapOf(), view, impl)
-        presenter.onCreate(null)
+
         presenter.handleCheckLinkText(workSpacelink)
         verify(view, timeout(defaultTimeout)).validLink = eq(false)
     }

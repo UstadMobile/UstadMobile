@@ -4,12 +4,6 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
 xmlns:tools="http://schemas.android.com/tools">
 
 <data>
-    <import type="com.ustadmobile.lib.db.entities.UmAccount"/>
-
-    <variable
-        name="umaccount"
-        type="UmAccount" />
-
     <variable
         name="versionText"
         type="String" />
@@ -37,7 +31,6 @@ xmlns:tools="http://schemas.android.com/tools">
     <TextView
         android:textAppearance="@style/UmTheme.TextAppearance.Caption"
         android:id="@+id/about_version"
-        app:personNamePersonUid="@{umaccount.personUid}"
         android:layout_width="0dp"
         android:paddingStart="@dimen/dimen_16dp"
         android:paddingEnd="@dimen/dimen_16dp"

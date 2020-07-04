@@ -12,7 +12,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.lifecycle.Lifecycle
 import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
@@ -176,7 +175,7 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     }
 
     private fun View.flattenHierarchy(): List<View> = if (this is ViewGroup) {
-        listOf(this) + children.map { it.flattenHierarchy() }.flatten()
+        listOf(this) + children.filter { it.visibility == View.VISIBLE }.map { it.flattenHierarchy() }.flatten()
     } else {
         listOf(this)
     }

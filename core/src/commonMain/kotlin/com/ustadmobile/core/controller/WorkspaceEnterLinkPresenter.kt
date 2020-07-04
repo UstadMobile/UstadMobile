@@ -27,11 +27,10 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     fun handleCheckLinkText(href: String){
-        //"handle validation after making a request"
-        if(!UMUtil.isValidUrl(href)) return
         GlobalScope.launch {
             try {
-                workSpace = defaultHttpClient().get<WorkSpace>(UMUtil.formatUrl(href))
+                val formattedHref = if(href.startsWith("http")) href else "https://$href"
+                workSpace = defaultHttpClient().get<WorkSpace>(formattedHref)
                 view.runOnUiThread(Runnable {
                     view.progressVisible = false
                     view.validLink = workSpace != null

@@ -74,6 +74,8 @@ class AccountListFragmentTest {
 
     lateinit var mockServerUrl: String
 
+    private val defaultNumOfAccounts = 2
+
     private fun MockWebServer.enqueueAccountResponse(umAccount: UmAccount =
                                                              UmAccount(1L, "dummy1", "", mockServerUrl)) {
         enqueue(MockResponse()
@@ -92,13 +94,13 @@ class AccountListFragmentTest {
 
     @After
     fun destroy(){
-        mockWebServer.close()
+        mockWebServer.shutdown()
     }
 
     @AdbScreenRecord("given stored accounts exists when app launched should be displayed")
     @Test
     fun givenStoreAccounts_whenAppLaunched_thenShouldShowAllAccounts(){
-        launchFragment(true, 2)
+        launchFragment(true, defaultNumOfAccounts)
         val accountManager = UstadAccountManager.getInstance(UstadMobileSystemImpl.instance, context)
         //3 - account for active account, add account and about view items
         onView(withId(R.id.account_list_recycler)).check(
@@ -108,7 +110,7 @@ class AccountListFragmentTest {
     @AdbScreenRecord("given active account when app launched should be displayed")
     @Test
     fun givenActiveAccountExists_whenAppLaunched_thenShouldShowIt(){
-        launchFragment(true, 4)
+        launchFragment(true, defaultNumOfAccounts)
 
         onView(withId(R.id.account_list_recycler)).check(
                 matches(atPosition(0, hasDescendant(withText("FirstName1 Lastname1")))))
@@ -130,7 +132,7 @@ class AccountListFragmentTest {
     @AdbScreenRecord("given delete button when clicked should remove account from the device")
     @Test
     fun givenDeleteAccountButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
-        val fragmentScenario = launchFragment(true, 4)
+        val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
         val accountManager = UstadAccountManager.getInstance(UstadMobileSystemImpl.instance, context)
 
         val storedAccounts = accountManager.storedAccounts
@@ -150,7 +152,7 @@ class AccountListFragmentTest {
     @AdbScreenRecord("given logout button when clicked should logout current active account")
     @Test
     fun givenLogoutButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
-        val fragmentScenario = launchFragment(true, 2)
+        val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
         val accountManager = UstadAccountManager.getInstance(UstadMobileSystemImpl.instance, context)
 
         val activeAccount = accountManager.activeAccount
@@ -195,16 +197,17 @@ class AccountListFragmentTest {
     }
 
 
-    private suspend fun addAccounts(numberOfAccounts: Int = 1){
+    private fun addAccounts(numberOfAccounts: Int = 1){
         var usageMap = mapOf<String, Long>()
         val accounts:MutableList<UmAccount> = (1 .. (numberOfAccounts + 1)).map {
-            val person = Person("Person.$it","FirstName$it",
-                    "Lastname$it").apply {
-                emailAddr = "$username@$mockServerUrl"
-                personUid = dbRule.db.personDao.insertAsync(this)
+            val umAccount = UmAccount(it.toLong()).apply {
+                username = "Person.$it"
+                firstName = "FirstName$it"
+                lastName = "Lastname$it"
+                endpointUrl = mockServerUrl
             }
-            usageMap = usageMap.plus(Pair(person.username!!, System.currentTimeMillis() - it.toLong()))
-            UmAccount(person.personUid,person.username, null,mockServerUrl)
+            usageMap = usageMap.plus(Pair(umAccount.username!!, System.currentTimeMillis() - it.toLong()))
+            umAccount
         }.toMutableList()
 
         val storedAccounts = UstadAccounts("${accounts[0].username}@$mockServerUrl",accounts,

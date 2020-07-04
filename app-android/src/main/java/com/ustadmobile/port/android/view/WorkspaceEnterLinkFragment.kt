@@ -13,6 +13,7 @@ import com.ustadmobile.core.controller.WorkspaceEnterLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
@@ -25,7 +26,7 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
 
     private val inputCheckHandler: Handler = Handler()
 
-    private var lastInputTime: Long = 0
+    private val atomicBoolean = AtomicBoolean(false)
 
     private val inputCheckerCallback = Runnable {
         val typedLink = workspaceLink
@@ -43,6 +44,7 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
             handleError(!value)
             mBinding?.showButton = value
             field = value
+            atomicBoolean.set(value)
         }
 
     override var progressVisible: Boolean = false
@@ -67,23 +69,24 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
         mPresenter = WorkspaceEnterLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         mBinding?.organisationLink?.addTextChangedListener(object: TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                val typedUrl = s.toString()
+                progressVisible = typedUrl.isNotEmpty() && !validLink
+            }
             override fun onTextChanged(url: CharSequence?, start: Int, before: Int, count: Int) {
                 inputCheckHandler.removeCallbacks(inputCheckerCallback)
             }
             override fun afterTextChanged(s: Editable?) {
-                val typedText = s.toString()
-                progressVisible = typedText.isNotEmpty()
-                lastInputTime = System.currentTimeMillis()
                 inputCheckHandler.postDelayed(inputCheckerCallback, inputCheckDelay)
             }
+
         })
 
         return rootView
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mPresenter = null
         workspaceLink = null
         mBinding = null
