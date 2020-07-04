@@ -7,6 +7,7 @@ import org.junit.runner.Description
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.provider
+import java.lang.IllegalStateException
 
 /**
  * This test rule creates a fresh spy wrapper around UstadMobileSystemImpl for each test run. It can
@@ -17,7 +18,7 @@ class SystemImplRule : TestWatcher(){
     private var systemImplSpy: UstadMobileSystemImpl? = null
 
     val systemImpl: UstadMobileSystemImpl
-        get() = systemImplSpy!!
+        get() = systemImplSpy ?: throw IllegalStateException("Attempt to access SystemImplRule before test starting")
 
     val diModule = DI.Module("SystemImplRule") {
         bind<UstadMobileSystemImpl>() with provider { systemImpl }

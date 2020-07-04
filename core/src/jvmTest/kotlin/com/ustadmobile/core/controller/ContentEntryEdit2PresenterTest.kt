@@ -1,7 +1,10 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
@@ -25,13 +28,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 
 
 class ContentEntryEdit2PresenterTest  {
-
-    @JvmField
-    @Rule
-    var systemImplRule = SystemImplRule()
 
     @JvmField
     @Rule
@@ -65,6 +66,8 @@ class ContentEntryEdit2PresenterTest  {
 
     private val errorMessage: String = "Dummy error"
 
+    private lateinit var systemImpl: UstadMobileSystemImpl
+
     private lateinit var di: DI
 
 
@@ -83,31 +86,31 @@ class ContentEntryEdit2PresenterTest  {
         mockEntryDao = spy{
             onBlocking { insertAsync(any()) }.thenReturn(entryUid)
         }
+
         repo = spy(realDb) {
             on{contentEntryDao}.thenAnswer{mockEntryDao}
         }
 
         containerManager = spy{}
 
-        whenever(systemImplRule.systemImpl.getStorageDirs(any(), any())).thenAnswer {
-            (it.getArgument(1) as UmResultCallback<List<UMStorageDir>>).onDone(
-                    mutableListOf(UMStorageDir("", "", removableMedia = false,
-                            isAvailable = false, isUserSpecific = false)))
+        systemImpl = mock{
+            on { getStorageDirs(any(), any()) }.thenAnswer {
+                (it.getArgument(1) as UmResultCallback<List<UMStorageDir>>).onDone(
+                        mutableListOf(UMStorageDir("", "", removableMedia = false,
+                        isAvailable = false, isUserSpecific = false)))
+            }
+            on { getString(any(), any()) }.thenAnswer{errorMessage}
         }
-        whenever(systemImplRule.systemImpl.getString(any(), any())).thenAnswer { errorMessage }
 
-//        systemImpl = mock{
-//            on { getStorageDirs(any(), any()) }.thenAnswer {
-//                (it.getArgument(1) as UmResultCallback<List<UMStorageDir>>).onDone(
-//                        mutableListOf(UMStorageDir("", "", removableMedia = false,
-//                        isAvailable = false, isUserSpecific = false)))
-//            }
-//            on { getString(any(), any()) }.thenAnswer{errorMessage}
-//        }
+        val mockAccountManager: UstadAccountManager = mock {
+
+        }
 
         di = DI {
-            import(systemImplRule.diModule)
-            import(clientDbRule.diModule)
+            bind<UstadMobileSystemImpl>() with singleton { systemImpl }
+            bind<UmAppDatabase>(tag = TAG_DB) with singleton { db }
+            bind<UmAppDatabase>(tag = TAG_REPO) with singleton { repo }
+            bind<UstadAccountManager>() with singleton { mockAccountManager }
         }
 
     }

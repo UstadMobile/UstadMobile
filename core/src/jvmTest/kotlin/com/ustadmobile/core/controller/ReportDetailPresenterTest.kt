@@ -23,6 +23,7 @@ import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -47,6 +48,8 @@ class ReportDetailPresenterTest {
 
     private lateinit var repoReportDaoSpy: ReportDao
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -59,6 +62,11 @@ class ReportDetailPresenterTest {
 
         runBlocking {
             clientDbRule.db.insertTestStatements()
+        }
+
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
         }
     }
 
@@ -88,9 +96,7 @@ class ReportDetailPresenterTest {
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())
         val presenter = ReportDetailPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
 
 
         presenter.onCreate(null)
@@ -127,9 +133,7 @@ class ReportDetailPresenterTest {
 
         val presenterArgs = mapOf(ARG_ENTITY_JSON to Json.stringify(ReportWithFilters.serializer(), testEntity))
         val presenter = ReportDetailPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
 
@@ -174,9 +178,7 @@ class ReportDetailPresenterTest {
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())
         val presenter = ReportDetailPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
 

@@ -53,7 +53,7 @@ class ClazzDetailPresenter(context: Any,
             editEntity = Clazz()
         }
 
-        val activePersonUid = activeAccount.getValue()?.personUid ?: 0L
+        val activePersonUid = accountManager.activeAccount.personUid
 
         val entityUid = editEntity.clazzUid
 
@@ -75,7 +75,7 @@ class ClazzDetailPresenter(context: Any,
              db.clazzDao.findByUid(entityUid)
         } ?: Clazz()
 
-        val activePersonUid = activeAccount.getValue()?.personUid ?: 0L
+        val activePersonUid = accountManager.activeAccount.personUid
 
         view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
                 "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid") +

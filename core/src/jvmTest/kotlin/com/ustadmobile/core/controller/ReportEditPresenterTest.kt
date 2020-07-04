@@ -21,6 +21,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
 import org.mockito.ArgumentMatchers.anyMap
 import org.mockito.ArgumentMatchers.anyString
 
@@ -42,6 +43,8 @@ class ReportEditPresenterTest {
 
     private lateinit var repoReportDaoSpy: ReportDao
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -52,6 +55,10 @@ class ReportEditPresenterTest {
         repoReportDaoSpy = spy(clientDbRule.db.reportDao)
         whenever(clientDbRule.db.reportDao).thenReturn(repoReportDaoSpy)
 
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
+        }
     }
 
 
@@ -60,9 +67,7 @@ class ReportEditPresenterTest {
         val presenterArgs = mapOf<String, String>()
 
         val presenter = ReportEditPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         val initialEntity = mockView.captureLastEntityValue()!!
@@ -82,9 +87,7 @@ class ReportEditPresenterTest {
         val presenterArgs = mapOf<String, String>()
 
         val presenter = ReportEditPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         val initialEntity = mockView.captureLastEntityValue()!!
@@ -113,9 +116,7 @@ class ReportEditPresenterTest {
 
         val presenterArgs = mapOf(UstadView.ARG_ENTITY_UID to testEntity.reportUid.toString())
         val presenter = ReportEditPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         val initialEntity = mockView.captureLastEntityValue()!!

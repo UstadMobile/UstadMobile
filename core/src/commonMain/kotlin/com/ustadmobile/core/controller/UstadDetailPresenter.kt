@@ -1,11 +1,11 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
 import com.ustadmobile.core.view.UstadSingleEntityView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -19,12 +19,12 @@ abstract class UstadDetailPresenter<V: UstadSingleEntityView<RT>, RT: Any>(conte
      di: DI)
     : UstadSingleEntityPresenter<V, RT>(context, arguments, view, lifecycleOwner, di) {
 
-    val activeAccount: DoorLiveData<UmAccount> by instance<DoorLiveData<UmAccount>>()
+    val accountManager: UstadAccountManager by instance<UstadAccountManager>()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        activeAccount.observeWithLifecycleOwner(lifecycleOwner, this::onAccountChanged)
+        accountManager.activeAccountLive.observeWithLifecycleOwner(lifecycleOwner, this::onAccountChanged)
     }
 
     protected open fun onAccountChanged(account: UmAccount?) {

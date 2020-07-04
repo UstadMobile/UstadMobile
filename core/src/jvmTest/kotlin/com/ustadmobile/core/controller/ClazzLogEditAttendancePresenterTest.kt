@@ -50,6 +50,10 @@ class ClazzLogEditAttendancePresenterTest {
         mockView = mock { }
         mockLifecycleOwner = mock { }
         context = Any()
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
+        }
     }
 
     @Test

@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
+import org.kodein.di.DI
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -40,6 +41,8 @@ class ReportListPresenterTest {
 
     private lateinit var repoReportDaoSpy: ReportDao
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -50,6 +53,10 @@ class ReportListPresenterTest {
         repoReportDaoSpy = spy(clientDbRule.db.reportDao)
         whenever(clientDbRule.db.reportDao).thenReturn(repoReportDaoSpy)
 
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
+        }
     }
 
     @Test
@@ -61,9 +68,7 @@ class ReportListPresenterTest {
 
         val presenterArgs = mapOf<String,String>()
         val presenter = ReportListPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
@@ -81,9 +86,7 @@ class ReportListPresenterTest {
             reportUid = clientDbRule.db.reportDao.insert(this)
         }
         val presenter = ReportListPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 

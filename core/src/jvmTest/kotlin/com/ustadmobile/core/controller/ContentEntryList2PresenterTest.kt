@@ -24,6 +24,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
 
 class ContentEntryList2PresenterTest {
 
@@ -52,6 +53,8 @@ class ContentEntryList2PresenterTest {
     val presenterArgs = mapOf(ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT,
             ARG_PARENT_ENTRY_UID to parentEntryUid.toString())
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -61,6 +64,11 @@ class ContentEntryList2PresenterTest {
         context = Any()
         repoContentEntrySpyDao = spy(clientDbRule.db.contentEntryDao)
         whenever(clientDbRule.db.contentEntryDao).thenReturn(repoContentEntrySpyDao)
+
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
+        }
 
     }
 
@@ -75,9 +83,7 @@ class ContentEntryList2PresenterTest {
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         createEntries()
         val presenter = ContentEntryList2Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         verify(repoContentEntrySpyDao, timeout(defaultTimeout)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
@@ -91,9 +97,7 @@ class ContentEntryList2PresenterTest {
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
         createEntries()
         val presenter = ContentEntryList2Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner,di)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
@@ -108,9 +112,7 @@ class ContentEntryList2PresenterTest {
         createEntries()
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
@@ -131,9 +133,7 @@ class ContentEntryList2PresenterTest {
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
         createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
@@ -155,9 +155,7 @@ class ContentEntryList2PresenterTest {
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, mockLifecycleOwner,di)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
@@ -183,9 +181,7 @@ class ContentEntryList2PresenterTest {
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
@@ -210,9 +206,7 @@ class ContentEntryList2PresenterTest {
         createEntries()
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
