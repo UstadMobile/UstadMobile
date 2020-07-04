@@ -2,12 +2,18 @@ package com.ustadmobile.core.util
 
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.ext.bindJndiForActiveEndpoint
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.provider
 import javax.naming.InitialContext
 
 /**
@@ -30,6 +36,11 @@ class UmAppDatabaseClientRule(val account: UmAccount = UmAccount(42, "theanswer"
 
     val accountLiveData: DoorMutableLiveData<UmAccount?> = DoorMutableLiveData(account)
 
+
+    val diModule = DI.Module("UmAppDatabase") {
+        bind<UmAppDatabase>(tag = TAG_DB) with provider { db }
+        bind<UmAppDatabase>(tag = TAG_REPO) with provider { repo }
+    }
 
     override fun starting(description: Description?) {
         val context = contextProvider()

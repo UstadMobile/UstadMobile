@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.Clazz
+import org.kodein.di.DI
 
 class ClazzListPresenterTest {
 
@@ -33,6 +34,8 @@ class ClazzListPresenterTest {
 
     private lateinit var repoClazzDaoSpy: ClazzDao
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -43,6 +46,10 @@ class ClazzListPresenterTest {
         repoClazzDaoSpy = spy(clientDbRule.db.clazzDao)
         whenever(clientDbRule.db.clazzDao).thenReturn(repoClazzDaoSpy)
 
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
+        }
         //TODO: insert any entities required for all tests
     }
 
@@ -58,9 +65,7 @@ class ClazzListPresenterTest {
         // ClazzList2View.ARG_SOME_FILTER to "filterValue"
         val presenterArgs = mapOf<String,String>()
         val presenter = ClazzListPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
@@ -77,9 +82,7 @@ class ClazzListPresenterTest {
         val excludeFromSchool = 7L
         val presenterArgs = mapOf<String,String>(PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to excludeFromSchool.toString())
         val presenter = ClazzListPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
@@ -97,9 +100,7 @@ class ClazzListPresenterTest {
             clazzUid = clientDbRule.db.clazzDao.insert(this)
         }
         val presenter = ClazzListPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 

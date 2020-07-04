@@ -25,6 +25,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
 
 class ClazzLogEditAttendancePresenterTest {
 
@@ -33,6 +34,8 @@ class ClazzLogEditAttendancePresenterTest {
     private lateinit var context: Any
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+
+    private lateinit var di: DI
 
     @JvmField
     @Rule
@@ -56,8 +59,7 @@ class ClazzLogEditAttendancePresenterTest {
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         //wait for the view to finish loading
@@ -89,8 +91,7 @@ class ClazzLogEditAttendancePresenterTest {
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
@@ -118,8 +119,7 @@ class ClazzLogEditAttendancePresenterTest {
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                mockLifecycleOwner, di)
 
         presenter.onCreate(null)
 
@@ -171,8 +171,7 @@ class ClazzLogEditAttendancePresenterTest {
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = any()

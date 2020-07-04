@@ -24,6 +24,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
+import org.kodein.di.DI
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -50,6 +51,8 @@ class ClazzDetailOverviewPresenterTest {
 
     private lateinit var repoScheduleSpy: ScheduleDao
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -65,6 +68,12 @@ class ClazzDetailOverviewPresenterTest {
             whenever(clientDbRule.db.scheduleDao).thenReturn(it)
         }
 
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
+        }
+
+
         //TODO: insert any entities required for all tests
     }
 
@@ -76,9 +85,7 @@ class ClazzDetailOverviewPresenterTest {
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
         val presenter = ClazzDetailOverviewPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
 
 
         presenter.onCreate(null)
@@ -102,9 +109,7 @@ class ClazzDetailOverviewPresenterTest {
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
         val presenter = ClazzDetailOverviewPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
 

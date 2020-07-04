@@ -4,6 +4,9 @@ import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.provider
 
 /**
  * This test rule creates a fresh spy wrapper around UstadMobileSystemImpl for each test run. It can
@@ -16,6 +19,9 @@ class SystemImplRule : TestWatcher(){
     val systemImpl: UstadMobileSystemImpl
         get() = systemImplSpy!!
 
+    val diModule = DI.Module("SystemImplRule") {
+        bind<UstadMobileSystemImpl>() with provider { systemImpl }
+    }
 
     override fun starting(description: Description?) {
         systemImplSpy = spy(UstadMobileSystemImpl.instance)

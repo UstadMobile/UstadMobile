@@ -7,6 +7,8 @@ import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.core.util.SystemImplRule
+import com.ustadmobile.core.util.UmAppDatabaseClientRule
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
@@ -20,12 +22,20 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
 
 
 class ContentEntryEdit2PresenterTest  {
 
-    lateinit var systemImpl: UstadMobileSystemImpl
+    @JvmField
+    @Rule
+    var systemImplRule = SystemImplRule()
+
+    @JvmField
+    @Rule
+    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
 
     private lateinit var mockView: ContentEntryEdit2View
 
@@ -55,6 +65,9 @@ class ContentEntryEdit2PresenterTest  {
 
     private val errorMessage: String = "Dummy error"
 
+    private lateinit var di: DI
+
+
     @Before
     fun setUp() {
         context = Any()
@@ -76,13 +89,25 @@ class ContentEntryEdit2PresenterTest  {
 
         containerManager = spy{}
 
-        systemImpl = mock{
-            on { getStorageDirs(any(), any()) }.thenAnswer {
-                (it.getArgument(1) as UmResultCallback<List<UMStorageDir>>).onDone(
-                        mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false, isUserSpecific = false)))
-            }
-            on { getString(any(), any()) }.thenAnswer{errorMessage}
+        whenever(systemImplRule.systemImpl.getStorageDirs(any(), any())).thenAnswer {
+            (it.getArgument(1) as UmResultCallback<List<UMStorageDir>>).onDone(
+                    mutableListOf(UMStorageDir("", "", removableMedia = false,
+                            isAvailable = false, isUserSpecific = false)))
+        }
+        whenever(systemImplRule.systemImpl.getString(any(), any())).thenAnswer { errorMessage }
+
+//        systemImpl = mock{
+//            on { getStorageDirs(any(), any()) }.thenAnswer {
+//                (it.getArgument(1) as UmResultCallback<List<UMStorageDir>>).onDone(
+//                        mutableListOf(UMStorageDir("", "", removableMedia = false,
+//                        isAvailable = false, isUserSpecific = false)))
+//            }
+//            on { getString(any(), any()) }.thenAnswer{errorMessage}
+//        }
+
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
         }
 
     }
@@ -124,7 +149,7 @@ class ContentEntryEdit2PresenterTest  {
     fun givenPresenterCreatedAndEntryNotCreated_whenClickSave_shouldCreateAnEntry() {
         createMockView()
         val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString())
-                ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
+                ,mockView,mockLifecycleOwner, di)
 
         presenter.onCreate(null)
 
@@ -154,7 +179,7 @@ class ContentEntryEdit2PresenterTest  {
         createMockView()
         contentEntry.leaf = false
         val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString())
-                ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
+                ,mockView,mockLifecycleOwner,di)
 
         presenter.onCreate(null)
         mockView.captureLastEntityValue()
@@ -179,7 +204,7 @@ class ContentEntryEdit2PresenterTest  {
         createMockView()
         contentEntry.contentEntryUid = entryUid
         val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString())
-                ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
+                ,mockView,mockLifecycleOwner, di)
 
         presenter.onCreate(null)
         mockView.captureLastEntityValue()
@@ -207,7 +232,7 @@ class ContentEntryEdit2PresenterTest  {
         createMockView()
         contentEntry.title = null
         val presenter = ContentEntryEdit2Presenter(context, mapOf()
-                ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
+                ,mockView,mockLifecycleOwner, di)
 
         presenter.onCreate(null)
         mockView.captureLastEntityValue()
@@ -223,8 +248,7 @@ class ContentEntryEdit2PresenterTest  {
     @Test
     fun givenPresenterCreatedAndEntryFileIsNotSelected_whenClickSave_shouldShowErrorMessage() {
         createMockView(true)
-        val presenter = ContentEntryEdit2Presenter(context, mapOf()
-                ,mockView,mockLifecycleOwner,systemImpl,db,repo,containerManager, activeAccount )
+        val presenter = ContentEntryEdit2Presenter(context, mapOf(), mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
         mockView.captureLastEntityValue()

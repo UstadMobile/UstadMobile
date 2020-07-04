@@ -47,6 +47,8 @@ class ClazzEdit2PresenterTest {
 
     private lateinit var repoClazzDaoSpy: ClazzDao
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -56,31 +58,23 @@ class ClazzEdit2PresenterTest {
         context = Any()
         repoClazzDaoSpy = spy(clientDbRule.db.clazzDao)
         whenever(clientDbRule.db.clazzDao).thenReturn(repoClazzDaoSpy)
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
+        }
 
-        //TODO: insert any entities required for all tests
     }
 
-    fun DI.MainBuilder.installDb() {
-        bind<UmAppDatabase>(tag = "db") with singleton { clientDbRule.db }
-        bind<UmAppDatabase>(tag = "repo") with singleton { clientDbRule.repo }
-        bind<UstadMobileSystemImpl>() with singleton { systemImplRule.systemImpl }
-    }
 
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
         val presenterArgs = mapOf<String, String>()
-
-        val di = DI {
-            import
-        }
-
 //        val presenter = ClazzEdit2Presenter(context,
 //                presenterArgs, mockView, mockLifecycleOwner,
 //                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
 //                clientDbRule.accountLiveData)
-        val presenter by di.newInstance { ClazzEdit2Presenter(context, presenterArgs, mockView,
-            mockLifecycleOwner, instance(), instance(tag = "db"), instance(tag = "repo"),
-            clientDbRule.accountLiveData) }
+        val presenter = ClazzEdit2Presenter(context, presenterArgs, mockView, mockLifecycleOwner,
+                di)
 
         presenter.onCreate(null)
 
@@ -108,9 +102,7 @@ class ClazzEdit2PresenterTest {
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
         val presenter = ClazzEdit2Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         val initialEntity = mockView.captureLastEntityValue()!!

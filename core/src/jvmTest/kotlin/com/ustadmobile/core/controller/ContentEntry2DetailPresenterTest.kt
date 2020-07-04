@@ -17,6 +17,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
 import java.lang.Thread.sleep
 
 class ContentEntry2DetailPresenterTest {
@@ -45,6 +46,8 @@ class ContentEntry2DetailPresenterTest {
 
     private var presenterArgs: Map<String, String>? = null
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -62,14 +65,17 @@ class ContentEntry2DetailPresenterTest {
         }
 
         presenterArgs = mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString())
+
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
+        }
     }
 
     @Test
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntry(){
         val presenter = ContentEntry2DetailPresenter(context,
-                presenterArgs!!, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, true,clientDbRule.db, clientDbRule.repo,
-                containerManager, clientDbRule.accountLiveData)
+                presenterArgs!!, mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
 
@@ -85,9 +91,7 @@ class ContentEntry2DetailPresenterTest {
     fun givenContentEntryExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled(){
 
         val presenter = ContentEntry2DetailPresenter(context,
-                presenterArgs!!, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, true,clientDbRule.db, clientDbRule.repo,
-                containerManager, clientDbRule.accountLiveData)
+                presenterArgs!!, mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
 

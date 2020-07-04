@@ -24,6 +24,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
 
 class ClazzLogListAttendancePresenterTest {
 
@@ -43,6 +44,8 @@ class ClazzLogListAttendancePresenterTest {
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
+    private lateinit var di: DI
+
     @Before
     fun setup(){
         mockView = mock { }
@@ -53,6 +56,11 @@ class ClazzLogListAttendancePresenterTest {
         repoClazzLogDao = spy(clientDbRule.db.clazzLogDao)
 
         whenever(clientDbRule.db.clazzLogDao).thenReturn(repoClazzLogDao)
+
+        di = DI {
+            import(systemImplRule.diModule)
+            import(clientDbRule.diModule)
+        }
     }
 
     @Test
@@ -66,8 +74,7 @@ class ClazzLogListAttendancePresenterTest {
 
         val presenter = ClazzLogListAttendancePresenter(context,
                 mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to "42"), mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                di)
         presenter.onCreate(null)
 
         verify(repoClazzLogDao, timeout(5000)).findByClazzUidAsFactory(42L,
@@ -99,7 +106,7 @@ class ClazzLogListAttendancePresenterTest {
 
         val presenter = ClazzLogListAttendancePresenter(context,
                 mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()), mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo, clientDbRule.accountLiveData)
+                di)
         presenter.onCreate(null)
         nullableArgumentCaptor<DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>>() {
             verify(mockView, timeout(5000)).graphData = capture()
