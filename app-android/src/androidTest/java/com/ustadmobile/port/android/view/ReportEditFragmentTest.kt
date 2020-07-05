@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -25,6 +26,7 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.controller.ReportEditPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
@@ -91,11 +93,15 @@ class ReportEditFragmentTest {
             yAxis = Report.AVG_DURATION
             xAxis = Report.WEEK
             subGroup = Report.GENDER
-            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
         }
 
-        fillFields(fragmentScenario, formVals, currentEntity, true, person, verbDisplay, contentEntry)
+        fillFields(fragmentScenario, formVals, currentEntity, true,
+                person, verbDisplay, contentEntry,
+                impl = systemImplNavRule.impl, context = fragmentScenario.letOnFragment {
+            it.context
+        }!!)
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
@@ -153,7 +159,10 @@ class ReportEditFragmentTest {
             personUid = dbRule.db.personDao.insert(this)
         }
 
-        fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment, person = person)
+        fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment, person = person,
+                impl = systemImplNavRule.impl, context = fragmentScenario.letOnFragment {
+            it.context
+        }!!)
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
@@ -179,17 +188,17 @@ class ReportEditFragmentTest {
                 updatedEntityFromDb?.xAxis)
         Assert.assertEquals("subgroup updated", Report.GENDER,
                 updatedEntityFromDb?.subGroup)
-        Assert.assertEquals("one filter added",1,
+        Assert.assertEquals("one filter added", 1,
                 reportFilerListFromDb!!.size)
     }
 
     companion object {
 
-        fun fillFields(fragmentScenario: FragmentScenario<ReportEditFragment>,
+        fun fillFields(fragmentScenario: FragmentScenario<ReportEditFragment>? = null,
                        report: ReportWithFilters,
-                       reportOnForm: ReportWithFilters?,
+                       reportOnForm: ReportWithFilters? = ReportWithFilters(),
                        setFieldsRequiringNavigation: Boolean = true, person: Person? = null,
-                       verbDisplay: VerbDisplay? = null, entry: ContentEntry? = null) {
+                       verbDisplay: VerbDisplay? = null, entry: ContentEntry? = null, impl: UstadMobileSystemImpl, context: Context) {
 
             report.reportTitle?.takeIf { it != reportOnForm?.reportTitle }?.also {
                 onView(withId(R.id.fragment_report_edit_title)).perform(clearText(), typeText(it))
@@ -199,22 +208,22 @@ class ReportEditFragmentTest {
 
             report.chartType.takeIf { it != reportOnForm?.chartType }?.also {
                 setMessageIdOption(R.id.fragment_edit_report_dialog_visual_type_textinputlayout,
-                        it, fragmentScenario.letOnFragment { it.chartOptions }!!)
+                        impl.getString(ReportEditPresenter.ChartOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
             }
 
             report.yAxis.takeIf { it != reportOnForm?.yAxis }?.also {
                 setMessageIdOption(R.id.fragment_edit_report_dialog_yaxis_textinputlayout,
-                        it, fragmentScenario.letOnFragment { it.yAxisOptions }!!)
+                        impl.getString(ReportEditPresenter.YAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
             }
 
             report.xAxis.takeIf { it != reportOnForm?.xAxis }?.also {
                 setMessageIdOption(R.id.fragment_edit_report_dialog_xaxis_textinputlayout,
-                        it, fragmentScenario.letOnFragment { it.xAxisOptions }!!)
+                        impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
             }
 
             report.subGroup.takeIf { it != reportOnForm?.subGroup }?.also {
                 setMessageIdOption(R.id.fragment_edit_report_dialog_subgroup_textinputlayout,
-                        it, fragmentScenario.letOnFragment { it.groupOptions }!!)
+                        impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
             }
 
             report.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
@@ -228,19 +237,19 @@ class ReportEditFragmentTest {
                 return
             }
 
-            fragmentScenario.onFragment { fragment ->
+            fragmentScenario?.onFragment { fragment ->
                 fragment.takeIf { verbDisplay != null }
                         ?.findNavController()?.currentBackStackEntry?.savedStateHandle
                         ?.set("VerbDisplay", defaultGson().toJson(listOf(verbDisplay)))
             }
 
-            fragmentScenario.onFragment { fragment ->
+            fragmentScenario?.onFragment { fragment ->
                 fragment.takeIf { person != null }
                         ?.findNavController()?.currentBackStackEntry?.savedStateHandle
                         ?.set("Person", defaultGson().toJson(listOf(person)))
             }
 
-            fragmentScenario.onFragment { fragment ->
+            fragmentScenario?.onFragment { fragment ->
                 fragment.takeIf { entry != null }
                         ?.findNavController()?.currentBackStackEntry?.savedStateHandle
                         ?.set("Content", defaultGson().toJson(listOf(entry)))
