@@ -13,7 +13,6 @@ import com.ustadmobile.core.controller.WorkspaceEnterLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
-import java.util.concurrent.atomic.AtomicBoolean
 
 
 class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
@@ -22,7 +21,7 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
 
     private var mPresenter: WorkspaceEnterLinkPresenter? = null
 
-    private val inputCheckDelay: Long = 500
+    private val inputCheckDelay: Long = 5000
 
     private val inputCheckHandler: Handler = Handler()
 
