@@ -119,12 +119,12 @@ class ClazzWorkDetailOverviewFragmentTest {
         val dueDateString =  dateWithTimeFormatWithPrepend.format(
                 arrayOf("Due date", clazzWork.clazzWorkDueDateTime,
                         scheduleTimeToDate(clazzWork.clazzWorkDueTime.toInt()), ""))
-        onView(withText(startDateString)).check(matches(isDisplayed()))
-        onView(withText(dueDateString)).check(matches(isDisplayed()))
-        onView(withText("Content")).check(matches(isDisplayed()))
+        onView(withText(startDateString)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withText(dueDateString)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withText("Content")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
         if(contentList.isNotEmpty()) {
-            onView(withText(contentList[0].title)).check(matches(isDisplayed()))
-            onView(withText(contentList[1].title)).check(matches(isDisplayed()))
+            onView(withText(contentList[0].title)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+            onView(withText(contentList[1].title)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
         }
 
         //Scroll to class comments
