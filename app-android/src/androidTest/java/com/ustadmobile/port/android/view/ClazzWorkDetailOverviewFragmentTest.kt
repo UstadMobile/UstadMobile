@@ -5,6 +5,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.ViewAssertion
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
@@ -156,7 +157,7 @@ class ClazzWorkDetailOverviewFragmentTest {
         }else {
             onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(
                     scrollToHolder(withTagInSimpleHeading("Submission")))
-            onView(withText("Submission")).check(matches(isDisplayed()))
+            onView(withText("Submission")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
             onView(withId(R.id.item_clazzwork_submission_text_entry_et)).check(matches(withEffectiveVisibility(Visibility.GONE)))
         }
 
