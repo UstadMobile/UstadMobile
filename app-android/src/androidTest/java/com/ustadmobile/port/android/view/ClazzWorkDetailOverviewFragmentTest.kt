@@ -110,9 +110,9 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     private fun checkClazzWorkBasicDetailDisplayOk(clazzWork: ClazzWork, contentList: List<ContentEntry>,
                                                    teacher: Boolean = false){
-        onView(withId(R.id.item_clazzwork_detail_description_cl)).check(matches(isDisplayed()))
-        onView(withId(R.id.item_clazzwork_detail_description_title)).check(matches(isDisplayed()))
-        onView(withText(clazzWork.clazzWorkInstructions)).check(matches(isDisplayed()))
+        onView(withId(R.id.item_clazzwork_detail_description_cl)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withId(R.id.item_clazzwork_detail_description_title)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withText(clazzWork.clazzWorkInstructions)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
 
         val startDateString =  dateWithTimeFormat.format(arrayOf(clazzWork.clazzWorkStartDateTime,
                 scheduleTimeToDate(clazzWork.clazzWorkStartTime.toInt()), ""))
