@@ -30,11 +30,7 @@ class ContentEntryEdit2Presenter(context: Any,
                                  arguments: Map<String, String>, view: ContentEntryEdit2View,
                                  lifecycleOwner: DoorLifecycleOwner,
                                  di: DI)
-    //systemImpl: UstadMobileSystemImpl,
-//                                 db: UmAppDatabase, repo: UmAppDatabase,
-//                                 private val containerDownloadManager: ContainerDownloadManager?,
-//                                 activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData
-    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, lifecycleOwner, di) {
+    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view,  di, lifecycleOwner) {
 
     private val containerDownloadManager: ContainerDownloadManager? by instanceOrNull<ContainerDownloadManager>()
 
@@ -88,7 +84,7 @@ class ContentEntryEdit2Presenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         val isLeaf = arguments[ARG_LEAF]?.toBoolean()
         return withTimeoutOrNull(2000) {
-            db.contentEntryDao.findEntryWithLanguageByEntryId(entityUid)
+            db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryId(entityUid)
         } ?: ContentEntryWithLanguage().apply {
             leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
         }

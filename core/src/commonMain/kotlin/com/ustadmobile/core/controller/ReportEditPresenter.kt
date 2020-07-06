@@ -26,9 +26,9 @@ import org.kodein.di.DI
 
 class ReportEditPresenter(context: Any,
                           arguments: Map<String, String>, view: ReportEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          di: DI)
-    : UstadEditPresenter<ReportEditView, ReportWithFilters>(context, arguments, view, lifecycleOwner, di) {
+                          di: DI,
+                          lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<ReportEditView, ReportWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -129,7 +129,7 @@ class ReportEditPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val report = withTimeoutOrNull(2000) {
-            db.reportDao.findByUid(entityUid)
+            db.takeIf { entityUid != 0L }?.reportDao?.findByUid(entityUid)
         } ?: Report()
 
         val reportFilterList = withTimeout(2000) {
@@ -173,12 +173,10 @@ class ReportEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
     override fun handleClickSave(entity: ReportWithFilters) {
-
         if (entity.reportTitle.isNullOrEmpty()) {
             view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, context)
             return

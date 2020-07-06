@@ -19,13 +19,13 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String>,
-                                      view: ContentEntryImportLinkView,
-                                      var endpointUrl: String,
-                                      val db: UmAppDatabase,
-                                      val repoDb: UmAppDatabase) :
-        UstadBaseController<ContentEntryImportLinkView>(context, arguments, view) {
+                                      view: ContentEntryImportLinkView, di: DI,
+                                      var endpointUrl: String) :
+        UstadBaseController<ContentEntryImportLinkView>(context, arguments, view, di) {
 
 
     private var videoTitle: String? = null
@@ -41,6 +41,8 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
     var isDoneEnabled = false
 
     var jobCount = 0
+
+    private val db: UmAppDatabase by instance(tag = UmAppDatabase.TAG_DB)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

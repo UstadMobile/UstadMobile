@@ -3,12 +3,14 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.hours
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzLogDao
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -30,11 +32,7 @@ class ClazzLogListAttendancePresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var repoClazzLogDao: ClazzLogDao
 
@@ -53,28 +51,30 @@ class ClazzLogListAttendancePresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoClazzLogDao = spy(clientDbRule.db.clazzLogDao)
-
-        whenever(clientDbRule.db.clazzLogDao).thenReturn(repoClazzLogDao)
 
         di = DI {
-            import(systemImplRule.diModule)
-            import(clientDbRule.diModule)
+            import(ustadTestRule.diModule)
         }
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        repoClazzLogDao = spy(repo.clazzLogDao)
+        whenever(repo.clazzLogDao).thenReturn(repoClazzLogDao)
     }
 
     @Test
     fun givenClazzUidFilter_whenOnCreateCalled_thenShouldFindByClazzUidAndSetList() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
         val testClazz = Clazz("Test Clazz").apply {
             clazzUid = 42L
             clazzTimeZone = "Asia/Dubai"
         }
-        clientDbRule.db.clazzDao.insert(testClazz)
+        db.clazzDao.insert(testClazz)
 
 
         val presenter = ClazzLogListAttendancePresenter(context,
-                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to "42"), mockView, mockLifecycleOwner,
-                di)
+                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to "42"), mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         verify(repoClazzLogDao, timeout(5000)).findByClazzUidAsFactory(42L,
@@ -84,9 +84,11 @@ class ClazzLogListAttendancePresenterTest {
 
     @Test
     fun givenExistingCompletedClazzLogs_whenOnCreateCalled_thenShouldSetGraphDataAndSetFabVisible() {
+        val db: UmAppDatabase by di.activeDbInstance()
+
         val testClazz = Clazz("Test Clazz").apply {
             clazzTimeZone = "Asia/Dubai"
-            clazzUid = clientDbRule.db.clazzDao.insert(this)
+            clazzUid = db.clazzDao.insert(this)
         }
 
         val oneDayInMs = (1000 * 60 * 60 * 24)
@@ -95,7 +97,7 @@ class ClazzLogListAttendancePresenterTest {
 
         //make five ClazzLogs showing attendance
         val numInClazz = 10
-        val clazzLogs = runBlocking { clientDbRule.db.insertClazzLogs(testClazz.clazzUid, 5) {index ->
+        val clazzLogs = runBlocking { db.insertClazzLogs(testClazz.clazzUid, 5) {index ->
             ClazzLog().apply {
                 logDate = timeRange.first + (index * oneDayInMs)
                 clazzLogNumAbsent = if(index.rem(2) == 0) 2 else 4
@@ -105,8 +107,8 @@ class ClazzLogListAttendancePresenterTest {
         } }
 
         val presenter = ClazzLogListAttendancePresenter(context,
-                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()), mockView, mockLifecycleOwner,
-                di)
+                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
+                mockLifecycleOwner)
         presenter.onCreate(null)
         nullableArgumentCaptor<DoorMutableLiveData<ClazzLogListAttendancePresenter.AttendanceGraphData>>() {
             verify(mockView, timeout(5000)).graphData = capture()

@@ -4,17 +4,17 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_PREFKEY
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.account.UstadAccountManager.Companion.MANIFEST_DEFAULT_SERVER
 import com.ustadmobile.core.account.UstadAccounts
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.userAtServer
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
@@ -22,7 +22,10 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import javax.naming.InitialContext
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.scoped
+import org.kodein.di.singleton
 
 class UstadAccountManagerTest {
 
@@ -30,13 +33,13 @@ class UstadAccountManagerTest {
 
     val appContext = Any()
 
-    lateinit var mockDbOpener: UstadAccountManager.DbOpener
-
-    private val openDbs = mutableMapOf<String, UmAppDatabase>()
-
     lateinit var mockWebServer: MockWebServer
 
     lateinit var mockServerUrl: String
+
+    private lateinit var di: DI
+
+    private lateinit var endpointScope: EndpointScope
 
     private fun MockWebServer.enqueueValidAccountResponse(umAccount: UmAccount =
                                                                   UmAccount(42L, "bob", "", mockServerUrl)) {
@@ -53,28 +56,26 @@ class UstadAccountManagerTest {
                     .thenReturn("http://app.ustadmobile.com/")
         }
 
-        openDbs.clear()
-
-        mockDbOpener = mock {
-            on { openDb(any(), any()) }.thenAnswer { invocation ->
-                val dbName = invocation.arguments[1] as String
-                openDbs.getOrPut(dbName) {
-                    InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                    UmAppDatabase.getInstance(invocation.arguments[0], dbName).apply { clearAllTables() }
-                }
-            }
-        }
-
         mockWebServer = MockWebServer().also {
             it.start()
         }
 
         mockServerUrl = mockWebServer.url("/").toString()
+
+        endpointScope = EndpointScope()
+
+        di = DI {
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
+                mock<UmAppDatabase>(extraInterfaces = arrayOf(DoorDatabaseSyncRepository::class)) {
+                    on { (this as DoorDatabaseSyncRepository).clientId }.thenReturn(42)
+                }
+            }
+        }
     }
 
     @Test
     fun givenNoUserInPrefKeys_whenInitialized_shouldInitGuestAccountOnDefaultServer() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
         val activeAccount = accountManager.activeAccount
         Assert.assertEquals("Initial account has personUid = 0", 0L, activeAccount.personUid)
         Assert.assertEquals("Initial account uses default apiUrl",
@@ -83,7 +84,7 @@ class UstadAccountManagerTest {
 
     @Test
     fun givenValidLoginCredentials_whenLoginCalledForFirstLogin_shouldInitLoginDetailsAndRemoveGuestAccount() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
         val loggedInAccount = UmAccount(42L, "bob", "",
                 mockServerUrl)
@@ -95,23 +96,20 @@ class UstadAccountManagerTest {
                     replaceActiveAccount = true)
         }
 
-        val dbName = sanitizeDbNameFromUrl(mockServerUrl)
-        val dbPair = accountManager.storedDatabases[dbName]
         Assert.assertEquals("Active account is the newly logged in account",
                 loggedInAccount.userAtServer, accountManager.activeAccount.userAtServer)
-        Assert.assertEquals("Database was opened", openDbs[dbName], dbPair?.db)
         Assert.assertEquals("There is one stored account", 1,
                 accountManager.storedAccounts.size)
     }
 
     @Test
-    fun givenValidLoginCredentials_whenLoginCalledForSecondAccountOnSameServer_shouldAddAccountNotDatabase() {
+    fun givenValidLoginCredentials_whenLoginCalledForSecondAccountOnSameServer_shouldAddAccount() {
         val savedAccount = UmAccount(50L, "joe", "", mockServerUrl)
         whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
                 Json.stringify(UstadAccounts.serializer(),
                         UstadAccounts(savedAccount.userAtServer, listOf(savedAccount))))
 
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
         val loggedInAccount = UmAccount(42L, "bob", "", mockServerUrl)
         mockWebServer.enqueueValidAccountResponse(loggedInAccount)
@@ -120,49 +118,15 @@ class UstadAccountManagerTest {
             accountManager.login("bob", "password", mockServerUrl)
         }
 
-        val dbName = sanitizeDbNameFromUrl(mockServerUrl)
-        val dbPair = accountManager.storedDatabases[dbName]
-        Assert.assertEquals("Database was opened", openDbs[dbName], dbPair?.db)
         Assert.assertEquals("There are two stored accounts", 2,
                 accountManager.storedAccounts.size)
         Assert.assertEquals("Active account is the newly logged in account",
                 loggedInAccount.userAtServer, accountManager.activeAccount.userAtServer)
-        Assert.assertEquals("There is one active database only (as this is the same server as previous account)",
-            1, accountManager.storedDatabases.size)
     }
-
-
-    @Test
-    fun givenValidLoginCredentials_whenLoginCalledForSecondAccountOnDifferentServer_shouldAddAccountAndDatabase() {
-        val savedAccount = UmAccount(50L, "joe", "", "http://another.server.app")
-        whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
-                Json.stringify(UstadAccounts.serializer(),
-                        UstadAccounts(savedAccount.userAtServer, listOf(savedAccount))))
-
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
-
-        val loggedInAccount = UmAccount(42L, "bob", "", mockServerUrl)
-        mockWebServer.enqueueValidAccountResponse(loggedInAccount)
-
-        runBlocking {
-            accountManager.login("bob", "password", mockServerUrl)
-        }
-
-        val dbName = sanitizeDbNameFromUrl(mockServerUrl)
-        val dbPair = accountManager.storedDatabases[dbName]
-        Assert.assertEquals("Database was opened", openDbs[dbName], dbPair?.db)
-        Assert.assertEquals("There are two stored accounts", 2,
-                accountManager.storedAccounts.size)
-        Assert.assertEquals("Active account is the newly logged in account",
-                loggedInAccount.userAtServer, accountManager.activeAccount.userAtServer)
-        Assert.assertEquals("There are two active databases only (as accounts are on different servers)",
-                2, accountManager.storedDatabases.size)
-    }
-
 
     @Test
     fun givenInvalidLoginCredentials_whenLoginCalled_thenShouldThrowException() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
         mockWebServer.enqueue(MockResponse()
                 .setResponseCode(403))
@@ -182,7 +146,7 @@ class UstadAccountManagerTest {
 
     @Test
     fun givenUnreachableServer_whenLoginCalled_thenShouldThrowException() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
         var exception: Exception? = null
 
@@ -206,7 +170,7 @@ class UstadAccountManagerTest {
         whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
                 Json.stringify(UstadAccounts.serializer(), storedAccounts))
 
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
         accountManager.activeAccount = storedAccounts.storedAccounts[1]
 
@@ -229,7 +193,7 @@ class UstadAccountManagerTest {
         whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
                 Json.stringify(UstadAccounts.serializer(), storedAccounts))
 
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
         accountManager.removeAccount(storedAccounts.storedAccounts[0])
 
@@ -246,7 +210,7 @@ class UstadAccountManagerTest {
         whenever(mockSystemImpl.getAppPref(eq(ACCOUNTS_PREFKEY), any())).thenReturn(
                 Json.stringify(UstadAccounts.serializer(), storedAccounts))
 
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
         accountManager.removeAccount(storedAccounts.storedAccounts[0])
 
@@ -256,7 +220,7 @@ class UstadAccountManagerTest {
 
     @Test
     fun givenValidRegistrationRequest_whenNewAccountRequested_thenShouldBeRequestedOnServerAndActive() {
-        val accountManager = UstadAccountManager(mockSystemImpl, appContext, mockDbOpener)
+        val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
         val personToRegister = Person().apply {
             firstNames = "Mary"
@@ -266,7 +230,7 @@ class UstadAccountManagerTest {
             username = "mary"
         }
 
-        val accountResponse = UmAccount(42L, "mary", "", null)
+        val accountResponse = UmAccount(42L, "mary", "", "")
         mockWebServer.enqueue(MockResponse()
                 .setBody(Json.stringify(UmAccount.serializer(), accountResponse))
                 .addHeader("Content-Type", "application/json; charset=utf-8"))
@@ -280,8 +244,5 @@ class UstadAccountManagerTest {
 
     }
 
-    fun givenInvalidRegistrationRequest_whenNewAccountRequested_thenShouldThrowException() {
-
-    }
 
 }

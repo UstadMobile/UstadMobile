@@ -8,11 +8,16 @@ import com.ustadmobile.core.view.GetStartedView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.UmAccount
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 class AccountListPresenter(context: Any, arguments: Map<String, String>, view: AccountListView,
-                           val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
-                           private val accountManager: UstadAccountManager)
-    : UstadBaseController<AccountListView>(context, arguments, view) {
+                           di: DI)
+    : UstadBaseController<AccountListView>(context, arguments, view, di) {
+
+    val accountManager: UstadAccountManager by instance()
+
+    val impl: UstadMobileSystemImpl by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

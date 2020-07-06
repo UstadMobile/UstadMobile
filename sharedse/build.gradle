@@ -121,6 +121,7 @@ kotlin {
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
 
 
                 implementation project(':lib-door-runtime')

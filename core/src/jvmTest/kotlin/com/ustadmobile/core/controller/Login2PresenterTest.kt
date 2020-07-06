@@ -24,6 +24,9 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 import org.mockito.ArgumentMatchers
 import javax.naming.InitialContext
 
@@ -45,6 +48,8 @@ class Login2PresenterTest {
 
     private val defaultTimeout: Long = 5000
 
+    private lateinit var di : DI
+
     @Before
     fun setUp(){
         view = mock {
@@ -58,6 +63,11 @@ class Login2PresenterTest {
         mockPersonDao = mock {}
         mockWebServer = MockWebServer()
         mockWebServer.start()
+
+        di = DI {
+            bind<UstadAccountManager>() with singleton { accountManager }
+            bind<UstadMobileSystemImpl>() with singleton { impl }
+        }
     }
 
     @After
@@ -80,8 +90,7 @@ class Login2PresenterTest {
 
     @Test
     fun givenRegistrationIsAllowed_whenLogin_shouldShowRegisterButton(){
-        val presenter = Login2Presenter(context, createParams(registration = true), view, impl,
-                accountManager)
+        val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         verify(view).createAccountVisible = eq(true)
     }
@@ -89,8 +98,7 @@ class Login2PresenterTest {
 
     @Test
     fun givenRegistrationIsNotAllowed_whenLogin_shouldNotShowRegisterButton(){
-        val presenter = Login2Presenter(context,createParams(registration = false), view, impl,
-                accountManager)
+        val presenter = Login2Presenter(context,createParams(registration = false), view, di)
         presenter.onCreate(mapOf())
         verify(view).createAccountVisible = eq(false)
     }
@@ -98,8 +106,7 @@ class Login2PresenterTest {
 
     @Test
     fun givenGuestConnectionIsAllowed_whenLogin_shouldShowConnectAsGuestButton(){
-        val presenter = Login2Presenter(context,createParams(guestConnection = true), view, impl,
-                accountManager)
+        val presenter = Login2Presenter(context,createParams(guestConnection = true), view, di)
         presenter.onCreate(mapOf())
         verify(view).connectAsGuestVisible = eq(true)
     }
@@ -107,8 +114,7 @@ class Login2PresenterTest {
 
     @Test
     fun givenGuestConnectionIsNotAllowed__whenLogin_shouldNotShowConnectAsGuestButton(){
-        val presenter = Login2Presenter(context,createParams(guestConnection = false), view, impl,
-                accountManager)
+        val presenter = Login2Presenter(context,createParams(guestConnection = false), view, di)
         presenter.onCreate(mapOf())
         verify(view).connectAsGuestVisible = eq(false)
     }
@@ -117,7 +123,7 @@ class Login2PresenterTest {
     @Test
     fun givenCreateAccountIsVisible_whenClicked_shouldOpenAccountCreationSection(){
         whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("true")
-        val presenter = Login2Presenter(context, createParams(registration = true), view, impl, accountManager)
+        val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()
         argumentCaptor<String>{
@@ -131,7 +137,7 @@ class Login2PresenterTest {
     @Test
     fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection(){
         whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("true")
-        val presenter = Login2Presenter(context, createParams(guestConnection = true), view, impl, accountManager)
+        val presenter = Login2Presenter(context, createParams(guestConnection = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleConnectAsGuest()
         argumentCaptor<String>{
@@ -146,7 +152,7 @@ class Login2PresenterTest {
     fun givenValidUsernameAndPassword_whenHandleLoginClicked_shouldCallSystemImplGo() {
         val destination = "dummyDestination"
         mockWebServer.enqueue(MockResponse()
-                .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", null)))
+                .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", "")))
                 .setHeader("Content-Type", "application/json"))
 
         val httpUrl = mockWebServer.url("/").toString()
@@ -155,7 +161,7 @@ class Login2PresenterTest {
 
         val presenter = Login2Presenter(context,
                 createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl,
-                        ARG_NEXT to destination)), view, impl, accountManager)
+                        ARG_NEXT to destination)), view, di)
         presenter.onCreate(null)
 
         presenter.handleLogin(VALID_USER, VALID_PASS)
@@ -179,7 +185,7 @@ class Login2PresenterTest {
         mockWebServer.enqueue(MockResponse().setResponseCode(403))
         val httpUrl = mockWebServer.url("/").toString()
         val presenter = Login2Presenter(context, createParams(extraParam =
-        mapOf(ARG_SERVER_URL to httpUrl)), view, impl, accountManager)
+        mapOf(ARG_SERVER_URL to httpUrl)), view, di)
         presenter.onCreate(null)
 
         presenter.handleLogin(VALID_USER, "wrongpassword")
@@ -203,7 +209,7 @@ class Login2PresenterTest {
         mockWebServer.shutdown()
         val httpUrl = mockWebServer.url("/").toString()
         val presenter = Login2Presenter(context,
-                createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl)), view, impl, accountManager)
+                createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl)), view, di)
         presenter.onCreate(null)
 
         presenter.handleLogin(VALID_USER, VALID_PASS)

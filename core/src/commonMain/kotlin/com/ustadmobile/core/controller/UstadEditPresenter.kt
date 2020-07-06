@@ -6,10 +6,9 @@ import com.ustadmobile.lib.util.copyOnWriteListOf
 import org.kodein.di.DI
 
 abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(context: Any,
-    arguments: Map<String, String>, view: V,
-    lifecycleOwner: DoorLifecycleOwner,
-    di: DI)
-    : UstadSingleEntityPresenter<V, RT>(context, arguments, view, lifecycleOwner, di) {
+    arguments: Map<String, String>, view: V, di: DI, lifecycleOwner: DoorLifecycleOwner)
+
+    : UstadSingleEntityPresenter<V, RT>(context, arguments, view, di, lifecycleOwner) {
 
     private val jsonLoadListeners: MutableList<JsonLoadListener> = copyOnWriteListOf()
 

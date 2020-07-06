@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
@@ -11,15 +10,11 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.instance
 
 abstract class UstadDetailPresenter<V: UstadSingleEntityView<RT>, RT: Any>(context: Any,
-     arguments: Map<String, String>, view: V,
-     lifecycleOwner: DoorLifecycleOwner,
-     di: DI)
-    : UstadSingleEntityPresenter<V, RT>(context, arguments, view, lifecycleOwner, di) {
-
-    val accountManager: UstadAccountManager by instance<UstadAccountManager>()
+     arguments: Map<String, String>, view: V, di: DI,
+     lifecycleOwner: DoorLifecycleOwner)
+    : UstadSingleEntityPresenter<V, RT>(context, arguments, view, di, lifecycleOwner) {
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

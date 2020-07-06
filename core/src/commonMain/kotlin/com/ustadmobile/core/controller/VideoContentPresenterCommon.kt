@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
@@ -11,20 +12,22 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.DIAware
 import org.kodein.di.instance
+import org.kodein.di.on
 
 abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>, view: VideoPlayerView,
-                                           override val di: DI)
-    : UstadBaseController<VideoPlayerView>(context, arguments, view), DIAware {
+                                           di: DI)
+    : UstadBaseController<VideoPlayerView>(context, arguments, view, di) {
 
 
     internal var containerUid: Long = 0
     private var navigation: String? = null
 
-    val db: UmAppDatabase by instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
+    val accountManager: UstadAccountManager by instance()
 
-    val repo: UmAppDatabase by instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
 
     internal lateinit var contentEntryDao: ContentEntryDao

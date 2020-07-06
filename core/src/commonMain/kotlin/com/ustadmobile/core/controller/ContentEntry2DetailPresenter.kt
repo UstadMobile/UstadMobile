@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.GoToEntryFn
@@ -32,10 +31,10 @@ import org.kodein.di.instanceOrNull
 
 class ContentEntry2DetailPresenter(context: Any,
                                    arguments: Map<String, String>, view: ContentEntry2DetailView,
-                                   lifecycleOwner: DoorLifecycleOwner,
-                                    di: DI)
+                                   di: DI, lifecycleOwner: DoorLifecycleOwner)
 
-    : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context, arguments, view, lifecycleOwner, di) {
+    : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context,
+        arguments, view,  di, lifecycleOwner) {
 
 
     private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
@@ -82,8 +81,8 @@ class ContentEntry2DetailPresenter(context: Any,
         if (canOpen) {
             val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
                     "false", context)!!.toBoolean()
-            val account = UmAccountManager.getActiveAccount(context)
-            if (loginFirst && (account == null || account.personUid == 0L)) {
+            val account = accountManager.activeAccount
+            if (loginFirst && account.personUid == 0L) {
                 systemImpl.go(Login2View.VIEW_NAME, arguments, context)
             } else {
                 openContentEntry()

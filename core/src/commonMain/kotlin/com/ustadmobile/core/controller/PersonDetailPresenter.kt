@@ -14,9 +14,8 @@ import org.kodein.di.DI
 
 class PersonDetailPresenter(context: Any,
                           arguments: Map<String, String>, view: PersonDetailView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          di : DI)
-    : UstadDetailPresenter<PersonDetailView, PersonWithDisplayDetails>(context, arguments, view, lifecycleOwner, di) {
+                            di : DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadDetailPresenter<PersonDetailView, PersonWithDisplayDetails>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.LIVEDATA

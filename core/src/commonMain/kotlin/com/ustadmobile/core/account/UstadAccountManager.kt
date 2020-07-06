@@ -7,11 +7,9 @@ import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.copyOnWriteListOf
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.header
@@ -23,8 +21,10 @@ import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import kotlin.jvm.Synchronized
-import kotlin.jvm.Volatile
 
 @Serializable
 data class UstadAccounts(var currentAccount: String,
@@ -32,9 +32,8 @@ data class UstadAccounts(var currentAccount: String,
                          val lastUsed: Map<String, Long> = mapOf())
 
 class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext: Any,
-                          val dbOpener: DbOpener = DefaultDbOpener(),
-                          val httpClient: HttpClient = defaultHttpClient(),
-                          val attachmentsDir: String? = null) {
+                          val di: DI,
+                          val httpClient: HttpClient = defaultHttpClient()) {
 
     data class DbPair(val db: UmAppDatabase, val repo: UmAppDatabase)
 
@@ -50,10 +49,6 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         override fun openDb(context: Any, name: String) = UmAppDatabase.getInstance(context, name)
     }
 
-    private fun UmAppDatabase.toDbAndRepoPair(endpointUrl: String) =
-            DbPair(this, this.asRepository(appContext, endpointUrl, "", httpClient,
-                attachmentsDir))
-
     private val _activeAccount: AtomicRef<UmAccount>
 
     private val _storedAccounts: MutableList<UmAccount>
@@ -61,8 +56,6 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     private val _storedAccountsLive: DoorMutableLiveData<List<UmAccount>>
 
     private val _activeAccountLive: DoorMutableLiveData<UmAccount>
-
-    private val dbs: MutableMap<String, DbPair> = mutableMapOf()
 
     private var accountLastUsedTimeMap = mutableMapOf<String, Long>()
 
@@ -78,12 +71,6 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         val activeAccountVal = accounts.storedAccounts.first { it.userAtServer == accounts.currentAccount }
         _activeAccount = atomic(activeAccountVal)
         _activeAccountLive = DoorMutableLiveData(activeAccountVal)
-
-        _storedAccounts.mapNotNull { it.endpointUrl }.forEach {endpointUrl ->
-            val dbName = sanitizeDbNameFromUrl(endpointUrl)
-            val db = dbOpener.openDb(appContext, dbName)
-            dbs[dbName] = db.toDbAndRepoPair(endpointUrl)
-        }
 
         accountLastUsedTimeMap.putAll(accounts.lastUsed)
     }
@@ -118,21 +105,6 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = _storedAccountsLive
 
 
-
-    //Provides an immutable map that prevents any possibility of other code changing the internal copy
-    val storedDatabases: Map<String, DbPair>
-        get() = dbs.entries.map { it.key to DbPair(it.value.db, it.value.repo) }.toMap()
-
-    val activeDatabase: UmAppDatabase
-        get() = activeAccount.endpointUrl?.let { dbs[sanitizeDbNameFromUrl(it)]?.db } ?: throw IllegalStateException("No database for active account")
-
-    val activeRepository: UmAppDatabase
-        get() = activeAccount.endpointUrl?.let { dbs[sanitizeDbNameFromUrl(it)]?.repo } ?: throw IllegalStateException("No database for active account")
-
-    fun getActiveDatabase(context: Any) = activeDatabase
-
-    fun getActiveRepository(context: Any) = activeRepository
-
     suspend fun register(person: Person, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
@@ -164,19 +136,9 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     @Synchronized
     private fun addAccount(account: UmAccount) {
         _storedAccounts += account
-
-        val endpointUrl = account.endpointUrl ?: throw IllegalArgumentException("addAccount account must have endpointurl")
-        addEndpointDb(endpointUrl)
-
         _storedAccountsLive.sendValue(_storedAccounts.toList())
     }
 
-    private fun addEndpointDb(endpointUrl: String) {
-        val dbName = sanitizeDbNameFromUrl(endpointUrl)
-        if(!dbs.containsKey(dbName)) {
-            dbs[dbName] = dbOpener.openDb(appContext, dbName).toDbAndRepoPair(endpointUrl)
-        }
-    }
 
     @Synchronized
     fun removeAccount(account: UmAccount, autoFallback: Boolean = true) {
@@ -195,8 +157,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
 
     suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
-        addEndpointDb(endpointUrl)
-        val nodeId = (dbs[sanitizeDbNameFromUrl(endpointUrl)]?.repo as? DoorDatabaseSyncRepository)?.clientId
+        val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
+        val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
                 ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
 
         val httpStmt = httpClient.post<HttpStatement> {
@@ -245,18 +207,6 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         const val MANIFEST_DEFAULT_SERVER = "defaultApiUrl"
 
         const val MANIFEST_URL_FALLBACK = "http://localhost/"
-
-        @Volatile
-        private lateinit var accountManager: UstadAccountManager
-
-        @Synchronized
-        fun getInstance(systemImpl: UstadMobileSystemImpl, appContext: Any) : UstadAccountManager {
-            if(!Companion::accountManager.isInitialized) {
-                accountManager = UstadAccountManager(systemImpl, appContext)
-            }
-
-            return accountManager
-        }
 
     }
 

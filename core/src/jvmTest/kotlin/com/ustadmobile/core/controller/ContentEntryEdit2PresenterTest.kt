@@ -1,20 +1,20 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.directActiveDbInstance
+import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Container
@@ -29,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
+import org.kodein.di.instance
 import org.kodein.di.singleton
 
 
@@ -36,7 +37,7 @@ class ContentEntryEdit2PresenterTest  {
 
     @JvmField
     @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ContentEntryEdit2View
 
@@ -58,9 +59,7 @@ class ContentEntryEdit2PresenterTest  {
 
     private val parentUid: Long = 12345678L
 
-    private val entryUid: Long = 100L
-
-    private val timeoutInMill: Long = 500
+    private val timeoutInMill: Long = 5000
 
     private lateinit var mockEntryDao:ContentEntryDao
 
@@ -77,20 +76,6 @@ class ContentEntryEdit2PresenterTest  {
         container = createMockContainer()
         contentEntry = createMockEntryWithLanguage()
         mockLifecycleOwner = mock { }
-        activeAccount = DoorMutableLiveData(UmAccount(42, "bobjones", "",
-                "http://localhost"))
-        val realDb = UmAppDatabase.getInstance(context)
-        db =  spy(realDb) { }
-        db.clearAllTables()
-
-        mockEntryDao = spy{
-            onBlocking { insertAsync(any()) }.thenReturn(entryUid)
-        }
-
-        repo = spy(realDb) {
-            on{contentEntryDao}.thenAnswer{mockEntryDao}
-        }
-
         containerManager = spy{}
 
         systemImpl = mock{
@@ -102,25 +87,36 @@ class ContentEntryEdit2PresenterTest  {
             on { getString(any(), any()) }.thenAnswer{errorMessage}
         }
 
-        val mockAccountManager: UstadAccountManager = mock {
-
-        }
 
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { systemImpl }
-            bind<UmAppDatabase>(tag = TAG_DB) with singleton { db }
-            bind<UmAppDatabase>(tag = TAG_REPO) with singleton { repo }
-            bind<UstadAccountManager>() with singleton { mockAccountManager }
+            import(ustadTestRule.diModule)
+            bind<UstadMobileSystemImpl>(overrides = true) with singleton { systemImpl }
+            bind<ContainerDownloadManager>() with singleton { containerManager }
         }
 
+        db = di.directActiveDbInstance()
+        repo = di.directActiveRepoInstance()
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+
+        whenever(systemImpl.getStorageDirs(any(), any())).thenAnswer {
+            (it.getArgument(1) as UmResultCallback<List<UMStorageDir>>).onDone(
+                    mutableListOf(UMStorageDir("", "", removableMedia = false,
+                            isAvailable = false, isUserSpecific = false)))
+        }
+
+        whenever(systemImpl.getString(any(), any())).thenReturn(errorMessage)
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
+        mockEntryDao = spy(repo.contentEntryDao)
+        whenever(repo.contentEntryDao).thenReturn(mockEntryDao)
     }
 
     @After
     fun tearDown() {}
     private fun createMockView(isUriNull: Boolean = false){
         mockView = mock{
-            onBlocking {
-                saveContainerOnExit(entryUid, "", db, repo)}.thenAnswer{container}
+            onBlocking { saveContainerOnExit(any(), any(), any(), any())}.thenAnswer{container}
             on {selectedStorageIndex}.thenAnswer {0}
             on{selectedFileUri}.thenAnswer{if(isUriNull) null else "Dummy Uri"}
         }
@@ -171,7 +167,7 @@ class ContentEntryEdit2PresenterTest  {
             verifyBlocking(mockView, timeout(timeoutInMill)){
                 mockView.saveContainerOnExit(capture(), any(), eq(db), eq(repo))
             }
-            assertEquals("Got expected content entry uid",entryUid, firstValue)
+            assertEquals("Got expected content entry uid", contentEntry.contentEntryUid, firstValue)
         }
 
     }
@@ -205,44 +201,46 @@ class ContentEntryEdit2PresenterTest  {
     @Test
     fun givenPresenterCreatedAndEntryCreated_whenClickSave_shouldUpdateAnEntry() {
         createMockView()
-        contentEntry.contentEntryUid = entryUid
-        val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString())
-                ,mockView,mockLifecycleOwner, di)
+        contentEntry.contentEntryUid = db.contentEntryDao.insert(contentEntry)
+        val presenter = ContentEntryEdit2Presenter(context,
+                mapOf(ARG_ENTITY_UID to contentEntry.contentEntryUid.toString(),
+                        UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString())
+                ,mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
-        mockView.captureLastEntityValue()
-        presenter.handleClickSave(contentEntry)
+        val entrySetOnView = mockView.captureLastEntityValue()
+        entrySetOnView!!.title = "Updated Title"
+        presenter.handleClickSave(entrySetOnView)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
             verifyBlocking(mockEntryDao, timeout(5000)){
                 updateAsync(capture())
             }
-            assertEquals("Got expected content entry title",contentEntry.title, firstValue.title)
+            assertEquals("Got expected content entry title", "Updated Title", firstValue.title)
         }
 
         argumentCaptor<Long>().apply {
-            verifyBlocking(mockView){
+            verifyBlocking(mockView, timeout(5000)){
                 mockView.saveContainerOnExit(capture(), any(), eq(db), eq(repo))
             }
-            assertEquals("Got expected content entry uid",entryUid, firstValue)
+
+            assertEquals("Got expected content entry uid",contentEntry.contentEntryUid,
+                    firstValue)
         }
-
-
     }
 
     @Test
     fun givenPresenterCreatedAndEntryTitleIsNotFilled_whenClickSave_shouldShowErrorMessage() {
         createMockView()
-        contentEntry.title = null
-        val presenter = ContentEntryEdit2Presenter(context, mapOf()
-                ,mockView,mockLifecycleOwner, di)
+        val presenter = ContentEntryEdit2Presenter(context, mapOf() ,mockView,mockLifecycleOwner, di)
 
         presenter.onCreate(null)
-        mockView.captureLastEntityValue()
-        presenter.handleClickSave(contentEntry)
+        val entityOnView = mockView.captureLastEntityValue()
+        entityOnView!!.title = null
+        presenter.handleClickSave(entityOnView)
 
         argumentCaptor<Boolean>().apply {
-            verify(mockView, after(timeoutInMill).times(2)).titleErrorEnabled = capture()
+            verify(mockView, timeout(timeoutInMill).times(2)).titleErrorEnabled = capture()
             assertTrue("Got expected entry title error flag", secondValue)
         }
     }

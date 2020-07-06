@@ -1,23 +1,20 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.HolidayCalendarEditView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.HolidayCalendar
-
-import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.builtins.list
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Holiday
+import com.ustadmobile.lib.db.entities.HolidayCalendar
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 
@@ -25,7 +22,7 @@ class HolidayCalendarEditPresenter(context: Any,
                           arguments: Map<String, String>, view: HolidayCalendarEditView,
                           lifecycleOwner: DoorLifecycleOwner,
                           di: DI)
-    : UstadEditPresenter<HolidayCalendarEditView, HolidayCalendar>(context, arguments, view, lifecycleOwner, di) {
+    : UstadEditPresenter<HolidayCalendarEditView, HolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

@@ -17,9 +17,8 @@ import org.kodein.di.DI
 
 class ReportDetailPresenter(context: Any,
                             arguments: Map<String, String>, view: ReportDetailView,
-                            lifecycleOwner: DoorLifecycleOwner,
-                            di: DI)
-    : UstadDetailPresenter<ReportDetailView, ReportWithFilters>(context, arguments, view, lifecycleOwner, di) {
+                            di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadDetailPresenter<ReportDetailView, ReportWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
 
     private val graphHelper = ReportGraphHelper(context, systemImpl, repo)

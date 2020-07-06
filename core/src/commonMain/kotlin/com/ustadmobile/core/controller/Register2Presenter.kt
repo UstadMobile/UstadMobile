@@ -10,11 +10,12 @@ import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 import kotlin.js.JsName
 
 class Register2Presenter(context: Any, arguments: Map<String, String>, view: Register2View,
-                         private val personDao: PersonDao, private val personRepo: PersonDao)
-    : UstadBaseController<Register2View>(context, arguments, view) {
+                         di: DI, private val personDao: PersonDao, private val personRepo: PersonDao)
+    : UstadBaseController<Register2View>(context, arguments, view, di) {
 
     private var mNextDest: String? = null
 

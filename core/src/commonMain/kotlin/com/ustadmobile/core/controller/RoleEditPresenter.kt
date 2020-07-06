@@ -19,10 +19,9 @@ import org.kodein.di.DI
 
 
 class RoleEditPresenter(context: Any,
-                          arguments: Map<String, String>, view: RoleEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          di: DI)
-    : UstadEditPresenter<RoleEditView, Role>(context, arguments, view, lifecycleOwner, di) {
+                          arguments: Map<String, String>, view: RoleEditView, di: DI,
+                          lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<RoleEditView, Role>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

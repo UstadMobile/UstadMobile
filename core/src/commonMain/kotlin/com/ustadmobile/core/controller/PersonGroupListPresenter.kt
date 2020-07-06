@@ -12,9 +12,8 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, view: PersonGroupListView,
-                          lifecycleOwner: DoorLifecycleOwner, di: DI)
-    : UstadListPresenter<PersonGroupListView, PersonGroup>(context, arguments, view, lifecycleOwner,
-        di) {
+        di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<PersonGroupListView, PersonGroup>(context, arguments, view, di, lifecycleOwner) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

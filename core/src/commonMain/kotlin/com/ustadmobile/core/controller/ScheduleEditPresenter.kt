@@ -10,8 +10,8 @@ import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: ScheduleEditView,
-lifecycleOwner: DoorLifecycleOwner, di: DI)
-    : UstadEditPresenter<ScheduleEditView, Schedule>(context, args, view, lifecycleOwner, di) {
+                            di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<ScheduleEditView, Schedule>(context, args, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON

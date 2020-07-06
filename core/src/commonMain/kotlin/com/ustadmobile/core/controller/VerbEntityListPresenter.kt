@@ -10,8 +10,8 @@ import com.ustadmobile.lib.db.entities.VerbDisplay
 import org.kodein.di.DI
 
 class VerbEntityListPresenter(context: Any, arguments: Map<String, String>, view: VerbEntityListView,
-                              lifecycleOwner: DoorLifecycleOwner, di: DI)
-    : UstadListPresenter<VerbEntityListView, VerbDisplay>(context, arguments, view, lifecycleOwner, di) {
+                              di: DI,lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<VerbEntityListView, VerbDisplay>(context, arguments, view, di, lifecycleOwner) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

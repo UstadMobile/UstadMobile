@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -18,9 +19,8 @@ import org.kodein.di.*
 abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>(
         context: Any,
         arguments: Map<String, String>,
-        view: V,
-        val lifecycleOwner: DoorLifecycleOwner,
-        override val di: DI): UstadBaseController<V>(context, arguments, view), DIAware {
+        view: V, di: DI,
+        val lifecycleOwner: DoorLifecycleOwner): UstadBaseController<V>(context, arguments, view, di) {
 
     protected var entity: RT? = null
 
@@ -34,11 +34,13 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
 
     var entityLiveDataObserver: DoorObserver<RT?>? = null
 
-    val systemImpl: UstadMobileSystemImpl by instance<UstadMobileSystemImpl>()
+    val systemImpl: UstadMobileSystemImpl by instance()
 
-    val db: UmAppDatabase by instance<UmAppDatabase>(tag = TAG_DB)
+    val accountManager: UstadAccountManager by instance()
 
-    val repo: UmAppDatabase by instance<UmAppDatabase>(tag = TAG_REPO)
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

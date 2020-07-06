@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
-                          lifecycleOwner: DoorLifecycleOwner, di: DI)
-    : UstadListPresenter<ClazzMemberListView, ClazzMember>(context, arguments, view, lifecycleOwner, di) {
+                          di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<ClazzMemberListView, ClazzMember>(context, arguments, view, di, lifecycleOwner) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

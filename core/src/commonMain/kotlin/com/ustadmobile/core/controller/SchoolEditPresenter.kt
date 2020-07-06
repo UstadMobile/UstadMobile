@@ -22,10 +22,9 @@ import org.kodein.di.DI
 
 
 class SchoolEditPresenter(context: Any,
-                          arguments: Map<String, String>, view: SchoolEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          di: DI)
-    : UstadEditPresenter<SchoolEditView, SchoolWithHolidayCalendar>(context, arguments, view, lifecycleOwner, di) {
+                          arguments: Map<String, String>, view: SchoolEditView, di: DI,
+                          lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<SchoolEditView, SchoolWithHolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
     enum class GenderOptions(val optionVal: Int, val messageId: Int){
         MIXED(School.SCHOOL_GENDER_MIXED,

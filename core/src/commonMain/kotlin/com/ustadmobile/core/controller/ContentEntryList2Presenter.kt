@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryList2View
@@ -19,8 +18,8 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
-                          lifecycleOwner: DoorLifecycleOwner, di: DI)
-    : UstadListPresenter<ContentEntryList2View, ContentEntry>(context, arguments, view, lifecycleOwner, di) {
+                                 di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<ContentEntryList2View, ContentEntry>(context, arguments, view, di, lifecycleOwner) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
@@ -46,7 +45,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         view.sortOptions = SortOrder.values().toList().map { ContentEntryListSortOption(it, context) }
         contentFilter = arguments[ARG_CONTENT_FILTER].toString()
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
-        loggedPersonUid = UmAccountManager.getActivePersonUid(context)
+        loggedPersonUid = accountManager.activeAccount.personUid
         getAndSetList()
     }
 

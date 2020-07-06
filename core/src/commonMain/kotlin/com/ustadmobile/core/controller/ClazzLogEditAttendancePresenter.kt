@@ -1,33 +1,31 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.doorMainDispatcher
-
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_PARTIAL
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 
 class ClazzLogEditAttendancePresenter(context: Any,
                           arguments: Map<String, String>, view: ClazzLogEditAttendanceView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          di: DI)
-    : UstadEditPresenter<ClazzLogEditAttendanceView, ClazzLog>(context, arguments, view, lifecycleOwner, di) {
+                          di: DI,
+                          lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<ClazzLogEditAttendanceView, ClazzLog>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

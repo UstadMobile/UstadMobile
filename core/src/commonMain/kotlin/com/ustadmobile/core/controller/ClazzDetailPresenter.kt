@@ -20,10 +20,9 @@ import org.kodein.di.DI
 typealias ClazzPermissionChecker = suspend (db: UmAppDatabase, personUid: Long, clazzUid: Long) -> Boolean
 
 class ClazzDetailPresenter(context: Any,
-                           arguments: Map<String, String>, view: ClazzDetailView,
-                           lifecycleOwner: DoorLifecycleOwner,
-                           di: DI)
-    : UstadDetailPresenter<ClazzDetailView, Clazz>(context, arguments, view, lifecycleOwner, di) {
+                           arguments: Map<String, String>, view: ClazzDetailView, di: DI,
+                           lifecycleOwner: DoorLifecycleOwner)
+    : UstadDetailPresenter<ClazzDetailView, Clazz>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

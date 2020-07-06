@@ -51,7 +51,7 @@ class ContentEntryImportLinkActivity : UstadBaseActivity(), ContentEntryImportLi
         umToolbar.title = getString(R.string.activity_import_link)
 
         val endpoint = intent.getStringExtra(ContentEntryImportLinkView.END_POINT_URL)
-                ?: UmAccountManager.getActiveEndpoint(viewContext)!!
+                ?: "http://localhost/"
 
         webView = findViewById(R.id.import_link_preview_webview)
         webView.settings.javaScriptEnabled = true

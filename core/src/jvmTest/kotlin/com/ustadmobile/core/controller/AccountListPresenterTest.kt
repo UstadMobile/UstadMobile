@@ -15,6 +15,9 @@ import junit.framework.Assert.assertTrue
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 
 class AccountListPresenterTest {
 
@@ -36,7 +39,9 @@ class AccountListPresenterTest {
 
     private lateinit var mockedAccountObserver:DoorObserver<UmAccount>
 
-    private val accountList = listOf(UmAccount(1,"dummy",null,null))
+    private val accountList = listOf(UmAccount(1,"dummy",null,""))
+
+    private lateinit var di: DI
 
     @Before
     fun setup() {
@@ -57,12 +62,16 @@ class AccountListPresenterTest {
         mockedAccountObserver = mock{
             on{ onChanged(any()) }.thenAnswer{ accountList[0] }
         }
+
+        di = DI {
+            bind<UstadMobileSystemImpl>() with singleton { impl }
+            bind<UstadAccountManager>() with singleton { accountManager }
+        }
     }
 
     @Test
     fun givenStoreAccounts_whenAppLaunched_thenShouldShowAllAccounts(){
-       val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
-                accountManager)
+       val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
         accountListLive.observeForever(mockedAccountListObserver)
@@ -75,8 +84,7 @@ class AccountListPresenterTest {
 
     @Test
     fun givenActiveAccountExists_whenAppLaunched_thenShouldShowIt(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
-                accountManager)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
 
@@ -90,8 +98,7 @@ class AccountListPresenterTest {
 
     @Test
     fun givenAddAccountButton_whenClicked_thenShouldOpenGetStarted(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
-                accountManager)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
         presenter.handleClickAddAccount()
@@ -105,10 +112,9 @@ class AccountListPresenterTest {
 
     @Test
     fun givenDeleteAccountButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
-                accountManager)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
-        val account = UmAccount(1,"dummy", null,null)
+        val account = UmAccount(1,"dummy", null,"")
         presenter.onCreate(null)
 
         presenter.handleClickDeleteAccount(account)
@@ -122,10 +128,9 @@ class AccountListPresenterTest {
 
     @Test
     fun givenLogoutButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
-                accountManager)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
-        val account = UmAccount(1,"dummy", null,null)
+        val account = UmAccount(1,"dummy", null,"")
         presenter.onCreate(null)
 
         activeAccountLive.sendValue(account)
@@ -142,10 +147,9 @@ class AccountListPresenterTest {
     @Test
     fun givenProfileButton_whenClicked_thenShouldGoToProfileView(){
 
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
-                accountManager)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
-        val account = UmAccount(1,"dummy", null,null)
+        val account = UmAccount(1,"dummy", null,"")
         presenter.onCreate(null)
 
         presenter.handleClickProfile(account.personUid)
@@ -159,8 +163,7 @@ class AccountListPresenterTest {
 
     @Test
     fun givenAboutButton_whenClicked_thenShouldGoToAboutView(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, impl,
-                accountManager)
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
 

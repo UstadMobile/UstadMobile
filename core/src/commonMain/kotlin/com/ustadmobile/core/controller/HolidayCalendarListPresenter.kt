@@ -8,8 +8,8 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>, view: HolidayCalendarListView,
-                          lifecycleOwner: DoorLifecycleOwner, di: DI)
-    : UstadListPresenter<HolidayCalendarListView, HolidayCalendar>(context, arguments, view, lifecycleOwner, di) {
+        di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<HolidayCalendarListView, HolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
 
     override fun onCreate(savedState: Map<String, String>?) {

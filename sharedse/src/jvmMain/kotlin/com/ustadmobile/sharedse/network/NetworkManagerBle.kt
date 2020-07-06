@@ -7,6 +7,7 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.NetworkNode
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherBuilder
@@ -43,7 +44,8 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
         get() = null
 
     override val umAppDatabaseRepo by lazy {
-        val activeAccount = UmAccountManager.getActiveAccount(context)
+        //TODO: this will need to be changed to use DI
+        val activeAccount = null as UmAccount?
         val serverUrl = if(activeAccount!= null) {
             activeAccount.endpointUrl ?: "http://localhost"
         }else {

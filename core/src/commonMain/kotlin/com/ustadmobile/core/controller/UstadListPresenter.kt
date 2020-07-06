@@ -2,13 +2,12 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
@@ -16,11 +15,12 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import org.kodein.di.on
 
-abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>, view: V,
-                                                    val lifecycleOwner: DoorLifecycleOwner,
-                                                    override val di: DI)
-    : UstadBaseController<V>(context, arguments, view), DIAware {
+abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>,
+                                                               view: V, di: DI,
+                                                    val lifecycleOwner: DoorLifecycleOwner)
+    : UstadBaseController<V>(context, arguments, view, di), DIAware {
 
     protected var mListMode = ListViewMode.BROWSER
 
@@ -28,13 +28,13 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     protected var mSearchQuery: String = "%"
 
-    val systemImpl: UstadMobileSystemImpl by instance<UstadMobileSystemImpl>()
+    val accountManager: UstadAccountManager by instance()
 
-    val db: UmAppDatabase by instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
+    val systemImpl: UstadMobileSystemImpl by instance()
 
-    val repo: UmAppDatabase by instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
 
-    val accountManager: UstadAccountManager by instance<UstadAccountManager>()
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

@@ -14,10 +14,9 @@ import org.kodein.di.DI
 
 
 class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>,
-                view: SchoolDetailOverviewView, lifecycleOwner: DoorLifecycleOwner,
-                di: DI)
+                view: SchoolDetailOverviewView, di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadDetailPresenter<SchoolDetailOverviewView, SchoolWithHolidayCalendar>(context, arguments,
-        view, lifecycleOwner, di) {
+        view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

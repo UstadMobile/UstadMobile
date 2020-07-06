@@ -5,7 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-actual fun requestClazzLogCreation(clazzUidFilter: Long, dbName: String, fromTime: Long, toTime: Long,
+actual fun requestClazzLogCreation(clazzUidFilter: Long, endpointUrl: String, fromTime: Long, toTime: Long,
                                    context: Any) {
     GlobalScope.launch {
         UmAccountManager.getRepositoryForActiveAccount(context).createClazzLogs(

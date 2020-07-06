@@ -13,11 +13,12 @@ import com.ustadmobile.lib.db.entities.Container
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 class ContentEntryExportPresenter(context: Any, arguments: Map<String, String>, view: ContentEntryExportView,
-                                  private val umDb: UmAppDatabase,private val umRepo: UmAppDatabase,
-                                  private val impl: UstadMobileSystemImpl)
-    : UstadBaseController<ContentEntryExportView>(context, arguments, view), ContainerManagerCommon.ExportProgressListener {
+                                  di: DI)
+    : UstadBaseController<ContentEntryExportView>(context, arguments, view, di), ContainerManagerCommon.ExportProgressListener {
 
     private var exporting: Boolean = false
 
@@ -32,6 +33,12 @@ class ContentEntryExportPresenter(context: Any, arguments: Map<String, String>, 
     private var entryTile: String = arguments[ARG_CONTENT_ENTRY_TITLE] ?: ""
 
     private var entryUid: Long = (arguments[UstadView.ARG_CONTENT_ENTRY_UID] ?: "0").toLong()
+
+    private val umRepo: UmAppDatabase by instance(tag = UmAppDatabase.TAG_REPO)
+
+    private val umDb: UmAppDatabase by instance(tag = UmAppDatabase.TAG_DB)
+
+    private val impl: UstadMobileSystemImpl by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

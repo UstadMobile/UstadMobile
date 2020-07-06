@@ -5,10 +5,11 @@ import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.lib.db.entities.Container
+import org.kodein.di.DI
 
 expect class ContentEditorPresenter(context: Any, arguments: Map<String, String>,
-                                    view: ContentEditorView, storage: String?,
-                                    database : UmAppDatabase,repository : UmAppDatabase,
+                                    view: ContentEditorView, di: DI, storage: String?,
+                                    database : UmAppDatabase, repository : UmAppDatabase,
                                     mountContainer: suspend (Long) -> String)
     : ContentEditorPresenterCommon{
 

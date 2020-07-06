@@ -38,7 +38,7 @@ fun Route.LoginRoute(db: UmAppDatabase) {
                         dsPersonUid = person.personUid, expires = getSystemTimeInMillis() + DEFAULT_SESSION_LENGTH))
 
                 call.respond(HttpStatusCode.OK,
-                        UmAccount(person.personUid, username, "", null))
+                        UmAccount(person.personUid, username, "", ""))
             }else {
                 call.respond(HttpStatusCode.Forbidden, "")
             }

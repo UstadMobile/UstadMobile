@@ -1,22 +1,16 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: LanguageListView,
-                          lifecycleOwner: DoorLifecycleOwner, di: DI)
-    : UstadListPresenter<LanguageListView, Language>(context, arguments, view, lifecycleOwner, di) {
+                            di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<LanguageListView, Language>(context, arguments, view, di, lifecycleOwner) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
@@ -33,7 +27,7 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.sortOptions = SortOrder.values().toList().map { LanguageListSortOption(it, context) }
-        loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+        loggedInPersonUid = accountManager.activeAccount.personUid
         getAndSetList()
     }
 

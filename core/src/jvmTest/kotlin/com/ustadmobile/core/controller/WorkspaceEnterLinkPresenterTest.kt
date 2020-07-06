@@ -14,6 +14,9 @@ import okio.Buffer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 import org.mockito.ArgumentMatchers
 
 
@@ -31,6 +34,8 @@ class WorkspaceEnterLinkPresenterTest {
 
     private val defaultTimeout: Long = 5000
 
+    private lateinit var di: DI
+
     @Before
     fun setUp(){
         view = mock {
@@ -40,7 +45,11 @@ class WorkspaceEnterLinkPresenterTest {
             }
         }
         impl = mock{}
-        presenter = WorkspaceEnterLinkPresenter(context, mapOf(), view, impl)
+        di = DI {
+            bind<UstadMobileSystemImpl>() with singleton { impl }
+        }
+
+        presenter = WorkspaceEnterLinkPresenter(context, mapOf(), view, di)
         mockWebServer = MockWebServer()
         mockWebServer.start()
     }
@@ -49,8 +58,6 @@ class WorkspaceEnterLinkPresenterTest {
     fun tearDown() {
         mockWebServer.shutdown()
     }
-
-
 
     @Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
@@ -67,7 +74,7 @@ class WorkspaceEnterLinkPresenterTest {
         val workSpacelink = "${mockWebServer.url("/")}workspace"
 
         val presenter = WorkspaceEnterLinkPresenter(context,
-                mapOf(), view, impl)
+                mapOf(), view, di)
 
         presenter.handleCheckLinkText(workSpacelink)
         verify(view, timeout(defaultTimeout)).validLink = eq(true)
@@ -78,7 +85,7 @@ class WorkspaceEnterLinkPresenterTest {
         mockWebServer.enqueue(MockResponse().setResponseCode(404))
         val workSpacelink = "${mockWebServer.url("/")}workspace"
         val presenter = WorkspaceEnterLinkPresenter(context,
-                mapOf(), view, impl)
+                mapOf(), view, di)
 
         presenter.handleCheckLinkText(workSpacelink)
         verify(view, timeout(defaultTimeout)).validLink = eq(false)

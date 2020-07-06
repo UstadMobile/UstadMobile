@@ -13,9 +13,8 @@ import org.kodein.di.DI
 
 class HolidayEditPresenter(context: Any,
                           arguments: Map<String, String>, view: HolidayEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          di: DI)
-    : UstadEditPresenter<HolidayEditView, Holiday>(context, arguments, view, lifecycleOwner, di) {
+                           di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<HolidayEditView, Holiday>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON

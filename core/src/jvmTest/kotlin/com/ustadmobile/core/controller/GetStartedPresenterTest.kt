@@ -9,6 +9,9 @@ import com.ustadmobile.core.view.WorkspaceEnterLinkView
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 import java.io.IOException
 
 class GetStartedPresenterTest {
@@ -21,13 +24,19 @@ class GetStartedPresenterTest {
 
     private val context = Any()
 
+    private lateinit var di: DI
+
     @Before
     @Throws(IOException::class)
     fun setup() {
         mockedView = mock()
         impl = mock()
 
-        mPresenter = GetStartedPresenter(context, mapOf(),mockedView,impl)
+        di = DI {
+            bind<UstadMobileSystemImpl>() with singleton { impl }
+        }
+
+        mPresenter = GetStartedPresenter(context, mapOf(),mockedView, di)
     }
 
     @Test

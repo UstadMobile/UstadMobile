@@ -2,10 +2,12 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -18,17 +20,14 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.instance
 import java.lang.Thread.sleep
 
 class ContentEntry2DetailPresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ContentEntry2DetailView
 
@@ -56,26 +55,29 @@ class ContentEntry2DetailPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoContentEntrySpyDao = spy(clientDbRule.db.contentEntryDao)
-        whenever(clientDbRule.db.contentEntryDao).thenReturn(repoContentEntrySpyDao)
+
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeDbInstance()
+
+        repoContentEntrySpyDao = spy(repo.contentEntryDao)
+        whenever(repo.contentEntryDao).thenReturn(repoContentEntrySpyDao)
         createdEntry = ContentEntry().apply {
             title = "Dummy Entry"
             leaf = true
-            contentEntryUid = clientDbRule.db.contentEntryDao.insert(this)
+            contentEntryUid = db.contentEntryDao.insert(this)
         }
 
         presenterArgs = mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString())
-
-        di = DI {
-            import(systemImplRule.diModule)
-            import(clientDbRule.diModule)
-        }
     }
 
     @Test
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntry(){
         val presenter = ContentEntry2DetailPresenter(context,
-                presenterArgs!!, mockView, mockLifecycleOwner, di)
+                presenterArgs!!, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
@@ -89,9 +91,9 @@ class ContentEntry2DetailPresenterTest {
 
     @Test
     fun givenContentEntryExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled(){
-
         val presenter = ContentEntry2DetailPresenter(context,
-                presenterArgs!!, mockView, mockLifecycleOwner, di)
+                presenterArgs!!, mockView, di, mockLifecycleOwner)
+        val systemImpl: UstadMobileSystemImpl by di.instance()
 
         presenter.onCreate(null)
 
@@ -99,7 +101,7 @@ class ContentEntry2DetailPresenterTest {
 
         presenter.handleClickEdit()
 
-        verify(systemImplRule.systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
+        verify(systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString())), any())
     }
 

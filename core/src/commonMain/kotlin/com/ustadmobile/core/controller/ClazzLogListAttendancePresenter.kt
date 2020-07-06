@@ -21,8 +21,8 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 
 class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, String>, view: ClazzLogListAttendanceView,
-                          lifecycleOwner: DoorLifecycleOwner, di: DI)
-    : UstadListPresenter<ClazzLogListAttendanceView, ClazzLog>(context, arguments, view, lifecycleOwner, di) {
+                          di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<ClazzLogListAttendanceView, ClazzLog>(context, arguments, view, di, lifecycleOwner) {
 
     //List of points to plot.
     data class AttendanceGraphData(val percentageAttendedSeries: List<Pair<Long, Float>>,

@@ -166,10 +166,10 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
                 args!![CONTENT_STORAGE_OPTION], UmAccountManager.getActiveDatabase(this),
                 UmAccountManager.getRepositoryForActiveAccount(this)) {
 
-            val mountedPath: String = embeddedHttp.mountContainer(it, null)!!
-            val counterMountedUrl: String = joinPaths(embeddedHttp.localHttpUrl,
-                    mountedPath)
-            counterMountedUrl
+//            val mountedPath: String = embeddedHttp.mountContainer(it, null)!!
+//            val counterMountedUrl: String = joinPaths(embeddedHttp.localHttpUrl,
+//                    mountedPath)
+            "UpdateMe"
         }
         presenter.onCreate(bundleToMap(mSavedInstance))
 

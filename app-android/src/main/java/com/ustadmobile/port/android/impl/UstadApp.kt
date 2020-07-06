@@ -21,10 +21,11 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
     val diModule = DI.Module("UstadApp-Android") {
         bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
-        bind<UstadAccountManager>() with singleton { UstadAccountManager.getInstance(instance(),
-                applicationContext) }
-        bind<UmAppDatabase>(tag = TAG_DB) with provider { instance<UstadAccountManager>().activeDatabase }
-        bind<UmAppDatabase>(tag = TAG_REPO) with provider { instance<UstadAccountManager>().activeRepository }
+//        bind<UstadAccountManager>() with singleton { UstadAccountManager.getInstance(instance(),
+//                applicationContext) }
+
+//        bind<UmAppDatabase>(tag = TAG_DB) with provider { instance<UstadAccountManager>().activeDatabase }
+//        bind<UmAppDatabase>(tag = TAG_REPO) with provider { instance<UstadAccountManager>().activeRepository }
         constant(TAG_DOWNLOAD_ENABLED) with true
     }
 

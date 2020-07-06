@@ -10,8 +10,8 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 class TimeZoneEntityListPresenter(context: Any, arguments: Map<String, String>, view: TimeZoneEntityListView,
-                          lifecycleOwner: DoorLifecycleOwner, di: DI)
-    : UstadListPresenter<TimeZoneEntityListView, TimeZoneEntity>(context, arguments, view, lifecycleOwner, di) {
+                                  di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<TimeZoneEntityListView, TimeZoneEntity>(context, arguments, view, di, lifecycleOwner) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

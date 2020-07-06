@@ -16,15 +16,20 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.*
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2View,
-                      val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
-                      private val accountManager: UstadAccountManager)
-    : UstadBaseController<Login2View>(context, arguments, view) {
+                      di: DI)
+    : UstadBaseController<Login2View>(context, arguments, view, di) {
 
     private  var nextDestination: String? = null
 
     private lateinit var serverUrl: String
+
+    private val impl: UstadMobileSystemImpl by instance()
+
+    private val accountManager: UstadAccountManager by instance()
 
     private var workSpace: WorkSpace = WorkSpace().apply {
         registrationAllowed = true

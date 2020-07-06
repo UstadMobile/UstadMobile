@@ -18,7 +18,7 @@ class PersonGroupEditPresenter(context: Any,
                           arguments: Map<String, String>, view: PersonGroupEditView,
                           lifecycleOwner: DoorLifecycleOwner,
                           di: DI)
-    : UstadEditPresenter<PersonGroupEditView, PersonGroup>(context, arguments, view, lifecycleOwner, di) {
+    : UstadEditPresenter<PersonGroupEditView, PersonGroup>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = TODO("PERSISTENCE_MODE.DB OR PERSISTENCE_MODE.JSON")

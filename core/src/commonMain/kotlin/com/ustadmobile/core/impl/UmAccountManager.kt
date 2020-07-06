@@ -10,6 +10,7 @@ import kotlin.js.JsName
 import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
+@Deprecated("Use UstadAccountManager instead. This class will be removed soon!")
 object UmAccountManager {
 
     @Volatile
@@ -36,22 +37,11 @@ object UmAccountManager {
 
             activeAccount = UmAccount(personUid, impl.getAppPref(PREFKEY_USERNAME, context),
                     impl.getAppPref(PREFKEY_ACCESS_TOKEN, context),
-                    impl.getAppPref(PREFKEY_ENDPOINT_URL, context))
+                    impl.getAppPref(PREFKEY_ENDPOINT_URL, context) ?: "")
             activeAccountLiveData.sendValue(activeAccount)
         }
 
         return activeAccount
-    }
-
-    @Synchronized
-    fun getActivePersonUid(context: Any, impl: UstadMobileSystemImpl): Long {
-        val activeAccount = getActiveAccount(context, impl)
-        return activeAccount?.personUid ?: 0L
-    }
-
-    @Synchronized
-    fun getActivePersonUid(context: Any): Long {
-        return getActivePersonUid(context, UstadMobileSystemImpl.instance)
     }
 
     @JsName("getActiveAccountWithContext")
@@ -115,10 +105,6 @@ object UmAccountManager {
             UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
                     "http://localhost", context) ?: "http://localhost"
         }
-    }
-
-    fun getActiveDatabaseName(context: Any): String {
-        return sanitizeDbNameFromUrl(getActiveEndpoint(context))
     }
 
     /**

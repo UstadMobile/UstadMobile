@@ -7,11 +7,12 @@ import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
 import com.nhaarman.mockitokotlin2.*
 import com.soywiz.klock.DateTime
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -24,6 +25,7 @@ import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -34,11 +36,7 @@ class ReportDetailPresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ReportDetailView
 
@@ -57,21 +55,23 @@ class ReportDetailPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoReportDaoSpy = spy(clientDbRule.db.reportDao)
-        whenever(clientDbRule.db.reportDao).thenReturn(repoReportDaoSpy)
-
-        runBlocking {
-            clientDbRule.db.insertTestStatements()
-        }
 
         di = DI {
-            import(systemImplRule.diModule)
-            import(clientDbRule.diModule)
+            import(ustadTestRule.diModule)
+        }
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
+        repoReportDaoSpy = spy(repo.reportDao)
+        whenever(repo.reportDao).thenReturn(repoReportDaoSpy)
+
+        runBlocking {
+            repo.insertTestStatements()
         }
     }
 
     @Test
     fun givenReportExists_whenOnCreateCalled_thenReportIsSetOnView() {
+        val db: UmAppDatabase by di.activeDbInstance()
         val testEntity = ReportWithFilters().apply {
             //set variables here
             chartType = Report.BAR_CHART
@@ -92,11 +92,11 @@ class ReportDetailPresenterTest {
                         entityType = ReportFilter.CONTENT_FILTER
                     }
             )
-            reportUid = clientDbRule.db.reportDao.insert(this)
+            reportUid = db.reportDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())
         val presenter = ReportDetailPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner, di)
+                presenterArgs, mockView, di, mockLifecycleOwner)
 
 
         presenter.onCreate(null)
@@ -108,6 +108,8 @@ class ReportDetailPresenterTest {
 
     @Test
     fun givenNewReport_whenUserClicksOnAddToDashboard_thenDatabaseIsCreated(){
+        val db: UmAppDatabase by di.activeDbInstance()
+
         val testEntity = ReportWithFilters().apply {
             //set variables here
             reportTitle = "New Report Title"
@@ -133,14 +135,14 @@ class ReportDetailPresenterTest {
 
         val presenterArgs = mapOf(ARG_ENTITY_JSON to Json.stringify(ReportWithFilters.serializer(), testEntity))
         val presenter = ReportDetailPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner, di)
+                presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
 
         presenter.handleOnClickAddFromDashboard(testEntity)
 
-        val existingEntitiesLive = clientDbRule.db.reportDao.findAllLive()
+        val existingEntitiesLive = db.reportDao.findAllLive()
         val entitySaved = runBlocking {
             existingEntitiesLive.waitUntil { it.size == 1 }
         }.getValue()!!.first()
@@ -154,6 +156,9 @@ class ReportDetailPresenterTest {
 
     @Test
     fun givenReportExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
+        val db: UmAppDatabase by di.activeDbInstance()
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+
         val testEntity = ReportWithFilters().apply {
             //set variables here
             chartType = Report.BAR_CHART
@@ -174,11 +179,11 @@ class ReportDetailPresenterTest {
                         entityType = ReportFilter.CONTENT_FILTER
                     }
             )
-            reportUid = clientDbRule.db.reportDao.insert(this)
+            reportUid = db.reportDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())
         val presenter = ReportDetailPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner, di)
+                presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
@@ -187,7 +192,7 @@ class ReportDetailPresenterTest {
 
         presenter.handleClickEdit()
 
-        verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ReportEditView.VIEW_NAME),
+        verify(systemImpl, timeout(5000)).go(eq(ReportEditView.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())), any())
     }
 

@@ -252,19 +252,6 @@ abstract class UstadMobileSystemCommon {
 
 
     /**
-     * Starts the user interface for the app
-     */
-    open fun startUI(context: Any) {
-        val activeAccount = UmAccountManager.getActiveAccount(context)
-
-        if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context) && activeAccount == null) {
-            go(Login2View.VIEW_NAME, mapOf(), context)
-        } else {
-            go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
-        }
-    }
-
-    /**
      * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
      * method in the implementation instead of using the factory API because
      * it enables the J2ME version to use the minimal jar
