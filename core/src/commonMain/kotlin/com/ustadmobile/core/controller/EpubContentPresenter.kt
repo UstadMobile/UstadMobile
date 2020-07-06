@@ -166,27 +166,25 @@ class EpubContentPresenter(context: Any,
                     epubContentView.authorName = authorNames
                 }
 
-                if (opf.navItem == null)
-                    throw IllegalArgumentException()
             })
-
-            if (opf.navItem == null)
-                throw IllegalArgumentException()
 
             val navXhtmlUrl = opf.navItem?.href?.let {
                 ocf?.rootFiles?.get(0)?.fullPath?.let { path -> UMFileUtil.joinPaths(mountedPath, path)
                 }?.let { url -> UMFileUtil.resolveLink(url, it) }
             }
 
-            val navContent = client.get<String>(navXhtmlUrl.toString())
+            if(navXhtmlUrl != null) {
+                val navContent = client.get<String>(navXhtmlUrl.toString())
 
-            val navDocument = EpubNavDocument()
-            val navParser = KMPXmlParser()
-            navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
-            navDocument.load(navParser)
-            epubContentView.runOnUiThread(Runnable {
-                epubContentView.tableOfContents = navDocument.toc
-            })
+                val navDocument = EpubNavDocument()
+                val navParser = KMPXmlParser()
+                navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
+                navDocument.load(navParser)
+                epubContentView.runOnUiThread(Runnable {
+                    epubContentView.tableOfContents = navDocument.toc
+                })
+            }
+
             view.runOnUiThread(Runnable {
                 view.progressVisible = false
             })
