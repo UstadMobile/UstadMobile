@@ -3,6 +3,10 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.espresso.Espresso.onIdle
+import androidx.test.espresso.web.sugar.Web.onWebView
+import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
+import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.rule.GrantPermissionRule
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -16,10 +20,12 @@ import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import kotlinx.android.synthetic.main.fragment_web_chunk.*
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
 import org.junit.Before
@@ -91,7 +97,7 @@ class WebChunkFragmentTest {
     }
 
     @Test
-    fun test(){
+    fun test() {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container!!.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container!!.containerUid)) {
@@ -102,6 +108,13 @@ class WebChunkFragmentTest {
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
 
+        repeat(5) {
+            try {
+                onWebView().withElement(findElement(Locator.CSS_SELECTOR, "div[data-test-id=tutorial-page]"))
+            } catch (io: RuntimeException) {
+                Thread.sleep(2000)
+            }
+        }
 
 
     }
