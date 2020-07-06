@@ -96,8 +96,9 @@ class WebChunkFragmentTest {
 
     }
 
+    @AdbScreenRecord("given contentEntry when web view loads then show web chunk")
     @Test
-    fun test() {
+    fun givenContentEntry_whenWebViewLoads_thenShowWebChunk() {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container!!.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container!!.containerUid)) {
