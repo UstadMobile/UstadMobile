@@ -101,6 +101,13 @@ kotlin {
 
 
     sourceSets {
+
+        all {
+            languageSettings {
+                useExperimentalAnnotation('kotlinx.serialization.InternalSerializationApi')
+            }
+        }
+
         commonMain {
             dependencies {
                 implementation project(":core")
@@ -111,6 +118,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "com.github.aakira:napier:$version_napier"
 
@@ -139,6 +147,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
+                implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation "com.github.aakira:napier:$version_napier"
 
             }
@@ -156,7 +165,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "androidx.lifecycle:lifecycle-livedata:$version_androidx_lifecycle"
-                implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "com.github.aakira:napier-android:$version_napier"
@@ -164,7 +173,7 @@ kotlin {
 
                 implementation "androidx.room:room-runtime:$version_android_room"
 
-                implementation "com.google.android.material:material:$version_androidx_support_lib"
+                implementation "com.google.android.material:material:$version_android_material"
 
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
@@ -192,6 +201,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
+
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
@@ -217,7 +227,7 @@ kotlin {
                 implementation project(":lib-test-common")
 
                 implementation "com.github.aakira:napier:$version_napier"
-                implementation "com.soywiz:klock-metadata:$version_klock"
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
             }
         }
 
@@ -229,7 +239,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-                implementation "com.soywiz:klock-jvm:$version_klock"
+                implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
@@ -254,6 +264,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.github.aakira:napier-android:$version_napier"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
@@ -331,37 +342,38 @@ jacoco {
  * Create a Jacocco task for reporting test coverage - as per:
  * https://medium.com/@aldychris/kotlin-multiplatform-for-ios-and-android-mobile-application-96a753e175f7
  */
-project.afterEvaluate {
-    def testTaskName = "jvmTest"
-
-    // Create gradle task
-    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
-        group = "Reporting"
-        description = "Generate Jacoco coverage reports on the common module build."
-
-        def excludes = [
-                '**/*Test*.*'
-        ]
-
-        classDirectories = fileTree(
-                dir: "${project.buildDir}/classes/kotlin/jvm/",
-                excludes: excludes
-        )
-
-        def coverageSourceDirs = [
-                "src/commonMain/kotlin"
-        ]
-
-        additionalSourceDirs = files(coverageSourceDirs)
-        sourceDirectories = files(coverageSourceDirs)
-        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
-
-        reports {
-            xml.enabled = true
-            html.enabled = true
-        }
-    }
-}
+//TODO: Fix this so we can have a coverage report for jvmTest
+//project.afterEvaluate {
+//    def testTaskName = "jvmTest"
+//
+//    // Create gradle task
+//    task "jvmJacocoTestReport" (type:JacocoReport, dependsOn: "$testTaskName") {
+//        group = "Reporting"
+//        description = "Generate Jacoco coverage reports on the common module build."
+//
+//        def excludes = [
+//                '**/*Test*.*'
+//        ]
+//
+//        classDirectories = fileTree(
+//                dir: "${project.buildDir}/classes/kotlin/jvm/",
+//                excludes: excludes
+//        )
+//
+//        def coverageSourceDirs = [
+//                "src/commonMain/kotlin"
+//        ]
+//
+//        additionalSourceDirs = files(coverageSourceDirs)
+//        sourceDirectories = files(coverageSourceDirs)
+//        executionData = files("${project.buildDir}/jacoco/jvmTest.exec")
+//
+//        reports {
+//            xml.enabled = true
+//            html.enabled = true
+//        }
+//    }
+//}
 
 publishing {
     publications {

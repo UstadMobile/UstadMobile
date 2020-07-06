@@ -84,7 +84,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
-                implementation "com.soywiz:klock-js:$version_klock"
+                implementation "com.soywiz.korlibs.klock:klock-js:$version_klock"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
 
@@ -120,7 +120,7 @@ dependencies {
      */
     kapt files("../lib-database-annotation-processor/build/libs/lib-database-annotation-processor.jar",
             "../lib-door-runtime/build/libs/lib-door-runtime-jvm-${rootProject.version}.jar")
-    kapt "com.squareup:kotlinpoet:1.2.0"
+    kapt "com.squareup:kotlinpoet:$version_kotlinpoet"
     kapt "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
     kapt "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
     kapt "io.ktor:ktor-server-netty:$version_ktor"

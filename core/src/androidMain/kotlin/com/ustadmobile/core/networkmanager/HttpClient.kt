@@ -2,6 +2,7 @@ package com.ustadmobile.core.networkmanager
 
 import android.content.Context
 import android.os.Build
+import com.google.gson.Gson
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import io.ktor.client.HttpClient
@@ -14,6 +15,12 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import java.lang.RuntimeException
 import java.util.concurrent.TimeUnit
+
+/**
+ * Note: OKHttp Ktor default configuration since 1.3.1 could cause a problem:
+ * See "Sporadic OkHttp errors after upgrading to ktor 1.3.1"
+ *  https://github.com/ktorio/ktor/issues/1708
+ */
 
 private val OK_HTTP_MIN_SDKVERSION = 21
 
@@ -31,6 +38,10 @@ private val okHttpClient = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
 }
 
 private val defaultGsonSerializer = GsonSerializer()
+
+private val defaultGson: Gson by lazy {Gson()}
+
+fun defaultGson() = defaultGson
 
 private val httpClient = if(Build.VERSION.SDK_INT < OK_HTTP_MIN_SDKVERSION) {
     HttpClient(Android) {

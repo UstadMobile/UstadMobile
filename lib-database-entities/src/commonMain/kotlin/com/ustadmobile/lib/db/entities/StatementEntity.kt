@@ -12,16 +12,16 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
-class StatementEntity {
+open class StatementEntity {
 
     @PrimaryKey(autoGenerate = true)
     var statementUid: Long = 0
 
     var statementId: String? = null
 
-    var personUid: Long = 0
+    var statementPersonUid: Long = 0
 
-    var verbUid: Long = 0
+    var statementVerbUid: Long = 0
 
     var xObjectUid: Long = 0
 

@@ -7,8 +7,8 @@
 
 # Android studio IML file
 *.iml
-.idea/
-
+.idea/*
+!.idea/fileTemplates
 
 # Java class files
 *.class
@@ -212,5 +212,10 @@ build/
 .vscode/
 
 #File output by utility script to find unused ids
-string_ids.txt
-unused_strings.txt
+
+
+
+#tool output
+tools/string_names.txt
+tools/string_ids.txt
+tools/unused_strings.txt

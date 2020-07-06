@@ -1,6 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.ustadmobile.core.view.ScormPackageView
 
 /**
  * Created by mike on 1/6/18.
@@ -9,7 +8,7 @@ import com.ustadmobile.core.view.ScormPackageView
 class ScormTypePlugin : ContentTypePlugin {
 
     override val viewName: String
-        get() = ScormPackageView.VIEW_NAME
+        get() = "ScormViewTodo"
 
     override val mimeTypes: Array<String>
         get() = arrayOf(*MIME_TYPES)

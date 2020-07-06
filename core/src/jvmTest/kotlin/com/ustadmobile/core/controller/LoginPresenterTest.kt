@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -18,6 +17,7 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import javax.naming.InitialContext
 
 
 class LoginPresenterTest {
@@ -104,7 +104,7 @@ class LoginPresenterTest {
 
         val httpUrl = mockWebServer.url("/").toString()
 
-        bindJndiForActiveEndpoint(httpUrl)
+        InitialContext().bindJndiForActiveEndpoint(httpUrl)
 
         val presenter = LoginPresenter(context,
                 mapOf(LoginPresenter.ARG_SERVER_URL to httpUrl,
@@ -202,7 +202,7 @@ class LoginPresenterTest {
 
         createPresenterClickRegisterAndEnterRegistrationCode("111")
 
-        verify(view, timeout(5000)).showSnackBarNotification(eq("Invalid Registration Code"), any(), any())
+        verify(view, timeout(5000)).showSnackBar(eq("Invalid Registration Code"), any(), any())
 
     }
 

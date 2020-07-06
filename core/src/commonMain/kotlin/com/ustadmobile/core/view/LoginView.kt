@@ -2,7 +2,7 @@ package com.ustadmobile.core.view
 
 import kotlin.js.JsName
 
-interface LoginView : UstadViewWithSnackBar {
+interface LoginView : UstadView {
 
     @JsName("setInProgress")
     fun setInProgress(inProgress: Boolean)

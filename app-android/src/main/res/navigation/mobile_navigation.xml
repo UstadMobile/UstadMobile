@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/home_content_dest">
+
+    <fragment
+        android:id="@+id/home_clazzlist_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzListFragment"
+        android:label="@string/classes" />
+
+    <fragment
+        android:id="@+id/home_personlist_dest"
+        android:name="com.ustadmobile.port.android.view.PersonListFragment"
+        android:label="@string/people" />
+
+
+    <fragment
+        android:id="@+id/person_list_dest"
+        android:name="com.ustadmobile.port.android.view.PersonListFragment"
+        android:label="@string/people" />
+
+    <fragment
+        android:id="@+id/verb_list_dest"
+        android:name="com.ustadmobile.port.android.view.VerbEntityListFragment"
+        android:label="@string/verb" />
+
+    <fragment
+        android:id="@+id/report_list_dest"
+        android:name="com.ustadmobile.port.android.view.ReportListFragment"
+        android:label="@string/reports" />
+
+
+    <fragment
+        android:id="@+id/home_schoollist_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolListFragment"
+        android:label="@string/schools" />
+
+
+    <fragment
+        android:id="@+id/personlist_dest"
+        android:name="com.ustadmobile.port.android.view.PersonListFragment" />
+
+    <fragment
+        android:id="@+id/clazz_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzEditFragment" />
+
+    <fragment
+
+        android:id="@+id/clazz_list_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzListFragment" />
+
+    <fragment
+        android:id="@+id/clazz_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzDetailFragment" />
+
+    <fragment
+        android:id="@+id/clazz_log_edit_attendance_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzLogEditAttendanceFragment"
+        android:label="@string/attendance" />
+
+    <fragment
+        android:id="@+id/person_edit_dest"
+        android:name="com.ustadmobile.port.android.view.PersonEditFragment" />
+
+    <fragment
+        android:id="@+id/person_detail_dest"
+        android:name="com.ustadmobile.port.android.view.PersonDetailFragment" />
+
+    <fragment
+        android:id="@+id/schedule_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ScheduleEditFragment" />
+
+    <fragment
+        android:id="@+id/report_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ReportEditFragment" />
+
+    <fragment
+        android:id="@+id/holidaycalendar_list_dest"
+        android:name="com.ustadmobile.port.android.view.HolidayCalendarListFragment" />
+
+    <fragment
+        android:id="@+id/holidaycalendar_edit_dest"
+        android:name="com.ustadmobile.port.android.view.HolidayCalendarEditFragment" />
+
+    <fragment
+        android:id="@+id/holiday_edit_dest"
+        android:name="com.ustadmobile.port.android.view.HolidayEditFragment" />
+
+    <fragment
+        android:id="@+id/timezoneentity_list_dest"
+        android:name="com.ustadmobile.port.android.view.TimeZoneEntityListFragment" />
+
+    <fragment
+        android:id="@+id/bitmask_edit_dest"
+        android:name="com.ustadmobile.port.android.view.BitmaskEditFragment" />
+
+    <fragment
+        android:id="@+id/settings_list_dest"
+        android:name="com.ustadmobile.port.android.view.SettingsFragment"
+        android:label="@string/settings" />
+    <fragment
+        android:id="@+id/role_list_dest"
+        android:name="com.ustadmobile.port.android.view.RoleListFragment"
+        android:label="@string/roles" />
+    <fragment
+        android:id="@+id/role_edit_dest"
+        android:name="com.ustadmobile.port.android.view.RoleEditFragment" />
+
+    <fragment
+        android:id="@+id/school_edit_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolEditFragment"
+        android:label="SchoolEditFragment" />
+    <fragment
+        android:id="@+id/school_detail_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolDetailFragment"
+        android:label="SchoolDetailFragment" />
+    <fragment
+        android:id="@+id/school_detail_overview_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolDetailOverviewFragment"
+        android:label="SchoolDetailOverviewFragment" />
+    <fragment
+        android:id="@+id/schoolmember_list_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment"
+        android:label="SchoolMemberListFragment" />
+    <fragment
+        android:id="@+id/home_content_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryListTabsFragment"
+        android:label="@string/content">
+        <argument
+            android:name="parentUid"
+            app:argType="long"
+            android:defaultValue="-4103245208651563007L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/content_entry_list_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
+        android:label="@string/content"/>
+
+    <fragment
+        android:id="@+id/content_entry_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryEdit2Fragment"
+        android:label="@string/content" />
+
+    <fragment
+        android:id="@+id/language_list_dest"
+        android:name="com.ustadmobile.port.android.view.LanguageListFragment"
+        android:label="@string/select_language" />
+
+    <fragment
+        android:id="@+id/content_entry_details_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
+        android:label="" />
+
+    <fragment
+        android:id="@+id/report_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ReportDetailFragment"
+        android:label="ReportDetailFragment" />
+
+    <fragment
+        android:id="@+id/content_xapi_dest"
+        android:name="com.ustadmobile.port.android.view.XapiPackageContentFragment"
+        android:label="" />
+
+    <fragment
+        android:id="@+id/video_content"
+        android:name="com.ustadmobile.port.android.view.VideoContentFragment"
+        android:label="" />
+
+
+</navigation>

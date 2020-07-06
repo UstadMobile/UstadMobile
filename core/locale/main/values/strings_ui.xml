@@ -43,25 +43,26 @@
     <string name='register'>Register</string>
     <string name='phone_number'>Phone number</string>
     <string name='name'>Name</string>
+    <string name="description">Description</string>
     <string name='male'>Male</string>
     <string name='female'>Female</string>
     <string name="other">Other</string>
     <string name="unset">Unset</string>
     <string name='settings'>Settings</string>
     <string name='language'>Language</string>
+    <string name='select_language'>Pick Language</string>
     <string name='advanced'>Advanced</string>
     <string name='optional'>Optional</string>
     <string name='email'>Email</string>
     <string name='regcode'>Signup Code</string>
     <string name='home'>Home</string>
     <string name="phone">Phone</string>
-    <string name="tablet">Tablet</string>
     <string name='attendance'>Attendance</string>
     <string name='classes'>Classes</string>
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
     <string name='contents'>Contents</string>
-    <string name='students'>Account</string>
+    <string name='students'>Students</string>
     <string name='forgot_password'>Forgot password</string>
     <string name='notifications'>Notifications</string>
     <string name='account'>Account</string>
@@ -69,8 +70,6 @@
     <string name="share">Share</string>
     <string name="send">Send</string>
     <string name="open">Open</string>
-    <string name="passed">Passed</string>
-    <string name="in_progress">In progress</string>
     <string name="downloading">Downloading</string>
     <string name="waiting">Waiting</string>
     <string name="queued">Queued</string>
@@ -80,6 +79,25 @@
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
     <string name="no_video_file_found">No video file found</string>
+    <string name="content_from_file">From file</string>
+    <string name="content_from_link">From link</string>
+    <string-array name="content_source_option">
+        <item>@string/content_from_file</item>
+        <item>@string/content_from_link</item>
+    </string-array>
+    <string name="import_content">Import Content</string>
+    <string name="update_content">Update Content</string>
+    <string name="publicly_accessible">Publicly accessible</string>
+    <string name="title">Title</string>
+    <string name="licence">Licence</string>
+    <string name="ebook">E-book</string>
+    <string name="interactive">Interactive</string>
+    <string name="collection">Collection</string>
+    <string name="document">Document</string>
+    <string name="article">Article</string>
+    <string name="audio">Audio</string>
+
+
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
@@ -93,7 +111,6 @@
 
     <!-- Registration dialog feedback -->
     <string name="field_required_prompt">This field is required</string>
-    <string name="field_password_min">Minimum 5 characters</string>
     <string name="field_password_error_min">Password should be at least 5 characters</string>
     <string name="filed_password_no_match">Password doesn\'t match, try again</string>
 
@@ -109,6 +126,7 @@
 
     <string name="also_available_in">Also available in</string>
 
+    <string name="created_partnership">Created in partnership with:</string>
     <string name="onboarding_get_started_label">Get Started</string>
     <string name="onboarding_no_internet_headline">No Internet? No problem.</string>
     <string name="onboarding_no_internet_subheadline">Download educational videos, articles and interactive exercises for later use. </string>
@@ -133,31 +151,28 @@
     <string name="download_state_downloaded"><![CDATA[<b>Downloaded</b>]]> total of %1$s items, which are using about %2$s of your device storage.</string>
     <string name="download_downloading_placeholder">Downloading %1$s of %2$s</string>
     <string name="download_summary_title">%1$s active downloads</string>
-    <string name="download_cancel_all">CANCEL ALL</string>
     <string name="download_cancel_label">Cancel download</string>
     <string name="download_pause_download">Pause</string>
     <string name="download_storage_option_device">Use %1$s - %2$s free</string>
-    <string name="download_storage_permission_title">File permissions required</string>
-    <string name="download_storage_permission_message">This app requires file permissions on the SD card to download and save content</string>
     <string name="download_locally_availability">Available nearby</string>
     <string name="download_cloud_availability">Available on cloud</string>
     <string name="insufficient_space">Insufficient storage space available</string>
-    <string name="clear_history">Clear History</string>
     <string name="download_entry_state_paused">Paused</string>
     <string name="get_app">Get app</string>
     <string name="no_app_found">"No app found to open file"</string>
     <string name="entry_details_author">Author</string>
-    <string name="entry_details_license">License</string>
-    <string name="entry_details_description">Description</string>
-    <string name="library_reading_level">Reading Level</string>
+    <string name="entry_details_publisher">Publisher</string>
+    <string name="entry_details_license">License: </string>
     <string name="file_not_found">File Not Found</string>
+    <string name="multiple_choice">Multiple choice</string>
+    <string name="preview">Preview</string>
 
     <!--Content editor -->
     <string name="content_type_multimedia">Multimedia</string>
-    <string name="content_type_multiple_choice">Multiple choice</string>
+    <string name="content_type">Content type </string>
+
     <string name="content_type_fill_the_blanks">Fill in the blanks</string>
     <string name="content_type_link">Link</string>
-    <string name="content_format_text">TEXT</string>
     <string name="content_format_paragraph">PARAGRAPH</string>
     <string name="content_direction_ltr">Left To Right</string>
     <string name="content_direction_rtl">Right To Left</string>
@@ -171,11 +186,9 @@
     <string name="content_insert_options">Insert</string>
     <string name="content_source_camera">From camera</string>
     <string name="content_source_device">From device</string>
-    <string name="content_choose_file">Choose file</string>
     <string name="content_prepare_file">Preparing file...</string>
-    <string name="content_preview_title">Previewing...</string>
     <string name="content_media_photo">Photo</string>
-    <string name="content_media_video">Video</string>
+    <string name="video">Video</string>
     <string name="content_media_message">What media type would you like to capture?</string>
     <string name="content_media_title">Media type</string>
     <string name="content_blank_page_title">Blank page</string>
@@ -188,9 +201,7 @@
     <string name="content_update_page_title">Update page</string>
     <string name="content_update_document_title">Update document</string>
     <string name="content_action_page_remove">Remove page</string>
-    <string name="content_editor_page_view_hint">Title</string>
     <string name="content_editor_page_delete_failure_message">Sorry you can not delete this page</string>
-    <string name="content_entry_not_found">ContentEntry Not Found</string>
     <string name="content_editor_directionality">Directionality</string>
     <string name='content_editor_menu_undo'>Undo</string>
     <string name='content_editor_menu_redo'>Redo</string>
@@ -210,7 +221,6 @@
     <string name='content_editor_menu_align_right'>Right</string>
     <string name='content_editor_menu_superscript'>Superscript</string>
     <string name='content_editor_menu_subscript'>Subscript</string>
-    <string name='content_editor_preview'>Preview</string>
     <string name='content_editor_link_text'>Link text</string>
     <string name='content_editor_link_url'>Link Url</string>
     <string name='content_editor_link_error'>Link text or url can not be empty, try again</string>
@@ -218,44 +228,19 @@
     <string name='content_editor_link_remove'>Remove Link</string>
     <string name="permission_camera_title">Camera and File Permission Required</string>
     <string name="permission_camera_message">This app requires both camera and file permissions to take photos and record videos</string>
-    <string name="content_editor_create_new">Add new</string>
-    <string name="content_editor_create_new_import">Import from file</string>
-    <string name="content_editor_create_new_import_link">Import from link</string>
+    <string name="content_editor_create_new_import">Import file</string>
+    <string name="content_editor_create_new_import_link">Import link</string>
     <string name="content_editor_create_new_content">Create new content</string>
-    <string name="content_editor_create_new_category">Create new folder</string>
-    <string name="content_editor_edit_category">Edit</string>
+    <string name="content_editor_create_new_category">New folder</string>
     <string name="content_editor_create_new_title">Add content</string>
-    <string name="content_editor_action_done">Done</string>
-    <string name="content_entry_label_title">Title</string>
-    <string name="content_entry_label_desc">Description</string>
-    <string name="content_entry_label_save">Save</string>
-    <string name="content_entry_label_update">Update document</string>
-    <string name="content_entry_label_select_file">Select file</string>
-    <string name="content_entry_label_update_file">Update file</string>
-    <string name="content_entry_label_update_content">Update Content</string>
-    <string name="content_from_file">From file</string>
-    <string name="content_from_link">From link</string>
-    <string name="content_entry_label_licence">License</string>
-    <string name="content_entry_label_visibility">Make content public</string>
-    <string name="content_entry_label_active">Make content active</string>
-    <string name="content_import_success_message">You have successfully imported a file</string>
-    <string name="content_import_failure_message">Selected file is not supported, try another file</string>
-    <string name="content_creation_empty_field_error">Fill out required fields and try again</string>
     <string name="content_creation_storage_option_title">Storage option</string>
-    <string name="content_creation_file_required_error">File to be imported is not selected, try again</string>
+    <string name="file_required_prompt">File to be imported is not selected, try again</string>
     <string name="content_creation_folder_new_message">New folder was successfully added</string>
     <string name="content_creation_folder_update_message">Folder was successfully updated</string>
-    <string name="empty_state_libraries">No folders found</string>
-    <string name="empty_state_downloaded">No downloads found</string>
-    <string name="empty_state_recycle">No recycled items</string>
     <string name="error_message_load_page">Failed to load the page</string>
     <string name="error_message_update_document">Failed to update document</string>
-    <string name="content_update_massage">Updated successfully</string>
-    <string name="content_folder_image_message">Support for adding an image is coming soon</string>
-    <string name="content_supported_files">Supported files: <![CDATA[<b>Epub, TinCan (XAPI) Zip</b>]]></string>
-    <string name="content_entry_importing">Importing, please wait</string>
+    <string name="supported_files">Supported files: <b>Video, Audio, EPUB, Xapi Zip,H5P</b></string>
     <string name="content_editor_save_error">Error while saving, try again</string>
-    <string name="content_entry_export">Export</string>
     <string name="content_entry_export_inprogress">Exporting</string>
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
 
@@ -275,19 +260,12 @@
     <string name="xapi_month" value="302">Month</string>
     <string name="xapi_custom_date" value="303">Custom Date</string>
     <string name="xapi_content_entry" value="304">Content Entry</string>
-    <string name="xapi_location" value="305">Location</string>
-    <string name="xapi_gender" value="306">Gender</string>
     <string name="xapi_clear" >Clear</string>
-    <string name="xapi_today" >Today</string>
 
 
     <string name="from">From</string>
-    <string name="tocao">To</string>
-    <string name="date_range">Date Range</string>
 
     <string name="done">Done</string>
-    <string name="select_locations">Select Locations</string>
-    <string name="select_entries">Select Entries</string>
 
     <string name="xapi_options_general">General</string>
     <string name="xapi_options_report_title">Report Title</string>
@@ -301,23 +279,26 @@
     <string name="xapi_options_did">Did</string>
     <string name="xapi_options_what">What</string>
     <string name="xapi_options_when">When</string>
-    <string name="xapi_options_where">Where</string>
+    <string name="xapi_options_where">Where</string>>
 
-    <string name="activity_preview_xapi">Preview</string>
-    <string name="add_to_dashboard">Add to Dashboard</string>
+    <string name="report">Report</string>
+    <string name="verb">Verb</string>
+    <string name="id_verbentity_urlid">ID: %s</string>
+    <string name="x_filter">%1$s filter</string>
+
+
+
+    <string name="dashboard">Dashboard</string>
     <string name="activity_import_link">Import Link</string>
 
     <string name="xapi_hours">Hrs</string>
     <string name="xapi_minutes">Mins</string>
     <string name="xapi_seconds">Secs</string>
 
-    <string name="xapi_person_header">Person</string>
     <string name="xapi_verb_header">Did what</string>
     <string name="xapi_result_header">Result</string>
-    <string name="xapi_when_header">When</string>
 
     <string name="xapi_score">Score (%)</string>
-    <string name="import_link_video">Title</string>
     <string name="import_title_not_entered">Title not entered</string>
 
 
@@ -328,36 +309,39 @@
     <string name="import_link_content_not_supported">Content not supported</string>
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
-    <string name="error_not_found_status">404 !</string>
-    <string name="error_not_found_tag">Sorry, the page that you are looking for can not be found.</string>
-
 
     <string name="offline_sharing_enable_bluetooth_prompt">Offline sharing requires Bluetooth</string>
     <string name="offline_sharing_enable_wifi_promot">Offline sharing requires WiFi to be switched on</string>
     <string name="enable">Enable</string>
-    <string name="more_information">More information</string>
-    <string name="less_information">Less information</string>
 
     <string name="repo_loading_status_loading_cloud">Loading from cloud</string>
     <string name="repo_loading_status_loading_mirror">Loading from peer </string>
-    <string name="repo_loading_status_loaded_empty">No content found</string>
     <string name="repo_loading_status_failed_noconnection">No connection or peer</string>
     <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
-
+    <!-- The Creative Commons CC BY license as per https://creativecommons.org/licenses/ -->
+    <string name="licence_type_cc_by">CC BY</string>
+    <!-- The Creative Commons CC BY SA license as per https://creativecommons.org/licenses/ -->
+    <string name="licence_type_cc_by_sa">CC BY SA</string>
+    <!-- The Creative Commons CC BY SA NC license as per https://creativecommons.org/licenses/ -->
+    <string name="licence_type_cc_by_sa_nc">CC BY SA NC</string>
+    <!-- The Creative Commons CC BY NC license as per https://creativecommons.org/licenses/ -->
+    <string name="licence_type_cc_by_nc">CC BY NC</string>
+    <!-- The Creative Commons CC BY NC SA license as per https://creativecommons.org/licenses/ -->
+    <string name="licence_type_cc_by_nc_sa">CC BY NC SA</string>
+    <!-- Public domain license e.g. the copyright has effectively been waived -->
+    <string name="licence_type_public_domain">Public Domain</string>
+    <!-- All rights reserved license -->
+    <string name="licence_type_all_rights">All Rights Reserved</string>
 
     <string name="syncing">Syncing..</string>
-    <string name="node_title_list">Node List</string>
     <string name="feed">Feed</string>
     <string name="people">People</string>
     <string name="record_attendance">Record attendance</string>
-    <string name="students_literal">Students</string>
-    <string name="last_recorded">last recorded</string>
     <string name="today">Today</string>
     <string name="sort_by">sort_by</string>
     <string name="log">Log</string>
     <string name="schedule">Schedule</string>
-    <string name="add_student">Add Student</string>
     <string name="first">first</string>
     <string name="last">last</string>
     <string name="last_week">Last week</string>
@@ -366,68 +350,29 @@
     <string name="mark_all_absent">Mark all absent</string>
     <string name="present">Present</string>
     <string name="absent">Absent</string>
-    <string name="present_selected">Present Selected</string>
-    <string name="absent_selected">Absent Selected</string>
-    <string name="partial_selected">Partial Selected</string>
-    <string name="present_unselected">Present Unselected</string>
-    <string name="absent_unselected">Absent Unselected</string>
-    <string name="partial_unselected">Partial Unselected</string>
-    <string name="call_parent">Call parent</string>
-    <string name="text_parent">Text parent</string>
-    <string name="enroll_in_class">Enroll in class</string>
     <string name="attendance_report">Attendance report</string>
-    <string name="record_dropout">Record dropout</string>
     <string name="father">Father</string>
     <string name="mother">Mother</string>
     <string name="birthday">Birthday</string>
-    <string name="field_fullname">Full names</string>
     <string name="first_names">First names</string>
     <string name="basic_details">Basic details</string>
-    <string name="home_address">Home address</string>
+    <string name="address">Address</string>
     <string name="add_person_to_class">Add person to class</string>
-    <string name="fathers_name">Fathers name</string>
-    <string name="fathers_number">Fathers number</string>
-    <string name="mothers_name">Mothers name</string>
-    <string name="mothers_number">Mothers number</string>
-    <string name="new_person">New Person</string>
-    <string name="edit_person">Edit Person</string>
     <string name="edit">Edit</string>
     <string name="clazz">Class</string>
     <string name="student_image">Student image</string>
-    <string name="enroll_new_student">Enroll new student</string>
 
-    <!--Social Emotional Learning (SEL)-->
-    <string name="sel">SEL</string>
-
-    <!-- Allows the user to record Social Emotion Learning Nomination -->
-    <string name="record_sel">Record SEL</string>
-    <string name="current_sel">Current SEL answers by students</string>
-    <string name="social_nomination">Social Nomination</string>
-    <string name="please_select_student_sn">Please select the student who will be performing this</string>
-    <string name="explain_sn">1. Explain the terms of consent to the child.</string>
-    <string name="child_given_consent">Child has provided consent to participate</string>
-    <string name="start_selection">start selection</string>
-    <string name="recognition_title_desc_sn">Recognition: Please tap each of your classmates pictures, and select their name from the popup.</string>
     <string name="question">question</string>
-    <string name="sel_question_tell_student">1. Tell the student you would like them to choose for this question. </string>
-    <string name="sel_question_press_start">2. Press the "START SELECTION" button at the bottom to hide this instruction and allow the student to make their selection.</string>
     <string name="questions">Questions</string>
-    <string name="sel_question_description">This is the question that will be shown and explained to the student.</string>
-    <string name="assign_to_all_classes">Assign to all classes</string>
-    <string name="allow_multiple_nominations">Allow multiple nominations</string>
-    <string name="sel_new_question_title">Question</string>
-    <string name="sel_recognition_student_recognizes">Student recognizes their classmates</string>
     <string name="add_person">Add Person</string>
-    <string name="update_picture">Update picture</string>
     <string name="add_class">Add Class</string>
     <string name="class_name">Class name</string>
     <string name="class_description">Class description</string>
-    <string name="add_class_day">Add a class day</string>
     <string name="to">to</string>
+    <string name="holiday">Holiday</string>
+    <string name="holidays">Holidays</string>
     <string name="holiday_calendar">Holiday Calendar</string>
     <string name="features_enabled">Features enabled</string>
-    <string name="class_setup">Class Setup</string>
-    <string name="add_session">Add session</string>
     <string name="weekly">Weekly</string>
     <string name="once">Once</string>
     <string name="daily">Every working day</string>
@@ -440,51 +385,26 @@
     <string name="thursday">Thursday</string>
     <string name="friday">Friday</string>
     <string name="saturday">Saturday</string>
-    <string name="jan">January</string>
-    <string name="feb">February</string>
-    <string name="mar">March</string>
-    <string name="apr">April</string>
-    <string name="may">May</string>
-    <string name="jun">June</string>
-    <string name="jul">July</string>
-    <string name="aug">August</string>
-    <string name="sep">September</string>
-    <string name="oct">October</string>
-    <string name="nov">November</string>
-    <string name="dec">December</string>
-    <string name="day">Day</string>
-    <string name="fromC">From</string>
+    <string name="day" value="300">Day</string>
     <string name="toC">To</string>
-    <string name="this_month">This Month</string>
-    <string name="last_year">Last Year</string>
-    <string name="attended_green">Attended over 80% of lessons</string>
-    <string name="attended_orange">Attended 60-79% of lessons</string>
-    <string name="attended_red">Attended less than 60% of lessons</string>
-    <string name="last_month">Last Month</string>
-    <string name="record_activity">Record activity</string>
+    <string name="last_month">Last month</string>
     <string name="activity_change">Activity change</string>
     <string name="change_implemented_if_any">Change implemented (if any)</string>
     <string name="duration">Duration</string>
     <string name="how_did_it_go">How did it go ?</string>
     <string name="notes">Notes</string>
     <string name="activity">Activity</string>
-    <string name="sel_done_select_another_student">SEL done. You can now move to another student</string>
     <string name="sort_by_name">Sort by name</string>
     <string name="sort_by_name_asc">name (ascending)</string>
     <string name="sort_by_name_desc">name (descending)</string>
     <string name="sort_by_text">Sort by</string>
-    <string name="namesb">Name</string>
     <string name="attendance_high_to_low">Attendance (high to low)</string>
     <string name="attendance_low_to_high">Attendance (low to high)</string>
     <string name="teacher">Teacher</string>
     <string name="partial">Partial</string>
     <string name="teachers_literal">Teachers</string>
-    <string name="add_teacher">Add teacher</string>
-    <string name="enroll_new_teacher">Enroll new teacher</string>
-    <string name="your_summary">Your summary</string>
     <string name="up">up</string>
     <string name="down">down</string>
-    <string name="taught_by">Taught by</string>
     <string name="activity_went_good">Activity went good</string>
     <string name="activity_went_bad">Activity didn\'t go as good</string>
     <string name="activity_enter_any_notes">Enter any notes you have about this activity</string>
@@ -499,100 +419,32 @@
     <string name="frequency">Frequency</string>
     <string name="yes_no">Yes\/No</string>
     <string name="time_period">Time period</string>
-    <string name="choose_report_options">Choose Report Options</string>
     <string name="location">Location</string>
-    <string name="disaggregate_by_gender">Disaggregate by gender</string>
-    <string name="create_report">Create report</string>
-    <string name="last_two_weeks">Last two weeks</string>
     <string name="last_three_months">Last three months</string>
-    <string name="custom_date_range">Custom date range</string>
-    <string name="show_student_numbers">Show student numbers</string>
-    <string name="show_student_percentages">Show student percentages</string>
-    <string name="attendance_thresholds">Attendance thresholds</string>
-    <string name="low">Low</string>
-    <string name="mid">Mid</string>
-    <string name="high">High</string>
-    <string name="overall_attendance">Overall attendance</string>
-    <string name="attendance_grouped_by_threshold">Attendance by threshold</string>
-    <string name="at_risk_students">At risk students</string>
-    <string name="operations_report">Operations report</string>
-    <string name="number_of_days_classes_open">Number of days classes open</string>
-    <string name="irc_master_list_report">IRC master list report</string>
-    <string name="sel_report">SEL report</string>
-    <string name="select_attendance_thresholds">Select Attendance Thresholds</string>
-    <string name="select_classes">Select classes</string>
-    <string name="overall_attendance_report">Overall attendance report</string>
     <string name="export">Export</string>
-    <string name="xls">XLS</string>
-    <string name="csv">CSV</string>
     <string name="date">Date</string>
     <string name="average">Average</string>
     <string name="age">Age</string>
     <string name="days">Days</string>
-    <string name="onboarding_easily_record_student_attendance">Easily record student attendance</string>
-    <!-- Get started - e.g. as used in the button when the app first runs-->
-    <string name="get_started2">Get started</string>
-    <string name="select_file">Select file</string>
-    <string name="bulk_upload_master">Bulk Upload Master</string>
     <string name="apply">Apply</string>
     <string name="file_selected">File selected:</string>
     <string name="all">All</string>
-    <string name="retention_officer">Retention officer</string>
-    <string name="at_risk_report_desc">At risk students report: shows all students deemed at risk (due to low attendance)</string>
     <string name="holiday_calendars">Holiday calendars</string>
     <string name="holiday_calendars_desc">Add, remove and modify holiday calendars</string>
-    <string name="sel_question_set">SEL Question sets</string>
+    <string name="sel_question_set">SEL Question set</string>
     <string name="sel_question_set_desc">Manage SEL questions</string>
     <string name="users">Users</string>
-    <string name="question_set">Question set</string>
-    <string name="new_question_set">New question set</string>
-    <string name="edit_question">Edit Question</string>
-    <string name="question_text">Question text</string>
-    <string name="question_type">Question type</string>
-    <string name="sel_question_type_nomination">Nomination</string>
-    <string name="sel_question_type_multiple_choise">Multiple choice</string>
-    <string name="sel_question_type_free_text">Free text</string>
-    <string name="add_option">Add option</string>
     <string name="nomination">Nomination</string>
     <string name="active">Active</string>
-    <string name="date_left">Date left</string>
-    <string name="class_days">Total Class days</string>
-    <string name="count_present_days">Count of days present</string>
-    <string name="count_absent_days">Count of days absent</string>
-    <string name="count_partial_days">Count of days partial</string>
-    <string name="student_id">Student ID</string>
     <string name="class_id">Class ID</string>
-    <string name="other_not_set">Other</string>
-    <string name="gender_literal">Gender</string>
-    <string name="yes_literal">Yes</string>
-    <string name="no_literal">No</string>
-    <string name="not_set">Not set</string>
-    <string name="consent_not_selected">Consent not given. Please check if consent has been given.</string>
-    <string name="recognition_not_selected">Recognition confirmation not given. Please check. </string>
+    <string name="gender_literal" value="306">Gender</string>
     <string name="sel_question_set_to_use">SEL question set to use</string>
-    <string name="nominating">Nominating</string>
     <string name="search">Search</string>
     <string name="attendance_percentage">Attendance percentage:</string>
     <string name="filter">Filter</string>
-    <string name="number_of_absent_days">Number of absent days in a row: </string>
     <string name="over">over</string>
-    <string name="select_timezone">Select the time zone for these locations</string>
-    <string name="no_schedule_message">You have to create a schedule to be able to take attendance</string>
-    <string name="view_class">View class</string>
-    <string name="view_student">View student</string>
     <string name="sync">Sync</string>
-    <string name="force_sync">Refresh</string>
     <string name="not_recorded">Not recorded</string>
-    <string name="number_of_classes">Classes</string>
-    <string name="dropout_reason_other_ngo">Other NGO</string>
-    <string name="dropout_reason_move">Move</string>
-    <string name="dropout_reason_cry">Cry</string>
-    <string name="dropout_reason_sickness">Sickness</string>
-    <string name="dropout_reason_parents_refuse_permission">Parents refuse permission</string>
-    <string name="dropout_reason_public_school">Public school</string>
-    <string name="dropout_reason_transportation">Transportation</string>
-    <string name="dropout_reason_personal_issues">Personal issues</string>
-    <string name="dropout_reason_other">Other</string>
     <string name="groups">Groups</string>
     <string name="group_setting_desc">Add, remove or modify groups</string>
     <string name="roles">Roles</string>
@@ -604,42 +456,14 @@
     <string name="locations_setting_desc">Manage locations</string>
     <string name="audit_log">Audit log</string>
     <string name="audit_log_setting_desc"> View and export audit log</string>
-    <string name="new_holiday">New holiday</string>
-    <string name="add_holiday_calendar">Add holiday calendar</string>
-    <string name="entries">entries</string>
     <string name="entry">entry</string>
-    <string name="holiday_calendar_name">Holiday calendar name</string>
-    <string name="add_calendar_range">Add a calendar range</string>
-    <string name="add_holiday">Add holiday</string>
-    <string name="new_role">New role</string>
-    <string name="permissions">Permissions</string>
     <string name="permission">permission</string>
-    <string name="add_role">Add role</string>
     <string name="role_name">Role name</string>
     <string name="members">members</string>
     <string name="member">member</string>
-    <string name="add_group">Add group</string>
-    <string name="group_name">Group name</string>
-    <string name="add_people">Add people</string>
-    <string name="new_group">New group</string>
-    <string name="new_role_assignment">New role assignment</string>
-    <string name="add_new_role_assignment">Add new role assignment</string>
     <string name="role_assignment">Role assignment</string>
-    <string name="role_assignments">Role assignments</string>
-    <string name="in_literal">in</string>
-    <string name="assign_role_to">Assign role to</string>
-    <string name="role_individual">Individual user</string>
-    <string name="role_group">Group</string>
     <string name="scope_by">Scope by</string>
     <string name="assign_to">Assign to</string>
-    <string name="add_edit_location">Add\/Edit location</string>
-    <string name="sub_locations">sub locations</string>
-    <string name="sub_location">sub location</string>
-    <string name="add_location">Add location</string>
-    <string name="location_title">Location title</string>
-    <string name="parent_location">Parent location</string>
-    <string name="changed_by">Changed by</string>
-    <string name="audit_log_desc">An audit log is a log of all activities relevant to class management, teachers and students.</string>
     <string name="person">Person</string>
     <string name="permission_person_select">View people</string>
     <string name="permission_person_insert" >Add People</string>
@@ -662,101 +486,49 @@
     <string name="permission_sel_question_insert">Add SEL questions</string>
     <string name="permission_sel_question_update">Update SEL questions</string>
     <string name="permission_sel_select">View SEL results</string>
-    <string name="permission_sel_insert">Record SEL</string>
     <string name="permission_sel_update">Update SEL results</string>
-    <string name="enroll_new_group_member">Enroll new group member</string>
-    <string name="enroll_group_member">Enroll person</string>
-    <string name="changed">changed</string>
-    <string name="sel_caps">SEL</string>
-    <string name="update_username_password">Update username\/password</string>
-    <string name="manage_access_for">Manage access for</string>
-    <string name="passwords_dont_match">Passwords dont match. Please check and try again.</string>
-    <string name="enroll">Enroll</string>
-    <string name="unable_to_update_password">Unable to update password</string>
     <string name="custom_fields">Custom fields</string>
     <string name="custom_field">Custom field</string>
     <string name="custom_fields_desc">Add, remove and modify custom fields</string>
-    <string name="entity">Entity</string>
-    <string name="add_field">Add field</string>
-    <string name="field_name_english">Field name (English)</string>
-    <string name="field_name_arabic">Field name (Arabic)</string>
     <string name="field_type">Field type</string>
     <string name="text">Text</string>
     <string name="dropdown">Dropdown</string>
     <string name="options">Options</string>
     <string name="option_value">Option value</string>
-    <string name="add_modify_option">Add\/modify option</string>
-    <string name="default_value">Default value</string>
     <string name="errors">Errors</string>
-    <string name="please_review_errors">Please review errors below</string>
-    <string name="please_review_warnings">Bulk upload done. Please review warnings below.</string>
     <string name="shake_feedback">Shake for feedback</string>
     <string name="feedback_hint">Please enter your feedback</string>
     <string name="send_feedback">Send feedback</string>
     <string name="feedback_thanks">Thank you for the feedback.</string>
     <string name="start_date">Start date</string>
     <string name="end_date">End date</string>
-    <string name="select_image_from_camera_or_gallery">Select image from Camera or Gallery</string>
-    <string name="camera">Camera</string>
-    <string name="gallery">Gallery</string>
-    <string name="unable_open_image">Unable to open that image</string>
-    <string name="current_password_not_correct">The current password is incorrect</string>
     <string name="save">Save</string>
     <string name="change_password">Change Password</string>
-    <string name="current_password">Current password</string>
     <string name="password_unchanged">Password (Unchanged)</string>
-    <string name="confirm_password_unchanged">Confirm password (Unchanged)</string>
-    <string name="select_a_timezone">Select a timezone</string>
-    <string name="dismiss">Dismiss</string>
-    <string name="next_attendance_message">Your next schedule has not started yet.</string>
-    <string name="it_will_start_tomorrow">It will start tomorrow</string>
-    <string name="it_will_start_in">It will start in</string>
-    <string name="username_not_available">This username is not available. Please choose another one.</string>
-    <string name="unable_to_update_username">Unable to check username. Please make sure you are online.</string>
-    <string name="unable_to_update_username_error">Unable to check username. Please try again later.</string>
-    <string name="last_synced_at">Last synced</string>
-    <string name="bottomnav_feed_title">Feed</string>
-    <string name="bottomnav_classes_title">Classes</string>
-    <string name="bottomnav_people_title">People</string>
-    <string name="bottomnav_reports_title">Reports</string>
-    <string name="bottomnav_content_title">Content</string>
-    <string name="login_no_network_no_person">Person not found locally. Please get online for first login.</string>
-    <string name="login_no_network_auth_fail">Person authentication failed offline.</string>
+    <string name="timezone">Timezone</string>
     <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
-    <string name="s_person_group">\'s person group</string>
-    <string name="cancel_invite">Cancel invite</string>
-    <string name="enter_name">Please enter name</string>
-    <string name="created_user">Created user</string>
     <string name="add">Add</string>
     <string name="refresh">Refresh</string>
 
+    <string name="school">School</string>
     <string name="schools">Schools</string>
-    <string name="add_school">Add school</string>
 
     <!-- Assignments e.g. homework for a class -->
     <string name="assignments">Assignments</string>
-    <string name="new_assignment">Add assignment</string>
 
-    <!-- How an assignment is graded e.g. by letter, numerical, etc -->
-    <string name="grading">Grading</string>
-    <!-- Grading by letter e.g. A-F -->
-    <string name="grading_letter">Letter</string>
     <string name="None">None</string>
-    <!-- e.g. Numerical assignment grading -->
-    <string name="numerical">Numerical</string>
 
     <string name="instructions_for_students">Instructions for students</string>
-
 
     <string name="not_started">Not started</string>
 
     <!-- Used to show what percentage of an assignment a student has completed. The %1$s will be
     replaced with the percentage the student completed e.g. "75% complete"-->
-    <string name="percentage_complete">%1$s% complete</string>
+    <string name="percentage_complete" formatted="false">%1$s% complete</string>
 
     <!-- used to show when an assignment (or other work item) was started by the assignee. The
     %1$s% will be replaced with the date that they started.-->
-    <string name="started_date">Started %1$s%</string>
+    <string name="started_date" formatted="false">Started %1$s%</string>
 
     <!-- Used to indicate that something (e.g. an assigment) has been started -->
     <string name="started">Started</string>
@@ -790,13 +562,112 @@ Voice of America\n
 Content is provided under license by external content providers. Ustad Mobile, unless explicitly mentioned otherwise, is not endorsed by any such content provider.</string>
 
     <string name="due_date">Due date</string>
-    <string name="title">Title</string>
     <string name="content">Content</string>
-    <string name="require_attachment">Require attachment</string>
-    <string name="add_assignment">Add Assignment</string>
-    <string name="assignment">Assignment</string>
     <string name="student_progress">Student progress</string>
 
     <string name="use_device_language">Use device language</string>
+
+    <!-- The title shown when we ask the user to select a specific type of item. E.g. "Select class", or "select person".-->
+    <string name="select_item">Select %1$s</string>
+
+    <!-- Allow the user to create a new item - e.g. when the user is selecting a class it would say "Create a new class" -->
+    <string name="create_new">Create a new %1$s</string>
+
+    <!-- This is used to display a duration - e.g. "04/Apr/2020 - 03/May/2020". %1$s and %1$2s will
+    be replaced with the from and to date respectively and will be formatted according to the
+    language settings in the app-->
+    <string name="from_to_date">%1$s - %2$s</string>
+
+    <!-- Used to show a quantity and name e.g. "5 oranges". %1$d will be replaced with the number
+    and %2$s will be replaced with the name of the item-->
+    <string name="num_items_with_name">%1$d %2$s</string>
+
+    <!-- Used to show a quantity and name e.g. "5 oranges". %1$d will be replaced with the number
+    and %2$s will be replaced with the name of the item-->
+    <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
+
+    <!-- Used to create a prompt to the user to add something e.g. "Add a Holiday". %1$s will be
+    replaced with the name of the item (e.g. Holiday)-->
+    <string name="add_a">Add a %1$s</string>
+
+    <!-- Used to set the title on an edit screen where the user is creating a new entity e.g.
+    new class, new assignment, etc. %1$s will be replaced with the name of the item.-->
+    <string name="new_entity">New %1$s</string>
+
+    <!-- Used to set the title on an edit screen where the user is editing an existing entity
+     e.g. Edit Class, Edit Assignment, etc -->
+    <string name="edit_entity">Edit %1$s</string>
+
+    <string name="add_to">Add to %1$s</string>
+    <string name="remove_from">Remove from %1$s</string>
+
+    <string name="items_selected">%1$d selected</string>
+
+    <string name="change_photo">Change photo</string>
+
+    <string name="remove_photo">Remove photo</string>
+
+    <string name="take_new_photo_from_camera">Take new photo from camera</string>
+
+    <string name="select_new_photo_from_gallery">Select new photo from gallery</string>
+
+    <string name="permission_clazz_assignment_view">View class assignments</string>
+    <string name="permission_clazz_asignment_edit">Create and edit class assignments</string>
+
+    <string name="overview">Overview</string>
+
+    <string name="add_new">Add new</string>
+    <string name="staff">Staff</string>
+    <string name="x_teachers_y_students">%1$d teachers, %2$d students</string>
+
+    <string name="call">Call</string>
+
+    <string name="organization_id">Organization ID</string>
+
+    <string name="student">Student</string>
+
+    <string name="contact_details">Contact details</string>
+
+
+    <string name="untitled">Untitled</string>
+    <string name="present_late_absent">%1$d present, %2$d late, %3$d absent</string>
+
+    <!-- Used to show the percentage attendance e.g. "50% attendance".
+    Translators note: translate only the word attendance, do not modify %1.0f%%-->
+    <string name="x_percent_attended">%1.0f%% attendance</string>
+
+    <string name="nothing_here">Nothing here</string>
+
+    <string name="clazz_work">Class work</string>
+    <string name="marked">marked</string>
+    <string name="submitted">submitted</string>
+    <string name="not_submitted">not submitted</string>
+    <string name="visible_from_date">Visible from date</string>
+    <string name="submission_type">Submission type</string>
+    <string name="no_submission_required">No submission required</string>
+    <string name="short_text">Short text</string>
+    <string name="attachment">Attachment</string>
+    <string name="quiz">Quiz</string>
+    <string name="allow_private_comments_from_students">Allow private comments from students</string>
+    <string name="deadline">Deadline</string>
+    <string name="class_timezone">Class timezone</string>
+    <string name="maximum_score">Maximum score</string>
+    <string name="quiz_questions">Quiz questions</string>
+    <string name="time">Time</string>
+    <string name="submission">Submission</string>
+    <string name="public_comments">Public comments</string>
+    <string name="private_comments">Private comments</string>
+    <string name="submit_your_answer">Submit your answer</string>
+    <string name="add_class_comment">Add a class comment</string>
+    <string name="add_private_comment">Add a private comment</string>
+    <string name="class_comments">Class comments</string>
+    <string name="submit">Submit</string>
+
+    <!-- Used to show three quantities and names e.g. "5 oranges, 2 apples, 3 pears". %1$d etc
+    will be replaced with the number and %2$s will be replaced with the name of the item-->
+    <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
+    <string name="marking">Marking</string>
+    <string name="return_and_mark_next">Return and mark next</string>
+    <string name="return_only">Return and finish</string>
 
 </resources>

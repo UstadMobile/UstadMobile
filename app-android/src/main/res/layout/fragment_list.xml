@@ -1,0 +1,39 @@
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View"/>
+        <import type="com.ustadmobile.core.view.ListViewAddMode"/>
+
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.UstadListPresenter" />
+
+        <variable
+            name="addMode"
+            type="com.ustadmobile.core.view.ListViewAddMode" />
+
+        <variable
+            name="sortOptions"
+            type="java.util.List&lt;com.ustadmobile.core.util.MessageIdOption&gt;"/>
+
+        <variable
+            name="onSortSelected"
+            type="com.ustadmobile.port.android.view.MessageIdSpinner.OnMessageIdOptionSelectedListener" />
+
+    </data>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fragment_list_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:clipToPadding="false"
+        android:paddingBottom="@{addMode == ListViewAddMode.FAB ? @dimen/dimen_54dp: @dimen/dimen_0dp}"
+        tools:itemCount="8"
+        tools:listitem="@layout/item_holiday_calendar"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+</layout>

@@ -57,23 +57,24 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "org.jetbrains.kotlinx:atomicfu-common:$atomicfu_version"
                 compileOnly project(":lib-room-annotations")
             }
         }
 
-        jsTest {
-            dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-test-js:$version_kotlin"
-            }
-        }
+//        jsTest {
+//            dependencies {
+//                implementation "org.jetbrains.kotlin:kotlin-test-js:$version_kotlin"
+//            }
+//        }
 
-        commonTest {
-            commonTest {
-                dependencies {
-                    implementation project(":lib-database-mpp")
-                }
-            }
-        }
+//        commonTest {
+//            commonTest {
+//                dependencies {
+//                    implementation project(":lib-database-mpp")
+//                }
+//            }
+//        }
 
         commonJvmMain {
             dependencies {
@@ -116,7 +117,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+                implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "com.github.aakira:napier-android:$version_napier"

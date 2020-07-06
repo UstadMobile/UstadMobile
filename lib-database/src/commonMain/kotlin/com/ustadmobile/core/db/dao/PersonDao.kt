@@ -125,9 +125,6 @@ abstract class PersonDao : BaseDao<Person> {
         }
     }
 
-    @Insert
-    abstract fun insertListAndGetIds(personList: List<Person>): List<Long>
-
 
     private fun createAndInsertAccessToken(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,
@@ -197,9 +194,6 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * From Person WHERE personUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Person?>
 
-    @Query("SELECT Count(*) FROM Person")
-    abstract fun countAll(): Long
-
     @Query("SELECT * FROM Clazz")
     abstract fun findAllClazzes(): List<Clazz>
 
@@ -208,48 +202,8 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun findByUidAsync(uid: Long) : Person?
 
 
-    @Query("SELECT * FROM Person WHERE active =1")
-    abstract fun findAllPeopleProvider(): DataSource.Factory<Int, Person>
-
-    @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames ASC")
-    abstract fun findAllPeopleNameAscProvider(): DataSource.Factory<Int, Person>
-
-    @Query("SELECT * FROM Person WHERE active=1 ORDER BY firstNames DESC")
-    abstract fun findAllPeopleNameDescProvider(): DataSource.Factory<Int, Person>
-
     @Update
     abstract fun updateAsync(entity: Person):Int
-
-    @Query("Select * From Person WHERE CAST(active AS INTEGER) = 1")
-    abstract fun findAllPeople(): List<Person>
-
-    @Query("Select * From Person")
-    abstract fun findAllPeopleIncludingInactive(): List<Person>
-
-    @Query("select group_concat(firstNames||' '||lastNAme, ', ') " +
-            " from Person WHERE personUid in (:uids)")
-    abstract suspend fun findAllPeopleNamesInUidList(uids: List<Long>):String?
-
-    @Query("SELECT * FROM Person WHERE CAST(admin AS INTEGER) = 1")
-    abstract fun findAllAdminsAsList(): List<Person>
-
-
-    @Query("SELECT Person.* , (0) AS clazzUid, " +
-            " (0) AS attendancePercentage, " +
-            " '' AS clazzName, " +
-            " (0) AS clazzMemberRole, " +
-            " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
-            " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
-            " DESC LIMIT 1) AS personPictureUid, " +
-            " CASE WHEN EXISTS " +
-            " (SELECT * FROM PersonGroupMember WHERE PersonGroupMember.groupMemberGroupUid = :groupUid " +
-            " AND PersonGroupMember.groupMemberPersonUid = Person.personUid AND " +
-            " CAST(PersonGroupMember.groupMemberActive AS INTEGER) = 1) " +
-            "   THEN 1 " +
-            "   ELSE 0 " +
-            " END AS enrolled " +
-            "  FROM Person WHERE CAST(Person.active AS INTEGER) = 1 ORDER BY Person.firstNames ASC")
-    abstract fun findAllPeopleWithEnrollmentInGroup(groupUid: Long): DataSource.Factory<Int, PersonWithEnrollment>
 
     @Insert
     abstract suspend fun insertPersonGroup(personGroup:PersonGroup):Long
@@ -258,22 +212,20 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
 
 
-    @Query(QUERY_FIND_ALL)
-    abstract fun findAllPeopleWithEnrollment(): DataSource.Factory<Int, PersonWithEnrollment>
+    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_DESC)
+    abstract fun findAllPeopleWithDisplayDetailsSortNameDesc(timestamp: Long, excludeClazz: Long,
+                                                             excludeSchool: Long,
+                                                             excludeSelected: List<Long>)
+            : DataSource.Factory<Int, PersonWithDisplayDetails>
 
-    @Query(QUERY_FIND_ALL + QUERY_SEARCH_BIT)
-    abstract fun findAllPeopleWithEnrollmentBySearch(searchQuery: String):
-            DataSource.Factory<Int, PersonWithEnrollment>
+    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_ASC)
+    abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(timestamp: Long, excludeClazz: Long,
+                                                            excludeSchool: Long,
+                                                            excludeSelected: List<Long>)
+            : DataSource.Factory<Int, PersonWithDisplayDetails>
 
-    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_DESC)
-    abstract fun findAllPeopleWithEnrollmentSortNameDesc(): DataSource.Factory<Int, PersonWithEnrollment>
-
-    @Query(QUERY_FIND_ALL + QUERY_SORT_BY_NAME_ASC)
-    abstract fun findAllPeopleWithEnrollmentSortNameAsc(): DataSource.Factory<Int, PersonWithEnrollment>
-
-    @Query("SELECT * FROM Person where CAST(active AS INTEGER) = 1")
-    abstract fun findAllActiveLive(): DoorLiveData<List<Person>>
-
+    @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
+    abstract fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?>
 
     private suspend fun createPersonCommon(person: Person, loggedInPersonUid: Long): PersonWithGroup{
 
@@ -350,8 +302,33 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * FROM Person")
     abstract fun getAllPerson(): List<Person>
 
+
     companion object {
 
+        const val QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_DESC =
+            """SELECT Person.* FROM Person 
+            WHERE 
+              
+            (:excludeClazz = 0 OR :excludeClazz NOT IN
+            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
+            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
+            (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
+            AND (Person.personUid NOT IN (:excludeSelected)) 
+            ORDER BY Person.firstNames DESC"""
+
+
+        const val QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_ASC =
+                """SELECT Person.* FROM Person
+            WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN
+            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
+            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
+            (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
+             AND (Person.personUid NOT IN (:excludeSelected)) 
+            ORDER BY Person.firstNames ASC"""
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR " +
                 " CAST((SELECT admin FROM Person WHERE personUid = :accountPersonUid) AS INTEGER) = 1 OR " +
@@ -366,33 +343,12 @@ abstract class PersonDao : BaseDao<Person> {
                 " (EntityRole.ertableId = " + Clazz.TABLE_ID +
                 "  AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM " +
                 "  ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
-                " OR" +
-                "(EntityRole.ertableId = " + Location.TABLE_ID +
-                " AND EntityRole.erEntityUid IN " +
-                " (SELECT locationAncestorAncestorLocationUid FROM LocationAncestorJoin " +
-                " WHERE locationAncestorChildLocationUid " +
-                "  IN (SELECT personLocationLocationUid FROM PersonLocationJoin " +
-                "  WHERE personLocationPersonUid = Person.personUid)))" +
                 " ) AND (Role.rolePermissions & "
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 
-        const val QUERY_FIND_ALL = "SELECT Person.* , (0) AS clazzUid, " +
-                " '' AS clazzName, " +
-                " (0) AS attendancePercentage, " +
-                " (0) AS clazzMemberRole, " +
-                " (SELECT PersonPicture.personPictureUid FROM PersonPicture WHERE " +
-                " PersonPicture.personPicturePersonUid = Person.personUid ORDER BY picTimestamp " +
-                " DESC LIMIT 1) AS personPictureUid, " +
-                " (0) AS enrolled FROM Person WHERE CAST(Person.active AS INTEGER) = 1 "
-
-        const val QUERY_SEARCH_BIT = " AND (Person.firstNames || ' ' || Person.lastName) LIKE " +
-            ":searchQuery "
-
-        const val QUERY_SORT_BY_NAME_DESC = " ORDER BY Person.lastName DESC "
-        const val QUERY_SORT_BY_NAME_ASC = " ORDER BY Person.firstNames ASC "
     }
 
     @Serializable

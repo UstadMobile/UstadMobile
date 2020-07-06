@@ -1,7 +1,7 @@
 package com.ustadmobile.port.sharedse.contentformats
 
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin
-import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 
 import java.io.File
 
@@ -15,6 +15,9 @@ interface ContentTypePlugin : ContentTypePlugin {
      * @param file file to be imported
      * @return constructed content entry from the file.
      */
-    fun getContentEntry(file: File): ContentEntry?
+    fun getContentEntry(file: File): ContentEntryWithLanguage?
+
+
+    fun isZipped(): Boolean
 
 }

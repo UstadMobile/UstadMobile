@@ -1,88 +1,72 @@
 package com.ustadmobile.core.controller
 
-import androidx.paging.DataSource
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.db.dao.SchoolDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_NAME_ASC
-import com.ustadmobile.core.view.ClazzListView.Companion.SORT_ORDER_NAME_DESC
-import com.ustadmobile.core.view.SchoolEditView
-import com.ustadmobile.core.view.SchoolEditView.Companion.ARG_SCHOOL_NEW
-import com.ustadmobile.core.view.SchoolListView
+import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.view.*
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.UmAccount
+import io.ktor.http.parseAndSortContentTypeHeader
 
-/**
- *  Presenter for SchoolListPresenter view
- **/
-class SchoolListPresenter(context: Any,
-                          arguments: Map<String, String>?,
-                          view: SchoolListView,
-                          val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
-                          val repository: UmAppDatabase =
-                                  UmAccountManager.getRepositoryForActiveAccount(context))
-    : UstadBaseController<SchoolListView>(context, arguments!!, view) {
+class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: SchoolListView,
+                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
+                          db: UmAppDatabase, repo: UmAppDatabase,
+                          activeAccount: DoorLiveData<UmAccount?>)
+    : UstadListPresenter<SchoolListView, School>(context, arguments, view, lifecycleOwner, systemImpl,
+        db, repo, activeAccount) {
 
-    private var idToOrderInteger: MutableMap<Long, Int>? = null
 
-    private var currentSortOrder = 0
+    var searchQuery = "%%"
+    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
-    private var schoolDao: SchoolDao = repository.schoolDao
-    private var searchQuery = "%%"
+    enum class SortOrder(val messageId: Int) {
+        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
+        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
+    }
 
-    private lateinit var factory: DataSource.Factory<Int, School>
+    class SchoolListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
-        idToOrderInteger = HashMap()
-        //Update sort presets
-        updateSortSpinnerPreset()
-        getAndSetProvider()
+        updateListOnView()
+        view.sortOptions = SortOrder.values().toList().map { SchoolListSortOption(it, context) }
     }
 
-    /**
-     * Upon clicking search -> should open up search experience.
-     */
-    fun handleSearchQuery(searchBit: String) {
-        searchQuery = searchBit
+    override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
+        //TODO: This
+        return true
     }
 
-    fun handleSortChanged(order: Long) {
-        var theOrder = order
-        theOrder += 1
-
-        if (idToOrderInteger!!.containsKey(theOrder)) {
-            currentSortOrder = idToOrderInteger!![theOrder]!!
-            getAndSetProvider()
+    private fun updateListOnView() {
+        view.list = when(currentSortOrder) {
+            SortOrder.ORDER_NAME_ASC -> repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameAsc(
+                    searchQuery)
+            SortOrder.ORDER_NAME_DSC -> repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameDesc(
+                    searchQuery)
         }
     }
 
-    private fun getAndSetProvider() {
-        factory = schoolDao.findAllSchoolsAndSort(searchQuery, currentSortOrder)
-        view.setListProvider(factory)
+    override fun handleClickEntry(entry: School) {
+        when(mListMode) {
+            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+            ListViewMode.BROWSER -> systemImpl.go(SchoolDetailView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.schoolUid.toString()), context)
+        }
     }
 
-    /**
-     * Updates the sort by drop down (spinner) on the School list. For now the sort options are
-     * defined within this method and will automatically update the sort options without any
-     * database call.
-     */
-    private fun updateSortSpinnerPreset() {
-
-        idToOrderInteger = HashMap()
-        idToOrderInteger!![1L] = SORT_ORDER_NAME_ASC
-        idToOrderInteger!![2L] = SORT_ORDER_NAME_DESC
-
-        val sortOptions = listOf(MessageID.sort_by_name_asc, MessageID.sort_by_name_desc)
-                .map { impl.getString(it, context) }
-        view.setSortOptions(sortOptions.toTypedArray())
+    override fun handleClickCreateNewFab() {
+        systemImpl.go(SchoolEditView.VIEW_NAME, mapOf(), context)
     }
 
-    fun handleClickAddSchool(){
-        val args = mapOf(ARG_SCHOOL_NEW to "true")
-        impl.go(SchoolEditView.VIEW_NAME, args, view.viewContext)
+    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+        val sortOrder = (sortOption as? SchoolListSortOption)?.sortOrder ?: return
+        if(sortOrder != currentSortOrder) {
+            currentSortOrder = sortOrder
+            updateListOnView()
+        }
     }
-
 }

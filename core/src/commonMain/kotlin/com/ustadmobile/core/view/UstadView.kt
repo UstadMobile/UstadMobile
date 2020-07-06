@@ -33,6 +33,10 @@ package com.ustadmobile.core.view
 import kotlinx.coroutines.Runnable
 import kotlin.js.JsName
 
+enum class GetResultMode {
+    EDITORNEW, FROMLIST
+}
+
 /**
  *
  * @author mike
@@ -50,6 +54,16 @@ interface UstadView {
      */
     val viewContext: Any
 
+
+    var loading: Boolean
+
+    /**
+     * Show a snackbar style notification that an error has happened
+     *
+     * @param message message to show
+     */
+    fun showSnackBar(message: String, action: () -> Unit = {}, actionMessageId: Int = 0)
+
     /**
      * Most UI platforms require that all UI changes are done in a particular thread. This method
      * simply wraps those implementations.
@@ -62,12 +76,43 @@ interface UstadView {
 
 
         //Begin common arguments
+
+        const val ARG_ENTITY_UID = "entityUid"
+
         const val ARG_CONTAINER_UID = "containerUid"
+
+        const val ARG_PARENT_ENTRY_UID = "parentUid"
+
+        const val ARG_PARENT_ENTRY_TITLE = "parentTitle"
 
         const val ARG_CONTENT_ENTRY_UID = "entryid"
 
+        const val ARG_NO_IFRAMES = "noiframe"
+
         const val ARG_CLAZZ_UID = "clazzUid"
+
+        const val ARG_SCHOOL_UID = "schoolUid"
+
+        const val ARG_LEAF = "content_type"
+
+        const val ARG_SCHOOLMEMBER_FILTER_STUDENTS ="schoolMemberFilterStudents"
+
+        const val ARG_SCHOOLMEMBER_FILTER_STAFF = "schoolMemberFilterStaff"
+
         const val ARG_CLAZZ_ASSIGNMENT_UID = "clazzAssignmentUid"
+
+        const val ARG_LISTMODE = "listMode"
+
+        const val ARG_GETRESULTMODE = "getResultMode"
+
+        const val ARG_LISTADDMODE = "listAddMode"
+
+        const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
+
+        @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
+        const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
+
+
     }
 
 }

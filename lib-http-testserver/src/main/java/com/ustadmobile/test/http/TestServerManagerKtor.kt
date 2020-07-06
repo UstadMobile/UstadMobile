@@ -169,7 +169,7 @@ fun Application.testServerManager() {
             if(testApplicationHolder != null) {
                 //shut it down
                 testApplicationHolder.mockWebServer.close()
-                testApplicationHolder.application.stop(0, 2, TimeUnit.SECONDS)
+                testApplicationHolder.application.stop(0, 2000)
                 umRestServerInstances.remove(portNum)
                 call.respond(HttpStatusCode.OK, "OK - closed")
             }else {

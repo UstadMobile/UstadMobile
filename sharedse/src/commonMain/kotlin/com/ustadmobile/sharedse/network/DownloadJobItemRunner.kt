@@ -8,14 +8,15 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.io.ConcatenatedInputStream
-import com.ustadmobile.core.io.ConcatenatedInputStreamEntrySource
+import com.ustadmobile.sharedse.io.ConcatenatedInputStream
+import com.ustadmobile.sharedse.io.ConcatenatedInputStreamEntrySource
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.base64StringToByteArray
+import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
@@ -32,7 +33,6 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_G
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.sharedse.network.containerfetcher.AbstractContainerFetcherListener
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherRequest
 import kotlinx.atomicfu.atomic
@@ -40,7 +40,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.io.IOException
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
 import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
@@ -301,7 +300,7 @@ class DownloadJobItemRunner
                         withContext(coroutineContext) {
                             launch(mainCoroutineDispatcher) {
                                 if (!connectToCloudNetwork()) {
-                                    throw IOException("${mkLogPrefix()} could not connect to cloud network")
+                                    throw Exception("${mkLogPrefix()} could not connect to cloud network")
                                 }
                             }
                         }
@@ -318,7 +317,7 @@ class DownloadJobItemRunner
                             || connectivityStatus?.connectivityState != ConnectivityStatus.STATE_CONNECTED_LOCAL
                             || networkNodeToUse.groupSsid != connectivityStatus?.wifiSsid) {
                         if (!connectToLocalNodeNetwork()) {
-                            throw IOException("${mkLogPrefix()} could not connect to local node network")
+                            throw Exception("${mkLogPrefix()} could not connect to local node network")
                             //recording failure will push the node towards the bad threshold, after which
                             // the download will be attempted from the cloud
 //                            recordHistoryFinished(history, false)

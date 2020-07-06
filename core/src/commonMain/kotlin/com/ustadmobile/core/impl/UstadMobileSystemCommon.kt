@@ -1,15 +1,8 @@
 package com.ustadmobile.core.impl
 
-import com.ustadmobile.core.controller.AddScheduleDialogPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
-import com.ustadmobile.core.impl.http.UmHttpCall
-import com.ustadmobile.core.impl.http.UmHttpRequest
-import com.ustadmobile.core.impl.http.UmHttpResponse
-import com.ustadmobile.core.impl.http.UmHttpResponseCallback
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.AddScheduleDialogView
 import com.ustadmobile.core.view.LoginView
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
@@ -20,7 +13,7 @@ import kotlin.jvm.JvmOverloads
 /**
  * Class has all the shared function across all supported platforms
  */
-open abstract class UstadMobileSystemCommon {
+abstract class UstadMobileSystemCommon {
 
     /**
      * Returns whether or not the init method has already been run
@@ -166,7 +159,6 @@ open abstract class UstadMobileSystemCommon {
     fun setLocale(locale: String, context: Any) = setAppPref(PREFKEY_LOCALE, locale, context)
 
 
-
     /**
      * Get a preference for the app
      *
@@ -219,7 +211,7 @@ open abstract class UstadMobileSystemCommon {
         if (locale == LOCALE_USE_SYSTEM)
             locale = getSystemLocale(context)
 
-        return locale
+        return locale.substring(0, 2)
     }
 
     /**
@@ -233,10 +225,10 @@ open abstract class UstadMobileSystemCommon {
      */
     @JsName("getAllUiLanguage")
     @Deprecated("Use getAllUiLanguagesList instead")
-    open fun getAllUiLanguage(context: Any): Map<String,String>{
+    open fun getAllUiLanguage(context: Any): Map<String, String> {
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
-                "",context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
-        val languageList =languagesConfigVal.split(",")
+                "", context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
+        val languageList = languagesConfigVal.split(",")
         return languageList.map { it to (LANGUAGE_NAMES[it] ?: it) }.toMap()
     }
 
@@ -250,7 +242,7 @@ open abstract class UstadMobileSystemCommon {
     @JsName("getAllUiLanguagesList")
     open fun getAllUiLanguagesList(context: Any): List<Pair<String, String>> {
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
-                "",context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
+                "", context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
         val availableLangs = languagesConfigVal.split(",").sorted()
 
 
@@ -271,6 +263,7 @@ open abstract class UstadMobileSystemCommon {
             go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
         }
     }
+
     /**
      * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
      * method in the implementation instead of using the factory API because
@@ -307,53 +300,6 @@ open abstract class UstadMobileSystemCommon {
         return xpp
     }
 
-
-    /**
-     * Make an asynchronous http request. This can (on platforms with a filesystem) rely on the
-     * caching directory.
-     *
-     * @param request request to make
-     * @param responseListener response listener to receive response when ready
-     */
-    @Deprecated(message = "Actual implementation will be replaced with KTOR")
-    fun makeRequestAsync(request: UmHttpRequest,
-                         responseListener: UmHttpResponseCallback): UmHttpCall {
-        throw Exception("Actual implemtation will be replaced with KTOR")
-    }
-
-    /**
-     * Directly send an asynchronous http request. This must *NOT* rely on the httpcachedir, as it
-     * will be used by HttpCacheDir as the underlying implementation to retrieve data from the network.
-     *
-     * @param request request to make
-     * @param responseListener response listener
-     * @return call
-     */
-    @Deprecated(message = "Actual implementation will be replaced with KTOR")
-    fun sendRequestAsync(request: UmHttpRequest,
-                         responseListener: UmHttpResponseCallback): UmHttpCall {
-        throw Exception("Actual implementation will be replaced with KTOR")
-    }
-
-    /**
-     * Directly send a synchronous request. THIS IS NOT FOR NORMAL USAGE. It is intended only to be
-     * used by the cache so requests can be pumped through the system http library, if present on
-     * that implementation. As http libraries like okhttp
-     *
-     * It must *NOT* be used directly by presenters etc.
-     *
-     * @param request request to make
-     * @return response
-     */
-    @Deprecated(message = "Actual implementation will be replaced with KTOR")
-    fun sendRequestSync(request: UmHttpRequest): UmHttpResponse {
-        throw Exception("Actual implementation will be replaced with KTOR")
-    }
-
-    @Deprecated(message = "Actual implementation will be replaced with KTOR")
-    fun makeRequestSync(request: UmHttpRequest): UmHttpResponse {
-        throw Exception("Actual implementation will be replaced with KTOR")
-    }
 
     /**
      * Get storage directories
@@ -393,7 +339,6 @@ open abstract class UstadMobileSystemCommon {
         } else null
 
     }
-
 
 
     /**
@@ -453,8 +398,7 @@ open abstract class UstadMobileSystemCommon {
     }
 
     fun scheduleChecks(context: Any) {
-        AddScheduleDialogPresenter.createPendingScheduledChecks(
-                UmAccountManager.getActiveDatabase(context).scheduledCheckDao)
+
     }
 
 

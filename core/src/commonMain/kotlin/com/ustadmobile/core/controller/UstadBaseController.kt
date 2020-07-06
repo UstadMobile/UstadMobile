@@ -32,6 +32,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmLifecycleListener
 import com.ustadmobile.core.impl.UmLifecycleOwner
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import kotlinx.atomicfu.atomic
 import kotlin.js.JsName
@@ -44,12 +45,14 @@ import kotlin.js.JsName
  * @author mike
  */
 abstract class UstadBaseController<V : UstadView>(override val context: Any,
-                                                  val arguments: Map<String, String?>, val view: V)
+                                                  protected val arguments: Map<String, String>, val view: V)
     : UmLifecycleOwner {
 
     private val lifecycleListeners = mutableListOf<UmLifecycleListener>()
 
     private val lifecycleStatus = atomic(0)
+
+    private var created: Boolean = false
 
     /**
      * Handle when the presenter is created. Analogous to Android's onCreate
@@ -57,7 +60,10 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      * @param savedState savedState if any
      */
     @JsName("onCreate")
-    open fun onCreate(savedState: Map<String, String?>?) {
+    open fun onCreate(savedState: Map<String, String>?) {
+        if(created) throw IllegalStateException("onCreate must be called ONCE AND ONLY ONCE! It has already been called")
+        created = true
+
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {
                 listener.onLifecycleCreate(this)
@@ -140,6 +146,10 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
 
     override fun removeLifecycleListener(listener: UmLifecycleListener) {
         lifecycleListeners.remove(listener)
+    }
+
+    open fun onSaveInstanceState(savedState: MutableMap<String, String>) {
+
     }
 
     companion object {

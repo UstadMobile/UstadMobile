@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import android.content.Context
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManager.FileEntrySource
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
@@ -25,8 +26,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.text.Charsets.UTF_8
 
-
-actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String?>,
+actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String>,
                                                        view: ContentEditorView, private val storage: String?,
                                                        private val database : UmAppDatabase,
                                                        private val repository : UmAppDatabase ,
@@ -60,7 +60,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
 
         creators = mutableListOf(OpfCreator(author, UUID.randomUUID().toString()))
 
-        val emptyDocInputStream : InputStream = impl.getAssetInputStreamAsync(context,filePath)
+        val emptyDocInputStream : InputStream = (context as Context).assets.open(filePath)
 
         val container = Container()
         container.containerContentEntryUid = contentEntryUid
@@ -166,7 +166,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         try {
             if (updateOpfMetadataInfo(currentTitle, description, author,
                             if (isNewDocument) UUID.randomUUID().toString() else null)) {
-                val entry = database.contentEntryDao.findByEntryId(contentEntryUid)!!
+                val entry = database.contentEntryDao.findEntryWithLanguageByEntryId(contentEntryUid)!!
                 entry.title = currentTitle
                 entry.description = currentDescription
                 entry.author = currentAuthor

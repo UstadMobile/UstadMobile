@@ -25,7 +25,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
-import com.ustadmobile.core.view.ContentEntryListView.Companion.ARG_DOWNLOADED_CONTENT
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -34,7 +34,6 @@ import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import org.apache.commons.io.IOUtils
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matchers.allOf
 import org.json.JSONException
@@ -71,7 +70,7 @@ import java.util.concurrent.TimeUnit
 class DownloadDialogAndNotificationEspressoTest {
 
     @get:Rule
-    public var mHomeActivityRule = ActivityTestRule(HomeActivity::class.java, false, false)
+    public var mHomeActivityRule = ActivityTestRule(MainActivity::class.java, false, false)
 
 
     @get:Rule
@@ -151,19 +150,20 @@ class DownloadDialogAndNotificationEspressoTest {
 
     @Throws(IOException::class, JSONException::class)
     private fun sendCommand(command: String, bytespersecond: Long): JSONObject {
-        return JSONObject(IOUtils.toString(URL("$testManagerUrl?cmd=" +
-                if (bytespersecond == 0L)
-                    command
-                else
-                    command + "&bytespersecond=" + bytespersecond
-                            + "&port=" + serverActivePort).openStream(), StandardCharsets.UTF_8))
+        TODO("Update this")
+//        return JSONObject(IOUtils.toString(URL("$testManagerUrl?cmd=" +
+//                if (bytespersecond == 0L)
+//                    command
+//                else
+//                    command + "&bytespersecond=" + bytespersecond
+//                            + "&port=" + serverActivePort).openStream(), StandardCharsets.UTF_8))
     }
 
     private fun startDownloading(wifiOnly: Boolean) {
-        onView(allOf<View>(
-                withTagValue(equalTo(entry1.contentEntryUid)),
-                withId(R.id.entry_holder)
-        )).perform(click())
+//        onView(allOf<View>(
+//                withTagValue(equalTo(entry1.contentEntryUid)),
+//                withId(R.id.entry_holder)
+//        )).perform(click())
 
         SystemClock.sleep(WAIT_TIME_MIN)
 

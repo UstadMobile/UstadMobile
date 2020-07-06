@@ -11,14 +11,13 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.request.get
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
-import kotlinx.io.StringReader
 import org.kmp.io.KMPXmlParser
 import com.ustadmobile.core.util.ext.toQueryString
+import com.ustadmobile.core.view.ContainerMounter
+import io.ktor.utils.io.core.toByteArray
+import kotlinx.coroutines.*
+import kotlinx.io.ByteArrayInputStream
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 
 /**
  * Created by mike on 9/13/17.
@@ -33,28 +32,29 @@ import kotlinx.serialization.json.JsonObject
  *
  */
 class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view: XapiPackageContentView,
-                                  private val account: UmAccount?,
-                                  private val containerMounter: suspend (Long) -> String)
+                                  private val mounter: ContainerMounter,
+                                  private val account: UmAccount? = UmAccountManager.getActiveAccount(context))
     : UstadBaseController<XapiPackageContentView>(context, args, view) {
 
     private var tinCanXml: TinCanXML? = null
 
     private var registrationUUID: String? = null
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    private var mountedPath: String = ""
+
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         registrationUUID = UMUUID.randomUUID().toString()
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLongOrNull() ?: 0L
         val contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
 
         GlobalScope.launch {
-            val mountedPath = containerMounter(containerUid)
-
+            mountedPath = mounter.mountContainer(containerUid)
             val client = defaultHttpClient()
             val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
 
             val xpp = KMPXmlParser()
-            xpp.setInput(StringReader(tincanContent))
+            xpp.setInput(ByteArrayInputStream(tincanContent.toByteArray()), "UTF-8")
             tinCanXml = TinCanXML.loadFromXML(xpp)
             val launchHref = tinCanXml?.launchActivity?.launchUrl
             val actorJsonStr = Json.stringify(UmAccountActor.serializer(),
@@ -64,14 +64,22 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     "endpoint" to UMFileUtil.resolveLink(mountedPath, "/xapi/$contentEntryUid/"),
                     "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
                     "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
-
             if(launchHref != null) {
                 val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + "?"  +
                         launchMethodParams.toQueryString()
                 view.runOnUiThread(Runnable {
-                    view.setTitle(tinCanXml?.launchActivity?.name ?: "")
-                    view.loadUrl(launchUrl)
+                    view.contentTitle = tinCanXml?.launchActivity?.name ?: ""
+                    view.url = launchUrl
                 })
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        GlobalScope.launch (Dispatchers.Main){
+            if(mountedPath.isNotEmpty()){
+                mounter.unMountContainer(mountedPath)
             }
         }
     }

@@ -1,0 +1,80 @@
+package com.ustadmobile.core.controller
+
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.lib.db.entities.Container
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+
+actual class VideoContentPresenter actual constructor(context: Any, arguments: Map<String, String>?,
+                                                      view: VideoPlayerView, private val db: UmAppDatabase,
+                                                      private val repo: UmAppDatabase)
+    : VideoContentPresenterCommon(context, arguments, view, db, repo) {
+
+    var container: Container? = null
+
+    actual override fun handleOnResume() {
+        GlobalScope.launch {
+
+            if (view.videoParams == null) {
+
+                val containerResult = containerDao.findByUidAsync(containerUid)
+                if (containerResult == null) {
+                    view.showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, context), {}, 0)
+                    view.loading = false
+                    return@launch
+                }
+                container = containerResult
+                val result = containerEntryDao.findByContainerAsync(containerUid)
+                view.containerManager = ContainerManager(containerResult, db, repo)
+                val containerManager = view.containerManager
+                var defaultLangName = ""
+                for (entry in result) {
+
+                    val containerEntryPath = entry.cePath
+                    val containerEntryFile = entry.containerEntryFile
+
+                    if (containerEntryPath != null && containerEntryFile != null) {
+                        if (VIDEO_EXT_LIST.any { containerEntryPath.toLowerCase().endsWith(it) }) {
+                            videoPath = containerEntryFile.cefPath
+                        } else if (containerEntryPath == "audio.c2") {
+                            audioEntry = entry
+                        } else if (containerEntryPath == "subtitle.srt" || containerEntryPath.toLowerCase() == "subtitle-english.srt") {
+
+                            defaultLangName = if (containerEntryPath.contains("-"))
+                                containerEntryPath.substring(containerEntryPath.indexOf("-") + 1, containerEntryPath.lastIndexOf("."))
+                            else "English"
+                            srtMap[defaultLangName] = containerEntryPath
+                        } else if (containerEntryPath.endsWith(".srt") && containerEntryPath.contains("-") && containerEntryPath.contains(".")) {
+                            val name = containerEntryPath.substring(containerEntryPath.indexOf("-") + 1, containerEntryPath.lastIndexOf("."))
+                            srtMap[name] = containerEntryPath
+                            srtLangList.add(name)
+                        }
+                    }
+                }
+
+                srtLangList.sortedWith(Comparator { a, b ->
+                    when {
+                        a > b -> 1
+                        a < b -> -1
+                        else -> 0
+                    }
+                })
+
+                srtLangList.add(0, UstadMobileSystemImpl.instance.getString(MessageID.no_subtitle, context))
+                if (defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
+
+            }
+
+            view.runOnUiThread(kotlinx.coroutines.Runnable {
+                view.videoParams = VideoParams(videoPath, audioEntry, srtLangList, srtMap)
+            })
+
+        }
+
+    }
+
+}

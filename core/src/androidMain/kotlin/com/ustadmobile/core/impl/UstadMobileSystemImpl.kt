@@ -41,17 +41,21 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
+import androidx.navigation.navOptions
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.io.InputStream
 import java.io.*
 import java.util.*
 import java.util.concurrent.Executors
@@ -75,118 +79,42 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private val sdCardStorageIndex = 1
 
-    private val bgExecutorService = Executors.newCachedThreadPool()
-
     private var appPreferences: SharedPreferences? = null
 
     var messageIdMap: Map<Int, Int> = mapOf()
 
     /**
-     * The rotation option is used for app demonstrations where a projector is used. The device
-     * must be in landscape mode when connected to HDMI output. Therefor to project portrait, the
-     * app itself must rotate it's views, and then the projector itself can be placed at a 90
-     * degree angle
-     *
-     * This is implemented by overrinding the setContentView method on UstadBaseActivity
+     * This should be used only for testing. This will use the given navcontroller instead of
+     * finding the navcontroller from the mainactivity. This is used for Espresso testing on Fragments.
      */
-    var rotationEnabled: Boolean? = false
-        internal set
+    @VisibleForTesting
+    var navController: NavController? = null
 
-    private val viewNameToAndroidImplMap = mapOf<String, Any>(
-            "DownloadDialog" to Class.forName("${PACKAGE_NAME}DownloadDialogFragment"),
-            VideoPlayerView.VIEW_NAME to Class.forName("${PACKAGE_NAME}VideoPlayerActivity"),
-            ContentEditorView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorActivity"),
-            ContentEditorPageListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEditorPageListFragment"),
-            ContentEntryEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryEditFragment"),
-            SelectMultipleLocationTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleLocationTreeDialogFragment"),
-            SelectMultipleEntriesTreeDialogView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SelectMultipleEntriesTreeDialogFragment"),
-            XapiReportOptionsView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiReportOptionsActivity"),
-            XapiReportDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiReportDetailActivity"),
-            WebChunkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}WebChunkActivity"),
-            HarView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HarActivity"),
-            Register2View.VIEW_NAME to Class.forName("${PACKAGE_NAME}Register2Activity"),
-            HomeView.VIEW_NAME to Class.forName("${PACKAGE_NAME}HomeActivity"),
-            SplashScreenView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SplashScreenActivity"),
-            OnBoardingView.VIEW_NAME to Class.forName("${PACKAGE_NAME}OnBoardingActivity"),
-            LoginView.VIEW_NAME to Class.forName("${PACKAGE_NAME}LoginActivity"),
-            EpubContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}EpubContentActivity"),
-            AboutView.VIEW_NAME to Class.forName("${PACKAGE_NAME}AboutActivity"),
-            XapiPackageContentView.VIEW_NAME to Class.forName("${PACKAGE_NAME}XapiPackageContentActivity"),
-            ScormPackageView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ScormPackageActivity"),
-            UserProfileView.VIEW_NAME to Class.forName("${PACKAGE_NAME}UserProfileActivity"),
-            ContentEntryListView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryListActivity"),
-            ContentEntryDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryDetailActivity"),
+    @Deprecated("This is deprecated since we switched to using NavController. Add the screen to ViewNameToDestMap.kt instead.")
+    private val viewNameToAndroidImplMap = mapOf<String, String>(
+            "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
+            VideoPlayerView.VIEW_NAME to "${PACKAGE_NAME}VideoPlayerActivity",
+            ContentEditorView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorActivity",
+            ContentEditorPageListView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorPageListFragment",
+            WebChunkView.VIEW_NAME to "${PACKAGE_NAME}WebChunkActivity",
+            Register2View.VIEW_NAME to "${PACKAGE_NAME}Register2Activity",
+            SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
+            OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
+            LoginView.VIEW_NAME to "${PACKAGE_NAME}LoginActivity",
+            EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
+            AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
+            ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
+            HarView.VIEW_NAME to "${PACKAGE_NAME}HarActivity",
+            ContentEntryExportView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryExportFragmentDialog",
+            ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
+            SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
+            PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
+    )
 
-            ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
 
-            ClazzDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzDetailActivity"),
-            ClassLogDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzLogDetailActivity"),
-            PersonDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonDetailActivity"),
-            PersonEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonEditActivity"),
-            PersonDetailEnrollClazzView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonDetailEnrollClazzActivity"),
-            ClazzDetailEnrollStudentView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzDetailEnrollStudentActivity"),
-            SELSelectStudentView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELSelectStudentActivity"),
-            SELSelectConsentView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELSelectConsentActivity"),
-            SELEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELEditActivity"),
-            SELQuestionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionActivity"),
-            SELQuestionEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionEditActivity"),
-            SELRecognitionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELRecognitionActivity"),
-            ClazzEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzEditActivity"),
-            AddScheduleDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddScheduleDialogFragment"),
-            ClazzActivityEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ClazzActivityEditActivity"),
-            AddActivityChangeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddActivityChangeDialogFragment"),
-            ReportEditView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportEditActivity"),
-            SelectMultipleTreeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectMultipleTreeDialogFragment"),
-            ReportSelectionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSelectionActivity"),
-            SelectClazzesDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectClazzesDialogFragment"),
-            SelectAttendanceThresholdsDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectAttendanceThresholdsDialogFragment"),
-            SelectTwoDatesDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectTwoDatesDialogFragment"),
-            ReportOverallAttendanceView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportOverallAttendanceActivity"),
-            ReportNumberOfDaysClassesOpenView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportNumberOfDaysClassesOpenActivity"),
-            ReportAttendanceGroupedByThresholdsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportAttendanceGroupedByThresholdsActivity"),
-            BulkUploadMasterView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}BulkUploadMasterActivity"),
-            SettingsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SettingsActivity"),
-            SELQuestionSetsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetsActivity"),
-            AddQuestionSetDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddQuestionSetDialogFragment"),
-            SELQuestionSetDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionSetDetailActivity"),
-            PersonPictureDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonPictureDialogFragment"),
-            SELQuestionDetail2View.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SELQuestionDetail2Activity"),
-            AddQuestionOptionDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddQuestionOptionDialogFragment"),
-            ReportAtRiskStudentsView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportAtRiskStudentsActivity"),
-            CallPersonRelatedDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CallPersonRelatedDialogFragment"),
-            ReportMasterView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportMasterActivity"),
-            ReportSELView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSELActivity"),
-            PersonListSearchView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonListSearchActivity"),
-            BaseReportView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ReportSelectionFragment"),
-            HolidayCalendarListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}HolidayCalendarListActivity"),
-            HolidayCalendarDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}HolidayCalendarDetailActivity"),
-            RoleListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleListActivity"),
-            RoleDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleDetailActivity"),
-            GroupListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupListActivity"),
-            GroupDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}GroupDetailActivity"),
-            RoleAssignmentDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleAssignmentDetailActivity"),
-            RoleAssignmentListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RoleAssignmentListActivity"),
-            LocationListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}LocationListActivity"),
-            LocationDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}LocationDetailActivity"),
-            AuditLogSelectionView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogSelectionActivity"),
-            AuditLogListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AuditLogListActivity"),
-            AddDateRangeDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddDateRangeDialogFragment"),
-            SelectClazzFeaturesView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectClazzFeaturesDialogFragment"),
-            PersonAuthDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PersonAuthDetailActivity"),
-            SelectPeopleDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}SelectPeopleDialogFragment"),
-            CustomFieldListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CustomFieldListActivity"),
-            CustomFieldDetailView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}CustomFieldDetailActivity"),
-            AddCustomFieldOptionDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}AddCustomFieldOptionDialogFragment"),
-            RecordDropoutDialogView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}RecordDropoutDialogFragment"),
-            ChangePasswordView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}ChangePasswordActivity"),
-            PeopleListView.VIEW_NAME to Class.forName("${STAGING_PACKAGE_NAME}PeopleListActivity"),
-
-            ContentEntryExportView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryExportFragmentDialog"),
-            ContentEntryImportLinkView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ContentEntryImportLinkActivity"),
-            ClazzAssignmentEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentEditActivity"),
-            ClazzAssignmentDetailView.VIEW_NAME to Class.forName("${PACKAGE_NAME}ClazzAssignmentDetailActivity"),
-            SchoolEditView.VIEW_NAME to Class.forName("${PACKAGE_NAME}SchoolEditActivity"))
-
+    val destinationProvider: DestinationProvider by lazy {
+        Class.forName("com.ustadmobile.port.android.impl.ViewNameToDestMap").newInstance() as DestinationProvider
+    }
 
 
     private abstract class UmCallbackAsyncTask<A, P, R>
@@ -280,16 +208,39 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param context System context object
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
-        val androidImplClass = viewNameToAndroidImplMap[viewName]
-        val ctx = context as Context
-        val argsBundle = UMAndroidUtil.mapToBundle(args)
+        val ustadDestination = destinationProvider.lookupDestinationName(viewName)
+        if(ustadDestination != null) {
+            val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
-        if (androidImplClass == null) {
+            //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
+            val options = navOptions {
+                anim {
+                    enter = androidx.navigation.ui.R.anim.fragment_open_enter
+                    exit = androidx.navigation.ui.R.anim.fragment_close_exit
+                    popEnter = androidx.navigation.ui.R.anim.fragment_open_enter
+                    popExit = androidx.navigation.ui.R.anim.fragment_close_exit
+                }
+            }
+            navController.navigate(ustadDestination.destinationId, args.toBundleWithNullableValues(),
+                options)
+
+            return
+        }
+
+
+        val androidImplClassName = viewNameToAndroidImplMap[viewName] ?: return
+        val androidImplClass: Class<*>
+        val ctx = context as Context
+        try {
+            androidImplClass = Class.forName(androidImplClassName)
+        }catch(e: Exception) {
             Log.wtf(TAG, "No activity for $viewName found")
             Toast.makeText(ctx, "ERROR: No Activity found for view: $viewName",
                     Toast.LENGTH_LONG).show()
             return
         }
+
+        val argsBundle = UMAndroidUtil.mapToBundle(args)
 
         if (DialogFragment::class.java.isAssignableFrom(androidImplClass as Class<*>)) {
             var toastMsg: String? = null
@@ -417,25 +368,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     /**
-     * Get an asset (from files that are in core/src/flavorName/assets)
-     *
-     */
-    actual fun getAsset(context: Any, path: String, callback: UmCallback<InputStream>) {
-        var mPath = path
-        if (path.startsWith("/")) {
-            mPath = path.substring(1)
-        }
-
-        bgExecutorService.execute {
-            try {
-                callback.onSuccess((context as Context).assets.open(mPath))
-            } catch (e: IOException) {
-                callback.onFailure(e)
-            }
-        }
-    }
-
-    /**
      * Get a preference for the app
      *
      * @param key preference key as a string
@@ -553,12 +485,12 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
         if (appConfig == null) {
             val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    "/com/ustadmobile/core/appconfig.properties", context)
+                    "com/ustadmobile/core/appconfig.properties", context)
             appConfig = Properties()
             var prefIn: InputStream? = null
 
             try {
-                prefIn = getAssetSync(context, appPrefResource)
+                prefIn =  (context as Context).assets.open(appPrefResource)
                 appConfig!!.load(prefIn)
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
@@ -623,15 +555,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         return appPreferences!!
     }
 
-    @Throws(IOException::class)
-    actual fun getAssetSync(context: Any, path: String): InputStream {
-        var mPath = path
-        if (path.startsWith("/")) {
-            mPath = path.substring(1)
-        }
-        return (context as Context).assets.open(mPath)
-    }
-
     /**
      * Returns the system base directory to work from
      *
@@ -670,13 +593,22 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         return canWriteFiles
     }
 
+    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
+        var path = path
+        if (path.startsWith("/")) {
+            path = path.substring(1)
+        }
+
+        return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
+    }
+
+
 
     actual companion object {
 
         const val TAG = "UstadMobileImplAndroid"
 
         private const val PACKAGE_NAME = "com.ustadmobile.port.android.view."
-        private const val STAGING_PACKAGE_NAME = "com.ustadmobile.staging.port.android.view."
 
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 
@@ -693,25 +625,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     }
 
-    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        var path = path
-        if (path.startsWith("/")) {
-            path = path.substring(1)
-        }
-
-        return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
-    }
-
-    /**
-     * Get asset as an input stream asynchronously
-     */
-    actual suspend fun getAssetInputStreamAsync(context: Any, path: String): InputStream {
-        var mPath = path
-        if (path.startsWith("/")) {
-            mPath = path.substring(1)
-        }
-        return (context as Context).assets.open(mPath);
-    }
 
 
 }

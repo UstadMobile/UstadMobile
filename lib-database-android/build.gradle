@@ -67,7 +67,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            testCoverageEnabled = true
+            testCoverageEnabled = false
         }
     }
 
@@ -76,6 +76,12 @@ android {
 kapt {
     arguments {
         arg("room.schemaLocation", "$projectDir/schemas")
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if(task.name.startsWith("assemble") || task.name.startsWith("build")) {
+        task.dependsOn(":lib-database:jvmJar")
     }
 }
 
@@ -98,7 +104,7 @@ dependencies {
 
 
     //ViewModel and LiveData
-    implementation "androidx.lifecycle:lifecycle-extensions:$version_androidx_lifecycle"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
     kapt "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
@@ -117,7 +123,7 @@ dependencies {
     implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
 
 
-    implementation "androidx.appcompat:appcompat:$version_androidx_support_lib"
+    implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
 
     testImplementation "junit:junit:$version_junit"

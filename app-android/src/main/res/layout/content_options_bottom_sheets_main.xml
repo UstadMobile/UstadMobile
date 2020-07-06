@@ -6,10 +6,10 @@
     android:id="@+id/bottom_content_option_sheet_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/icons"
     android:clipToPadding="true"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="0dp"
+    app:behavior_peekHeight="@dimen/dimen_0dp"
+    style="@style/UmTheme.ShapeAppearance.MediumComponent"
     app:layout_behavior="@string/bottom_sheet_behavior">
     <LinearLayout
         android:orientation="vertical"
@@ -21,9 +21,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
+                android:textStyle="bold"
                 android:layout_toStartOf="@+id/action_close_tab_content_options"
-                android:textSize="17sp"
-                android:textColor="@color/text_primary"
+                android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                 android:text="@string/content_insert_options"
                 android:padding="@dimen/dimen_16dp"
                 android:layout_width="match_parent"
@@ -32,7 +32,7 @@
                 android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
                 android:id="@+id/action_close_tab_content_options"
-                android:tint="@color/secondary_text"
+                android:tint="?colorOnIconTint"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 app:srcCompat="@drawable/ic_expand_more_black_24dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
@@ -41,19 +41,19 @@
         </RelativeLayout>
         <View
             android:layout_marginBottom="@dimen/dimen_8dp"
-            android:background="@color/divider_faint"
+            android:background="?android:listDivider"
             android:layout_width="match_parent"
             android:layout_height="1dp"/>
         <RelativeLayout
             android:clickable="true"
-            android:foreground="?android:attr/selectableItemBackground"
+            android:background="@drawable/bg_listitem"
             android:focusable="true"
             android:id="@+id/content_option_multiplechoice"
             android:padding="@dimen/dimen_16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <androidx.appcompat.widget.AppCompatImageView
-                android:tint="@color/text_secondary"
+                android:tint="?colorOnIconTint"
                 app:srcCompat="@drawable/ic_multiple_choice"
                 android:id="@+id/multiple_choice"
                 android:layout_centerVertical="true"
@@ -61,10 +61,10 @@
                 android:layout_height="@dimen/dimen_20dp" />
 
             <TextView
-                android:text="@string/content_type_multiple_choice"
+                android:text="@string/multiple_choice"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_toEndOf="@+id/multiple_choice"
-                android:textSize="15sp"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </RelativeLayout>
@@ -72,7 +72,7 @@
 
         <RelativeLayout
             android:clickable="true"
-            android:foreground="?android:attr/selectableItemBackground"
+            android:background="@drawable/bg_listitem"
             android:focusable="true"
             android:id="@+id/content_option_filltheblanks"
             android:layout_marginTop="@dimen/dimen_8dp"
@@ -80,7 +80,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <androidx.appcompat.widget.AppCompatImageView
-                android:tint="@color/text_secondary"
+                android:tint="?colorOnIconTint"
                 android:id="@+id/device_image"
                 app:srcCompat="@drawable/ic_create_black_24dp"
                 android:layout_centerVertical="true"
@@ -88,9 +88,9 @@
                 android:layout_height="@dimen/dimen_20dp" />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_toEndOf="@+id/device_image"
-                android:textSize="15sp"
                 android:text="@string/content_type_fill_the_blanks"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -99,7 +99,7 @@
 
         <RelativeLayout
             android:clickable="true"
-            android:foreground="?android:attr/selectableItemBackground"
+            android:background="@drawable/bg_listitem"
             android:focusable="true"
             android:id="@+id/content_option_multimedia"
             android:layout_marginTop="@dimen/dimen_8dp"
@@ -107,7 +107,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <androidx.appcompat.widget.AppCompatImageView
-                android:tint="@color/text_secondary"
+                android:tint="?colorOnIconTint"
                 android:id="@+id/perm"
                 app:srcCompat="@drawable/ic_perm_media_black_24dp"
                 android:layout_centerVertical="true"
@@ -115,9 +115,9 @@
                 android:layout_height="@dimen/dimen_20dp" />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_toEndOf="@+id/perm"
-                android:textSize="15sp"
                 android:text="@string/content_type_multimedia"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -134,7 +134,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <androidx.appcompat.widget.AppCompatImageView
-                android:tint="@color/text_secondary"
+                android:tint="?colorOnIconTint"
                 android:id="@+id/link_option"
                 app:srcCompat="@drawable/ic_insert_link_black_24dp"
                 android:layout_centerVertical="true"
@@ -142,9 +142,9 @@
                 android:layout_height="@dimen/dimen_20dp" />
 
             <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_toEndOf="@+id/link_option"
-                android:textSize="15sp"
                 android:text="@string/content_type_link"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />

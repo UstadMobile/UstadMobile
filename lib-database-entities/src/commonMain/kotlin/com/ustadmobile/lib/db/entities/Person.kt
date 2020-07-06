@@ -23,9 +23,9 @@ open class Person() {
 
     var username: String? = null
 
-    var firstNames: String? = null
+    var firstNames: String? = ""
 
-    var lastName: String? = null
+    var lastName: String? = ""
 
     var emailAddr: String? = null
 
@@ -33,7 +33,7 @@ open class Person() {
 
     var gender: Int = 0
 
-    var active: Boolean = false
+    var active: Boolean = true
 
     var admin: Boolean = false
 
@@ -50,6 +50,11 @@ open class Person() {
     var dateOfBirth: Long = 0
 
     var personAddress: String? = null
+
+    /**
+     * The ID given to the person by their organization
+     */
+    var personOrgId: String? = null
 
 
     @MasterChangeSeqNum

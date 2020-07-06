@@ -1,78 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-    Helped by using:
-    http://www.materialpalette.com/blue-grey/light-blue
-    -->
-    <color name="primary">#009688</color>
-    <color name="primary_dark">#00796B</color>
-    <color name="primary_light">#B2DFDB</color>
-    <color name="accent">#FF9800</color>
-    <color name="primary_text">#FFFFFF</color>
-    <color name="secondary_text">#727272</color>
-    <color name="secondary_text_light">#41727272</color>
-    <color name="red">#FF0000</color>
 
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
-    <color name="icons">#FFFFFF</color>
-    <color name="icons_light">#ABFFFFFF</color>
-    <color name="divider">#BDBDBD</color>
-    <color name="divider_faint">#50BDBDBD</color>
-    <color name="divider_faint_blank">#50b4b4b4</color>
+    <color name="primaryLightColor">#48a999</color> <!--@200 Intensity-->
+    <color name="primaryLightVariantColor">#C2FFF5</color>
+    <color name="primaryColor">#00796b</color> <!--@500 Intensity-->
+    <color name="primaryVariantColor">#005E55</color> <!--@600 Intensity-->
+    <color name="primaryDarkColor">#004c40</color> <!--@700 Intensity-->
 
-    <color name="background_light">#E8EAED</color>
+    <color name="secondaryColor">#ff9800</color> <!--@500 Intensity-->
+    <color name="secondaryDarkColor">#c66900</color> <!--@700 Intensity-->
 
-    <item name="umblue" type="color">#FF3F31B5</item>
-    <item name="opds_card_pressed" type="color">#FF888888</item>
-    <item name="opds_card_normal" type="color">#FFFFFFFF</item>
-    <item name="basepoint_navigation_drawer_tint" type="color">#FF757575</item>
+    <color name="errorLightColor">#cf6679</color> <!--@200 Intensity-->
+    <color name="errorColor">#b00020</color> <!--@500 Intensity-->
+    <color name="surfaceColor">#ffffff</color>
+    <color name="backgroundColor">#ffffff</color>
 
-    <!-- Catalog Entry View colors-->
-    <item name="catalog_entry_remove_modify_button_background" type="color">@color/primary_dark</item>
-    <item name="catalog_entry_remove_modify_button_text" type="color">@color/primary_text</item>
+    <color name="onPrimaryColor">#ffffff</color>
+    <color name="onSecondaryColor">#000000</color>
+    <color name="onSurfaceColor">#000000</color>
+    <color name="onBackgroundColor">#121212</color>
+    <color name="onPrimaryColorLight">#E8EAED</color>
+    <color name="onErrorColor">#ffffff</color>
 
-    <item name="catalog_entry_download_button_background" type="color">@color/primary</item>
-    <item name="catalog_entry_download_button_text" type="color">@color/primary_text</item>
-
-    <item name="catalog_entry_open_button_background" type="color">@color/primary</item>
-    <item name="catalog_entry_open_button_text" type="color">@color/primary_text</item>
-
-    <item name="catalog_entry_display_mode_normal_background" type="color">#FFFFFF</item>
-    <item name="catalog_entry_display_mode_banner_background" type="color">@color/background_light</item>
-
-
-
-    <!--
-    Text only button background color: Used when we want something that looks like hyperlink
-    text but actually uses a button for accessibility purposes
-    -->
-    <item name="text_only_button_background_color" type="color">@android:color/white</item>
-
-    <color name="highlight_area">#009688</color>
-
-    <color name="entry_learner_progress_in_progress">#565656</color>
-
-    <color name="entry_learner_progresss_failed">#ffa904</color>
-
-    <color name="entry_learner_progress_passed">#6bb865</color>
-
-    <!--content editor screen colors-->
-    <color name="content_overlay_color">#50000000</color>
-    <color name="content_white_btn_ripple">#50BDBDBD</color>
-    <color name="content_icon_active">#263238</color>
-    <color name="content_white_fab_pressed">#fcfcfc</color>
-    <color name="colorTextSecondaryTransparent">#21757575</color>
-
-
-    <color name="just_black">#000000</color>
-    <color name="color_gray">#FF888888</color>
-    <color name="traffic_green">#009900</color>
-    <color name="traffic_orange">#FFCC00</color>
-    <color name="traffic_red">#FF0000</color>
-
-    <color name="fab_text">#FFFF</color>
-    <color name="toolbar">#000</color>
-
+    <color name="navigationBarColor">#000000</color>
+    <color name="iconTintColor">#727272</color>
+    <color name="successColor">#4CAF50</color>
 
 </resources>

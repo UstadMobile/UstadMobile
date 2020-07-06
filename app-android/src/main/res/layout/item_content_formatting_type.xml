@@ -14,12 +14,13 @@
         android:id="@+id/format_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:ignore="UselessParent">
+        tools:ignore="UnusedAttribute,UselessParent"
+        tools:targetApi="m">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:layout_marginBottom="@dimen/dimen_10dp"
             android:layout_marginTop="@dimen/dimen_10dp"
-            android:tint="@color/text_secondary"
+            android:tint="?colorOnIconTint"
             android:id="@+id/format_icon"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dimen_25dp"

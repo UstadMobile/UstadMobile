@@ -6,12 +6,17 @@ apply plugin: "jacoco"
 // https://developer.android.com/studio/projects/android-library.html
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
-def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
+def keyStoreFile = System.getenv("KEYSTORE")
+if(keyStoreFile == null) {
+    keyStoreFile = "keystore.properties"
+}
+
+def keyStorePropertiesExists = rootProject.file(keyStoreFile).exists()
 def keystoreProperties = new Properties()
 def baseAppId = "com.toughra.ustadmobile"
 
 if (keyStorePropertiesExists) {
-    keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
+    keystoreProperties.load(new FileInputStream(rootProject.file(keyStoreFile)))
 }
 
 kotlin {
@@ -53,8 +58,8 @@ android {
         applicationId "${baseAppId}.launcher"
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
-        versionCode 1
-        versionName "6.4.29.7"
+        versionCode rootProject.ext.ustadVersionCode
+        versionName rootProject.ext.ustadVersion
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + rootProject.ext.buildConfigProperties["android.acra.url"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
@@ -118,7 +123,6 @@ android {
         }
 
         release {
-            testCoverageEnabled = true
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -128,30 +132,12 @@ android {
 }
 
 configurations.all {
-//    Use this if needed to fix support library versions
-//    resolutionStrategy {
-//        force "com.android.support:appcompat-v7:$support_lib_version"
-//        force "com.android.support:cardview-v7:$support_lib_version"
-//        force "com.android.support:design:$support_lib_version"
-//        force "com.android.support:support-v4:$support_lib_version"
-//        force "com.android.support:recyclerview-v7:$support_lib_version"
-//        force "android.arch.lifecycle:livedata-core:$room_version"
-//        force "android.arch.lifecycle:runtime:$room_version"
-//        force "android.arch.core:runtime:$lifecycle_version"
-//    }
-
     resolutionStrategy {
         force "androidx.lifecycle:lifecycle-livedata-core:$version_androidx_lifecycle"
         force "androidx.lifecycle:lifecycle-runtime:$version_androidx_lifecycle"
         force "androidx.arch.core:core-runtime:$version_androidx_arch"
         force "androidx.recyclerview:recyclerview:$version_androidx_recyclerview"
     }
-
-//    resolutionStrategy.eachDependency { details ->
-//        if(details.request.group == 'androidx.recyclerview'){
-//            details.useVersion "2.2.3"
-//        }
-//    }
 
 
     exclude group: "net.sf.kxml", module: "kxml2"
@@ -171,6 +157,7 @@ dependencies {
 
     implementation "com.github.aakira:napier-android:$version_napier"
     implementation "com.github.aakira:napier:$version_napier"
+    implementation "com.google.android.material:material:$version_android_material"
 
     implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
 

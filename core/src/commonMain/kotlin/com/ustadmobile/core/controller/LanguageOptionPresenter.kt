@@ -6,7 +6,7 @@ import com.ustadmobile.core.view.LanguageOptionView
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlin.js.JsName
 
-abstract class LanguageOptionPresenter(context: Any, arguments: Map<String, String?>, view: LanguageOptionView,
+abstract class LanguageOptionPresenter(context: Any, arguments: Map<String, String>, view: LanguageOptionView,
                               private val impl: UstadMobileSystemImpl):
         UstadBaseController<LanguageOptionView>(context, arguments, view){
 
@@ -14,7 +14,7 @@ abstract class LanguageOptionPresenter(context: Any, arguments: Map<String, Stri
 
     abstract fun handleNavigation()
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.setCurrentLanguage(languageOptions[impl.getDisplayedLocale(context)!!])
     }

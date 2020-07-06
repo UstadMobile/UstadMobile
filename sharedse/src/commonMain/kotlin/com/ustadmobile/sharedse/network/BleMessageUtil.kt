@@ -1,7 +1,6 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.sharedse.io.ByteBufferSe
-import kotlinx.io.ByteBuffer
 
 /**
  * Util class for {[BleMessage]}, it converts the entry UUID from Long to Bytes and vice versa.
@@ -14,7 +13,7 @@ object BleMessageUtil {
      * @return Converted bytes
      */
     fun bleMessageLongToBytes(entryList: List<Long>): ByteArray {
-        val buffer = ByteBuffer.allocate(entryList.size * 8)
+        val buffer = ByteBufferSe.allocate(entryList.size * 8)
         for (entry in entryList) {
             buffer.putLong(entry)
         }

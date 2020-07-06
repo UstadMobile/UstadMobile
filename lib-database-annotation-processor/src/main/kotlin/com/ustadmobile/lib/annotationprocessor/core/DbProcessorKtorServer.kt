@@ -564,8 +564,14 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         val nanoHttpdGetFns = mutableListOf<String>()
         val nanoHttpdPostFns = mutableListOf<String>()
 
+        val implementedMethodNames = mutableSetOf<String>()
         methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv,
                 includeImplementedMethods = true).forEach { daoSubEl ->
+            if(daoSubEl.simpleName.toString() in implementedMethodNames) {
+                return@forEach
+            }
+
+            implementedMethodNames += daoSubEl.simpleName.toString()
             val daoMethodEl = daoSubEl as ExecutableElement
             val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
                     daoMethodEl) as ExecutableType

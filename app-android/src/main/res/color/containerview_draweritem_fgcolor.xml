@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true"
-        android:color="@color/primary" /> <!-- pressed -->
+        android:color="?colorPrimary" /> <!-- pressed -->
     <item android:state_activated="true"
-        android:color="@color/primary" /> <!-- focused -->
-    <item android:color="@color/primary_text" /> <!-- default -->
+        android:color="?colorPrimary" /> <!-- focused -->
+    <item android:color="?colorOnSurface" /> <!-- default -->
 </selector>

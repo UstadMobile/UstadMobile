@@ -1,7 +1,6 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.sharedse.io.ByteBufferSe
-import kotlinx.io.ByteBuffer
 import kotlinx.serialization.stringFromUtf8Bytes
 import kotlinx.serialization.toUtf8Bytes
 
@@ -40,7 +39,7 @@ open class WiFiDirectGroupBle {
 
     fun toBytes(): ByteArray {
         val string = ("$ssid|$passphrase")
-        val buffer = ByteBuffer.allocate(string.toUtf8Bytes().size + 4 + 2)
+        val buffer = ByteBufferSe.allocate(string.toUtf8Bytes().size + 4 + 2)
                 .putInt(NetworkManagerBleCommon.convertIpAddressToInteger(ipAddress!!))
                 .putChar(port!!.toChar())
                 .put(string.toUtf8Bytes())

@@ -59,7 +59,7 @@ interface ContentEditorPageActionDelegate {
  * @author kileha3
  */
 
-abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String, String?>, view: ContentEditorView,
+abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String, String>, view: ContentEditorView,
                                             private val storage: String?, val umDatabase :UmAppDatabase,
                                             internal val mountContainer: suspend (Long) -> String)
     : UstadBaseController<ContentEditorView>(context, arguments, view) , ContentEditorPageActionDelegate{
@@ -175,12 +175,12 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
      */
     abstract suspend fun getDocumentPath(storage: String?) : String
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         contentEntryUid = arguments.getOrElse(UstadView.ARG_CONTENT_ENTRY_UID, {"0"})!!.toLong()
 
         GlobalScope.launch {
-            contentEntry = umDatabase.contentEntryDao.findByEntryId(contentEntryUid)
+            contentEntry = umDatabase.contentEntryDao.findEntryWithLanguageByEntryId(contentEntryUid)
             if(contentEntry != null){
                val container = umDatabase.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry!!.contentEntryUid)
 

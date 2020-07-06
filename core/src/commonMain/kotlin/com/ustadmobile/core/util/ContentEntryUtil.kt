@@ -1,9 +1,6 @@
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
-import com.ustadmobile.core.controller.ContentEntryListPresenter
-import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
+import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MimeType.EPUB
@@ -19,6 +16,9 @@ import com.ustadmobile.core.util.MimeType.TEXT
 import com.ustadmobile.core.util.MimeType.TINCAN
 import com.ustadmobile.core.util.MimeType.WEB_CHUNK
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import kotlin.js.JsName
 
 
@@ -64,7 +64,7 @@ private val mimeTypeToViewNameMap = mapOf(
         WEB_CHUNK to WebChunkView.VIEW_NAME,
         HAR to HarView.VIEW_NAME,
         EPUB to EpubContentView.VIEW_NAME
-) + VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoPlayerView.VIEW_NAME }.toMap()
+) + VideoContentPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoPlayerView.VIEW_NAME }.toMap()
 
 
 val mimeTypeToPlayStoreIdMap = mapOf(
@@ -118,7 +118,7 @@ suspend fun goToContentEntry(contentEntryUid: Long,
             }
 
             val args = HashMap<String, String>()
-            args[ContentEntryListPresenter.ARG_NO_IFRAMES] = noIframe.toString()
+            args[ARG_NO_IFRAMES] = noIframe.toString()
             args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
             args[ARG_CONTAINER_UID] = containerToOpen.containerUid.toString()
             systemImpl.go(viewName, args, context)
@@ -128,7 +128,7 @@ suspend fun goToContentEntry(contentEntryUid: Long,
 
             val args = HashMap<String, String>()
             args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
-            systemImpl.go(ContentEntryDetailView.VIEW_NAME, args, context)
+            systemImpl.go(ContentEntry2DetailView.VIEW_NAME, args, context)
 
         }
         else -> {

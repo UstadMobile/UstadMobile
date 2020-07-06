@@ -4,6 +4,7 @@ import com.ustadmobile.core.catalog.contenttype.TinCanType
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.sharedse.contentformats.ContentTypePlugin
 import org.xmlpull.v1.XmlPullParserException
 import java.io.File
@@ -14,8 +15,8 @@ import java.util.zip.ZipInputStream
 
 class TinCanTypePlugin : TinCanType(), ContentTypePlugin {
 
-    override fun getContentEntry(file: File): ContentEntry? {
-        var contentEntry: ContentEntry? = null
+    override fun getContentEntry(file: File): ContentEntryWithLanguage? {
+        var contentEntry: ContentEntryWithLanguage? = null
         try {
             ZipInputStream(FileInputStream(file)).use {
                 var zipEntry: ZipEntry? = null
@@ -28,10 +29,11 @@ class TinCanTypePlugin : TinCanType(), ContentTypePlugin {
                         if(activity == null)
                             throw IOException("TinCanXml from ${file.absolutePath} has no launchActivity!")
 
-                        contentEntry = ContentEntry().apply {
+                        contentEntry = ContentEntryWithLanguage().apply {
                             contentFlags = ContentEntry.FLAG_IMPORTED
                             licenseType = ContentEntry.LICENSE_TYPE_OTHER
                             title = activity.name
+                            contentFlags  = ContentEntry.FLAG_IMPORTED
                             author = ""
                             description = activity.desc
                             leaf = true
@@ -48,5 +50,9 @@ class TinCanTypePlugin : TinCanType(), ContentTypePlugin {
         }
 
         return contentEntry
+    }
+
+    override fun isZipped(): Boolean{
+        return true
     }
 }

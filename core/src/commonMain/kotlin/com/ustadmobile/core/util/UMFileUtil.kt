@@ -315,27 +315,6 @@ object UMFileUtil {
         return retVal
     }
 
-    /**
-     * Ensure that the given filename has the correct extension on it. If the filename given already
-     * includes the correct file extension for the given mime type it will be returned as is. Otherewise
-     * the correct extension will be added. If the appropriate extension is unknown, the filename
-     * will not be changed.
-     *
-     * @param filename The filename as given
-     * @param mimeType The mimetype of the file
-     * @return The filename with the correct extension for the mime type as above.
-     */
-    fun appendExtensionToFilenameIfNeeded(filename: String, mimeType: String): String {
-        var retVal = filename
-        val expectedExtension = UstadMobileSystemImpl.instance.getExtensionFromMimeType(
-                mimeType) ?: return filename
-
-        if (!filename.endsWith(".$expectedExtension")) {
-            retVal += ".$expectedExtension"
-        }
-
-        return retVal
-    }
 
     /**
      * Parse a deliminated string with keys and values like Content-Type parameters
@@ -571,73 +550,6 @@ object UMFileUtil {
         }
     }
 
-    /**
-     * Split a filename into it's basename and extension.
-     *
-     * @param filename e.g. file.jpg
-     * @return A two component String array e.g. {"file", "jpg"}
-     */
-    fun splitFilename(filename: String): Array<String> {
-        val dotIndex = filename.lastIndexOf('.')
-        return if (dotIndex != -1)
-            arrayOf(filename.substring(0, dotIndex), filename.substring(dotIndex + 1))
-        else
-            arrayOf(filename)
-    }
-
-
-    /**
-     * Remove the extension from a filename. The input filename is expected to be only a filename,
-     * e.g. without the path or url query strings. This can be obtained using getFilename if needed.
-     *
-     * @param filename Input filename without path or query string components e.g. file.txt
-     * @return filename without the extension, e.g. file
-     */
-    fun removeExtension(filename: String): String {
-        val lastDot = filename.lastIndexOf('.')
-
-        return if (lastDot != -1 && lastDot != filename.length - 1) {
-            filename.substring(0, lastDot)
-        } else {
-            filename
-        }
-    }
-
-    /**
-     * Ensure a given path has a given prefix (e.g. file:///) - if it doesn't
-     * then join the prefix to the string, otherwise return it as is
-     *
-     * @param
-     */
-    fun ensurePathHasPrefix(prefix: String, path: String): String {
-        return if (path.startsWith(prefix)) {
-            path
-        } else {
-            joinPaths(*arrayOf(prefix, path))
-        }
-    }
-
-    /**
-     * Remove a prefix if it is present (e.g. starting file:// in the case
-     * of android)
-     */
-    fun stripPrefixIfPresent(prefix: String, path: String): String {
-        return if (!path.startsWith(prefix)) {
-            path
-        } else {
-            path.substring(prefix.length)
-        }
-    }
-
-    fun stripExtensionIfPresent(uri: String): String {
-        val lastSlashPos = uri.lastIndexOf('/')
-        val lastDotPos = uri.lastIndexOf('.')
-        return if (lastDotPos != -1 && lastDotPos > lastSlashPos) {
-            uri.substring(0, lastDotPos)
-        } else {
-            uri
-        }
-    }
 
 
     /**
@@ -656,32 +568,6 @@ object UMFileUtil {
         }
     }
 
-    /**
-     * Make sure that the given path has the given suffix; if it doesn't
-     * add the suffix.
-     *
-     * @param suffix the suffix that the path must end with
-     * @param path   The path to add the suffix to if missing
-     * @return The path with the suffix added if it was originally missing
-     */
-    fun ensurePathHasSuffix(suffix: String, path: String): String {
-        return if (!path.endsWith(suffix)) {
-            path + suffix
-        } else {
-            path
-        }
-    }
-
-    /**
-     * Strip out mime type parameters if they are present
-     *
-     * @param mimeType Mime type e.g. application/atom+xml;profile=opds
-     * @return Mime type without any params e.g. application/atom+xml
-     */
-    fun stripMimeParams(mimeType: String): String {
-        val i = mimeType.indexOf(';')
-        return if (i != -1) mimeType.substring(0, i).trim { it <= ' ' } else mimeType
-    }
 
     /**
      * Return a String formatted to show the file size in a user friendly format
@@ -716,43 +602,7 @@ object UMFileUtil {
         return "$unitSize $unit"
     }
 
-    /**
-     * Make a rough guess if the given uri is a file or not.
-     *
-     *
-     * Will return true if the uri starts with file:/// or just /
-     *
-     * @param uri the uri to check to determine if it is a file uri or not. Should be an absolute
-     * uri.
-     * @return True if it looks like a file as above, false otherwise
-     */
-    fun isFileUri(uri: String): Boolean {
-        return uri.startsWith("file:/") || uri.startsWith("/")
-    }
 
-
-    /**
-     * Given a referrer path e.g. /View1?arg=1/View2?arg=2/View2?arg=3/View3?arg=3 this will provide
-     * the argument portion for the most recent (e.g. rightmost) instance of that view name.
-     *
-     *
-     * E.g. if viewname = View2, then "arg=3". If View1, then "arg=1".
-     *
-     * @param viewname     The viewname to look for in the referrer path
-     * @param referrerPath The referrer path in the form of /Viewname?argname=argvalue
-     * @return String with the arguments for the last instance of this viewname, or null if not found
-     */
-    fun getLastReferrerArgsByViewname(viewname: String, referrerPath: String): String? {
-        val lastIndex = referrerPath.lastIndexOf("/$viewname?")
-        return if (lastIndex != -1) {
-            val nextSlash = referrerPath.indexOf("/", lastIndex + 1)
-            val qPos = referrerPath.indexOf("?", lastIndex + 1)
-            if (qPos != -1 && qPos < nextSlash)
-                referrerPath.substring(qPos + 1, nextSlash)
-            else
-                ""
-        } else null
-    }
 
 
     fun clearTopFromReferrerPath(viewname: String, args: Map<String, String?>, referrerPath: String): String {

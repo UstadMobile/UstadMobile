@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
+import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -21,10 +21,7 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.head
 import io.ktor.routing.route
-import io.ktor.util.cio.write
-import io.netty.handler.codec.http.HttpResponseStatus
-import kotlinx.coroutines.io.ByteWriteChannel
-import kotlinx.coroutines.io.writeFully
+import io.ktor.utils.io.ByteWriteChannel
 import java.io.File
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
@@ -86,7 +83,7 @@ fun Route.ContainerMountRoute(db: UmAppDatabase) {
                 srtLangList.add(0, UstadMobileSystemImpl.instance.getString(MessageID.no_subtitle, context))
                 if (defaultLangName.isNotEmpty()) srtLangList.add(1, defaultLangName)
 
-                call.respond(HttpStatusCode.OK, VideoPlayerPresenterCommon.VideoParams(videoPath, audioEntry, srtLangList, srtMap))
+                call.respond(HttpStatusCode.OK, VideoContentPresenterCommon.VideoParams(videoPath, audioEntry, srtLangList, srtMap))
 
             }else{
                 call.respond(HttpStatusCode.NotFound, "No such container: $containerUid")
@@ -189,7 +186,10 @@ fun Route.ContainerMountRoute(db: UmAppDatabase) {
                                 override val status = if(isRangeRequest)
                                     HttpStatusCode.PartialContent else HttpStatusCode.OK
                                 override suspend fun writeTo(channel: ByteWriteChannel) {
-                                    channel.writeFully(inputStream.readBytes())
+                                    inputStream.use {
+                                        val outBytes = inputStream.readBytes()
+                                        channel.writeFully(outBytes, 0, outBytes.size)
+                                    }
                                 }
                             })
                         }

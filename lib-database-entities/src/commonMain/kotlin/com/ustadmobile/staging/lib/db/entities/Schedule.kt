@@ -63,7 +63,9 @@ class Schedule {
     var scheduleLastChangedBy: Int = 0
 
     //active or removed
-    var scheduleActive: Boolean = false
+    var scheduleActive: Boolean = true
+
+
 
     companion object {
 
@@ -74,13 +76,14 @@ class Schedule {
         val SCHEDULE_FREQUENCY_MONTHLY = 4
         val SCHEDULE_FREQUENCY_YEARLY = 5
 
-        val DAY_SUNDAY = 1
-        val DAY_MONDAY = 2
-        val DAY_TUESDAY = 3
-        val DAY_WEDNESDAY = 4
-        val DAY_THURSDAY = 5
-        val DAY_FRIDAY = 6
-        val DAY_SATURDAY = 7
+        // Constants as per Klock
+        val DAY_SUNDAY = 0
+        val DAY_MONDAY = 1
+        val DAY_TUESDAY = 2
+        val DAY_WEDNESDAY = 3
+        val DAY_THURSDAY = 4
+        val DAY_FRIDAY = 5
+        val DAY_SATURDAY = 6
 
 
         val MONTH_JANUARY = 1
@@ -95,5 +98,43 @@ class Schedule {
         val MONTH_OCTOBER = 10
         val MONTH_NOVEMBER = 11
         val MONTH_DECEMBER = 12
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Schedule
+
+        if (scheduleUid != other.scheduleUid) return false
+        if (sceduleStartTime != other.sceduleStartTime) return false
+        if (scheduleEndTime != other.scheduleEndTime) return false
+        if (scheduleDay != other.scheduleDay) return false
+        if (scheduleMonth != other.scheduleMonth) return false
+        if (scheduleFrequency != other.scheduleFrequency) return false
+        if (umCalendarUid != other.umCalendarUid) return false
+        if (scheduleClazzUid != other.scheduleClazzUid) return false
+        if (scheduleMasterChangeSeqNum != other.scheduleMasterChangeSeqNum) return false
+        if (scheduleLocalChangeSeqNum != other.scheduleLocalChangeSeqNum) return false
+        if (scheduleLastChangedBy != other.scheduleLastChangedBy) return false
+        if (scheduleActive != other.scheduleActive) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = scheduleUid.hashCode()
+        result = 31 * result + sceduleStartTime.hashCode()
+        result = 31 * result + scheduleEndTime.hashCode()
+        result = 31 * result + scheduleDay
+        result = 31 * result + scheduleMonth
+        result = 31 * result + scheduleFrequency
+        result = 31 * result + umCalendarUid.hashCode()
+        result = 31 * result + scheduleClazzUid.hashCode()
+        result = 31 * result + scheduleMasterChangeSeqNum.hashCode()
+        result = 31 * result + scheduleLocalChangeSeqNum.hashCode()
+        result = 31 * result + scheduleLastChangedBy
+        result = 31 * result + scheduleActive.hashCode()
+        return result
     }
 }

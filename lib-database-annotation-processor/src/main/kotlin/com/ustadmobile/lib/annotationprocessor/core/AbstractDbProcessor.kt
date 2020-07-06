@@ -14,7 +14,6 @@ import java.io.File
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.*
 import com.ustadmobile.door.annotation.*
-import io.ktor.client.response.HttpResponse
 import java.util.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
@@ -35,6 +34,8 @@ import kotlinx.coroutines.Runnable
 import java.io.IOException
 import kotlin.reflect.KClass
 import com.ustadmobile.door.RepositoryLoadHelper
+import io.ktor.client.statement.HttpStatement
+import io.ktor.http.Headers
 
 //here in a comment because it sometimes gets removed by 'optimization of parameters'
 // import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -142,7 +143,6 @@ fun jdbcDaoTypeSpecBuilder(simpleName: String, superTypeName: TypeName) = TypeSp
 
 fun daosOnDb(dbType: ClassName, processingEnv: ProcessingEnvironment, excludeDbSyncDao: Boolean = false): List<ClassName> {
     val dbTypeEl = processingEnv.elementUtils.getTypeElement(dbType.canonicalName) as TypeElement
-    processingEnv.messager.printMessage(Diagnostic.Kind.NOTE, "DbProcessorSync: daosOnDb: ${dbType.simpleName}")
     val daoList = dbTypeEl.enclosedElements
             .filter { it.kind == ElementKind.METHOD && Modifier.ABSTRACT in it.modifiers}
             .map { it as ExecutableElement }
@@ -301,6 +301,7 @@ internal val CLIENT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.call", "rec
 
 internal val CLIENT_PARAMETER_MEMBER_NAME = MemberName("io.ktor.client.request", "parameter")
 
+internal val CLIENT_HTTPSTMT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.call", "receive")
 
 /**
  * Generates a CodeBlock that will make KTOR HTTP Client Request for a DAO method. It will set
@@ -311,8 +312,10 @@ internal val CLIENT_PARAMETER_MEMBER_NAME = MemberName("io.ktor.client.request",
  * @param dbPathVarName the variable name that contains the name of the database
  * @param daoName the DAO name (e.g. simple class name of the DAO class)
  * @param methodName the name of the method that is being queried
- * @param httpResponseVarName the variable name that will be added to the codeblock that will contain
- * the http response object
+ * @param httpStatementVarName the variable name that will be added to the codeblock that will contain
+ * the http statement object
+ * @param httpResponseHeadersVarName the variable name that will be used to capture the http headers
+ * received from the response (after the .execute call is done)
  * @param httpResultType the type of response expected from the other end (e.g. the result type of
  * the method)
  * @param params a list of the parameters (e.g. from the method signature) that need to be sent
@@ -326,7 +329,8 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                                                    dbPathVarName: String,
                                                    daoName: String,
                                                    methodName: String,
-                                                   httpResponseVarName: String = "_httpResponse",
+                                                   httpStatementVarName: String = "_httpStatement",
+                                                   httpResponseHeadersVarName: String = "_httpResponseHeaders",
                                                    httpResultVarName: String = "_httpResult",
                                                    requestBuilderCodeBlock: CodeBlock = CodeBlock.of(""),
                                                    httpResultType: TypeName,
@@ -335,11 +339,13 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
                                                    kotlinxSerializationJsonVarName: String = "",
                                                    useMultipartPartsVarName: String? = null,
                                                    addDbVersionParamName: String? = "_db"): CodeBlock {
+
+    //Begin creation of the HttpStatement call that will set the URL, parameters, etc.
     val nonQueryParams = getHttpBodyParams(params)
     val codeBlock = CodeBlock.builder()
-            .beginControlFlow("val $httpResponseVarName = _httpClient.%M<%T>",
+            .beginControlFlow("val $httpStatementVarName = _httpClient.%M<%T>",
                     if(nonQueryParams.isNullOrEmpty()) CLIENT_GET_MEMBER_NAME else CLIENT_POST_MEMBER_NAME,
-                    HttpResponse::class)
+                    HttpStatement::class)
             .beginControlFlow("url")
             .add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
             .add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"\n", daoName, methodName)
@@ -395,7 +401,7 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
             CodeBlock.of("body = %T(_json.stringify(%T.%L.%M, ${requestBodyParam.name}), %T.Application.Json.%M())\n",
                 TextContent::class, entityComponentType,
                     serializerFnCodeBlock,
-                    MemberName("kotlinx.serialization", "list"),
+                    MemberName("kotlinx.serialization.builtins", "list"),
                     ContentType::class,
                     MemberName("com.ustadmobile.door.ext", "withUtf8Charset"))
         }else {
@@ -410,6 +416,10 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
 
     codeBlock.endControlFlow()
 
+    //End creation of the HttpStatement
+
+    codeBlock.add("var $httpResponseHeadersVarName: %T? = null\n", Headers::class)
+
     val receiveCodeBlock = if(useKotlinxListSerialization && httpResultType is ParameterizedTypeName
             && httpResultType.rawType == List::class.asClassName() ) {
         val serializerFnCodeBlock = if(httpResultType.typeArguments[0].javaToKotlinType() in QUERY_SINGULAR_TYPES) {
@@ -417,25 +427,29 @@ internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String =
         }else {
             CodeBlock.of("serializer()")
         }
-        CodeBlock.of("$kotlinxSerializationJsonVarName.parse(%T.%L.%M, $httpResponseVarName.%M<String>())\n",
+        CodeBlock.of("$kotlinxSerializationJsonVarName.parse(%T.%L.%M, $httpStatementVarName.%M<String>())\n",
                 httpResultType.typeArguments[0], serializerFnCodeBlock,
-                MemberName("kotlinx.serialization", "list"),
+                MemberName("kotlinx.serialization.builtins", "list"),
                 CLIENT_RECEIVE_MEMBER_NAME)
     }else{
-        CodeBlock.of("$httpResponseVarName.%M<%T>()\n",
-                CLIENT_RECEIVE_MEMBER_NAME, httpResultType)
-    }
-    if(httpResultType.isNullable) {
-        codeBlock.beginControlFlow("val $httpResultVarName = if(${httpResponseVarName}.status == %T.NoContent)",
-            HttpStatusCode::class)
-                .add("null\n")
-                .nextControlFlow("else")
-                .add(receiveCodeBlock)
+        CodeBlock.Builder().beginControlFlow("$httpStatementVarName.execute")
+                .add(" response ->\n")
+                .add("$httpResponseHeadersVarName = response.headers\n")
+                .apply { takeIf { httpResultType.isNullable }
+                        ?.beginControlFlow(
+                            "if(response.status == %T.NoContent)", HttpStatusCode::class)
+                            ?.add("null\n")
+                            ?.nextControlFlow("else")
+                }
+                .add("response.%M<%T>()\n", CLIENT_HTTPSTMT_RECEIVE_MEMBER_NAME, httpResultType)
+                .apply { takeIf { httpResultType.isNullable }?.endControlFlow() }
                 .endControlFlow()
-    }else {
-        codeBlock.add("val $httpResultVarName = ")
-        codeBlock.add(receiveCodeBlock)
+                .build()
+
     }
+
+    codeBlock.add("val $httpResultVarName = ")
+    codeBlock.add(receiveCodeBlock)
 
 
     return codeBlock.build()
@@ -551,6 +565,7 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
                     .add(beforeInsertCode.invoke(accessorVarName, it.value, true))
             transactionCodeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($accessorVarName)\n")
         }else {
+            codeBlock.takeIf { entry -> it.key.isNotEmpty() }?.add("?.")
             codeBlock
                 .add(it.key.joinToString (prefix = "", separator = "?.", postfix = ""))
                 .add("\n")
@@ -769,7 +784,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
         println("Db tmp file: ${dbTmpFile.absolutePath}")
         dataSource.url = "jdbc:sqlite:${dbTmpFile.absolutePath}"
-        messager!!.printMessage(Diagnostic.Kind.NOTE, "Annotation processor db tmp file: ${dbTmpFile.absolutePath}")
 
         dbConnection = dataSource.connection
         dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {entity ->
@@ -857,7 +871,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
     protected fun generateSyncTriggersCodeBlock(entityClass: ClassName, execSqlFn: String, dbType: Int): CodeBlock {
         val codeBlock = CodeBlock.builder()
-        messager.printMessage(Diagnostic.Kind.NOTE, "AbstractDbProcessor: generateSyncTriggersCodeBlock: ${entityClass.canonicalName}")
         val syncableEntityInfo = SyncableEntityInfo(entityClass, processingEnv)
         when(dbType){
             DoorDbType.SQLITE -> {
@@ -936,8 +949,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             }
         }
 
-        messager.printMessage(Diagnostic.Kind.NOTE, "AbstractDbProcessor: finish generateSyncTriggersCodeBlock: ${entityClass.canonicalName}")
-
         return codeBlock.build()
     }
 
@@ -991,8 +1002,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             namedParams.forEach { preparedStatementSql = preparedStatementSql!!.replace(":$it", "?") }
             namedParams.forEach {
                 val queryVarTypeName = queryVars[it]
-                execStmtSql = execStmtSql!!.replace(":$it",
-                    defaultSqlQueryVal(queryVarTypeName!!))
+                if(queryVarTypeName != null) {
+                    execStmtSql = execStmtSql!!.replace(":$it",
+                            defaultSqlQueryVal(queryVarTypeName))
+                }else {
+                    messager.printMessage(Diagnostic.Kind.ERROR,
+                            "On ${enclosing?.qualifiedName}.${method?.simpleName} Variable $it in query name but not in function parameters: " +
+                                    "SQL = '$preparedStatementSql' function params = ${queryVars.keys.joinToString()}\n",
+                            enclosing)
+                }
+
             }
         }
 
@@ -1515,7 +1534,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         MemberName("io.ktor.client.request", "header"),
                         "X-nid"),
                 params = daoFunSpec.parameters))
-        codeBlock.add("val _requestId = _httpResponse.headers.get(%S)?.toInt() ?: -1\n",
+        codeBlock.add("val _requestId = _httpResponseHeaders?.get(%S)?.toInt() ?: -1\n",
                 "X-reqid")
 
         codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
@@ -1556,12 +1575,10 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         val entityPkEl = processingEnv.elementUtils.getTypeElement(className.canonicalName)
                                 .enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null}
 
-                        val attRespVarName = "_attResp_${className.simpleName}"
                         attEntityCodeBlock
-                                .add("var $attRespVarName : %T = null\n", HttpResponse::class.asClassName().copy(nullable = true))
                                 .beginControlFlow("try")
-                                .beginControlFlow("$attRespVarName = _httpClient.%M<%T>",
-                                    CLIENT_GET_MEMBER_NAME, HttpResponse::class)
+                                .beginControlFlow("_httpClient.%M<%T>",
+                                    CLIENT_GET_MEMBER_NAME, HttpStatement::class)
                                 .add("%M(_db)\n",
                                         MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
                                 .beginControlFlow("url")
@@ -1571,15 +1588,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                 .endControlFlow()
                                 .add("%M(%S, $entityVarName.%L)\n", CLIENT_PARAMETER_MEMBER_NAME,
                                         "_pk", entityPkEl.simpleName)
-                                .endControlFlow()
-
-                        //TODO: throw an exception whne the status code != 200
-                        attEntityCodeBlock.beginControlFlow("if($attRespVarName.status == %T.OK)",
-                                HttpStatusCode::class)
+                                .nextControlFlow(".execute")
+                                .add("response ->\n")
+                                //TODO: throw an exception whne the status code != 200
+                                .beginControlFlow("if(response.status == %T.OK)",
+                                        HttpStatusCode::class)
                                 .add("val _attFileDest = File($attDirVarName, $entityVarName.${entityPkEl.simpleName}.toString())\n")
-                                .add("$attRespVarName.content.%M(_attFileDest.%M())\n",
-                                        MemberName("kotlinx.coroutines.io", "copyAndClose"),
+                                .add("response.content.%M(_attFileDest.%M())\n",
+                                        MemberName("io.ktor.utils.io", "copyAndClose"),
                                         MemberName("io.ktor.util.cio", "writeChannel"))
+                                .endControlFlow()
                                 .endControlFlow()
 
                         attEntityCodeBlock.nextControlFlow("catch(e: %T)", Exception::class)
@@ -1587,7 +1605,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                         "\"Could·not·download·attachment·for·${className.simpleName}·PK·\${$entityVarName.${entityPkEl.simpleName}}\",e)\n",
                                         IOException::class)
                                 .nextControlFlow("finally")
-                                .add("$attRespVarName?.close()\n")
                                 .endControlFlow()
 
                         if(isList) {

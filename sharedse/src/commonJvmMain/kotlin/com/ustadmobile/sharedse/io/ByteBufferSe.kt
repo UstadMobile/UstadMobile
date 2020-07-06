@@ -1,5 +1,5 @@
 package com.ustadmobile.sharedse.io
-
+import io.ktor.utils.io.core.ByteOrder
 
 typealias UMByteBuffer = java.nio.ByteBuffer
 
@@ -37,8 +37,55 @@ actual class ByteBufferSe {
         return ByteBufferSe(dw.slice())
     }
 
+    actual fun order(byteOrder: ByteOrder): ByteBufferSe {
+        dw.order(if(byteOrder == ByteOrder.BIG_ENDIAN) java.nio.ByteOrder.BIG_ENDIAN else java.nio.ByteOrder.LITTLE_ENDIAN)
+        return this
+    }
+
+    actual fun clear(): ByteBufferSe {
+        dw.clear()
+        return this
+    }
+
+    actual fun put(byteArr: ByteArray, offset: Int, length: Int): ByteBufferSe {
+        dw.put(byteArr, offset, length)
+        return this
+    }
+
+    actual fun put(byteArr: ByteArray): ByteBufferSe {
+        dw.put(byteArr)
+        return this
+    }
+
+    actual fun put(value: Byte): ByteBufferSe {
+        dw.put(value)
+        return this
+    }
+
+    actual fun putChar(value: Char):ByteBufferSe {
+        dw.putChar(value)
+        return this
+    }
+
+    actual fun putInt(value: Int) : ByteBufferSe {
+        dw.putInt(value)
+        return this
+    }
+
+    actual fun putLong(value: Long): ByteBufferSe {
+        dw.putLong(value)
+        return this
+    }
+
+    actual fun putShort(value: Short): ByteBufferSe {
+        dw.putShort(value)
+        return this
+    }
+
     actual companion object {
         actual fun wrap(array: ByteArray) = ByteBufferSe(java.nio.ByteBuffer.wrap(array))
+
+        actual fun allocate(length: Int) = ByteBufferSe(java.nio.ByteBuffer.allocate(length))
     }
 
 }

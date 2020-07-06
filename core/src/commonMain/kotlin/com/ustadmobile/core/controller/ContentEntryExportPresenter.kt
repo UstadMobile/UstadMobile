@@ -14,7 +14,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
-class ContentEntryExportPresenter(context: Any, arguments: Map<String, String?>, view: ContentEntryExportView,
+class ContentEntryExportPresenter(context: Any, arguments: Map<String, String>, view: ContentEntryExportView,
                                   private val umDb: UmAppDatabase,private val umRepo: UmAppDatabase,
                                   private val impl: UstadMobileSystemImpl)
     : UstadBaseController<ContentEntryExportView>(context, arguments, view), ContainerManagerCommon.ExportProgressListener {
@@ -33,7 +33,7 @@ class ContentEntryExportPresenter(context: Any, arguments: Map<String, String?>,
 
     private var entryUid: Long = (arguments[UstadView.ARG_CONTENT_ENTRY_UID] ?: "0").toLong()
 
-    override fun onCreate(savedState: Map<String, String?>?) {
+    override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
         GlobalScope.launch {
@@ -44,7 +44,7 @@ class ContentEntryExportPresenter(context: Any, arguments: Map<String, String?>,
                     view.setUpStorageOptions(result!!)
                     destinationDir = result[0].dirURI!!
                     view.setDialogMessage(entryTile)
-                    view.checkFilePermissions()
+                    //view.checkFilePermissions()
                 }
             })
         }

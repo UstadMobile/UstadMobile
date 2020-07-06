@@ -4,7 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryDetailView
+import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -85,7 +85,7 @@ class TestGoToContentEntryUtil {
 
             goToContentEntry(contentEntry.contentEntryUid, umAppDatabase, context, impl,
                     true, true, false)
-            verify(impl).go(eq(ContentEntryDetailView.VIEW_NAME), any(), eq(context))
+            verify(impl).go(eq(ContentEntry2DetailView.VIEW_NAME), any(), eq(context))
         }
     }
 

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerETag
@@ -29,11 +30,12 @@ abstract class ContainerDao : BaseDao<Container> {
     @JsName("getMostRecentDownloadedContainerForContentEntryAsync")
     abstract suspend fun getMostRecentDownloadedContainerForContentEntryAsync(contentEntry: Long): Container?
 
-    @Query("Select Container.* FROM Container " +
-            "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "ORDER BY Container.cntLastModified DESC LIMIT 1")
+    @Query(SELECT_ACTIVE_RECENT_CONTAINER)
     @JsName("getMostRecentContainerForContentEntry")
     abstract fun getMostRecentContainerForContentEntry(contentEntry: Long): Container?
+
+    @Query(SELECT_ACTIVE_RECENT_CONTAINER)
+    abstract fun getMostRecentContainerForContentEntryLive(contentEntry: Long) : DoorLiveData<Container?>
 
     @Query("SELECT Container.fileSize FROM Container " +
             "WHERE Container.containerContentEntryUid = :contentEntryUid " +
@@ -112,9 +114,7 @@ abstract class ContainerDao : BaseDao<Container> {
     @JsName("updateMimeType")
     abstract fun updateMimeType(mimeType: String, containerUid: Long)
 
-    @Query("Select Container.* FROM Container " +
-            "WHERE Container.containerContentEntryUid = :contentEntry " +
-            "ORDER BY Container.cntLastModified DESC LIMIT 1")
+    @Query(SELECT_ACTIVE_RECENT_CONTAINER)
     abstract suspend fun getMostRecentContainerForContentEntryAsync(contentEntry: Long): Container?
 
     @Query("Select Container.containerUid, Container.mimeType FROM Container " +
@@ -127,5 +127,11 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(container : Container)
+
+    companion object{
+        private const val SELECT_ACTIVE_RECENT_CONTAINER = "Select Container.* FROM Container " +
+                "WHERE Container.containerContentEntryUid = :contentEntry " +
+                "ORDER BY Container.cntLastModified DESC LIMIT 1"
+    }
 
 }

@@ -3,7 +3,7 @@ package com.ustadmobile.lib.rest
 import com.google.common.collect.Lists
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.FILE_SIZE
-import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
+import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.controller.checkIfH5PValidAndReturnItsContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
@@ -14,17 +14,14 @@ import com.ustadmobile.lib.db.entities.H5PImportData
 import io.github.bonigarcia.wdm.WebDriverManager
 import io.ktor.application.call
 import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.route
-import io.ktor.util.toMap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
@@ -37,7 +34,6 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.logging.LogEntry
 import org.openqa.selenium.logging.LogType
 import org.openqa.selenium.logging.LoggingPreferences
-import org.openqa.selenium.remote.DesiredCapabilities
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -111,87 +107,83 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
             val videoTitle = call.request.queryParameters["title"] ?: ""
             val contentEntryUid = call.request.queryParameters["contentEntryUid"]?.toLong()
 
-            val response = defaultHttpClient().get<HttpResponse>(urlString)
+            defaultHttpClient().get<HttpStatement>(urlString).execute { response ->
+                val headers = response.headers
 
-            val headers = response.headers
+                val mimetype = headers["Content-Type"]
 
-            val mimetype = headers["Content-Type"]
+                if (VideoContentPresenterCommon.VIDEO_MIME_MAP.keys.contains(mimetype)) {
 
-            if (VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.contains(mimetype)) {
+                    if (headers["Content-Length"]?.toInt() ?: 0 >= FILE_SIZE) {
+                        call.respond(HttpStatusCode.BadRequest, "File size too big")
+                        return@execute
+                    }
 
-                if (headers["Content-Length"]?.toInt() ?: 0 >= FILE_SIZE) {
-                    call.respond(HttpStatusCode.BadRequest, "File size too big")
-                    return@get
+                    val entryDao = db.contentEntryDao
+                    val parentChildJoinDao = db.contentEntryParentChildJoinDao
+                    val containerDao = db.containerDao
+
+                    val contentEntry = ContentEntry()
+                    contentEntry.leaf = true
+                    contentEntry.title = videoTitle
+                    contentEntry.sourceUrl = urlString
+                    contentEntry.contentFlags = ContentEntry.FLAG_IMPORTED
+
+                    val parentChildJoin = ContentEntryParentChildJoin()
+                    parentChildJoin.cepcjParentContentEntryUid = parentUid
+
+                    if (contentEntryUid == null) {
+                        contentEntry.contentEntryUid = entryDao.insert(contentEntry)
+                        parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
+                        parentChildJoin.cepcjUid = parentChildJoinDao.insert(parentChildJoin)
+                    } else {
+                        contentEntry.contentEntryUid = contentEntryUid
+                        parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
+                        entryDao.update(contentEntry)
+                    }
+
+
+                    val container = Container(contentEntry)
+                    container.mimeType = headers["Content-Type"]!!
+
+
+                    val http = defaultHttpClient()
+                    val iContext = InitialContext()
+                    val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
+                    val containerDir = File(containerDirPath)
+                    containerDir.mkdirs()
+
+                    val parentDir = Files.createTempDirectory("video").toFile()
+
+                    var fileName = FilenameUtils.getName(urlString)
+                    if (!fileName.contains(".")) {
+                        fileName = headers["Content-Disposition"]?.substringAfter("filename=\"")?.substringBefore("\";")?.toLowerCase()
+                    }
+
+                    if (FilenameUtils.getExtension(fileName).isNullOrEmpty()) {
+                        fileName += VideoContentPresenterCommon.VIDEO_MIME_MAP[mimetype]
+                    }
+
+                    val videoFile = File(parentDir, fileName)
+                    val input = http.get<InputStream>(urlString)
+                    FileUtils.copyInputStreamToFile(input, videoFile)
+
+                    container.fileSize = videoFile.length()
+                    container.cntLastModified = parentDir.lastModified()
+                    container.mobileOptimized = true
+                    container.containerUid = containerDao.insert(container)
+
+                    val manager = ContainerManager(container, db,
+                            db, containerDir.absolutePath)
+
+                    manager.addEntries(ContainerManager.FileEntrySource(videoFile, videoFile.name))
+
+                    call.respond(H5PImportData(contentEntry, container, parentChildJoin))
+                }else {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid URL")
                 }
-
-                val entryDao = db.contentEntryDao
-                val parentChildJoinDao = db.contentEntryParentChildJoinDao
-                val containerDao = db.containerDao
-
-                val contentEntry = ContentEntry()
-                contentEntry.leaf = true
-                contentEntry.title = videoTitle
-                contentEntry.sourceUrl = urlString
-                contentEntry.contentFlags = ContentEntry.FLAG_IMPORTED
-
-                val parentChildJoin = ContentEntryParentChildJoin()
-                parentChildJoin.cepcjParentContentEntryUid = parentUid
-
-                if (contentEntryUid == null) {
-                    contentEntry.contentEntryUid = entryDao.insert(contentEntry)
-                    parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
-                    parentChildJoin.cepcjUid = parentChildJoinDao.insert(parentChildJoin)
-                } else {
-                    contentEntry.contentEntryUid = contentEntryUid
-                    parentChildJoin.cepcjChildContentEntryUid = contentEntry.contentEntryUid
-                    entryDao.update(contentEntry)
-                }
-
-
-                val container = Container(contentEntry)
-                container.mimeType = headers["Content-Type"]!!
-
-
-                val http = defaultHttpClient()
-                val iContext = InitialContext()
-                val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
-                val containerDir = File(containerDirPath)
-                containerDir.mkdirs()
-
-                val parentDir = Files.createTempDirectory("video").toFile()
-
-                var fileName = FilenameUtils.getName(urlString)
-                if(!fileName.contains(".")){
-                    fileName =  headers["Content-Disposition"]?.substringAfter("filename=\"")?.substringBefore("\";")?.toLowerCase()
-                }
-
-                if(FilenameUtils.getExtension(fileName).isNullOrEmpty()){
-                    fileName += VideoPlayerPresenterCommon.VIDEO_MIME_MAP[mimetype]
-                }
-
-                val videoFile = File(parentDir, fileName)
-                val input = http.get<InputStream>(urlString)
-                FileUtils.copyInputStreamToFile(input, videoFile)
-
-                container.fileSize = videoFile.length()
-                container.cntLastModified = parentDir.lastModified()
-                container.mobileOptimized = true
-                container.containerUid = containerDao.insert(container)
-
-                val manager = ContainerManager(container, db,
-                        db, containerDir.absolutePath)
-
-                manager.addEntries(ContainerManager.FileEntrySource(videoFile, videoFile.name))
-
-                call.respond(H5PImportData(contentEntry, container, parentChildJoin))
-
-
-            } else {
-                call.respond(HttpStatusCode.BadRequest, "Invalid URL")
             }
         }
-
-
     }
 }
 
@@ -206,7 +198,7 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
             val indexList = mutableListOf<LogIndex.IndexEntry>()
 
 
-            val json = Json(JsonConfiguration.Stable.copy(strictMode = false))
+            val json = Json(JsonConfiguration.Stable.copy())
             val http = defaultHttpClient()
 
             val iContext = InitialContext()
@@ -260,14 +252,15 @@ fun downloadH5PUrl(db: UmAppDatabase, h5pUrl: String, contentEntryUid: Long, par
                                             val urlDirectory = File(parentDir, getNameFromUrl(url))
                                             urlDirectory.mkdirs()
 
-                                            val response = getResponseFromUrl(http, urlString, log.message.params.response?.requestHeaders)
+                                            val response = getStatementFromUrl(http, urlString, log.message.params.response?.requestHeaders)
                                             val h5pFile = downloadFileFromLogIndex(response, urlString, urlDirectory)
-                                            val logIndex = createIndexFromLog(urlString,
-                                                    mimeType
-                                                            ?: response.contentType()?.contentType, urlDirectory,
-                                                    h5pFile, log.message.params.response?.headers
-                                                    ?: response.headers.toMap().entries.associate { it.key to it.value[0] })
-                                            indexList.add(logIndex)
+//                                            TODO: Refactor this to handle Ktor 1.3
+//                                            val logIndex = createIndexFromLog(urlString,
+//                                                    mimeType
+//                                                            ?: response.contentType()?.contentType, urlDirectory,
+//                                                    h5pFile, log.message.params.response?.headers
+//                                                    ?: response.headers.toMap().entries.associate { it.key to it.value[0] })
+//                                            indexList.add(logIndex)
 
                                         } catch (e: Exception) {
                                             print(e.message)
@@ -350,11 +343,12 @@ suspend fun addToIndex(baseUrl: String, itUrl: String, parentDir: File, http: Ht
 
     val urlDirectory = File(parentDir, getNameFromUrl(downloadUrl))
     urlDirectory.mkdirs()
-    val response = getResponseFromUrl(http, downloadUrl.toString(), null)
+    val response = getStatementFromUrl(http, downloadUrl.toString(), null)
     val h5pFile = downloadFileFromLogIndex(response, downloadUrl.toString(), urlDirectory)
-    return createIndexFromLog(downloadUrl.toString(),
-            response.contentType()?.contentType, urlDirectory,
-            h5pFile, response.headers.toMap().entries.associate { it.key to it.value[0] })
+    TODO("Refactor this to use Ktor 1.3")
+//    return createIndexFromLog(downloadUrl.toString(),
+//            response.contentType()?.contentType, urlDirectory,
+//            h5pFile, response.headers.toMap().entries.associate { it.key to it.value[0] })
 
 
 }
@@ -454,7 +448,7 @@ suspend fun waitForNewFiles(driver: ChromeDriver): List<LogEntry> {
  * @throws IOException
  */
 @Throws(IOException::class)
-suspend fun downloadFileFromLogIndex(response: HttpResponse, url: String, destination: File): File {
+suspend fun downloadFileFromLogIndex(statement: HttpStatement, url: String, destination: File): File {
 
     var fileName = FilenameUtils.getName(url)
     var index = fileName.indexOf("?")
@@ -464,7 +458,7 @@ suspend fun downloadFileFromLogIndex(response: HttpResponse, url: String, destin
     val file = File(destination, fileName)
     var inputStream: InputStream? = null
     try {
-        file.writeBytes(response.receive<InputStream>().readBytes())
+        file.writeBytes(statement.receive<InputStream>().readBytes())
     } catch (e: IOException) {
         println(e.message)
     } finally {
@@ -474,7 +468,7 @@ suspend fun downloadFileFromLogIndex(response: HttpResponse, url: String, destin
 
 }
 
-suspend fun getResponseFromUrl(http: HttpClient, url: String, requestHeaders: Map<String, String>?): HttpResponse {
+suspend fun getStatementFromUrl(http: HttpClient, url: String, requestHeaders: Map<String, String>?): HttpStatement {
     return http.get(url) {
         if (requestHeaders != null) {
             for (e in requestHeaders.entries) {

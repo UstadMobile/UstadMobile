@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/home_content_dest"
+        android:icon="@drawable/library_books_24px"
+        android:title="@string/content" />
+
+    <item
+        android:id="@+id/home_schoollist_dest"
+        android:icon="@drawable/ic_school_black_24dp"
+        android:title="@string/schools" />
+
+    <item
+        android:id="@+id/home_clazzlist_dest"
+        android:icon="@drawable/ic_group_black_24dp"
+        android:title="@string/classes" />
+
+    <item
+        android:id="@+id/home_personlist_dest"
+        android:icon="@drawable/ic_person_black_24dp"
+        android:title="@string/people" />
+
+    <item
+        android:id="@+id/report_list_dest"
+        android:icon="@drawable/ic_report_24dp"
+        android:title="@string/reports" />
+
+    <!--
+
+
+    <item
+        android:id="@+id/home_feed_dest"
+        android:icon="@drawable/ic_newspaper"
+        android:title="@string/feed"/>
+    -->
+
+</menu>

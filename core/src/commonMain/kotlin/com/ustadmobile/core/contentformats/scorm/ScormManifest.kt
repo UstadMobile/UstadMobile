@@ -1,7 +1,6 @@
 package com.ustadmobile.core.contentformats.scorm
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import kotlinx.io.IOException
 import kotlinx.io.InputStream
 import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPXmlParser
@@ -134,7 +133,6 @@ class ScormManifest {
     /**
      *
      * @param in
-     * @throws IOException
      */
     fun loadFromInputStream(`in`: InputStream) {
         val xpp = UstadMobileSystemImpl.instance.newPullParser()

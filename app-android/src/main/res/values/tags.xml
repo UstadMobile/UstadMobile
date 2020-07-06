@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="tag_datelong" type="id"/>
+    <item name="tag_dateusespinner" type="id"/>
+    <item name="tag_timelong" type="id"/>
+    <item name="tag_messageidoptions" type="id"/>
+    <item name="tag_imagefilepath" type="id"/>
+    <item name="tag_imageloadjob" type="id"/>
+    <item name="tag_button_toggle_group_map" type="id"/>
+
+    <!-- Used by the imagelookup binder -->
+    <item name="tag_imagelookup_key" type="id"/>
+    <item name="tag_imagelookup_fallback" type="id"/>
+    <item name="tag_imagelookup_map" type="id"/>
+    <item name="tag_imagelookup_currentres" type="id"/>
+
+    <!--Used by the messageidlookup binder -->
+    <item name="tag_messageidoption_selected" type="id"/>
+    <item name="tag_messageidoption_fallback" type="id"/>
+    <item name="tag_messageidoptions_list" type="id"/>
+
+    <item name="tag_graphlookup_key" type="id"/>
+
 </resources>

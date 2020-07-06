@@ -419,8 +419,12 @@ class OpfDocument {
         return creators
     }
 
-    fun getCreator(index: Int): OpfCreator {
-        return creators!![index]
+    fun getCreator(index: Int): OpfCreator ?{
+        return creators?.get(index)
+    }
+
+    fun getLanguage(index: Int): String? {
+        return if(languages.size > index) languages[index] else null
     }
 
     /**

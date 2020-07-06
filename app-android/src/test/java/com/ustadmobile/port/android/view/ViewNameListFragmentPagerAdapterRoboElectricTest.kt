@@ -2,14 +2,14 @@ package com.ustadmobile.port.android.view
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ViewNameListFragmentPagerAdapterRoboElectricTest {
 
     class DummyFragment: Fragment() {

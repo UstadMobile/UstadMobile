@@ -33,7 +33,6 @@ package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UMLog
 import kotlinx.io.ByteArrayOutputStream
-import kotlinx.io.IOException
 import kotlinx.io.InputStream
 import kotlinx.io.OutputStream
 import kotlinx.serialization.stringFromUtf8Bytes
@@ -64,7 +63,7 @@ object UMIOUtils {
     fun closeInputStream(`in`: InputStream?) {
         try {
             `in`?.close()
-        } catch (e: IOException) {
+        } catch (e: Exception) {
         }
 
     }
@@ -84,7 +83,7 @@ object UMIOUtils {
                     out.flush()
                 out.close()
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
 
         }
 
@@ -107,6 +106,7 @@ object UMIOUtils {
         out.flush()
     }
 
+    @ExperimentalStdlibApi
     @JvmOverloads
     @JvmStatic
     fun readStreamToString(`in`: InputStream, bufsize: Int = DEFAULT_BUFFER_SIZE): String {
@@ -114,7 +114,7 @@ object UMIOUtils {
         readFully(`in`, bout, bufsize)
         `in`.close()
 
-        return stringFromUtf8Bytes(bout.toByteArray())
+        return  bout.toByteArray().decodeToString() //stringFromUtf8Bytes(bout.toByteArray())
     }
 
     @JvmOverloads
@@ -126,25 +126,10 @@ object UMIOUtils {
     }
 
 
-    /**
-     * Read from the given input stream and return a string
-     *
-     * @param `in` Input Stream to read from
-     * @param encoding Encoding to use
-     * @return String from the given input stream in the given encoding
-     * @throws IOException
-     */
-    @JvmOverloads
-    @JvmStatic
-    fun readToString(`in`: InputStream): String {
-        val bout = ByteArrayOutputStream()
-        readFully(`in`, bout, 1024)
-        `in`.close()
-        return stringFromUtf8Bytes(bout.toByteArray())
-    }
 
 
-    fun throwIfNotNullIO(e: IOException?) {
+
+    fun throwIfNotNullIO(e: Exception?) {
         if (e != null) {
             throw e
         }
@@ -172,30 +157,6 @@ object UMIOUtils {
     }
 
 
-    /**
-     * Logs and throws the given exception if it is not null
-     *
-     * @param e Exception (Null if no exception happened)
-     * @param level Exception level
-     * @param code Exception code
-     * @param message Message if any
-     *
-     * @see UMLog
-     *
-     * @throws IOException
-     */
-    fun logAndThrowIfNotNullIO(e: IOException?, level: Int, code: Int, message: String) {
-        if (e != null) {
-            UMLog.l(level, code, message, e)
-            throw e
-        }
-    }
-
-    fun throwIfNotNull(e: Exception?) {
-        if (e != null) {
-            throw e
-        }
-    }
 
     fun sanitizeIDForFilename(id: String): String {
         var c: Char
