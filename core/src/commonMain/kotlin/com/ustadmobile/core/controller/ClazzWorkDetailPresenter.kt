@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ClazzWorkDetailView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -36,7 +35,7 @@ class ClazzWorkDetailPresenter(context: Any,
             db.clazzWorkDao.findByUidAsync(entityUid)
         } ?: ClazzWork()
 
-        view.title = clazzWork.clazzWorkTitle
+        view.clazzWorkTitle = clazzWork.clazzWorkTitle
 
         return clazzWork
     }
@@ -51,9 +50,7 @@ class ClazzWorkDetailPresenter(context: Any,
                 db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
                         entity?.clazzWorkClazzUid?: 0L)
             }
-            //TODO: Enable AFTER TESTING
-            view.studentRole = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-//            view.studentRole = true
+            view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
         }
 
     }

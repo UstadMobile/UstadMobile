@@ -18,7 +18,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -195,13 +194,6 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
         t -> metricsRecyclerAdapter?.submitList(t)
     }
 
-
-    override var clazzWorkWithMetrics: DoorLiveData<ClazzWorkWithMetrics>? = null
-        get() = field
-        set(value) {
-            metricsRecyclerAdapter?.submitList(listOf(value?.value))
-            metricsRecyclerAdapter?.visible = true
-        }
 
     override var clazzWorkWithMetricsFlat: ClazzWorkWithMetrics? = null
         get() = field

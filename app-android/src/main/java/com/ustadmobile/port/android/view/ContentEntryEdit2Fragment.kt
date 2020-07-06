@@ -207,7 +207,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
-        title = getString(R.string.content)
+        clazzWorkTitle = getString(R.string.content)
 
         GlobalScope.launch {
             val thisFrag = this@ContentEntryEdit2Fragment

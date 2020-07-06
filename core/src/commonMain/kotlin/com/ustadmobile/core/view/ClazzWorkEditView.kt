@@ -2,7 +2,9 @@ package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ClazzWorkEditPresenter
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 
 
 interface ClazzWorkEditView: UstadEditView<ClazzWork> {

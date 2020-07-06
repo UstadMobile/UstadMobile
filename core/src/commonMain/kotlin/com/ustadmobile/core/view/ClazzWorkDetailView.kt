@@ -7,9 +7,9 @@ interface ClazzWorkDetailView: UstadDetailView<ClazzWork> {
 
     fun setEditVisible(visible: Boolean)
 
-    var studentRole : Boolean
+    var isStudent : Boolean
 
-    var title: String?
+    var clazzWorkTitle: String?
 
     companion object {
 

@@ -137,7 +137,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         set(value) {
             field = value
             mBinding?.school = value
-            title = value?.schoolName
+            clazzWorkTitle = value?.schoolName
         }
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE

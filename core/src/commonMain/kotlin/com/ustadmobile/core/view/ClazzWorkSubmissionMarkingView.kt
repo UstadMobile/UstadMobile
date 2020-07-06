@@ -7,17 +7,16 @@ import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 import com.ustadmobile.lib.db.entities.CommentsWithPerson
 
-
 interface ClazzWorkSubmissionMarkingView: UstadEditView<ClazzMemberAndClazzWorkWithSubmission> {
 
-    var privateCommentsToPerson: DataSource.Factory<Int, CommentsWithPerson>?
+    var privateComments: DataSource.Factory<Int, CommentsWithPerson>?
 
-    var clazzWorkQuizQuestionsAndOptionsWithResponse
+    var submissionQuestionAndOptionsWithResponse
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
 
-    var markingLeft: Boolean
+    var isMarkingFinished: Boolean
 
-    var clazzWorkWithMetricsFlat : ClazzWorkWithMetrics?
+    var clazzWorkMetrics : ClazzWorkWithMetrics?
 
     companion object {
 

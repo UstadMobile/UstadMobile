@@ -38,10 +38,6 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     abstract fun findWithMetricsByClazzUidLiveDesc(clazzUid: Long): DataSource.Factory<Int,ClazzWorkWithMetrics>
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
-    abstract fun findClazzWorkWithMetricsByClazzWorkUidLive(clazzWorkUid: Long)
-            : DoorLiveData<ClazzWorkWithMetrics?>
-
-    @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
     abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long)
             : ClazzWorkWithMetrics?
 

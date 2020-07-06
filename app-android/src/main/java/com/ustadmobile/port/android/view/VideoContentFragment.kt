@@ -36,13 +36,11 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.VideoPlayerView
-import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.InputStream
 import java.io.BufferedInputStream
 import java.io.IOException
 
@@ -128,7 +126,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     override var entry: ContentEntry? = null
         set(value) {
             field = value
-            title = value?.title
+            clazzWorkTitle = value?.title
             mBinding?.entry = value
         }
 

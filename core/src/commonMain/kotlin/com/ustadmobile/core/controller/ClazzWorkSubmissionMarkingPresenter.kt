@@ -62,12 +62,12 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
         if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid ==
                 clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid ){
-            view.markingLeft == false
+            view.isMarkingFinished == false
         }else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
                 clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid){
-            view.markingLeft = true
+            view.isMarkingFinished = true
         }else {
-            view.markingLeft = unmarkedMembers.size > 1
+            view.isMarkingFinished = unmarkedMembers.size > 1
         }
 
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
@@ -113,7 +113,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                         qResponse.first())
                 }
 
-            view.clazzWorkQuizQuestionsAndOptionsWithResponse =
+            view.submissionQuestionAndOptionsWithResponse =
                     DoorMutableLiveData(questionsAndOptionsWithResponseList)
         }
 
@@ -122,7 +122,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                     ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
                     clazzMember?.clazzMemberPersonUid?:0L, loggedInPersonUid)
         }
-        view.privateCommentsToPerson = privateComments
+        view.privateComments = privateComments
 
         val test = withTimeoutOrNull(2000){
             db.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToTest(
@@ -141,7 +141,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                         filterByClazzWorkUid)
 
         view.runOnUiThread(Runnable {
-            view.clazzWorkWithMetricsFlat = clazzWorkWithMetrics
+            view.clazzWorkMetrics = clazzWorkWithMetrics
         })
 
         return clazzMemberWithSubmission

@@ -75,7 +75,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         val view = super.onCreateView(inflater, container, savedInstanceState)
         val mTitle = arguments?.get(ARG_PARENT_ENTRY_TITLE)
         if(mTitle != null){
-            title = mTitle.toString()
+            clazzWorkTitle = mTitle.toString()
         }
         mPresenter = ContentEntryList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, viewLifecycleOwner, UstadMobileSystemImpl.instance,

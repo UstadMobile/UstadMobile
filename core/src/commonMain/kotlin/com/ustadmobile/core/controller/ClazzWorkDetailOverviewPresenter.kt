@@ -64,7 +64,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                     clazzWorkWithSubmission.clazzWorkClazzUid)
         }
 
-        view.studentMode = (clazzMember != null &&
+        view.isStudent = (clazzMember != null &&
                 clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
 
 
@@ -126,7 +126,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         view.clazzWorkPublicComments = publicComments
 
 
-        if(clazzWorkWithSubmission.clazzWorkCommentsEnabled && view.studentMode) {
+        if(clazzWorkWithSubmission.clazzWorkCommentsEnabled && view.isStudent) {
             val privateComments = withTimeoutOrNull(2000) {
                 db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
                         clazzWorkWithSubmission.clazzWorkUid, loggedInPersonUid)

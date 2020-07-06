@@ -4,8 +4,6 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.db.dao.CommentsDao
-import com.ustadmobile.core.db.waitForLiveData
-import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.util.SystemImplRule
 import com.ustadmobile.core.util.UmAppDatabaseClientRule
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
@@ -13,7 +11,6 @@ import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
@@ -100,7 +97,7 @@ class ClazzWorkDetailOverviewPresenterTest {
         verify(mockView, timeout(5000).atLeastOnce()).timeZone =
                 testClazzWork.clazzAndMembers.clazz.clazzTimeZone!!
 
-        verify(mockView, timeout(5000).atLeastOnce()).studentMode = false
+        verify(mockView, timeout(5000).atLeastOnce()).isStudent = false
 
         val liveDataSet = nullableArgumentCaptor<DoorMutableLiveData<
                 List<ClazzWorkQuestionAndOptionWithResponse>>>().run {

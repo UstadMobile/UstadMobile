@@ -284,7 +284,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                         ListViewMode.BROWSER.toString())
 
         quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
-                studentMode)
+                isStudent)
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
         submissionHeadingRecyclerAdapter?.visible = false
@@ -408,7 +408,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
     }
 
-    override var studentMode: Boolean = false
+    override var isStudent: Boolean = false
         get() = field
         set(value) {
             field = value
@@ -419,7 +419,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             if(entity?.clazzWorkCommentsEnabled == false){
                 privateCommentsHeadingRecyclerAdapter?.visible = false
                 newPrivateCommentRecyclerAdapter?.visible = false
-            }else if (studentMode){
+            }else if (isStudent){
                 privateCommentsHeadingRecyclerAdapter?.visible = true
                 newPrivateCommentRecyclerAdapter?.visible = true
             }else if(entity?.clazzWorkSubmissionType ==
@@ -427,7 +427,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 questionsHeadingRecyclerAdapter?.visible = true
             }
 
-            submissionButtonRecyclerAdapter?.visible = studentMode &&
+            submissionButtonRecyclerAdapter?.visible = isStudent &&
                     entity?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L &&
                     entity?.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
 
@@ -449,14 +449,14 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             submissionResultRecyclerAdapter?.visible = true
 
             submissionFreeTextRecyclerAdapter?.visible = value?.clazzWorkSubmissionType ==
-                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT && studentMode
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT && isStudent
 
             if(value?.clazzWorkSubmissionType ==
-                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ && !studentMode){
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ && !isStudent){
                 questionsHeadingRecyclerAdapter?.visible = true
             }
 
-            submissionButtonRecyclerAdapter?.visible = studentMode &&
+            submissionButtonRecyclerAdapter?.visible = isStudent &&
                     value?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L &&
                     value.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
 
@@ -469,7 +469,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             if(entity?.clazzWorkCommentsEnabled == false){
                 privateCommentsHeadingRecyclerAdapter?.visible = false
                 newPrivateCommentRecyclerAdapter?.visible = false
-            }else if (studentMode){
+            }else if (isStudent){
                 privateCommentsHeadingRecyclerAdapter?.visible = true
                 newPrivateCommentRecyclerAdapter?.visible = true
             }

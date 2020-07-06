@@ -1,9 +1,11 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
+import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
+import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 
 
 interface ClazzWorkDetailOverviewView: UstadDetailView<ClazzWorkWithSubmission> {
@@ -15,8 +17,7 @@ interface ClazzWorkDetailOverviewView: UstadDetailView<ClazzWorkWithSubmission> 
     var timeZone: String
     var clazzWorkPublicComments: DataSource.Factory<Int, CommentsWithPerson>?
     var clazzWorkPrivateComments: DataSource.Factory<Int, CommentsWithPerson>?
-    var studentMode : Boolean
-
+    var isStudent : Boolean
 
     companion object {
 

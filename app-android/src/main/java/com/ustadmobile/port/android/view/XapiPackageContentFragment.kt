@@ -35,7 +35,7 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
     override var contentTitle: String = ""
         set(value) {
             field = value
-            title = value
+            clazzWorkTitle = value
         }
 
     override var url: String = ""

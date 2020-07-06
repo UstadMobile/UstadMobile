@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -25,7 +24,6 @@ import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.StatementListReport
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -189,7 +187,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         set(value) {
             field = value
             mBinding?.report = value
-            title = value?.reportTitle
+            clazzWorkTitle = value?.reportTitle
         }
 
 

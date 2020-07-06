@@ -98,7 +98,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
         submitWithMetricsRecyclerAdapter =
                 ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(
-                        clazzWorkWithMetricsFlat, entity, mPresenter,false, markingLeft)
+                        clazzWorkMetrics, entity, mPresenter,false, isMarkingFinished)
         submissionResultRecyclerAdapter =
                 ClazzWorkDetailOverviewFragment.SubmissionResultRecyclerAdapter(
                         clazzWorkWithSubmission)
@@ -189,7 +189,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             newPrivateCommentRecyclerAdapter?.commentFrom = UmAccountManager.getActivePersonUid(requireContext())
             newPrivateCommentRecyclerAdapter?.visible = true
 
-            title = value?.person?.fullName()?:""
+            clazzWorkTitle = value?.person?.fullName()?:""
 
             val clazzWorkWithSubmission: ClazzWorkWithSubmission =
                     ClazzWorkWithSubmission().generateWithClazzWorkAndClazzWorkSubmission(
@@ -215,15 +215,15 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
                 submissionFreeTextRecyclerAdapter?.visible = false
             }
 
-            submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkWithMetricsFlat))
+            submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkMetrics))
             submitWithMetricsRecyclerAdapter?.visible = true
-            submitWithMetricsRecyclerAdapter?.showNext = markingLeft
+            submitWithMetricsRecyclerAdapter?.showNext = isMarkingFinished
             submitWithMetricsRecyclerAdapter?.passThis = entity
 
 
         }
 
-    override var privateCommentsToPerson: DataSource.Factory<Int, CommentsWithPerson>? = null
+    override var privateComments: DataSource.Factory<Int, CommentsWithPerson>? = null
         get() = field
         set(value) {
             val privateCommentsObserverVal = privateCommentsObserver?:return
@@ -233,7 +233,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         }
 
 
-    override var clazzWorkQuizQuestionsAndOptionsWithResponse
+    override var submissionQuestionAndOptionsWithResponse
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
         get() = field
         set(value) {
@@ -243,20 +243,20 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         }
 
 
-    override var markingLeft: Boolean = false
+    override var isMarkingFinished: Boolean = false
         get() = field
         set(value) {
             field = value
         }
-    override var clazzWorkWithMetricsFlat: ClazzWorkWithMetrics? = null
+    override var clazzWorkMetrics: ClazzWorkWithMetrics? = null
         get() = field
         set(value) {
 
             field = value
             submitWithMetricsRecyclerAdapter?.visible = true
-            submitWithMetricsRecyclerAdapter?.showNext = markingLeft
+            submitWithMetricsRecyclerAdapter?.showNext = isMarkingFinished
             submitWithMetricsRecyclerAdapter?.passThis = entity
-            submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkWithMetricsFlat))
+            submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkMetrics))
 
         }
 

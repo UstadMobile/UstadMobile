@@ -105,7 +105,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
             mBinding?.clazzWork = value
         }
 
-    override var studentRole: Boolean = false
+    override var isStudent: Boolean = false
         get() = field
         set(value) {
             field = value

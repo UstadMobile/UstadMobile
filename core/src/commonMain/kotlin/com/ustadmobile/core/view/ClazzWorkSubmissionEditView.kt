@@ -1,7 +1,5 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.ClazzWorkSubmission
 import com.ustadmobile.lib.db.entities.ClazzWorkSubmissionWithClazzWork
 
 

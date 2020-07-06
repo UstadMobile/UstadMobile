@@ -42,7 +42,7 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
     class ClazzWorkListViewHolder(val itemBinding: ItemClazzWorkListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
     class ClazzWorkListRecyclerAdapter(var presenter: ClazzWorkListPresenter?,
-                                       val canSeeResult: Boolean = false)
+                                       private val canSeeResult: Boolean = false)
         : SelectablePagedListAdapter<ClazzWorkWithMetrics, ClazzWorkListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkListViewHolder {
@@ -124,7 +124,7 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
         }
     }
 
-    override var canSeeResult: Boolean = false
+    override var hasResultViewPermission: Boolean = false
         get() = field
         set(value){
             mDataRecyclerViewAdapter = ClazzWorkListRecyclerAdapter(mPresenter, value)
