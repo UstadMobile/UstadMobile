@@ -59,7 +59,6 @@ class VideoContentFragmentTest {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-
     @JvmField
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())

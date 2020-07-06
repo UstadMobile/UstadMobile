@@ -43,13 +43,11 @@ open class IndexLog {
 abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, String>,
                                        view: WebChunkView,
                                        private val isDownloadEnabled: Boolean,
-                                       private val appRepo: UmAppDatabase,
+                                       val appRepo: UmAppDatabase,
                                        val umAppDb: UmAppDatabase,
                                        private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
 
     : UstadBaseController<WebChunkView>(context, arguments, view) {
-
-    private var navigation: String? = null
 
     internal var containerUid: Long? = null
 
@@ -59,22 +57,18 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        var entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID)!!.toLong()
-        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID)!!.toLong()
-
-        navigation = arguments[ARG_REFERRER] ?: ""
+        var entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
+        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
         GlobalScope.launch {
             try {
                 val result = umAppDb.contentEntryDao.getContentByUuidAsync(entryUuid)
                 view.runOnUiThread(Runnable {
-                    val resultTitle = result?.title
-                    if (resultTitle != null)
-                        view.setToolbarTitle(resultTitle)
+                    view.entry = result
                 })
             } catch (e: Exception) {
                 view.runOnUiThread(Runnable {
-                    view.showError(UstadMobileSystemImpl.instance
+                    view.showSnackBar(UstadMobileSystemImpl.instance
                             .getString(MessageID.error_opening_file, context))
                 })
             }
@@ -104,11 +98,11 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                             arguments[ARG_NO_IFRAMES]?.toBoolean()!!)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
-                        view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
+                        view.showNoAppFoundError(impl.getString(MessageID.no_app_found, context),
                                 MessageID.get_app,
-                                e.mimeType!!)
+                                e.mimeType ?: "")
                     } else {
-                        view.showError(e.message!!)
+                        view.showSnackBar(e.message ?: "")
                     }
                 }
 
