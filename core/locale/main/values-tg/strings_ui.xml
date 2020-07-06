@@ -73,7 +73,7 @@
     <string name="exams">имтиҳонҳо</string>
     <string name="reports">гузоришҳо</string>
     <string name="contents">Мундариҷа</string>
-    <string name="students">Ҳисоб</string>
+    <string name="students">Хонандагон</string>
     <string name="forgot_password">Фаромуш кардани парол</string>
     <string name="account">ҳисоб</string>
     <string name="share_application">Мубодила кардани барнома</string>
@@ -110,13 +110,13 @@
     <string name="download_wifi_only">Танҳо WiFi</string>
     <string name="download_calculating">Ҳисоб карда истодааст …</string>
     <string name="download_state_download">
-        <b> Зеркашӣ </b> ҳамагӣ% 1 $ s чизҳо, онҳо ҳамагӣ% 2 $ и анбори дастгоҳи шуморо истифода хоҳанд кард.</string>
+        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ%2$ и анбори дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="content_font_24">24pt</string>
     <string name="schools">Муассисаҳои таълимӣ</string>
     <string name="download_state_downloading">
-        <b> Зеркашӣ </b> ҳамагӣ% 1 $ s чизҳо, онҳо ҳамагӣ% 2 $ и анбори дастгоҳи шуморо истифода хоҳанд кард.</string>
-    <string name="download_downloading_placeholder">Зеркашии% 1 $ s аз% 2 $ s</string>
-    <string name="download_summary_title">Зеркашии фаъол% 1 $ s</string>
+        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$-и захираҳои дастгоҳи шуморо истифода хоҳанд кард.</string>
+    <string name="download_downloading_placeholder">Боргирии%1$s аз %2$s</string>
+    <string name="download_summary_title">Боргирии фаъол %1$s</string>
     <string name="download_cancel_all">Ҳамаро бекор кардан</string>
     <string name="download_cancel_label">Бекор кардани боргирӣ</string>
     <string name="download_pause_download">Таваққуф кардан</string>
@@ -129,7 +129,7 @@
     <string name="download_entry_state_paused">Таваққуф карда шуд</string>
     <string name="get_app">Барномаро дастрас намоед</string>
     <string name="entry_details_author">Муаллиф</string>
-    <string name="entry_details_license">Иҷозатнома</string>
+    <string name="entry_details_license">Иҷозатнома:</string>
     <string name="entry_details_description">Шарҳу тавсиф</string>
     <string name="library_reading_level">Сатҳи хониш</string>
     <string name="file_not_found">Файл ёфт нашуд</string>
@@ -200,9 +200,9 @@
     <string name="content_editor_link_remove">Тоза кардани пайванд</string>
     <string name="permission_camera_message">Ин барнома иҷозати аксбардори ва наворбардориро талаб мекунад</string>
     <string name="content_editor_create_new">Илова кардани нав</string>
-    <string name="content_editor_create_new_import">Воридот аз файл</string>
-    <string name="content_editor_create_new_import_link">Воридот аз пайванд</string>
-    <string name="content_editor_create_new_category">Эҷод кардани ҷузвдони нав</string>
+    <string name="content_editor_create_new_import">Воридоти файл</string>
+    <string name="content_editor_create_new_import_link">Воридоти пайванд</string>
+    <string name="content_editor_create_new_category">Ҷузвдони нав</string>
     <string name="content_editor_edit_category">Таҳрир кардан</string>
     <string name="content_editor_create_new_title">Илова кардани мундариҷа</string>
     <string name="content_entry_label_desc">Шарҳу тавсиф</string>
@@ -479,7 +479,7 @@
     <string name="dropout_reason_other">Дигар</string>
     <string name="groups">Гурӯҳҳо</string>
     <string name="roles">Нақшҳо</string>
-    <string name="role">Нақшҳо</string>
+    <string name="role">Нақш</string>
     <string name="roles_setting_desc">Иҷозатномаҳои ба нақшҳо додашударо идора кардан</string>
     <string name="rols_assignment">Тақсимоти вазифаҳо</string>
     <string name="locations">Макон</string>
@@ -620,9 +620,9 @@
     <string name="assignment">Супориш</string>
     <string name="student_progress">Пешрафти хонанда</string>
     <string name="use_device_language">Забони дастгоҳро истифода баред</string>
-    <string name="location_permission_details">"Ин барнома Bluetooth ва WiFi-ро барои ёфтани корбарони дигар дар наздикӣ истифода мебарад. Он гоҳ барнома метавонад бо корбарони наздик бо суръати баланд боркаш кардани мундариҷаро  бидуни дархости дастрасӣ ба Интернет имконият диҳад. Азбаски ин амалро барои муайян кардани макони шумо истифода бурдан мумкин аст, шумо бояд барои муайян кардани ҷойгиршавӣ иҷозат диҳед. Ин барнома натиҷаҳои ин амал ва макони шуморо бо ягон роҳ сабт намекунад. Ин барнома аз рамзи кушодаасос сохта шудааст, ки онро дар github.com/UstadMobile/UstadMobile санҷидан мумкин аст"</string>
+    <string name="location_permission_details">Ин барнома Bluetooth ва WiFi-ро барои ёфтани корбарони дигар дар наздикӣ истифода мебарад. Он гоҳ барнома метавонад бо корбарони наздик бо суръати баланд боркаш кардани мундариҷаро бидуни дархости дастрасӣ ба Интернет имконият диҳад. Азбаски ин амалро барои муайян кардани макони шумо истифода бурдан мумкин аст, шумо бояд барои муайян кардани ҷойгиршавӣ иҷозат диҳед. Ин барнома натиҷаҳои ин амал ва макони шуморо бо ягон роҳ сабт намекунад. Ин барнома аз рамзи кушодаасос сохта шудааст, ки онро дар github.com/UstadMobile/UstadMobile санҷидан мумкин аст</string>
     <string name="download_state_downloaded">
-        <b> Зеркашӣ </b> ҳамагӣ% 1 $ s чизҳо, онҳо ҳамагӣ% 2 $ и анбори дастгоҳи шуморо истифода хоҳанд кард.</string>
+        <b>Бор гардид </b> ҳамагӣ %1$ s мавод, онҳо ҳамагӣ %2$-и захирагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="download_storage_option_device">Истифодаи %1$s - аз %2$s озод</string>
     <string name="download_storage_permission_message">Ин барнома барои зеркашӣ ва нигоҳ доштани мундариҷа дар корти SD иҷозати файлро талаб мекунад</string>
     <string name="insufficient_space">Ҷойи кофии нигоҳдории мундариҷа мавҷуд нест</string>
@@ -651,7 +651,7 @@
     <string name="error_message_update_document">Ҳуҷҷатро навсозӣ карда натавонист</string>
     <string name="content_supported_files">Файлҳои дастгиримешудагӣ: <b> Epub, TinCan (XAPI) Zip </b>
     </string>
-    <string name="content_editor_save_error">"Ҳангоми захирасозӣ ба  хатогӣ рӯ ба рӯ шуд, бори дигар кӯшиш кунед"</string>
+    <string name="content_editor_save_error">Ҳангоми захирасозӣ ба хатогӣ рӯ ба рӯ шуд, бори дигар кӯшиш кунед</string>
     <string name="enter_register_code">Рамзи бақайдгириро ворид кунед</string>
     <string name="add_to_dashboard">Ба панели фаъолиятҳо илова кунед</string>
     <string name="xapi_score">Ҳисоб (%)</string>
@@ -687,7 +687,7 @@
     <string name="sel_done_select_another_student">SEL анҷом дода шуд. Ҳоло шумо метавонед ба хонандаи дигар гузаред</string>
     <string name="taught_by">Таълим аз тарафи</string>
     <string name="activity_went_bad">Фаъолият на онқадар хуб иҷро шуд</string>
-    <string name="add_activity">Фаъолияти навро илова намоед</string>
+    <string name="add_activity">Фаъолияти навро илова намоед...</string>
     <string name="add_activity_literal">Фаъолиятро илова намоед</string>
     <string name="select_one">Якеро интихоб намоед</string>
     <string name="choose_report_options">Шаклҳои гузоришро интихоб кунед</string>
@@ -707,7 +707,7 @@
     <string name="select_timezone">Минтақаи вақтро барои ин мавзеъҳо интихоб кунед</string>
     <string name="dropout_reason_other_ngo">Дигар ташкилотҳои ғайридавлатӣ</string>
     <string name="dropout_reason_parents_refuse_permission">Волидайн иҷозат намедиҳанд</string>
-    <string name="group_setting_desc">Илова, нест ё тағир додани гурӯҳҳо</string>
+    <string name="group_setting_desc">Илова, нест ё тағйир додани гурӯҳҳо</string>
     <string name="role_assignment_setting_desc">Тақсимоти вазифаҳо ба истифодабаранда ё гурӯҳ</string>
     <string name="add_holiday_calendar">Ворид намудани тақвими идҳо</string>
     <string name="add_holiday">Идро илова кунед</string>
@@ -722,4 +722,97 @@
     <string name="permission_clazz_add_student">Илова намудани хонандагон ба синфҳо</string>
     <string name="permission_activity_insert">Ба машғулият дарсӣ оғоз кунед</string>
     <string name="permission_sel_question_insert">Саволҳои SEL ро илова кунед</string>
+    <string name="x_filter">%1$s филтр</string>
+    <string name="return_only">Бозгардед ва ба итмом расонед</string>
+    <string name="return_and_mark_next">Бозгардед ва баъдиро қайд кунед</string>
+    <string name="marking">Аломатгузорӣ</string>
+    <string name="three_num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s, %5$d %6$s</string>
+    <string name="submit">Пешниҳод намоед</string>
+    <string name="class_comments">Шарҳи синф</string>
+    <string name="add_private_comment">Шарҳи махфиро илова намоед</string>
+    <string name="add_class_comment">Шарҳи синфро илова намоед</string>
+    <string name="submit_your_answer">Ҷавоби худро пешниҳод кунед</string>
+    <string name="maximum_score">Баҳои ниҳоӣ</string>
+    <string name="private_comments">Шарҳи махфӣ</string>
+    <string name="public_comments">Шарҳи оммавӣ</string>
+    <string name="submission">Супориш</string>
+    <string name="time">Вақт</string>
+    <string name="quiz_questions">Саволҳои викторина</string>
+    <string name="class_timezone">Вақти маҳаллии синф</string>
+    <string name="deadline">Мӯҳлати охирин</string>
+    <string name="allow_private_comments_from_students">Шарҳҳои махфии хонандагонро иҷозат диҳед</string>
+    <string name="quiz">Викторина</string>
+    <string name="attachment">Замима</string>
+    <string name="short_text">Матни кӯтоҳ</string>
+    <string name="no_submission_required">Зарурати пешниҳод нест</string>
+    <string name="submission_type">Навъи пешниҳод</string>
+    <string name="visible_from_date">Намоён аз сана</string>
+    <string name="not_submitted">Пешниҳод нашудааст</string>
+    <string name="submitted">Пешниҳод шудааст</string>
+    <string name="marked">Ишора шудааст</string>
+    <string name="clazz_work">Кори синфӣ</string>
+    <string name="nothing_here">Чизе инҷо нест</string>
+    <string name="x_percent_attended">%1.0f%% иштирок</string>
+    <string name="present_late_absent">%1$d ҳозир аст, %2$d дер кардаст, %3$d ғоиб аст</string>
+    <string name="untitled">Бе сарлавҳа</string>
+    <string name="contact_details">Маълумот барои тамос</string>
+    <string name="student">Хонанда</string>
+    <string name="organization_id">ID-и муассиса</string>
+    <string name="call">Занг занед</string>
+    <string name="x_teachers_y_students">%1$d омӯзгорон, %2$d хонандагон</string>
+    <string name="staff">Кормандон</string>
+    <string name="permission_clazz_assignment_view">Супоришҳои синфиро аз назар гузаронед</string>
+    <string name="add_new">Иловаи нав</string>
+    <string name="overview">Шарҳ</string>
+    <string name="permission_clazz_asignment_edit">Вазифаҳои синфҳоро таҳия ва таҳрир кунед</string>
+    <string name="edit_entity">%1$s таҳрир намоед</string>
+    <string name="select_new_photo_from_gallery">Сурати навро аз галерея интихоб намоед</string>
+    <string name="take_new_photo_from_camera">Сурати навро аз камера гиред</string>
+    <string name="remove_photo">Тоза кардани сурат</string>
+    <string name="change_photo">Ивази сурат</string>
+    <string name="items_selected">%1$d интихоб шуд</string>
+    <string name="remove_from">Аз %1$s тоза намоед</string>
+    <string name="add_to">Ба %1$s илова намоед</string>
+    <string name="new_entity">%1$s-и нав</string>
+    <string name="add_a">%1$s илова намоед</string>
+    <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
+    <string name="num_items_with_name">%1$d %2$s</string>
+    <string name="from_to_date">%1$s - %2$s</string>
+    <string name="create_new">%1$s-и нав эҷод намоед</string>
+    <string name="select_item">%1$s интихоб намоед</string>
+    <string name="school">Муассисаи таълимӣ</string>
+    <string name="timezone">Вақти маҳаллӣ</string>
+    <string name="holidays">Идҳо</string>
+    <string name="holiday">Ид</string>
+    <string name="address">Суроға</string>
+    <string name="licence_type_all_rights">Ҳама ҳуқуқҳо ҳифз шудаанд</string>
+    <string name="licence_type_public_domain">Домени ҷамъиятӣ</string>
+    <string name="licence_type_cc_by_nc_sa">Нусха аз NC SA</string>
+    <string name="licence_type_cc_by_nc">Нусха аз NC</string>
+    <string name="licence_type_cc_by_sa_nc">Нусха аз SA NC</string>
+    <string name="licence_type_cc_by_sa">CC аз SA</string>
+    <string name="licence_type_cc_by">Нусха аз</string>
+    <string name="dashboard">Лавҳаи иттилоотӣ</string>
+    <string name="id_verbentity_urlid">ID: %s</string>
+    <string name="verb">Феъл</string>
+    <string name="report">Гузориш</string>
+    <string name="supported_files">Файлҳои дастгиршаванда: <b> Видео, Аудио, EPUB, Xapi Zip, H5P </b>
+    </string>
+    <string name="file_required_prompt">Файли воридшаванда интихоб карда нашудааст, бори дигар кӯшиш кунед</string>
+    <string name="video">Видео</string>
+    <string name="content_type">Навъи мӯҳтаво</string>
+    <string name="preview">Пешнамоиш</string>
+    <string name="entry_details_publisher">Ношир</string>
+    <string name="audio">Аудо</string>
+    <string name="article">Мақола</string>
+    <string name="document">Хуҷҷат</string>
+    <string name="collection">Маҷмӯа</string>
+    <string name="interactive">Интерактивӣ</string>
+    <string name="ebook">Китоби электронӣ</string>
+    <string name="licence">Иҷозатнома</string>
+    <string name="publicly_accessible">Дастраси омма</string>
+    <string name="update_content">Навсозии мундариҷа</string>
+    <string name="import_content">Воридоти мундариҷа</string>
+    <string name="select_language">Интихоби забон</string>
+    <string name="description">Шарҳ</string>
 </resources>
