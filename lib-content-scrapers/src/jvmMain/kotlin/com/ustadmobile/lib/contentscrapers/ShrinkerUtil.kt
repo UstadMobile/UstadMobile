@@ -37,6 +37,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.PNG_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import org.kmp.io.KMPPullParserException
 
+@ExperimentalStdlibApi
 object ShrinkerUtil {
 
     val HTML_MIME_TYPES = listOf("application/xhtml+xml", "text/html")
@@ -191,7 +192,7 @@ object ShrinkerUtil {
 
                     val htmlFile = File(opfDir, opfItem.href!!)
                     FileInputStream(htmlFile).use { htmlFileInputStream ->
-                        var html = UMIOUtils.readToString(htmlFileInputStream)
+                        var html = UMIOUtils.readStreamToString(htmlFileInputStream)
                         /*
                          * Pratham uses an entity code to map &nbsp; to &#160; - this confuses jsoup
                          */

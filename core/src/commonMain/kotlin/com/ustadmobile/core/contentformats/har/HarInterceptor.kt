@@ -1,5 +1,6 @@
 package com.ustadmobile.core.contentformats.har
 
+@ExperimentalStdlibApi
 abstract class HarInterceptor {
 
     abstract fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse

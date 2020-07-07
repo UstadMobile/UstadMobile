@@ -28,6 +28,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions
 import java.io.File
 import java.net.URL
 
+@ExperimentalStdlibApi
 class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
 
 

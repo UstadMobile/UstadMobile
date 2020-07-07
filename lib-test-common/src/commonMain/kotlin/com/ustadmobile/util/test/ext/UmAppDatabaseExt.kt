@@ -262,7 +262,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var firstStatement = StatementEntity()
     firstStatement.statementPersonUid = firstPerson.personUid
     firstStatement.resultDuration = 2400000
-    firstStatement.resultScoreScaled = 50
+    firstStatement.resultScoreScaled = 50f
     firstStatement.statementVerbUid = firstVerb.verbUid
     firstStatement.xObjectUid = firstObject.xObjectUid
     firstStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -273,7 +273,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var secondStaement = StatementEntity()
     secondStaement.statementPersonUid = firstPerson.personUid
     secondStaement.resultDuration = 7200000
-    secondStaement.resultScoreScaled = 100
+    secondStaement.resultScoreScaled = 100f
     secondStaement.statementVerbUid = secondVerb.verbUid
     secondStaement.xObjectUid = firstObject.xObjectUid
     secondStaement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -284,7 +284,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var thirdStatement = StatementEntity()
     thirdStatement.statementPersonUid = secondPerson.personUid
     thirdStatement.resultDuration = 600000
-    thirdStatement.resultScoreScaled = 50
+    thirdStatement.resultScoreScaled = 50f
     thirdStatement.statementVerbUid = firstVerb.verbUid
     thirdStatement.xObjectUid = secondObject.xObjectUid
     thirdStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -294,7 +294,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var fourthStatement = StatementEntity()
     fourthStatement.statementPersonUid = thirdPerson.personUid
     fourthStatement.resultDuration = 120000
-    fourthStatement.resultScoreScaled = 20
+    fourthStatement.resultScoreScaled = 20f
     fourthStatement.statementVerbUid = firstVerb.verbUid
     fourthStatement.xObjectUid = secondObject.xObjectUid
     fourthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -305,7 +305,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var fifthStatement = StatementEntity()
     fifthStatement.statementPersonUid = fourthPerson.personUid
     fifthStatement.resultDuration = 100000
-    fifthStatement.resultScoreScaled = 85
+    fifthStatement.resultScoreScaled = 85f
     fifthStatement.statementVerbUid = thirdVerb.verbUid
     fifthStatement.xObjectUid = firstObject.xObjectUid
     fifthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -316,7 +316,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var sixthStatement = StatementEntity()
     sixthStatement.statementPersonUid = thirdPerson.personUid
     sixthStatement.resultDuration = 60000
-    sixthStatement.resultScoreScaled = 25
+    sixthStatement.resultScoreScaled = 25f
     sixthStatement.statementVerbUid = firstVerb.verbUid
     sixthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
     sixthStatement.xObjectUid = secondObject.xObjectUid
@@ -327,7 +327,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var seventhStatement = StatementEntity()
     seventhStatement.statementPersonUid = secondPerson.personUid
     seventhStatement.resultDuration = 30000
-    seventhStatement.resultScoreScaled = 5
+    seventhStatement.resultScoreScaled = 5f
     seventhStatement.statementVerbUid = firstVerb.verbUid
     seventhStatement.xObjectUid = firstObject.xObjectUid
     seventhStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -339,7 +339,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
         var statement = StatementEntity()
         statement.statementPersonUid = secondPerson.personUid
         statement.resultDuration = 30000
-        statement.resultScoreScaled = 5
+        statement.resultScoreScaled = 5f
         statement.statementVerbUid = firstVerb.verbUid
         statement.xObjectUid = firstObject.xObjectUid
         statement.resultSuccess = StatementEntity.RESULT_SUCCESS

@@ -18,7 +18,7 @@ import java.io.File
 import java.lang.IllegalArgumentException
 import kotlin.system.exitProcess
 
-
+@ExperimentalStdlibApi
 class ScraperRunner(private val containerPath: String, private val indexTotal: Int = 4, private val scraperTotal: Int = 1) {
 
 
@@ -40,7 +40,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
         var parentEntry: ContentEntry? = null
         if (parentUid != 0L) {
             runBlocking {
-                parentEntry = contentEntryDao.findByEntryId(parentUid)
+                parentEntry = contentEntryDao.findByUidAsync(parentUid)
             }
         }
         return parentEntry

@@ -29,6 +29,7 @@ import java.nio.file.Paths
  * This will contain the path to the rootfile which contains all the content inside the epub.
  * Open the rootfile using the path and extract the id, author etc to create the content entry
  */
+@ExperimentalStdlibApi
 class IndexFolderScraper {
 
     private var contentEntryDao: ContentEntryDao? = null

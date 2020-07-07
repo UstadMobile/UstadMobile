@@ -7,7 +7,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
 import io.ktor.client.request.put
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.statement.HttpStatement
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
@@ -39,6 +39,7 @@ class ItemData {
 }
 
 
+@ExperimentalStdlibApi
 class KhanProgressTracker : HarInterceptor() {
 
     val exercisePath = "/api/internal/user/exercises/"
@@ -149,7 +150,7 @@ class KhanProgressTracker : HarInterceptor() {
             }
 
             val cardDetailsContent = HarContent()
-            cardDetailsContent.data = ByteArrayInputStream(completeResponse.toUtf8Bytes())
+            cardDetailsContent.data = ByteArrayInputStream(completeResponse.encodeToByteArray())
             cardDetailsContent.text = completeResponse
             cardDetailsContent.mimeType = "application/json"
             cardDetailsContent.size = completeResponse.length.toLong()
@@ -179,7 +180,7 @@ class KhanProgressTracker : HarInterceptor() {
         val containerEntry = harContainer.containerManager.getEntry(harText
                 ?: "") ?: return response
         val data = harContainer.containerManager.getInputStream(containerEntry)
-        val result = UMIOUtils.readToString(data)
+        val result = UMIOUtils.readStreamToString(data)
         val itemResp = json.parse(ItemResponse.serializer(), result).itemData ?: return response
         var question = json.parse(ItemData.serializer(), itemResp).question?.content
                 ?: return response
@@ -245,13 +246,13 @@ class KhanProgressTracker : HarInterceptor() {
 
         GlobalScope.launch {
 
-            client.put<HttpResponse> {
+            client.put<HttpStatement> {
                 url {
                     takeFrom(harContainer.localHttp)
                     encodedPath = "${encodedPath}xapi/${harContainer.entry.contentEntryUid}/statements"
                 }
                 this.body = statement
-            }
+            }.execute()
 
         }
 

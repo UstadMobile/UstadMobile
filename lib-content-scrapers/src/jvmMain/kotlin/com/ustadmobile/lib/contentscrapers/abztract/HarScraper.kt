@@ -14,6 +14,7 @@ import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.Container
 import io.github.bonigarcia.wdm.WebDriverManager
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.InternalSerializationApi
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.HarEntry
@@ -38,7 +39,7 @@ typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
 
 typealias WaitConditionFn = (waitCondition: WebDriverWait) -> Unit
 
-
+@ExperimentalStdlibApi
 abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : Scraper(containerDir, db, contentEntryUid, sqiUid) {
 
     protected var chromeDriver: ChromeDriver
@@ -163,6 +164,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 }
 
                 runBlocking {
+
 
                     if(containerManager.getEntry(containerPath) == null) {
                         containerPath += counter

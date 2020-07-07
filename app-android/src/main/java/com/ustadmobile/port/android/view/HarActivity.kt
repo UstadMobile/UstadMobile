@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
@@ -71,48 +72,9 @@ class HarActivity : ContainerContentActivity(), UstadViewWithSnackBar, HarAndroi
             super.onBackPressed()
         }
     }
-
-    private fun clickUpNavigation() {
-        mPresenter.handleUpNavigation()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            // Respond to the action bar's Up/Home button
-            android.R.id.home -> {
-                runOnUiThread { this.clickUpNavigation() }
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun showError(message: String) {
-        showSnackBarNotification(message, {}, 0)
-    }
-
     override fun setToolbarTitle(title: String) {
         umToolbar.title = title
     }
 
-    override fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String) {
-        showSnackBarNotification(message, {
-            var appPackageName = mimeTypeToPlayStoreIdMap[mimeType]
-            if (appPackageName == null) {
-                appPackageName = "cn.wps.moffice_eng"
-            }
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
-            } catch (anfe: android.content.ActivityNotFoundException) {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
-            }
-        }, actionMessageId)
-    }
 
-    override fun setChromeClient(client: HarWebViewClient) {
-        mWebView.webViewClient = client
-        client.setRecoder(recorder)
-        clientDeferred.complete(client)
-    }
-
-}
+}*/

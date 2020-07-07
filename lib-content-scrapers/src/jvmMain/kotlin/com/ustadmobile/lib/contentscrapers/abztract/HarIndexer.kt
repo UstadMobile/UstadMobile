@@ -17,6 +17,7 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.support.ui.WebDriverWait
 
+@ExperimentalStdlibApi
 abstract class HarIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
 
     protected var chromeDriver: ChromeDriver

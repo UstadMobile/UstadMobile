@@ -32,6 +32,7 @@ fun HarResponse.toWebResourceResponse(): WebResourceResponse {
 }
 
 
+@ExperimentalStdlibApi
 class HarWebViewClient(private val harContainer: HarContainer) : WebViewClient() {
 
     var recorder: PayloadRecorder? = null

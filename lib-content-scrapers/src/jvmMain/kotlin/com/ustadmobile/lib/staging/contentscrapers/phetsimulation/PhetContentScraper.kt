@@ -46,6 +46,7 @@ import javax.xml.transform.TransformerException
  *
  * The download links url have eTag and last modified in the headers to identify new content
  */
+@ExperimentalStdlibApi
 class PhetContentScraper(private val url: String, private val destinationDirectory: File, private val containerDir: File) {
     /**
      * @return the title of the simulation in english

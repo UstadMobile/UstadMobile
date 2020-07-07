@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.contentscrapers.edraakK12
+package com.ustadmobile.lib.staging.contentscrapers.edraakK12
 
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
@@ -23,6 +23,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_FILENAME_MP4
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_FILENAME_WEBM
 import com.ustadmobile.lib.contentscrapers.ShrinkerUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.edraakK12.ContentResponse
 import com.ustadmobile.lib.db.entities.ContentEntry
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
@@ -52,6 +53,7 @@ import javax.xml.transform.TransformerException
  *
  * The Test component type is the same as Exercise component type
  */
+@ExperimentalStdlibApi
 class EdraakK12ContentScraper : Runnable {
 
     private lateinit var containerDirectory: File
@@ -205,7 +207,7 @@ class EdraakK12ContentScraper : Runnable {
         }
 
         try {
-            val index = UMIOUtils.readToString(javaClass.getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG))
+            val index = UMIOUtils.readStreamToString(javaClass.getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG))
             val doc = Jsoup.parse(index, UTF_ENCODING)
             doc.head().selectFirst("title").text(response.title!!)
             FileUtils.writeStringToFile(File(destinationDirectory, INDEX_HTML), doc.toString(), UTF_ENCODING)

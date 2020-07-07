@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
+import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
@@ -16,6 +16,7 @@ import java.net.URL
 import java.nio.file.Files
 
 
+@ExperimentalStdlibApi
 class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid) {
 
 
@@ -55,13 +56,13 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
             val mimetype = conn.contentType
             conn.disconnect()
 
-            if (!VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.contains(mimetype)) {
+            if (!VIDEO_MIME_MAP.keys.contains(mimetype)) {
                 hideContentEntry()
                 setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
                 throw ScraperException(ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED, "Video type not supported for $mimetype for url $url")
             }
 
-            val ext = VideoPlayerPresenterCommon.VIDEO_MIME_MAP[mimetype]
+            val ext = VIDEO_MIME_MAP[mimetype]
 
             val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
 

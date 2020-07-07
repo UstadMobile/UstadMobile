@@ -43,6 +43,7 @@ import java.net.URL
 import java.util.*
 import java.util.regex.Pattern
 
+@ExperimentalStdlibApi
 class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
 
     override fun scrapeUrl(sourceUrl: String) {

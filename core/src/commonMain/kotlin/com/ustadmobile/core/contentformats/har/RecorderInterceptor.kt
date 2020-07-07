@@ -4,6 +4,7 @@ import com.ustadmobile.core.util.UMIOUtils
 import kotlinx.io.ByteArrayInputStream
 import kotlinx.serialization.toUtf8Bytes
 
+@ExperimentalStdlibApi
 class RecorderInterceptor : HarInterceptor() {
 
     override fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
@@ -17,7 +18,7 @@ class RecorderInterceptor : HarInterceptor() {
         val input = response.content?.data ?: return response
         var data = UMIOUtils.readStreamToString(input)
         data = data.replace(head, "$1$jsInject")
-        response.content?.data = ByteArrayInputStream(data.toUtf8Bytes())
+        response.content?.data = ByteArrayInputStream(data.encodeToByteArray())
 
         return response
     }

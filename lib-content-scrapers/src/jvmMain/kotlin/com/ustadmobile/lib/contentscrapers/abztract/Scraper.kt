@@ -9,6 +9,7 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
+@ExperimentalStdlibApi
 abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var contentEntryUid: Long, val sqiUid: Int) {
 
     val mimeTypeToContentFlag: Map<String, Int> = mapOf(

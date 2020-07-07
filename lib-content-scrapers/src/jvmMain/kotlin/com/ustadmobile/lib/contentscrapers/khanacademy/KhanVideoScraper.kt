@@ -4,7 +4,7 @@ import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.controller.VideoPlayerPresenterCommon
+import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.createSrtFile
@@ -35,6 +35,7 @@ import java.nio.file.Files
 import java.util.*
 
 
+@ExperimentalStdlibApi
 class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid) {
 
 
@@ -153,13 +154,13 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
                     throw ScraperException(ERROR_TYPE_FILE_SIZE_LIMIT_EXCEEDED, "$sourceUrl has exceeded file size limit at $length")
                 }
 
-                if (!VideoPlayerPresenterCommon.VIDEO_MIME_MAP.keys.contains(mimetype)) {
+                if (!VIDEO_MIME_MAP.keys.contains(mimetype)) {
                     hideContentEntry()
                     setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
                     throw ScraperException(ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED, "Video type not supported for $mimetype for url $mp4Url")
                 }
 
-                val ext = VideoPlayerPresenterCommon.VIDEO_MIME_MAP[mimetype]
+                val ext = VIDEO_MIME_MAP[mimetype]
 
                 val tempFile = File(tempDir, khanId + ext)
                 FileUtils.copyURLToFile(mp4Url, tempFile)

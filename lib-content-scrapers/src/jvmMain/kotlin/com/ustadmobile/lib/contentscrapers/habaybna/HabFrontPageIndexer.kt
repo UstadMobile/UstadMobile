@@ -8,6 +8,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
+@ExperimentalStdlibApi
 class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
 
     private val arabicLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "ar")

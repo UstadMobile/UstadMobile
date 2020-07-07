@@ -15,6 +15,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.QUESTIONS_JSON
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.VIDEO_FILENAME_WEBM
+import com.ustadmobile.lib.staging.contentscrapers.edraakK12.EdraakK12ContentScraper
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer

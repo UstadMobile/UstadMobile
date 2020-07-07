@@ -10,6 +10,7 @@ import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.khanLiteMap
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
+@ExperimentalStdlibApi
 class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, 0) {
 
     private lateinit var parentEntry: ContentEntry

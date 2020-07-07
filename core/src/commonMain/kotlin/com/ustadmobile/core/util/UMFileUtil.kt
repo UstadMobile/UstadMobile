@@ -602,6 +602,15 @@ object UMFileUtil {
         return "$unitSize $unit"
     }
 
+    fun stripExtensionIfPresent(uri: String): String {
+        val lastSlashPos = uri.lastIndexOf('/')
+        val lastDotPos = uri.lastIndexOf('.')
+        return if (lastDotPos != -1 && lastDotPos > lastSlashPos) {
+            uri.substring(0, lastDotPos)
+        } else {
+            uri
+        }
+    }
 
 
 

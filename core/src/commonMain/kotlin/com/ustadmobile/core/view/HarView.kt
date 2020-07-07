@@ -1,17 +1,14 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlin.js.JsName
 
 interface HarView : UstadView {
 
+    var entry: ContentEntry?
+
     @JsName("loadUrl")
     fun loadUrl(url: String)
-
-    @JsName("showError")
-    fun showError(message: String)
-
-    @JsName("setToolbarTitle")
-    fun setToolbarTitle(title: String)
 
     @JsName("showErrorWithAction")
     fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String)

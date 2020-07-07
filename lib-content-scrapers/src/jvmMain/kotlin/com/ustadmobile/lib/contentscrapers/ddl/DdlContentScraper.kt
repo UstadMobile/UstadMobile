@@ -46,6 +46,7 @@ import java.util.*
  * Check if the file was downloaded before with etag or last modified
  * Create the content entry
  */
+@ExperimentalStdlibApi
 class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
 
     private val categorySchemaDao: ContentCategorySchemaDao

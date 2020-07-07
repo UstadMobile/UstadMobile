@@ -24,6 +24,7 @@ import kotlin.random.Random
 import kotlin.system.exitProcess
 
 
+@ExperimentalStdlibApi
 open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
 
     private val ytPath: String

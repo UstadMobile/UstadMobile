@@ -58,6 +58,7 @@ import kotlin.system.exitProcess
  * SubjectResponse has a list of tutorials which each have a list of content items
  * Every content item is a course categorized by Video, Exercise or Article.
  */
+@ExperimentalStdlibApi
 class KhanContentIndexer internal constructor(private val indexerUrl: URL, private val parentEntry: ContentEntry, private val indexLocation: File,
                                               private val contentType: String, private val scrapeQueueItemUid: Int, private val runId: Int) : Runnable {
 

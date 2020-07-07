@@ -14,6 +14,7 @@ import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.net.URL
 
+@ExperimentalStdlibApi
 class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : SeleniumIndexer(parentContentEntry, runUid, db, sqiUid) {
 
     override fun indexUrl(sourceUrl: String) {

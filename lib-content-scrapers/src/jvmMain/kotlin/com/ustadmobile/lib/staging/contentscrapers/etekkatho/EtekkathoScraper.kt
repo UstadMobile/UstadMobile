@@ -16,6 +16,7 @@ import java.net.URL
  *
  * The url requires a request property header with user agent for the download to be successful
  */
+@ExperimentalStdlibApi
 class EtekkathoScraper @Throws(IOException::class)
 constructor(url: String, private val destinationDir: File) {
 

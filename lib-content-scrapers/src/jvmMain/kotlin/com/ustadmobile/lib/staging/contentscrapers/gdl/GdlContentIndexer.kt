@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.contentscrapers.gdl
+package com.ustadmobile.lib.staging.contentscrapers.gdl
 
 import com.ustadmobile.core.contentformats.opds.OpdsFeed
 import com.ustadmobile.core.db.UmAppDatabase
@@ -29,6 +29,7 @@ import java.net.MalformedURLException
 import java.net.URL
 import kotlin.system.exitProcess
 
+@ExperimentalStdlibApi
 class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: File,
                         val contentType: String, val scrapeQueueItemUid: Int, val runId: Int) : Runnable {
 

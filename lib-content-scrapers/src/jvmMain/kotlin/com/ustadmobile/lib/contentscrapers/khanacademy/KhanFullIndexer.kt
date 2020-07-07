@@ -13,6 +13,7 @@ import net.lightbody.bmp.core.har.HarEntry
 import java.lang.Exception
 import java.net.URL
 
+@ExperimentalStdlibApi
 class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : HarIndexer(parentContentEntry, runUid, db, sqiUid) {
 
     override fun indexUrl(sourceUrl: String) {

@@ -7,6 +7,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
+@ExperimentalStdlibApi
 class KhanYoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntryUid, runUid, db, sqiUid) {
 
     private var playlistCount = 0

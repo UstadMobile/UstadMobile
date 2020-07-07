@@ -11,10 +11,14 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonBuilder
 import kotlinx.serialization.json.JsonConfiguration
 
 
-class HarContainer(val containerManager: ContainerManager, val entry: ContentEntry, val umAccount: UmAccount?, val context: Any, val localHttp: String, var block: (sourceUrl: String) -> Unit) {
+@ExperimentalStdlibApi
+class HarContainer(val containerManager: ContainerManager, val entry: ContentEntry,
+                   val umAccount: UmAccount?, val context: Any,
+                   val localHttp: String, var block: (sourceUrl: String) -> Unit) {
 
     var startingUrl: String
     private val linkPatterns = mutableMapOf<Regex, String>()
@@ -22,14 +26,7 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
     var requestMap = mutableMapOf<Pair<String, String>, MutableList<HarEntry>>()
     var interceptors: MutableMap<HarInterceptor, String?> = mutableMapOf()
 
-    val json = Json(JsonConfiguration(
-            encodeDefaults = true,
-            strictMode = false,
-            unquoted = false,
-            allowStructuredMapKeys = true,
-            prettyPrint = false,
-            useArrayPolymorphism = false
-    ))
+    val json = Json(JsonConfiguration(ignoreUnknownKeys = true))
 
     init {
 
@@ -42,7 +39,7 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
 
         var harExtra = HarExtra()
         if (harExtraEntry != null) {
-            val data = UMIOUtils.readToString(containerManager.getInputStream(harExtraEntry))
+            val data = UMIOUtils.readStreamToString(containerManager.getInputStream(harExtraEntry))
             harExtra = json.parse(HarExtra.serializer(), data)
         }
 
@@ -59,7 +56,7 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
         }
 
 
-        val harContent = json.parse(Har.serializer(), UMIOUtils.readToString(containerManager.getInputStream(indexEntry)))
+        val harContent = json.parse(Har.serializer(), UMIOUtils.readStreamToString(containerManager.getInputStream(indexEntry)))
 
         val entries = harContent.log.entries
 

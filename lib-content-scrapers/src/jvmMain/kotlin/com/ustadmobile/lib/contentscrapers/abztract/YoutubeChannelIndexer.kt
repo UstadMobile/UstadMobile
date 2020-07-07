@@ -21,6 +21,7 @@ import kotlin.random.Random
 import kotlin.system.exitProcess
 
 
+@ExperimentalStdlibApi
 class YoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntryUid, runUid, db, sqiUid) {
 
 

@@ -56,6 +56,7 @@ import java.util.*
  * We also need to increase the font for the epub and this is done by modifying the css and replacing the existing
  * Move on to next epub until list is complete
  */
+@ExperimentalStdlibApi
 class AsbScraper {
     private val COVER_URL = "https://www.africanstorybook.org/illustrations/covers/"
 

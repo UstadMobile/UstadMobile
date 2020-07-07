@@ -94,6 +94,7 @@ import java.util.regex.Pattern
  * Create a content directory for all the url and their location into a json so it can be played back.
  * Zip all files with the course as the name
  */
+@ExperimentalStdlibApi
 class KhanContentScraper : Runnable {
     private lateinit var containerDir: File
 

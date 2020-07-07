@@ -3,7 +3,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.controller.VideoPlayerPresenterCommon.Companion.VIDEO_MIME_MAP
+import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
@@ -21,6 +21,7 @@ import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.system.exitProcess
 
+@ExperimentalStdlibApi
 open class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : Scraper(containerDir, db, contentEntryUid, sqiUid) {
 
     private val ytPath: String

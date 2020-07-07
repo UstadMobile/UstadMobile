@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
+@ExperimentalStdlibApi
 class DdlFrontPageIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(contentEntryUid, runUid, db, sqiUid) {
 
     var langCount = 0

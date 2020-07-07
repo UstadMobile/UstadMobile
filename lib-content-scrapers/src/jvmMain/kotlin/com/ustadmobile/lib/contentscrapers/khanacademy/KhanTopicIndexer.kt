@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import java.net.URL
 
+@ExperimentalStdlibApi
 class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
 
 

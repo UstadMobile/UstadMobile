@@ -21,10 +21,11 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
+import com.ustadmobile.lib.staging.contentscrapers.edraakK12.EdraakK12ContentScraper
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
+import io.ktor.utils.io.charsets.Charset
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.charsets.Charset
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import java.io.File
@@ -57,6 +58,7 @@ import java.net.URL
  * until the component type found is ImportedComponent. Once it is found, EdraakK12ContentScraper
  * will decide if its a quiz or course and scrap its content
  */
+@ExperimentalStdlibApi
 class IndexEdraakK12Content {
 
     private var url: URL? = null
