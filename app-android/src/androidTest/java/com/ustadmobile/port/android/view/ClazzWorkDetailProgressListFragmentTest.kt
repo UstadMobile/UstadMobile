@@ -317,7 +317,100 @@ class ClazzWorkDetailProgressListFragmentTest  {
         val testClazzWork = runBlocking {
             dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
-                    true,0,true, true)
+                    true,0, submitted = true, isStudentToClazz = true)
+        }
+
+        val contentEntriesWithJoin = runBlocking {
+            dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+        }
+        val contentList = contentEntriesWithJoin.contentList
+
+        val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
+        dbRule.account.personUid = teacherMember.clazzMemberPersonUid
+
+        val student1 = testClazzWork.clazzAndMembers.studentList.get(0)
+        val student3 = testClazzWork.clazzAndMembers.studentList.get(2)
+        val student4 = testClazzWork.clazzAndMembers.studentList.get(3)
+
+        runBlocking {
+            Comments().apply {
+                commentsText = "Student 1 private comment"
+                commentsDateTimeAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
+                commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
+                commentsPublic = false
+                commentsPersonUid = student1.clazzMemberPersonUid
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
+            }
+            Comments().apply {
+                commentsText = "Student 3 private comment"
+                commentsDateTimeAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
+                commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
+                commentsPublic = false
+                commentsPersonUid = student3.clazzMemberPersonUid
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
+            }
+
+        }
+
+        contentList.forEach{
+            runBlocking {
+                ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressContentEntryUid = it.contentEntryUid
+                    contentEntryProgressPersonUid = student1.clazzMemberPersonUid
+                    contentEntryProgressProgress = 42.0F
+                    contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+                    contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
+                }
+
+                ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressContentEntryUid = it.contentEntryUid
+                    contentEntryProgressPersonUid = student3.clazzMemberPersonUid
+                    contentEntryProgressProgress = 24.0F
+                    contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+                    contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
+                }
+
+                ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressContentEntryUid = it.contentEntryUid
+                    contentEntryProgressPersonUid = student4.clazzMemberPersonUid
+                    contentEntryProgressProgress = 100.0F
+                    contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+                    contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
+                }
+            }
+        }
+
+
+        reloadFragment(testClazzWork.clazzWork)
+        checkProgressList(testClazzWork)
+
+    }
+
+    @AdbScreenRecord("ClazzWorkDetailProgressList: Should show correct progress for Quiz as well ")
+    @Test
+    fun givenValidClazzWorkUidWithQuiz_whenStudentSubmittedAndContentProgressed_thenShouldUpdateView() {
+
+        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+
+        val clazzWork = ClazzWork().apply {
+            clazzWorkTitle = "Test ClazzWork A"
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
+            clazzWorkInstructions = "Pass espresso test for ClazzWork"
+            clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+            clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+            clazzWorkCommentsEnabled = true
+            clazzWorkMaximumScore = 120
+        }
+
+        val testClazzWork = runBlocking {
+            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                    clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ,
+                    true,0, submitted = true, isStudentToClazz = true)
         }
 
         val contentEntriesWithJoin = runBlocking {

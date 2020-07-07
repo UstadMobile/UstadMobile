@@ -81,8 +81,4 @@ class NewCommentRecyclerViewAdapter(
         viewHolder = null
     }
 
-    override fun getItemCount(): Int {
-        return 1
-    }
-
 }

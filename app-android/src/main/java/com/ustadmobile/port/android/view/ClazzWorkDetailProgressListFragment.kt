@@ -18,6 +18,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
+import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -137,6 +138,7 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
                 UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                 UmAccountManager.activeAccountLiveData)
 
+        addMode = ListViewAddMode.FAB
         metricsRecyclerAdapter = ClazzWorkProgressRecyclerAdapter(clazzWorkWithMetricsFlat, false)
         mDataRecyclerViewAdapter = ClazzMemberWithClazzWorkProgressListRecyclerAdapter(mPresenter,
                 hasContent)
@@ -150,6 +152,7 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
 
     override fun onResume() {
         super.onResume()
+        addMode = ListViewAddMode.FAB
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(R.string.student_progress)
     }

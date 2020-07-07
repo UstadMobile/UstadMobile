@@ -23,6 +23,7 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Comments
+import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -129,9 +130,46 @@ class ClazzWorkSubmissionMarkingFragmentTest {
         }
 
         //Add content
-        runBlocking {
-            dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+        val contentList = runBlocking {
+            dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2).contentList
         }
+
+        val student1 = testClazzWork.clazzAndMembers.studentList.get(0)
+        val student3 = testClazzWork.clazzAndMembers.studentList.get(2)
+        val student4 = testClazzWork.clazzAndMembers.studentList.get(3)
+
+
+        contentList.forEach{
+            runBlocking {
+                ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressContentEntryUid = it.contentEntryUid
+                    contentEntryProgressPersonUid = student1.clazzMemberPersonUid
+                    contentEntryProgressProgress = 42.0F
+                    contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+                    contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
+                }
+
+                ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressContentEntryUid = it.contentEntryUid
+                    contentEntryProgressPersonUid = student3.clazzMemberPersonUid
+                    contentEntryProgressProgress = 24.0F
+                    contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+                    contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
+                }
+
+                ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressContentEntryUid = it.contentEntryUid
+                    contentEntryProgressPersonUid = student4.clazzMemberPersonUid
+                    contentEntryProgressProgress = 100.0F
+                    contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+                    contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
+                }
+            }
+        }
+
 
         val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
         dbRule.account.personUid = teacherMember.clazzMemberPersonUid

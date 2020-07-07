@@ -66,6 +66,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         view.isStudent = (clazzMember != null &&
                 clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+//        view.isStudent = true
 
 
         if(clazzWorkWithSubmission.clazzWorkSubmission == null){
@@ -128,7 +129,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         if(clazzWorkWithSubmission.clazzWorkCommentsEnabled && view.isStudent) {
             val privateComments = withTimeoutOrNull(2000) {
-                db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
+                db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(ClazzWork.CLAZZ_WORK_TABLE_ID,
                         clazzWorkWithSubmission.clazzWorkUid, loggedInPersonUid)
             }
             view.clazzWorkPrivateComments = privateComments
@@ -198,17 +199,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         }
     }
-
-    fun addComment(comment: String, commentPublic: Boolean){
-        val comment = Comments(ClazzWork.CLAZZ_WORK_TABLE_ID, entity?.clazzWorkUid?:0L,
-            UmAccountManager.getActivePersonUid(context), UMCalendarUtil.getDateInMilliPlusDays(0),
-        comment, commentPublic)
-        GlobalScope.launch {
-            db.commentsDao.insertAsync(comment)
-        }
-    }
-
-
 
 
 }

@@ -412,8 +412,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         get() = field
         set(value) {
             field = value
-            newPrivateCommentRecyclerAdapter?.visible = value
-            submissionButtonRecyclerAdapter?.visible = value
+            //submissionButtonRecyclerAdapter?.visible = value
             quizQuestionsRecyclerAdapter?.studentMode = value
             submissionFreeTextRecyclerAdapter?.visible = value
             if(entity?.clazzWorkCommentsEnabled == false){
@@ -425,6 +424,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }else if(entity?.clazzWorkSubmissionType ==
                     ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
                 questionsHeadingRecyclerAdapter?.visible = true
+                newPrivateCommentRecyclerAdapter?.visible = false
+            }else{
+                newPrivateCommentRecyclerAdapter?.visible = false
             }
 
             submissionButtonRecyclerAdapter?.visible = isStudent &&

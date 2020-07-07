@@ -51,6 +51,7 @@ class ClazzWorkDetailPresenter(context: Any,
                         entity?.clazzWorkClazzUid?: 0L)
             }
             view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+//            view.isStudent = true
         }
 
     }
