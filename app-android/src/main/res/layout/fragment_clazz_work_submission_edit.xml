@@ -20,10 +20,6 @@
             name="fieldsEnabled"
             type="boolean" />
 
-        <variable
-            name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzWorkSubmissionEditFragmentEventHandler" />
-
     </data>
 
 

@@ -123,6 +123,12 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         }
     }
 
+    override var title: String? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null
