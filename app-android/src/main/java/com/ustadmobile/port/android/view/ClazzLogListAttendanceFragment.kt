@@ -24,8 +24,6 @@ import com.toughra.ustadmobile.databinding.ItemClazzLogAttendanceListBinding
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.door.DoorMutableLiveData
@@ -225,7 +223,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         val view = super.onCreateView(inflater, container, savedInstanceState)
         autoShowFabOnAddPermission = false
         mPresenter = ClazzLogListAttendancePresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, viewLifecycleOwner, kodein).also {
+                this, di, viewLifecycleOwner).also {
             mDataRecyclerViewAdapter = ClazzLogListRecyclerAdapter(it, clazzTimeZone)
         }
 

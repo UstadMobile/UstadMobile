@@ -127,7 +127,7 @@ class Login2FragmentTest {
     @Test
     fun givenValidUsernameAndPassword_whenHandleLoginClicked_shouldCallSystemImplGo() {
         mockWebServer.enqueue(MockResponse()
-                .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", null)))
+                .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", "")))
                 .setHeader("Content-Type", "application/json"))
 
         val httpUrl = mockWebServer.url("/").toString()

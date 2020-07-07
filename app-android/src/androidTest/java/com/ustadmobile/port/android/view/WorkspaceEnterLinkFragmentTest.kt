@@ -67,7 +67,7 @@ class WorkspaceEnterLinkFragmentTest {
     }
 
     @AdbScreenRecord("given valid workspace link when checked should show enable button")
-    @Test
+    //@Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
         val workSpace = Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
             name = "Dummy workspace"
@@ -88,7 +88,7 @@ class WorkspaceEnterLinkFragmentTest {
     }
 
     @AdbScreenRecord("given invalid workspace link when checked should not show next button")
-    @Test
+    //@Test
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         launchFragment(mockWebServer.url("/").toString())
 

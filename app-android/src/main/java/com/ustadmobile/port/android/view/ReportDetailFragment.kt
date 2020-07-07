@@ -15,10 +15,11 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentReportDetailBinding
 import com.toughra.ustadmobile.databinding.ItemReportChartHeaderBinding
 import com.toughra.ustadmobile.databinding.ItemReportStatementListBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ReportDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
@@ -27,6 +28,9 @@ import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.StatementListReport
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 interface ReportDetailFragmentEventHandler {
@@ -129,7 +133,9 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         mBinding = FragmentReportDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+
+        val accountManager: UstadAccountManager by instance()
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         reportRecyclerView = rootView.findViewById(R.id.fragment_detail_report_list)
         chartAdapter = RecyclerViewChartAdapter(this, null)
         statementAdapter = StatementViewRecyclerAdapter(this, null).also {
@@ -141,7 +147,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         reportRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = ReportDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                this, kodein)
+                di, viewLifecycleOwner)
 
         chartAdapter?.presenter = mPresenter
         statementAdapter?.presenter = mPresenter

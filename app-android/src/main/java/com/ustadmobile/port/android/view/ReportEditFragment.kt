@@ -101,7 +101,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         contentDisplayRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = ReportEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, kodein)
+                di, viewLifecycleOwner)
 
         personRecyclerAdapter?.presenter = mPresenter
         verbDisplayRecyclerAdapter?.presenter = mPresenter

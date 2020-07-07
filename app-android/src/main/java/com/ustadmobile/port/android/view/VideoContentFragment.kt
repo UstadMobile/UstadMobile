@@ -30,19 +30,16 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenter
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.VideoPlayerView
-import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.InputStream
 import java.io.BufferedInputStream
 import java.io.IOException
 
@@ -94,7 +91,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         }
 
         mPresenter = VideoContentPresenter(viewContext,
-                arguments.toStringMap(), this, kodein)
+                arguments.toStringMap(), this, di)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
@@ -204,9 +201,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
         val subtitleFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
                 C.SELECTION_FLAG_DEFAULT, null)
-
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-        val appDatabase = UmAccountManager.getActiveDatabase(viewContext)
 
         GlobalScope.launch {
             try {

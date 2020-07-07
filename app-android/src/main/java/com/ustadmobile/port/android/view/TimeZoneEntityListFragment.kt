@@ -8,15 +8,19 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemTimezoneentityListItemBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.TimeZoneEntityListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.TimeZoneEntityListView
 import com.ustadmobile.lib.db.entities.TimeZoneEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class TimeZoneEntityListFragment(): UstadListViewFragment<TimeZoneEntity, TimeZoneEntity>(),
         TimeZoneEntityListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -52,9 +56,10 @@ class TimeZoneEntityListFragment(): UstadListViewFragment<TimeZoneEntity, TimeZo
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+        val accountManager: UstadAccountManager by instance()
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         mPresenter = TimeZoneEntityListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, kodein)
+                this,  di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = TimeZoneEntityListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,

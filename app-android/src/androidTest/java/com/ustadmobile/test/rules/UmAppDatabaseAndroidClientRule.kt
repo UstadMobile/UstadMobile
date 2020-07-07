@@ -11,6 +11,7 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 import kotlin.random.Random
 
 class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "theanswer","", "http://localhost/"),
@@ -29,16 +30,17 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
 
     override fun starting(description: Description?) {
         val di = (getApplicationContext<BaseUstadApp>() as UstadApp).di
-        val accountManager = di.direct.instance<UstadAccountManager>()
+
+        val accountManager: UstadAccountManager by di.instance()
         accountManager.activeAccount = account
 
-        dbInternal = di.direct.instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).apply {
+        dbInternal = di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).apply {
             clearAllTables()
             val _nodeId = Random.nextInt(1, Int.MAX_VALUE)
             syncNodeDao.replace(SyncNode(_nodeId, false))
         }
 
-        repoInternal = di.direct.instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+        repoInternal = if(useDbAsRepo) dbInternal else di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
     }
 
 

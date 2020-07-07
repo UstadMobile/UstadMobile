@@ -8,13 +8,14 @@ import androidx.fragment.app.Fragment
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
 import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
+import org.kodein.di.DIAware
 import org.kodein.di.android.x.di
 import java.util.*
 
 /**
  * Created by mike on 10/15/15.
  */
-open class UstadBaseFragment : Fragment(), UstadView {
+open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     private val runOnAttach = Vector<Runnable>()
 
@@ -22,7 +23,7 @@ open class UstadBaseFragment : Fragment(), UstadView {
 
     protected var fabManager: FabManagerLifecycleObserver? = null
 
-    val kodein by di()
+    override val di by di()
 
     override var loading: Boolean = false
         get() = field

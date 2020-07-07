@@ -4,22 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemPersonListItemBinding
 import com.ustadmobile.core.controller.PersonListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.core.view.GetResultMode
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.core.controller.UstadListPresenter
@@ -62,7 +54,7 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = PersonListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, kodein)
+                this,  di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,

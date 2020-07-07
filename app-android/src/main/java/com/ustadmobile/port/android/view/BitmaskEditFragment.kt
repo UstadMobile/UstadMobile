@@ -13,14 +13,11 @@ import com.toughra.ustadmobile.databinding.FragmentBitmaskEditBinding
 import com.toughra.ustadmobile.databinding.ItemBitmaskBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.BitmaskEditView
-import org.kodein.di.android.x.di
 
 interface BitmaskEditFragmentEventHandler {
 
@@ -82,7 +79,7 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
         }
 
         mPresenter = BitmaskEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, kodein)
+                 di, viewLifecycleOwner)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         mRecyclerViewAdapter = BitmaskRecyclerViewAdapter()

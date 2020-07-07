@@ -29,7 +29,7 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
         }
 
         mPresenter = ScheduleEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, kodein)
+                di, viewLifecycleOwner)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView

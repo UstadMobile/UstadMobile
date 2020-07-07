@@ -91,7 +91,7 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
         holidayRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = HolidayCalendarEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, kodein)
+                this, di)
         holidayRecyclerAdapter?.presenter = mPresenter
 
 

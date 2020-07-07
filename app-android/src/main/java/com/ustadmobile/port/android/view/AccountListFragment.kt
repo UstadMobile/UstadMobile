@@ -186,8 +186,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
         mBinding?.accountListRecycler?.layoutManager = LinearLayoutManager(requireContext())
 
-        mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this,
-                accountManager = UstadAccountManager.getInstance(UstadMobileSystemImpl.instance,requireContext()))
+        mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di)
 
         //version text - where do we get it
         accountListAdapter = AccountListAdapter(mPresenter)

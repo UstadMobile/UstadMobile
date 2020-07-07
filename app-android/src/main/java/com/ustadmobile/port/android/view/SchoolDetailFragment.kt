@@ -65,7 +65,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         mPager = mBinding?.fragmentSchoolDetailViewpager
 
         mPresenter = SchoolDetailPresenter(requireContext(),arguments.toStringMap(), this,
-                this, kodein)
+                di, viewLifecycleOwner)
 
         return rootView
     }

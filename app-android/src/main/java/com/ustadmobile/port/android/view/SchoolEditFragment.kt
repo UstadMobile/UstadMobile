@@ -100,7 +100,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
 
         mPresenter = SchoolEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, kodein)
+                di, viewLifecycleOwner)
 
         clazzRecyclerAdapter?.presenter = mPresenter
 

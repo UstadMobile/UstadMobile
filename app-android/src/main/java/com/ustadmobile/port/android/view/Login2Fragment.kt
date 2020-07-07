@@ -85,7 +85,7 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         }
 
         mPresenter = Login2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this,
-                accountManager = UstadAccountManager.getInstance(UstadMobileSystemImpl.instance, requireActivity()))
+                di)
         mBinding?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return rootView

@@ -66,7 +66,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = ReportListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, kodein)
+                this,  di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ReportListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,

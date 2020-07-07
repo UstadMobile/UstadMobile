@@ -84,7 +84,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
         }
 
         mPresenter = RoleEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, kodein)
+                di, viewLifecycleOwner)
 
         mRecyclerViewAdapter = BitmaskRecyclerViewAdapter()
         mRecyclerView?.adapter = mRecyclerViewAdapter

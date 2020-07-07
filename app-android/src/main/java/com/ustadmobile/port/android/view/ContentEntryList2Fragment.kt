@@ -13,7 +13,6 @@ import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ListViewMode
@@ -78,7 +77,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             title = mTitle.toString()
         }
         mPresenter = ContentEntryList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, viewLifecycleOwner, kodein)
+                this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
                 arguments?.get(UstadView.ARG_LISTMODE).toString())

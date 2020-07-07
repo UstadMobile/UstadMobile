@@ -37,7 +37,7 @@ class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
         setEditFragmentTitle(R.string.holiday)
 
         mPresenter = HolidayEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, kodein)
+                di, viewLifecycleOwner)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 

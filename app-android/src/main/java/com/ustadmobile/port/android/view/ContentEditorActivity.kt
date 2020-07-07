@@ -41,9 +41,12 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEditorPresenter
 import com.ustadmobile.core.controller.ContentEditorPresenterCommon.Companion.EDITOR_BASE_DIR_NAME
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMAndroidUtil.convertDpToPixel
@@ -52,7 +55,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil.getDirectionality
 import com.ustadmobile.core.impl.UMAndroidUtil.getDisplayWidth
 import com.ustadmobile.core.impl.UMAndroidUtil.getMimeType
 import com.ustadmobile.core.impl.UMAndroidUtil.getSpanCount
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil.joinPaths
 import com.ustadmobile.core.view.ContentEditorView
@@ -81,6 +83,10 @@ import id.zelory.compressor.Compressor
 import id.zelory.compressor.constraint.quality
 import id.zelory.compressor.constraint.format
 import kotlinx.coroutines.CompletableDeferred
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         ContentEditorView, UmWebContentEditorChromeClient.JsLoadingCallback,
@@ -162,9 +168,12 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
         val embeddedHttp =  networkManagerBle.httpd
 
         embeddedHttp.addRoute("$assetsDir(.)+",AndroidAssetsHandler::class.java, applicationContext)
-        presenter = ContentEditorPresenter(this, args!!, this,
-                args!![CONTENT_STORAGE_OPTION], UmAccountManager.getActiveDatabase(this),
-                UmAccountManager.getRepositoryForActiveAccount(this)) {
+
+        val accountManager: UstadAccountManager by di.instance()
+        val db: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = TAG_DB)
+        val repo: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = TAG_REPO)
+        presenter = ContentEditorPresenter(this, args!!, this, di,
+                "", db, repo) {
 
 //            val mountedPath: String = embeddedHttp.mountContainer(it, null)!!
 //            val counterMountedUrl: String = joinPaths(embeddedHttp.localHttpUrl,
@@ -685,9 +694,10 @@ open class ContentEditorActivity : UstadBaseWithContentOptionsActivity(),
             SCREEN_ORIENTATION_UNSPECIFIED
         }
 
-        umDb = UmAccountManager.getActiveDatabase(this)
+        val accountManager: UstadAccountManager by instance()
+        umDb = on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
 
-        umRepo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+        umRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
 
         setContentView(R.layout.activity_content_editor)
 

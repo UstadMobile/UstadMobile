@@ -57,7 +57,7 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
                               savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = SchoolListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, kodein)
+                this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = SchoolListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,

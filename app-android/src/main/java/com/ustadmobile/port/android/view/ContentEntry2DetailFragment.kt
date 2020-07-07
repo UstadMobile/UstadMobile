@@ -17,12 +17,13 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
 import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntry2DetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.*
-import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
@@ -34,6 +35,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 interface ContentEntryDetailFragmentEventHandler {
@@ -88,7 +91,8 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         get() = field
         set(value) {
             currentLiveData?.removeObserver(availableTranslationObserver)
-            val dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+            val accountManager: UstadAccountManager by instance()
+            val dbRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
             val displayTypeRepoVal = dbRepo.contentEntryRelatedEntryJoinDao
             currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
             currentLiveData?.observe(this, availableTranslationObserver)
@@ -184,7 +188,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             val thisFrag = this@ContentEntry2DetailFragment
             withContext(Dispatchers.Main){
                 mPresenter = ContentEntry2DetailPresenter(requireContext(), arguments.toStringMap(), thisFrag,
-                        thisFrag.viewLifecycleOwner, kodein)
+                        di, thisFrag.viewLifecycleOwner)
                 mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
                 val flexboxLayoutManager = FlexboxLayoutManager(requireContext())

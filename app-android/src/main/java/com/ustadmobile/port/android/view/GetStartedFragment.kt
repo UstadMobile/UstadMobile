@@ -26,7 +26,8 @@ class GetStartedFragment : UstadBaseFragment(), GetStartedView {
             rootView = it.root
         }
 
-        mPresenter = GetStartedPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this)
+        mPresenter = GetStartedPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),this,
+            di)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         mBinding?.presenter = mPresenter
         return rootView
