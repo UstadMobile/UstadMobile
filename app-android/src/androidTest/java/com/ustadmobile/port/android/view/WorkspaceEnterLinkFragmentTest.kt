@@ -56,6 +56,8 @@ class WorkspaceEnterLinkFragmentTest {
 
     private lateinit var mockWebServer: MockWebServer
 
+    private val defaultTimeout: Long = 5000
+
     @Before
     fun setup(){
         mockWebServer = MockWebServer()
@@ -82,7 +84,7 @@ class WorkspaceEnterLinkFragmentTest {
 
         launchFragment(mockWebServer.url("/").toString())
 
-        sleep(3000)
+        sleep(defaultTimeout)
         onView(withId(R.id.next_button)).check(matches(isDisplayed()))
 
         onView(withId(R.id.workspace_link_view)).check(matches(
@@ -96,7 +98,7 @@ class WorkspaceEnterLinkFragmentTest {
 
         launchFragment(mockWebServer.url("/").toString())
 
-        sleep(3000)
+        sleep(defaultTimeout)
         onView(withId(R.id.next_button)).check(matches(not(isDisplayed())))
         onView(withId(R.id.workspace_link_view)).check(matches(
                 hasInputLayoutError(context.getString(R.string.invalid_url))))

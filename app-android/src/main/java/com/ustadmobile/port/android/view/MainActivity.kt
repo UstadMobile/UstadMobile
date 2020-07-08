@@ -19,7 +19,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.GetStartedView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.sharedse.network.NetworkManagerBle
@@ -48,8 +47,9 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val navController = host.navController
         navController.addOnDestinationChangedListener(this)
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
-
-        appBarConfiguration = AppBarConfiguration(navController.graph)
+        val navGraph = navController.graph
+        navController.setGraph(navGraph, intent.extras)
+        appBarConfiguration = AppBarConfiguration(navGraph)
         mBinding.bottomNavView.setupWithNavController(navController)
         setupActionBarWithNavController(navController, AppBarConfiguration(mBinding.bottomNavView.menu))
 
