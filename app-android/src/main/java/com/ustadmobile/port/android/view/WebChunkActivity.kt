@@ -6,9 +6,12 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.webkit.WebView
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.WebChunkPresenter
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.WebChunkView
@@ -16,6 +19,8 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.CompletableDeferred
+import org.kodein.di.instance
+import org.kodein.di.on
 
 @ExperimentalStdlibApi
 class WebChunkActivity : UstadBaseActivity(), WebChunkView {
@@ -43,10 +48,12 @@ class WebChunkActivity : UstadBaseActivity(), WebChunkView {
         mWebView!!.settings.allowFileAccessFromFileURLs = true
         mWebView!!.settings.mediaPlaybackRequiresUserGesture = false
 
-        val repository = UmAccountManager.getRepositoryForActiveAccount(this)
+        val accountManager: UstadAccountManager by instance()
+        val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+        val repository: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
         mPresenter = WebChunkPresenter(this,
-                bundleToMap(intent.extras), this, true, repository,
-                UmAccountManager.getActiveDatabase(viewContext))
+                bundleToMap(intent.extras), this, di, true, repository,
+                db)
         mPresenter!!.onCreate(bundleToMap(savedInstanceState))
 
     }

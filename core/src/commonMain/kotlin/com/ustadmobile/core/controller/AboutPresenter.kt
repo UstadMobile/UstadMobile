@@ -8,14 +8,18 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 /**
  * Created by mike on 12/27/16.
  */
 @kotlinx.serialization.InternalSerializationApi
 class AboutPresenter(context: Any, args: Map<String, String>?, view: AboutView,
-                     val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance)
-    : UstadBaseController<AboutView>(context, args!!, view) {
+                     di: DI)
+    : UstadBaseController<AboutView>(context, args!!, view, di) {
+
+    val impl: UstadMobileSystemImpl by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

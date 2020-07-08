@@ -85,11 +85,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_submission_marking_rv)
 
         mPresenter = ClazzWorkSubmissionMarkingPresenter(requireContext(), arguments.toStringMap(),
-                this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, di, this)
 
         val clazzWorkWithSubmission: ClazzWorkWithSubmission =
                 ClazzWorkWithSubmission().generateWithClazzWorkAndClazzWorkSubmission(
@@ -132,8 +128,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWork?.clazzWorkUid?:0L, entity?.clazzMemberPersonUid?:0L,
-                UmAccountManager.getActivePersonUid(requireContext())
+                entity?.clazzWork?.clazzWorkUid?:0L, entity?.clazzMemberPersonUid?:0L
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 
@@ -186,7 +181,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
             newPrivateCommentRecyclerAdapter?.entityUid = value?.clazzWork?.clazzWorkUid?:0L
             newPrivateCommentRecyclerAdapter?.commentTo = value?.clazzMemberPersonUid?:0L
-            newPrivateCommentRecyclerAdapter?.commentFrom = UmAccountManager.getActivePersonUid(requireContext())
+            newPrivateCommentRecyclerAdapter?.commentFrom = 0L
             newPrivateCommentRecyclerAdapter?.visible = true
 
             clazzWorkTitle = value?.person?.fullName()?:""

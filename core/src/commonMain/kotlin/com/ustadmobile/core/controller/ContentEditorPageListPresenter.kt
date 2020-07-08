@@ -12,11 +12,12 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 
 class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String>,
-                                     view: ContentEditorPageListView, val contentEntryDao: ContentEntryDao,
+                                     view: ContentEditorPageListView, di: DI, val contentEntryDao: ContentEntryDao,
                                      private val pageActionDelegate: ContentEditorPageActionDelegate)
-    : UstadBaseController<ContentEditorPageListView>(context, arguments, view) {
+    : UstadBaseController<ContentEditorPageListView>(context, arguments, view, di) {
 
     private val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
 

@@ -1,28 +1,23 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 
 class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, String>,
-                           view: ClazzWorkDetailProgressListView,
-                           lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                           db: UmAppDatabase, repo: UmAppDatabase,
-                           activeAccount: DoorLiveData<UmAccount?>)
+                           view: ClazzWorkDetailProgressListView, di: DI,
+                           lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<ClazzWorkDetailProgressListView,
-        ClazzMemberWithClazzWorkProgress>(context, arguments, view, lifecycleOwner, systemImpl,
-            db, repo, activeAccount) {
+        ClazzMemberWithClazzWorkProgress>(context, arguments, view, di, lifecycleOwner) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

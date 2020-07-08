@@ -1,34 +1,30 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.findClazzTimeZone
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import org.kodein.di.DI
 
 
 class ClazzWorkDetailOverviewPresenter(context: Any,
            arguments: Map<String, String>, view: ClazzWorkDetailOverviewView,
-           lifecycleOwner: DoorLifecycleOwner,
-           systemImpl: UstadMobileSystemImpl,
-           db: UmAppDatabase, repo: UmAppDatabase,
-           activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData,
+           di: DI, lifecycleOwner: DoorLifecycleOwner,
             private val newCommentItemListener: DefaultNewCommentItemListener =
-                                               DefaultNewCommentItemListener(db, context)
+                                               DefaultNewCommentItemListener(di, context)
     )
-    : UstadDetailPresenter<ClazzWorkDetailOverviewView, ClazzWorkWithSubmission>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount), NewCommentItemListener by newCommentItemListener {
+    : UstadDetailPresenter<ClazzWorkDetailOverviewView, ClazzWorkWithSubmission>(context,
+        arguments, view, di, lifecycleOwner)
+        , NewCommentItemListener by newCommentItemListener {
 
 
     override val persistenceMode: PersistenceMode
@@ -38,7 +34,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWorkWithSubmission? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+        val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val clazzWorkWithSubmission = withTimeoutOrNull(2000){
             db.clazzWorkDao.findWithSubmissionByUidAndPerson(entityUid, loggedInPersonUid)
@@ -66,7 +62,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         view.isStudent = (clazzMember != null &&
                 clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-//        view.isStudent = true
 
 
         if(clazzWorkWithSubmission.clazzWorkSubmission == null){
@@ -169,7 +164,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                 newOptionsAndResponse.add(everyResult)
             }
 
-            val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+            val loggedInPersonUid = accountManager.activeAccount.personUid
             val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
                 db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
                         entity?.clazzWorkClazzUid?:0L)

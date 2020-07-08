@@ -1,8 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.PersonEditView
@@ -11,16 +9,13 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import org.kodein.di.DI
 
 
 class PersonDetailPresenter(context: Any,
                           arguments: Map<String, String>, view: PersonDetailView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<PersonDetailView, PersonWithDisplayDetails>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                            di : DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadDetailPresenter<PersonDetailView, PersonWithDisplayDetails>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.LIVEDATA

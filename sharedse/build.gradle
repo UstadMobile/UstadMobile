@@ -57,6 +57,12 @@ android {
             returnDefaultValues = true
         }
     }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
 }
 
 sourceCompatibility = '1.8'
@@ -121,6 +127,7 @@ kotlin {
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
 
 
                 implementation project(':lib-door-runtime')
@@ -170,6 +177,8 @@ kotlin {
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "com.github.aakira:napier-android:$version_napier"
                 implementation project(":lib-database-android")
+                implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
+
 
                 implementation "androidx.room:room-runtime:$version_android_room"
 

@@ -108,10 +108,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         questionRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = ClazzWorkEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                di, this)
 
         questionRecyclerAdapter?.presenter = mPresenter
 

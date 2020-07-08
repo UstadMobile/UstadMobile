@@ -30,7 +30,6 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenter
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toNullableStringMap
@@ -92,9 +91,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         }
 
         mPresenter = VideoContentPresenter(viewContext,
-                arguments.toStringMap(), this,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()))
+                arguments.toStringMap(), this, di)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
@@ -204,9 +201,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
         val subtitleFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
                 C.SELECTION_FLAG_DEFAULT, null)
-
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-        val appDatabase = UmAccountManager.getActiveDatabase(viewContext)
 
         GlobalScope.launch {
             try {

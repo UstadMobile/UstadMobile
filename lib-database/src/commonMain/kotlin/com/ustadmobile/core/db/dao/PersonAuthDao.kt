@@ -92,7 +92,7 @@ abstract class PersonAuthDao : BaseDao<PersonAuth> {
                 getSystemTimeInMillis() + SESSION_LENGTH, getSystemTimeInMillis().toString())
 
         insertAccessToken(accessToken)
-        return (UmAccount(personUid, username, accessToken.token, null))
+        return (UmAccount(personUid, username, accessToken.token, ""))
     }
 
 

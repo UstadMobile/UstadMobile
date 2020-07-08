@@ -42,7 +42,11 @@ class ViewNameToDestMap: DestinationProvider {
             XapiPackageContentView.VIEW_NAME to UstadDestination(R.id.content_xapi_dest, false),
             ReportListView.VIEW_NAME to UstadDestination(R.id.report_list_dest, true),
             ReportEditView.VIEW_NAME to UstadDestination(R.id.report_edit_dest, false),
-            ReportDetailView.VIEW_NAME to UstadDestination(R.id.report_detail_dest, true)
+            ReportDetailView.VIEW_NAME to UstadDestination(R.id.report_detail_dest, true),
+            WorkspaceEnterLinkView.VIEW_NAME to UstadDestination(R.id.workspace_enterlink_dest, false),
+            Login2View.VIEW_NAME to UstadDestination(R.id.login_dest, false),
+            GetStartedView.VIEW_NAME to UstadDestination(R.id.account_get_started_dest, false),
+            AccountListView.VIEW_NAME to UstadDestination(R.id.account_list_dest, false)
     )
 
     override val navControllerViewId: Int

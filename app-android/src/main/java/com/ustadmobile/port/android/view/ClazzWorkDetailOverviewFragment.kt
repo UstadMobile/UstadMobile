@@ -16,6 +16,7 @@ import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetail
 import com.toughra.ustadmobile.databinding.ItemClazzworkDetailDescriptionBinding
 import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionResultBinding
 import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionTextEntryBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -30,6 +31,9 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 interface NewCommentHandler{
     fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String, public: Boolean, to: Long, from: Long)
@@ -47,6 +51,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var mPresenter: ClazzWorkDetailOverviewPresenter? = null
 
     private lateinit var dbRepo : UmAppDatabase
+
+    val accountManager: UstadAccountManager by instance()
 
     private var contentRecyclerAdapter: ContentEntryList2Fragment.ContentEntryListRecyclerAdapter? = null
     private var contentLiveData: LiveData<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
@@ -318,8 +324,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         newPublicCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_class_comment), true, ClazzWork.CLAZZ_WORK_TABLE_ID,
                 entity?.clazzWorkUid?:0L, 0,
-                UmAccountManager.getActivePersonUid(requireContext())
-        )
+                accountManager.activeAccount.personUid)
+
         newPublicCommentRecyclerAdapter?.visible = true
 
         publicCommentsRecyclerAdapter = CommentsRecyclerAdapter().also {
@@ -333,8 +339,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
                 entity?.clazzWorkUid?:0L, 0,
-                UmAccountManager.getActivePersonUid(requireContext())
-        )
+                accountManager.activeAccount.personUid)
         newPrivateCommentRecyclerAdapter?.visible = false
 
         privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
@@ -351,10 +356,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         mPresenter = ClazzWorkDetailOverviewPresenter(requireContext(),
                 arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                di, this)
 
         detailMergerRecyclerAdapter = MergeAdapter(
                 detailRecyclerAdapter,

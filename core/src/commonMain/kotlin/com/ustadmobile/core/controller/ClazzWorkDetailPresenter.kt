@@ -1,29 +1,23 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzWorkDetailView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import org.kodein.di.DI
 
 
 class ClazzWorkDetailPresenter(context: Any,
                           arguments: Map<String, String>, view: ClazzWorkDetailView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<ClazzWorkDetailView, ClazzWork>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                           di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadDetailPresenter<ClazzWorkDetailView, ClazzWork>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -43,7 +37,7 @@ class ClazzWorkDetailPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+        val loggedInPersonUid = accountManager.activeAccount.personUid
 
         GlobalScope.launch {
             val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
@@ -51,7 +45,6 @@ class ClazzWorkDetailPresenter(context: Any,
                         entity?.clazzWorkClazzUid?: 0L)
             }
             view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-//            view.isStudent = true
         }
 
     }

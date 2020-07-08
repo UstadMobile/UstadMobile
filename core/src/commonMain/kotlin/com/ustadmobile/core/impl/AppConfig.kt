@@ -35,7 +35,9 @@ object AppConfig {
 
     const val KEY_SUPPORTED_LANGUAGES = "app.ui_languages"
 
-    const val KEY_SHOW_REGISTER = "app.register_before_open"
+    const val KEY_SHOW_CREATE_ACCOUNT = "app.register_before_open"
+
+    const val KEY_SHOW_CONNECT_AS_GUEST = "app.connect_as_guest"
 
     const val BULK_UPLOAD_VISIBILITY = "bulk_upload_visibility"
 

@@ -19,19 +19,17 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 
 class ClazzWorkSubmissionMarkingPresenter(context: Any,
-              arguments: Map<String, String>, view: ClazzWorkSubmissionMarkingView,
+              arguments: Map<String, String>, view: ClazzWorkSubmissionMarkingView, di: DI,
               lifecycleOwner: DoorLifecycleOwner,
-              systemImpl: UstadMobileSystemImpl,
-              db: UmAppDatabase, repo: UmAppDatabase,
-              activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData,
               private val newCommentItemListener: DefaultNewCommentItemListener =
-                      DefaultNewCommentItemListener(db, context))
+                      DefaultNewCommentItemListener(di, context))
     : UstadEditPresenter<ClazzWorkSubmissionMarkingView,
-        ClazzMemberAndClazzWorkWithSubmission>(context, arguments, view, lifecycleOwner, systemImpl,
-            db, repo, activeAccount), NewCommentItemListener by newCommentItemListener  {
+        ClazzMemberAndClazzWorkWithSubmission>(context, arguments, view, di, lifecycleOwner),
+        NewCommentItemListener by newCommentItemListener  {
 
     var filterByClazzWorkUid: Long = -1
     var filterByClazzMemberUid: Long = -1
@@ -48,7 +46,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzMemberAndClazzWorkWithSubmission? {
-        val loggedInPersonUid = UmAccountManager.getActivePersonUid(context)
+        val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val clazzMemberWithSubmission = withTimeoutOrNull(2000){
             db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,

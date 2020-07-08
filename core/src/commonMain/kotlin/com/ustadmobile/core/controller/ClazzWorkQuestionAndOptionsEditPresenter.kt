@@ -2,32 +2,26 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzWorkQuestionAndOptionsEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion.Companion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion.Companion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionOption
-import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 
 class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
                           arguments: Map<String, String>, view: ClazzWorkQuestionAndOptionsEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<ClazzWorkQuestionAndOptionsEditView, ClazzWorkQuestionAndOptions>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                           di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<ClazzWorkQuestionAndOptionsEditView, ClazzWorkQuestionAndOptions>(
+        context, arguments, view, di, lifecycleOwner) {
 
     enum class ClazzWorkQuestionOptions(val optionVal: Int, val messageId: Int){
         FREE_TEXT(CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT,

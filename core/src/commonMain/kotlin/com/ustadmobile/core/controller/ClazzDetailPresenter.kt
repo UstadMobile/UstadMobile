@@ -1,33 +1,28 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_UID
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.Clazz
-
-import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 
 typealias ClazzPermissionChecker = suspend (db: UmAppDatabase, personUid: Long, clazzUid: Long) -> Boolean
 
 class ClazzDetailPresenter(context: Any,
-                           arguments: Map<String, String>, view: ClazzDetailView,
-                           lifecycleOwner: DoorLifecycleOwner,
-                           systemImpl: UstadMobileSystemImpl,
-                           db: UmAppDatabase, repo: UmAppDatabase,
-                           activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<ClazzDetailView, Clazz>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                           arguments: Map<String, String>, view: ClazzDetailView, di: DI,
+                           lifecycleOwner: DoorLifecycleOwner)
+    : UstadDetailPresenter<ClazzDetailView, Clazz>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -57,7 +52,7 @@ class ClazzDetailPresenter(context: Any,
             editEntity = Clazz()
         }
 
-        val activePersonUid = activeAccount.getValue()?.personUid ?: 0L
+        val activePersonUid = accountManager.activeAccount.personUid
 
         val entityUid = editEntity.clazzUid
 
@@ -79,7 +74,7 @@ class ClazzDetailPresenter(context: Any,
              db.clazzDao.findByUid(entityUid)
         } ?: Clazz()
 
-        val activePersonUid = activeAccount.getValue()?.personUid ?: 0L
+        val activePersonUid = accountManager.activeAccount.personUid
 
         view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
                 "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid",

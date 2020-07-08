@@ -123,13 +123,8 @@ class ClazzWorkQuestionAndOptionsEditFragment: UstadEditFragment<ClazzWorkQuesti
         optionsRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
 
-
-
         mPresenter = ClazzWorkQuestionAndOptionsEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                di, this)
 
         //After the presenter is created
         optionsRecyclerAdapter?.presenter = mPresenter

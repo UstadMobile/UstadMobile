@@ -2,9 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.google.common.collect.Lists
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter.Companion.FILE_SIZE
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
-import com.ustadmobile.core.controller.checkIfH5PValidAndReturnItsContent
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.lib.db.entities.Container
@@ -52,7 +50,8 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
             val urlString = call.request.queryParameters["hp5Url"] ?: ""
             val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
             val contentEntryUid = call.request.queryParameters["contentEntryUid"]?.toLong()
-            val content = checkIfH5PValidAndReturnItsContent(urlString)
+            val content = ""
+            //val content = checkIfH5PValidAndReturnItsContent(urlString)
             val isValid = content?.contains("H5PIntegration")
             when {
                 isValid == null -> call.respond(HttpStatusCode.BadRequest, "Invalid URL")
@@ -114,7 +113,7 @@ fun Route.H5PImportRoute(db: UmAppDatabase, h5pDownloadFn: (String, Long, String
 
                 if (VideoContentPresenterCommon.VIDEO_MIME_MAP.keys.contains(mimetype)) {
 
-                    if (headers["Content-Length"]?.toInt() ?: 0 >= FILE_SIZE) {
+                    if (headers["Content-Length"]?.toInt() ?: 0 >= 1024 * 1024 * 1024) {
                         call.respond(HttpStatusCode.BadRequest, "File size too big")
                         return@execute
                     }

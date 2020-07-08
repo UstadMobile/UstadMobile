@@ -34,7 +34,8 @@ import kotlin.jvm.Volatile
     SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
-    Report::class, ReportFilter::class
+    Report::class, ReportFilter::class,
+    DeviceSession::class, WorkSpace::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -246,12 +247,22 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("syncNodeDao")
     abstract val syncNodeDao: SyncNodeDao
 
+    @JsName("deviceSessionDao")
+    abstract val deviceSessionDao: DeviceSessionDao
+    
+    @JsName("workSpaceDao")
+    abstract val workSpaceDao: WorkSpaceDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
 
 
     companion object {
+
+        const val TAG_DB = 2
+
+        const val TAG_REPO = 4
+
 
         @Volatile
         private var instance: UmAppDatabase? = null

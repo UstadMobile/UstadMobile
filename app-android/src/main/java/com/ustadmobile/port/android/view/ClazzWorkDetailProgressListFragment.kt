@@ -133,10 +133,7 @@ class ClazzWorkDetailProgressListFragment(): UstadListViewFragment<ClazzMemberWi
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = ClazzWorkDetailProgressListPresenter(requireContext(),
                 UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, di, this)
 
         addMode = ListViewAddMode.FAB
         metricsRecyclerAdapter = ClazzWorkProgressRecyclerAdapter(clazzWorkWithMetricsFlat, false)

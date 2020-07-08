@@ -20,7 +20,7 @@ class ClazzLogScheduleWorker(context: Context, workerParams: WorkerParameters) :
 
     companion object {
 
-        const val INPUT_DBNAME = "dbName"
+        const val INPUT_ENDPOINTURL = "dbName"
 
         const val INPUT_FROMTIME = "fromTime"
 

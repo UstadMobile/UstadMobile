@@ -61,8 +61,6 @@ class ContentEntryEdit2FragmentTest  {
     @Rule
     val adbScreenRecordRule = AdbScreenRecordRule()
 
-    private val context = getApplicationContext<Application>()
-
     private var containerManager: ContainerManager ? = null
 
     private var container : Container ? = null

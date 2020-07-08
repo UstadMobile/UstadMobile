@@ -416,6 +416,8 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
     implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
+    //dependency injection
+    implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
