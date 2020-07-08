@@ -29,6 +29,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.lang.Thread.sleep
 
 
 @AdbScreenRecord("Workspace screen Test")
@@ -67,7 +68,7 @@ class WorkspaceEnterLinkFragmentTest {
     }
 
     @AdbScreenRecord("given valid workspace link when checked should show enable button")
-    //@Test
+    @Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
         val workSpace = Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
             name = "Dummy workspace"
@@ -81,6 +82,7 @@ class WorkspaceEnterLinkFragmentTest {
 
         launchFragment(mockWebServer.url("/").toString())
 
+        sleep(3000)
         onView(withId(R.id.next_button)).check(matches(isDisplayed()))
 
         onView(withId(R.id.workspace_link_view)).check(matches(
@@ -88,12 +90,14 @@ class WorkspaceEnterLinkFragmentTest {
     }
 
     @AdbScreenRecord("given invalid workspace link when checked should not show next button")
-    //@Test
+    @Test
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
+        mockWebServer.enqueue(MockResponse().setResponseCode(404))
+
         launchFragment(mockWebServer.url("/").toString())
 
+        sleep(3000)
         onView(withId(R.id.next_button)).check(matches(not(isDisplayed())))
-
         onView(withId(R.id.workspace_link_view)).check(matches(
                 hasInputLayoutError(context.getString(R.string.invalid_url))))
     }

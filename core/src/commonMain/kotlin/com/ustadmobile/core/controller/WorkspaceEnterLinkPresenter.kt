@@ -2,15 +2,16 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.util.UMUtil
 import io.ktor.client.request.get
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -20,6 +21,8 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
 
     private var workSpace: WorkSpace? = null
 
+    private var checkTextLinkJob: Deferred<Unit>? = null
+
     private val impl: UstadMobileSystemImpl by instance()
 
     fun handleClickNext(){
@@ -28,21 +31,31 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     fun handleCheckLinkText(href: String){
-        GlobalScope.launch {
+
+        if(checkTextLinkJob != null){
+            checkTextLinkJob?.cancel()
+            checkTextLinkJob = null
+        }
+
+        checkTextLinkJob = GlobalScope.async(doorMainDispatcher()) {
             try {
                 val formattedHref = if(href.startsWith("http")) href else "https://$href"
-                workSpace = defaultHttpClient().get<WorkSpace>(formattedHref)
-                view.runOnUiThread(Runnable {
-                    view.progressVisible = false
-                    view.validLink = workSpace != null
-                })
+                workSpace = defaultHttpClient().get<WorkSpace>(
+                        UMFileUtil.joinPaths(formattedHref, "/workspace"))
+                view.progressVisible = false
+                view.validLink = workSpace != null
             }catch (e: Exception) {
-                view.runOnUiThread(Runnable {
-                    view.progressVisible = false
-                    view.validLink = false
-                })
+                view.progressVisible = false
+                view.validLink = false
             }
+             return@async
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        checkTextLinkJob = null
+        workSpace = null
     }
 
 }
