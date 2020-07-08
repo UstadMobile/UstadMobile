@@ -26,6 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:elevation="@dimen/dimen_4dp"
+            android:paddingEnd="@dimen/dimen_16dp"
             android:minHeight="?actionBarSize"/>
 
 

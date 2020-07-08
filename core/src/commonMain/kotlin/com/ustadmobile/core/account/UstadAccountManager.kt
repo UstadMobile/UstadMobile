@@ -77,7 +77,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     private val defaultAccount: UmAccount
         get() = UmAccount(0L, "guest", "",
-                (systemImpl.getManifestPreference(MANIFEST_DEFAULT_SERVER, appContext) ?: MANIFEST_URL_FALLBACK))
+                (systemImpl.getManifestPreference(MANIFEST_DEFAULT_SERVER, appContext) ?: MANIFEST_URL_FALLBACK),
+                "Guest", "User")
 
 
 

@@ -41,7 +41,7 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
             try {
                 val formattedHref = if(href.startsWith("http")) href else "https://$href"
                 workSpace = defaultHttpClient().get<WorkSpace>(
-                        UMFileUtil.joinPaths(formattedHref, "/workspace"))
+                        UMFileUtil.joinPaths(formattedHref, "workspace","verify"))
                 view.progressVisible = false
                 view.validLink = workSpace != null
             }catch (e: Exception) {
