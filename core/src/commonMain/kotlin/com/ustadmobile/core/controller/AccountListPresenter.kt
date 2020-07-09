@@ -45,5 +45,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
 
     fun handleClickLogout(account: UmAccount){
         accountManager.removeAccount(account)
+        view.showGetStarted = accountManager.storedAccounts.size == 1
+                && accountManager.storedAccounts.contains(account)
     }
 }

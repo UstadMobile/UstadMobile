@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.WorkSpace
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -23,7 +24,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                       di: DI)
     : UstadBaseController<Login2View>(context, arguments, view, di) {
 
-    private  var nextDestination: String? = null
+    private  lateinit var nextDestination: String
 
     private lateinit var serverUrl: String
 
@@ -61,19 +62,17 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         view.isEmptyPassword = password == null || password.isEmpty()
 
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
-            GlobalScope.launch {
+            GlobalScope.launch(doorMainDispatcher()) {
                 try {
                     accountManager.login(username,password,serverUrl)
-                    view.runOnUiThread(Runnable { view.inProgress = false })
-                    impl.go(nextDestination, context)
+                    view.inProgress = false
+                    impl.go(nextDestination, mapOf(),context)
                 } catch (e: Exception) {
-                    view.runOnUiThread(Runnable {
-                        view.errorMessage = impl.getString(if(e is UnauthorizedException)
-                                    MessageID.wrong_user_pass_combo else
-                            MessageID.login_network_error , context)
-                        view.inProgress = false
-                        view.clearFields()
-                    })
+                    view.errorMessage = impl.getString(if(e is UnauthorizedException)
+                        MessageID.wrong_user_pass_combo else
+                        MessageID.login_network_error , context)
+                    view.inProgress = false
+                    view.clearFields()
                 }
             }
         }else{

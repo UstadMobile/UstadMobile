@@ -5,19 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentAccountListBinding
 import com.toughra.ustadmobile.databinding.ItemAccountAboutBinding
 import com.toughra.ustadmobile.databinding.ItemAccountActiveBinding
 import com.toughra.ustadmobile.databinding.ItemAccountListBinding
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.AccountListPresenter
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
@@ -30,6 +31,12 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             Observer<UmAccount>{
 
         private var activeAccount: UmAccount? = null
+
+        var storedAccounts: MutableList<UmAccount>? = null
+            set(value){
+                field = value
+                updateAccount()
+            }
 
         class ActiveAccountViewHolder(val binding: ItemAccountActiveBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -47,7 +54,16 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
 
         private fun updateAccount(){
+            val mStoredAccounts = storedAccounts
             currentViewHolder?.binding?.account = activeAccount
+            currentViewHolder?.binding?.profileBtnVisibility =
+                    if(activeAccount?.personUid == 0L) View.GONE else View.VISIBLE
+
+            currentViewHolder?.binding?.logoutBtnVisibility =
+                    if(mStoredAccounts != null && (mStoredAccounts.size == 1
+                                    && mStoredAccounts.contains(activeAccount) || mStoredAccounts.isEmpty()))
+                        View.GONE else View.VISIBLE
+
         }
 
         override fun onChanged(account: UmAccount?) {
@@ -106,13 +122,13 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
 
         override fun onChanged(umAccounts: List<UmAccount>?) {
-            storedAccounts = umAccounts as MutableList<UmAccount>?
+            storedAccounts = umAccounts?.toMutableList()
             updateList()
         }
 
         private fun updateList(){
             val umAccount = activeAccount
-            val mStoredAccounts = storedAccounts
+            val mStoredAccounts = storedAccounts?.toTypedArray()?.let { copyOnWriteListOf(*it) }
             if(umAccount != null){
                 if(mStoredAccounts != null && mStoredAccounts.contains(umAccount)){
                     mStoredAccounts.remove(umAccount)
@@ -138,7 +154,10 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         t -> accountListAdapter?.activeAccount = t
     }
 
-    private var accountListObserver = Observer<List<UmAccount>?> { _ -> loading = false }
+    private var accountListObserver = Observer<List<UmAccount>?> {
+        loading = false
+        activeAccountAdapter?.storedAccounts = it as MutableList<UmAccount>?
+    }
 
 
     override var accountListLive: DoorLiveData<List<UmAccount>>? = null
@@ -160,6 +179,16 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             field = value
             value?.observe(viewLifecycleOwner, observer)
             value?.observe(viewLifecycleOwner, activeAccountObserver)
+        }
+
+    override var showGetStarted: Boolean? = null
+        set(value) {
+            field = value
+            if(value != null && value){
+                val navOptions = NavOptions.Builder().setPopUpTo(R.id.account_list_dest, true)
+                        .build()
+                findNavController().navigate(R.id.account_get_started_dest,null, navOptions)
+            }
         }
 
 

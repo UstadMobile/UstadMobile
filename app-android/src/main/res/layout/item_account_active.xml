@@ -10,6 +10,13 @@ xmlns:tools="http://schemas.android.com/tools">
     <variable
         name="account"
         type="UmAccount" />
+    <variable
+        name="logoutBtnVisibility"
+        type="Integer" />
+
+    <variable
+        name="profileBtnVisibility"
+        type="Integer" />
 
     <variable
         name="presenter"
@@ -112,7 +119,7 @@ xmlns:tools="http://schemas.android.com/tools">
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dimen_16dp"
         android:padding="@dimen/dimen_8dp"
-        android:layout_marginBottom="@dimen/dimen_16dp"
+        android:visibility="@{profileBtnVisibility}"
         android:contentDescription="@string/profile"
         android:text="@{String.format(@string/my,@string/profile)}"
         app:layout_constraintStart_toEndOf="@+id/account_user_icon"
@@ -126,21 +133,28 @@ xmlns:tools="http://schemas.android.com/tools">
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dimen_16dp"
+        android:visibility="@{logoutBtnVisibility}"
         android:layout_marginStart="@dimen/dimen_16dp"
         android:padding="@dimen/dimen_8dp"
-        android:layout_marginBottom="@dimen/dimen_16dp"
         android:contentDescription="@string/logout"
         android:text="@string/logout"
         app:layout_constraintStart_toEndOf="@+id/account_profile"
         app:layout_constraintTop_toBottomOf="@+id/account_user_icon"
         app:layout_constraintBottom_toTopOf="@+id/divider" />
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/labelBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="account_logout,account_profile" />
     <View
         android:id="@+id/divider"
+        android:layout_marginTop="@dimen/dimen_16dp"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintEnd_toStartOf="parent"
         android:layout_width="match_parent"
         android:background="?android:listDivider"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/labelBarrier"
         android:layout_height="0.6dp"/>
 
 

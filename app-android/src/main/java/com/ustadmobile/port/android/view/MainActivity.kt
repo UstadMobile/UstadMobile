@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
@@ -19,7 +18,6 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
-import com.toughra.ustadmobile.generated.callback.OnClickListener
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -30,6 +28,7 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 import kotlinx.coroutines.CompletableDeferred
+import org.kodein.di.instance
 import java.util.*
 
 
@@ -122,16 +121,12 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         impl.go(SettingsView.VIEW_NAME, mapOf(), this)
     }
 
-    private fun handleClickProfile(){
-        impl.go(AccountListView.VIEW_NAME, mapOf(), this)
-    }
-
     private fun setUserProfile(menuItem: MenuItem){
-        val accountManager = UstadAccountManager(impl,this,di)
+        val accountManager: UstadAccountManager by instance()
         val profileIconLetter = accountManager.activeAccount.firstName?.first().toString()
         val profileLetterView:TextView = menuItem.actionView.findViewById(R.id.person_name_letter)
         profileLetterView.text = profileIconLetter.toUpperCase(Locale.ROOT)
-        profileLetterView.setOnClickListener { handleClickProfile() }
+        profileLetterView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
     }
 
     companion object {
