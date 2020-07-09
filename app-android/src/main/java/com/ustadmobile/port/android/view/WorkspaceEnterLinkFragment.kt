@@ -66,6 +66,7 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
         mPresenter = WorkspaceEnterLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
+        mBinding?.presenter = mPresenter
         mBinding?.organisationLink?.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(url: CharSequence?, start: Int, before: Int, count: Int) {

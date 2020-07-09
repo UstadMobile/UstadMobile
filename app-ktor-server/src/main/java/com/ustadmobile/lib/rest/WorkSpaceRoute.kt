@@ -13,7 +13,7 @@ fun Route.WorkSpaceRoute(db: UmAppDatabase) {
     route("Workspace") {
         get("verify") {
             val workSpace = db.workSpaceDao.getWorkSpace()
-            call.respond(if(workSpace == null)  HttpStatusCode.OK else HttpStatusCode.NotFound,
+            call.respond(if(workSpace != null)  HttpStatusCode.OK else HttpStatusCode.NotFound,
                     workSpace?:WorkSpace())
         }
     }
