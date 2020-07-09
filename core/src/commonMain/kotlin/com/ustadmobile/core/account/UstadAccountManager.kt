@@ -153,7 +153,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             activeAccount = nextAccount
         }
 
-        _storedAccountsLive.sendValue(_storedAccounts.toList())
+        _storedAccountsLive.sendValue(_storedAccounts.toMutableList())
     }
 
 
