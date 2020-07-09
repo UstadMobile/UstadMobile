@@ -38,7 +38,8 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
 
     val adminuser = db.personDao.findByUsername("admin")
     val iContext = InitialContext()
-    val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
+    val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as? String
+            ?: "./build/container"
 
     val workSpace = WorkSpace().apply {
         name = "UstadmobileWorkspace"
