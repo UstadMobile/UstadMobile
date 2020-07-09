@@ -66,7 +66,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                 try {
                     accountManager.login(username,password,serverUrl)
                     view.inProgress = false
-                    impl.go(nextDestination, mapOf(),context)
+                    impl.go(nextDestination,context)
                 } catch (e: Exception) {
                     view.errorMessage = impl.getString(if(e is UnauthorizedException)
                         MessageID.wrong_user_pass_combo else

@@ -24,11 +24,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @AdbScreenRecord("MainActivity test")
 class MainActivityTest {
-
-    @JvmField
-    @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
-
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
