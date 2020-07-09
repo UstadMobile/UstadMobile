@@ -58,8 +58,6 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
                 PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(adminPass)))
 
 
-
-
         val adminPassFile = File(containerDirPath, "admin.txt")
         if(!adminPassFile.parentFile.isDirectory) {
             adminPassFile.parentFile.mkdirs()
