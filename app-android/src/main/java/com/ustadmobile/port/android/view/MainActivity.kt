@@ -30,6 +30,7 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 import kotlinx.coroutines.CompletableDeferred
+import java.util.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -127,9 +128,9 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private fun setUserProfile(menuItem: MenuItem){
         val accountManager = UstadAccountManager(impl,this,di)
-        val profileIconLetter = accountManager.activeAccount.username?.substring(0,1)
+        val profileIconLetter = accountManager.activeAccount.firstName?.first().toString()
         val profileLetterView:TextView = menuItem.actionView.findViewById(R.id.person_name_letter)
-        profileLetterView.text = profileIconLetter?.toUpperCase()
+        profileLetterView.text = profileIconLetter.toUpperCase(Locale.ROOT)
         profileLetterView.setOnClickListener { handleClickProfile() }
     }
 

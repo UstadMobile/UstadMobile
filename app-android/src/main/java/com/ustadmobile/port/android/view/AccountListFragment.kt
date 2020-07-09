@@ -112,9 +112,12 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
         private fun updateList(){
             val umAccount = activeAccount
+            val mStoredAccounts = storedAccounts
             if(umAccount != null){
-                storedAccounts?.remove(umAccount)
-                submitList(storedAccounts)
+                if(mStoredAccounts != null && mStoredAccounts.contains(umAccount)){
+                    mStoredAccounts.remove(umAccount)
+                }
+                submitList(mStoredAccounts)
             }
         }
 
