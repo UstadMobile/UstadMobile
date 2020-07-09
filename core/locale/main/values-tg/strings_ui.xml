@@ -14,11 +14,11 @@
     <string name="it_will_start_tomorrow">Он пагоҳ оғоз мешавад</string>
     <string name="username_not_available">Ин номи корбарӣ мавҷуд нест. Лутфан дигареро интихоб кунед.</string>
     <string name="app_name">Мактаб Мобайл</string>
-    <string name="login">воридшавӣ</string>
-    <string name="error">хатогӣ</string>
+    <string name="login">Бақайдгирӣ</string>
+    <string name="error">Хатогӣ</string>
     <string name="err_registering_new_user">Хатогии бақайдгирии истифодабарандаи нав:</string>
     <string name="unable_to_update_username_error">Тафтиши номи корбарӣ ғайриимкон аст. Лутфан боварӣ ҳосил кунед, ки шумо онлайн ҳастед.</string>
-    <string name="register_empty_fields">Лутфан ҳама сатрҳои лозимаро хонапурӣ кунед</string>
+    <string name="register_empty_fields">Лутфан ҳама сатрҳои лозимаро пур кунед</string>
     <string name="register_incorrect_email">Суроғаи почтаи электронии нодуруст</string>
     <string name="wrong_user_pass_combo">Номи истифодабаранда / пароли хато: бори дигар кӯшиш кунед.</string>
     <string name="login_network_error">Хатогии пайвастшавӣ башабака: лутфан пайваст будани худро санҷед.</string>
@@ -796,7 +796,7 @@
     <string name="id_verbentity_urlid">ID: %s</string>
     <string name="verb">Феъл</string>
     <string name="report">Гузориш</string>
-    <string name="supported_files">Файлҳои дастгиршаванда: <b> Видео, Аудио, EPUB, Xapi Zip, H5P </b>
+    <string name="supported_files">Файлҳои дастгиршаванда: <b> Видео, Аудио, EPUB, Xapi Zip, H5P</b>
     </string>
     <string name="file_required_prompt">Файли воридшаванда интихоб карда нашудааст, бори дигар кӯшиш кунед</string>
     <string name="video">Видео</string>
@@ -815,4 +815,5 @@
     <string name="import_content">Воридоти мундариҷа</string>
     <string name="select_language">Интихоби забон</string>
     <string name="description">Шарҳ</string>
+    <string name="created_partnership">Дар ҳамкорӣ бо шарики мазкур таҳия шудааст:</string>
 </resources>
