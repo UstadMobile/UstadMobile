@@ -8,6 +8,7 @@ import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -76,6 +77,11 @@ abstract class NetworkManagerBleCommon(
     private var jobItemManagerList: DownloadJobItemManagerList? = null
 
     private lateinit var nextDownloadItemsLiveData: DoorLiveData<List<DownloadJobItem>>
+
+    private val _connectivityStatus = DoorMutableLiveData<ConnectivityStatus>()
+
+    val connectivityStatus: DoorLiveData<ConnectivityStatus>
+        get() = _connectivityStatus
 
     //Was previously internal: this does not compile since Kotlin 1.3.61
     class DownloadQueueLocalAvailabilityObserver(val localAvailabilityManager: LocalAvailabilityManager): DoorObserver<List<DownloadJobItem>> {

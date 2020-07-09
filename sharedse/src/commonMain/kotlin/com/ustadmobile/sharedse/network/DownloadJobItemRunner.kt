@@ -1,13 +1,16 @@
 package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
 import com.ustadmobile.sharedse.io.ConcatenatedInputStream
 import com.ustadmobile.sharedse.io.ConcatenatedInputStreamEntrySource
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
@@ -43,6 +46,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
 import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
+import org.kodein.di.on
 
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
@@ -67,15 +74,28 @@ class DownloadJobItemRunner
  */
 (private val context: Any,
  private val downloadItem: DownloadJobItem,
- private val containerDownloadManager: ContainerDownloadManager,
- private val networkManager: NetworkManagerBleCommon,
- private val appDb: UmAppDatabase,
+// private val containerDownloadManager: ContainerDownloadManager,
+// private val networkManager: NetworkManagerBleCommon,
+ //private val appDb: UmAppDatabase,
  private val endpointUrl: String,
- private var connectivityStatus: ConnectivityStatus?,
- private val connectivityStatusLiveData: DoorLiveData<ConnectivityStatus?>,
+// private var connectivityStatus: ConnectivityStatus?,
+// private val connectivityStatusLiveData: DoorLiveData<ConnectivityStatus?>,
  private val retryDelay: Long = 3000,
- private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
- private val localAvailabilityManager: LocalAvailabilityManager): ContainerDownloadRunner {
+ override val di: DI
+// private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
+/* private val localAvailabilityManager: LocalAvailabilityManager*/): ContainerDownloadRunner, DIAware {
+
+    private val endpoint = Endpoint(endpointUrl)
+
+    private val containerDownloadManager: ContainerDownloadManager by di.on(endpoint).instance()
+
+    private val appDb: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
+
+    private val networkManager: NetworkManagerBle by di.instance()
+
+    private val mainCoroutineDispatcher: CoroutineDispatcher by di.instance(tag = TAG_MAIN_COROUTINE_CONTEXT)
+
+    private val localAvailabilityManager: LocalAvailabilityManager by di.on(endpoint).instance()
 
     private var connectivityStatusObserver: DoorObserver<ConnectivityStatus?>? = null
 
@@ -139,7 +159,7 @@ class DownloadJobItemRunner
             val allowedIntVal = if(value) 1 else 0
             meteredConnectionAllowed.value = allowedIntVal
 
-            val connectivityStatusVal = connectivityStatus
+            val connectivityStatusVal = networkManager.connectivityStatus.getValue()
             val meteredConnectionAllowedVal = meteredConnectionAllowed.value
             if (meteredConnectionAllowedVal == 0 && connectivityStatusVal != null
                     && connectivityStatusVal.connectivityState == STATE_METERED) {
@@ -153,14 +173,14 @@ class DownloadJobItemRunner
      * @param newStatus changed connectivity status
      */
     internal fun handleConnectivityStatusChanged(newStatus: ConnectivityStatus?) {
-        this.connectivityStatus = newStatus
+        //this.connectivityStatus = newStatus
         UMLog.l(UMLog.DEBUG, 699, mkLogPrefix() +
                 " Connectivity state changed: " + newStatus)
         if (waitingForLocalConnection.value)
             return
 
-        if (connectivityStatus != null) {
-            when (newStatus!!.connectivityState) {
+        if (newStatus != null) {
+            when (newStatus.connectivityState) {
                 STATE_METERED -> if (meteredConnectionAllowed.value == 0) {
                     Napier.d({"${mkLogPrefix()} Connectivity state changed: on metered connection, " +
                             "must stop now."})
@@ -197,7 +217,9 @@ class DownloadJobItemRunner
                 }
 
                 withContext(mainCoroutineDispatcher) {
-                    connectivityStatusLiveData.removeObserver(connectivityStatusObserver!!)
+                    connectivityStatusObserver?.also {
+                        networkManager.connectivityStatus.removeObserver(it)
+                    }
                 }
 
                 updateItemStatus(newStatus)
@@ -211,8 +233,10 @@ class DownloadJobItemRunner
         if(downloadCalled) {
             throw IllegalStateException("Can only call download() once on DownloadJobItemRunner!")
         }
-        downloadManagerHolderRef = if(containerDownloadManager is ContainerDownloadManagerImpl) {
-            containerDownloadManager.getDownloadJobItemHolder(downloadItem.djiUid)
+
+        val containerDownloadManagerVal = containerDownloadManager
+        downloadManagerHolderRef = if(containerDownloadManagerVal is ContainerDownloadManagerImpl) {
+            containerDownloadManagerVal.getDownloadJobItemHolder(downloadItem.djiUid)
         }else {
             null
         }
@@ -228,7 +252,7 @@ class DownloadJobItemRunner
         connectivityStatusObserver = ObserverFnWrapper(this::handleConnectivityStatusChanged)
 
         withContext(mainCoroutineDispatcher) {
-            connectivityStatusLiveData.observeForever(connectivityStatusObserver!!)
+            networkManager.connectivityStatus.observeForever(connectivityStatusObserver!!)
         }
 
         destinationDir = appDb.downloadJobDao.getDestinationDir(downloadJobId)
@@ -290,13 +314,16 @@ class DownloadJobItemRunner
                 history.networkNode = if (isFromCloud) 0L else currentNetworkNode!!.nodeId
                 history.id = appDb.downloadJobItemHistoryDao.insert(history).toInt()
 
+                val connectivityStatusVal = networkManager.connectivityStatus.getValue()
                 val downloadEndpoint: String
                 if (networkNodeToUse == null) {
-                    if (connectivityStatus?.wifiSsid != null
-                            && connectivityStatus?.wifiSsid?.toUpperCase()?.startsWith("DIRECT-") ?: false) {
+                    if (connectivityStatusVal?.wifiSsid != null
+                            && connectivityStatusVal?.wifiSsid?.toUpperCase()?.startsWith("DIRECT-") ?: false) {
                         //we are connected to a local peer, but need the normal wifi
                         //TODO: if the wifi is just not available and is required, don't mark as a failure of this job
                         // set status to waiting for connection and stop
+
+                        //TODO: this looks wrong - why use launch here?
                         withContext(coroutineContext) {
                             launch(mainCoroutineDispatcher) {
                                 if (!connectToCloudNetwork()) {
@@ -306,7 +333,7 @@ class DownloadJobItemRunner
                         }
                     }
 
-                    if(connectivityStatus?.wifiSsid != null) {
+                    if(connectivityStatusVal?.wifiSsid != null) {
                         networkManager.lockWifi(downloadWiFiLock)
                     }
 
@@ -314,8 +341,8 @@ class DownloadJobItemRunner
                     currentHttpClient = defaultHttpClient()
                 } else {
                     if (networkNodeToUse.groupSsid == null
-                            || connectivityStatus?.connectivityState != ConnectivityStatus.STATE_CONNECTED_LOCAL
-                            || networkNodeToUse.groupSsid != connectivityStatus?.wifiSsid) {
+                            || connectivityStatusVal?.connectivityState != ConnectivityStatus.STATE_CONNECTED_LOCAL
+                            || networkNodeToUse.groupSsid != connectivityStatusVal?.wifiSsid) {
                         if (!connectToLocalNodeNetwork()) {
                             throw Exception("${mkLogPrefix()} could not connect to local node network")
                             //recording failure will push the node towards the bad threshold, after which
@@ -470,8 +497,8 @@ class DownloadJobItemRunner
     private suspend fun connectToCloudNetwork(): Boolean {
         UMLog.l(UMLog.DEBUG, 699, "${mkLogPrefix()} Reconnecting cloud network")
         networkManager.restoreWifi()
-        waitForLiveData(connectivityStatusLiveData!!, CONNECTION_TIMEOUT * 1000.toLong()) {
-            val checkStatus = connectivityStatus
+        waitForLiveData(networkManager.connectivityStatus, CONNECTION_TIMEOUT * 1000.toLong()) {
+            val checkStatus = networkManager.connectivityStatus.getValue()
             when {
                 checkStatus == null -> false
                 checkStatus.connectivityState == ConnectivityStatus.STATE_UNMETERED -> {
@@ -481,8 +508,9 @@ class DownloadJobItemRunner
             }
         }
 
-        return connectivityStatus!!.connectivityState == ConnectivityStatus.STATE_UNMETERED
-                || (meteredConnectionAllowed.value == 1 && connectivityStatus!!.connectivityState == STATE_METERED)
+        val connectivityState = networkManager.connectivityStatus.getValue()
+        return connectivityState?.connectivityState == ConnectivityStatus.STATE_UNMETERED
+                || (meteredConnectionAllowed.value == 1 && connectivityState?.connectivityState == STATE_METERED)
     }
 
     /**
@@ -553,9 +581,9 @@ class DownloadJobItemRunner
                 wiFiDirectGroupBle.value!!.passphrase)
 
         withContext(mainCoroutineDispatcher) {
-            waitForLiveData(connectivityStatusLiveData, (lWiFiConnectionTimeout).toLong()) {
+            waitForLiveData(networkManager.connectivityStatus, (lWiFiConnectionTimeout).toLong()) {
                 statusRef.value = it
-                it != null && isExpectedWifiDirectGroup(it)
+                isExpectedWifiDirectGroup(it)
             }
         }
 
