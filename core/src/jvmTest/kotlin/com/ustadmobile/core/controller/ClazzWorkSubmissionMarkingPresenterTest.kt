@@ -1,33 +1,30 @@
 
 package com.ustadmobile.core.controller
 
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.db.dao.ClazzWorkSubmissionDao
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission
-
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import org.junit.Assert
-import kotlinx.coroutines.runBlocking
-import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.core.util.ext.waitForListToBeSet
+import com.ustadmobile.core.util.*
+import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZMEMBER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZWORK_UID
+import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.util.test.ext.TestClazzWork
 import com.ustadmobile.util.test.ext.createTestContentEntriesAndJoinToClazzWork
 import com.ustadmobile.util.test.ext.insertTestClazzWorkAndQuestionsAndOptionsWithResponse
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -38,11 +35,7 @@ class ClazzWorkSubmissionMarkingPresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ClazzWorkSubmissionMarkingView
 
@@ -55,17 +48,29 @@ class ClazzWorkSubmissionMarkingPresenterTest {
 
     lateinit var testClazzWork: TestClazzWork
 
+    private lateinit var di: DI
+    private lateinit var db: UmAppDatabase
+    private lateinit var repo: UmAppDatabase
+
     @Before
     fun setup() {
         mockView = mock { }
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
+
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+
+        db = di.directActiveDbInstance()
+        repo = di.directActiveRepoInstance()
+
         context = Any()
-        repoClazzWorkDaoSpy = spy(clientDbRule.db.clazzWorkDao)
-        repoClazzWorkSubmissionDaoSpy = spy(clientDbRule.db.clazzWorkSubmissionDao)
-        whenever(clientDbRule.db.clazzWorkDao).thenReturn(repoClazzWorkDaoSpy)
-        whenever(clientDbRule.db.clazzWorkSubmissionDao).thenReturn(repoClazzWorkSubmissionDaoSpy)
+        repoClazzWorkDaoSpy = spy(repo.clazzWorkDao)
+        repoClazzWorkSubmissionDaoSpy = spy(repo.clazzWorkSubmissionDao)
+        whenever(repo.clazzWorkDao).thenReturn(repoClazzWorkDaoSpy)
+        whenever(repo.clazzWorkSubmissionDao).thenReturn(repoClazzWorkSubmissionDaoSpy)
 
 
 
@@ -83,7 +88,7 @@ class ClazzWorkSubmissionMarkingPresenterTest {
         val dateNow: Long = UMCalendarUtil.getDateInMilliPlusDays(0)
 
         testClazzWork = runBlocking {
-            clientDbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, true, -1,
                     true,0, submitted = true,
                     isStudentToClazz = true, dateNow = dateNow, marked = false)
@@ -91,11 +96,12 @@ class ClazzWorkSubmissionMarkingPresenterTest {
 
         //Add content
         runBlocking {
-            clientDbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+            db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
         }
 
+        val accountManager: UstadAccountManager by di.instance<UstadAccountManager>()
         val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
-        clientDbRule.account.personUid = teacherMember.clazzMemberPersonUid
+        accountManager.activeAccount.personUid = teacherMember.clazzMemberPersonUid
     }
 
     @Test
@@ -107,9 +113,7 @@ class ClazzWorkSubmissionMarkingPresenterTest {
         val presenterArgs = mapOf(ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
                                 ARG_CLAZZMEMBER_UID to clazzMemberUid.toString())
         val presenter = ClazzWorkSubmissionMarkingPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         GlobalScope.launch {
@@ -130,13 +134,11 @@ class ClazzWorkSubmissionMarkingPresenterTest {
         val presenterArgs = mapOf(ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
                 ARG_CLAZZMEMBER_UID to clazzMemberUid.toString())
         val presenter = ClazzWorkSubmissionMarkingPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         val member = runBlocking {
-            clientDbRule.db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid, clazzMemberUid)
+            db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid, clazzMemberUid)
         }
 
         member?.submission?.clazzWorkSubmissionScore = 42
@@ -145,41 +147,11 @@ class ClazzWorkSubmissionMarkingPresenterTest {
         presenter.handleClickSaveAndMarkNext(member, false)
         Thread.sleep(1000)
         val memberPost = runBlocking {
-            clientDbRule.db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid, clazzMemberUid)
+            db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid, clazzMemberUid)
         }
 
         Assert.assertEquals("Saving marking OK", memberPost?.submission?.clazzWorkSubmissionScore, 42)
 
-
-
-
-
-//        val testEntity = ClazzMemberAndClazzWorkWithSubmission().apply {
-//            someName = "Spelling Clazz"
-//            clazzWorkSubmissionWithPersonUid = clientDbRule.repo.clazzWorkSubmissionWithPersonDao.insert(this)
-//        }
-//
-//        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzWorkSubmissionWithPersonUid.toString())
-//        val presenter = ClazzWorkSubmissionMarkingPresenter(context,
-//                presenterArgs, mockView, mockLifecycleOwner,
-//                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-//                clientDbRule.accountLiveData)
-//        presenter.onCreate(null)
-//
-//        val initialEntity = mockView.captureLastEntityValue()!!
-//
-//        //Make some changes to the entity (e.g. as the user would do using data binding)
-//        //e.g. initialEntity!!.someName = "New Spelling Clazz"
-//
-//        presenter.handleClickSave(initialEntity)
-//
-//        val entitySaved = runBlocking {
-//            clientDbRule.db.clazzWorkSubmissionWithPersonDao.findByUidLive(testEntity.clazzWorkSubmissionWithPersonUid)
-//                    .waitUntil(5000) { it?.someName == "New Spelling Clazz" }.getValue()
-//        }
-//
-//        Assert.assertEquals("Name was saved and updated",
-//                "New Spelling Clazz", entitySaved!!.someName)
     }
 
 

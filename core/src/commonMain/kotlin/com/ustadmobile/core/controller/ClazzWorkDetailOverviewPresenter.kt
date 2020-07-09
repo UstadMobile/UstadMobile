@@ -26,10 +26,8 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         arguments, view, di, lifecycleOwner)
         , NewCommentItemListener by newCommentItemListener {
 
-
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
-
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWorkWithSubmission? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L

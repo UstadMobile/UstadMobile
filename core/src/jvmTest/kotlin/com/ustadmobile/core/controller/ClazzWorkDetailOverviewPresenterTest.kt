@@ -2,10 +2,13 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.db.dao.CommentsDao
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.directActiveDbInstance
+import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -24,6 +27,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -34,11 +39,7 @@ class ClazzWorkDetailOverviewPresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ClazzWorkDetailOverviewView
 
@@ -50,6 +51,12 @@ class ClazzWorkDetailOverviewPresenterTest {
 
     private lateinit var repoCommentsDaoSpy: CommentsDao
 
+    private lateinit var di: DI
+
+    private lateinit var db: UmAppDatabase
+
+    private lateinit var repo: UmAppDatabase
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -57,11 +64,19 @@ class ClazzWorkDetailOverviewPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoClazzWorkDaoSpy = spy(clientDbRule.db.clazzWorkDao)
-        whenever(clientDbRule.db.clazzWorkDao).thenReturn(repoClazzWorkDaoSpy)
 
-        repoCommentsDaoSpy = spy(clientDbRule.db.commentsDao)
-        whenever(clientDbRule.db.commentsDao).thenReturn(repoCommentsDaoSpy)
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+
+        db = di.directActiveDbInstance()
+        repo = di.directActiveRepoInstance()
+
+        repoClazzWorkDaoSpy = spy(repo.clazzWorkDao)
+        whenever(repo.clazzWorkDao).thenReturn(repoClazzWorkDaoSpy)
+
+        repoCommentsDaoSpy = spy(repo.commentsDao)
+        whenever(repo.commentsDao).thenReturn(repoCommentsDaoSpy)
 
     }
 
@@ -69,7 +84,7 @@ class ClazzWorkDetailOverviewPresenterTest {
     fun givenClazzWorkExists_whenOnCreateCalled_thenClazzWorkIsSetOnView() {
 
         val testClazzWork = runBlocking {
-            clientDbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     ClazzWork(), true, -1, true, 0,
             false, true)
         }
@@ -77,9 +92,7 @@ class ClazzWorkDetailOverviewPresenterTest {
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString())
         val presenter = ClazzWorkDetailOverviewPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
@@ -111,20 +124,19 @@ class ClazzWorkDetailOverviewPresenterTest {
     @Test
     fun givenClazzWorkExists_whenClickAddPublicComment_thenShouldPersistComment(){
         val testClazzWork = runBlocking {
-            clientDbRule.db.insertTestClazzWork(ClazzWork())
+            db.insertTestClazzWork(ClazzWork())
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString())
         val presenter = ClazzWorkDetailOverviewPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
         verify(mockView, timeout(5000).atLeastOnce()).entity = any()
 
-        presenter.addComment("Hello World", true)
+        presenter.addComment(ClazzWork.CLAZZ_WORK_TABLE_ID, testClazzWork.clazzWork.clazzWorkUid,
+                "Hello World", true, 0L,0L)
 
         verifyBlocking(repoCommentsDaoSpy, timeout(5000)){
             insertAsync(argThat{ this.commentsText == "Hello World"})
@@ -135,7 +147,7 @@ class ClazzWorkDetailOverviewPresenterTest {
     @Test
     fun givenClazzWorkExists_whenClickSubmit_thenShouldPersistSubmissionResult(){
         val testClazzWork = runBlocking {
-            clientDbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     ClazzWork().apply {
                         clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
                     }, true, -1, true, 0,
@@ -144,9 +156,7 @@ class ClazzWorkDetailOverviewPresenterTest {
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString())
         val presenter = ClazzWorkDetailOverviewPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
@@ -171,7 +181,7 @@ class ClazzWorkDetailOverviewPresenterTest {
 
         //Verify submission is set
         GlobalScope.launch {
-            val postSubmission = clientDbRule.db.clazzWorkSubmissionDao.findByClazzWorkUidAsync(
+            val postSubmission = db.clazzWorkSubmissionDao.findByClazzWorkUidAsync(
                     testClazzWork.clazzWork.clazzWorkUid)
 
             Assert.assertEquals("Submission set",
@@ -183,21 +193,22 @@ class ClazzWorkDetailOverviewPresenterTest {
 
     @Test
     fun givenClazzWorkExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
+
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+
         val testEntity = ClazzWork().apply {
             //set variables here
-            clazzWorkUid = clientDbRule.db.clazzWorkDao.insert(this)
+            clazzWorkUid = db.clazzWorkDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzWorkUid.toString())
         val presenter = ClazzWorkDetailOverviewPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
         presenter.handleClickEdit()
 
-        verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ClazzWorkEditView.VIEW_NAME),
+        verify(systemImpl, timeout(5000)).go(eq(ClazzWorkEditView.VIEW_NAME),
             eq(mapOf(ARG_ENTITY_UID to testEntity.clazzWorkUid.toString())), any())
     }
 
