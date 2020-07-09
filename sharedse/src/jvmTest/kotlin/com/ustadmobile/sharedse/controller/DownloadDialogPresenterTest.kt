@@ -11,21 +11,17 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.util.UstadTestRule
-import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Assert.*
@@ -37,7 +33,6 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 
 class DownloadDialogPresenterTest {
 
@@ -103,17 +98,10 @@ class DownloadDialogPresenterTest {
             }
         }
 
-//
-//        val httpd = EmbeddedHTTPD(0, context, umAppDatabase, umAppDatabaseRepo)
-//        httpd.start()
-
-
         val accountManager: UstadAccountManager by di.instance()
         db =  di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
         repo = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         contentEntrySet = insertTestContentEntries(db, System.currentTimeMillis())
-
-        Napier.base(DebugAntilog())
     }
 
     @Test
@@ -312,14 +300,6 @@ class DownloadDialogPresenterTest {
                 ARG_CONTENT_ENTRY_UID to contentEntrySet.rootEntry.contentEntryUid.toString()
         )
 
-//        val preparerCountdownLatch = CountDownLatch(1)
-//        val preparationRequested = AtomicBoolean(false)
-//        val downloadJobPreparerRequester = {downloadJobUid: Int, context: Any ->
-//            preparationRequested.set(true)
-//            preparerCountdownLatch.countDown()
-//        }
-
-
         val mockDownloadPrepRequester = mock<DownloadPreparationRequester> {  }
         val extendedDi = DI {
             extend(di)
@@ -346,118 +326,112 @@ class DownloadDialogPresenterTest {
         }
 
         verify(mockDownloadPrepRequester, timeout(5000)).requestPreparation(any())
-//        preparerCountdownLatch.await(5000, TimeUnit.MILLISECONDS)
-//        assertTrue("Preparer requester was invoked", preparationRequested.get())
 
         Unit
     }
-//
+
     @Test
     fun givenNoExistingDownloadJobNoMeteredDataAllowed_whenContinueButtonIsPressed_shouldCreateDownlaodJobInvokePreparerRequesterAndSetStatusToNeedsPrepared() = runBlocking {
         givenNoExistingDownloadJob_whenContinueIsPressed_shouldCreateDownloadJobAndInvokePreparerAndSetStatusToNeedsPrepared(false)
     }
-//
+
     @Test
     fun givenNoExistingDownloadJobMeteredDataAllowed_whenContinueButtonIsPressed_shouldCreateDownlaodJobInvokePreparerRequesterAndSetStatusToNeedsPrepared() = runBlocking {
         givenNoExistingDownloadJob_whenContinueIsPressed_shouldCreateDownloadJobAndInvokePreparerAndSetStatusToNeedsPrepared(true)
     }
 
-//    @Test
-//    fun givenDownloadRunning_whenCreated_shouldShowStackedOptions() {
-//        runBlocking{
-//            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
-//                it.djStatus = JobStatus.RUNNING
-//            }
-//            val existingDownloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
-//            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L, 1L,
-//                    1000L).also {
-//                it.djiStatus = JobStatus.RUNNING
-//            }
-//            val existingDownloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(existingDownloadJobItem)
-//
-//            whenever(containerDownloadManager.getDownloadJob(existingDownloadJob.djUid))
-//                    .thenReturn(existingDownloadJobLiveData)
-//            whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
-//                    .thenReturn(existingDownloadJobItemLiveData)
-//
-//            val args = mapOf(ARG_CONTENT_ENTRY_UID to "1")
-//            presenter = DownloadDialogPresenter(context, args, mockedDialogView, context,
-//                    umAppDatabase, umAppDatabaseRepo, containerDownloadManager, systemImpl,
-//                    { Int, Any -> Unit })
-//            presenter.onCreate(HashMap<String, String>())
-//            presenter.onStart()
-//
-//            verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
-//            argumentCaptor<IntArray>() {
-//                verify(mockedDialogView, timeout(5000)).setStackedOptions(capture(), any())
-//                assertArrayEquals("Set expected stacked options", DownloadDialogPresenter.STACKED_OPTIONS,
-//                        firstValue)
-//            }
-//        }
-//    }
-//
-//    @Test
-//    @Throws(InterruptedException::class)
-//    fun givenDownloadRunning_whenClickPause_shouldCallPause() {
-//        runBlocking {
-//            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
-//                it.djStatus = JobStatus.RUNNING
-//            }
-//            val existingDownloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
-//            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L, 1L,
-//                    1000L).also {
-//                it.djiStatus = JobStatus.RUNNING
-//            }
-//            val existingDownloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(existingDownloadJobItem)
-//
-//            whenever(containerDownloadManager.getDownloadJob(existingDownloadJob.djUid))
-//                    .thenReturn(existingDownloadJobLiveData)
-//            whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
-//                    .thenReturn(existingDownloadJobItemLiveData)
-//
-//            presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"),
-//                    mockedDialogView, context, umAppDatabase, umAppDatabaseRepo, containerDownloadManager,
-//                    systemImpl, {Int, Any -> Unit})
-//            presenter.onCreate(HashMap<String, String>())
-//            presenter.onStart()
-//
-//            verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
-//
-//            presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE)
-//
-//            verify(containerDownloadManager, timeout(5000)).pause(existingDownloadJob.djUid)
-//        }
-//    }
-//
-//    @Test
-//    fun givenDownloadRunning_whenClickCancel_shouldSetStatusToCancelling() {
-//        runBlocking {
-//            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
-//                it.djStatus = JobStatus.RUNNING
-//            }
-//            val existingDownloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
-//            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L, 1L,
-//                    1000L).also {
-//                it.djiStatus = JobStatus.RUNNING
-//            }
-//            val existingDownloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(existingDownloadJobItem)
-//
-//            whenever(containerDownloadManager.getDownloadJob(existingDownloadJob.djUid))
-//                    .thenReturn(existingDownloadJobLiveData)
-//            whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
-//                    .thenReturn(existingDownloadJobItemLiveData)
-//
-//            presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"), mockedDialogView,
-//                    context, umAppDatabase, umAppDatabaseRepo, containerDownloadManager, impl = systemImpl)
-//                    { Int, Any -> Unit }
-//            presenter.onCreate(HashMap<String, String>())
-//            presenter.onStart()
-//
-//            verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
-//
-//            presenter.handleClickStackedButton(STACKED_BUTTON_CANCEL)
-//
-//            verify(containerDownloadManager, timeout(5000)).cancel(existingDownloadJob.djUid)
-//        }
-//    }
+    @Test
+    fun givenDownloadRunning_whenCreated_shouldShowStackedOptions() {
+        runBlocking{
+            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
+                it.djStatus = JobStatus.RUNNING
+            }
+            val existingDownloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
+            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L, 1L,
+                    1000L).also {
+                it.djiStatus = JobStatus.RUNNING
+            }
+            val existingDownloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(existingDownloadJobItem)
+
+            whenever(containerDownloadManager.getDownloadJob(existingDownloadJob.djUid))
+                    .thenReturn(existingDownloadJobLiveData)
+            whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
+                    .thenReturn(existingDownloadJobItemLiveData)
+
+            val args = mapOf(ARG_CONTENT_ENTRY_UID to "1")
+            presenter = DownloadDialogPresenter(context, args, mockedDialogView, di, mockLifecycle)
+            presenter.onCreate(HashMap<String, String>())
+            presenter.onStart()
+
+            verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
+            argumentCaptor<IntArray>() {
+                verify(mockedDialogView, timeout(5000)).setStackedOptions(capture(), any())
+                assertArrayEquals("Set expected stacked options", DownloadDialogPresenter.STACKED_OPTIONS,
+                        firstValue)
+            }
+        }
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun givenDownloadRunning_whenClickPause_shouldCallPause() {
+        runBlocking {
+            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
+                it.djStatus = JobStatus.RUNNING
+            }
+            val existingDownloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
+            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L, 1L,
+                    1000L).also {
+                it.djiStatus = JobStatus.RUNNING
+            }
+            val existingDownloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(existingDownloadJobItem)
+
+            whenever(containerDownloadManager.getDownloadJob(existingDownloadJob.djUid))
+                    .thenReturn(existingDownloadJobLiveData)
+            whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
+                    .thenReturn(existingDownloadJobItemLiveData)
+
+            presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"),
+                    mockedDialogView, di, mockLifecycle)
+            presenter.onCreate(HashMap<String, String>())
+            presenter.onStart()
+
+            verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
+
+            presenter.handleClickStackedButton(DownloadDialogPresenter.STACKED_BUTTON_PAUSE)
+
+            verify(containerDownloadManager, timeout(5000)).pause(existingDownloadJob.djUid)
+        }
+    }
+
+    @Test
+    fun givenDownloadRunning_whenClickCancel_shouldSetStatusToCancelling() {
+        runBlocking {
+            val existingDownloadJob = DownloadJob(1L, System.currentTimeMillis()).also {
+                it.djStatus = JobStatus.RUNNING
+            }
+            val existingDownloadJobLiveData = DoorMutableLiveData<DownloadJob?>(existingDownloadJob)
+            val existingDownloadJobItem = DownloadJobItem(existingDownloadJob, 1L, 1L,
+                    1000L).also {
+                it.djiStatus = JobStatus.RUNNING
+            }
+            val existingDownloadJobItemLiveData = DoorMutableLiveData<DownloadJobItem?>(existingDownloadJobItem)
+
+            whenever(containerDownloadManager.getDownloadJob(existingDownloadJob.djUid))
+                    .thenReturn(existingDownloadJobLiveData)
+            whenever(containerDownloadManager.getDownloadJobItemByContentEntryUid(existingDownloadJobItem.djiContentEntryUid))
+                    .thenReturn(existingDownloadJobItemLiveData)
+
+            presenter = DownloadDialogPresenter(context, mapOf(ARG_CONTENT_ENTRY_UID to "1"), mockedDialogView,
+                    di, mockLifecycle)
+            presenter.onCreate(HashMap<String, String>())
+            presenter.onStart()
+
+            verify(mockedDialogView, timeout(5000)).setStackOptionsVisible(true)
+
+            presenter.handleClickStackedButton(STACKED_BUTTON_CANCEL)
+
+            verify(containerDownloadManager, timeout(5000)).cancel(existingDownloadJob.djUid)
+        }
+    }
 }
