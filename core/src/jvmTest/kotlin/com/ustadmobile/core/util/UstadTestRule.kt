@@ -43,7 +43,7 @@ fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDataba
  */
 class UstadTestRule: TestWatcher() {
 
-    private var endpointScope: EndpointScope? = null
+    var endpointScope: EndpointScope? = null
 
     private var systemImplSpy: UstadMobileSystemImpl? = null
 

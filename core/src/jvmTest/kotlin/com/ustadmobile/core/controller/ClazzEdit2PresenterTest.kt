@@ -7,6 +7,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
@@ -22,6 +23,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.scoped
+import org.kodein.di.singleton
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -52,8 +56,11 @@ class ClazzEdit2PresenterTest {
         }
         context = Any()
 
+        val mockClazzLogCreator = mock<ClazzLogCreatorManager>()
+
         di = DI {
             import(ustadTestRule.diModule)
+            bind<ClazzLogCreatorManager>() with scoped(ustadTestRule.endpointScope!!).singleton { mockClazzLogCreator }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
