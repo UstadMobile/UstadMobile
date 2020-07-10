@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.util
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -72,6 +73,8 @@ class UstadTestRule: TestWatcher() {
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+
+            bind<Gson>() with singleton { Gson() }
         }
     }
 
