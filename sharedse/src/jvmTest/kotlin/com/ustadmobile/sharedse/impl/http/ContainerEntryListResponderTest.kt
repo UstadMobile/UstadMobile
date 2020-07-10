@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.port.sharedse.impl.http.ContainerEntryListResponder
 import com.ustadmobile.port.sharedse.impl.http.ContainerEntryListResponder.Companion.PARAM_CONTAINER_UID
 import com.ustadmobile.sharedse.util.UstadTestRule
+import com.ustadmobile.test.util.ext.insertContainerFromResources
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import kotlinx.coroutines.runBlocking
@@ -23,8 +24,6 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 
 class ContainerEntryListResponderTest {
@@ -52,30 +51,13 @@ class ContainerEntryListResponderTest {
 
         val accountManager: UstadAccountManager by di.instance()
         val activeDb: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = TAG_DB)
-
-        val tmpDir = testFileRule.newFolder()
-
-        container = Container().apply {
-            containerUid = activeDb.containerDao.insert(this)
+        val containerPair = runBlocking {
+            activeDb.insertContainerFromResources(testFileRule.newFolder(), testFileRule.newFolder(),
+                *RES_FILENAMES.map { "$RES_FOLDER$it" }.toTypedArray())
         }
 
-        val containerTmpDir = testFileRule.newFolder("testresponder-containerfiles")
-        containerManager = ContainerManager(container, activeDb, activeDb,
-                containerTmpDir.absolutePath)
-
-        RES_FILENAMES.forEach { filename ->
-            this::class.java.getResourceAsStream("$RES_FOLDER/$filename").use { inStream ->
-                val entryTmpFile = File(tmpDir, filename)
-                FileOutputStream(entryTmpFile).use {outStream ->
-                    inStream.copyTo(outStream)
-                    outStream.flush()
-                    runBlocking {
-                        containerManager.addEntries(ContainerManager.FileEntrySource(entryTmpFile,
-                                entryTmpFile.name))
-                    }
-                }
-            }
-        }
+        container = containerPair.first
+        containerManager = containerPair.second
     }
 
     @ExperimentalStdlibApi
