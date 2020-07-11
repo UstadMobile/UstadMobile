@@ -56,7 +56,6 @@ import com.ustadmobile.core.networkmanager.defaultOkHttpClient
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
-import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherBuilder
 import okhttp3.OkHttpClient
 import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import java.net.HttpURLConnection
@@ -141,7 +140,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
     private var localOkHttpClient: OkHttpClient? = null
 
     override val containerFetcher: ContainerFetcher by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        ContainerFetcherBuilder(this).build()
+        TODO("ContainerFetcher should not be here as a variable - use DI")
     }
 
     override val containerDownloadManager = ContainerDownloadManagerImpl(appDb = umAppDatabase,

@@ -149,7 +149,6 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
-                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
@@ -157,6 +156,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
 
             }
         }
