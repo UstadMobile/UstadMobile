@@ -444,5 +444,7 @@ abstract class UstadMobileSystemCommon {
 
         const val TAG_MAIN_COROUTINE_CONTEXT = 16
 
+        const val TAG_DLMGR_SINGLETHREAD_CONTEXT = 32
+
     }
 }

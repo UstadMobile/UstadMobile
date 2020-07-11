@@ -2,6 +2,7 @@ package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.door.DoorLiveData
 import java.lang.IllegalStateException
 import java.util.*
@@ -17,14 +18,18 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import com.ustadmobile.core.util.ext.makeRootDownloadJobItem
 import com.ustadmobile.core.util.ext.isStatusCompleted
+import com.ustadmobile.core.account.Endpoint
+import org.kodein.di.*
 
-
-typealias ContainerDownloaderMaker = suspend (downloadJob: DownloadJobItem, downloadJobManager: ContainerDownloadManager) -> ContainerDownloadRunner
-
+/**
+ * This class manages a download queue for a given endpoint.
+ */
 class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineContext = newSingleThreadContext("UstadDownloadManager"),
-                                   private val appDb: UmAppDatabase,
-                                   private val onQueueEmpty: () -> Unit = {},
-                                   private val containerDownloaderMaker: ContainerDownloaderMaker): ContainerDownloadManager() {
+                                   val endpoint: Endpoint, override val di: DI): ContainerDownloadManager(), DIAware {
+
+    var onQueueEmpty: (() -> Unit) = {}
+
+    val appDb: UmAppDatabase by on(endpoint).instance(tag = TAG_DB)
 
     /**
      * This class ensures that a reference is kept as long as anything still holds a reference to
@@ -370,7 +375,9 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         val nextDownload = appDb.downloadJobItemDao.findNextDownloadJobItems2(1,
                 currentConnectivityStatus?.connectivityState == ConnectivityStatus.STATE_UNMETERED)
         if(nextDownload.isNotEmpty()) {
-            val containerDownloader = containerDownloaderMaker(nextDownload[0], this@ContainerDownloadManagerImpl)
+            val containerDownloader: ContainerDownloadRunner = di.direct.instance(
+                    arg = DownloadJobItemRunnerDIArgs(endpoint, nextDownload[0]))
+
             activeDownloads[nextDownload[0].djiUid] = ActiveContainerDownload(nextDownload[0],
                     containerDownloader)
             GlobalScope.launch(Dispatchers.IO) {
