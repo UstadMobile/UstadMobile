@@ -88,7 +88,23 @@ class ConcatenatedContainerEntryFileResponderTest {
 
     @Test
     fun givenValidRequest_whenHeadCalled_thenShouldServeHeadersWithNoData() {
+        val containerEntries = db.containerEntryDao.findByContainerWithMd5(container.first.containerUid)
+        val containerEntryFileUids = containerEntries.map { it.ceCefUid }.joinToString(separator = ";") { it.toString() }
+        val mockSession = mock<NanoHTTPD.IHTTPSession> {
+            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/$containerEntryFileUids")
+        }
 
+        val mockUriResource = mock<RouterNanoHTTPD.UriResource> {
+            on { initParameter(0, DI::class.java )}.thenReturn(di)
+        }
+
+        val headResponse = ConcatenatedContainerEntryFileResponder().other("HEAD",
+            mockUriResource, mutableMapOf(URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl),
+            mockSession)
+
+        Assert.assertEquals("Head response has no data", 0, headResponse.data.readBytes().size)
+        Assert.assertTrue("Head response has content length > 0",
+                (headResponse.getHeader("content-length")?.toLong() ?: 0) > 0)
     }
 
     companion object {

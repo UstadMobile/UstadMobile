@@ -72,11 +72,12 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
     init {
         id = idCounter
         idCounter++
-//        addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder::class.java, appDatabase)
-//        addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
-//                ContainerEntryListResponder::class.java, appDatabase)
-//        addRoute("/$ENDPOINT_CONCATENATEDFILES/(.*)+", ConcatenatedContainerEntryFileResponder::class.java,
-//                appDatabase)
+
+        addRoute("/:${ContainerEntryListResponder.PATH_VAR_ENDPOINT}/ContainerEntryList/findByContainerWithMd5(.*)+",
+                ContainerEntryListResponder::class.java, di)
+        addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/(.*)+",
+                ConcatenatedContainerEntryFileResponder::class.java, di)
+
 //        addRoute("/xapi/:contentEntryUid/statements", XapiStatementResponder::class.java, repository)
 //        addRoute("/xapi/:contentEntryUid/activities/state", XapiStateResponder::class.java, repository)
     }
