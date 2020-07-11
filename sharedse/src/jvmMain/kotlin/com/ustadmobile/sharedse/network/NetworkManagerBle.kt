@@ -10,12 +10,11 @@ import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
-import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherBuilder
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.OkHttpClient
+import org.kodein.di.DI
 
-actual open class NetworkManagerBle actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
-                                                       umAppDatabase: UmAppDatabase) : NetworkManagerBleCommon(umAppDatabase),
+actual open class NetworkManagerBle actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispatcher) : NetworkManagerBleCommon(context, di,singleThreadDispatcher),
         NetworkManagerWithConnectionOpener{
 
 
@@ -37,24 +36,24 @@ actual open class NetworkManagerBle actual constructor(context: Any, singleThrea
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
     override val containerFetcher: ContainerFetcher by lazy {
-        ContainerFetcherBuilder(this).build()
+        TODO("Container fetcher should not be here as a variable - should use DI")
     }
 
     override val localConnectionOpener: ConnectionOpener?
         get() = null
 
-    override val umAppDatabaseRepo by lazy {
-        //TODO: this will need to be changed to use DI
-        val activeAccount = null as UmAccount?
-        val serverUrl = if(activeAccount!= null) {
-            activeAccount.endpointUrl ?: "http://localhost"
-        }else {
-            UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
-                    "http://localhost", context) ?: "http://localhost"
-        }
-        umAppDatabase.asRepository<UmAppDatabase>(context, serverUrl, "", defaultHttpClient(),
-                null)
-    }
+//    override val umAppDatabaseRepo by lazy {
+//        //TODO: this will need to be changed to use DI
+//        val activeAccount = null as UmAccount?
+//        val serverUrl = if(activeAccount!= null) {
+//            activeAccount.endpointUrl ?: "http://localhost"
+//        }else {
+//            UstadMobileSystemImpl.instance.getAppConfigString("apiUrl",
+//                    "http://localhost", context) ?: "http://localhost"
+//        }
+//        umAppDatabase.asRepository<UmAppDatabase>(context, serverUrl, "", defaultHttpClient(),
+//                null)
+//    }
 
     override suspend fun sendBleMessage(context: Any, bleMessage: BleMessage, deviceAddr: String): BleMessage? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

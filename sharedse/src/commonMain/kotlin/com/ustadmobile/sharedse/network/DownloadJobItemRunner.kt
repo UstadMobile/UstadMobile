@@ -46,6 +46,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
 import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -148,6 +149,9 @@ class DownloadJobItemRunner
 
     private val timeSinceStart
         get() = getSystemTimeInMillis() - startTime
+
+    private val containerFetcher: ContainerFetcher by instance()
+
 
     fun setWiFiConnectionTimeout(lWiFiConnectionTimeout: Int) {
         this.lWiFiConnectionTimeout = lWiFiConnectionTimeout
@@ -395,7 +399,7 @@ class DownloadJobItemRunner
                 downloadStatusLock.withLock {
                     Napier.d({"${mkLogPrefix()} enqueuing download URL=$downloadUrl fileDest=" +
                             destTmpFile.getAbsolutePath()})
-                    jobDeferred = networkManager.containerFetcher.enqueue(containerRequest,
+                    jobDeferred = containerFetcher.enqueue(containerRequest,
                             object: AbstractContainerFetcherListener() {
                                 override fun onProgress(request: ContainerFetcherRequest,
                                                         bytesDownloaded: Long, contentLength: Long) {
