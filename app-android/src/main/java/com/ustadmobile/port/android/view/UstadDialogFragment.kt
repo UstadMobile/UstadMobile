@@ -5,13 +5,17 @@ import androidx.fragment.app.DialogFragment
 import com.ustadmobile.core.view.DialogResultListener
 import com.ustadmobile.core.view.DismissableDialog
 import com.ustadmobile.core.view.UstadView
+import org.kodein.di.DIAware
 import java.util.*
+import org.kodein.di.android.x.di
 
 /**
  * Created by mike on 7/17/17.
  */
 
-open class UstadDialogFragment : DialogFragment(), DismissableDialog, UstadView {
+open class UstadDialogFragment : DialogFragment(), DismissableDialog, UstadView, DIAware {
+
+    override val di by di()
 
     protected lateinit var mResultListener: DialogResultListener
 

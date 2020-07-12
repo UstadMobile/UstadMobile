@@ -7,8 +7,11 @@ import com.ustadmobile.core.util.ext.runPreload
 
 class DbPreloadWorker(context: Context, workerParams: WorkerParameters): Worker(context, workerParams) {
 
+    //TODO: this needs to be made aware of multiple databases
+    //val kodein by di()
+
     override fun doWork(): Result {
-        UmAccountManager.getActiveDatabase(applicationContext).runPreload()
+        //UmAccountManager.getActiveDatabase(applicationContext).runPreload()
         return Result.success()
     }
 

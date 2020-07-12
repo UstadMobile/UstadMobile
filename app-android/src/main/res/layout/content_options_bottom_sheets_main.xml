@@ -145,7 +145,7 @@
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_toEndOf="@+id/link_option"
-                android:text="@string/content_type_link"
+                android:text="@string/link"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </RelativeLayout>

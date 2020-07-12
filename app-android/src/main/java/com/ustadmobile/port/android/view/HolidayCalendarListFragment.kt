@@ -4,21 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemHolidayCalendarBinding
 import com.ustadmobile.core.controller.HolidayCalendarListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.HolidayCalendarListView
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -67,10 +60,7 @@ class HolidayCalendarListFragment()
         val view = super.onCreateView(inflater, container, savedInstanceState)
 
         mPresenter = HolidayCalendarListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this,  di, viewLifecycleOwner)
         mDataRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
                 requireContext().getString(R.string.create_new, requireContext().getString(R.string.holiday_calendar)))

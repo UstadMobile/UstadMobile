@@ -3,17 +3,19 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.goToContentEntry
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
+import com.ustadmobile.core.view.WebChunkView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 import kotlin.js.JsName
 
 open class IndexLog {
@@ -42,12 +44,13 @@ open class IndexLog {
 
 abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, String>,
                                        view: WebChunkView,
+                                       di: DI,
                                        private val isDownloadEnabled: Boolean,
                                        val appRepo: UmAppDatabase,
                                        val umAppDb: UmAppDatabase,
                                        private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
 
-    : UstadBaseController<WebChunkView>(context, arguments, view) {
+    : UstadBaseController<WebChunkView>(context, arguments, view, di) {
 
     internal var containerUid: Long? = null
 

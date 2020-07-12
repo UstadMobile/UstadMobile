@@ -1,26 +1,21 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.RoleEditView
 import com.ustadmobile.core.view.RoleListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 
 class RoleListPresenter(context: Any, arguments: Map<String, String>, view: RoleListView,
-                        lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                        db: UmAppDatabase, repo: UmAppDatabase,
-                        activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<RoleListView, Role>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                        di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<RoleListView, Role>(context, arguments, view, di, lifecycleOwner) {
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 

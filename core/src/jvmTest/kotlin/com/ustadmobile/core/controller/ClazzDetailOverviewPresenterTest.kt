@@ -1,29 +1,27 @@
 
 package com.ustadmobile.core.controller
 
+import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ClazzDao
+import com.ustadmobile.core.db.dao.ScheduleDao
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.view.ClazzDetailOverviewView
+import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.ClazzDetailOverviewView
-import com.ustadmobile.core.view.ClazzDetailView
-import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.ClazzDao
-import com.ustadmobile.core.db.dao.ClazzLogDao
-import com.ustadmobile.core.db.dao.ScheduleDao
-import com.ustadmobile.core.db.waitForLiveData
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
-import com.ustadmobile.core.util.ext.waitForListToBeSet
-import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.Person
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -32,13 +30,10 @@ import org.junit.Assert
  */
 class ClazzDetailOverviewPresenterTest {
 
-    @JvmField
-    @Rule
-    var systemImplRule = SystemImplRule()
 
     @JvmField
     @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ClazzDetailOverviewView
 
@@ -50,6 +45,8 @@ class ClazzDetailOverviewPresenterTest {
 
     private lateinit var repoScheduleSpy: ScheduleDao
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -57,28 +54,34 @@ class ClazzDetailOverviewPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoClazzDaoSpy = spy(clientDbRule.db.clazzDao).also {
-            whenever(clientDbRule.db.clazzDao).thenReturn(it)
+
+        di = DI {
+            import(ustadTestRule.diModule)
         }
 
-        repoScheduleSpy = spy(clientDbRule.db.scheduleDao).also {
-            whenever(clientDbRule.db.scheduleDao).thenReturn(it)
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        repoClazzDaoSpy = spy(repo.clazzDao).also {
+            whenever(repo.clazzDao).thenReturn(it)
         }
 
-        //TODO: insert any entities required for all tests
+        repoScheduleSpy = spy(db.scheduleDao).also {
+            whenever(db.scheduleDao).thenReturn(it)
+        }
     }
 
     @Test
     fun givenClazzExists_whenOnCreateCalled_thenClazzIsSetOnView() {
+        val db: UmAppDatabase by di.activeDbInstance()
         val testEntity = Clazz().apply {
             //set variables here
-            clazzUid = clientDbRule.db.clazzDao.insert(this)
+            clazzUid = db.clazzDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
         val presenter = ClazzDetailOverviewPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
 
 
         presenter.onCreate(null)
@@ -96,21 +99,21 @@ class ClazzDetailOverviewPresenterTest {
 
     @Test
     fun givenClazzExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
+        val db: UmAppDatabase by di.activeDbInstance()
         val testEntity = Clazz().apply {
             //set variables here
-            clazzUid = clientDbRule.db.clazzDao.insert(this)
+            clazzUid = db.clazzDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
         val presenter = ClazzDetailOverviewPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
         presenter.handleClickEdit()
 
-        verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ClazzEdit2View.VIEW_NAME),
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+        verify(systemImpl, timeout(5000)).go(eq(ClazzEdit2View.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())), any())
     }
 }

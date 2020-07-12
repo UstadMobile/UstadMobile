@@ -58,23 +58,13 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
 
-        <activity
-            android:name="com.ustadmobile.port.android.view.LoginActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/login" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.Register2Activity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/register" />
+
         <activity android:name="com.ustadmobile.port.android.view.ContentEditorActivity" />
 
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true" />
 
-        <activity
-            android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"

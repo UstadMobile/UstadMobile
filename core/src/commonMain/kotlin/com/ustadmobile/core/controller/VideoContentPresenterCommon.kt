@@ -1,27 +1,33 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.generated.locale.MessageID.loading
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.InputStream
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 
-abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>?, view: VideoPlayerView,
-                                           private val db: UmAppDatabase, private val repo: UmAppDatabase)
-    : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
+abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>, view: VideoPlayerView,
+                                           di: DI)
+    : UstadBaseController<VideoPlayerView>(context, arguments, view, di) {
 
 
     internal var containerUid: Long = 0
+
+    val accountManager: UstadAccountManager by instance()
+
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+
 
     internal lateinit var contentEntryDao: ContentEntryDao
     internal lateinit var containerDao: ContainerDao
@@ -50,7 +56,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
         view.loading = true
-        GlobalScope.launch {
+        GlobalScope.launch(doorMainDispatcher()) {
             view.entry = contentEntryDao.getContentByUuidAsync(entryUuid)
         }
 

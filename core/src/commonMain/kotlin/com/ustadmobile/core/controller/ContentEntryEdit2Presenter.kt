@@ -4,9 +4,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmResultCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -16,7 +14,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -25,17 +22,17 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
+import org.kodein.di.instanceOrNull
 
 
 class ContentEntryEdit2Presenter(context: Any,
                                  arguments: Map<String, String>, view: ContentEntryEdit2View,
                                  lifecycleOwner: DoorLifecycleOwner,
-                                 systemImpl: UstadMobileSystemImpl,
-                                 db: UmAppDatabase, repo: UmAppDatabase,
-                                 private val containerDownloadManager: ContainerDownloadManager?,
-                                 activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                                 di: DI)
+    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view,  di, lifecycleOwner) {
+
+    private val containerDownloadManager: ContainerDownloadManager? by instanceOrNull<ContainerDownloadManager>()
 
     enum class LicenceOptions(val optionVal: Int, val messageId: Int){
         LICENSE_TYPE_CC_BY(ContentEntry.LICENSE_TYPE_CC_BY, MessageID.licence_type_cc_by),
@@ -87,7 +84,7 @@ class ContentEntryEdit2Presenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         val isLeaf = arguments[ARG_LEAF]?.toBoolean()
         return withTimeoutOrNull(2000) {
-            db.contentEntryDao.findEntryWithLanguageByEntryId(entityUid)
+            db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryId(entityUid)
         } ?: ContentEntryWithLanguage().apply {
             leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
         }
@@ -155,7 +152,7 @@ class ContentEntryEdit2Presenter(context: Any,
                         downloadJobItem.djiStatus = JobStatus.COMPLETE
                         downloadJobItem.downloadedSoFar = container.fileSize
 
-                        containerDownloadManager.handleDownloadJobItemUpdated(downloadJobItem)
+                        containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
                     }
                 }
                 view.finishWithResult(listOf(entity))

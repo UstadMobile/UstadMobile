@@ -20,6 +20,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryStatus
 import kotlinx.io.ByteArrayOutputStream
 import kotlinx.io.InputStream
 import org.jsoup.Jsoup
+import org.kodein.di.DI
 import org.xmlpull.v1.XmlPullParserException
 import java.io.*
 import java.text.SimpleDateFormat
@@ -27,11 +28,11 @@ import java.util.*
 import kotlin.text.Charsets.UTF_8
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String>,
-                                                       view: ContentEditorView, private val storage: String?,
+                                                       view: ContentEditorView, di: DI, private val storage: String?,
                                                        private val database : UmAppDatabase,
-                                                       private val repository : UmAppDatabase ,
+                                                       private val repository : UmAppDatabase,
                                                        mountContainer: suspend (Long) -> String)
-    :ContentEditorPresenterCommon(context,arguments,view,storage,database,mountContainer){
+    :ContentEditorPresenterCommon(context,arguments,view,di,storage,database,mountContainer){
 
 
     private var nextNavItem: EpubNavItem? = null

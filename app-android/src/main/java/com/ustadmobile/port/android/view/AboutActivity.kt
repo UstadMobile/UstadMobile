@@ -11,10 +11,14 @@ import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.CompletableDeferred
+import org.kodein.di.android.di
+import org.kodein.di.DIAware
 
-class AboutActivity : UstadBaseActivity(), AboutView {
+class AboutActivity : UstadBaseActivity(), AboutView, DIAware {
 
     private lateinit var mAboutPresenter: AboutPresenter
+
+    override val di by di()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +27,7 @@ class AboutActivity : UstadBaseActivity(), AboutView {
         setTitle(R.string.about)
         mAboutPresenter = AboutPresenter(this,
                 bundleToMap(intent.extras),
-                this)
+                this, di)
         mAboutPresenter.onCreate(bundleToMap(savedInstanceState))
 
         setUMToolbar(R.id.toolbar)
