@@ -3,6 +3,9 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isJavascriptEnabled
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.Locator
@@ -25,6 +28,8 @@ import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
+import org.hamcrest.core.AllOf
+import org.hamcrest.core.AllOf.allOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -109,7 +114,8 @@ class HarContentFragmentTest {
         var count = 0
         repeat(5) {
             try {
-                onWebView().withElement(findElement(Locator.CSS_SELECTOR, "div.main"))
+                onWebView(allOf(isDisplayed(), isJavascriptEnabled()))
+                        .withElement(findElement(Locator.CSS_SELECTOR, "div.main"))
             } catch (io: RuntimeException) {
                 count++
                 Thread.sleep(2000)
