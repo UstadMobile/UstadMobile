@@ -8,11 +8,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @ExperimentalStdlibApi
-actual class HarPresenter actual constructor(context: Any, arguments: Map<String, String>,
-                                             view: HarView, db: UmAppDatabase,
-                                             repository: UmAppDatabase,
-                                             localHttp: String)
-    : HarPresenterCommon(context, arguments, view,db, repository, localHttp) {
+actual class HarContentPresenter actual constructor(context: Any, arguments: Map<String, String>,
+                                                    view: HarView, db: UmAppDatabase,
+                                                    repository: UmAppDatabase,
+                                                    localHttp: String)
+    : HarContentPresenterCommon(context, arguments, view,db, repository, localHttp) {
 
     lateinit var harWebViewClient: HarWebViewClient
 

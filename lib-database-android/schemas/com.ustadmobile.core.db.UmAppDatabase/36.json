@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "75c4c68633e07c38082fece62a9ee33d",
+    "identityHash": "4dc48617dbb1e70d346ecde41b642c59",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4013,7 +4013,7 @@
       },
       {
         "tableName": "School",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolEmailAddress` TEXT, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL, `schoolTimeZone` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolEmailAddress` TEXT, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL, `schoolTimeZone` TEXT)",
         "fields": [
           {
             "fieldPath": "schoolUid",
@@ -4067,18 +4067,6 @@
             "fieldPath": "schoolFeatures",
             "columnName": "schoolFeatures",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolLocationLong",
-            "columnName": "schoolLocationLong",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolLocationLatt",
-            "columnName": "schoolLocationLatt",
-            "affinity": "REAL",
             "notNull": true
           },
           {
@@ -7326,7 +7314,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '75c4c68633e07c38082fece62a9ee33d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4dc48617dbb1e70d346ecde41b642c59')"
     ]
   }
 }

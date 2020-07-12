@@ -29,6 +29,7 @@ import okio.Okio
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import org.junit.Before
 
+@ExperimentalStdlibApi
 class TestContentScraperUtil {
 
     @Before

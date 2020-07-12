@@ -20,6 +20,7 @@ import java.lang.IllegalArgumentException
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 
+@ExperimentalStdlibApi
 class TestHarScraper {
 
 
@@ -32,9 +33,7 @@ class TestHarScraper {
     private lateinit var containerFolder: File
     private lateinit var entry: ContentEntry
 
-
     private val RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/harcontent"
-
 
     @Before
     fun setup() {

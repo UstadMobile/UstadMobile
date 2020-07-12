@@ -164,9 +164,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 }
 
                 runBlocking {
-
-
-                    if(containerManager.getEntry(containerPath) == null) {
+                    if(containerManager.getEntry(containerPath) != null) {
                         containerPath += counter
                     }
                     containerManager.addEntries(HarEntrySource(it, listOf(containerPath)))

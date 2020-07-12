@@ -21,8 +21,8 @@ import kotlinx.coroutines.launch
 import kotlin.js.JsName
 
 @ExperimentalStdlibApi
-abstract class HarPresenterCommon(context: Any, arguments: Map<String, String>, view: HarView,
-                                  val db: UmAppDatabase, val appRepo: UmAppDatabase, val localHttp: String) :
+abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, String>, view: HarView,
+                                         val db: UmAppDatabase, val appRepo: UmAppDatabase, val localHttp: String) :
         UstadBaseController<HarView>(context, arguments, view) {
 
     lateinit var harContainer: HarContainer

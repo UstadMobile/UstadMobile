@@ -38,6 +38,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import org.kmp.io.KMPPullParserException
 import java.util.function.Consumer
 
+@ExperimentalStdlibApi
 class TestShrinkerUtils {
 
 

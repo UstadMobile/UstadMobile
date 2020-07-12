@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import org.junit.Before
 import java.net.URL
 
+@ExperimentalStdlibApi
 class TestCK12ContentScraper {
     private lateinit var db: UmAppDatabase
     private val PRACTICE_JSON = "/com/ustadmobile/lib/contentscrapers/ck12/ck12-practice.txt"

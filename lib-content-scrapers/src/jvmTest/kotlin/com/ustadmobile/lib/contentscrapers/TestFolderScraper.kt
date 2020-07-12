@@ -10,6 +10,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 
+@ExperimentalStdlibApi
 class TestFolderScraper {
 
     private var tmpDir: File? = null

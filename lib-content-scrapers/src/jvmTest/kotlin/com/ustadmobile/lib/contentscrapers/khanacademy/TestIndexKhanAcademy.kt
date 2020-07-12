@@ -23,6 +23,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 
+@ExperimentalStdlibApi
 class TestIndexKhanAcademy {
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {

@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import com.toughra.ustadmobile.databinding.FragmentHarContentBinding
-import com.ustadmobile.core.controller.HarPresenter
+import com.ustadmobile.core.controller.HarContentPresenter
 import com.ustadmobile.core.impl.HarWebViewClient
 import com.ustadmobile.core.impl.PayloadRecorder
 import com.ustadmobile.core.impl.UmAccountManager
@@ -29,7 +29,7 @@ class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHand
     private val clientDeferred = CompletableDeferred<HarWebViewClient>()
 
     private var webView: WebView? = null
-    private var presenter: HarPresenter? = null
+    private var presenter: HarContentPresenter? = null
     val recorder = PayloadRecorder()
 
     private var networkManagerProvider: BleNetworkManagerProvider? = null
@@ -63,7 +63,7 @@ class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHand
         GlobalScope.launch(Dispatchers.Main) {
             val thisFrag = this@HarContentFragment
             val networkManagerBle = networkManagerProvider?.networkManager?.await()
-            presenter = HarPresenter(thisFrag.viewContext, arguments.toStringMap(),
+            presenter = HarContentPresenter(thisFrag.viewContext, arguments.toStringMap(),
                     thisFrag, UmAccountManager.getActiveDatabase(requireContext()),
                     UmAccountManager.getRepositoryForActiveAccount(requireContext()),
                     networkManagerBle?.httpd?.localHttpUrl ?: "")

@@ -39,6 +39,7 @@ import java.net.URISyntaxException
 import java.net.URL
 import java.nio.file.Files
 
+@ExperimentalStdlibApi
 class TestPrathamContentScraper {
 
 
