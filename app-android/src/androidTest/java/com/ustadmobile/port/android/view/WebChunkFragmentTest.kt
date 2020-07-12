@@ -4,6 +4,9 @@ import android.Manifest
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.Espresso.onIdle
+import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isJavascriptEnabled
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.Locator
@@ -28,6 +31,8 @@ import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import kotlinx.android.synthetic.main.fragment_web_chunk.*
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
+import org.hamcrest.CoreMatchers
+import org.hamcrest.core.AllOf.allOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -112,7 +117,9 @@ class WebChunkFragmentTest {
         var count = 0
         repeat(5) {
             try {
-                onWebView().withElement(findElement(Locator.CSS_SELECTOR, "div[data-test-id=tutorial-page]"))
+                onWebView(allOf(isDisplayed(), isJavascriptEnabled()))
+                        .withElement(findElement(Locator.CSS_SELECTOR,
+                                "div[data-test-id=tutorial-page]"))
             } catch (io: RuntimeException) {
                 Thread.sleep(2000)
                 count++
