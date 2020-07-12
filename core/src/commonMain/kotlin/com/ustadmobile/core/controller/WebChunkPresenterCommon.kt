@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
@@ -16,6 +17,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import kotlin.js.JsName
 
 open class IndexLog {
@@ -44,15 +47,19 @@ open class IndexLog {
 
 abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, String>,
                                        view: WebChunkView,
-                                       di: DI,
-                                       private val isDownloadEnabled: Boolean,
-                                       val appRepo: UmAppDatabase,
-                                       val umAppDb: UmAppDatabase,
-                                       private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
+                                       di: DI)
 
     : UstadBaseController<WebChunkView>(context, arguments, view, di) {
 
     internal var containerUid: Long? = null
+
+    private val goToEntryFn: GoToEntryFn by di.instance<GoToEntryFn>()
+
+    val accountManager: UstadAccountManager by instance()
+
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
     @JsName("handleMountChunk")
     abstract suspend fun handleMountChunk()
@@ -65,7 +72,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
         GlobalScope.launch {
             try {
-                val result = umAppDb.contentEntryDao.getContentByUuidAsync(entryUuid)
+                val result = repo.contentEntryDao.getContentByUuidAsync(entryUuid)
                 view.runOnUiThread(Runnable {
                     view.entry = result
                 })
@@ -94,9 +101,9 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
             GlobalScope.launch {
                 try {
-                    val entry = appRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
+                    val entry = repo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
                             ?: throw IllegalArgumentException("No File found")
-                    goToEntryFn(entry.contentEntryUid, umAppDb, context, impl, true,
+                    goToEntryFn(entry.contentEntryUid, repo, context, impl, true,
                             true,
                             arguments[ARG_NO_IFRAMES]?.toBoolean()!!)
                 } catch (e: Exception) {

@@ -1,31 +1,23 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.WebChunkView
-import io.ktor.client.request.get
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import org.kodein.di.DI
 
 actual class WebChunkPresenter actual constructor(context: Any, arguments: Map<String, String>,
-                                                  view: WebChunkView, isDownloadEnabled: Boolean,
-                                                  appRepo: UmAppDatabase,
-                                                  umAppDb: UmAppDatabase)
-    : WebChunkPresenterCommon(context, arguments, view, isDownloadEnabled, appRepo, umAppDb) {
+                                                  view: WebChunkView, di: DI)
+    : WebChunkPresenterCommon(context, arguments, view, di) {
 
     actual override suspend fun handleMountChunk() {
-        val result = umAppDb.containerDao.findByUidAsync(containerUid!!)
+        val result = repo.containerDao.findByUidAsync(containerUid!!)
         if (result == null) {
             view.showSnackBar(UstadMobileSystemImpl.instance
                     .getString(MessageID.error_opening_file, this))
             return
         }
-        view.containerManager = ContainerManager(result, umAppDb, appRepo)
+        view.containerManager = ContainerManager(result, db, repo)
        /* view.mountChunk(result, object : UmCallback<String>{
             override fun onSuccess(result: String?) {
 

@@ -11,7 +11,6 @@ import com.toughra.ustadmobile.databinding.FragmentWebChunkBinding
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.WebChunkPresenter
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
@@ -40,10 +39,8 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
         webView?.settings?.allowFileAccessFromFileURLs = true
         webView?.settings?.mediaPlaybackRequiresUserGesture = false
 
-        val repository = UmAccountManager.getRepositoryForActiveAccount(this)
         mPresenter = WebChunkPresenter(this,
-                arguments.toStringMap(), this, true, repository,
-                UmAccountManager.getActiveDatabase(viewContext))
+                arguments.toStringMap(), this, di)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return mBinding?.root
