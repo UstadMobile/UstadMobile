@@ -7,9 +7,8 @@ import org.kodein.di.DI
 @ExperimentalStdlibApi
 expect class HarContentPresenter(context: Any, arguments: Map<String, String>,
                                  view: HarView,
-                                 db: UmAppDatabase,
-                                 repository: UmAppDatabase,
-                                 localHttp: String,  di: DI): HarContentPresenterCommon {
+                                 localHttp: String,
+                                 di: DI): HarContentPresenterCommon {
 
 
 }

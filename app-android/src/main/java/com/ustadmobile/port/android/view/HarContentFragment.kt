@@ -64,9 +64,7 @@ class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHand
             val thisFrag = this@HarContentFragment
             val networkManagerBle = networkManagerProvider?.networkManager?.await()
             presenter = HarContentPresenter(thisFrag.viewContext, arguments.toStringMap(),
-                    thisFrag, UmAccountManager.getActiveDatabase(requireContext()),
-                    UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                    networkManagerBle?.httpd?.localHttpUrl ?: "")
+                    thisFrag, networkManagerBle?.httpd?.localHttpUrl ?: "", di)
             presenter?.onCreate(savedInstanceState.toNullableStringMap())
         }
     }

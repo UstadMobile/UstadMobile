@@ -20,11 +20,12 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.on
 import kotlin.js.JsName
 
 @ExperimentalStdlibApi
 abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, String>, view: HarView,
-                                         val db: UmAppDatabase, val appRepo: UmAppDatabase, val localHttp: String, di: DI) :
+                                         val localHttp: String, di: DI) :
         UstadBaseController<HarView>(context, arguments, view, di) {
 
     lateinit var harContainer: HarContainer
@@ -32,6 +33,10 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
     val containerDeferred = CompletableDeferred<HarContainer>()
 
     private val accountManager: UstadAccountManager by instance()
+
+    val dbRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -41,14 +46,14 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
         GlobalScope.launch {
             try {
-                val result = appRepo.contentEntryDao.getContentByUuidAsync(entryUuid)
+                val result = dbRepo.contentEntryDao.getContentByUuidAsync(entryUuid)
                         ?: ContentEntry()
                 view.runOnUiThread(Runnable {
                     view.entry = result
                 })
 
-                val containerResult = appRepo.containerDao.findByUidAsync(containerUid) ?: throw Exception()
-                val containerManager = ContainerManager(containerResult, db, appRepo)
+                val containerResult = dbRepo.containerDao.findByUidAsync(containerUid) ?: throw Exception()
+                val containerManager = ContainerManager(containerResult, db, dbRepo)
                 harContainer = HarContainer(containerManager, result, accountManager.activeAccount, context, localHttp) {
                     handleUrlLinkToContentEntry(it)
                 }
@@ -76,9 +81,9 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
             GlobalScope.launch {
                 try {
-                    val entry = appRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
+                    val entry = dbRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
                             ?: throw IllegalArgumentException("No File found")
-                    goToContentEntry(entry.contentEntryUid, appRepo, context, impl, true,
+                    goToContentEntry(entry.contentEntryUid, dbRepo, context, impl, true,
                             true,
                             arguments[ARG_NO_IFRAMES]?.toBoolean()
                                     ?: false)
