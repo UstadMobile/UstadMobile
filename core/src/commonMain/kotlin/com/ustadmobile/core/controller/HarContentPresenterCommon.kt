@@ -1,11 +1,11 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.goToContentEntry
@@ -18,17 +18,20 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.instance
 import kotlin.js.JsName
 
 @ExperimentalStdlibApi
 abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, String>, view: HarView,
-                                         val db: UmAppDatabase, val appRepo: UmAppDatabase, val localHttp: String) :
-        UstadBaseController<HarView>(context, arguments, view) {
+                                         val db: UmAppDatabase, val appRepo: UmAppDatabase, val localHttp: String, di: DI) :
+        UstadBaseController<HarView>(context, arguments, view, di) {
 
     lateinit var harContainer: HarContainer
     var containerUid: Long = 0
     val containerDeferred = CompletableDeferred<HarContainer>()
 
+    private val accountManager: UstadAccountManager by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -46,8 +49,7 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
                 val containerResult = appRepo.containerDao.findByUidAsync(containerUid) ?: throw Exception()
                 val containerManager = ContainerManager(containerResult, db, appRepo)
-                val account = UmAccountManager.getActiveAccount(context)
-                harContainer = HarContainer(containerManager, result, account, context, localHttp) {
+                harContainer = HarContainer(containerManager, result, accountManager.activeAccount, context, localHttp) {
                     handleUrlLinkToContentEntry(it)
                 }
                 containerDeferred.complete(harContainer)

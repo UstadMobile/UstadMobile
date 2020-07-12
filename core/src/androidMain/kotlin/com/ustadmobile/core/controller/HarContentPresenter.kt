@@ -6,13 +6,14 @@ import com.ustadmobile.core.view.HarAndroidView
 import com.ustadmobile.core.view.HarView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 
 @ExperimentalStdlibApi
 actual class HarContentPresenter actual constructor(context: Any, arguments: Map<String, String>,
                                                     view: HarView, db: UmAppDatabase,
                                                     repository: UmAppDatabase,
-                                                    localHttp: String)
-    : HarContentPresenterCommon(context, arguments, view,db, repository, localHttp) {
+                                                    localHttp: String, di: DI)
+    : HarContentPresenterCommon(context, arguments, view,db, repository, localHttp, di) {
 
     lateinit var harWebViewClient: HarWebViewClient
 
