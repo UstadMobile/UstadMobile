@@ -26,6 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
+import org.kodein.di.instance
 import org.kodein.di.singleton
 import java.io.File
 
@@ -47,8 +48,6 @@ class TestHarContainer {
 
     private lateinit var di: DI
 
-    private lateinit var accountManager: UstadAccountManager
-
 
     @Before
     fun setup() {
@@ -61,11 +60,11 @@ class TestHarContainer {
 
         di = DI {
             import(ustadTestRule.diModule)
-            bind<UstadAccountManager>() with singleton { accountManager }
         }
 
         val repo: UmAppDatabase by di.activeRepoInstance()
         val db: UmAppDatabase by di.activeDbInstance()
+        val accountManager: UstadAccountManager by di.instance()
 
         val httpd = EmbeddedHTTPD(0, di)
         httpd.start()
@@ -98,7 +97,9 @@ class TestHarContainer {
                 tmpDir.absolutePath)
         addEntriesFromZipToContainer(chunkCountingOut.absolutePath, containerManager)
 
-        harContainer = HarContainer(containerManager, targetEntry, accountManager.activeAccount, context, httpd.localHttpUrl)
+        harContainer = HarContainer(containerManager, targetEntry, accountManager.activeAccount, context, httpd.localHttpUrl){
+
+        }
     }
 
     @Test
@@ -106,19 +107,10 @@ class TestHarContainer {
         val response = harContainer?.serve(HarRequest().apply {
             this.url = "http://www.ustadmobile.com/index.html"
             this.body = "index.html"
+            this.method = "GET"
         })
 
         Assert.assertEquals("index html was found", 200, response!!.status)
-    }
-
-    @Test
-    fun givenInvalidUrl_whenWebViewLoaded_thenReturn404() {
-        val response = harContainer?.serve(HarRequest().apply {
-            this.url = "www.ustadmobile.com/index.html"
-            this.body = "index.html"
-        })
-
-        Assert.assertEquals("index html was found", 404, response!!.status)
     }
 
     @Test
@@ -126,9 +118,10 @@ class TestHarContainer {
         val response = harContainer?.serve(HarRequest().apply {
             this.url = "http://www.ustadmobile.com/faketest.html"
             this.body = "faketest.html"
+            this.method = "GET"
         })
 
-        Assert.assertEquals("index html was found", 200, response!!.status)
+        Assert.assertEquals("index html was found", 404, response!!.status)
     }
 
     @Test
@@ -136,9 +129,10 @@ class TestHarContainer {
         val response = harContainer?.serve(HarRequest().apply {
             this.url = "http://www.ustadmobile.com/favicon.ico"
             this.body = "favicon.ico"
+            this.method = "GET"
         })
 
-        Assert.assertEquals("index html was found", 200, response!!.status)
+        Assert.assertEquals("index html was found", 402, response!!.status)
     }
 
 }

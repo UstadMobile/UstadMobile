@@ -104,7 +104,7 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
         val defaultHarContent = HarContent()
 
         if (harList.isNullOrEmpty()) {
-            defaultResponse.status = 401
+            defaultResponse.status = 404
             defaultResponse.statusText = "OK"
             defaultHarContent.mimeType = ""
             defaultResponse.content = defaultHarContent
