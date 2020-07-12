@@ -109,12 +109,18 @@ class WebChunkFragmentTest {
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
 
+        var count = 0
         repeat(5) {
             try {
                 onWebView().withElement(findElement(Locator.CSS_SELECTOR, "div[data-test-id=tutorial-page]"))
             } catch (io: RuntimeException) {
                 Thread.sleep(2000)
+                count++
             }
+        }
+        
+        if(count == 5){
+            throw Exception()
         }
 
 
