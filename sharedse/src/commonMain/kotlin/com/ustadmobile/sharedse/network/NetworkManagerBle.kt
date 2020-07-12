@@ -6,10 +6,11 @@ import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import org.kodein.di.DI
 
 expect open class NetworkManagerBle(context: Any = Any(),
-                                    singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default,
-                                    umAppDatabase: UmAppDatabase = UmAccountManager.getActiveDatabase(context))
+                                    di: DI,
+                                    singleThreadDispatcher: CoroutineDispatcher = Dispatchers.Default)
     : NetworkManagerBleCommon {
 
     override val isWiFiEnabled: Boolean

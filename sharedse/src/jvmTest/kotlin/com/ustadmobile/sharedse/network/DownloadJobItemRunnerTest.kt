@@ -424,7 +424,7 @@ class DownloadJobItemRunnerTest {
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
 
-            val jobItemRunner = DownloadJobItemRunner(context, item, cloudEndPoint, 500,
+            val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500,
                     clientDi)
 
             val startTime = System.currentTimeMillis()
@@ -465,8 +465,7 @@ class DownloadJobItemRunnerTest {
 
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
-            val jobItemRunner = DownloadJobItemRunner(context, item, cloudEndPoint, 500,
-                    clientDi)
+            val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
 
             jobItemRunner.download().await()
 
@@ -497,8 +496,7 @@ class DownloadJobItemRunnerTest {
 
             val item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
-            val jobItemRunner = DownloadJobItemRunner(context, item, cloudEndPoint, 500,
-                    clientDi)
+            val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
 
             jobItemRunner.download().await()
 
@@ -532,8 +530,7 @@ class DownloadJobItemRunnerTest {
             }
 
 
-            val jobItemRunner = DownloadJobItemRunner(context, item, cloudEndPoint, 500,
-                    clientDi)
+            val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
 
 
             jobItemRunner.download()

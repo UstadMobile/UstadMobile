@@ -52,6 +52,8 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
+data class DownloadJobItemRunnerDIArgs(val endpoint: Endpoint, val downloadJobItem: DownloadJobItem)
+
 /**
  * Class which handles all file downloading tasks, it reacts to different status as changed
  * in the Db from either UI or Network change.
@@ -73,18 +75,10 @@ class DownloadJobItemRunner
  * @param mainCoroutineDispatcher A coroutine dispatcher that will, on Android, dispatch on the main
  * thread. This is required because Room's LiveData.observeForever must be called from the main thread
  */
-(private val context: Any,
- private val downloadItem: DownloadJobItem,
-// private val containerDownloadManager: ContainerDownloadManager,
-// private val networkManager: NetworkManagerBleCommon,
- //private val appDb: UmAppDatabase,
+(private val downloadItem: DownloadJobItem,
  private val endpointUrl: String,
-// private var connectivityStatus: ConnectivityStatus?,
-// private val connectivityStatusLiveData: DoorLiveData<ConnectivityStatus?>,
  private val retryDelay: Long = 3000,
- override val di: DI
-// private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
-/* private val localAvailabilityManager: LocalAvailabilityManager*/): ContainerDownloadRunner, DIAware {
+ override val di: DI): ContainerDownloadRunner, DIAware {
 
     private val endpoint = Endpoint(endpointUrl)
 
@@ -539,7 +533,8 @@ class DownloadJobItemRunner
         val channel = Channel<Boolean>(1)
 
 
-        networkManager.sendMessage(context, requestGroupCreation, currentNetworkNode!!, object : BleMessageResponseListener {
+        //TODO: NetworkManager.sendMessage should not need context
+        networkManager.sendMessage(Any(), requestGroupCreation, currentNetworkNode!!, object : BleMessageResponseListener {
             override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
                 UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
                         " BLE response received: from " + sourceDeviceAddress + ":" + response +

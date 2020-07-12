@@ -13,6 +13,7 @@ import com.ustadmobile.port.sharedse.impl.http.asBleHttpResponse
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.toUtf8Bytes
+import org.kodein.di.DI
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
@@ -37,9 +38,8 @@ class BleGattServer
  * @param networkManager Instance of a NetworkManagerBle for getting
  * BluetoothManager instance.
  */
-(context: Context, networkManager: NetworkManagerBle,
- sessionFactory: HttpSessionFactory) :
-        BleGattServerCommon(context, networkManager, sessionFactory) {
+(context: Context, di: DI) :
+        BleGattServerCommon(context, di) {
 
     class PendingReplyMessage(val destAddr: String, val characteristicUuid: UUID,
                               val message: BleMessage, mtu: Int,

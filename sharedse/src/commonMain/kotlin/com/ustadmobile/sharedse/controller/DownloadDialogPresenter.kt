@@ -43,12 +43,6 @@ class DownloadDialogPresenter(context: Any,
                               arguments: Map<String, String>, view: DownloadDialogView,
                               di: DI,
                               private val lifecycleOwner: DoorLifecycleOwner)
-    //,
-//                              private var appDatabase: UmAppDatabase,
-//                              private val appDatabaseRepo: UmAppDatabase,
-//                              private val containerDownloadManager: ContainerDownloadManager,
-//                              private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
-//                              private val downloadJobPreparationRequester: (Int, Any) -> Unit = ::requestDownloadPreparation
     : UstadBaseController<DownloadDialogView>(context, arguments, view, di), DoorObserver<DownloadJob?> {
 
     private var deleteFileOptions = false

@@ -86,9 +86,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         wifiOnlyHolder = rootView.findViewById(R.id.wifi_only_option_holder)
 
 
-
-
-        val builder = AlertDialog.Builder(context!!)
+        val builder = AlertDialog.Builder(requireContext())
         builder.setPositiveButton(R.string.ok, this)
         builder.setNegativeButton(R.string.cancel, this)
         builder.setView(rootView)
@@ -104,18 +102,9 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
 
 
-
-        GlobalScope.launch(Dispatchers.Main) {
-            val networkManager = activity.networkManagerBle.await()
-
-            val accountManager: UstadAccountManager by instance()
-            val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
-            val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
-            mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
-                    this@DownloadDialogFragment, di, this@DownloadDialogFragment,
-                    db, repo, networkManager.containerDownloadManager).also {
-                it.onCreate(null)
-            }
+        mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
+                this@DownloadDialogFragment, di, viewLifecycleOwner).also {
+            it.onCreate(null)
         }
 
         return mDialog

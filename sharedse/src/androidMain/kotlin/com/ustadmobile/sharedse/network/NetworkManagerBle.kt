@@ -61,6 +61,7 @@ import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import java.net.HttpURLConnection
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import kotlinx.coroutines.*
+import org.kodein.di.DI
 import java.lang.Runnable
 
 /**
@@ -83,15 +84,8 @@ actual open class NetworkManagerBle
  *
  * @param context Platform specific application context
  */
-actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
-                   umAppDatabase: UmAppDatabase)
-    : NetworkManagerBleCommon(context, singleThreadDispatcher, Dispatchers.Main, Dispatchers.IO,
-        umAppDatabase), EmbeddedHTTPD.ResponseListener, NetworkManagerWithConnectionOpener {
-
-    constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher, httpd: EmbeddedHTTPD,
-                umAppDatabase: UmAppDatabase) : this(context, singleThreadDispatcher, umAppDatabase) {
-        this.httpd = httpd
-    }
+actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispatcher)
+    : NetworkManagerBleCommon(context, di, singleThreadDispatcher), EmbeddedHTTPD.ResponseListener, NetworkManagerWithConnectionOpener {
 
     lateinit var httpd: EmbeddedHTTPD
 
@@ -139,28 +133,11 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
 
     private var localOkHttpClient: OkHttpClient? = null
 
-    override val containerFetcher: ContainerFetcher by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        TODO("ContainerFetcher should not be here as a variable - use DI")
-    }
-
-    override val containerDownloadManager = ContainerDownloadManagerImpl(appDb = umAppDatabase,
-            onQueueEmpty = { onDownloadQueueEmpty() }) { job, manager ->
-        DownloadJobItemRunner(context, job, manager, this, umAppDatabase,
-                UmAccountManager.getActiveEndpoint(context),
-                connectivityStatus = manager.connectivityLiveData.getValue(),
-                mainCoroutineDispatcher = Dispatchers.Main,
-                connectivityStatusLiveData = manager.connectivityLiveData,
-                localAvailabilityManager = localAvailabilityManager)
-    }
     private var gattClientCallbackManager: GattClientCallbackManager? = null
 
     override var localConnectionOpener: ConnectionOpener? = null
         get() = field
         protected set
-
-    override val umAppDatabaseRepo by lazy {
-        UmAccountManager.getRepositoryForActiveAccount(context)
-    }
 
     override val localHttpPort: Int
         get() = httpd.listeningPort
@@ -183,28 +160,30 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
             { runnable, delay -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun start() {
-            if (isBleCapable) {
-                UMLog.l(UMLog.DEBUG, 689,
-                        "Starting BLE scanning")
-                notifyStateChanged(STATE_STARTED)
-                gattClientCallbackManager = GattClientCallbackManager(context as Context,
-                        bluetoothAdapter!!, localAvailabilityManager.nodeHistoryHandler)
-                bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
-                        bleScanCallback as BluetoothAdapter.LeScanCallback?)
-                UMLog.l(UMLog.DEBUG, 689,
-                        "BLE Scanning started ")
-            } else {
-                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
-                UMLog.l(UMLog.ERROR, 689,
-                        "Not BLE capable, no need to start")
-            }
+            //TODO: Reenable this using DI
+//            if (isBleCapable) {
+//                UMLog.l(UMLog.DEBUG, 689,
+//                        "Starting BLE scanning")
+//                notifyStateChanged(STATE_STARTED)
+//                gattClientCallbackManager = GattClientCallbackManager(context as Context,
+//                        bluetoothAdapter!!, localAvailabilityManager.nodeHistoryHandler)
+//                bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
+//                        bleScanCallback as BluetoothAdapter.LeScanCallback?)
+//                UMLog.l(UMLog.DEBUG, 689,
+//                        "BLE Scanning started ")
+//            } else {
+//                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
+//                UMLog.l(UMLog.ERROR, 689,
+//                        "Not BLE capable, no need to start")
+//            }
         }
 
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun stop() {
-            bluetoothAdapter!!.stopLeScan(bleScanCallback as BluetoothAdapter.LeScanCallback?)
-            gattClientCallbackManager = null
-            notifyStateChanged(STATE_STOPPED)
+            //TODO: Reenable this using DI
+//            bluetoothAdapter!!.stopLeScan(bleScanCallback as BluetoothAdapter.LeScanCallback?)
+//            gattClientCallbackManager = null
+//            notifyStateChanged(STATE_STOPPED)
         }
     }
 
@@ -232,8 +211,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
                     service.addCharacteristic(it)
                 }
 
-                gattServerAndroid = BleGattServer(mContext,
-                        this@NetworkManagerBle) {input, output -> httpd.newSession(input, output)}
+                gattServerAndroid = BleGattServer(mContext, di)
                 bleServiceAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
 
 
@@ -490,14 +468,13 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         localConnectionOpener = null
 
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
-        val status = ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
-                false, null)
-        connectivityStatusRef.value = status
-        (umAppDatabaseRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_DISCONNECTED
+        _connectivityStatus.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
+                false, null))
 
-        GlobalScope.launch {
-            containerDownloadManager.handleConnectivityChanged(status)
-        }
+        //Should not be needed... anything that needs to should be observing the connectivity live data.
+//        GlobalScope.launch {
+//            //containerDownloadManager.handleConnectivityChanged(status)
+//        }
     }
 
 
@@ -527,8 +504,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
         //val ssid = if (networkInfo != null) normalizeAndroidWifiSsid(networkInfo.extraInfo) else null
         val status = ConnectivityStatus(state, true, ssid)
         addLogs("changed to $state")
-        connectivityStatusRef.value = status
-        (umAppDatabaseRepo as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+
 
         //get network SSID
         if (ssid != null /*&& ssid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX)*/) {
@@ -563,9 +539,7 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
             }
         }
 
-        GlobalScope.launch {
-            containerDownloadManager.handleConnectivityChanged(status)
-        }
+        _connectivityStatus.sendValue(status)
     }
 
 
@@ -771,7 +745,6 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
      */
     actual override fun connectToWiFi(ssid: String, passphrase: String, timeout: Int) {
         managerHelper.deleteTemporaryWifiDirectSsids()
-        endAnyLocalSession()
         managerHelper.setGroupInfo(ssid,passphrase)
 
         val startTime = System.currentTimeMillis()
@@ -865,42 +838,8 @@ actual constructor(context: Any, singleThreadDispatcher: CoroutineDispatcher,
 
     actual override fun restoreWifi() {
         UMLog.l(UMLog.INFO, 339, "NetworkManager: restore wifi")
-        endAnyLocalSession()
         managerHelper.restoreWiFi()
     }
-
-
-    /**
-     * Send an http request to the server so it knows we are done
-     */
-    private fun endAnyLocalSession() {
-        GlobalScope.launch {
-            val currentConnectivityStatus = connectivityStatusRef.value
-            val currentWifiSsid = currentConnectivityStatus?.wifiSsid
-            if (currentConnectivityStatus == null
-                    || currentWifiSsid == null
-                    || !currentWifiSsid.startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX))
-                return@launch
-
-            val endpoint = umAppDatabase.networkNodeDao.getEndpointUrlByGroupSsid(
-                    currentWifiSsid)
-            if (endpoint == null) {
-                UMLog.l(UMLog.ERROR, 699,
-                        "ERROR: No endpoint url for ssid $currentWifiSsid")
-                return@launch
-            }
-
-            try {
-                val endSessionUrl = endpoint + "endsession"
-                localHttpClient?.get<Any>(endSessionUrl)
-                UMLog.l(UMLog.INFO, 699, "Send end of session request $endSessionUrl")
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        }
-
-    }
-
 
     /**
      * {@inheritDoc}

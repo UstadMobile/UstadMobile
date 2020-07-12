@@ -18,8 +18,6 @@ actual open class NetworkManagerBle actual constructor(context: Any, di: DI, sin
         NetworkManagerWithConnectionOpener{
 
 
-    override val containerDownloadManager: ContainerDownloadManager
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
     actual override val isWiFiEnabled: Boolean
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
@@ -35,9 +33,6 @@ actual open class NetworkManagerBle actual constructor(context: Any, di: DI, sin
     override val localHttpPort: Int
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
-    override val containerFetcher: ContainerFetcher by lazy {
-        TODO("Container fetcher should not be here as a variable - should use DI")
-    }
 
     override val localConnectionOpener: ConnectionOpener?
         get() = null

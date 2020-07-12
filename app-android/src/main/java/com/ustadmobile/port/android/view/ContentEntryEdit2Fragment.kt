@@ -212,20 +212,14 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         val navController = findNavController()
         title = getString(R.string.content)
 
-        GlobalScope.launch {
-            val thisFrag = this@ContentEntryEdit2Fragment
-            val networkManagerBle = (activity as? MainActivity)?.networkManagerBle?.await()
-            withContext(Dispatchers.Main){
-                mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), thisFrag,
-                        thisFrag, di)
-                mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
-                navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                        Language::class.java) {
-                    val language = it.firstOrNull() ?: return@observeResult
-                    entity?.language = language
-                    entity?.primaryLanguageUid = language.langUid
-                }
-            }
+        mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,
+                viewLifecycleOwner, di)
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                Language::class.java) {
+            val language = it.firstOrNull() ?: return@observeResult
+            entity?.language = language
+            entity?.primaryLanguageUid = language.langUid
         }
     }
 

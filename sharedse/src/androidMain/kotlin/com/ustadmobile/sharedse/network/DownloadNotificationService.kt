@@ -34,18 +34,18 @@ class DownloadNotificationService : Service() {
 
     private val mNetworkServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, serviceBinder: IBinder) {
-            mNetworkServiceBound = true
-            val networkService = (serviceBinder as NetworkManagerBleAndroidService.LocalServiceBinder).service
-            networkService.runWhenNetworkManagerReady {
-                val boundNetworkService = networkService.networkManagerBle!!
-                networkManagerBle = boundNetworkService
-                networkManagerDeferred.complete(boundNetworkService)
-            }
+//            mNetworkServiceBound = true
+//            val networkService = (serviceBinder as NetworkManagerBleAndroidService.LocalServiceBinder).service
+//            networkService.runWhenNetworkManagerReady {
+//                val boundNetworkService = networkService.networkManagerBle!!
+//                networkManagerBle = boundNetworkService
+//                networkManagerDeferred.complete(boundNetworkService)
+//            }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
-            mNetworkServiceBound = false
-            networkManagerBle = null
+//            mNetworkServiceBound = false
+//            networkManagerBle = null
         }
     }
 
@@ -163,28 +163,28 @@ class DownloadNotificationService : Service() {
         lateinit var downloadJobLiveData: DoorLiveData<DownloadJob?>
 
         init {
-            builder.setProgress(MAX_PROGRESS_VALUE, 0, false)
-                    .addAction(createAction(downloadJobUid,
-                            ACTION_CANCEL_DOWNLOAD, impl.getString(MessageID.download_cancel_label,
-                            applicationContext)))
-                    .addAction(createAction(downloadJobUid,
-                            ACTION_PAUSE_DOWNLOAD, impl.getString(MessageID.download_pause_download,
-                            applicationContext)))
-                    .setContentTitle(contentTitle)
-                    .setContentText(contentText)
-
-            GlobalScope.launch(Dispatchers.Main) {
-                val downloadJobTitleInDb = umAppDatabase.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid)
-                        ?: ""
-                builder.setContentTitle(downloadJobTitleInDb)
-                contentTitle = downloadJobTitleInDb
-                if (notifyAfterInit)
-                    doNotify()
-
-                downloadJobLiveData = networkManagerDeferred.await().containerDownloadManager
-                        .getDownloadJob(downloadJobUid)
-                downloadJobLiveData.observeForever(this@DownloadJobNotificationHolder)
-            }
+//            builder.setProgress(MAX_PROGRESS_VALUE, 0, false)
+//                    .addAction(createAction(downloadJobUid,
+//                            ACTION_CANCEL_DOWNLOAD, impl.getString(MessageID.download_cancel_label,
+//                            applicationContext)))
+//                    .addAction(createAction(downloadJobUid,
+//                            ACTION_PAUSE_DOWNLOAD, impl.getString(MessageID.download_pause_download,
+//                            applicationContext)))
+//                    .setContentTitle(contentTitle)
+//                    .setContentText(contentText)
+//
+//            GlobalScope.launch(Dispatchers.Main) {
+//                val downloadJobTitleInDb = umAppDatabase.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid)
+//                        ?: ""
+//                builder.setContentTitle(downloadJobTitleInDb)
+//                contentTitle = downloadJobTitleInDb
+//                if (notifyAfterInit)
+//                    doNotify()
+//
+//                downloadJobLiveData = networkManagerDeferred.await().containerDownloadManager
+//                        .getDownloadJob(downloadJobUid)
+//                downloadJobLiveData.observeForever(this@DownloadJobNotificationHolder)
+//            }
         }
 
         override fun onChanged(t: DownloadJob?) {
@@ -293,10 +293,6 @@ class DownloadNotificationService : Service() {
         umAppDatabaseRepo = UmAccountManager.getRepositoryForActiveAccount(
                 this@DownloadNotificationService)
 
-        //bind to network service
-        val networkServiceIntent = Intent(applicationContext,
-                NetworkManagerBleAndroidService::class.java)
-        bindService(networkServiceIntent, mNetworkServiceConnection, Context.BIND_AUTO_CREATE)
 
         impl = UstadMobileSystemImpl.instance
     }
@@ -331,13 +327,13 @@ class DownloadNotificationService : Service() {
                         }
 
                 GlobalScope.launch {
-                    val downloadJobPreparer = DownloadJobPreparer(
-                            downloadJobUid = downloadJobUid)
-                    val containerDownloadManager = networkManagerDeferred.await().containerDownloadManager
-                    downloadJobPreparer.prepare(containerDownloadManager,
-                            appDatabase = umAppDatabase, appDatabaseRepo = umAppDatabaseRepo,
-                            onProgress = {})
-                    containerDownloadManager.enqueue(downloadJobUid)
+//                    val downloadJobPreparer = DownloadJobPreparer(
+//                            downloadJobUid = downloadJobUid)
+//                    val containerDownloadManager = networkManagerDeferred.await().containerDownloadManager
+//                    downloadJobPreparer.prepare(containerDownloadManager,
+//                            appDatabase = umAppDatabase, appDatabaseRepo = umAppDatabaseRepo,
+//                            onProgress = {})
+//                    containerDownloadManager.enqueue(downloadJobUid)
                 }
 
 
@@ -368,13 +364,13 @@ class DownloadNotificationService : Service() {
 
             ACTION_PAUSE_DOWNLOAD -> {
                 GlobalScope.launch {
-                    networkManagerDeferred.await().containerDownloadManager.pause(downloadJobUid)
+                    //networkManagerDeferred.await().containerDownloadManager.pause(downloadJobUid)
                 }
             }
 
             ACTION_CANCEL_DOWNLOAD -> {
                 GlobalScope.launch {
-                    networkManagerDeferred.await().containerDownloadManager.cancel(downloadJobUid)
+                    //networkManagerDeferred.await().containerDownloadManager.cancel(downloadJobUid)
                 }
             }
 
@@ -389,14 +385,14 @@ class DownloadNotificationService : Service() {
                 }
 
                 GlobalScope.async {
-                    val containerDownloadManager = networkManagerDeferred.await().containerDownloadManager
-                    deleteDownloadJob(umAppDatabase, downloadJobUid, containerDownloadManager) {
-                        deleteNotificationHolder.builder.setProgress(MAX_PROGRESS_VALUE, it, false)
-                        deleteNotificationHolder.doNotify()
-                    }
-                    activeDeleteJobNotifications.remove(deleteNotificationHolder)
-                    mNotificationManager.cancel(deleteNotificationHolder.notificationId)
-                    checkIfCompleteAfterDelay()
+//                    val containerDownloadManager = networkManagerDeferred.await().containerDownloadManager
+//                    deleteDownloadJob(umAppDatabase, downloadJobUid, containerDownloadManager) {
+//                        deleteNotificationHolder.builder.setProgress(MAX_PROGRESS_VALUE, it, false)
+//                        deleteNotificationHolder.doNotify()
+//                    }
+//                    activeDeleteJobNotifications.remove(deleteNotificationHolder)
+//                    mNotificationManager.cancel(deleteNotificationHolder.notificationId)
+//                    checkIfCompleteAfterDelay()
                 }
 
             }

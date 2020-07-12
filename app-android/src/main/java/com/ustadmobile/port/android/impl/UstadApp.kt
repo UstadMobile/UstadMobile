@@ -20,6 +20,8 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.coroutines.newSingleThreadContext
 import org.kodein.di.*
 
 /**
@@ -47,6 +49,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<EmbeddedHTTPD>() with singleton {
             EmbeddedHTTPD(0, di).also { it.start() }
+        }
+
+        bind<NetworkManagerBle>() with singleton {
+            NetworkManagerBle(applicationContext, di, newSingleThreadContext("NetworkManager"))
         }
 
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }

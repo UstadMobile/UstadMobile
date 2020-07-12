@@ -101,17 +101,6 @@ abstract class BleEntryStatusTask : BleMessageResponseListener {
     }
 
     /**
-     * Set networkManagerBle for testing purpose.
-     *
-     * Was previously internal - this does not work since Kotlin 1.3.61
-     *
-     * @param managerBle NetworkManagerBleCommon object
-     */
-    fun setManagerBle(managerBle: NetworkManagerBleCommon) {
-        this.managerBle = managerBle
-    }
-
-    /**
      * Set list of entry uuids , for test purpose
      * @param entryUidsToCheck List of uuids
      */

@@ -183,22 +183,18 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        GlobalScope.launch {
-            val networkManagerBle = (activity as? MainActivity)?.networkManagerBle?.await()
-            val thisFrag = this@ContentEntry2DetailFragment
-            withContext(Dispatchers.Main){
-                mPresenter = ContentEntry2DetailPresenter(requireContext(), arguments.toStringMap(), thisFrag,
-                        di, thisFrag.viewLifecycleOwner)
-                mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+        mPresenter = ContentEntry2DetailPresenter(requireContext(), arguments.toStringMap(), this,
+                di, viewLifecycleOwner)
 
-                val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
-                flexboxLayoutManager.flexDirection = FlexDirection.ROW
-                availableTranslationAdapter = AvailableTranslationRecyclerAdapter(thisFrag,mPresenter)
-                mBinding?.availableTranslationView?.adapter = availableTranslationAdapter
-                mBinding?.availableTranslationView?.layoutManager = flexboxLayoutManager
-                fabManager?.visible = true
-            }
-        }
+        val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
+        flexboxLayoutManager.flexDirection = FlexDirection.ROW
+        availableTranslationAdapter = AvailableTranslationRecyclerAdapter(this,
+                mPresenter)
+        mBinding?.availableTranslationView?.adapter = availableTranslationAdapter
+        mBinding?.availableTranslationView?.layoutManager = flexboxLayoutManager
+        fabManager?.visible = true
+
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 
     override fun onDestroyView() {
