@@ -590,5 +590,4 @@ object UMUtil {
         return 8
     }
 
-
 }

@@ -2,36 +2,22 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.BitmaskEditView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-
-import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 
-class BitmaskEditPresenter(context: Any,
-                          arguments: Map<String, String>, view: BitmaskEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<BitmaskEditView, LongWrapper>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
-
-
-
-
-
+class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: BitmaskEditView,
+                           di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<BitmaskEditView, LongWrapper>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON

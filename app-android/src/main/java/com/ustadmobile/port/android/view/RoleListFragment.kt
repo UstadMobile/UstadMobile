@@ -8,17 +8,20 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemRoleListItemBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.RoleListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RoleListView
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 class RoleListFragment(): UstadListViewFragment<Role, Role>(),
@@ -61,12 +64,10 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+        val accountManager: UstadAccountManager by instance()
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         mPresenter = RoleListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this,  di, viewLifecycleOwner)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,

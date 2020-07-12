@@ -97,15 +97,12 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEditorView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorActivity",
             ContentEditorPageListView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorPageListFragment",
             WebChunkView.VIEW_NAME to "${PACKAGE_NAME}WebChunkActivity",
-            Register2View.VIEW_NAME to "${PACKAGE_NAME}Register2Activity",
             SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
             OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
-            LoginView.VIEW_NAME to "${PACKAGE_NAME}LoginActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             HarView.VIEW_NAME to "${PACKAGE_NAME}HarActivity",
-            ContentEntryExportView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryExportFragmentDialog",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
@@ -209,8 +206,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
         val ustadDestination = destinationProvider.lookupDestinationName(viewName)
-        if(ustadDestination != null) {
-            val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
+        if (ustadDestination != null) {
+            val navController = navController
+                    ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
             //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
             val options = navOptions {
@@ -222,7 +220,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 }
             }
             navController.navigate(ustadDestination.destinationId, args.toBundleWithNullableValues(),
-                options)
+                    options)
 
             return
         }
@@ -233,7 +231,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         val ctx = context as Context
         try {
             androidImplClass = Class.forName(androidImplClassName)
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             Log.wtf(TAG, "No activity for $viewName found")
             Toast.makeText(ctx, "ERROR: No Activity found for view: $viewName",
                     Toast.LENGTH_LONG).show()
@@ -343,7 +341,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO){
+    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO) {
         val dirList = ArrayList<UMStorageDir>()
         val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
         val contentDirName = getContentDirName(context)
@@ -490,7 +488,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             var prefIn: InputStream? = null
 
             try {
-                prefIn =  (context as Context).assets.open(appPrefResource)
+                prefIn = (context as Context).assets.open(appPrefResource)
                 appConfig!!.load(prefIn)
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
@@ -603,7 +601,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-
     actual companion object {
 
         const val TAG = "UstadMobileImplAndroid"
@@ -624,7 +621,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }
-
 
 
 }

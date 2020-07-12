@@ -4,11 +4,15 @@ import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LanguageOptionView
 import com.ustadmobile.lib.db.entities.UmAccount
+import org.kodein.di.DI
+import org.kodein.di.instance
 import kotlin.js.JsName
 
 abstract class LanguageOptionPresenter(context: Any, arguments: Map<String, String>, view: LanguageOptionView,
-                              private val impl: UstadMobileSystemImpl):
-        UstadBaseController<LanguageOptionView>(context, arguments, view){
+                              di: DI):
+        UstadBaseController<LanguageOptionView>(context, arguments, view, di){
+
+    private val impl: UstadMobileSystemImpl by instance()
 
     private val languageOptions = impl.getAllUiLanguage(context)
 
@@ -22,7 +26,7 @@ abstract class LanguageOptionPresenter(context: Any, arguments: Map<String, Stri
     @JsName("handleUserLogout")
     fun handleUserLogout(){
         UmAccountManager.setActiveAccount(UmAccount(0,
-                null, null, null), context)
+                null, null, ""), context)
         handleNavigation()
     }
 

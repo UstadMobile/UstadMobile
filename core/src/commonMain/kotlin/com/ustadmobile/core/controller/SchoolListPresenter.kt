@@ -1,24 +1,16 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.http.parseAndSortContentTypeHeader
+import org.kodein.di.DI
 
 class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: SchoolListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<SchoolListView, School>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
-
+                          di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<SchoolListView, School>(context, arguments, view, di, lifecycleOwner) {
 
     var searchQuery = "%%"
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC

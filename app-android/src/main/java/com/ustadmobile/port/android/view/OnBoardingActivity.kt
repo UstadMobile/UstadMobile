@@ -136,7 +136,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
 
         presenter = OnBoardingPresenter(this,
-                bundleToMap(intent.extras), this, UstadMobileSystemImpl.instance)
+                bundleToMap(intent.extras), this, di)
         presenter?.onCreate(bundleToMap(savedInstanceState))
     }
 

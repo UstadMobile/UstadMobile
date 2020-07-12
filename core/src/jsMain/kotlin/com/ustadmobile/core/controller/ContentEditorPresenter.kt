@@ -5,13 +5,14 @@ import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ContentEditorView
 import com.ustadmobile.lib.db.entities.Container
+import org.kodein.di.DI
 
 actual class ContentEditorPresenter actual constructor(context: Any, arguments: Map<String, String>,
-                                                       view: ContentEditorView, private val storage: String?,
+                                                       view: ContentEditorView, di: DI, private val storage: String?,
                                                        private val database : UmAppDatabase,
                                                        private val repository : UmAppDatabase,
                                                        mountContainer: suspend (Long) -> String)
-    :ContentEditorPresenterCommon(context,arguments,view,storage,database,mountContainer){
+    :ContentEditorPresenterCommon(context,arguments,view,di, storage,database,mountContainer){
 
 
     actual override suspend fun openExistingDocument(container: Container): Boolean {

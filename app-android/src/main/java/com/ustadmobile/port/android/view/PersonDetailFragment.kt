@@ -17,11 +17,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonDetailBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzDetailBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
@@ -29,6 +29,9 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 interface PersonDetailFragmentEventHandler {
 
@@ -94,12 +97,10 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             it.classesRecyclerview.adapter = clazzMemberWithClazzRecyclerAdapter
         }
 
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+        val accountManager: UstadAccountManager by instance()
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         mPresenter = PersonDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                di, viewLifecycleOwner)
         clazzMemberWithClazzRecyclerAdapter?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 

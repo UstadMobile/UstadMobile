@@ -5,15 +5,13 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.GoToEntryFn
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -26,19 +24,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 
 class ContentEntry2DetailPresenter(context: Any,
                                    arguments: Map<String, String>, view: ContentEntry2DetailView,
-                                   lifecycleOwner: DoorLifecycleOwner,
-                                   systemImpl: UstadMobileSystemImpl,
-                                   private val isDownloadEnabled: Boolean,
-                                   db: UmAppDatabase, repo: UmAppDatabase,
-                                   private val containerDownloadManager: ContainerDownloadManager?,
-                                   activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData,
-                                   private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
-    : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                                   di: DI, lifecycleOwner: DoorLifecycleOwner)
+
+    : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context,
+        arguments, view,  di, lifecycleOwner) {
+
+
+    private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
+
+    private val containerDownloadManager: ContainerDownloadManager? by di.instanceOrNull<ContainerDownloadManager>()
+
+    private val goToEntryFn: GoToEntryFn by di.instance<GoToEntryFn>()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -48,9 +51,9 @@ class ContentEntry2DetailPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val entryUuid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        if (containerDownloadManager != null) {
+        containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
-                downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).apply {
+                downloadJobItemLiveData = it.getDownloadJobItemByContentEntryUid(entryUuid).apply {
                     observeWithLifecycleOwner(lifecycleOwner, this@ContentEntry2DetailPresenter::onDownloadJobItemChanged)
                 }
             }
@@ -78,9 +81,9 @@ class ContentEntry2DetailPresenter(context: Any,
         if (canOpen) {
             val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
                     "false", context)!!.toBoolean()
-            val account = UmAccountManager.getActiveAccount(context)
-            if (loginFirst && (account == null || account.personUid == 0L)) {
-                systemImpl.go(LoginView.VIEW_NAME, arguments, context)
+            val account = accountManager.activeAccount
+            if (loginFirst && account.personUid == 0L) {
+                systemImpl.go(Login2View.VIEW_NAME, arguments, context)
             } else {
                 openContentEntry()
             }

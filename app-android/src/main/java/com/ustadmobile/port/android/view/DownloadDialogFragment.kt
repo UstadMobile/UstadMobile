@@ -10,10 +10,13 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
@@ -21,6 +24,8 @@ import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.util.*
 
 
@@ -102,11 +107,13 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
         GlobalScope.launch(Dispatchers.Main) {
             val networkManager = activity.networkManagerBle.await()
+
+            val accountManager: UstadAccountManager by instance()
+            val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+            val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
             mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
-                    this@DownloadDialogFragment, this@DownloadDialogFragment,
-                    UmAccountManager.getActiveDatabase(context as Context),
-                    UmAccountManager.getRepositoryForActiveAccount(context as Context),
-                    networkManager.containerDownloadManager).also {
+                    this@DownloadDialogFragment, di, this@DownloadDialogFragment,
+                    db, repo, networkManager.containerDownloadManager).also {
                 it.onCreate(null)
             }
         }
