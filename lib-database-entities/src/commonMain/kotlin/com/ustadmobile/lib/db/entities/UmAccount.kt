@@ -3,4 +3,4 @@ package com.ustadmobile.lib.db.entities
 import kotlinx.serialization.Serializable
 
 @Serializable
-class UmAccount(var personUid: Long, var username: String?, var auth: String?, var endpointUrl: String?)
+data class UmAccount(var personUid: Long, var username: String? = null, var auth: String? = null, var endpointUrl: String = "", var firstName: String? = null, var lastName: String ? = null)

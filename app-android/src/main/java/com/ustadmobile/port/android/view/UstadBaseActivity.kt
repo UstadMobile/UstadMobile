@@ -44,6 +44,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
+import org.kodein.di.DIAware
+import org.kodein.di.android.di
 import java.util.*
 
 /**
@@ -52,7 +54,10 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadView, ShakeDetector.Listener, UstadViewWithProgress, BleNetworkManagerProvider {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications,
+        UstadView, ShakeDetector.Listener, UstadViewWithProgress, BleNetworkManagerProvider, DIAware {
+
+    override val di by di()
 
     private var baseController: UstadBaseController<*>? = null
 

@@ -3,10 +3,10 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.hours
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.db.waitUntil
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.ext.waitUntil
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
@@ -25,6 +25,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
 
 class ClazzLogEditAttendancePresenterTest {
 
@@ -34,30 +35,38 @@ class ClazzLogEditAttendancePresenterTest {
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
-    @JvmField
-    @Rule
-    var systemImplRule = SystemImplRule()
+    private lateinit var di: DI
 
     @JvmField
     @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
+
+    private lateinit var db: UmAppDatabase
+
+    private lateinit var repo: UmAppDatabase
 
     @Before
     fun setup() {
         mockView = mock { }
         mockLifecycleOwner = mock { }
         context = Any()
+
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+
+        db = di.directActiveDbInstance()
+        repo = di.directActiveRepoInstance()
     }
 
     @Test
     fun givenExistingClazzWithStudentsAndNoAttendanceLogsYet_whenLoadedFromDbAndAttendanceSet_thenShouldSetListWithAllMembersAndSaveToDatabase() {
-        val testClazzAndMembers = runBlocking { clientDbRule.db.insertTestClazzAndMembers(5, 1) }
-        val testClazzLog = runBlocking { clientDbRule.db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
+        val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5, 1) }
+        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         //wait for the view to finish loading
@@ -79,18 +88,17 @@ class ClazzLogEditAttendancePresenterTest {
 
     @Test
     fun givenExistingClazWithStudentsAndAttendanceLogsInDb_whenLoadedFromDb_thenShouldSetListWithAllMembers() {
-        val testClazzAndMembers = runBlocking { clientDbRule.db.insertTestClazzAndMembers(5, 1) }
-        val testClazzLog = runBlocking { clientDbRule.db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
+        val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5, 1) }
+        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
         val testAttendanceLogs = runBlocking {
-            clientDbRule.db.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
+            db.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
                     testClazzAndMembers.studentList)
         }
 
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         nullableArgumentCaptor<DoorMutableLiveData<List<ClazzLogAttendanceRecordWithPerson>>>().apply {
@@ -102,24 +110,23 @@ class ClazzLogEditAttendancePresenterTest {
 
     @Test
     fun givenExistingClazzLoaded_whenUserSelectsNextClazzDay_currentValuesAreSavedAndNextDayIsDisplayed() {
-        val testClazzAndMembers = runBlocking { clientDbRule.db.insertTestClazzAndMembers(
+        val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(
                 5, 1, (DateTime.now() - 36.hours).unixMillisLong) }
-        val testClazzLog = runBlocking { clientDbRule.db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
+        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
         val prevTestClazzLog = ClazzLog().apply {
             logDate = System.currentTimeMillis() - 12.hours.millisecondsLong
             clazzLogClazzUid = testClazzAndMembers.clazz.clazzUid
-            clazzLogUid = clientDbRule.db.clazzLogDao.insert(this)
+            clazzLogUid = db.clazzLogDao.insert(this)
         }
 
         val testAttendanceLogs = runBlocking {
-            clientDbRule.db.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
+            db.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
                     testClazzAndMembers.studentList)
         }
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
@@ -146,8 +153,8 @@ class ClazzLogEditAttendancePresenterTest {
 
         //wait for items from previous log to be saved
         runBlocking {
-            clientDbRule.db.waitUntil(5000, listOf("ClazzLogAttendanceRecord")) {
-                clientDbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid).size ==
+            db.waitUntil(5000, listOf("ClazzLogAttendanceRecord")) {
+                db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid).size ==
                         testClazzAndMembers.studentList.size
             }
         }
@@ -157,7 +164,7 @@ class ClazzLogEditAttendancePresenterTest {
         Assert.assertEquals("After selecting a different clazz log day, same number of student records are loaded",
                 testClazzAndMembers.studentList.size, clazzLogAttendanceRecordLiveData.getValue()!!.size)
 
-        val clazzLog1AttendanceRecords = clientDbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid)
+        val clazzLog1AttendanceRecords = db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid)
         Assert.assertEquals("Previous clazz log was recorded",  testClazzAndMembers.studentList.size,
                 clazzLog1AttendanceRecords.size)
         Assert.assertTrue("Previous clazz log attendance records show all students aremarked present",
@@ -166,13 +173,12 @@ class ClazzLogEditAttendancePresenterTest {
 
     @Test
     fun givenExistingClazzWithStudents_whenClickMarkAllThenSavedCalled_thenShouldSetAllAndSaveToDatabase() {
-        val testClazzAndMembers = runBlocking { clientDbRule.db.insertTestClazzAndMembers(5, 1) }
-        val testClazzLog = runBlocking { clientDbRule.db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
+        val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5, 1) }
+        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
-                mockLifecycleOwner, systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         verify(mockView, timeout(5000)).clazzLogAttendanceRecordList = any()

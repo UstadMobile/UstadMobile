@@ -97,15 +97,12 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             ContentEditorView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorActivity",
             ContentEditorPageListView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorPageListFragment",
             WebChunkView.VIEW_NAME to "${PACKAGE_NAME}WebChunkActivity",
-            Register2View.VIEW_NAME to "${PACKAGE_NAME}Register2Activity",
             SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
             OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
-            LoginView.VIEW_NAME to "${PACKAGE_NAME}LoginActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
 
-            ContentEntryExportView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryExportFragmentDialog",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"

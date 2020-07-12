@@ -5,6 +5,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
 import org.junit.Before
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.singleton
 import java.io.IOException
 
 class OnBoardingPresenterTest {
@@ -17,6 +20,8 @@ class OnBoardingPresenterTest {
 
     private val context = Any()
 
+    private lateinit var di : DI
+
     @Before
     @Throws(IOException::class)
     fun setup() {
@@ -28,7 +33,11 @@ class OnBoardingPresenterTest {
 
         whenever(impl.getLocale(any())).thenReturn("")
 
-        presenter = OnBoardingPresenter(context, mapOf(),view,impl)
+        di  = DI {
+            bind<UstadMobileSystemImpl>() with singleton { impl }
+        }
+
+        presenter = OnBoardingPresenter(context, mapOf(),view, di)
     }
 
     @Test

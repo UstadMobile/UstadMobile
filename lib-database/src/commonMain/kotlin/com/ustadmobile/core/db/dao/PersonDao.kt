@@ -132,7 +132,7 @@ abstract class PersonDao : BaseDao<Person> {
         accessToken.token = KmpUuid.randomUUID().toString()
 
         insertAccessToken(accessToken)
-        return UmAccount(personUid, username, accessToken.token, null)
+        return UmAccount(personUid, username, accessToken.token, "")
     }
 
     fun authenticate(token: String, personUid: Long): Boolean {

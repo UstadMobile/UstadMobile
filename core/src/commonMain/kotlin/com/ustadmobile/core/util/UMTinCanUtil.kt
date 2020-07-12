@@ -196,28 +196,6 @@ object UMTinCanUtil {
         }
     }
 
-    /**
-     * Make an actor JSON as per makeActorFromuserAccount for the currently
-     * logged in user against the server that they logged in using
-     *
-     * @see UMTinCanUtil.makeActorFromUserAccount
-     * @param context Current context object
-     * @return JSON Object representing the currently logged in user.
-     */
-    fun makeActorFromActiveUser(context: Any): JsonObject {
-        val account = UmAccountManager.getActiveAccount(context)
-        val accountUsername = account?.username
-        val accountEndpoint = account?.endpointUrl
-        return if (accountUsername != null && accountEndpoint != null) {
-            makeActorFromUserAccount(accountUsername,
-                    accountEndpoint)
-        } else {
-            makeActorFromUserAccount("anonymous",
-                    UmAccountManager.getActiveEndpoint(context)!!)
-        }
-
-    }
-
 
     /**
      * Make a JSON object representing the verb in the form of:

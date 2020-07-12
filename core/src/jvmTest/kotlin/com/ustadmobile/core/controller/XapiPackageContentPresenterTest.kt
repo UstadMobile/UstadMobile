@@ -4,11 +4,17 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.XapiPackageContentView
@@ -16,29 +22,28 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.Runnable
 import kotlinx.serialization.json.Json
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
+import org.kodein.di.*
 import org.mockito.Mockito.*
 import org.mockito.Mockito.timeout
 import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 
 class XapiPackageContentPresenterTest {
 
     private lateinit var context: Any
 
-    private lateinit var db: UmAppDatabase
+    val account = UmAccount(42, "username", "fefe1010fe",
+            "http://localhost/")
 
-    private lateinit var repo: UmAppDatabase
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var xapiTmpFile: File
 
@@ -49,30 +54,32 @@ class XapiPackageContentPresenterTest {
     private lateinit var mockedView: XapiPackageContentView
 
 
-    private var httpd: EmbeddedHTTPD? = null
-
     private val mountLatch = CountDownLatch(1)
 
     private val contentEntryUid = 1234L
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
-        checkJndiSetup()
+        val endpointUrl = account.endpointUrl!!
+        val endpoint = Endpoint(endpointUrl)
 
-        context = Any()
-        try {
-            db = UmAppDatabase.getInstance(context)
-            repo = db//.getUmRepository("http://localhost/dummy/", "")
-            db.clearAllTables()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        di = DI {
+            import(ustadTestRule.diModule)
         }
 
+        di.direct.instance<UstadAccountManager>().activeAccount = account
+
+        val db: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
+        val repo: UmAppDatabase by di.on(endpoint).instance(tag = TAG_REPO)
+
+        context = Any()
 
         xapiContainer = Container().also {
             it.containerContentEntryUid = contentEntryUid
         }
-        xapiContainer.containerUid = repo.containerDao.insert(xapiContainer)
+        xapiContainer.containerUid = db.containerDao.insert(xapiContainer)
 
         xapiTmpFile = File.createTempFile("testxapipackagecontentpresenter",
                 "xapiTmpFile")
@@ -85,8 +92,6 @@ class XapiPackageContentPresenterTest {
                 containerDirTmp!!.absolutePath)
         addEntriesFromZipToContainer(xapiTmpFile.absolutePath, containerManager)
 
-        httpd = EmbeddedHTTPD(0, Any(), db, repo)
-        httpd!!.start()
         mockedView = mock{
             on { runOnUiThread(any())}.doAnswer{
                 Thread(it.getArgument<Any>(0) as Runnable).start()
@@ -108,24 +113,18 @@ class XapiPackageContentPresenterTest {
         args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
         args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
 
-        val account = UmAccount(42, "username", "fefe1010fe",
-                "http://localhost/")
-        val xapiPresenter = XapiPackageContentPresenter(
-                context, args, mockedView!!,httpd!!, account)
-
-
+        val xapiPresenter = XapiPackageContentPresenter(context, args, mockedView, di)
         xapiPresenter.onCreate(null)
 
-        mountLatch.await(15000, TimeUnit.MILLISECONDS)
-
         argumentCaptor<String> {
-            verify(mockedView, timeout(5000)).url = capture()
+            verify(mockedView, timeout(5000 * 5000)).url = capture()
+            val httpd = di.direct.instance<ContainerMounter>() as EmbeddedHTTPD
             Assert.assertTrue("Mounted path starts with url and html name",
-                    firstValue.startsWith(httpd!!.localHttpUrl) && firstValue.contains("tetris.html"))
+                    firstValue.startsWith(httpd.localHttpUrl) && firstValue.contains("tetris.html"))
             val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
             val umAccountActor = Json.parse(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
-                    umAccountActor.account.name, account.username)
+                    account.username, umAccountActor.account.name)
             val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/xapi/$contentEntryUid/")
             Assert.assertEquals("Received expected Xapi endpoint: /xapi/contentEntryUid",
                     expectedEndpoint, paramsProvided["endpoint"])
