@@ -5,6 +5,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.*
 import androidx.test.espresso.action.ViewActions.*
@@ -99,9 +100,7 @@ class ReportEditFragmentTest {
 
         fillFields(fragmentScenario, formVals, currentEntity, true,
                 person, verbDisplay, contentEntry,
-                impl = systemImplNavRule.impl, context = fragmentScenario.letOnFragment {
-            it.context
-        }!!)
+                impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext())
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
