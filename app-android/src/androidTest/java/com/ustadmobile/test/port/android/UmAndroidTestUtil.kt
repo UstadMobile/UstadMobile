@@ -61,7 +61,7 @@ object UmAndroidTestUtil {
     }
 
     fun swipeScreenDown() {
-        val uiDevice = UiDevice.getInstance(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation())
+        val uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         val deviceHeight = uiDevice.displayHeight
         uiDevice.swipe(100, deviceHeight / 2, 0, 0, 10)
     }
