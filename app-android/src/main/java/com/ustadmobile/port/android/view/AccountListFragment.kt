@@ -11,16 +11,17 @@ import androidx.recyclerview.widget.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentAccountListBinding
 import com.toughra.ustadmobile.databinding.ItemAccountAboutBinding
-import com.toughra.ustadmobile.databinding.ItemAccountActiveBinding
 import com.toughra.ustadmobile.databinding.ItemAccountListBinding
 import com.ustadmobile.core.controller.AccountListPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
+import org.kodein.di.instance
 
 class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickListener {
 
@@ -45,8 +46,10 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
 
         override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
-            //TODO: set a variable on the binding to tell it it is the active account (e.g. position = 0)
             holder.binding.umaccount = getItem(position)
+            holder.binding.activeAccount = position == 0
+            holder.binding.logoutBtnVisibility = if(currentList.size == 1 || currentList.isEmpty())
+                View.GONE else View.VISIBLE
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -146,12 +149,13 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         }
 
         mBinding?.accountListRecycler?.layoutManager = LinearLayoutManager(requireContext())
-
+        val impl: UstadMobileSystemImpl by instance()
         mPresenter = AccountListPresenter(requireContext(),arguments.toStringMap(),this, di)
 
-        //version text - where do we get it
+        val versionText = impl.getVersion(requireContext()) + " - " +
+                UMCalendarUtil.makeHTTPDate(impl.getBuildTimestamp(requireContext()))
         accountAdapter = AccountAdapter(mPresenter)
-        aboutItemAdapter = AboutItemAdapter("Version 0.2.1 'KittyHawk'",mPresenter)
+        aboutItemAdapter = AboutItemAdapter(versionText,mPresenter)
 
         newItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
                 createNewText = String.format(getString(R.string.add_another),
@@ -171,9 +175,12 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mBinding?.accountListRecycler?.adapter = null
         mBinding = null
         accountAdapter = null
+        aboutItemAdapter = null
         mergeRecyclerAdapter = null
+        mPresenter = null
     }
 
     companion object {

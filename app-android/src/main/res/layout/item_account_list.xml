@@ -5,10 +5,18 @@
 
     <data>
         <import type="com.ustadmobile.lib.db.entities.UmAccount"/>
-
+        <import type="android.view.View"/>
         <variable
             name="umaccount"
             type="UmAccount" />
+
+        <variable
+            name="activeAccount"
+            type="boolean" />
+
+        <variable
+            name="logoutBtnVisibility"
+            type="Integer" />
 
         <variable
             name="presenter"
@@ -36,6 +44,7 @@
 
         <!-- Line 1-->
         <androidx.appcompat.widget.AppCompatImageView
+            android:visibility="@{activeAccount ? View.GONE: View.VISIBLE}"
             android:id="@+id/account_delete_icon"
             android:layout_width="50dp"
             android:layout_height="@dimen/dimen_30dp"
@@ -70,7 +79,7 @@
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:src="@drawable/ic_delete_black_24dp"
+            android:src="@drawable/person_with_key"
             android:tint="?colorOnIconTint"
             app:layout_constraintStart_toStartOf="@+id/person_full_name"
             app:layout_constraintTop_toBottomOf="@+id/person_full_name"
@@ -99,7 +108,6 @@
             android:tint="?colorOnIconTint"
             app:layout_constraintStart_toEndOf="@+id/person_username"
             app:layout_constraintTop_toBottomOf="@+id/person_full_name"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="@dimen/dimen_16dp"/>
 
         <TextView
@@ -116,6 +124,55 @@
             tools:text="https://example.com"
             />
 
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/account_profile"
+            style="@style/UmTheme.Widget.OutlinedButton"
+            android:onClick="@{() -> presenter.handleClickProfile(umaccount.personUid)}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:padding="@dimen/dimen_8dp"
+            android:visibility="@{umaccount.personUid == 0 ? View.GONE : View.VISIBLE}"
+            android:contentDescription="@string/profile"
+            android:text="@{String.format(@string/my,@string/profile)}"
+            app:layout_constraintStart_toEndOf="@+id/account_user_icon"
+            app:layout_constraintTop_toBottomOf="@+id/account_user_icon"
+            app:layout_constraintBottom_toTopOf="@+id/divider" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/account_logout"
+            style="@style/UmTheme.Widget.OutlinedButton"
+            android:onClick="@{() -> presenter.handleClickLogout(umaccount)}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:visibility="@{logoutBtnVisibility}"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:padding="@dimen/dimen_8dp"
+            android:contentDescription="@string/logout"
+            android:text="@string/logout"
+            app:layout_constraintStart_toEndOf="@+id/account_profile"
+            app:layout_constraintTop_toBottomOf="@+id/account_user_icon"
+            app:layout_constraintBottom_toTopOf="@+id/divider" />
+        <androidx.constraintlayout.widget.Barrier
+            android:visibility="@{activeAccount ? View.VISIBLE: View.GONE}"
+            android:id="@+id/labelBarrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="account_logout,account_profile" />
+        <View
+            android:visibility="@{activeAccount ? View.VISIBLE: View.GONE}"
+            android:id="@+id/divider"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
+            android:layout_width="match_parent"
+            android:background="?android:listDivider"
+            app:layout_constraintTop_toBottomOf="@+id/labelBarrier"
+            android:layout_height="0.6dp"/>
 
 
 

@@ -50,6 +50,9 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         }
         val mWorkSpace = arguments[ARG_WORKSPACE]
         if(mWorkSpace != null){
+            //change this when registration is allowed
+            workSpace.registrationAllowed = false
+
             workSpace = Json.parse(WorkSpace.serializer(), mWorkSpace)
         }
         view.createAccountVisible = workSpace.registrationAllowed
