@@ -10,6 +10,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.copyOnWriteListOf
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.*
@@ -89,8 +90,10 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
                 addAccount(value)
             }
 
+            accountLastUsedTimeMap[activeAccount.userAtServer] = getSystemTimeInMillis()
             _activeAccount.value = value
             _activeAccountLive.sendValue(value)
+            commit()
         }
 
     val activeAccountLive: DoorLiveData<UmAccount>
@@ -132,14 +135,15 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     }
 
     @Synchronized
-    private fun addAccount(account: UmAccount) {
+    private fun addAccount(account: UmAccount, autoCommit: Boolean = true) {
         _storedAccounts += account
         _storedAccountsLive.sendValue(_storedAccounts.toList())
+        takeIf { autoCommit }?.commit()
     }
 
 
     @Synchronized
-    fun removeAccount(account: UmAccount, autoFallback: Boolean = true) {
+    fun removeAccount(account: UmAccount, autoFallback: Boolean = true, autoCommit: Boolean = true) {
         _storedAccounts.removeAll { it.userAtServer == account.userAtServer }
 
         if(autoFallback && activeAccount.userAtServer == account.userAtServer) {
@@ -151,6 +155,15 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         }
 
         _storedAccountsLive.sendValue(_storedAccounts.toList())
+        takeIf { autoCommit }?.commit()
+    }
+
+    @Synchronized
+    fun commit() {
+        val ustadAccounts = UstadAccounts(activeAccount.userAtServer,
+            _storedAccounts, accountLastUsedTimeMap)
+        systemImpl.setAppPref(ACCOUNTS_PREFKEY,
+                Json.stringify(UstadAccounts.serializer(), ustadAccounts), appContext)
     }
 
 
@@ -187,10 +200,10 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
 
         responseAccount.endpointUrl = endpointUrl
-        addAccount(responseAccount)
+        addAccount(responseAccount, autoCommit = false)
 
         if(replaceActiveAccount) {
-            removeAccount(activeAccount, autoFallback = false)
+            removeAccount(activeAccount, autoFallback = false, autoCommit = false)
         }
 
         activeAccount = responseAccount
