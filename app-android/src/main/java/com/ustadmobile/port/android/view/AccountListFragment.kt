@@ -48,7 +48,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
             holder.binding.umaccount = getItem(position)
             holder.binding.activeAccount = position == 0
-            holder.binding.logoutBtnVisibility = if(currentList.size == 1 || currentList.isEmpty())
+            holder.binding.logoutBtnVisibility = if(currentList.size == 1 && currentList[0].personUid == 0L)
                 View.GONE else View.VISIBLE
         }
 
