@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 
@@ -7,9 +8,7 @@ import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 interface ClazzWorkDetailProgressListView: UstadListView<ClazzMemberWithClazzWorkProgress,
         ClazzMemberWithClazzWorkProgress> {
 
-    var clazzWorkWithMetricsFlat : ClazzWorkWithMetrics?
-
-    var hasContent: Boolean?
+    var clazzWorkWithMetrics : DataSource.Factory<Int, ClazzWorkWithMetrics>?
 
     companion object {
         const val VIEW_NAME = "ClazzMemberWithClazzWorkProgressListView"

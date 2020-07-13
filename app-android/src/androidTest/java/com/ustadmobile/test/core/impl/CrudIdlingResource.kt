@@ -50,7 +50,7 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     val excludedViewIds : MutableList<Int> = CopyOnWriteArrayList()
 
 
-    override fun getName() = "DataBinding $id"
+    override fun getName() = "CrudIdlingResource $id"
 
     /**
      * Sets the fragment from a [FragmentScenario] to be used from [DataBindingIdlingResource].

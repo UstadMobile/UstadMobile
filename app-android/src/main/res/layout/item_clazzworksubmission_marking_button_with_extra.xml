@@ -43,7 +43,7 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="@string/return_and_mark_next"
-            android:onClick="@{(view) -> mPresenter.handleClickSaveAndMarkNext(clazzMemberAndClazzWorkWithSubmission, showNext)}"
+            android:onClick="@{(view) -> mPresenter.handleClickSaveAndMarkNext(showNext)}"
             app:submissionButtonText="@{showNext}"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
             app:layout_constraintTop_toTopOf="parent" />

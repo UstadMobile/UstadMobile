@@ -70,6 +70,10 @@ open class ClazzMember()  {
         this.clazzMemberActive = true
     }
 
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
+
     companion object {
 
         const val ROLE_STUDENT = 1

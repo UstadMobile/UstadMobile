@@ -28,9 +28,9 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         ClazzMemberAndClazzWorkWithSubmission>(context, arguments, view, di, lifecycleOwner),
         NewCommentItemListener by newCommentItemListener  {
 
-    var filterByClazzWorkUid: Long = -1
-    var filterByClazzMemberUid: Long = -1
-    var unmarkedMembers: List<ClazzWorkSubmission> = listOf()
+    private var filterByClazzWorkUid: Long = -1
+    private var filterByClazzMemberUid: Long = -1
+    private var unmarkedMembers: List<ClazzWorkSubmission> = listOf()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -119,13 +119,6 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         }
         view.privateComments = privateComments
 
-        val test = withTimeoutOrNull(2000){
-            db.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToTest(
-                    ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
-                    clazzMember?.clazzMemberPersonUid?:0L, loggedInPersonUid)
-
-        }
-
         newCommentItemListener.fromPerson = loggedInPersonUid
         newCommentItemListener.toPerson = clazzMember?.clazzMemberPersonUid?:0L
         newCommentItemListener.entityId = clazzWorkWithSubmission.clazzWorkUid
@@ -163,7 +156,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 entityVal)
     }
 
-    fun handleClickSaveAndMarkNext(entity: ClazzMemberAndClazzWorkWithSubmission?, showNext: Boolean?){
+    fun handleClickSaveAndMarkNext(showNext: Boolean?){
 
         val entityFromView = view.entity
         val next = showNext ?: true
@@ -172,11 +165,8 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             handleClickSaveWithMovement(entityFromView, !next)
         }
 
-        //unmarkedMembers
         if(next) {
-            val nextClazzMemberUid = unmarkedMembers.get(0).clazzWorkSubmissionClazzMemberUid
-
-
+            val nextClazzMemberUid = unmarkedMembers[0].clazzWorkSubmissionClazzMemberUid
 
             systemImpl.go(ClazzWorkSubmissionMarkingView.VIEW_NAME,
                     mapOf(ARG_CLAZZWORK_UID to filterByClazzWorkUid.toString(),

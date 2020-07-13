@@ -41,6 +41,10 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long)
             : ClazzWorkWithMetrics?
 
+    @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
+    abstract fun findClazzWorkWithMetricsByClazzWorkUid(clazzWorkUid: Long)
+            : DataSource.Factory<Int, ClazzWorkWithMetrics>?
+
     @Query(STUDENT_PROGRESS_QUERY)
     abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long): DataSource.Factory<Int,
             ClazzMemberWithClazzWorkProgress>
@@ -137,7 +141,21 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                     )
     
                 ) as mProgress,
-            cm.*
+            cm.*, 
+
+            (SELECT CASE WHEN EXISTS (
+                SELECT ClazzWorkContentJoin.* FROM ClazzWorkContentJoin
+                LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = clazzWorkContentJoinContentUid
+                WHERE 
+                    ClazzWorkContentJoin.clazzWorkContentJoinClazzWorkUid = :clazzWorkUid
+                    AND CAST(ClazzWorkContentJoin.clazzWorkContentJoinInactive AS INTEGER) = 0
+                    AND NOT ContentEntry.ceInactive
+                    AND ContentEntry.publik 
+                
+                )
+            THEN 1 ELSE 0 END) as clazzWorkHasContent
+
+            
             FROM ClazzMember
                 LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
                 LEFT JOIN ClazzWork ON ClazzWork.clazzWorkUid = :clazzWorkUid

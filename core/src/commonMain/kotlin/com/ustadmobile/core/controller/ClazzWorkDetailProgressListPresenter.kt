@@ -19,14 +19,6 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     : UstadListPresenter<ClazzWorkDetailProgressListView,
         ClazzMemberWithClazzWorkProgress>(context, arguments, view, di, lifecycleOwner) {
 
-
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
-
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
-
     private var filterByClazzWorkUid: Long = -1
 
 
@@ -43,20 +35,9 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
 
     private fun updateListOnView() {
 
-        GlobalScope.launch {
-            val clazzWorkWithMetrics =
-                repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUidAsync(
-                        filterByClazzWorkUid)
 
-            val contentList = repo.clazzWorkContentJoinDao.findAllContentByClazzWorkUid(
-                    filterByClazzWorkUid, mLoggedInPersonUid)
-
-            view.runOnUiThread(Runnable {
-                view.clazzWorkWithMetricsFlat = clazzWorkWithMetrics
-                view.hasContent = !contentList.isEmpty()
-            })
-
-        }
+        view.clazzWorkWithMetrics = repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUid(
+                filterByClazzWorkUid)
 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(
                 filterByClazzWorkUid)

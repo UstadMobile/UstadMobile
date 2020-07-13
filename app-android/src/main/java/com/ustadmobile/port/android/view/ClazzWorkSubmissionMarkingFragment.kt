@@ -19,7 +19,6 @@ import com.ustadmobile.core.controller.ClazzWorkSubmissionMarkingPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.door.DoorMutableLiveData
@@ -51,7 +50,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     private var markingEditRecyclerAdapter
             : ClazzWorkSubmissionScoreEditRecyclerAdapter? = null
     private var submissionFreeTextRecyclerAdapter
-            : ClazzWorkDetailOverviewFragment.SubmissionTextEntryWithResultRecyclerAdapter? = null
+            : SubmissionTextEntryWithResultRecyclerAdapter? = null
 
     private var markingHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var questionsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
@@ -105,7 +104,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         markingEditRecyclerAdapter?.visible = false
 
         submissionFreeTextRecyclerAdapter =
-                ClazzWorkDetailOverviewFragment.SubmissionTextEntryWithResultRecyclerAdapter(
+                SubmissionTextEntryWithResultRecyclerAdapter(
                         clazzWorkWithSubmission, visible = false, editMode = false)
         submissionFreeTextRecyclerAdapter?.visible = false
 

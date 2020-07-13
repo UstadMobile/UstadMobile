@@ -6,7 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress"/>
         <import type="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment"/>
-        <import type="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment.ClazzMemberWithClazzWorkProgressListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.ClazzWorkProgressListRecyclerAdapter"/>
         <import type="android.view.View"/>
 
         <variable
@@ -15,12 +15,10 @@
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.ClazzWorkDetailProgressListPresenter" />
-        <variable
-            name="hasContent"
-            type="Boolean" />
+
         <variable
             name="selectablePagedListAdapter"
-            type="ClazzMemberWithClazzWorkProgressListRecyclerAdapter" />
+            type="ClazzWorkProgressListRecyclerAdapter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -65,12 +63,11 @@
             android:layout_width="0dp"
             android:layout_height="3dp"
             android:layout_marginTop="4dp"
-            android:visibility="@{hasContent?View.VISIBLE:View.GONE}"
+            android:visibility="@{clazzMemberWithClazzWorkProgress.clazzWorkHasContent?View.VISIBLE:View.GONE}"
             android:progress="@{Math.round(clazzMemberWithClazzWorkProgress.mProgress)}"
             app:layout_constraintEnd_toEndOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_progress_member_pic"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzwork_progress_member_name" />
-
 
         <TextView
             android:id="@+id/item_person_line2_text"

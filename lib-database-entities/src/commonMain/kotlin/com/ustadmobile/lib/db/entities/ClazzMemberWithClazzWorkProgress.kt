@@ -18,4 +18,6 @@ class ClazzMemberWithClazzWorkProgress : Person() {
     //Progress
     var mProgress: Float = 0.0F
 
+    var clazzWorkHasContent: Boolean = false
+
 }
