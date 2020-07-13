@@ -129,14 +129,14 @@
         android:label="@string/content">
         <argument
             android:name="parentUid"
-            app:argType="long"
-            android:defaultValue="-4103245208651563007L" />
+            android:defaultValue="-4103245208651563007L"
+            app:argType="long" />
     </fragment>
 
     <fragment
         android:id="@+id/content_entry_list_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
-        android:label="@string/content"/>
+        android:label="@string/content" />
 
     <fragment
         android:id="@+id/content_entry_edit_dest"
@@ -192,5 +192,9 @@
         android:label="@string/accounts"
         />
 
+    <fragment
+        android:id="@+id/webchunk_view"
+        android:name="com.ustadmobile.port.android.view.WebChunkFragment"
+        android:label="" />
 
 </navigation>
