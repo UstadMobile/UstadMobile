@@ -11,7 +11,21 @@ interface PersonEditView: UstadEditView<Person> {
 
     var personPicturePath: String?
 
+    var password: String ?
+
+    var confirmedPassword: String?
+
     var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>?
+
+    var isRegistrationMode: Boolean?
+
+    var showUsernameError: Boolean
+
+    var showPasswordMatchingError: Boolean
+
+    var showRequiredPasswordError: Boolean
+
+    var showRequiredConfirmPasswordError: Boolean
 
     companion object {
 

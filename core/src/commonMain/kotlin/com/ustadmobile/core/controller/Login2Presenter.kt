@@ -14,9 +14,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.WorkSpace
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -50,11 +49,9 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         }
         val mWorkSpace = arguments[ARG_WORKSPACE]
         if(mWorkSpace != null){
-            //change this when registration is allowed
-            workSpace.registrationAllowed = false
-
             workSpace = Json.parse(WorkSpace.serializer(), mWorkSpace)
         }
+
         view.createAccountVisible = workSpace.registrationAllowed
         view.connectAsGuestVisible = workSpace.guestLogin
     }
@@ -84,7 +81,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleCreateAccount(){
-        impl.go(PersonEditView.VIEW_NAME, arguments, context)
+        val args = arguments.plus(Pair(ARG_WORKSPACE, Json.stringify(WorkSpace.serializer(), workSpace)))
+        impl.go(PersonEditView.VIEW_NAME, args, context)
     }
 
     fun handleConnectAsGuest(){

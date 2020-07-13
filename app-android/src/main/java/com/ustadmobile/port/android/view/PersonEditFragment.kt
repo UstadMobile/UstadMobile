@@ -80,8 +80,8 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             field?.removeObserver(clazzMemberWithClazzObserver)
             field = value
             value?.observe(this, clazzMemberWithClazzObserver)
-        } 
-    
+        }
+
     private var clazzMemberWithClazzRecyclerAdapter: ClazzMemberWithClazzRecyclerAdapter? = null
 
     private var clazzMemberNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
@@ -203,6 +203,51 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             }else {
                 mBinding?.personPictureUri = null
             }
+        }
+    override var password: String? = null
+        get() = mBinding?.password
+
+
+    override var confirmedPassword: String? = null
+        get() = mBinding?.confirmPassword
+
+    override var isRegistrationMode: Boolean? = null
+        set(value) {
+            mBinding?.classVisibility = if(value != null && value) View.GONE else View.VISIBLE
+            field = value
+        }
+    override var showUsernameError: Boolean = false
+        set(value) {
+            mBinding?.usernameTextinputlayout?.isErrorEnabled = value
+            mBinding?.usernameTextinputlayout?.error =
+                    if(value) getString(R.string.field_required_prompt) else null
+            field = value
+        }
+
+    override var showPasswordMatchingError: Boolean = false
+        set(value) {
+            val error = if(value) getString(R.string.filed_password_no_match) else null
+            mBinding?.passwordTextinputlayout?.isErrorEnabled = value
+            mBinding?.confirmPasswordTextinputlayout?.isErrorEnabled = value
+            mBinding?.confirmPasswordTextinputlayout?.error = error
+            mBinding?.passwordTextinputlayout?.error = error
+            field = value
+        }
+
+    override var showRequiredPasswordError: Boolean = false
+        set(value) {
+            mBinding?.passwordTextinputlayout?.isErrorEnabled = value
+            mBinding?.passwordTextinputlayout?.error =
+                    if(value) getString(R.string.field_required_prompt) else null
+            field = value
+        }
+
+    override var showRequiredConfirmPasswordError: Boolean = false
+        set(value) {
+            mBinding?.confirmPasswordTextinputlayout?.isErrorEnabled = value
+            mBinding?.confirmPasswordTextinputlayout?.error =
+                    if(value) getString(R.string.field_required_prompt) else null
+            field = value
         }
 
 

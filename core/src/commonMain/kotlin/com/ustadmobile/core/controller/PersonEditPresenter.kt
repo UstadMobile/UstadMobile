@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
@@ -9,12 +11,14 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonPicture
+import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -23,6 +27,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 
 class PersonEditPresenter(context: Any,
@@ -30,10 +35,18 @@ class PersonEditPresenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<PersonEditView, Person>(context, arguments, view, di, lifecycleOwner) {
 
+    private lateinit var serverUrl: String
+
+    private val impl: UstadMobileSystemImpl by instance()
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper<ClazzMemberWithClazz>(ClazzMemberWithClazz::clazzMemberUid,
+    private var workSpace: WorkSpace = WorkSpace().apply {
+        registrationAllowed = false
+    }
+
+    private val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper<ClazzMemberWithClazz>(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
             ClazzMemberWithClazz.serializer().list, this) { clazzMemberUid = it }
 
@@ -45,6 +58,7 @@ class PersonEditPresenter(context: Any,
         clazzMemberJoinEditHelper.onDeactivateEntity(clazzMemberWithClazz)
     }
 
+
     /*
      * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
      * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
@@ -55,6 +69,17 @@ class PersonEditPresenter(context: Any,
                 MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
         view.clazzList = clazzMemberJoinEditHelper.liveList
+        val mWorkSpace = arguments[UstadView.ARG_WORKSPACE]
+        if(mWorkSpace != null){
+            workSpace = Json.parse(WorkSpace.serializer(), mWorkSpace)
+        }
+
+        serverUrl = if (arguments.containsKey(UstadView.ARG_SERVER_URL)) {
+            arguments.getValue(UstadView.ARG_SERVER_URL)
+        } else {
+            impl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost", context)?:""
+        }
+        view.isRegistrationMode = workSpace.registrationAllowed
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Person? {
@@ -85,10 +110,10 @@ class PersonEditPresenter(context: Any,
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Person? = null
-        if(entityJsonStr != null) {
-            editEntity = Json.parse(Person.serializer(), entityJsonStr)
+        editEntity = if(entityJsonStr != null) {
+            Json.parse(Person.serializer(), entityJsonStr)
         }else {
-            editEntity = Person()
+            Person()
         }
 
         return editEntity
@@ -102,38 +127,57 @@ class PersonEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: Person) {
+
+        if(workSpace.registrationAllowed && (entity.username == null
+                        || view.password == null || view.confirmedPassword == null
+                        || view.password != view.confirmedPassword)){
+
+            view.showUsernameError = entity.username == null
+            view.showRequiredPasswordError = view.password == null
+            view.showRequiredConfirmPasswordError = view.confirmedPassword == null
+            view.showPasswordMatchingError = view.password != view.confirmedPassword
+            return
+        }
+
         GlobalScope.launch {
-            if(entity.personUid == 0L) {
-                entity.personUid = repo.personDao.insertAsync(entity)
-            }else {
-                repo.personDao.updateAsync(entity)
-            }
-
-            clazzMemberJoinEditHelper.entitiesToInsert.forEach {
-                repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzMemberClazzUid,
-                    it.clazzMemberRole)
-            }
-            repo.clazzMemberDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
-                getSystemTimeInMillis())
-
-            var personPicture = db.personPictureDao.findByPersonUidAsync(entity.personUid)
-            val viewPicturePath = view.personPicturePath
-            val currentPath = if(personPicture != null) repo.personPictureDao.getAttachmentPath(personPicture) else null
-
-            if(personPicture != null && viewPicturePath != null && currentPath != viewPicturePath) {
-                repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
-                repo.personPictureDao.update(personPicture)
-            }else if(viewPicturePath != null && currentPath != viewPicturePath) {
-                personPicture = PersonPicture().apply {
-                    personPicturePersonUid = entity.personUid
+            if(workSpace.registrationAllowed){
+                val password = view.password
+                if(password != null){
+                    accountManager.register(entity, password, serverUrl)
                 }
-                personPicture.personPictureUid = repo.personPictureDao.insert(personPicture)
-                repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
-            }else if(personPicture != null && currentPath != null && viewPicturePath == null) {
-                //picture has been removed
-                personPicture.personPictureActive = false
-                repo.personPictureDao.setAttachmentDataFromUri(personPicture, null, context)
-                repo.personPictureDao.update(personPicture)
+            }else{
+                if(entity.personUid == 0L) {
+                    entity.personUid = repo.personDao.insertAsync(entity)
+                }else {
+                    repo.personDao.updateAsync(entity)
+                }
+
+                clazzMemberJoinEditHelper.entitiesToInsert.forEach {
+                    repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzMemberClazzUid,
+                            it.clazzMemberRole)
+                }
+                repo.clazzMemberDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
+                        getSystemTimeInMillis())
+
+                var personPicture = db.personPictureDao.findByPersonUidAsync(entity.personUid)
+                val viewPicturePath = view.personPicturePath
+                val currentPath = if(personPicture != null) repo.personPictureDao.getAttachmentPath(personPicture) else null
+
+                if(personPicture != null && viewPicturePath != null && currentPath != viewPicturePath) {
+                    repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
+                    repo.personPictureDao.update(personPicture)
+                }else if(viewPicturePath != null && currentPath != viewPicturePath) {
+                    personPicture = PersonPicture().apply {
+                        personPicturePersonUid = entity.personUid
+                    }
+                    personPicture.personPictureUid = repo.personPictureDao.insert(personPicture)
+                    repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
+                }else if(personPicture != null && currentPath != null && viewPicturePath == null) {
+                    //picture has been removed
+                    personPicture.personPictureActive = false
+                    repo.personPictureDao.setAttachmentDataFromUri(personPicture, null, context)
+                    repo.personPictureDao.update(personPicture)
+                }
             }
 
             withContext(doorMainDispatcher()) {

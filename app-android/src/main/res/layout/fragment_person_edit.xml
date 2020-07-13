@@ -17,8 +17,17 @@
             type="String" />
 
         <variable
+            name="confirmPassword"
+            type="String" />
+
+        <variable
+            name="password"
+            type="String" />
+
+        <variable
             name="loading"
             type="boolean" />
+
 
         <variable
             name="fieldsEnabled"
@@ -27,6 +36,10 @@
         <variable
             name="genderOptions"
             type="List&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="classVisibility"
+            type="Integer" />
 
         <variable
             name="activityEventHandler"
@@ -40,6 +53,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
+            android:paddingBottom="@dimen/dimen_16dp"
             android:layout_height="wrap_content">
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -226,19 +240,74 @@
                     android:hint="@string/username" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/password_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:hint="@string/password"
+                app:errorTextColor="?colorError"
+                app:hintEnabled="true"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginEnd="@dimen/dimen_16dp"
+                android:enabled="@{fieldsEnabled}"
+                app:passwordToggleEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout">
+
+                <!-- android:inputType="textCapWords" -->
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/password_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:text="@={password}"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/confirm_password_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:hint="@string/confirm_password"
+                app:errorTextColor="?colorError"
+                app:hintEnabled="true"
+                android:layout_margin="@dimen/dimen_16dp"
+                android:enabled="@{fieldsEnabled}"
+                app:passwordToggleEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/password_textinputlayout">
+
+                <!-- android:inputType="textCapWords" -->
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/confirm_password_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:text="@={confirmPassword}"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <TextView
+                android:visibility="@{classVisibility}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/clazzlist_header_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_16dp"
                 android:text="@string/classes"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout" />
+                app:layout_constraintTop_toBottomOf="@+id/confirm_password_textinputlayout" />
 
             <androidx.recyclerview.widget.RecyclerView
+                android:visibility="@{classVisibility}"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:id="@+id/clazzlist_recyclerview"
                 android:layout_width="match_parent"
