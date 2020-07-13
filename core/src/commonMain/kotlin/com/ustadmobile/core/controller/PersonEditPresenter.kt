@@ -46,7 +46,7 @@ class PersonEditPresenter(context: Any,
         registrationAllowed = false
     }
 
-    private val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper<ClazzMemberWithClazz>(ClazzMemberWithClazz::clazzMemberUid,
+    private val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
             ClazzMemberWithClazz.serializer().list, this) { clazzMemberUid = it }
 
