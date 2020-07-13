@@ -159,9 +159,7 @@ class ReportEditFragmentTest {
         }
 
         fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment, person = person,
-                impl = systemImplNavRule.impl, context = fragmentScenario.letOnFragment {
-            it.context
-        }!!)
+                impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext())
 
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
