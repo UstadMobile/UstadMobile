@@ -200,6 +200,23 @@ class AccountListFragmentTest {
     }
 
 
+    @AdbScreenRecord("given account list when account is clicked should be active")
+    @Test
+    fun givenAccountList_whenAccountIsClicked_shouldBeActive(){
+        launchFragment(true, defaultNumOfAccounts)
+
+        onView(withId(R.id.account_list_recycler)).check(
+                matches(atPosition(0, hasDescendant(withText("FirstName1 Lastname1")))))
+
+        onView(withId(R.id.account_list_recycler)).perform(
+                actionOnItemAtPosition<RecyclerView.ViewHolder>(2, click()))
+
+        onView(withId(R.id.account_list_recycler)).check(
+                matches(atPosition(0, hasDescendant(withText("FirstName3 Lastname3")))))
+
+    }
+
+
 
     @AdbScreenRecord("given about item displayed when clicked should open about screen")
     @Test

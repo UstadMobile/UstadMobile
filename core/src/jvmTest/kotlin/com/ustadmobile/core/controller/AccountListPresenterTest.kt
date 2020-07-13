@@ -145,6 +145,24 @@ class AccountListPresenterTest {
 
 
     @Test
+    fun givenAccountList_whenAccountIsClicked_shouldBeActive(){
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
+
+        val account = UmAccount(1,"dummy", null,"")
+        presenter.onCreate(null)
+
+        activeAccountLive.sendValue(account)
+
+        presenter.handleClickAccount(account)
+        argumentCaptor<UmAccount>{
+            verify(accountManager).activeAccount = capture()
+            assertTrue("Expected account was set active",
+                    account == firstValue)
+        }
+    }
+
+
+    @Test
     fun givenProfileButton_whenClicked_thenShouldGoToProfileView(){
 
         val presenter = AccountListPresenter(context, mapOf(), mockView, di)

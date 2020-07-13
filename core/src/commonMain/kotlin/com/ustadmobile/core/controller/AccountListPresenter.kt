@@ -48,4 +48,8 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
         view.showGetStarted = accountManager.storedAccounts.size == 1
                 && accountManager.storedAccounts.contains(account)
     }
+
+    fun handleClickAccount(account: UmAccount){
+        accountManager.activeAccount = account
+    }
 }

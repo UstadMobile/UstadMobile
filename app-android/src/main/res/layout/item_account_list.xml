@@ -20,6 +20,7 @@
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/dimen_16dp"
         android:id="@+id/item_account_list"
+        android:onClick="@{() -> presenter.handleClickAccount(umaccount)}"
         app:backgroundIfAnimationEnabled="@{@drawable/bg_listitem}">
 
 
