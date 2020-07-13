@@ -26,35 +26,17 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
     private var mBinding: FragmentAccountListBinding? = null
 
+    private var mCurrentStoredAccounts: List<UmAccount>? = null
+
+    private var mActiveAccount: UmAccount? = null
 
     class AccountAdapter(var mPresenter: AccountListPresenter?):
-            ListAdapter<UmAccount,RecyclerView.ViewHolder>(DIFF_CALLBACK_ACCOUNT),
-            Observer<List<UmAccount>>{
-
-        private var activeAccountViewHolder: ActiveAccountViewHolder ? = null
-
-        var activeAccount: UmAccount? = null
-        set(value){
-            field = value
-            updateAccountList()
-            updateActiveAccount()
-        }
-
-        private var storedAccounts: MutableList<UmAccount>? = null
+            ListAdapter<UmAccount, AccountAdapter.AccountViewHolder>(DIFF_CALLBACK_ACCOUNT){
 
         class AccountViewHolder(val binding: ItemAccountListBinding): RecyclerView.ViewHolder(binding.root)
 
-        class ActiveAccountViewHolder(val binding: ItemAccountActiveBinding): RecyclerView.ViewHolder(binding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            if(viewType == VIEW_TYPE_ACTIVE_ACCOUNT){
-                val mBinding = ItemAccountActiveBinding.inflate(
-                        LayoutInflater.from(parent.context), parent, false).apply {
-                    presenter = mPresenter
-                }
-                return ActiveAccountViewHolder(mBinding)
-            }
-
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder {
             val mBinding = ItemAccountListBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false).apply {
                 presenter = mPresenter
@@ -62,71 +44,14 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             return AccountViewHolder(mBinding)
         }
 
-        override fun getItemViewType(position: Int): Int {
-            if(position == 0) return VIEW_TYPE_ACTIVE_ACCOUNT
-            return VIEW_TYPE_ACCOUNT_LIST
-        }
-
-        override fun getItemCount(): Int {
-            return currentList.size + 1
-        }
-
-        override fun onChanged(umAccounts: List<UmAccount>?) {
-            storedAccounts = umAccounts?.toMutableList()
-            updateAccountList()
-        }
-
-        private fun updateAccountList(){
-            val umAccount = activeAccount
-            val mStoredAccounts = storedAccounts?.toTypedArray()?.let { copyOnWriteListOf(*it) }
-            if(umAccount != null){
-                if(mStoredAccounts != null && mStoredAccounts.contains(umAccount)){
-                    mStoredAccounts.remove(umAccount)
-                }
-                submitList(mStoredAccounts)
-            }
-        }
-
-        private fun updateActiveAccount(){
-            val mStoredAccounts = storedAccounts
-            activeAccountViewHolder?.binding?.account = activeAccount
-            activeAccountViewHolder?.binding?.profileBtnVisibility =
-                    if(activeAccount?.personUid == 0L) View.GONE else View.VISIBLE
-
-            activeAccountViewHolder?.binding?.logoutBtnVisibility =
-                    if(mStoredAccounts != null && (mStoredAccounts.size == 1
-                                    && mStoredAccounts.contains(activeAccount) || mStoredAccounts.isEmpty()))
-                        View.GONE else View.VISIBLE
-
-        }
-
-        private fun getRealPosition(position: Int): Int{
-            return if(position == 0) position else position - 1
-        }
-
-
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            if(holder is AccountViewHolder){
-                holder.binding.umaccount = getItem(getRealPosition(position))
-            }else{
-                activeAccountViewHolder = holder as ActiveAccountViewHolder
-                updateActiveAccount()
-            }
-
+        override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
+            //TODO: set a variable on the binding to tell it it is the active account (e.g. position = 0)
+            holder.binding.umaccount = getItem(position)
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             super.onDetachedFromRecyclerView(recyclerView)
             mPresenter = null
-            storedAccounts = null
-            activeAccount = null
-        }
-
-        companion object{
-
-            const val VIEW_TYPE_ACTIVE_ACCOUNT = 1
-
-            const val VIEW_TYPE_ACCOUNT_LIST = 2
         }
     }
 
@@ -152,21 +77,30 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
     }
 
     private var activeAccountObserver = Observer<UmAccount?> {
-        t -> accountAdapter?.activeAccount = t
+        mActiveAccount = it
+        updateAccountList()
     }
 
     private var accountListObserver = Observer<List<UmAccount>?> {
-        loading = false
+        mCurrentStoredAccounts = it
+        updateAccountList()
+    }
+
+    private fun updateAccountList() {
+        val activeAccountVal = mActiveAccount
+        val storedAccountsVal = mCurrentStoredAccounts
+        if(activeAccountVal != null && storedAccountsVal != null) {
+            val otherAccounts: List<UmAccount> = storedAccountsVal.toMutableList().also { it.remove(activeAccountVal) }
+                    .sortedBy { it.username }
+            accountAdapter?.submitList(listOf(activeAccountVal) + otherAccounts)
+        }
     }
 
 
     override var accountListLive: DoorLiveData<List<UmAccount>>? = null
         set(value) {
-            val observer = accountAdapter ?:return
-            field?.removeObserver(observer)
             field?.removeObserver(accountListObserver)
             field = value
-            value?.observe(viewLifecycleOwner, observer)
             value?.observe(viewLifecycleOwner, accountListObserver)
         }
 
