@@ -18,23 +18,6 @@ actual class WebChunkPresenter actual constructor(context: Any, arguments: Map<S
             return
         }
         view.containerManager = ContainerManager(result, db, repo)
-       /* view.mountChunk(result, object : UmCallback<String>{
-            override fun onSuccess(result: String?) {
-
-                GlobalScope.launch {
-                    val client = defaultHttpClient()
-                    val indexContent = client.get<String>(UMFileUtil.joinPaths(result!!,"index.json"))
-                    val indexLog:dynamic = JSON.parse<IndexLog>(indexContent)
-                    val urlToLoad = indexLog.entries[0].url
-                    view.loadUrl(urlToLoad)
-                }
-            }
-
-            override fun onFailure(exception: Throwable?) {
-                view.runOnUiThread(kotlinx.coroutines.Runnable { view.showError(UstadMobileSystemImpl.instance.getString(MessageID.error_opening_file, context)) })
-            }
-
-        })*/
 
     }
 }

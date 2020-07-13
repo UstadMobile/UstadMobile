@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest
+import android.os.Build
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.Espresso.onIdle
@@ -33,6 +34,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
 import org.hamcrest.CoreMatchers
 import org.hamcrest.core.AllOf.allOf
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -66,7 +68,9 @@ class WebChunkFragmentTest {
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
 
-    var container: Container? = null
+    lateinit var container: Container
+
+    private val WAIT_TIME = 2000L
 
     @Before
     fun setup() {
@@ -91,11 +95,11 @@ class WebChunkFragmentTest {
         targetEntry.contentEntryUid = dbRule.db.contentEntryDao.insert(targetEntry)
 
         container = Container()
-        container?.mimeType = "application/webchunk+zip"
-        container?.containerContentEntryUid = targetEntry.contentEntryUid
-        container?.containerUid = dbRule.db.containerDao.insert(container!!)
+        container.mimeType = "application/webchunk+zip"
+        container.containerContentEntryUid = targetEntry.contentEntryUid
+        container.containerUid = dbRule.db.containerDao.insert(container)
 
-        val containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo,
+        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,
                 tmpDir.absolutePath)
         addEntriesFromZipToContainer(chunkCountingOut.absolutePath, containerManager)
 
@@ -105,8 +109,10 @@ class WebChunkFragmentTest {
     @Test
     fun givenContentEntry_whenWebViewLoads_thenShowWebChunk() {
 
+        Assume.assumeTrue(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
+
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container!!.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container!!.containerUid)) {
+                fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container.containerUid)) {
             WebChunkFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
@@ -114,20 +120,17 @@ class WebChunkFragmentTest {
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
 
-        var count = 0
         repeat(5) {
             try {
                 onWebView(allOf(isDisplayed(), isJavascriptEnabled()))
                         .withElement(findElement(Locator.CSS_SELECTOR,
                                 "div[data-test-id=tutorial-page]"))
             } catch (io: RuntimeException) {
-                Thread.sleep(2000)
-                count++
+                if (it == 5) {
+                    throw Exception()
+                }
+                Thread.sleep(WAIT_TIME)
             }
-        }
-        
-        if(count == 5){
-            throw Exception()
         }
 
 
