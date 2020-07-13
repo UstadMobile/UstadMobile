@@ -21,7 +21,6 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
 
     internal var containerUid: Long = 0
-    private var navigation: String? = null
 
     val accountManager: UstadAccountManager by instance()
 
@@ -53,7 +52,6 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         containerDao = db.containerDao
         contentEntryDao = db.contentEntryDao
 
-        navigation = arguments[ARG_REFERRER] ?: ""
         val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 

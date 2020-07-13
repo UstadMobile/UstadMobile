@@ -201,7 +201,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
     override fun onClickNewPerson() {
         onSaveStateToBackStackStateHandle()
         val list = personFilterList?.value?.map { it.entityUid }
-        navigateToPickEntityFromList(ReportFilterWithDisplayDetails::class.java,
+        navigateToPickEntityFromList(Person::class.java,
                 R.id.person_list_dest,
                 bundleOf(PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST to list?.joinToString()))
 

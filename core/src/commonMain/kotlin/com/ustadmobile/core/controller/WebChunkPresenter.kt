@@ -5,7 +5,7 @@ import com.ustadmobile.core.view.WebChunkView
 import org.kodein.di.DI
 
 expect class WebChunkPresenter(context: Any, arguments: Map<String, String>, view: WebChunkView,
-                               di: DI, isDownloadEnabled: Boolean, appRepo: UmAppDatabase, umAppDb: UmAppDatabase): WebChunkPresenterCommon {
+                               di: DI): WebChunkPresenterCommon {
 
     override suspend fun handleMountChunk()
 
