@@ -110,15 +110,11 @@ class ClazzWorkDetailProgressListPresenterTest {
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
-        GlobalScope.launch {
-            verify(clazzWorkDaoSpy, timeout(5000)).findClazzWorkWithMetricsByClazzWorkUidAsync(
-                    testClazzWork.clazzWork.clazzWorkUid)
-            verify(mockView, timeout(5000)).list = any()
-        }
 
-        verify(clazzWorkContentJoinDaoSpy, timeout(5000)).findAllContentByClazzWorkUid(
-                testClazzWork.clazzWork.clazzWorkUid, 0)
+        verify(clazzWorkDaoSpy, timeout(5000)).findClazzWorkWithMetricsByClazzWorkUid(
+                testClazzWork.clazzWork.clazzWorkUid)
         verify(mockView, timeout(5000)).list = any()
+
 
         verify(clazzWorkDaoSpy, timeout(5000)).findStudentProgressByClazzWork(
                 testClazzWork.clazzWork.clazzWorkUid)
