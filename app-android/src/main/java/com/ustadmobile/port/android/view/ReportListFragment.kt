@@ -68,17 +68,16 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
         mPresenter = ReportListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this,  di, viewLifecycleOwner)
 
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, requireContext().getString(R.string.create_new,
+                requireContext().getString(R.string.report)))
         mDataRecyclerViewAdapter = ReportListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.create_new,
-                requireContext().getString(R.string.report))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
-        mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.report)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        fabManager?.text = requireContext().getText(R.string.report)
     }
 
     /**

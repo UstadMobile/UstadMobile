@@ -2,10 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.requestClazzLogCreation
-import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -23,6 +20,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 
 class ClazzEdit2Presenter(context: Any,
@@ -99,10 +97,10 @@ class ClazzEdit2Presenter(context: Any,
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
 
-            requestClazzLogCreation(entity.clazzUid,
+            val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
+            clazzLogCreatorManager.requestClazzLogCreation(entity.clazzUid,
                     accountManager.activeAccount.endpointUrl,
-                    fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong,
-                    context)
+                    fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
             view.finishWithResult(listOf(entity))
         }
