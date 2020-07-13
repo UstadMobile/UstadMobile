@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
@@ -82,11 +83,11 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         val currentFrag =
                 findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id ?: 0
-        val topMainMenuItemVisible = BOTTOM_NAV_DEST.contains(currentFrag)
-        menu.findItem(R.id.menu_main_settings).isVisible = topMainMenuItemVisible
-        menu.findItem(R.id.menu_main_profile).isVisible = topMainMenuItemVisible
-
-        if(topMainMenuItemVisible){
+        val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
+        menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
+        menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
+        mBinding.bottomNavView.visibility = if(mainScreenItemsVisible) View.VISIBLE else View.GONE
+        if(mainScreenItemsVisible){
             setUserProfile(menu.findItem(R.id.menu_main_profile))
         }
         return super.onCreateOptionsMenu(menu)

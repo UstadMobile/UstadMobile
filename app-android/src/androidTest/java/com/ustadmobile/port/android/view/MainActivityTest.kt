@@ -11,11 +11,13 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import junit.framework.Assert.assertEquals
+import org.hamcrest.CoreMatchers.not
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,12 +50,26 @@ class MainActivityTest {
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        onView(withId(R.id.person_name_letter)).check(matches(isDisplayed())).perform(click())
 
         onView(withText("G")).check(matches(isDisplayed()))
 
+        onView(withId(R.id.person_name_letter)).check(matches(isDisplayed())).perform(click())
+
         assertEquals("It navigated account list screen",
                 R.id.account_list_dest, systemImplNavRule.navController.currentDestination?.id)
+    }
+
+    @AdbScreenRecord("given app launched when user navigates away from top screens then should hide bottom nav")
+    @Test
+    fun givenAppLaunched_whenUserNavigatesWayFromTopScreens_thenShouldHideBottomNav() {
+
+        val scenario = launchActivity<MainActivity>()
+                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+
+        scenario.clickOptionMenu(R.id.settings_list_dest)
+
+        onView(withId(R.id.bottom_nav_view)).check(matches(not(isDisplayed())))
     }
 
 
