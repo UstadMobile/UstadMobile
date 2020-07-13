@@ -27,7 +27,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickAddAccount(){
-        impl.go(GetStartedView.VIEW_NAME, mapOf(), context)
+        impl.go(GetStartedView.VIEW_NAME, context)
     }
 
     fun handleClickDeleteAccount(account: UmAccount){
@@ -40,13 +40,15 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickAbout(){
-        impl.go(AboutView.VIEW_NAME, mapOf(), context)
+        impl.go(AboutView.VIEW_NAME, context)
     }
 
     fun handleClickLogout(account: UmAccount){
         accountManager.removeAccount(account)
-        view.showGetStarted = accountManager.storedAccounts.size == 1
-                && accountManager.storedAccounts.contains(account)
+        if(accountManager.storedAccounts.size == 1
+                && accountManager.storedAccounts.contains(account)){
+            view.showGetStarted()
+        }
     }
 
     fun handleClickAccount(account: UmAccount){

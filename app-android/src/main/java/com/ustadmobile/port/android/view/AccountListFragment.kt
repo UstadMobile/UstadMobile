@@ -115,15 +115,11 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             value?.observe(viewLifecycleOwner, activeAccountObserver)
         }
 
-    override var showGetStarted: Boolean? = null
-        set(value) {
-            field = value
-            if(value != null && value){
-                val navOptions = NavOptions.Builder().setPopUpTo(R.id.account_list_dest, true)
-                        .build()
-                findNavController().navigate(R.id.account_get_started_dest,null, navOptions)
-            }
-        }
+    override fun showGetStarted(){
+        val navOptions = NavOptions.Builder().setPopUpTo(R.id.account_list_dest, true)
+                .build()
+        findNavController().navigate(R.id.account_get_started_dest,null, navOptions)
+    }
 
 
     private var accountAdapter: AccountAdapter ? = null

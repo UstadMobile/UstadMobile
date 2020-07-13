@@ -4,15 +4,16 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.AboutView
+import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.view.GetStartedView
+import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.DI
@@ -104,7 +105,7 @@ class AccountListPresenterTest {
         presenter.handleClickAddAccount()
 
         argumentCaptor<String>{
-            verify(impl).go(capture(), any(), any())
+            verify(impl).go(capture(), any())
             assertTrue("Get started was opened", GetStartedView.VIEW_NAME == firstValue)
         }
     }
@@ -120,7 +121,7 @@ class AccountListPresenterTest {
         presenter.handleClickDeleteAccount(account)
 
         argumentCaptor<UmAccount>{
-            verify(accountManager).removeAccount(capture(), any())
+            verify(accountManager).removeAccount(capture(), any(), any())
             assertTrue("Expected account was removed from the device",
                     account == firstValue)
         }
@@ -137,7 +138,7 @@ class AccountListPresenterTest {
 
         presenter.handleClickLogout(account)
         argumentCaptor<UmAccount>{
-            verify(accountManager).removeAccount(capture(), any())
+            verify(accountManager).removeAccount(capture(), any(), any())
             assertTrue("Expected account was removed from the device",
                     account == firstValue)
         }
@@ -188,7 +189,7 @@ class AccountListPresenterTest {
         presenter.handleClickAbout()
 
         argumentCaptor<String>{
-            verify(impl).go(capture(), any(), any())
+            verify(impl).go(capture(),any())
             assertTrue("About screen was opened", AboutView.VIEW_NAME == firstValue)
         }
     }

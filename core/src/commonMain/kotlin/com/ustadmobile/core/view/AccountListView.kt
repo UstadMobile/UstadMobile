@@ -9,7 +9,7 @@ interface AccountListView : UstadView {
 
     var activeAccountLive: DoorLiveData<UmAccount>?
 
-    var showGetStarted: Boolean ?
+    fun showGetStarted()
 
     companion object {
 
