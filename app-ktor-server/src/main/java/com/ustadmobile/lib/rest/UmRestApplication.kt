@@ -34,13 +34,13 @@ import javax.naming.InitialContext
 private val _restApplicationDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
 
 
-fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase = _restApplicationDb) {
+fun Application.umRestApplication(devMode: Boolean = false, db: UmAppDatabase = _restApplicationDb) {
 
     val adminuser = db.personDao.findByUsername("admin")
     val iContext = InitialContext()
     val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
 
-    if(adminuser == null) {
+    if (adminuser == null) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
         adminPerson.personUid = db.personDao.insert(adminPerson)
@@ -50,10 +50,8 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
                 PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(adminPass)))
 
 
-
-
         val adminPassFile = File(containerDirPath, "admin.txt")
-        if(!adminPassFile.parentFile.isDirectory) {
+        if (!adminPassFile.parentFile.isDirectory) {
             adminPassFile.parentFile.mkdirs()
         }
 
@@ -61,7 +59,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
         println("Saved admin password to ${adminPassFile.absolutePath}")
     }
 
-    if(devMode) {
+    if (devMode) {
         install(CORS) {
             method(HttpMethod.Get)
             method(HttpMethod.Post)
@@ -89,19 +87,24 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
 
         LoginRoute(db)
         ContainerMountRoute(db)
+        val uploadFolder = File(containerDirPath, "upload")
+        uploadFolder.mkdir()
+        ResumableUploadRoute(uploadFolder)
         UmAppDatabase_KtorRoute(db, Gson(), File("attachments/UmAppDatabase").absolutePath)
         db.preload()
 
-        if(devMode) {
+        if (devMode) {
 
             get("UmAppDatabase/clearAllTables") {
                 db.clearAllTables()
                 call.respond("OK - cleared")
             }
 
-            get("UmContainer/addContainer"){
+            get("UmContainer/addContainer") {
 
-                val indexTempDir = 0; val indexTempFile = 1; val indexContainer = 2
+                val indexTempDir = 0;
+                val indexTempFile = 1;
+                val indexContainer = 2
 
                 val resourceName = call.request.queryParameters["resource"]
                 val entryUid = call.request.queryParameters["entryid"]
@@ -114,7 +117,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
 
                 handleInvalidRequest(call)
 
-                val preparedRes = prepareResources(resourceName,contentTye!!, entryUid, mimeType)
+                val preparedRes = prepareResources(resourceName, contentTye!!, entryUid, mimeType)
 
                 val containerManager = ContainerManager(preparedRes[indexContainer] as Container, _restApplicationDb, _restApplicationDb,
                         (preparedRes[indexTempDir] as File).absolutePath)
@@ -129,23 +132,23 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
     }
 }
 
-private suspend fun handleInvalidRequest(call: ApplicationCall){
+private suspend fun handleInvalidRequest(call: ApplicationCall) {
     val resourceName = call.request.queryParameters["resource"]
     val entryId = call.request.queryParameters["entryid"]
     val resourceType = call.request.queryParameters["type"]
-    if((resourceName != null && resourceName.isEmpty()) || resourceName == null
+    if ((resourceName != null && resourceName.isEmpty()) || resourceName == null
             || (entryId != null && entryId.isEmpty()) || entryId == null ||
-            (resourceType != null && resourceType.isEmpty()) || resourceType == null){
+            (resourceType != null && resourceType.isEmpty()) || resourceType == null) {
         call.respond("Invalid request make sure you have included all resource param")
         return
     }
 }
 
 
-private fun prepareResources(resourceName: String?, path: String, entryId: String?, mimetype: String): Array<Any>{
+private fun prepareResources(resourceName: String?, path: String, entryId: String?, mimetype: String): Array<Any> {
     val epubContainer = Container()
 
-    if(entryId!= null && entryId.isNotEmpty()){
+    if (entryId != null && entryId.isNotEmpty()) {
         epubContainer.containerContentEntryUid = entryId.toLong()
     }
 

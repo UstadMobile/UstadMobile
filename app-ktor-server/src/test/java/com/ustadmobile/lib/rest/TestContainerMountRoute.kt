@@ -4,8 +4,6 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
-import com.ustadmobile.core.io.ConcatenatedInputStream
-import com.ustadmobile.core.io.ConcatenatedPart
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.Container
@@ -27,7 +25,7 @@ import java.io.File
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.client.request.get
 import io.ktor.client.request.head
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpHeaders
 import io.netty.handler.codec.http.DefaultHttpResponse
 import io.netty.handler.codec.http.HttpResponseStatus
@@ -35,11 +33,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.InputStream
-import kotlinx.io.core.IoBuffer
-import kotlinx.io.core.readAvailable
-import kotlinx.io.core.writeFully
-import kotlinx.io.streams.asInput
-import kotlinx.io.streams.asOutput
 import org.junit.After
 import org.junit.Assert
 import java.io.ByteArrayInputStream
@@ -96,7 +89,7 @@ class TestContainerMountRoute {
 
     @After
     fun tearDown() {
-        server.stop(0, 7, TimeUnit.SECONDS)
+        server.stop(0, 7000)
     }
 
     @Test
@@ -107,8 +100,8 @@ class TestContainerMountRoute {
             }
 
             httpClient.use {
-                val mountResponse = httpClient.get<HttpResponse>(
-                        "http://localhost:${defaultPort}/ContainerMount/${container.containerUid + 1}/epub.css")
+                val mountResponse = httpClient.get<HttpStatement>(
+                        "http://localhost:${defaultPort}/ContainerMount/${container.containerUid + 1}/epub.css").execute()
                 Assert.assertEquals("Container to be mounted was not found",HttpResponseStatus.NOT_FOUND.code(), mountResponse.status.value)
             }
         }
@@ -122,8 +115,8 @@ class TestContainerMountRoute {
             }
 
             httpClient.use {
-                val mountResponse = httpClient.get<HttpResponse>(
-                        "http://localhost:${defaultPort}/ContainerMount/${container.containerUid}/${testPath}")
+                val mountResponse = httpClient.get<HttpStatement>(
+                        "http://localhost:${defaultPort}/ContainerMount/${container.containerUid}/${testPath}").execute()
                 Assert.assertEquals("Container was mounted and requested file found",HttpResponseStatus.OK.code(), mountResponse.status.value)
             }
         }
@@ -137,8 +130,8 @@ class TestContainerMountRoute {
             }
 
             httpClient.use {
-                val mountResponse = httpClient.head<HttpResponse>(
-                        "http://localhost:${defaultPort}/ContainerMount/${container.containerUid}/${testPath}")
+                val mountResponse = httpClient.head<HttpStatement>(
+                        "http://localhost:${defaultPort}/ContainerMount/${container.containerUid}/${testPath}").execute()
                 Assert.assertTrue("Container mounted and responded with content length",
                         200 == mountResponse.status.value && mountResponse.headers[HttpHeaders.ContentLength]!!.toInt() > 0)
             }
