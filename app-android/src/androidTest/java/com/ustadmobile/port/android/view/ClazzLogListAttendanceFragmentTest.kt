@@ -91,7 +91,7 @@ class ClazzLogListAttendanceFragmentTest {
                         RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click()))
 
         Assert.assertEquals("After clicking on attendance log, fragment goes to attendance view",
-                systemImplNavRule.navController.currentDestination?.id, R.id.clazz_log_edit_attendance_dest)
+                R.id.clazz_log_edit_attendance_dest, systemImplNavRule.navController.currentDestination?.id)
     }
 
     @AdbScreenRecord("Given attendance has been recorded for past days, graph should be displayed to user")

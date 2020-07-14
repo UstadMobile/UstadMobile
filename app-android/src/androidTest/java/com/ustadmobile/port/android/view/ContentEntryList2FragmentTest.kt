@@ -68,6 +68,7 @@ class ContentEntryList2FragmentTest  {
 
         launchFragment(bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT))
+
         onView(withId(R.id.fragment_list_recyclerview)).check(matches(isDisplayed()))
 
         onView(withId(R.id.fragment_list_recyclerview)).check(matches(hasChildCount(contentEntries.size)))
@@ -77,7 +78,7 @@ class ContentEntryList2FragmentTest  {
 
 
         assertEquals("After clicking on item, it navigates to detail view",
-                systemImplNavRule.navController.currentDestination?.id,R.id.content_entry_details_dest)
+                R.id.content_entry_details_dest, systemImplNavRule.navController.currentDestination?.id)
     }
 
 
