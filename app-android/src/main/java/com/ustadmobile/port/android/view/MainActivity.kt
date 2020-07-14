@@ -86,7 +86,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
-        mBinding.bottomNavView.visibility = if(mainScreenItemsVisible) View.VISIBLE else View.GONE
+        mBinding.bottomNavView.visibility = if(DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
+            View.GONE else View.VISIBLE
         if(mainScreenItemsVisible){
             setUserProfile(menu.findItem(R.id.menu_main_profile))
         }
@@ -131,6 +132,10 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     }
 
     companion object {
-        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest, R.id.home_clazzlist_dest, R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
+        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest, R.id.home_clazzlist_dest,
+                R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
+
+        val DEST_TO_HIDE_BOTTOM_NAV = listOf(R.id.login_dest, R.id.account_get_started_dest,
+                R.id.workspace_enterlink_dest)
     }
 }

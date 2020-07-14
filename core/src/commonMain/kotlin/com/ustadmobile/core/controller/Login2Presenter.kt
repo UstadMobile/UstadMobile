@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -59,6 +60,9 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         val mWorkSpace = arguments[ARG_WORKSPACE]
         if(mWorkSpace != null){
             workSpace = Json.parse(WorkSpace.serializer(), mWorkSpace)
+
+            //Disabled for now
+            workSpace.registrationAllowed = false
         }else{
             val isRegistrationAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_REGISTRATION,
                     context)
@@ -70,6 +74,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                 guestLogin = isGuestLoginAllowed
             }
         }
+
         view.createAccountVisible = workSpace.registrationAllowed
         view.connectAsGuestVisible = workSpace.guestLogin
     }
@@ -82,9 +87,9 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
             GlobalScope.launch(doorMainDispatcher()) {
                 try {
-                    accountManager.login(username,password,serverUrl)
+                    val umAccount = accountManager.login(username,password,serverUrl)
                     view.inProgress = false
-                    view.navigateToNextDestination(fromDestination,nextDestination)
+                    view.navigateToNextDestination(umAccount,fromDestination,nextDestination)
                 } catch (e: Exception) {
                     view.errorMessage = impl.getString(if(e is UnauthorizedException)
                         MessageID.wrong_user_pass_combo else
@@ -103,6 +108,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleConnectAsGuest(){
+        accountManager.activeAccount = UmAccount(0L,"guest",
+                "",serverUrl,"Guest","User")
         impl.go(ContentEntryListTabsView.VIEW_NAME, arguments, context)
     }
 

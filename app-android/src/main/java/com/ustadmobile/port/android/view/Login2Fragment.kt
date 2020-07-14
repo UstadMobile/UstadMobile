@@ -13,6 +13,8 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.instance
 
 
@@ -76,13 +78,16 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         mBinding?.username = ""
     }
 
-    override fun navigateToNextDestination(fromDestination: String, nextDestination: String) {
+    override fun navigateToNextDestination(account: UmAccount,fromDestination: String, nextDestination: String) {
         val impl: UstadMobileSystemImpl by instance()
+        val navController = findNavController()
         val umNextDestination = impl.destinationProvider.lookupDestinationName(nextDestination)
         val umFromDestination = impl.destinationProvider.lookupDestinationName(fromDestination)
+        navController.currentBackStackEntry?.savedStateHandle?.set(UstadView.ARG_SNACK_MESSAGE,
+                String.format(getString(R.string.logged_in_as),account.username,account.endpointUrl))
         if(umNextDestination != null && umFromDestination != null){
             val navOptions = NavOptions.Builder().setPopUpTo(umFromDestination.destinationId, true).build()
-            findNavController().navigate(umNextDestination.destinationId,null, navOptions)
+            navController.navigate(umNextDestination.destinationId,null, navOptions)
         }
     }
 

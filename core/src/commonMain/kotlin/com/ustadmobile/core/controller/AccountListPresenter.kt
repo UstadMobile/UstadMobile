@@ -54,5 +54,6 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
 
     fun handleClickAccount(account: UmAccount){
         accountManager.activeAccount = account
+        view.showContentEntryList(account)
     }
 }

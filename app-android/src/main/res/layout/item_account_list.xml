@@ -47,15 +47,16 @@
             />
 
         <!-- Line 1-->
-        <androidx.appcompat.widget.AppCompatImageView
+        <com.google.android.material.button.MaterialButton
             android:visibility="@{activeAccount ? View.GONE: View.VISIBLE}"
             android:id="@+id/account_delete_icon"
             android:layout_width="50dp"
-            android:layout_height="@dimen/dimen_30dp"
+            android:layout_height="50dp"
             android:layout_marginEnd="@dimen/dimen_20dp"
             android:layout_marginTop="@dimen/dimen_20dp"
-            android:src="@drawable/ic_delete_black_24dp"
-            android:tint="?colorOnIconTint"
+            app:icon="@drawable/ic_delete_black_24dp"
+            app:iconTint="?colorOnIconTint"
+            style="@style/UmTheme.Widget.TextButton.IconOnly"
             android:onClick="@{()->presenter.handleClickDeleteAccount(umaccount)}"
             app:layout_constraintStart_toEndOf="@id/person_full_name"
             app:layout_constraintTop_toTopOf="parent" />
@@ -91,12 +92,13 @@
 
         <TextView
             android:lines="1"
+            app:layout_constraintHorizontal_bias="0.0"
             android:paddingBottom="@dimen/dimen_16dp"
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginTop="@dimen/dimen_8dp"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             android:id="@+id/person_username"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:text="@{umaccount.username}"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@+id/account_user_icon"
@@ -116,19 +118,19 @@
             android:layout_marginStart="@dimen/dimen_16dp"/>
 
         <TextView
-            android:lines="1"
-            android:layout_marginStart="@dimen/dimen_10dp"
-            android:layout_marginTop="@dimen/dimen_8dp"
-            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             android:id="@+id/person_link"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:lines="1"
             android:text="@{umaccount.endpointUrl}"
-            app:layout_constraintStart_toEndOf="@+id/account_link_icon"
+            app:layout_constraintHorizontal_bias="0.0"
+            android:layout_marginStart="@dimen/dimen_10dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             app:layout_constraintEnd_toStartOf="@+id/account_delete_icon"
+            app:layout_constraintStart_toEndOf="@+id/account_link_icon"
             app:layout_constraintTop_toBottomOf="@+id/person_full_name"
-            tools:text="https://example.com"
-            />
+            tools:text="https://example.com" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/labelBarrier"
