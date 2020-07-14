@@ -22,8 +22,6 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.util.test.ext.TestClazzWork
 import com.ustadmobile.util.test.ext.createTestContentEntriesAndJoinToClazzWork
 import com.ustadmobile.util.test.ext.insertTestClazzWorkAndQuestionsAndOptionsWithResponse
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule

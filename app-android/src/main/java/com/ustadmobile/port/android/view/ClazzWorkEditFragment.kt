@@ -18,16 +18,16 @@ import com.toughra.ustadmobile.databinding.ItemClazzworkquestionBinding
 import com.ustadmobile.core.controller.ClazzWorkEditPresenter
 import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
@@ -167,7 +167,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             field = value
             mBinding?.clazzWork = value
             mBinding?.typeOptions = this.submissionTypeOptions
-            mBinding?.questionsVisibility = if(value?.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
+            mBinding?.questionsVisibility = if(value?.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
                 View.VISIBLE
             }else{
                 View.GONE
@@ -226,7 +227,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(ContentEntry::class.java,
                 R.id.content_entry_list_dest,
-                bundleOf(ContentEntryList2View.ARG_CLAZZWORK_FILTER to entity?.clazzWorkUid.toString()))
+                bundleOf(ContentEntryList2View.ARG_CLAZZWORK_FILTER to
+                        entity?.clazzWorkUid.toString()))
 
     }
 
@@ -239,7 +241,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             : DiffUtil.ItemCallback<ClazzWorkQuestionAndOptions>() {
             override fun areItemsTheSame(oldItem: ClazzWorkQuestionAndOptions,
                                          newItem: ClazzWorkQuestionAndOptions): Boolean {
-                return oldItem.clazzWorkQuestion.clazzWorkQuestionUid == newItem.clazzWorkQuestion.clazzWorkQuestionUid
+                return oldItem.clazzWorkQuestion.clazzWorkQuestionUid ==
+                        newItem.clazzWorkQuestion.clazzWorkQuestionUid
             }
 
             override fun areContentsTheSame(oldItem: ClazzWorkQuestionAndOptions,
