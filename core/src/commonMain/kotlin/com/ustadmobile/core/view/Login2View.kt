@@ -16,7 +16,7 @@ interface Login2View : UstadView {
 
     fun clearFields()
 
-    fun navigateToNextDestination(account: UmAccount,fromDestination: String, nextDestination: String)
+    fun navigateToNextDestination(account: UmAccount?,fromDestination: String, nextDestination: String)
 
     var errorMessage: String
 
