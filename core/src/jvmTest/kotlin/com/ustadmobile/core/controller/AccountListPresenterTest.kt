@@ -4,10 +4,7 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.GetStartedView
-import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.DoorObserver
@@ -98,15 +95,34 @@ class AccountListPresenterTest {
     }
 
     @Test
-    fun givenAddAccountButton_whenClicked_thenShouldOpenGetStarted(){
+    fun givenSelectServerAllowed_whenAccountButtonClicked_thenShouldOpenGetStartedScreen(){
+        impl = mock {
+            on{getAppConfigBoolean(any(), any())}.thenReturn(true)
+        }
         val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
         presenter.handleClickAddAccount()
 
         argumentCaptor<String>{
-            verify(impl).go(capture(), any())
-            assertTrue("Get started was opened", GetStartedView.VIEW_NAME == firstValue)
+            verify(impl).go(capture(), any(), any())
+            assertTrue("Get started screen was opened", GetStartedView.VIEW_NAME == firstValue)
+        }
+    }
+
+    @Test
+    fun givenSelectServerNotAllowed_whenAccountButtonClicked_thenShouldOpenLoginScreen(){
+        impl = mock {
+            on{getAppConfigBoolean(any(), any())}.thenReturn(false)
+        }
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
+
+        presenter.onCreate(null)
+        presenter.handleClickAddAccount()
+
+        argumentCaptor<String>{
+            verify(impl).go(capture(), any(), any())
+            assertTrue("Login screen was opened", Login2View.VIEW_NAME == firstValue)
         }
     }
 

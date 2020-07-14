@@ -136,6 +136,7 @@ class AccountListFragmentTest {
     @AdbScreenRecord("given add account button when clicked should open get started screen")
     @Test
     fun givenAddAccountButton_whenClicked_thenShouldOpenGetStarted(){
+
         launchFragment()
         onView(withId(R.id.account_list_recycler)).perform(
                 actionOnItemAtPosition<RecyclerView.ViewHolder>(1,
