@@ -88,7 +88,7 @@ class WorkspaceEnterLinkFragmentTest {
         onView(withId(R.id.next_button)).check(matches(isDisplayed()))
 
         onView(withId(R.id.workspace_link_view)).check(matches(
-                not(hasInputLayoutError(context.getString(R.string.invalid_url)))))
+                not(hasInputLayoutError(context.getString(R.string.invalid_link)))))
     }
 
     @AdbScreenRecord("given invalid workspace link when checked should not show next button")
@@ -101,7 +101,7 @@ class WorkspaceEnterLinkFragmentTest {
         sleep(defaultTimeout)
         onView(withId(R.id.next_button)).check(matches(not(isDisplayed())))
         onView(withId(R.id.workspace_link_view)).check(matches(
-                hasInputLayoutError(context.getString(R.string.invalid_url))))
+                hasInputLayoutError(context.getString(R.string.invalid_link))))
     }
 
 
