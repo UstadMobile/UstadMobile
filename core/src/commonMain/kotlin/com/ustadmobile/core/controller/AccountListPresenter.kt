@@ -1,12 +1,11 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.AboutView
-import com.ustadmobile.core.view.AccountListView
-import com.ustadmobile.core.view.GetStartedView
-import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -27,7 +26,9 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickAddAccount(){
-        impl.go(GetStartedView.VIEW_NAME, context)
+        val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
+        val args = arguments.plus(Pair(ARG_FROM, AccountListView.VIEW_NAME))
+        impl.go(if(canSelectServer) GetStartedView.VIEW_NAME else Login2View.VIEW_NAME,args, context)
     }
 
     fun handleClickDeleteAccount(account: UmAccount){

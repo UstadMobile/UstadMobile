@@ -48,8 +48,12 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
             holder.binding.umaccount = getItem(position)
             holder.binding.activeAccount = position == 0
-            holder.binding.logoutBtnVisibility = if(currentList.size == 1 && currentList[0].personUid == 0L)
+            holder.binding.logoutBtnVisibility =
+                    if(currentList.size == 1 && currentList[0].personUid == 0L || position != 0)
                 View.GONE else View.VISIBLE
+            holder.binding.profileBtnVisibility =
+                    if(currentList[0].personUid == 0L || position != 0)
+                        View.GONE else View.VISIBLE
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -187,7 +191,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             }
 
             override fun areContentsTheSame(oldItem: UmAccount, newItem: UmAccount): Boolean {
-                return oldItem == newItem
+                return false
             }
         }
 

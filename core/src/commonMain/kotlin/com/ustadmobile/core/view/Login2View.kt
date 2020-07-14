@@ -14,6 +14,8 @@ interface Login2View : UstadView {
 
     fun clearFields()
 
+    fun navigateToNextDestination(fromDestination: String, nextDestination: String)
+
     var errorMessage: String
 
     companion object {

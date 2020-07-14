@@ -43,7 +43,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var mBinding: ActivityMainBinding
 
-    private val impl = UstadMobileSystemImpl.instance
+    private val impl: UstadMobileSystemImpl by instance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
