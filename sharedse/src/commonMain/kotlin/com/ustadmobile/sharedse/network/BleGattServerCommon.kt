@@ -9,8 +9,11 @@ import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
-import kotlinx.io.ByteArrayInputStream
-import kotlinx.io.ByteArrayOutputStream
+//import kotlinx.io.ByteArrayInputStream
+//import kotlinx.io.ByteArrayOutputStream
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 
 /**
  * This is an abstract class which is used to implement platform specific BleGattServerCommon.
@@ -27,19 +30,19 @@ import kotlinx.io.ByteArrayOutputStream
  *
  * @author kileha3
  */
-abstract class BleGattServerCommon() {
+abstract class BleGattServerCommon(var context: Any, override val di: DI): DIAware {
 
-    lateinit var networkManager: NetworkManagerBleCommon
+    val networkManager: NetworkManagerBle by di.instance()
 
-    lateinit var httpSessionFactory: HttpSessionFactory
+    val httpSsesionFactory: HttpSessionFactory by di.instance<HttpSessionFactory>()
 
-    lateinit var context: Any
+    //lateinit var httpSessionFactory: HttpSessionFactory
 
-    constructor(aContext: Any, aNetworkManager: NetworkManagerBleCommon, aSessionFactory: HttpSessionFactory): this() {
-        context = aContext
-        networkManager = aNetworkManager
-        httpSessionFactory = aSessionFactory
-    }
+//    constructor(aContext: Any, aNetworkManager: NetworkManagerBleCommon, aSessionFactory: HttpSessionFactory): this() {
+//        context = aContext
+//        networkManager = aNetworkManager
+//        httpSessionFactory = aSessionFactory
+//    }
 
     /**
      * Handle request from peer device
@@ -54,20 +57,21 @@ abstract class BleGattServerCommon() {
 
         when (requestType) {
             ENTRY_STATUS_REQUEST -> {
-                UMLog.l(UMLog.DEBUG, 691,
-                        "BLEGattServerCommon: entry status request message")
-                val entryStatusResponse = ArrayList<Long>()
-
-                val containerDao = UmAccountManager.getActiveDatabase(context).containerDao
-                for (containerUid in bleMessageBytesToLong(requestReceived.payload!!)) {
-                    val foundLocalContainerUid = containerDao.findLocalAvailabilityByUid(containerUid)
-                    entryStatusResponse.add(if (foundLocalContainerUid != 0L)
-                        1L
-                    else
-                        0L)
-                }
-                return BleMessage(ENTRY_STATUS_RESPONSE, 42.toByte(),
-                        bleMessageLongToBytes(entryStatusResponse))
+//                UMLog.l(UMLog.DEBUG, 691,
+//                        "BLEGattServerCommon: entry status request message")
+//                val entryStatusResponse = ArrayList<Long>()
+//
+//                val containerDao = UmAccountManager.getActiveDatabase(context).containerDao
+//                for (containerUid in bleMessageBytesToLong(requestReceived.payload!!)) {
+//                    val foundLocalContainerUid = containerDao.findLocalAvailabilityByUid(containerUid)
+//                    entryStatusResponse.add(if (foundLocalContainerUid != 0L)
+//                        1L
+//                    else
+//                        0L)
+//                }
+//                return BleMessage(ENTRY_STATUS_RESPONSE, 42.toByte(),
+//                        bleMessageLongToBytes(entryStatusResponse))
+                return BleMessage(ENTRY_STATUS_REQUEST, 42.toByte(), bleMessageLongToBytes(listOf(0L)))
             }
 
             WIFI_GROUP_REQUEST -> {

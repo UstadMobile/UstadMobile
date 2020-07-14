@@ -15,6 +15,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -44,7 +45,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
-                    context.url, "", defaultHttpClient())
+                    context.url, "", defaultHttpClient()).also {
+                (it as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+            }
         }
 
         bind<EmbeddedHTTPD>() with singleton {

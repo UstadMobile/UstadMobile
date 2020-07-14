@@ -58,7 +58,7 @@ class MountedContainerResponderTest {
         db.clearAllTables()
 
         container = Container()
-        container.containerUid = repo!!.containerDao.insert(container)
+        container.containerUid = repo.containerDao.insert(container)
         containerManager = ContainerManager(container!!, db!!, repo!!,
                 containerTmpDir.absolutePath)
         val tmpExtractFile = File(containerTmpDir, "testfile1.png")

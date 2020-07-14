@@ -234,17 +234,17 @@ class DownloadDialogAndNotificationEspressoTest {
         val channel = Channel<Boolean>(1)
         val networkManager = UstadMobileSystemImpl.instance.networkManager as NetworkManagerBle
 
-        networkManager.addDownloadChangeListener(object : OnDownloadJobItemChangeListener{
-            override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
-                if(status != null){
-                    if(status.status == checkerStatus)
-                        channel.offer(status.status == checkerStatus)
-                }
-            }
-
-        })
-
-        withTimeoutOrNull(timeout) { channel.receive() }
+//        networkManager.addDownloadChangeListener(object : OnDownloadJobItemChangeListener{
+//            override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
+//                if(status != null){
+//                    if(status.status == checkerStatus)
+//                        channel.offer(status.status == checkerStatus)
+//                }
+//            }
+//
+//        })
+//
+//        withTimeoutOrNull(timeout) { channel.receive() }
     }
 
     //@Test
