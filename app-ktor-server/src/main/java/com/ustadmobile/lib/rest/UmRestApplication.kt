@@ -41,6 +41,13 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
     val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as? String
             ?: "./build/container"
 
+    val workSpace = WorkSpace().apply {
+        name = "UstadmobileWorkspace"
+        guestLogin = true
+        registrationAllowed = true
+    }
+    db.workSpaceDao.insert(workSpace)
+
     if(adminuser == null) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
@@ -49,8 +56,6 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
 
         db.personAuthDao.insert(PersonAuth(adminPerson.personUid,
                 PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(adminPass)))
-
-
 
 
         val adminPassFile = File(containerDirPath, "admin.txt")
@@ -91,6 +96,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
         LoginRoute(db)
         ContainerMountRoute(db)
         UmAppDatabase_KtorRoute(db, Gson(), File("attachments/UmAppDatabase").absolutePath)
+        WorkSpaceRoute(db)
         db.preload()
 
         if(devMode) {

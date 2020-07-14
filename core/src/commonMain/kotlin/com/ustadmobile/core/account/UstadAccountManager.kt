@@ -13,10 +13,7 @@ import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
-import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.client.request.url
+import io.ktor.client.request.*
 import io.ktor.client.statement.HttpStatement
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
@@ -78,7 +75,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     private val defaultAccount: UmAccount
         get() = UmAccount(0L, "guest", "",
-                (systemImpl.getManifestPreference(MANIFEST_DEFAULT_SERVER, appContext) ?: MANIFEST_URL_FALLBACK))
+                (systemImpl.getManifestPreference(MANIFEST_DEFAULT_SERVER, appContext) ?: MANIFEST_URL_FALLBACK),
+                "Guest", "User")
 
 
 
@@ -109,7 +107,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
 
     suspend fun register(person: Person, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
-        val httpStmt = httpClient.post<HttpStatement>() {
+        val httpStmt = httpClient.get<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             parameter("person", Json.stringify(Person.serializer(), person))
             parameter("password", password)
@@ -179,6 +177,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             parameter("username", username)
             parameter("password", password)
             header("X-nid", nodeId)
+
         }
 
 

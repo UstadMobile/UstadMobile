@@ -6,13 +6,11 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.DI
@@ -97,7 +95,10 @@ class AccountListPresenterTest {
     }
 
     @Test
-    fun givenAddAccountButton_whenClicked_thenShouldOpenGetStarted(){
+    fun givenSelectServerAllowed_whenAccountButtonClicked_thenShouldOpenGetStartedScreen(){
+        impl = mock {
+            on{getAppConfigBoolean(any(), any())}.thenReturn(true)
+        }
         val presenter = AccountListPresenter(context, mapOf(), mockView, di)
 
         presenter.onCreate(null)
@@ -105,7 +106,23 @@ class AccountListPresenterTest {
 
         argumentCaptor<String>{
             verify(impl).go(capture(), any(), any())
-            assertTrue("Get started was opened", GetStartedView.VIEW_NAME == firstValue)
+            assertTrue("Get started screen was opened", GetStartedView.VIEW_NAME == firstValue)
+        }
+    }
+
+    @Test
+    fun givenSelectServerNotAllowed_whenAccountButtonClicked_thenShouldOpenLoginScreen(){
+        impl = mock {
+            on{getAppConfigBoolean(any(), any())}.thenReturn(false)
+        }
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
+
+        presenter.onCreate(null)
+        presenter.handleClickAddAccount()
+
+        argumentCaptor<String>{
+            verify(impl).go(capture(), any(), any())
+            assertTrue("Login screen was opened", Login2View.VIEW_NAME == firstValue)
         }
     }
 
@@ -120,7 +137,7 @@ class AccountListPresenterTest {
         presenter.handleClickDeleteAccount(account)
 
         argumentCaptor<UmAccount>{
-            verify(accountManager).removeAccount(capture(), any())
+            verify(accountManager).removeAccount(capture(), any(), any())
             assertTrue("Expected account was removed from the device",
                     account == firstValue)
         }
@@ -137,8 +154,26 @@ class AccountListPresenterTest {
 
         presenter.handleClickLogout(account)
         argumentCaptor<UmAccount>{
-            verify(accountManager).removeAccount(capture(), any())
+            verify(accountManager).removeAccount(capture(), any(), any())
             assertTrue("Expected account was removed from the device",
+                    account == firstValue)
+        }
+    }
+
+
+    @Test
+    fun givenAccountList_whenAccountIsClicked_shouldBeActive(){
+        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
+
+        val account = UmAccount(1,"dummy", null,"")
+        presenter.onCreate(null)
+
+        activeAccountLive.sendValue(account)
+
+        presenter.handleClickAccount(account)
+        argumentCaptor<UmAccount>{
+            verify(accountManager).activeAccount = capture()
+            assertTrue("Expected account was set active",
                     account == firstValue)
         }
     }
@@ -170,7 +205,7 @@ class AccountListPresenterTest {
         presenter.handleClickAbout()
 
         argumentCaptor<String>{
-            verify(impl).go(capture(), any(), any())
+            verify(impl).go(capture(),any())
             assertTrue("About screen was opened", AboutView.VIEW_NAME == firstValue)
         }
     }

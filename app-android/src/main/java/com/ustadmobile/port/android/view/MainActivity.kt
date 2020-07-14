@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
@@ -17,15 +19,18 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.GetStartedView
+import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 import kotlinx.coroutines.CompletableDeferred
+import org.kodein.di.instance
+import java.util.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
@@ -38,6 +43,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var mBinding: ActivityMainBinding
 
+    private val impl = UstadMobileSystemImpl.instance
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -48,8 +55,9 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val navController = host.navController
         navController.addOnDestinationChangedListener(this)
         navController.addOnDestinationChangedListener(DeleteTempFilesNavigationListener(this))
-
-        appBarConfiguration = AppBarConfiguration(navController.graph)
+        val navGraph = navController.graph
+        navController.setGraph(navGraph, intent.extras)
+        appBarConfiguration = AppBarConfiguration(navGraph)
         mBinding.bottomNavView.setupWithNavController(navController)
         setupActionBarWithNavController(navController, AppBarConfiguration(mBinding.bottomNavView.menu))
 
@@ -75,7 +83,13 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         val currentFrag =
                 findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id ?: 0
-        menu.findItem(R.id.menu_main_settings).isVisible = BOTTOM_NAV_DEST.contains(currentFrag)
+        val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
+        menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
+        menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
+        mBinding.bottomNavView.visibility = if(mainScreenItemsVisible) View.VISIBLE else View.GONE
+        if(mainScreenItemsVisible){
+            setUserProfile(menu.findItem(R.id.menu_main_profile))
+        }
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -105,7 +119,15 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
      * When settings gear clicked in the menu options - Goes to the settings activity.
      */
     private fun handleClickSettings() {
-        UstadMobileSystemImpl.instance.go(SettingsView.VIEW_NAME, mapOf(), this)
+        impl.go(SettingsView.VIEW_NAME, mapOf(), this)
+    }
+
+    private fun setUserProfile(menuItem: MenuItem){
+        val accountManager: UstadAccountManager by instance()
+        val profileIconLetter = accountManager.activeAccount.firstName?.first().toString()
+        val profileLetterView:TextView = menuItem.actionView.findViewById(R.id.person_name_letter)
+        profileLetterView.text = profileIconLetter.toUpperCase(Locale.ROOT)
+        profileLetterView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
     }
 
     companion object {

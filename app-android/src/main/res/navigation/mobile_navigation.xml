@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/account_get_started_dest">
+    app:startDestination="@id/redirect_dest">
 
     <fragment
         android:id="@+id/home_clazzlist_dest"
@@ -190,6 +190,12 @@
         android:id="@+id/account_list_dest"
         android:name="com.ustadmobile.port.android.view.AccountListFragment"
         android:label="@string/accounts"
+        />
+
+    <fragment
+        android:id="@+id/redirect_dest"
+        android:name="com.ustadmobile.port.android.view.RedirectFragment"
+        android:label=""
         />
 
     <fragment
