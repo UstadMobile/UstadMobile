@@ -39,6 +39,7 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzWorkDetailProgressListView.VIEW_NAME to UstadDestination(R.id.clazzwork_detail_progress_list, false),
             ClazzWorkSubmissionMarkingView.VIEW_NAME to UstadDestination(R.id.clazzworksubmission_marking_edit, false),
             VideoPlayerView.VIEW_NAME to UstadDestination(R.id.video_content, false),
+            WebChunkView.VIEW_NAME to UstadDestination(R.id.webchunk_view, false),
             XapiPackageContentView.VIEW_NAME to UstadDestination(R.id.content_xapi_dest, false),
             ReportListView.VIEW_NAME to UstadDestination(R.id.report_list_dest, true),
             ReportEditView.VIEW_NAME to UstadDestination(R.id.report_edit_dest, false),

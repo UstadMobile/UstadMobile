@@ -117,6 +117,8 @@ interface UstadView {
 
         const val ARG_SERVER_URL = "serverUrl"
 
+        const val ARG_FROM = "from"
+
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
 
