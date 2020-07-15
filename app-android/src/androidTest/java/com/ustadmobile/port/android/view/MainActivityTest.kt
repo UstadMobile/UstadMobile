@@ -1,9 +1,11 @@
 package com.ustadmobile.port.android.view
 
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.toughra.ustadmobile.R
@@ -16,6 +18,7 @@ import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions
 import junit.framework.Assert.assertEquals
 import org.hamcrest.CoreMatchers.not
 import org.junit.Rule
@@ -61,7 +64,7 @@ class MainActivityTest {
 
     @AdbScreenRecord("given app launched when user navigates away from top screens then should hide bottom nav")
     @Test
-    fun givenAppLaunched_whenUserNavigatesWayFromTopScreens_thenShouldHideBottomNav() {
+    fun givenAppLaunched_whenUserNavigatesToScreenWithNoBottomNav_thenShouldHideBottomNav() {
 
         val scenario = launchActivity<MainActivity>()
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)

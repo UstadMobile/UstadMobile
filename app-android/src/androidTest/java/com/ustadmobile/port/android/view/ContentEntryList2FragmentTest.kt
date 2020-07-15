@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view
 
+import android.os.Bundle
 import androidx.core.os.bundleOf
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +22,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertContentEntryWithParentChildJoinAndMostRecentContainer
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions
@@ -63,16 +66,8 @@ class ContentEntryList2FragmentTest  {
         val contentEntries = runBlocking {
             dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(4,parentEntryUid) }
 
-        val fragmentScenario = launchFragmentInContainer<ContentEntryList2Fragment>(
-                bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
-                        ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT),
-                themeResId = R.style.UmTheme_App
-        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
-        fragmentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
-        }
+        launchFragment(bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+                ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT))
 
         onView(withId(R.id.fragment_list_recyclerview)).check(matches(isDisplayed()))
 
@@ -97,17 +92,7 @@ class ContentEntryList2FragmentTest  {
             dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(6,
                     createdEntries[0].contentEntryUid) }
 
-        val fragmentScenario = launchFragmentInContainer<ContentEntryList2Fragment>(
-                bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
-                        ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT,
-                        ARG_LISTMODE to ListViewMode.PICKER.toString()),
-                themeResId = R.style.UmTheme_App
-        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
-        fragmentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
-        }
+        launchFragment()
 
         onView(withId(R.id.fragment_list_recyclerview)).check(matches(isDisplayed()))
 
@@ -126,17 +111,7 @@ class ContentEntryList2FragmentTest  {
         runBlocking {
             dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3,parentEntryUid) }
 
-        val fragmentScenario = launchFragmentInContainer<ContentEntryList2Fragment>(
-                bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
-                        ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT,
-                        ARG_LISTMODE to ListViewMode.PICKER.toString()),
-                themeResId = R.style.UmTheme_App
-        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
-        fragmentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
-        }
+        launchFragment()
 
         onView(withId(R.id.fragment_list_recyclerview)).check(matches(isDisplayed()))
 
@@ -160,17 +135,12 @@ class ContentEntryList2FragmentTest  {
                     createdEntries[0].contentEntryUid) }
 
         var list2Fragment: ContentEntryList2Fragment? = null
-        with(launchFragmentInContainer<ContentEntryList2Fragment>(
-                bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
-                        ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT,
-                        ARG_LISTMODE to ListViewMode.PICKER.toString()),
-                themeResId = R.style.UmTheme_App
-        )
-        ){ onFragment { run {
+
+        val scenario = launchFragment()
+
+        scenario.onFragment {
             list2Fragment = it
-            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController) }
-        } }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
         onView(withId(R.id.fragment_list_recyclerview)).check(matches(isDisplayed()))
 
@@ -187,5 +157,17 @@ class ContentEntryList2FragmentTest  {
 
         //items on a recycler should be created parent items + 1 for create new content item view
         onView(withId(R.id.fragment_list_recyclerview)).check(matches(hasChildCount(createdEntries.size + 1)))
+    }
+
+    private fun launchFragment(bundle:Bundle = bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
+            ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT,
+            ARG_LISTMODE to ListViewMode.PICKER.toString())): FragmentScenario<ContentEntryList2Fragment>{
+        return launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                fragmentArgs = bundle) {
+            ContentEntryList2Fragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
     }
 }
