@@ -32,7 +32,6 @@ class TestResumableUploadRoute {
 
     @Before
     fun setup() {
-      //  UmFileUtilSe.makeTempDir("upload", "")
         tmpFolder = File.createTempFile("upload", "")
         tmpFolder.delete()
         tmpFolder.mkdirs()
@@ -65,7 +64,8 @@ class TestResumableUploadRoute {
         val sessionId = IOUtils.toString(sessionCon.inputStream, Charset.defaultCharset())
 
         val fileSize = epubTmpFile.length()
-        for(uploadedTo in 0..fileSize step CHUNKSIZE){
+        val start = 0
+        for(uploadedTo in start..fileSize step CHUNKSIZE){
 
             val inputStream = FileInputStream(epubTmpFile)
 
