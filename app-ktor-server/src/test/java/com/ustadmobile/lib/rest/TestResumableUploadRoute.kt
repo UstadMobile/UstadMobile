@@ -20,6 +20,7 @@ import java.io.FileInputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.Charset
+import kotlin.math.min
 
 class TestResumableUploadRoute {
 
@@ -31,6 +32,7 @@ class TestResumableUploadRoute {
 
     @Before
     fun setup() {
+      //  UmFileUtilSe.makeTempDir("upload", "")
         tmpFolder = File.createTempFile("upload", "")
         tmpFolder.delete()
         tmpFolder.mkdirs()
@@ -62,10 +64,8 @@ class TestResumableUploadRoute {
 
         val sessionId = IOUtils.toString(sessionCon.inputStream, Charset.defaultCharset())
 
-        var uploadedTo = 0L
-        var readRange = 1
-
-        while (readRange >= 1) {
+        val fileSize = epubTmpFile.length()
+        for(uploadedTo in 0..fileSize step CHUNKSIZE){
 
             val inputStream = FileInputStream(epubTmpFile)
 
@@ -75,11 +75,12 @@ class TestResumableUploadRoute {
                 startBytesSkipped += inputStream.skip(uploadedTo - startBytesSkipped)
             }
 
-            val bufferSize = if (inputStream.available() < CHUNKSIZE) inputStream.available() else CHUNKSIZE.toInt()
-            val buffer = ByteArray(bufferSize)
+            val remaining = fileSize - uploadedTo
+            val bufferSize = min(CHUNKSIZE, remaining)
+            val buffer = ByteArray(bufferSize.toInt())
 
             // read
-            readRange = inputStream.read(buffer)
+            var readRange = inputStream.read(buffer)
             val end = uploadedTo + readRange - 1
 
             if (readRange <= 0) {
@@ -100,8 +101,6 @@ class TestResumableUploadRoute {
             val responseCode = httpCon.responseCode
 
             httpCon.disconnect()
-
-            uploadedTo += readRange
 
             Assert.assertEquals("data uploaded successfully", HttpStatusCode.NoContent.value, responseCode)
 

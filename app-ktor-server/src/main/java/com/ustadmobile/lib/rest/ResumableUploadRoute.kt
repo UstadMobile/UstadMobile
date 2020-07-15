@@ -50,7 +50,7 @@ fun Route.ResumableUploadRoute(folder: File) {
                 val input = call.receiveStream()
                 val uploadFile = File(folder, sessionId)
                 val fileOut = FileOutputStream(uploadFile, true)
-                fileOut.write(IOUtils.toByteArray(input))
+                fileOut.write(input.readBytes())
 
                 call.respond(HttpStatusCode.NoContent)
             }
