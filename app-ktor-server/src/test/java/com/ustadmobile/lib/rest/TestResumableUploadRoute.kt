@@ -37,13 +37,6 @@ class TestResumableUploadRoute {
         tmpFolder.mkdirs()
 
         server = embeddedServer(Netty, port = defaultPort) {
-            install(ContentNegotiation) {
-                gson {
-                    register(ContentType.Application.Json, GsonConverter())
-                    register(ContentType.Any, GsonConverter())
-                }
-            }
-
             install(Routing) {
                 ResumableUploadRoute(tmpFolder)
             }
@@ -80,12 +73,11 @@ class TestResumableUploadRoute {
             val buffer = ByteArray(bufferSize.toInt())
 
             // read
-            var readRange = inputStream.read(buffer)
-            val end = uploadedTo + readRange - 1
-
-            if (readRange <= 0) {
-                return
+            var readRange = 0
+            while(readRange < buffer.size){
+                readRange += inputStream.read(buffer)
             }
+            val end = uploadedTo + readRange - 1
 
             val httpCon = URL("http://localhost:$defaultPort/upload/receiveData").openConnection() as HttpURLConnection
             httpCon.doOutput = true

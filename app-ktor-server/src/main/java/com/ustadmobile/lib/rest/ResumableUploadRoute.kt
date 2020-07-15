@@ -74,7 +74,7 @@ fun ApplicationRequest.isValidRequest(folder: File): Pair<Boolean, String> {
         }
 
         if (uploadFile.length() != fromByte) {
-            return Pair(false, "Content should start from ${uploadFile.length()}")
+            return Pair(false, "Range should start from:${uploadFile.length()}")
         }
 
         if (dashPos == header.length - 1) {
