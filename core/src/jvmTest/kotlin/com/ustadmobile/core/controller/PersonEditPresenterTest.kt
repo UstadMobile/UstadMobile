@@ -3,28 +3,15 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.PersonDao
-import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmResultCallback
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.activeRepoInstance
-import com.ustadmobile.core.util.directActiveDbInstance
 import com.ustadmobile.core.util.directActiveRepoInstance
-import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.*
 import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -35,7 +22,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
-import org.kodein.di.instance
 import org.kodein.di.singleton
 
 
@@ -121,8 +107,8 @@ class PersonEditPresenterTest  {
         presenter.handleClickSave(person)
 
         argumentCaptor<Boolean>().apply {
-            verify(mockView, timeout(timeoutInMill)).showRequiredPasswordError = capture()
-            verify(mockView, timeout(timeoutInMill)).showUsernameError = capture()
+            verify(mockView, timeout(timeoutInMill)).passwordRequiredErrorVisible = capture()
+            verify(mockView, timeout(timeoutInMill)).usernameRequiredErrorVisible = capture()
             assertEquals("Required password field errors were shown", true, firstValue)
             assertEquals("Required username field errors were shown", true, secondValue)
         }
@@ -151,7 +137,7 @@ class PersonEditPresenterTest  {
         presenter.handleClickSave(person)
 
         argumentCaptor<Boolean>().apply {
-            verify(mockView, timeout(timeoutInMill)).showPasswordMatchingError = capture()
+            verify(mockView, timeout(timeoutInMill)).noMatchPasswordErrorVisible = capture()
             assertEquals("Password doesn't match field errors were shown", true, firstValue)
         }
 
@@ -188,7 +174,7 @@ class PersonEditPresenterTest  {
         argumentCaptor<Person>().apply {
             verifyBlocking(accountManager, timeout(timeoutInMill)){
                 register(capture(), any(), eq(serverUrl), eq(false))
-                assertEquals("Person registration was done", person, firstValue)
+                assertEquals("Person registration was done", person.personUid, firstValue.personUid)
             }
         }
 

@@ -4,32 +4,39 @@ import android.app.Application
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.typeText
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
-import com.google.gson.Gson
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.days
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.schedule.localMidnight
+import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
+import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.port.android.util.setDateField
+import com.ustadmobile.test.port.android.util.setMessageIdOption
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
-import junit.framework.Assert.assertEquals
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.hamcrest.Matchers.allOf
+import okio.Buffer
 import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
@@ -37,8 +44,8 @@ import org.junit.Rule
 import org.junit.Test
 
 
-@AdbScreenRecord("Login screen Test")
-class Login2FragmentTest {
+@AdbScreenRecord("PersonEdit screen Test")
+class PersonEditFragmentTest {
 
     @JvmField
     @Rule
@@ -60,10 +67,21 @@ class Login2FragmentTest {
 
     private lateinit var mockWebServer: MockWebServer
 
+    private lateinit var serverUrl: String
+
+    val impl =  UstadMobileSystemImpl.instance
+
     @Before
     fun setUp(){
+        impl.messageIdMap = MessageIDMap.ID_MAP
         mockWebServer = MockWebServer()
         mockWebServer.start()
+        serverUrl = mockWebServer.url("/").toString()
+
+        mockWebServer.enqueue(MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
+                        UmAccount(0L)).toByteArray())))
     }
 
     @After
@@ -71,146 +89,128 @@ class Login2FragmentTest {
         mockWebServer.shutdown()
     }
 
-    @AdbScreenRecord("given registration is allowed when logging in then should show create account button")
+
+    @AdbScreenRecord("given person edit opened in normal mode classes should be shown")
     @Test
-    fun givenRegistrationIsAllowed_whenLogin_shouldShowRegisterButton(){
-        launchFragment(registration = true)
-        onView(withId(R.id.create_account)).check(matches(isDisplayed()))
+    fun givenPersonEditOpened_whenInNoRegistrationMode_thenClassesShouldBeShown(){
+        launchFragment(false, fillForm = false)
+        onView(withId(R.id.clazzlist_recyclerview)).check(matches(isDisplayed()))
+        onView(withId(R.id.clazzlist_header_textview)).check(matches(isDisplayed()))
     }
 
-
-    @AdbScreenRecord("given registration is not allowed when logging in then should hide create account button")
+    @AdbScreenRecord("given person edit opened in registration mode classes should be hidden")
     @Test
-    fun givenRegistrationIsNotAllowed_whenLogin_shouldNotShowRegisterButton(){
-        launchFragment(registration = false)
-        onView(withId(R.id.create_account)).check(matches(not(isDisplayed())))
+    fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden(){
+        launchFragment(true, fillForm = false)
+        onView(withId(R.id.clazzlist_recyclerview)).check(matches(not(isDisplayed())))
+        onView(withId(R.id.clazzlist_header_textview)).check(matches(not(isDisplayed())))
     }
 
-
-    @AdbScreenRecord("given connect as guest is allowed when logging in then should show connect as guest button")
+    @AdbScreenRecord("given person edit opened in registration mode when username and password are not filled and save is clicked should show errors")
     @Test
-    fun givenGuestConnectionIsAllowed_whenLogin_shouldShowConnectAsGuestButton(){
-        launchFragment(guestConnection = true)
-        onView(withId(R.id.connect_as_guest)).check(matches(isDisplayed()))
-    }
+    fun givenPersonEditOpenedInRegistrationMode_whenUserNameAndPasswordAreNotFilled_thenShouldShowErrors(){
+        launchFragment(allowedRegistration = true,leftOutPassword = true, leftOutUsername = true)
 
-
-    @AdbScreenRecord("given connect as guest is not allowed when logging in then should hide connect as guest button")
-    @Test
-    fun givenGuestConnectionIsNotAllowed__whenLogin_shouldNotShowConnectAsGuestButton(){
-        launchFragment(guestConnection = false)
-        onView(withId(R.id.connect_as_guest)).check(matches(not(isDisplayed())))
-    }
-
-
-    @AdbScreenRecord("given create account button is visible when clicked should go to account creation screen")
-    @Test
-    fun givenCreateAccountIsVisible_whenClicked_shouldOpenAccountCreationSection(){
-        launchFragment(registration = true)
-        onView(withId(R.id.create_account)).perform(click())
-        assertEquals("It navigated to account creation screen",
-                R.id.person_edit_dest, systemImplNavRule.navController.currentDestination?.id)
-    }
-
-    @AdbScreenRecord("given connect as guest button is visible when clicked should go to content screen")
-    @Test
-    fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection(){
-        launchFragment(guestConnection = true)
-        onView(withId(R.id.connect_as_guest)).perform(click())
-        assertEquals("It navigated to account creation screen",
-                R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
-
-    }
-
-
-    @AdbScreenRecord("given valid username and password when handle login clicked should go to the destination")
-    @Test
-    fun givenValidUsernameAndPassword_whenHandleLoginClicked_shouldCallSystemImplGo() {
-        mockWebServer.enqueue(MockResponse()
-                .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", "")))
-                .setHeader("Content-Type", "application/json"))
-
-        val httpUrl = mockWebServer.url("/").toString()
-
-        launchFragment(httpUrl, fillAllFields = true)
-
-        assertEquals("It navigated to the default screen",
-                R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
-    }
-
-    @AdbScreenRecord("given invalid username and password when handle login clicked should show password and username errors")
-    @Test
-    fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
-        mockWebServer.enqueue(MockResponse().setResponseCode(403))
-        val httpUrl = mockWebServer.url("/").toString()
-        launchFragment(httpUrl, fillAllFields = true)
-
-        onView(allOf(withId(R.id.login_error_text), withText(
-                context.getString(R.string.wrong_user_pass_combo))))
-                .check(matches(isDisplayed()))
-    }
-
-
-    @AdbScreenRecord("given server is offline when handle login clicked should shoe network errors ")
-    @Test
-    fun givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
-        mockWebServer.shutdown()
-        val httpUrl = mockWebServer.url("/").toString()
-        launchFragment(httpUrl, fillAllFields = true)
-
-        onView(allOf(withId(R.id.login_error_text),
-                withText(context.getString(R.string.login_network_error))))
-                .check(matches(isDisplayed()))
-    }
-
-    @AdbScreenRecord("given login form without filling it when clicked should show required fields errors")
-    @Test
-    fun givenFieldsAreNotFilled_whenHandleLoginCalled_thenShouldShowErrors() {
-        mockWebServer.shutdown()
-        val httpUrl = mockWebServer.url("/").toString()
-        launchFragment(httpUrl, fillAllFields = false)
-
-        onView(withId(R.id.username_view)).check(matches(
+        onView(withId(R.id.username_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
 
-        onView(withId(R.id.password_view)).check(matches(
+        onView(withId(R.id.password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
     }
 
+    @AdbScreenRecord("given person edit opened in registration mode when password doesn't match and save is clicked should show errors")
+    @Test
+    fun givenPersonEditOpenedInRegistrationMode_whenPasswordDoNotMatch_thenShouldShowErrors(){
+        launchFragment(allowedRegistration = true,misMatchPassword = true)
+        onView(withId(R.id.password_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
 
-    private fun launchFragment(serverUrl: String? = null, fillAllFields: Boolean = false,
-                               registration:Boolean = false, guestConnection:Boolean = false){
+        onView(withId(R.id.confirm_password_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
+    }
+
+
+
+    private fun launchFragment(allowedRegistration: Boolean = false,misMatchPassword: Boolean = false,
+                               leftOutPassword: Boolean = false, leftOutUsername: Boolean = false, fillForm: Boolean = true){
 
         val workspace = WorkSpace().apply {
-            name = ""
-            guestLogin = guestConnection
-            registrationAllowed = registration
+            registrationAllowed = allowedRegistration
         }
-        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), workspace))
-        val bundle = args.plus(mapOf(UstadView.ARG_SERVER_URL to serverUrl,
-                ARG_NEXT to ContentEntryListTabsView.VIEW_NAME) as Map<String, String>).toBundle()
+        val password = "password"
+        val confirmedPassword = if(misMatchPassword) "password1" else password
 
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), workspace))
+        val bundle = args.plus(mapOf(UstadView.ARG_SERVER_URL to serverUrl)).toBundle()
+
+        val scenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundle) {
-            Login2Fragment().also {
+            PersonEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        if(fillAllFields){
-            onView(withId(R.id.person_username)).perform(typeText(VALID_USER))
-            onView(withId(R.id.person_password)).perform(typeText(VALID_PASS))
-        }
+        if(fillForm){
 
-        onView(withId(R.id.login_button)).perform(click())
+            val personOnForm = Person()
+            val person = Person().apply {
+                firstNames = "Jane"
+                lastName = "Doe"
+                phoneNum = "00000000000"
+                gender = Person.GENDER_MALE
+                dateOfBirth = (DateTime.now().toOffsetByTimezone("Asia/Dubai").localMidnight - 7.days)
+                        .utc.unixMillisLong
+                emailAddr = "email@dummy.com"
+                personAddress = "dummy address, 101 dummy"
+            }
+
+            person.firstNames.takeIf { it != personOnForm.firstNames }?.also {
+                typeOnField(R.id.firstnames_text,it)
+            }
+
+            person.lastName.takeIf { it != personOnForm.lastName }?.also {
+                typeOnField(R.id.lastname_text,it)
+            }
+
+            person.gender.takeIf { it != personOnForm.gender }?.also {
+                setMessageIdOption(R.id.gender_value,impl.getString(MessageID.male,context))
+            }
+
+            person.dateOfBirth.takeIf { it != personOnForm.dateOfBirth }?.also {
+                setDateField(R.id.birthday_text,it)
+            }
+
+            person.phoneNum.takeIf { it != personOnForm.phoneNum }?.also {
+                typeOnField(R.id.phonenumber_text,it)
+            }
+
+            person.emailAddr.takeIf { it != personOnForm.emailAddr }?.also {
+                typeOnField(R.id.email_text,it)
+            }
+
+            if(!leftOutUsername){
+                person.username.takeIf { it != personOnForm.username }?.also {
+                    typeOnField(R.id.username_text,it)
+                }
+
+            }
+
+
+            if(!leftOutPassword){
+                typeOnField(R.id.password_text,password)
+
+                onView(withId(R.id.nested_view)).perform(swipeUp())
+
+                typeOnField(R.id.confirm_password_text,confirmedPassword)
+            }
+
+            scenario.clickOptionMenu(R.id.menu_done)
+        }
     }
 
-    companion object {
-
-        private const val VALID_USER = "JohnDoe"
-
-        private const val VALID_PASS = "password"
+    private fun typeOnField(id: Int, text:String){
+        onView(withId(id)).perform(clearText(),closeSoftKeyboard(), typeText(text))
     }
 
 }

@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzEditBinding
@@ -119,7 +120,6 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
         }
         mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzMemberWithClazzRecyclerAdapter,
                 clazzMemberNewItemRecyclerViewAdapter)
-        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
 
         return rootView
     }
@@ -127,6 +127,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setEditFragmentTitle(R.string.person)
+        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
 
         CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->
             findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
@@ -211,44 +212,56 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
     override var confirmedPassword: String? = null
         get() = mBinding?.confirmPassword
 
-    override var isRegistrationMode: Boolean? = null
+    override var classVisible: Boolean? = null
         set(value) {
             mBinding?.classVisibility = if(value != null && value) View.GONE else View.VISIBLE
             field = value
         }
-    override var showUsernameError: Boolean = false
+
+    override var usernameRequiredErrorVisible: Boolean = false
         set(value) {
-            mBinding?.usernameTextinputlayout?.isErrorEnabled = value
-            mBinding?.usernameTextinputlayout?.error =
-                    if(value) getString(R.string.field_required_prompt) else null
             field = value
+            handleInputError(mBinding?.usernameTextinputlayout, value,
+                    getString(R.string.field_required_prompt))
         }
 
-    override var showPasswordMatchingError: Boolean = false
+    override var passwordRequiredErrorVisible: Boolean = false
         set(value) {
-            val error = if(value) getString(R.string.filed_password_no_match) else null
-            mBinding?.passwordTextinputlayout?.isErrorEnabled = value
-            mBinding?.confirmPasswordTextinputlayout?.isErrorEnabled = value
-            mBinding?.confirmPasswordTextinputlayout?.error = error
-            mBinding?.passwordTextinputlayout?.error = error
-            field = value
+            field = false
+            handleInputError(mBinding?.passwordTextinputlayout, value,
+                    getString(R.string.field_required_prompt))
         }
 
-    override var showRequiredPasswordError: Boolean = false
+
+    override var noMatchPasswordErrorVisible: Boolean = false
         set(value) {
-            mBinding?.passwordTextinputlayout?.isErrorEnabled = value
-            mBinding?.passwordTextinputlayout?.error =
-                    if(value) getString(R.string.field_required_prompt) else null
             field = value
+            if(value){
+                handleInputError(mBinding?.passwordTextinputlayout, value,
+                        getString(R.string.filed_password_no_match))
+                handleInputError(mBinding?.confirmPasswordTextinputlayout, value,
+                        getString(R.string.filed_password_no_match))
+            }
         }
 
-    override var showRequiredConfirmPasswordError: Boolean = false
+    override var confirmPasswordErrorVisible: Boolean = false
         set(value) {
-            mBinding?.confirmPasswordTextinputlayout?.isErrorEnabled = value
-            mBinding?.confirmPasswordTextinputlayout?.error =
-                    if(value) getString(R.string.field_required_prompt) else null
             field = value
+            handleInputError(mBinding?.confirmPasswordTextinputlayout, value,
+                    getString(R.string.field_required_prompt))
         }
+
+    override var errorMessage: String? = null
+        set(value) {
+            field = value
+            mBinding?.errorText?.visibility = if(value != null) View.VISIBLE else View.GONE
+            mBinding?.errorText?.text = value
+        }
+
+    private fun handleInputError(inputView: TextInputLayout?, error: Boolean, hint: String?){
+        inputView?.isErrorEnabled = error
+        inputView?.error = if(error) hint else null
+    }
 
 
     override var fieldsEnabled: Boolean = false

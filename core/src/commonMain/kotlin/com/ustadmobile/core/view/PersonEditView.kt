@@ -17,15 +17,17 @@ interface PersonEditView: UstadEditView<Person> {
 
     var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>?
 
-    var isRegistrationMode: Boolean?
+    var classVisible: Boolean?
 
-    var showUsernameError: Boolean
+    var usernameRequiredErrorVisible: Boolean
 
-    var showPasswordMatchingError: Boolean
+    var noMatchPasswordErrorVisible: Boolean
 
-    var showRequiredPasswordError: Boolean
+    var passwordRequiredErrorVisible: Boolean
 
-    var showRequiredConfirmPasswordError: Boolean
+    var confirmPasswordErrorVisible: Boolean
+
+    var errorMessage: String?
 
     companion object {
 

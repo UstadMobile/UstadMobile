@@ -1,11 +1,13 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
@@ -79,7 +81,7 @@ class PersonEditPresenter(context: Any,
         } else {
             impl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost", context)?:""
         }
-        view.isRegistrationMode = workSpace.registrationAllowed
+        view.classVisible = workSpace.registrationAllowed
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Person? {
@@ -127,23 +129,29 @@ class PersonEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: Person) {
+        GlobalScope.launch(doorMainDispatcher()) {
+            val noPasswordMatch = view.password != view.confirmedPassword
+                    && !view.password.isNullOrEmpty() &&  !view.confirmedPassword.isNullOrEmpty()
+            if(workSpace.registrationAllowed && (entity.username.isNullOrEmpty()
+                            || view.password.isNullOrEmpty() || view.confirmedPassword.isNullOrEmpty()
+                            || noPasswordMatch)){
 
-        if(workSpace.registrationAllowed && (entity.username == null
-                        || view.password == null || view.confirmedPassword == null
-                        || view.password != view.confirmedPassword)){
+                view.usernameRequiredErrorVisible = entity.username.isNullOrEmpty()
+                view.passwordRequiredErrorVisible = view.password.isNullOrEmpty()
+                view.confirmPasswordErrorVisible = view.confirmedPassword.isNullOrEmpty()
+                view.noMatchPasswordErrorVisible = noPasswordMatch
+                return@launch
+            }
 
-            view.showUsernameError = entity.username == null
-            view.showRequiredPasswordError = view.password == null
-            view.showRequiredConfirmPasswordError = view.confirmedPassword == null
-            view.showPasswordMatchingError = view.password != view.confirmedPassword
-            return
-        }
-
-        GlobalScope.launch {
             if(workSpace.registrationAllowed){
                 val password = view.password
                 if(password != null){
-                    accountManager.register(entity, password, serverUrl)
+                   try{
+                       accountManager.register(entity, password, serverUrl)
+                   }catch (e:Exception){
+                       view.errorMessage = impl.getString(MessageID.login_network_error , context)
+                       return@launch
+                   }
                 }
             }else{
                 if(entity.personUid == 0L) {
@@ -180,9 +188,7 @@ class PersonEditPresenter(context: Any,
                 }
             }
 
-            withContext(doorMainDispatcher()) {
-                view.finishWithResult(listOf(entity))
-            }
+            view.finishWithResult(listOf(entity))
         }
     }
 
