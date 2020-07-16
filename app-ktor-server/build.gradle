@@ -28,6 +28,9 @@ kotlin {
       sourceSets {
 
           jvmMain {
+
+              kotlin.srcDir("build/generated/source/door")
+
               dependencies {
                   implementation fileTree(dir: 'libs', include: ['*.jar'])
                   implementation "io.ktor:ktor-server-netty:$version_ktor"
@@ -35,9 +38,12 @@ kotlin {
                   implementation "io.ktor:ktor-server-netty:$version_ktor"
                   implementation "io.ktor:ktor-jackson:$version_ktor"
                   implementation "io.ktor:ktor-gson:$version_ktor"
+                  implementation "io.ktor:ktor-client-core:$version_ktor"
+                  implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                   implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
                   implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
                   implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
+                  implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
                   implementation "commons-io:commons-io:$version_commons_io"
                   implementation "org.jsoup:jsoup:$version_jsoup"
@@ -111,7 +117,6 @@ shadowJar {
 }
 
 sourceSets {
-    main.java.srcDirs += ["$buildDir/generated/source/door"]
     main.resources.srcDirs += [angularDestinationPath]
 }
 
