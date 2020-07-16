@@ -3,7 +3,9 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.lib.db.entities.DeviceSession
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.application.call
@@ -13,6 +15,7 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
+import kotlinx.serialization.json.Json
 
 private const val DEFAULT_SESSION_LENGTH = (1000L * 60 * 60 * 24 * 365)//One year
 
@@ -42,6 +45,28 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
                         UmAccount(person.personUid, username, "", "",person.firstNames,person.lastName))
             }else {
                 call.respond(HttpStatusCode.Forbidden, "")
+            }
+        }
+
+        post("register"){
+            val person = call.request.queryParameters["person"]
+            val password = call.request.queryParameters["password"]
+            if(person == null || password == null){
+                call.respond(HttpStatusCode.BadRequest, "No password or person information provided")
+                return@post
+            }
+
+            val mPerson = Json.parse(Person.serializer(),person)
+            val pUid = db.personDao.insert(mPerson)
+            val personAuth = com.ustadmobile.lib.db.entities.PersonAuth(mPerson.personUid,
+                    PersonAuthDao.PLAIN_PASS_PREFIX+password)
+            val aUid = db.personAuthDao.insert(personAuth)
+
+            if(pUid != -1L && aUid != -1L){
+                call.respond(HttpStatusCode.OK,UmAccount(mPerson.personUid, mPerson.username, "",
+                        "",mPerson.firstNames,mPerson.lastName))
+            }else{
+                call.respond(HttpStatusCode.BadRequest, "Failed to register a person")
             }
         }
     }
