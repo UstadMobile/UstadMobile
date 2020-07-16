@@ -35,7 +35,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     data class DbPair(val db: UmAppDatabase, val repo: UmAppDatabase)
 
-    data class LoginResponse(val statusCode: Int, val umAccount: UmAccount?)
+    data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
 
     interface DbOpener {
 
@@ -188,7 +188,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
                 null
             }
 
-            LoginResponse(response.status.value, responseAccount)
+            ResponseWithAccount(response.status.value, responseAccount)
         }
 
         val responseAccount = loginResponse.umAccount
@@ -219,15 +219,22 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             parameter("newPassword", newPassword)
         }
 
-        return httpStmt.execute { response ->
+        val changePasswordResponse = httpStmt.execute { response ->
             val responseAccount = if (response.status.value == 200) {
                 response.receive<UmAccount>()
             } else {
                 null
             }
-            responseAccount
+            ResponseWithAccount(response.status.value, responseAccount)
         }
-
+        val responseAccount = changePasswordResponse.umAccount
+        if (changePasswordResponse.statusCode == 403) {
+            throw UnauthorizedException("Access denied")
+        }else if(responseAccount == null || !(changePasswordResponse.statusCode == 200
+                        || changePasswordResponse.statusCode == 204)) {
+            throw IllegalStateException("Server error - response ${changePasswordResponse.statusCode}")
+        }
+        return responseAccount
     }
 
 

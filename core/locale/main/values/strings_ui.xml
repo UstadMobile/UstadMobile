@@ -506,6 +506,7 @@
     <string name="end_date">End date</string>
     <string name="save">Save</string>
     <string name="change_password">Change Password</string>
+    <string name="current_password">Current Password</string>
     <string name="password_unchanged">Password (Unchanged)</string>
     <string name="timezone">Timezone</string>
     <string name="users_settings_desc">Add, remove, modify users, or reset their password</string>
