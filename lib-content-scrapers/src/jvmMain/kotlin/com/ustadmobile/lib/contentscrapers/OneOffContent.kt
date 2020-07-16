@@ -41,7 +41,7 @@ class OneOffContent(val containerFolder: File) {
             psa_3Entry = contentEntryDao.findByUidAsync(69377)!!
             psa_4Entry = contentEntryDao.findByUidAsync(69374)!!
         }
-        psaMap = mapOf("PSA_1" to psa_2Entry,
+        psaMap = mapOf("PSA_1" to psa_1Entry,
                 "PSA_2" to psa_2Entry, "PSA_3" to psa_3Entry, "PSA_4" to psa_4Entry)
     }
 
@@ -72,7 +72,7 @@ class OneOffContent(val containerFolder: File) {
 
             val container = Container().apply {
                 containerContentEntryUid = newVideoEntry.contentEntryUid
-                mimeType = MimeType.WEBM
+                mimeType = MimeType.MP4
                 mobileOptimized = true
                 cntLastModified = System.currentTimeMillis()
             }
