@@ -2,13 +2,94 @@ import groovy.xml.XmlUtil
 
 plugins {
     id 'application'
-    id 'kotlin'
     id 'war'
+    id 'org.jetbrains.kotlin.multiplatform'
     id 'maven-publish'
     //TODO: This should be defined by a variable, which might need to ome from settings.gradle
     id 'com.github.johnrengelman.shadow'
     id 'kotlinx-serialization'
     id 'com.github.psxpaul.execfork' version '0.1.11'
+}
+
+
+kotlin {
+
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+    }
+      sourceSets {
+
+          jvmMain {
+              dependencies {
+                  implementation fileTree(dir: 'libs', include: ['*.jar'])
+                  implementation "io.ktor:ktor-server-netty:$version_ktor"
+                  implementation "io.ktor:ktor-server-servlet:$version_ktor"
+                  implementation "io.ktor:ktor-server-netty:$version_ktor"
+                  implementation "io.ktor:ktor-jackson:$version_ktor"
+                  implementation "io.ktor:ktor-gson:$version_ktor"
+                  implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
+                  implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
+                  implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
+
+                  implementation "commons-io:commons-io:$version_commons_io"
+                  implementation "org.jsoup:jsoup:$version_jsoup"
+                  implementation "com.google.code.gson:gson:$version_gson"
+                  implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
+                  implementation "ch.qos.logback:logback-classic:$version_logback"
+
+                  implementation project(":core")
+                  implementation project(":sharedse")
+                  implementation project(":lib-database")
+                  implementation project(":lib-database-mpp")
+                  implementation project(":lib-door-runtime")
+                  implementation project(":lib-room-annotations")
+                  implementation project(":lib-database-entities")
+                  implementation project(":lib-util")
+
+                  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+
+              }
+          }
+
+          jvmTest {
+              dependencies {
+
+                  implementation project(":lib-test-common")
+                  implementation project(":sharedse")
+
+                  implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                  implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                  implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                  implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+                  implementation "io.ktor:ktor-server-netty:$version_ktor"
+                  implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+
+                  implementation "io.ktor:ktor-client-core:$version_ktor"
+                  implementation "io.ktor:ktor-client-json:$version_ktor"
+                  implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+                  implementation "io.ktor:ktor-client-gson:$version_ktor"
+                  implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+
+                  implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                  implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                  implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                  implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+                  implementation "org.postgresql:postgresql:$version_postgres_jdbc"
+
+
+              }
+          }
+
+      }
+
 }
 
 def angularDestinationPath = "$buildDir/generated/source/angular/"
@@ -35,7 +116,6 @@ sourceSets {
 }
 
 
-
 war {
     classpath configurations.servletRuntime
 }
@@ -43,41 +123,41 @@ war {
 /**
  * Add welcome file to web.xml to be used as a default file to be opened
  */
-task addWelcomeFileToWebXml{
-   doLast{
-       def xmlFile = project.file("src/main/webapp/WEB-INF/web.xml")
-       def webXml = new XmlParser().parse(xmlFile)
-       def exists = false
-       webXml.value().each {
-           if(it.toString().contains("welcome-file-list")){
-               exists = true
-               return
-           }
-       }
+task addWelcomeFileToWebXml {
+    doLast {
+        def xmlFile = project.file("src/main/webapp/WEB-INF/web.xml")
+        def webXml = new XmlParser().parse(xmlFile)
+        def exists = false
+        webXml.value().each {
+            if (it.toString().contains("welcome-file-list")) {
+                exists = true
+                return
+            }
+        }
 
-       if(!exists){
-           def welcome = webXml.appendNode("welcome-file-list")
-           welcome.appendNode("welcome-file","en/index.html")
-           xmlFile.withWriter {out->
-               XmlUtil.serialize(webXml, out)
-           }
-       }else{
-           println("Welcome file already added")
-       }
-   }
+        if (!exists) {
+            def welcome = webXml.appendNode("welcome-file-list")
+            welcome.appendNode("welcome-file", "en/index.html")
+            xmlFile.withWriter { out ->
+                XmlUtil.serialize(webXml, out)
+            }
+        } else {
+            println("Welcome file already added")
+        }
+    }
 }
 
 /**
  * Prepare resources, ready for packaging
  */
-task prepareResources{
-    doLast{
-        copy{
+task prepareResources {
+    doLast {
+        copy {
             from rootProject.file("app-angular/dist").path
             into "${angularDestinationPath}webapp"
         }
 
-        copy{
+        copy {
             from project.file("src/main/webapp").path
             into "${angularDestinationPath}webapp"
         }
@@ -87,11 +167,11 @@ task prepareResources{
 /**
  * Remove angular static files
  */
-task removeTempResources{
-    doLast{
+task removeTempResources {
+    doLast {
         def ngResource = file(angularDestinationPath)
-        if(ngResource.exists()){
-            delete{
+        if (ngResource.exists()) {
+            delete {
                 delete ngResource
             }
         }
@@ -102,7 +182,7 @@ task removeTempResources{
 /**
  * Create a production jar with angular static files
  */
-task prodModeJar(type: Jar){
+task prodModeJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
@@ -110,14 +190,14 @@ task prodModeJar(type: Jar){
 /**
  * Create a development jar file without angular static files
  */
-task devModJar(type: Jar){
+task devModJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
 /**
  * Create a production war with angular static files
  */
-task prodModeWar(type: War){
+task prodModeWar(type: War) {
     from "${angularDestinationPath}webapp"
     classpath = configurations.servletRuntime
     webXml = file("${angularDestinationPath}webapp/WEB-INF/web.xml")
@@ -126,7 +206,7 @@ task prodModeWar(type: War){
 /**
  * Create development war file without angular
  */
-task devModeWar(type: War){
+task devModeWar(type: War) {
     classpath = configurations.servletRuntime
 }
 
@@ -164,13 +244,15 @@ appRun.dependsOn(shadowJar)
 appRunDebug.dependsOn(shadowJar)
 appRunDevMode.dependsOn(shadowJar)
 
-prepareResources.dependsOn(addWelcomeFileToWebXml,":app-angular:buildProd")
+prepareResources.dependsOn(addWelcomeFileToWebXml, ":app-angular:buildProd")
 
 prodModeJar.dependsOn(prepareResources)
 prodModeJar.finalizedBy(removeTempResources)
 
 prodModeWar.dependsOn(prepareResources)
 prodModeWar.finalizedBy(removeTempResources)
+/*
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -190,12 +272,12 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:$version_logback"
 
     implementation project(path: ":core", configuration: "jvmDefault")
-    implementation project(":sharedse")
-    implementation project(":lib-database")
-    implementation project(":lib-database-mpp")
-    implementation project(":lib-door-runtime")
-    implementation project(":lib-room-annotations")
-    implementation project(":lib-database-entities")
+    implementation project(path: ":sharedse", configuration: "jvmDefault")
+    implementation project(path: ":lib-database", configuration: "jvmDefault")
+    implementation project(path: ":lib-database-mpp", configuration: "jvmDefault")
+    implementation project(path: ":lib-room-annotations", configuration: "jvmDefault")
+    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
+   // implementation project(path: ":lib-door-runtime", configuration: "jvmDefault")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
@@ -225,6 +307,8 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
 }
+*/
+
 
 sourceCompatibility = "8"
 targetCompatibility = "8"

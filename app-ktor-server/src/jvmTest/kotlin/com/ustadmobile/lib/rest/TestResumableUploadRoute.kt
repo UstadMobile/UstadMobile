@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.lib.rest.ResumableUploadRoute.SESSIONID
+import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
@@ -61,12 +62,7 @@ class TestResumableUploadRoute {
         for(uploadedTo in start..fileSize step CHUNKSIZE){
 
             val inputStream = FileInputStream(epubTmpFile)
-
-            // skip
-            var startBytesSkipped: Long = 0
-            while (startBytesSkipped < uploadedTo) {
-                startBytesSkipped += inputStream.skip(uploadedTo - startBytesSkipped)
-            }
+            val rangeIn = RangeInputStream(inputStream, uploadedTo, uploadedTo + CHUNKSIZE)
 
             val remaining = fileSize - uploadedTo
             val bufferSize = min(CHUNKSIZE, remaining)
@@ -75,7 +71,7 @@ class TestResumableUploadRoute {
             // read
             var readRange = 0
             while(readRange < buffer.size){
-                readRange += inputStream.read(buffer)
+                readRange += rangeIn.read(buffer)
             }
             val end = uploadedTo + readRange - 1
 
@@ -101,5 +97,7 @@ class TestResumableUploadRoute {
         Assert.assertArrayEquals("file matches", FileInputStream(epubTmpFile).readBytes(), FileInputStream(File(tmpFolder, sessionId)).readBytes())
 
     }
+
+
 
 }
