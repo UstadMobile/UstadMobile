@@ -8,7 +8,6 @@ import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.application.install
 import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -30,7 +29,7 @@ import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 
-class TestLoginRoute {
+class TestLogin {
     lateinit var server: ApplicationEngine
 
     lateinit var db: UmAppDatabase
@@ -76,7 +75,7 @@ class TestLoginRoute {
             val authResponse = httpClient.get<HttpResponse> {
                 url{
                     takeFrom("http://localhost:8097")
-                    path("Login", "login")
+                    path("PersonAuthRegister", "auth/login")
                     parameter("username", "bobjones")
                     parameter("password", "secret")
                 }
@@ -101,7 +100,7 @@ class TestLoginRoute {
             val authResponse = httpClient.get<HttpResponse> {
                 url {
                     takeFrom("http://localhost:8097")
-                    path("Login", "login")
+                    path("PersonAuthRegister", "auth/login")
                     parameter("username", "bobjones")
                     parameter("password", "wrongsecret")
                 }
@@ -118,7 +117,7 @@ class TestLoginRoute {
             val authResponse = httpClient.get<HttpResponse> {
                 url {
                     takeFrom("http://localhost:8097")
-                    path("Login", "login")
+                    path("PersonAuthRegister", "auth/login")
                 }
             }
 

@@ -93,7 +93,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
             downloadH5PUrl(db, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
         }
 
-        LoginRoute(db)
+        PersonAuthRegister(db)
         ContainerMountRoute(db)
         UmAppDatabase_KtorRoute(db, Gson(), File("attachments/UmAppDatabase").absolutePath)
         WorkSpaceRoute(db)
