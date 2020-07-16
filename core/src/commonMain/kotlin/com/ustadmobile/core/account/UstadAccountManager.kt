@@ -211,6 +211,26 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         return responseAccount
     }
 
+    suspend fun changePassword(username: String, currentPassword: String, newPassword: String, endpointUrl: String): UmAccount?{
+        val httpStmt = httpClient.post<HttpStatement> {
+            url("${endpointUrl.removeSuffix("/")}/password/change")
+            parameter("username", username)
+            parameter("currentPassword", currentPassword)
+            parameter("newPassword", newPassword)
+        }
+
+        return httpStmt.execute { response ->
+            val responseAccount = if (response.status.value == 200) {
+                response.receive<UmAccount>()
+            } else {
+                null
+            }
+            responseAccount
+        }
+
+    }
+
+
 
     companion object {
 
