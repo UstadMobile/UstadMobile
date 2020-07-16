@@ -61,7 +61,7 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
             if(person != null){
 
                 if(!person.admin && currentPassword == null){
-                    call.respond(HttpStatusCode.BadRequest, "No old password provide")
+                    call.respond(HttpStatusCode.Forbidden, "No old password provide")
                     return@post
                 }
 
@@ -69,7 +69,7 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
                                 && person.passwordHash.substring(2) == currentPassword)
                                 ||(person.passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) &&
                                 authenticateEncryptedPassword(currentPassword, person.passwordHash.substring(2))))){
-                    call.respond(HttpStatusCode.BadRequest, "Current password doesn't match, try again")
+                    call.respond(HttpStatusCode.Forbidden, "Current password doesn't match, try again")
                     return@post
                 }
 
