@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.lib.db.entities.DeviceSession
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.application.call
@@ -49,14 +48,22 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
         }
 
         post("register"){
-            val person = call.request.queryParameters["person"]
+            val personString = call.request.queryParameters["person"]
             val password = call.request.queryParameters["password"]
-            if(person == null || password == null){
+            if(personString == null || password == null){
                 call.respond(HttpStatusCode.BadRequest, "No password or person information provided")
                 return@post
             }
 
-            val mPerson = Json.parse(Person.serializer(),person)
+            val mPerson = Json.parse(Person.serializer(),personString)
+
+            val person = db.personDao.findByUsername(mPerson.username)
+
+            if(person != null){
+                call.respond(HttpStatusCode.Conflict, "Person already exists, change username")
+                return@post
+            }
+
             val pUid = db.personDao.insert(mPerson)
             val personAuth = com.ustadmobile.lib.db.entities.PersonAuth(mPerson.personUid,
                     PersonAuthDao.PLAIN_PASS_PREFIX+password)
