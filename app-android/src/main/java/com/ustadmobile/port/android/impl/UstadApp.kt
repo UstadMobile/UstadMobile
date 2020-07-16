@@ -14,6 +14,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.initPicasso
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager
+import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.asRepository
@@ -59,6 +61,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }
+
+        bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerAndroidImpl(applicationContext) }
 
         constant(TAG_DOWNLOAD_ENABLED) with true
 

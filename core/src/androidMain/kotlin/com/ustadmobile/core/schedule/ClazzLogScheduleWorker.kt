@@ -3,12 +3,21 @@ package com.ustadmobile.core.schedule
 import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import org.kodein.di.DI
+import org.kodein.di.android.di
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class ClazzLogScheduleWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
+    val di: DI by di(context)
+
     override fun doWork(): Result {
-        val db = UmAccountManager.getRepositoryForActiveAccount(super.getApplicationContext())
+        val endpoint = inputData.getString(INPUT_ENDPOINTURL) ?: return Result.failure()
+        val db: UmAppDatabase by di.on(Endpoint(endpoint)).instance(tag = TAG_DB)
         val fromTime = inputData.getLong(INPUT_FROMTIME, Long.MAX_VALUE)
         val toTime = inputData.getLong(INPUT_TOTIME, 0L)
         val clazzUidFilter = inputData.getLong(INPUT_CLAZZUIDFILTER, 0)
