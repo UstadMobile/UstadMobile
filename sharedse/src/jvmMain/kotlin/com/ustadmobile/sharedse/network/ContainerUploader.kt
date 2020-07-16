@@ -1,7 +1,11 @@
 package com.ustadmobile.sharedse.network
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderListener
@@ -16,15 +20,15 @@ import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 import java.io.FileInputStream
+import java.io.InputStream
+import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.min
-
-@Serializable
-data class UploadStatus(val sessionId: String, val uploadedTo: Long)
 
 class ContainerUploader(val request: ContainerUploaderRequest,
                         val listener: ContainerUploaderListener?,
@@ -37,6 +41,8 @@ class ContainerUploader(val request: ContainerUploaderRequest,
 
     private val networkManager: NetworkManagerBle by instance()
 
+    private val db: UmAppDatabase by di.on(Endpoint(request.endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
+
     suspend fun progressUpdater() = coroutineScope {
         while (isActive) {
             listener?.onProgress(request, bytesSoFar.get(), contentLength.get())
@@ -48,11 +54,9 @@ class ContainerUploader(val request: ContainerUploaderRequest,
         return coroutineScope {
             val progressUpdaterJob = async { progressUpdater() }
             var downloadStatus = 0
-            val uploadFile = File(request.fromFile)
-            val jsonFile = File(uploadFile.parentFile, "${uploadFile.name}.uploadInfo")
 
             var urlConnection: HttpURLConnection? = null
-            var inStream: FileInputStream? = null
+            var inStream: InputStream? = null
             var rangeStream: RangeInputStream? = null
             try {
                 val localConnectionOpenerVal =
@@ -66,27 +70,32 @@ class ContainerUploader(val request: ContainerUploaderRequest,
 
                 urlConnection = connectionOpener(URL(request.uploadToUrl))
 
-                if (!jsonFile.exists()) {
+                var uploadJob: ContainerUploadJob? = null
+                if (uploadJob == null) {
                     urlConnection.requestMethod = "GET"
                     urlConnection.connect()
 
                     val sessionId = String(UMIOUtils.readStreamToByteArray(urlConnection.inputStream))
-                    val status = UploadStatus(sessionId, 0)
-                    val jsonStatus = Json.stringify(UploadStatus.serializer(), status)
-                    jsonFile.writeText(jsonStatus)
+                    uploadJob = ContainerUploadJob().apply {
+                        this.sessionId = sessionId
+                        this.bytesSoFar = 0
+                        this.containerEntryFileUids = request.fileList
+                    }
+                    uploadJob.cujUid = db.containerUploadJobDao.insert(uploadJob)
+
                     urlConnection.disconnect()
                 }
 
-                // read from file and into uploadStatus obj
-                val jsonContent = jsonFile.readText()
-                var uploadStatus = Json.parse(UploadStatus.serializer(), jsonContent)
+                val start = uploadJob.bytesSoFar ?: 0L
 
-                val fileToUpload = File(request.fromFile)
-                val fileSize = fileToUpload.length()
-                val start = uploadStatus.uploadedTo
+                val response = db.containerEntryFileDao.generateConcatenatedFilesResponse(request.fileList)
+                inStream = response.dataSrc ?: throw Exception()
+                val fileSize = response.contentLength
 
                 bytesSoFar.set(start)
                 contentLength.set(fileSize)
+
+                rangeStream = RangeInputStream(inStream, start, bytesSoFar.get() + chunkSize)
 
                 for (uploadedTo in start..fileSize step chunkSize.toLong()) {
 
@@ -94,24 +103,24 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     var errorMessage: String? = null
                     do {
 
-
+                        var skip = 0L
                         if (errorMessage?.isNotEmpty() == true) {
                             // reset the bytes if the server is more ahead than recorded
                             if (errorMessage.startsWith("Range should start from:")) {
                                 errorMessage = errorMessage.substringAfter(":")
+                                skip = errorMessage.toLong() - bytesSoFar.get()
                                 bytesSoFar.set(errorMessage.toLong())
                             }
                         }
 
-                        inStream = FileInputStream(fileToUpload)
-                        rangeStream = RangeInputStream(inStream, bytesSoFar.get(), bytesSoFar.get() + chunkSize)
+                        rangeStream = RangeInputStream(inStream, skip, bytesSoFar.get() + chunkSize)
 
                         val remaining = fileSize - bytesSoFar.get()
                         val sizeToRead = min(chunkSize, remaining.toInt())
                         val buffer = ByteArray(sizeToRead)
 
                         while (readRange < sizeToRead) {
-                            readRange += rangeStream.read(buffer)
+                            readRange += inStream.read(buffer)
                         }
 
                         val end = bytesSoFar.get() + readRange - 1
@@ -121,7 +130,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                         urlConnection.requestMethod = "PUT"
                         urlConnection.setRequestProperty("Content-Length", readRange.toString())
                         urlConnection.setRequestProperty("Range", "bytes=${bytesSoFar.get()}-$end")
-                        urlConnection.setRequestProperty("SessionId", uploadStatus.sessionId)
+                        urlConnection.setRequestProperty("SessionId", uploadJob.sessionId)
                         urlConnection.outputStream.write(buffer)
                         urlConnection.outputStream.flush()
                         urlConnection.outputStream.close()
@@ -140,9 +149,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     val endedAt = bytesSoFar.get() + readRange
                     bytesSoFar.set(endedAt)
 
-                    uploadStatus = UploadStatus(uploadStatus.sessionId, endedAt)
-                    val statusJson = Json.stringify(UploadStatus.serializer(), uploadStatus)
-                    jsonFile.writeText(statusJson)
+                    db.containerUploadJobDao.updateJob(uploadJob.sessionId ?: "", endedAt)
 
                 }
 
@@ -152,11 +159,11 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     JobStatus.PAUSED
                 }
 
+                db.containerUploadJobDao.setJobStatus(downloadStatus, uploadJob.sessionId?: "")
 
             } finally {
                 progressUpdaterJob.cancel()
                 listener?.onProgress(request, bytesSoFar.get(), contentLength.get())
-                inStream?.close()
                 inStream?.close()
                 rangeStream?.close()
                 urlConnection?.disconnect()

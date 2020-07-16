@@ -1,6 +1,6 @@
 package com.ustadmobile.sharedse.network.containeruploader
 
-abstract class AbstractContainerFetcherListener: ContainerUploaderListener {
+abstract class AbstractContainerUploaderListener: ContainerUploaderListener {
 
     override fun onStart(request: ContainerUploaderRequest) {
 
