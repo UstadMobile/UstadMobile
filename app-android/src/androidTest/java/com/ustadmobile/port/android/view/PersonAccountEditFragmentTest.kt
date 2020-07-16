@@ -4,17 +4,17 @@ import android.app.Application
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.action.ViewActions.clearText
-import androidx.test.espresso.action.ViewActions.typeText
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.nhaarman.mockitokotlin2.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.controller.PersonAccountEditPresenter
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.toBundle
@@ -30,7 +30,9 @@ import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.setDateField
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import junit.framework.Assert
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -42,8 +44,12 @@ import org.junit.Rule
 import org.junit.Test
 
 
-@AdbScreenRecord("PersonEdit screen Test")
-class PersonEditFragmentTest {
+@AdbScreenRecord("PersonAccountEdit screen Test")
+class PersonAccountEditFragmentTest {
+
+    @JvmField
+    @Rule
+    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
 
     @JvmField
     @Rule
@@ -67,6 +73,8 @@ class PersonEditFragmentTest {
 
     private lateinit var serverUrl: String
 
+    private val mPersonUid: Long = 121212
+
     @Before
     fun setUp(){
         mockWebServer = MockWebServer()
@@ -84,110 +92,111 @@ class PersonEditFragmentTest {
         mockWebServer.shutdown()
     }
 
-
-    @AdbScreenRecord("given person edit opened in normal mode classes should be shown")
-    @Test
-    fun givenPersonEditOpened_whenInNoRegistrationMode_thenClassesShouldBeShown(){
-        launchFragment(false, fillForm = false)
-        onView(withId(R.id.clazzlist_recyclerview)).check(matches(isDisplayed()))
-        onView(withId(R.id.clazzlist_header_textview)).check(matches(isDisplayed()))
+    private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false): Person {
+        return Person().apply {
+            fatherName = "Doe"
+            firstNames = "Jane"
+            lastName = "Doe"
+            if(withUsername){
+                username = "dummyUserName"
+            }
+            admin = isAdmin
+            personUid = mPersonUid
+            dbRule.repo.personDao.insert(this)
+        }
     }
 
-    @AdbScreenRecord("given person edit opened in registration mode classes should be hidden")
+
+    @AdbScreenRecord("given person account edit launched when username is null should show username field")
     @Test
-    fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden(){
-        launchFragment(true, fillForm = false)
-        onView(withId(R.id.clazzlist_recyclerview)).check(matches(not(isDisplayed())))
-        onView(withId(R.id.clazzlist_header_textview)).check(matches(not(isDisplayed())))
+    fun givenPersonAccountEditLaunched_whenUsernameIsNull_themUsernameFieldShouldBeVisible(){
+        val person = createPerson(false)
+        launchFragment(person)
+        onView(withId(R.id.username_textinputlayout)).check(matches(isDisplayed()))
     }
 
-    @AdbScreenRecord("given person edit opened in registration mode when username and password are not filled and save is clicked should show errors")
+    @AdbScreenRecord("given person account edit launched when username is null should hide username field")
     @Test
-    fun givenPersonEditOpenedInRegistrationMode_whenUserNameAndPasswordAreNotFilled_thenShouldShowErrors(){
-        launchFragment(allowedRegistration = true,leftOutPassword = true, leftOutUsername = true)
+    fun givenPersonAccountEditLaunched_whenUsernameIsNotNull_themUsernameFieldShouldBeHidden(){
+        val person = createPerson(true)
+        launchFragment(person)
+        onView(withId(R.id.username_textinputlayout)).check(matches(not(isDisplayed())))
+    }
 
+    @AdbScreenRecord("given person account edit launched when username is null and not filled on save clicked should show error")
+    @Test
+    fun givenPersonAccountEditLaunched_whenUsernameIsNullAndSaveClicked_shouldShowErrors(){
+        val person = createPerson(false)
+        launchFragment(person, true, leftOutUsername = true)
         onView(withId(R.id.username_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
 
-        onView(withId(R.id.password_textinputlayout)).check(matches(
+    }
+
+    @AdbScreenRecord("given person account edit launched when username is null and person not admin when save clicked should show error")
+    @Test
+    fun givenPersonAccountEditLaunched_whenUserIsNotAdminAndSaveClicked_shouldShowErrors() {
+        val person = createPerson(true)
+        launchFragment(person, true, leftOutUsername = true)
+
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.field_required_prompt))))
+
+        onView(withId(R.id.new_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
     }
 
-    @AdbScreenRecord("given person edit opened in registration mode when password doesn't match and save is clicked should show errors")
+    @AdbScreenRecord("given person account edit launched and person is admin when new password not filled on save clicked should show error")
     @Test
-    fun givenPersonEditOpenedInRegistrationMode_whenPasswordDoNotMatch_thenShouldShowErrors(){
-        launchFragment(misMatchPassword = true)
-        onView(withId(R.id.password_textinputlayout)).check(matches(
-                hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
+    fun givenPersonAccountEditLaunchedAndPersonIsAdmin_whenNewPasswordIsNotFilledAndSaveClicked_thenShouldShowError(){
+        val person = createPerson(false, isAdmin = true)
+        launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = false)
 
-        onView(withId(R.id.confirm_password_textinputlayout)).check(matches(
-                hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
+        onView(withId(R.id.new_password_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.field_required_prompt))))
+
+    }
+
+    @AdbScreenRecord("given person account edit launched when all fields are filled on save clicked should show no error")
+    @Test
+    fun givenPersonAccount_whenAllFieldsAreFilledAndSaveClicked_thenShouldShowNoErrors(){
+        val person = createPerson(false, isAdmin = false)
+        launchFragment(person, true, leftOutUsername = false, fillCurrentPassword = true,
+                fillNewPassword = true)
+
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(
+                not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
+
+        onView(withId(R.id.new_password_textinputlayout)).check(matches(
+                not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
     }
 
 
+    private fun launchFragment(person: Person, fillForm: Boolean = false, leftOutUsername: Boolean = false,
+                               fillCurrentPassword: Boolean = false, fillNewPassword: Boolean = false){
 
-    private fun launchFragment(allowedRegistration: Boolean = false,misMatchPassword: Boolean = false,
-                               leftOutPassword: Boolean = false, leftOutUsername: Boolean = false, fillForm: Boolean = true){
-
-        val workspace = WorkSpace().apply {
-            registrationAllowed = allowedRegistration
-        }
-        val password = "password"
-        val confirmedPassword = if(misMatchPassword) "password1" else password
-
-        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), workspace))
-        val bundle = args.plus(mapOf(UstadView.ARG_SERVER_URL to serverUrl)).toBundle()
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString()).toBundle()
 
         val scenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundle) {
-            PersonEditFragment().also {
+                fragmentArgs = args) {
+            PersonAccountEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         if(fillForm){
-
-            val personOnForm = Person()
-            val person = Person().apply {
-                firstNames = "Jane"
-                lastName = "Doe"
-                phoneNum = "00000000000"
-                dateOfBirth = (DateTime.now().toOffsetByTimezone("Asia/Dubai").localMidnight - 7.days)
-                        .utc.unixMillisLong
-                emailAddr = "email@dummy.com"
-                personAddress = "dummy address, 101 dummy"
-            }
-
-            person.firstNames.takeIf { it != personOnForm.firstNames }?.also {
-                onView(withId(R.id.firstnames_text)).perform(clearText(), typeText(it))
-            }
-
-            person.lastName.takeIf { it != personOnForm.lastName }?.also {
-                onView(withId(R.id.lastname_text)).perform(clearText(), typeText(it))
-            }
-
-            person.phoneNum.takeIf { it != personOnForm.phoneNum }?.also {
-                onView(withId(R.id.phonenumber_text)).perform(clearText(), typeText(it))
-            }
-
-            person.dateOfBirth.takeIf { it != personOnForm.dateOfBirth }?.also {
-                setDateField(R.id.birthday_text,it)
-            }
-
-            person.emailAddr.takeIf { it != personOnForm.emailAddr }?.also {
-                onView(withId(R.id.email_text)).perform(clearText(), typeText(it))
-            }
-
-            if(!leftOutPassword){
-                onView(withId(R.id.password_text)).perform(clearText(), typeText(password))
-                onView(withId(R.id.confirm_password_text)).perform(clearText(), typeText(confirmedPassword))
-            }
-
             if(!leftOutUsername){
-                onView(withId(R.id.username_text)).perform(clearText(), typeText(confirmedPassword))
+                onView(withId(R.id.account_username_text)).perform(click(),typeText("person.username"))
             }
 
+            if(fillCurrentPassword){
+                onView(withId(R.id.account_current_password_text)).perform(click(),typeText("password"))
+            }
+
+            if(fillNewPassword){
+                onView(withId(R.id.account_new_password_text)).perform(click(),typeText("password"))
+            }
             scenario.clickOptionMenu(R.id.menu_done)
         }
     }

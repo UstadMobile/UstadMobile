@@ -1,6 +1,9 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.PersonAccountEditView
@@ -16,6 +19,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 
 class PersonAccountEditPresenter(context: Any,
@@ -27,6 +31,8 @@ class PersonAccountEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
     private lateinit var serverUrl: String
+
+    private val impl: UstadMobileSystemImpl by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -57,23 +63,28 @@ class PersonAccountEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: Person) {
-        GlobalScope.launch {
-            withContext(doorMainDispatcher()) {
-                if(!entity.admin && view.currentPassword == null || view.newPassword == null
-                        || entity.username == null){
+        GlobalScope.launch(doorMainDispatcher()) {
+            if(!entity.admin && view.currentPassword.isNullOrEmpty() || view.newPassword.isNullOrEmpty()
+                    || entity.username.isNullOrEmpty()){
 
-                    view.usernameRequiredErrorVisible = entity.username == null
-                    view.currentPasswordRequiredErrorVisible = view.currentPassword == null && !entity.admin
-                    view.newPasswordRequiredErrorVisible = view.newPassword == null
-                    return@withContext
-                }
-                val currentPassword = view.currentPassword
-                val newPassword = view.newPassword
-                val username = entity.username
-                if(currentPassword != null && newPassword != null && username != null){
+                view.usernameRequiredErrorVisible = entity.username.isNullOrEmpty()
+                view.currentPasswordRequiredErrorVisible = view.currentPassword.isNullOrEmpty() && !entity.admin
+                view.newPasswordRequiredErrorVisible = view.newPassword.isNullOrEmpty()
+                return@launch
+            }
+            val currentPassword = view.currentPassword
+            val newPassword = view.newPassword
+            val username = entity.username
+            if(currentPassword != null && newPassword != null && username != null){
+                try{
                     accountManager.changePassword(username,currentPassword,newPassword, serverUrl)
+                    view.finishWithResult(listOf(entity))
+                } catch (e: Exception){
+                    view.errorMessage = impl.getString(if(e is UnauthorizedException)
+                        MessageID.filed_password_no_match else
+                        MessageID.login_network_error , context)
+                    view.clearFields()
                 }
-                view.finishWithResult(listOf(entity))
             }
         }
     }

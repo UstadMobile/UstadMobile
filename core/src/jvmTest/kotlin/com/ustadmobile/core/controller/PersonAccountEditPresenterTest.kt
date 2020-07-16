@@ -1,8 +1,10 @@
 package com.ustadmobile.core.controller
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.view.PersonAccountEditView
@@ -11,10 +13,8 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
-import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okio.Buffer
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -44,12 +44,13 @@ class PersonAccountEditPresenterTest  {
 
     private lateinit var serverUrl: String
 
-    private val defaultTimeOut: Long = 2000
+    private val defaultTimeOut: Long = 5000
 
     private val mPersonUid: Long = 234567
 
     private lateinit var accountManager: UstadAccountManager
 
+    private lateinit var impl: UstadMobileSystemImpl
 
     @Before
     fun setUp() {
@@ -57,7 +58,7 @@ class PersonAccountEditPresenterTest  {
         mockLifecycleOwner = mock { }
 
         mockView = mock{}
-
+        impl = mock()
 
         mockWebServer = MockWebServer()
         mockWebServer.start()
@@ -71,6 +72,7 @@ class PersonAccountEditPresenterTest  {
         di = DI {
             import(ustadTestRule.diModule)
             bind<UstadAccountManager>(overrides = true) with singleton { accountManager }
+            bind<UstadMobileSystemImpl>(overrides = true) with singleton { impl }
         }
 
         repo = di.directActiveRepoInstance()
@@ -79,6 +81,17 @@ class PersonAccountEditPresenterTest  {
     @After
     fun tearDown() {
         mockWebServer.shutdown()
+    }
+
+    private fun enQueuePasswordChangeResponse(success: Boolean = true){
+        if(success){
+            mockWebServer.enqueue(MockResponse()
+                    .setResponseCode(200)
+                    .setBody(Gson().toJson(UmAccount(mPersonUid, "", "auth", "")))
+                    .setHeader("Content-Type", "application/json"))
+        }else{
+            mockWebServer.enqueue(MockResponse().setResponseCode(403))
+        }
     }
 
 
@@ -137,18 +150,15 @@ class PersonAccountEditPresenterTest  {
 
     @Test
     fun givenPresenterCreated_whenAllFieldsAreFilledAndSaveClicked_thenShouldChangePassword(){
-
-        mockWebServer.enqueue(MockResponse()
-                .setHeader("Content-Type", "application/json")
-                .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
-                        UmAccount(0L)).toByteArray())))
+        enQueuePasswordChangeResponse()
 
         mockView = mock{
             on{currentPassword}.thenReturn("oldPassword")
             on{newPassword}.thenReturn("password")
         }
         val person = createPerson(isAdmin = true, withUsername = true)
-        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
+                UstadView.ARG_SERVER_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         presenter.handleClickSave(person)
@@ -158,6 +168,7 @@ class PersonAccountEditPresenterTest  {
                 assertEquals("Password change request was sent", person.username, firstValue)
             }
         }
+        verify(mockView, timeout(defaultTimeOut)).finishWithResult(any())
     }
 
 }
