@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
@@ -48,8 +49,12 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         override fun onBindViewHolder(holder: AccountViewHolder, position: Int) {
             holder.binding.umaccount = getItem(position)
             holder.binding.activeAccount = position == 0
-            holder.binding.logoutBtnVisibility = if(currentList.size == 1 && currentList[0].personUid == 0L || position != 0)
+            holder.binding.logoutBtnVisibility =
+                    if(currentList.size == 1 && currentList[0].personUid == 0L || position != 0)
                 View.GONE else View.VISIBLE
+            holder.binding.profileBtnVisibility =
+                    if(currentList[0].personUid == 0L || position != 0)
+                        View.GONE else View.VISIBLE
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -115,9 +120,16 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             value?.observe(viewLifecycleOwner, activeAccountObserver)
         }
 
+    override fun showContentEntryList(account: UmAccount) {
+        val navController = findNavController()
+        val navOptions = NavOptions.Builder().setPopUpTo(R.id.account_list_dest, true).build()
+        navController.currentBackStackEntry?.savedStateHandle?.set(ARG_SNACK_MESSAGE,
+                String.format(getString(R.string.logged_in_as),account.username,account.endpointUrl))
+        navController.navigate(R.id.home_content_dest, null, navOptions)
+    }
+
     override fun showGetStarted(){
-        val navOptions = NavOptions.Builder().setPopUpTo(R.id.account_list_dest, true)
-                .build()
+        val navOptions = NavOptions.Builder().setPopUpTo(R.id.account_list_dest, true).build()
         findNavController().navigate(R.id.account_get_started_dest,null, navOptions)
     }
 
@@ -187,7 +199,7 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
             }
 
             override fun areContentsTheSame(oldItem: UmAccount, newItem: UmAccount): Boolean {
-                return oldItem == newItem
+                return false
             }
         }
 

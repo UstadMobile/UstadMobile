@@ -52,7 +52,7 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
 
     private fun handleError(isError: Boolean){
         mBinding?.workspaceLinkView?.isErrorEnabled = isError
-        mBinding?.workspaceLinkView?.error = if(isError) getString(R.string.invalid_url) else null
+        mBinding?.workspaceLinkView?.error = if(isError) getString(R.string.invalid_link) else null
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

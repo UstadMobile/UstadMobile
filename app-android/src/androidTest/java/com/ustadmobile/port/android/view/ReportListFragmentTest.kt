@@ -66,7 +66,7 @@ class ReportListFragmentTest{
             reportUid = dbRule.db.reportDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf()) {
             ReportListFragment().also {
                 it.installNavController(systemImplNavRule.navController)
