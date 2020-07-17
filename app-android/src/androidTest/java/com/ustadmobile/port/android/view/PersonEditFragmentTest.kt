@@ -189,7 +189,7 @@ class PersonEditFragmentTest {
             }
 
             person.phoneNum.takeIf { it != personOnForm?.phoneNum }?.also {
-                typeOnField(R.id.phonenumber_text,it)
+                typeOnField(R.id.phonenumber_text,it, true)
             }
 
             person.emailAddr.takeIf { it != personOnForm?.emailAddr }?.also {
@@ -204,23 +204,23 @@ class PersonEditFragmentTest {
                 person.username.takeIf { it != personOnForm?.username }?.also {
                     typeOnField(R.id.username_text,it)
                 }
-
             }
 
 
             if(!leftOutPassword){
-                typeOnField(R.id.password_text,password)
+                typeOnField(R.id.password_text,password, true)
 
-                typeOnField(R.id.confirm_password_text,confirmedPassword)
+                typeOnField(R.id.confirm_password_text,confirmedPassword, true)
             }
 
             scenario.clickOptionMenu(R.id.menu_done)
         }
     }
 
-    private fun typeOnField(id: Int, text:String){
-        onView(withId(R.id.nested_view)).perform(swipeUp())
-        //onView(withId(id)).check(matches(isDisplayed())).perform(closeSoftKeyboard(), clearText(), typeText(text), closeSoftKeyboard())
+    private fun typeOnField(id: Int, text:String, scroll: Boolean = false){
+        if(scroll){
+            onView(withId(R.id.nested_view)).perform(swipeUp())
+        }
         onView(withId(id)).check(matches(isDisplayed())).perform(replaceText(text))
     }
 
