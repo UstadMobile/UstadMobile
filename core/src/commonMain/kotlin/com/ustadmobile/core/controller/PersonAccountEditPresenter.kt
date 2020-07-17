@@ -4,7 +4,6 @@ import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -15,7 +14,6 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI

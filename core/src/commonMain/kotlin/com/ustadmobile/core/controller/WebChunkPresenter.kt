@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.WebChunkView
 import org.kodein.di.DI
 

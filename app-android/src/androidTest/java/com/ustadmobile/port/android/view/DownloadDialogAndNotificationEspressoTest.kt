@@ -32,18 +32,20 @@ import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions
-import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matchers.allOf
 import org.json.JSONException
 import org.json.JSONObject
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assume
+import org.junit.Before
+import org.junit.Rule
 import java.io.IOException
-import java.net.URL
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
 
 

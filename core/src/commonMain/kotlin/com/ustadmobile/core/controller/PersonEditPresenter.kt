@@ -1,13 +1,11 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
@@ -24,7 +22,6 @@ import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
