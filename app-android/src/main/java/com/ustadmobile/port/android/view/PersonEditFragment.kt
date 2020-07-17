@@ -163,6 +163,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             //for some reason setting the options before (and indepently from) the value causes
             // a databinding problem
             mBinding?.genderOptions = genderOptions
+            loading = false
         }
 
 

@@ -87,6 +87,8 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/item_presenter_field_row_image_view"
@@ -108,6 +110,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -129,6 +133,8 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/lastname_textInputLayout">
@@ -152,6 +158,8 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/gender_textinputlayout">
 
@@ -176,6 +184,8 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/birthday_textinputlayout">
@@ -196,7 +206,8 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
-
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/phonenumber_textinputlayout">
@@ -217,6 +228,8 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/email_textinputlayout">
@@ -237,6 +250,8 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/address_textinputlayout">
@@ -261,6 +276,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:passwordToggleEnabled="true"
                 app:errorTextColor="?colorError"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -283,6 +300,8 @@
                 app:errorTextColor="?colorError"
                 android:layout_margin="@dimen/dimen_16dp"
                 app:passwordToggleEnabled="true"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/password_textinputlayout">

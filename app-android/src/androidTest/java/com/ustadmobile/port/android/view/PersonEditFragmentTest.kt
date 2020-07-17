@@ -197,6 +197,10 @@ class PersonEditFragmentTest {
                 typeOnField(R.id.email_text,it)
             }
 
+            person.personAddress.takeIf { it != personOnForm.personAddress }?.also {
+                typeOnField(R.id.address_text,it)
+            }
+
             if(!leftOutUsername){
                 person.username.takeIf { it != personOnForm.username }?.also {
                     typeOnField(R.id.username_text,it)
@@ -208,8 +212,6 @@ class PersonEditFragmentTest {
             if(!leftOutPassword){
                 typeOnField(R.id.password_text,password)
 
-                onView(withId(R.id.nested_view)).perform(swipeUp())
-
                 typeOnField(R.id.confirm_password_text,confirmedPassword)
             }
 
@@ -218,6 +220,7 @@ class PersonEditFragmentTest {
     }
 
     private fun typeOnField(id: Int, text:String){
+        onView(withId(R.id.nested_view)).perform(swipeUp())
         onView(withId(id)).perform(clearText(), typeText(text), closeSoftKeyboard())
     }
 
