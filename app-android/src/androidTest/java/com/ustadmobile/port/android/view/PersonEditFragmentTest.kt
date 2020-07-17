@@ -85,7 +85,9 @@ class PersonEditFragmentTest {
     @Test
     fun givenPersonEditOpened_whenInNoRegistrationMode_thenClassesShouldBeShown(){
         launchFragment(false, fillForm = false)
-        onView(withId(R.id.nested_view)).perform(swipeUp())
+
+        scrollToBottom()
+
         onView(withId(R.id.clazzlist_recyclerview)).check(matches(isDisplayed()))
         onView(withId(R.id.clazzlist_header_textview)).check(matches(isDisplayed()))
     }
@@ -94,6 +96,9 @@ class PersonEditFragmentTest {
     @Test
     fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden(){
         launchFragment(true, fillForm = false)
+
+        scrollToBottom()
+
         onView(withId(R.id.clazzlist_recyclerview)).check(matches(not(isDisplayed())))
         onView(withId(R.id.clazzlist_header_textview)).check(matches(not(isDisplayed())))
     }
@@ -102,6 +107,8 @@ class PersonEditFragmentTest {
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenUserNameAndPasswordAreNotFilled_thenShouldShowErrors(){
         launchFragment(allowedRegistration = true,leftOutPassword = true, leftOutUsername = true)
+
+        scrollToBottom()
 
         onView(withId(R.id.username_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
@@ -114,6 +121,9 @@ class PersonEditFragmentTest {
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenPasswordDoNotMatch_thenShouldShowErrors(){
         launchFragment(allowedRegistration = true,misMatchPassword = true)
+
+        scrollToBottom()
+
         onView(withId(R.id.password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
 
@@ -128,7 +138,9 @@ class PersonEditFragmentTest {
         launchFragment(allowedRegistration = true,misMatchPassword = false, leftOutUsername = false)
 
         sleep(5000)
-        onView(withId(R.id.nested_view)).perform(swipeUp())
+
+        scrollToBottom()
+
         onView(withId(R.id.error_text)).check(matches(isDisplayed()))
     }
 
@@ -154,6 +166,7 @@ class PersonEditFragmentTest {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
+        //Soft keyboard tend to hide views, when try to type will throw exception so instead of type we'll replace text
         if(fillForm){
 
             val personOnForm = scenario.letOnFragment { it.entity}
@@ -173,11 +186,11 @@ class PersonEditFragmentTest {
             }
 
             person.firstNames.takeIf { it != personOnForm?.firstNames }?.also {
-                typeOnField(R.id.firstnames_text,it)
+                onView(withId(R.id.firstnames_text)).perform(replaceText(it))
             }
 
             person.lastName.takeIf { it != personOnForm?.lastName }?.also {
-                typeOnField(R.id.lastname_text,it)
+                onView(withId(R.id.lastname_text)).perform(replaceText(it))
             }
 
             person.gender.takeIf { it != personOnForm?.gender }?.also {
@@ -189,39 +202,40 @@ class PersonEditFragmentTest {
             }
 
             person.phoneNum.takeIf { it != personOnForm?.phoneNum }?.also {
-                typeOnField(R.id.phonenumber_text,it, true)
+                //scroll
+                onView(withId(R.id.phonenumber_text)).perform(replaceText(it))
             }
 
             person.emailAddr.takeIf { it != personOnForm?.emailAddr }?.also {
-                typeOnField(R.id.email_text,it)
+                onView(withId(R.id.email_text)).perform(replaceText(it))
             }
 
             person.personAddress.takeIf { it != personOnForm?.personAddress }?.also {
-                typeOnField(R.id.address_text,it)
+                onView(withId(R.id.address_text)).perform(replaceText(it))
             }
 
             if(!leftOutUsername){
                 person.username.takeIf { it != personOnForm?.username }?.also {
-                    typeOnField(R.id.username_text,it)
+                    onView(withId(R.id.username_text)).perform(replaceText(it))
                 }
             }
 
 
             if(!leftOutPassword){
-                typeOnField(R.id.password_text,password, true)
-
-                typeOnField(R.id.confirm_password_text,confirmedPassword, true)
+                //scroll
+                scrollToBottom()
+                onView(withId(R.id.password_text)).perform(replaceText(password))
+                onView(withId(R.id.confirm_password_text)).perform(replaceText(confirmedPassword))
             }
 
             scenario.clickOptionMenu(R.id.menu_done)
         }
     }
 
-    private fun typeOnField(id: Int, text:String, scroll: Boolean = false){
-        if(scroll){
-            onView(withId(R.id.nested_view)).perform(swipeUp())
-        }
-        onView(withId(id)).check(matches(isDisplayed())).perform(replaceText(text))
+    private fun scrollToBottom(){
+        onView(withId(R.id.nested_view)).perform(swipeUp())
+        //make sure scroll animation is completed
+        sleep(300)
     }
 
 }
