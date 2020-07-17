@@ -685,5 +685,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="my">My %1$s</string>
     <string name="add_another">Add another %1$s </string>
     <string name="logged_in_as">Logged in as  %1$s on %2$s</string>
+    <string name="person_exists">Person already exist, pick another username</string>
 
 </resources>

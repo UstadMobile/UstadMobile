@@ -107,7 +107,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
 
     suspend fun register(person: Person, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
-        val httpStmt = httpClient.get<HttpStatement>() {
+        val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             parameter("person", Json.stringify(Person.serializer(), person))
             parameter("password", password)

@@ -20,7 +20,6 @@ import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.test.core.impl.CrudIdlingResource
@@ -36,12 +35,12 @@ import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okio.Buffer
 import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.lang.Thread.sleep
 
 
 @AdbScreenRecord("PersonEdit screen Test")
@@ -77,11 +76,6 @@ class PersonEditFragmentTest {
         mockWebServer = MockWebServer()
         mockWebServer.start()
         serverUrl = mockWebServer.url("/").toString()
-
-        mockWebServer.enqueue(MockResponse()
-                .setHeader("Content-Type", "application/json")
-                .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
-                        UmAccount(0L)).toByteArray())))
     }
 
     @After
@@ -129,6 +123,17 @@ class PersonEditFragmentTest {
                 hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
     }
 
+    @AdbScreenRecord("given person edit opened in registration mode when try to register existing person should show errors")
+    @Test
+    fun givenPersonEditOpenedInRegistrationMode_whenTryToRegisterExistingPerson_thenShouldShowErrors(){
+        mockWebServer.enqueue(MockResponse().setResponseCode(409))
+        launchFragment(allowedRegistration = true,misMatchPassword = false, leftOutUsername = false)
+
+        sleep(5000)
+        onView(withId(R.id.nested_view)).perform(swipeUp())
+        onView(withId(R.id.error_text)).check(matches(isDisplayed()))
+    }
+
 
 
     private fun launchFragment(allowedRegistration: Boolean = false,misMatchPassword: Boolean = false,
@@ -163,6 +168,9 @@ class PersonEditFragmentTest {
                         .utc.unixMillisLong
                 emailAddr = "email@dummy.com"
                 personAddress = "dummy address, 101 dummy"
+                if(!leftOutUsername){
+                    username = "jane.doe"
+                }
             }
 
             person.firstNames.takeIf { it != personOnForm.firstNames }?.also {
@@ -210,7 +218,7 @@ class PersonEditFragmentTest {
     }
 
     private fun typeOnField(id: Int, text:String){
-        onView(withId(id)).perform(clearText(),closeSoftKeyboard(), typeText(text))
+        onView(withId(id)).perform(clearText(), typeText(text), closeSoftKeyboard())
     }
 
 }

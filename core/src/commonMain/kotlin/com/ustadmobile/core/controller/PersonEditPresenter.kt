@@ -147,9 +147,10 @@ class PersonEditPresenter(context: Any,
                 val password = view.password
                 if(password != null){
                    try{
-                       accountManager.register(entity, password, serverUrl)
+                       val umAccount = accountManager.register(entity, password, serverUrl)
                    }catch (e:Exception){
-                       view.errorMessage = impl.getString(MessageID.login_network_error , context)
+                       view.errorMessage = impl.getString(if(e is IllegalArgumentException) MessageID.person_exists
+                       else MessageID.login_network_error , context)
                        return@launch
                    }
                 }
