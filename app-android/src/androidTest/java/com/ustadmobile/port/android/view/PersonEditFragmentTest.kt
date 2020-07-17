@@ -25,10 +25,7 @@ import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
-import com.ustadmobile.test.port.android.util.clickOptionMenu
-import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.port.android.util.setDateField
-import com.ustadmobile.test.port.android.util.setMessageIdOption
+import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
@@ -88,6 +85,7 @@ class PersonEditFragmentTest {
     @Test
     fun givenPersonEditOpened_whenInNoRegistrationMode_thenClassesShouldBeShown(){
         launchFragment(false, fillForm = false)
+        onView(withId(R.id.nested_view)).perform(swipeUp())
         onView(withId(R.id.clazzlist_recyclerview)).check(matches(isDisplayed()))
         onView(withId(R.id.clazzlist_header_textview)).check(matches(isDisplayed()))
     }
@@ -158,7 +156,8 @@ class PersonEditFragmentTest {
 
         if(fillForm){
 
-            val personOnForm = Person()
+            val personOnForm = scenario.letOnFragment { it.entity}
+
             val person = Person().apply {
                 firstNames = "Jane"
                 lastName = "Doe"
@@ -173,36 +172,36 @@ class PersonEditFragmentTest {
                 }
             }
 
-            person.firstNames.takeIf { it != personOnForm.firstNames }?.also {
+            person.firstNames.takeIf { it != personOnForm?.firstNames }?.also {
                 typeOnField(R.id.firstnames_text,it)
             }
 
-            person.lastName.takeIf { it != personOnForm.lastName }?.also {
+            person.lastName.takeIf { it != personOnForm?.lastName }?.also {
                 typeOnField(R.id.lastname_text,it)
             }
 
-            person.gender.takeIf { it != personOnForm.gender }?.also {
+            person.gender.takeIf { it != personOnForm?.gender }?.also {
                 setMessageIdOption(R.id.gender_value,impl.getString(MessageID.male,context))
             }
 
-            person.dateOfBirth.takeIf { it != personOnForm.dateOfBirth }?.also {
+            person.dateOfBirth.takeIf { it != personOnForm?.dateOfBirth }?.also {
                 setDateField(R.id.birthday_text,it)
             }
 
-            person.phoneNum.takeIf { it != personOnForm.phoneNum }?.also {
+            person.phoneNum.takeIf { it != personOnForm?.phoneNum }?.also {
                 typeOnField(R.id.phonenumber_text,it)
             }
 
-            person.emailAddr.takeIf { it != personOnForm.emailAddr }?.also {
+            person.emailAddr.takeIf { it != personOnForm?.emailAddr }?.also {
                 typeOnField(R.id.email_text,it)
             }
 
-            person.personAddress.takeIf { it != personOnForm.personAddress }?.also {
+            person.personAddress.takeIf { it != personOnForm?.personAddress }?.also {
                 typeOnField(R.id.address_text,it)
             }
 
             if(!leftOutUsername){
-                person.username.takeIf { it != personOnForm.username }?.also {
+                person.username.takeIf { it != personOnForm?.username }?.also {
                     typeOnField(R.id.username_text,it)
                 }
 
@@ -221,7 +220,8 @@ class PersonEditFragmentTest {
 
     private fun typeOnField(id: Int, text:String){
         onView(withId(R.id.nested_view)).perform(swipeUp())
-        onView(withId(id)).perform(clearText(), typeText(text), closeSoftKeyboard())
+        //onView(withId(id)).check(matches(isDisplayed())).perform(closeSoftKeyboard(), clearText(), typeText(text), closeSoftKeyboard())
+        onView(withId(id)).check(matches(isDisplayed())).perform(replaceText(text))
     }
 
 }
