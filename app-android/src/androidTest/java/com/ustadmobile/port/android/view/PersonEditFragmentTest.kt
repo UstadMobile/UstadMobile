@@ -215,6 +215,8 @@ class PersonEditFragmentTest {
             }
 
             if(!leftOutUsername){
+                //scroll
+                scrollToBottom()
                 person.username.takeIf { it != personOnForm?.username }?.also {
                     onView(withId(R.id.username_text)).perform(replaceText(it))
                 }
@@ -235,7 +237,7 @@ class PersonEditFragmentTest {
     private fun scrollToBottom(){
         onView(withId(R.id.nested_view)).perform(swipeUp())
         //make sure scroll animation is completed
-        sleep(300)
+        sleep(500)
     }
 
 }
