@@ -71,7 +71,7 @@ class WorkspaceEnterLinkPresenterTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(Buffer().write(workSpace.toByteArray())))
 
-        val workSpacelink = "${mockWebServer.url("/")}workspace"
+        val workSpacelink = "${mockWebServer.url("/")}"
 
         val presenter = WorkspaceEnterLinkPresenter(context,
                 mapOf(), view, di)
@@ -83,7 +83,7 @@ class WorkspaceEnterLinkPresenterTest {
     @Test
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         mockWebServer.enqueue(MockResponse().setResponseCode(404))
-        val workSpacelink = "${mockWebServer.url("/")}workspace"
+        val workSpacelink = "${mockWebServer.url("/")}"
         val presenter = WorkspaceEnterLinkPresenter(context,
                 mapOf(), view, di)
 

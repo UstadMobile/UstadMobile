@@ -57,7 +57,7 @@ class OnBoardingActivityTest {
     @Test
     fun givenOnBoardingDisplays_whenUserClicksOnArabic_thenActivityRecreatedInArabic() {
 
-        val activityScenario = launchActivity<OnBoardingActivity>()
+        launchActivity<OnBoardingActivity>()
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
@@ -81,7 +81,7 @@ class OnBoardingActivityTest {
 
         Intents.init()
 
-        val activityScenario = launchActivity<OnBoardingActivity>()
+        launchActivity<OnBoardingActivity>()
 
         onView(withId(R.id.get_started_btn)).perform(click())
 
