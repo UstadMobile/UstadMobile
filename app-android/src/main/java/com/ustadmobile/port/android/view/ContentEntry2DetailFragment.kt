@@ -1,6 +1,6 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,9 +12,9 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.github.aakira.napier.Napier
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
 import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
 import com.ustadmobile.core.account.UstadAccountManager
@@ -31,10 +31,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -100,22 +97,21 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         }
 
 
-    override var downloadOptions: Map<String, String>? = null
-        set(value) {
-            if(value != null){
-                runAfterRequestingPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
-                    UstadMobileSystemImpl.instance.go("DownloadDialog", value, requireContext())
-                }
-            }
-
+    override fun showDownloadDialog(args: Map<String, String>) {
+        val systemImpl: UstadMobileSystemImpl = direct.instance()
+        runAfterRequestingPermissionIfNeeded(WRITE_EXTERNAL_STORAGE) {
+            systemImpl.go("DownloadDialog", args, requireContext())
         }
+    }
+
     override var downloadJobItem: DownloadJobItem? = null
         set(value) {
+            Napier.d("ContentEntryDetail: Download Status = ${downloadJobItem?.djiStatus} currentDownloadJobItemStatus = $currentDownloadJobItemStatus")
+            mBinding?.downloadJobItem = value
             if(currentDownloadJobItemStatus != value?.djiStatus) {
                 when {
                     value.isStatusCompletedSuccessfully() -> {
                         mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
-                        mBinding?.entryDownloadOpenBtn?.text = resources.getText(R.string.open)
                         mBinding?.entryDetailProgress?.visibility = View.GONE
                     }
 
@@ -125,7 +121,6 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
                     }
 
                     else -> {
-                        mBinding?.entryDownloadOpenBtn?.text = resources.getText(R.string.download)
                         mBinding?.entryDownloadOpenBtn?.visibility = View.VISIBLE
                         mBinding?.entryDetailProgress?.visibility = View.GONE
                     }
@@ -137,7 +132,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
             if(value != null && value.isStatusQueuedOrDownloading()) {
                 mBinding?.entryDetailProgress?.statusText = value.toStatusString(
-                        UstadMobileSystemImpl.instance, this)
+                        UstadMobileSystemImpl.instance, requireContext())
                 mBinding?.entryDetailProgress?.progress = if(value.downloadLength > 0) {
                     (value.downloadedSoFar.toFloat()) / (value.downloadLength.toFloat())
                 }else {
@@ -200,7 +195,6 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
     override fun onDestroyView() {
         mBinding = null
         mPresenter = null
-        downloadOptions = null
         currentLiveData = null
         downloadJobItem = null
         mBinding?.availableTranslationView?.adapter = null

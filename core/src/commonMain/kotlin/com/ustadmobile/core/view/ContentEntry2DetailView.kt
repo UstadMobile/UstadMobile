@@ -11,7 +11,10 @@ interface ContentEntry2DetailView: UstadDetailView<ContentEntryWithMostRecentCon
 
     var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
 
-    var downloadOptions: Map<String, String>?
+    /**
+     * Show the download dialog. The platform should request permission before if required.
+     */
+    fun showDownloadDialog(args: Map<String, String>)
 
     var downloadJobItem: DownloadJobItem?
 

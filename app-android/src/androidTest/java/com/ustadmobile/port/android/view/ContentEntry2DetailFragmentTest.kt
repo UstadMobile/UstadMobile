@@ -1,9 +1,13 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.content.Context
+import android.content.Intent
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -14,6 +18,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -164,17 +169,19 @@ class ContentEntry2DetailFragmentTest {
             }
         }.toLong()
 
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val launchIntent = Intent(context, MainActivity::class.java).also {
+            it.putExtra(UstadView.ARG_NEXT, "${ContentEntry2DetailView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$uid")
+        }
 
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to uid)) {
-            ContentEntry2DetailFragment().also {fragment ->
-                fragment.installNavController(systemImplNavRule.navController)
-            }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+
+        val activityScenario = launchActivity<MainActivity>(intent = launchIntent)
+                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        onView(withText("Server Title")).check(matches(isDisplayed()))
+        Thread.sleep(10000 * 1000)
 
+        onView(withText("Server Title")).check(matches(isDisplayed()))
         onView(withText(R.string.download)).perform(click())
 
 
