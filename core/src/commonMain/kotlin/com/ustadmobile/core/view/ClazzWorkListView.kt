@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 
 interface ClazzWorkListView: UstadListView<ClazzWork, ClazzWorkWithMetrics> {
 
-    val hasResultViewPermission: Boolean
+    var hasResultViewPermission: Boolean
 
     companion object {
         const val VIEW_NAME = "ClazzWorkListView"

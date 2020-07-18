@@ -4,32 +4,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import androidx.navigation.fragment.findNavController
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemClazzWorkListBinding
 import com.ustadmobile.core.controller.ClazzWorkListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
-import com.ustadmobile.core.view.GetResultMode
-import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMetrics>(),
         ClazzWorkListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -42,7 +31,7 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
     class ClazzWorkListViewHolder(val itemBinding: ItemClazzWorkListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
     class ClazzWorkListRecyclerAdapter(var presenter: ClazzWorkListPresenter?,
-                                       private val canSeeResult: Boolean = false)
+                                       var canSeeResult: Boolean = false)
         : SelectablePagedListAdapter<ClazzWorkWithMetrics, ClazzWorkListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkListViewHolder {
@@ -71,7 +60,8 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
         mPresenter = ClazzWorkListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, this)
 
-        mDataRecyclerViewAdapter = ClazzWorkListRecyclerAdapter(mPresenter, false)
+        mDataRecyclerViewAdapter = ClazzWorkListRecyclerAdapter(mPresenter, hasResultViewPermission)
+
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.clazz_work))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
@@ -124,6 +114,6 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
     override var hasResultViewPermission: Boolean = false
         get() = field
         set(value){
-            mDataRecyclerViewAdapter = ClazzWorkListRecyclerAdapter(mPresenter, value)
+            (mDataRecyclerViewAdapter as ClazzWorkListRecyclerAdapter).canSeeResult = value
         }
 }

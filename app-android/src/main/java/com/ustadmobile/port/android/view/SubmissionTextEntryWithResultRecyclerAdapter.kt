@@ -33,7 +33,7 @@ class SubmissionTextEntryWithResultRecyclerAdapter(clazzWork: ClazzWorkWithSubmi
 
     private var viewHolder: SubmissionTextEntryWithResultViewHolder? = null
 
-    public var _clazzWork : ClazzWorkWithSubmission? = clazzWork
+    var _clazzWork : ClazzWorkWithSubmission? = clazzWork
         get() = field
         set(value){
             if(field == value)
@@ -49,7 +49,7 @@ class SubmissionTextEntryWithResultRecyclerAdapter(clazzWork: ClazzWorkWithSubmi
         return SubmissionTextEntryWithResultViewHolder(
                 ItemClazzworkSubmissionTextEntryBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                    it.clazzWorkWithSubmission = _clazzWork
+                    //it.clazzWorkWithSubmission = _clazzWork
                     it.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
                     it.editMode = modeEdit
                 })
@@ -65,5 +65,7 @@ class SubmissionTextEntryWithResultRecyclerAdapter(clazzWork: ClazzWorkWithSubmi
     }
 
     override fun onBindViewHolder(holder: SubmissionTextEntryWithResultViewHolder, position: Int) {
+        holder.itemBinding.clazzWorkWithSubmission = getItem(position)
+        holder.itemView.tag = getItem(position).clazzWorkUid?:0L
     }
 }

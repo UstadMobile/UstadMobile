@@ -67,6 +67,25 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
         println("Saved admin password to ${adminPassFile.absolutePath}")
     }
 
+    //Create teacher and student for testing
+    val testTeacher = db.personDao.findByUsername("testteacher")
+    if(testTeacher == null) {
+        val teacher = Person("testteacher", "Teacher", "One")
+        teacher.personUid = db.personDao.insert(teacher)
+        val teacherPass = "teacher"
+        db.personAuthDao.insert(PersonAuth(teacher.personUid,
+                PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(teacherPass)))
+    }
+
+    val testStudent = db.personDao.findByUsername("teststudent")
+    if(testStudent == null) {
+        val student = Person("teststudent", "Student", "One")
+        student.personUid = db.personDao.insert(student)
+        val studentPass = "teacher"
+        db.personAuthDao.insert(PersonAuth(student.personUid,
+                PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(studentPass)))
+    }
+
     if(devMode) {
         install(CORS) {
             method(HttpMethod.Get)

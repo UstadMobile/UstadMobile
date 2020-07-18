@@ -233,7 +233,8 @@ fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMembe
         }
     }
 
-    if(clazzMemberWithClazzWorkAndProgress.mProgress >= 0){
+    if(clazzMemberWithClazzWorkAndProgress.clazzWorkHasContent &&
+            clazzMemberWithClazzWorkAndProgress.mProgress >= 0){
         line2Bit2 = " - " + completed + " " + clazzMemberWithClazzWorkAndProgress.mProgress.toInt() +
                 "% " + ofContent
     }

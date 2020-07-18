@@ -44,7 +44,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = ClazzWorkDetailProgressListPresenter(requireContext(),
                 UMAndroidUtil.bundleToMap(arguments), this, di, this)
-        addMode = ListViewAddMode.FAB
+        addMode = ListViewAddMode.NONE
 
         metricsRecyclerAdapter = ClazzWorkMetricsRecyclerAdapter(null, false)
         mDataRecyclerViewAdapter = ClazzWorkProgressListRecyclerAdapter(mPresenter)
@@ -58,7 +58,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
 
     override fun onResume() {
         super.onResume()
-        addMode = ListViewAddMode.FAB
+        addMode = ListViewAddMode.NONE
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(R.string.student_progress)
     }

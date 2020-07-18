@@ -25,7 +25,7 @@
             android:id="@+id/item_clazzwork_submission_result_score_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_8dp"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="@dimen/dimen_16dp"
             android:contentDescription="@string/score"

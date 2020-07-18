@@ -62,26 +62,6 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         val navController = findNavController()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
-        val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
-
-        val tabs = listOf(
-                ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue,
-                ClazzWorkDetailProgressListView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
-                       entityUidValue)
-        val viewNameToTitle = mapOf(
-                ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
-                ClazzWorkDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
-                ClazzWorkDetailProgressListView.VIEW_NAME to getText(R.string.student_progress).toString()
-        )
-
-        mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
-                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
-                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle        )
-
-        Handler().post {
-            mPager?.adapter = mPagerAdapter
-            mTabLayout?.setupWithViewPager(mPager)
-        }
     }
 
     override fun onDestroyView() {
@@ -102,12 +82,41 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
             mBinding?.clazzWork = value
         }
 
-    override var isStudent: Boolean = false
+    override var isStudent: Boolean = true
         get() = field
         set(value) {
             field = value
             if(value) {
                 mBinding?.fragmentClazzWorkDetailAbl?.visibility = View.GONE
+                mBinding?.fragmentClazzworkDetailTablayout?.visibility = View.GONE
+            }
+
+            val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
+
+            val tabs: List<String>
+            tabs = if(isStudent){
+                listOf(
+                        ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue
+                )
+            }else {
+                listOf(
+                        ClazzWorkDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" + entityUidValue,
+                        ClazzWorkDetailProgressListView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
+                                entityUidValue)
+            }
+            val viewNameToTitle = mapOf(
+                    ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
+                    ClazzWorkDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
+                    ClazzWorkDetailProgressListView.VIEW_NAME to getText(R.string.student_progress).toString()
+            )
+
+            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
+                    FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
+                    VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle        )
+
+            Handler().post {
+                mPager?.adapter = mPagerAdapter
+                mTabLayout?.setupWithViewPager(mPager)
             }
         }
 

@@ -67,7 +67,7 @@
             android:id="@+id/line2_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@{@string/three_num_items_with_name_with_comma(clazzWork.markedStudents, @string/marked, clazzWork.submittedStudents, @string/submitted, clazzWork.notSubmittedStudents, @string/not_submitted)}"
+            android:text="@{@string/three_num_items_with_name_with_comma(clazzWork.markedStudents, @string/marked, clazzWork.submittedStudents, @string/submitted, clazzWork.calculateNotSubmittedStudents(), @string/not_submitted)}"
             android:visibility="@{showMetrics?View.VISIBLE:View.GONE}"
             app:layout_constraintEnd_toEndOf="@+id/line1_text"
             app:layout_constraintStart_toStartOf="@+id/line1_text"
@@ -95,6 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
+            android:visibility="@{clazzWork.clazzWorkDueDateTime>0?View.VISIBLE:View.GONE}"
             app:layout_constraintStart_toStartOf="@+id/line1_text"
             app:layout_constraintTop_toBottomOf="@+id/line2_text"
             android:src="@drawable/ic_event_available_black_24dp"/>

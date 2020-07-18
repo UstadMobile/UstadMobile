@@ -5,6 +5,7 @@
 
     <data>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="android.view.View"/>
 
         <variable
             name="clazzWorkWithSubmission"
@@ -53,6 +54,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
             android:contentDescription="@string/school"
+            android:visibility="@{clazzWorkWithSubmission.clazzWorkStartDateTime>0 &amp;&amp; clazzWorkWithSubmission.clazzWorkDueDateTime>0?View.VISIBLE:View.GONE}"
             android:src="@drawable/ic_event_available_black_24dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/barrier2" />
@@ -66,6 +68,7 @@
             android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_marginTop="8dp"
             android:contentDescription="@string/school"
+            android:visibility="@{clazzWorkWithSubmission.clazzWorkStartDateTime>0?View.VISIBLE:View.GONE}"
             app:dateTimePrepend="@{``}"
             app:dateTimeTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkStartTime}"
             app:dateTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkStartDateTime}"
@@ -83,7 +86,7 @@
             android:layout_marginStart="8dp"
             android:contentDescription="@string/school"
             android:text=""
-            android:visibility="visible"
+            android:visibility="@{clazzWorkWithSubmission.clazzWorkStartDateTime>0?View.VISIBLE:View.GONE}"
             app:layout_constraintBottom_toBottomOf="@+id/item_clazzwork_detail_description_start_date"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_detail_description_start_date"
@@ -96,6 +99,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             app:dateTimePrepend="@{@string/due_date}"
+            android:visibility="@{clazzWorkWithSubmission.clazzWorkDueDateTime>0?View.VISIBLE:View.GONE}"
             app:dateTimeTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkDueTime}"
             app:dateTimeLongWithExtra="@{clazzWorkWithSubmission.clazzWorkDueDateTime}"
             app:dateTimeAppend="@{``}"

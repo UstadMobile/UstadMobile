@@ -8,8 +8,6 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
@@ -31,27 +29,41 @@ class ClazzWorkDetailPresenter(context: Any,
 
         view.clazzWorkTitle = clazzWork.clazzWorkTitle
 
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+
+        val clazzMember: ClazzMember? =
+                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+                        entity?.clazzWorkClazzUid?: 0L)
+
+        view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+
         return clazzWork
     }
 
     override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
+
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
-
-        GlobalScope.launch {
-            val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
+        val clazzMember: ClazzMember? =
                 db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
                         entity?.clazzWorkClazzUid?: 0L)
-            }
-            view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-        }
+
+        view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+
+        super.onCreate(savedState)
 
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        //TODO: this
-        return true
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+
+        val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
+            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+                    entity?.clazzWorkClazzUid?: 0L)
+        }
+        val isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        return !isStudent
+
     }
 
     override fun handleClickEdit() {

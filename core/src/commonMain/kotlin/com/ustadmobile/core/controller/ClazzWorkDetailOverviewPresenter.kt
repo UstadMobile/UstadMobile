@@ -61,7 +61,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         view.isStudent = (clazzMember != null &&
                 clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
 
-
+        //If Submission object doesnt exist, create it.
         if(clazzWorkWithSubmission.clazzWorkSubmission == null){
             clazzWorkWithSubmission.clazzWorkSubmission = ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
@@ -140,7 +140,16 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         //TODO: this
-        return true
+
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+
+        val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
+            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+                    entity?.clazzWorkClazzUid?: 0L)
+        }
+        val isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        return !isStudent
+
     }
 
     fun handleClickSubmit(){
@@ -178,6 +187,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                     clazzWorkSubmissionPersonUid = loggedInPersonUid
                 }
             }
+            submission.clazzWorkSubmissionDateTimeFinished = UMCalendarUtil.getDateInMilliPlusDays(0)
 
             if(submission.clazzWorkSubmissionUid == 0L) {
                 submission.clazzWorkSubmissionUid = db.clazzWorkSubmissionDao.insertAsync(submission)

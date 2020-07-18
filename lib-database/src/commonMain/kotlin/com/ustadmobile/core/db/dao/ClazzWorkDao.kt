@@ -26,8 +26,10 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
         LEFT JOIN ClazzMember ON ClazzMember.clazzMemberPersonUid = :personUid
 			AND ClazzMember.clazzMemberClazzUid = ClazzWork.clazzWorkClazzUid 
 			AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1
-        LEFT JOIN ClazzWorkSubmission ON ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid = ClazzMember.clazzMemberUid 
-		WHERE ClazzWork.clazzWorkUid = :uid
+        LEFT JOIN ClazzWorkSubmission ON 
+            ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid = ClazzMember.clazzMemberUid
+             AND ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+		WHERE ClazzWork.clazzWorkUid = :uid 
     """)
     abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission?
 
@@ -88,13 +90,29 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             WHERE ClazzWork.clazzWorkUid = :clazzWorkUid
             AND CAST(ClazzWork.clazzWorkActive AS INTEGER) = 1
         """
+
+
         const val FIND_WITH_METRICS_BY_CLAZZUID = """
             SELECT ClazzWork.*, 
-             0 as totalStudents, 
-             0 as submittedStudents, 
-             0 as notSubmittedStudents,
-             0 as completedStudents, 
-             0 as markedStudents, 
+            
+            (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
+                AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
+                AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
+                ) as totalStudents, 
+            (
+                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
+            ) as submittedStudents, 
+            0 as notSubmittedStudents,
+            0 as completedStudents, 
+            (
+                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
+                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
+            ) as markedStudents,
+
              0 as firstContentEntryUid,
              Clazz.clazzTimeZone as clazzTimeZone 
              FROM ClazzWork 

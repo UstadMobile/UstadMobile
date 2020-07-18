@@ -88,6 +88,9 @@ fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: Text
     }else{
         dateWithTimeFormatWithPrepend.format(arrayOf(prepend, dateDate, timeDate, append))
     }
+    if(date == 0L){
+        text=""
+    }
     et.text = text
 
 }

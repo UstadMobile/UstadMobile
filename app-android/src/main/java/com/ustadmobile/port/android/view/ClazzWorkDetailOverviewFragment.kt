@@ -15,14 +15,12 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
 import com.toughra.ustadmobile.databinding.ItemClazzworkDetailDescriptionBinding
 import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionResultBinding
-import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionTextEntryBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.ListViewMode
@@ -31,9 +29,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
-import org.kodein.di.direct
 import org.kodein.di.instance
-import org.kodein.di.on
 
 interface NewCommentHandler{
     fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String, public: Boolean, to: Long, from: Long)
@@ -57,7 +53,12 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var contentRecyclerAdapter: ContentEntryList2Fragment.ContentEntryListRecyclerAdapter? = null
     private var contentLiveData: LiveData<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
     private val contentObserver = Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
-        t -> contentRecyclerAdapter?.submitList(t)
+        t -> {
+        if(t != null && t?.size != null && t?.size >0){
+            contentHeadingRecyclerAdapter?.visible = true
+        }
+        contentRecyclerAdapter?.submitList(t)
+    }
     }
 
     private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter? = null
@@ -68,6 +69,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var contentHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var submissionResultRecyclerAdapter: SubmissionResultRecyclerAdapter? = null
     private var submissionFreeTextRecyclerAdapter: SubmissionTextEntryWithResultRecyclerAdapter ? = null
+    private val freeTextObserver = Observer<List<ClazzWorkWithSubmission>?> {
+        t -> submissionFreeTextRecyclerAdapter?.submitList(t)
+    }
     private var submissionHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
     private var questionsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
     private var submissionButtonRecyclerAdapter: SimpleButtonRecyclerAdapter? = null
@@ -220,8 +224,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         //fragment_list_recyclerview
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
 
-
-
+        
         //Main Merger:PP
         detailRecyclerAdapter = ClazzWorkBasicDetailsRecyclerAdapter(entity)
         detailRecyclerAdapter?.visible = false
@@ -292,7 +295,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         contentHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.content).toString()
         )
-        contentHeadingRecyclerAdapter?.visible = true
+        contentHeadingRecyclerAdapter?.visible = false
 
 
         mPresenter = ClazzWorkDetailOverviewPresenter(requireContext(),
@@ -323,6 +326,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     }
 
     override fun onClickButton(view: View) {
+        //TODO: Disable Submission views.
         mPresenter?.handleClickSubmit()
     }
 
@@ -331,6 +335,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         mBinding = null
         mPresenter = null
         entity = null
+        contentLiveData = null
+        privateCommentsLiveData = null
+        publicCommentsLiveData = null
         newPrivateCommentRecyclerAdapter = null
         publicCommentsRecyclerAdapter = null
         privateCommentsRecyclerAdapter = null
@@ -373,11 +380,19 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }
 
             submissionButtonRecyclerAdapter?.visible = isStudent &&
-                    entity?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L &&
-                    entity?.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+                    (entity?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L || entity?.clazzWorkSubmission == null)
+                    &&
+                    (entity?.clazzWorkSubmission == null || entity?.clazzWorkSubmissionType !=
+                            ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE)
 
-            submissionHeadingRecyclerAdapter?.visible =
-                    submissionButtonRecyclerAdapter?.visible?:false
+            submissionResultRecyclerAdapter?.visible = isStudent &&
+                    entity?.clazzWorkSubmission?.clazzWorkSubmissionMarkerPersonUid != 0L
+
+
+            submissionHeadingRecyclerAdapter?.visible = isStudent &&
+                    (submissionResultRecyclerAdapter?.visible?:false ||
+                            submissionFreeTextRecyclerAdapter?.visible?:false ||
+                            submissionButtonRecyclerAdapter?.visible?:false)
 
         }
 
@@ -388,13 +403,18 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             detailRecyclerAdapter?._clazzWork = entity
             detailRecyclerAdapter?.visible = true
 
-            submissionFreeTextRecyclerAdapter?._clazzWork = entity
 
             submissionResultRecyclerAdapter?._clazzWork = entity
-            submissionResultRecyclerAdapter?.visible = true
+            //submissionResultRecyclerAdapter?.visible = true
+            submissionResultRecyclerAdapter?.visible = isStudent &&
+                    value?.clazzWorkSubmission?.clazzWorkSubmissionMarkerPersonUid != 0L
 
             submissionFreeTextRecyclerAdapter?.visible = value?.clazzWorkSubmissionType ==
                     ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT && isStudent
+
+            if(submissionFreeTextRecyclerAdapter?.visible == true){
+                submissionFreeTextRecyclerAdapter?.submitList(listOf(entity))
+            }
 
             if(value?.clazzWorkSubmissionType ==
                     ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ && !isStudent){
@@ -405,8 +425,12 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                     value?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L &&
                     value.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
 
-            submissionHeadingRecyclerAdapter?.visible =
-                    submissionButtonRecyclerAdapter?.visible?:false
+
+            submissionHeadingRecyclerAdapter?.visible = isStudent &&
+                    (submissionResultRecyclerAdapter?.visible?:false ||
+                    submissionFreeTextRecyclerAdapter?.visible?:false ||
+                    submissionButtonRecyclerAdapter?.visible?:false)
+
 
             newPublicCommentRecyclerAdapter?.entityUid = entity?.clazzWorkUid?:0L
             newPublicCommentRecyclerAdapter?.entityUid = entity?.clazzWorkUid?:0L
@@ -420,7 +444,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }
         }
 
-    override var clazzWorkContent: DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
+    override var clazzWorkContent: DataSource.Factory<Int,
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
         get() = field
         set(value) {
             contentLiveData?.removeObserver(contentObserver)

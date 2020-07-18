@@ -4,8 +4,10 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
@@ -31,9 +33,19 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //TODO
+        val clazzUid = arguments.get(UstadView.ARG_CLAZZ_UID)?.toLong()?:0L
 
-        return true
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+        val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
+            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, clazzUid)
+        }
+
+        val isStudent = (clazzMember != null &&
+                clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+
+        view.hasResultViewPermission = !isStudent
+
+        return !isStudent
     }
 
     private fun updateListOnView() {

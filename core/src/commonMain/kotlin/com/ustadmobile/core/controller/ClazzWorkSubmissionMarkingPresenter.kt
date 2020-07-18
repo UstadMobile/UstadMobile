@@ -115,7 +115,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         val privateComments = withTimeoutOrNull(2000) {
             db.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
                     ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
-                    clazzMember?.clazzMemberPersonUid?:0L, loggedInPersonUid)
+                    clazzMember?.clazzMemberPersonUid?:0L)
         }
         view.privateComments = privateComments
 

@@ -63,12 +63,12 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:hint="@{hintText}"
             android:inputType="textCapSentences"
-            android:singleLine="true"
+            android:singleLine="false"
+            android:text="@={commentText}"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/item_comment_new_send_ib"
+            app:layout_constraintEnd_toStartOf="@+id/item_comment_new_send_ib"
             app:layout_constraintStart_toEndOf="@+id/item_comment_new_person_icon"
-            app:layout_constraintTop_toTopOf="parent"
-            android:text="@={commentText}" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/item_comment_new_send_ib"
