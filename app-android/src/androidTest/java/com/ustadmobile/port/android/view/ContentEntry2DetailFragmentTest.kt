@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.recyclerview.widget.RecyclerView
@@ -8,6 +9,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.rule.GrantPermissionRule
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -20,7 +22,9 @@ import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
+import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -34,7 +38,7 @@ class ContentEntry2DetailFragmentTest {
     @JvmField
     @Rule
     var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true,
-        controlServerUrl = "http://192.168.70.30:8900")
+        controlServerUrl = "http://192.168.70.31:8900")
 
     @JvmField
     @Rule
@@ -52,6 +56,10 @@ class ContentEntry2DetailFragmentTest {
     @JvmField
     @Rule
     val adbScreenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
+    val grantPermissionRule = GrantPermissionRule.grant(WRITE_EXTERNAL_STORAGE)
 
     @AdbScreenRecord("Given content entry exists should show user selected content entry")
     @Test
@@ -148,6 +156,15 @@ class ContentEntry2DetailFragmentTest {
             }
         }.toLong()
 
+        val containerUid = runBlocking {
+            defaultHttpClient().get<String>("${dbRule.endpointUrl}UmContainer/addContainer") {
+                parameter("entryUid", uid)
+                parameter("type", "epub")
+                parameter("resource", "test.epub")
+            }
+        }.toLong()
+
+
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to uid)) {
             ContentEntry2DetailFragment().also {fragment ->
@@ -157,6 +174,11 @@ class ContentEntry2DetailFragmentTest {
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         onView(withText("Server Title")).check(matches(isDisplayed()))
+
+        onView(withText(R.string.download)).perform(click())
+
+
+
     }
 
 
