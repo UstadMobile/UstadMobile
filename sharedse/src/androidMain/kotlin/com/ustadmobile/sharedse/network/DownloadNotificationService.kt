@@ -403,7 +403,7 @@ class DownloadNotificationService : Service(), DIAware {
         val mNotificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID,
                 NOTIFICATION_CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH)
         mNotificationChannel.vibrationPattern = longArrayOf(0)
-        mNotificationChannel.enableVibration(true)
+        mNotificationChannel.enableVibration(false)
         mNotificationChannel.setSound(null, null)
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
                 .createNotificationChannel(mNotificationChannel)

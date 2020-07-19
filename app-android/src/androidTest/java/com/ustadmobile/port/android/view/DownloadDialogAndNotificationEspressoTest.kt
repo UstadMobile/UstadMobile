@@ -22,7 +22,6 @@ import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
@@ -124,9 +123,9 @@ class DownloadDialogAndNotificationEspressoTest {
 
         val testAccount = UmAccount(0, "test", "",testEndpoint)
 
-        UmAccountManager.setActiveAccount(testAccount, mContext)
+        //UmAccountManager.setActiveAccount(testAccount, mContext)
 
-        umRepo = UmAccountManager.getRepositoryForActiveAccount(mContext)
+        //umRepo = UmAccountManager.getRepositoryForActiveAccount(mContext)
 
 
         prepareContentEntries()
