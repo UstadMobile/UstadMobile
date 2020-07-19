@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -14,6 +15,7 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -98,11 +100,12 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
 
         if (uploadAttemptStatus == JobStatus.COMPLETE) {
 
-            val container = db.containerDao.findByUid(containerUploadJob.cujContainerUid)
+            val container = db.containerDao.findByUid(containerUploadJob.cujContainerUid) ?: throw Exception()
+            val containerStr = Json.stringify(Container.serializer(), container)
 
             val job = db.containerUploadJobDao.findByUid(containerUploadJob.cujUid)
             currentHttpClient.post<HttpStatement>() {
-                url(UMFileUtil.joinPaths(endpointUrl, "/upload/sessionId/${job.sessionId}/"))
+                url(UMFileUtil.joinPaths(endpointUrl, "/upload/sessionId/${job.sessionId}/$containerStr"))
                 header("content-type","application/json")
                 body = containerEntries
             }.execute()
