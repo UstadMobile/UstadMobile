@@ -20,7 +20,7 @@ typealias OnNodeStatusChangeFn = suspend (bluetoothAddr: String) -> Unit
 typealias OnNodeReputationChanged = suspend (bluetoothAddr: String, reputation: Int) -> Unit
 
 class LocalAvailabilityManagerImpl(private val context: Any,
-                                   private val entryStatusTaskMaker: StatusTaskMakerFn,
+                                   private val entryStatusTaskMaker: StatusTaskMakerFn = { context, containerUids, networkNode -> null },
                                    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
                                    private val onNewNodeDiscovered: OnNodeStatusChangeFn = { },
                                    private val onNodeLost: OnNodeStatusChangeFn = { },

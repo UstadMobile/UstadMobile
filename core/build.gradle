@@ -284,6 +284,9 @@ kotlin {
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"
                 implementation "io.ktor:ktor-client-android:$version_ktor"
 
+                //dependency injection
+                implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
+
                 implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
                 implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
             }

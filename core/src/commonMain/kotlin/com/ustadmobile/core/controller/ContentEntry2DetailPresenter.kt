@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -27,6 +28,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 
 class ContentEntry2DetailPresenter(context: Any,
@@ -39,7 +41,7 @@ class ContentEntry2DetailPresenter(context: Any,
 
     private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
 
-    private val containerDownloadManager: ContainerDownloadManager? by di.instanceOrNull<ContainerDownloadManager>()
+    private val containerDownloadManager: ContainerDownloadManager? by di.on(accountManager.activeAccount).instanceOrNull()
 
     private val goToEntryFn: GoToEntryFn by di.instance<GoToEntryFn>()
 
@@ -51,6 +53,7 @@ class ContentEntry2DetailPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val entryUuid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        println(containerDownloadManager)
         containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
                 downloadJobItemLiveData = it.getDownloadJobItemByContentEntryUid(entryUuid).apply {
@@ -88,7 +91,7 @@ class ContentEntry2DetailPresenter(context: Any,
                 openContentEntry()
             }
         } else if (isDownloadEnabled) {
-            view.downloadOptions = arguments
+            view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString() ?: "0")))
         }
     }
 

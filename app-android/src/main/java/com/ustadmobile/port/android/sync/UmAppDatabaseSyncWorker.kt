@@ -2,9 +2,7 @@ package com.ustadmobile.port.android.sync
 
 import android.content.Context
 import androidx.work.*
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import kotlinx.coroutines.runBlocking
@@ -15,14 +13,15 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
 
     override fun doWork(): Result {
         try {
-            println("Start sync")
-            val clientRepo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-            runBlocking {
-                val syncRepo =(clientRepo as DoorDatabaseSyncRepository)
-                //syncRepo.sync(null)
-            }
-
-            UMLog.l(UMLog.INFO, 100, "database syncWith repo ran")
+//            TODO: SyncWorker would need to iterate over active databases
+//            println("Start sync")
+//            val clientRepo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
+//            runBlocking {
+//                val syncRepo =(clientRepo as DoorDatabaseSyncRepository)
+//                //syncRepo.sync(null)
+//            }
+//
+//            UMLog.l(UMLog.INFO, 100, "database syncWith repo ran")
         } catch (e: Exception) {
             UMLog.l(UMLog.WARN, 101, "Exception running syncWith :" + e.message)
         }

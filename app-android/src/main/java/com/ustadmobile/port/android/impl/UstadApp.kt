@@ -11,16 +11,27 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.core.networkmanager.initPicasso
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager
+import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.sharedse.network.*
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
+import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import org.kodein.di.*
 
@@ -44,7 +55,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
-                    context.url, "", defaultHttpClient())
+                    context.url, "", defaultHttpClient()).also {
+                (it as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+            }
         }
 
         bind<EmbeddedHTTPD>() with singleton {
@@ -57,7 +70,31 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }
 
+        bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerAndroidImpl(applicationContext) }
+
         constant(TAG_DOWNLOAD_ENABLED) with true
+
+        bind<ContainerDownloadManager>() with scoped(EndpointScope.Default).singleton {
+            ContainerDownloadManagerImpl(endpoint = context, di = di)
+        }
+
+        bind<DownloadPreparationRequester>() with scoped(EndpointScope.Default).singleton {
+            DownloadPreparationRequesterAndroidImpl(applicationContext, context)
+        }
+
+        bind<ContainerDownloadRunner>() with factory {
+            arg: DownloadJobItemRunnerDIArgs -> DownloadJobItemRunner(arg.downloadJobItem,
+                arg.endpoint.url, di = di)
+        }
+
+        bind<CoroutineDispatcher>(tag = TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
+
+        bind<LocalAvailabilityManager>() with scoped(EndpointScope.Default).singleton {
+            val db: UmAppDatabase = instance(tag = TAG_DB)
+            LocalAvailabilityManagerImpl(applicationContext, locallyAvailableContainerDao = db.locallyAvailableContainerDao)
+        }
+
+        bind<ContainerFetcher>() with singleton { ContainerFetcherJvm(di) }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }

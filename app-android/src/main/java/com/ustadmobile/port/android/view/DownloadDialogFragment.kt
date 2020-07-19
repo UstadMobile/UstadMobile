@@ -103,7 +103,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
 
         mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
-                this@DownloadDialogFragment, di, viewLifecycleOwner).also {
+                this@DownloadDialogFragment, di, this).also {
             it.onCreate(null)
         }
 
@@ -116,7 +116,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         this.storageDirs = storageOptions
         for (umStorageDir in storageOptions) {
             val deviceStorageLabel = String.format(impl.getString(
-                    MessageID.download_storage_option_device, context!!), umStorageDir.name,
+                    MessageID.download_storage_option_device, requireContext()), umStorageDir.name,
                     UMFileUtil.formatFileSize(umStorageDir.usableSpace))
             options.add(deviceStorageLabel)
         }

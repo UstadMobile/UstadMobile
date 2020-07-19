@@ -56,10 +56,6 @@
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.WebChunkActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="" />
 
 
 

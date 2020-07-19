@@ -1,9 +1,6 @@
 package com.ustadmobile.core.impl
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
@@ -100,6 +97,12 @@ class UstadAccountManagerTest {
                 loggedInAccount.userAtServer, accountManager.activeAccount.userAtServer)
         Assert.assertEquals("There is one stored account", 1,
                 accountManager.storedAccounts.size)
+        argumentCaptor<String> {
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
+            val accountSaved = Json.parse(UstadAccounts.serializer(), firstValue)
+            Assert.assertEquals("Saved account as active", loggedInAccount.userAtServer,
+                    accountSaved.currentAccount)
+        }
     }
 
     @Test
@@ -122,6 +125,15 @@ class UstadAccountManagerTest {
                 accountManager.storedAccounts.size)
         Assert.assertEquals("Active account is the newly logged in account",
                 loggedInAccount.userAtServer, accountManager.activeAccount.userAtServer)
+
+        argumentCaptor<String> {
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
+            val accountSaved = Json.parse(UstadAccounts.serializer(), firstValue)
+            Assert.assertEquals("Saved account as active", loggedInAccount.userAtServer,
+                    accountSaved.currentAccount)
+            Assert.assertEquals("Two accounts were saved", 2,
+                accountSaved.storedAccounts.size)
+        }
     }
 
     @Test
@@ -178,6 +190,12 @@ class UstadAccountManagerTest {
                 "joe@$mockServerUrl", accountManager.activeAccount.userAtServer)
         Assert.assertEquals("AccountManager still has both accounts stored", 2,
             accountManager.storedAccounts.size)
+        argumentCaptor<String> {
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
+            val accountSaved = Json.parse(UstadAccounts.serializer(), firstValue)
+            Assert.assertEquals("Saved account as active", "joe@$mockServerUrl",
+                    accountSaved.currentAccount)
+        }
     }
 
     @Test
@@ -199,6 +217,12 @@ class UstadAccountManagerTest {
 
         Assert.assertEquals("Most recently used account after account that was removed is now active",
             "harry@$mockServerUrl", accountManager.activeAccount.userAtServer)
+        argumentCaptor<String> {
+            verify(mockSystemImpl, atLeastOnce()).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
+            val accountSaved = Json.parse(UstadAccounts.serializer(), lastValue)
+            Assert.assertEquals("Fallback account is saved as active acount", "harry@$mockServerUrl",
+                    accountSaved.currentAccount)
+        }
     }
 
     @Test

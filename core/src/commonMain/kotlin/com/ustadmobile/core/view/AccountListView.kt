@@ -9,6 +9,10 @@ interface AccountListView : UstadView {
 
     var activeAccountLive: DoorLiveData<UmAccount>?
 
+    fun showContentEntryList(account: UmAccount)
+
+    fun showGetStarted()
+
     companion object {
 
         const val VIEW_NAME = "AccountListView"

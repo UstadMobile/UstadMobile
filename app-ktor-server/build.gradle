@@ -8,7 +8,7 @@ plugins {
     //TODO: This should be defined by a variable, which might need to ome from settings.gradle
     id 'com.github.johnrengelman.shadow'
     id 'kotlinx-serialization'
-    id 'com.github.psxpaul.execfork' version '0.1.11'
+    id 'com.github.psxpaul.execfork' version '0.1.13'
 }
 
 

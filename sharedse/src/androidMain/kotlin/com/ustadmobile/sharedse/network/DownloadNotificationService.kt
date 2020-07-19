@@ -1,10 +1,8 @@
 package com.ustadmobile.sharedse.network
 
 import android.app.*
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -12,58 +10,39 @@ import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.port.sharedse.R
 import java.util.concurrent.atomic.AtomicInteger
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.DownloadJob
 import kotlinx.coroutines.*
+import org.kodein.di.*
+import org.kodein.di.android.di
+import java.lang.IllegalArgumentException
 
 /**
  * This services monitors the download job statuses and act accordingly
  */
-class DownloadNotificationService : Service() {
+class DownloadNotificationService : Service(), DIAware {
 
-    private val mNetworkServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, serviceBinder: IBinder) {
-//            mNetworkServiceBound = true
-//            val networkService = (serviceBinder as NetworkManagerBleAndroidService.LocalServiceBinder).service
-//            networkService.runWhenNetworkManagerReady {
-//                val boundNetworkService = networkService.networkManagerBle!!
-//                networkManagerBle = boundNetworkService
-//                networkManagerDeferred.complete(boundNetworkService)
-//            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName) {
-//            mNetworkServiceBound = false
-//            networkManagerBle = null
-        }
-    }
-
-    private var mNetworkServiceBound = false
-
-    private var networkManagerBle: NetworkManagerBle? = null
-
-    private val networkManagerDeferred = CompletableDeferred<NetworkManagerBle> ()
+    override val di: DI by di()
 
     private lateinit var mNotificationManager: NotificationManagerCompat
 
     private val notificationIdRef = AtomicInteger(9)
 
-    private lateinit var umAppDatabase: UmAppDatabase
-
-    private lateinit var umAppDatabaseRepo: UmAppDatabase
-
-    private lateinit var impl: UstadMobileSystemImpl
+    private val impl: UstadMobileSystemImpl by instance()
 
     private var stopped = false
 
@@ -153,7 +132,8 @@ class DownloadNotificationService : Service() {
         }
     }
 
-    inner class DownloadJobNotificationHolder(val downloadJobUid: Int, notifyAfterInit: Boolean = true) : NotificationHolder2(
+    inner class DownloadJobNotificationHolder(val downloadJobUid: Int, endpoint: Endpoint,
+                                              notifyAfterInit: Boolean = true) : NotificationHolder2(
             impl.getString(MessageID.loading, applicationContext),
             impl.getString(MessageID.waiting, applicationContext)), DoorObserver<DownloadJob?> {
 
@@ -163,28 +143,29 @@ class DownloadNotificationService : Service() {
         lateinit var downloadJobLiveData: DoorLiveData<DownloadJob?>
 
         init {
-//            builder.setProgress(MAX_PROGRESS_VALUE, 0, false)
-//                    .addAction(createAction(downloadJobUid,
-//                            ACTION_CANCEL_DOWNLOAD, impl.getString(MessageID.download_cancel_label,
-//                            applicationContext)))
-//                    .addAction(createAction(downloadJobUid,
-//                            ACTION_PAUSE_DOWNLOAD, impl.getString(MessageID.download_pause_download,
-//                            applicationContext)))
-//                    .setContentTitle(contentTitle)
-//                    .setContentText(contentText)
-//
-//            GlobalScope.launch(Dispatchers.Main) {
-//                val downloadJobTitleInDb = umAppDatabase.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid)
-//                        ?: ""
-//                builder.setContentTitle(downloadJobTitleInDb)
-//                contentTitle = downloadJobTitleInDb
-//                if (notifyAfterInit)
-//                    doNotify()
-//
-//                downloadJobLiveData = networkManagerDeferred.await().containerDownloadManager
-//                        .getDownloadJob(downloadJobUid)
-//                downloadJobLiveData.observeForever(this@DownloadJobNotificationHolder)
-//            }
+            builder.setProgress(MAX_PROGRESS_VALUE, 0, false)
+                    .addAction(createAction(downloadJobUid,
+                            ACTION_CANCEL_DOWNLOAD, impl.getString(MessageID.download_cancel_label,
+                            applicationContext)))
+                    .addAction(createAction(downloadJobUid,
+                            ACTION_PAUSE_DOWNLOAD, impl.getString(MessageID.download_pause_download,
+                            applicationContext)))
+                    .setContentTitle(contentTitle)
+                    .setContentText(contentText)
+
+            GlobalScope.launch(Dispatchers.Main) {
+                val db: UmAppDatabase = on(endpoint).direct.instance(tag = TAG_DB)
+                val downloadJobTitleInDb = db.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid)
+                        ?: ""
+                builder.setContentTitle(downloadJobTitleInDb)
+                contentTitle = downloadJobTitleInDb
+                if (notifyAfterInit)
+                    doNotify()
+
+                val containerDownloadManager: ContainerDownloadManager = di.on(endpoint).direct.instance()
+                downloadJobLiveData = containerDownloadManager.getDownloadJob(downloadJobUid)
+                downloadJobLiveData.observeForever(this@DownloadJobNotificationHolder)
+            }
         }
 
         override fun onChanged(t: DownloadJob?) {
@@ -220,10 +201,10 @@ class DownloadNotificationService : Service() {
                     .setContentText(contentText)
 
             GlobalScope.launch {
-                val downloadJobTitleInDb = umAppDatabase.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid) ?: ""
-                builder.setContentTitle(downloadJobTitleInDb)
-                contentTitle = downloadJobTitleInDb
-                doNotify()
+//                val downloadJobTitleInDb = umAppDatabase.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid) ?: ""
+//                builder.setContentTitle(downloadJobTitleInDb)
+//                contentTitle = downloadJobTitleInDb
+//                doNotify()
 
             }
         }
@@ -288,13 +269,6 @@ class DownloadNotificationService : Service() {
         super.onCreate()
         mNotificationManager = NotificationManagerCompat.from(this)
         createChannel()
-
-        umAppDatabase = UmAccountManager.getActiveDatabase(this)
-        umAppDatabaseRepo = UmAccountManager.getRepositoryForActiveAccount(
-                this@DownloadNotificationService)
-
-
-        impl = UstadMobileSystemImpl.instance
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -318,22 +292,30 @@ class DownloadNotificationService : Service() {
         }
 
         val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: -1
+        val endpointUrl = intentExtras?.getString(EXTRA_ENDPOINT)
+        val endpoint: Endpoint? = if(endpointUrl != null) Endpoint(endpointUrl) else null
+
         when (intentAction) {
             ACTION_PREPARE_DOWNLOAD -> {
+                val endpointVal = endpoint ?: throw IllegalArgumentException("ACTION_PREPARE_DOWNLOAD requires EXTRA_ENDPOINT")
+
                 val downloadJobNotificationHolder = activeDownloadJobNotifications
                                 .firstOrNull {it.downloadJobUid == downloadJobUid }
-                        ?: DownloadJobNotificationHolder(downloadJobUid).also {
+                        ?: DownloadJobNotificationHolder(downloadJobUid, endpointVal).also {
                             activeDownloadJobNotifications.add(it)
                         }
 
+
                 GlobalScope.launch {
-//                    val downloadJobPreparer = DownloadJobPreparer(
-//                            downloadJobUid = downloadJobUid)
-//                    val containerDownloadManager = networkManagerDeferred.await().containerDownloadManager
-//                    downloadJobPreparer.prepare(containerDownloadManager,
-//                            appDatabase = umAppDatabase, appDatabaseRepo = umAppDatabaseRepo,
-//                            onProgress = {})
-//                    containerDownloadManager.enqueue(downloadJobUid)
+                    val downloadJobPreparer = DownloadJobPreparer(downloadJobUid = downloadJobUid)
+                    val containerDownloadManager: ContainerDownloadManager by on(endpointVal).instance()
+                    val appDatabase: UmAppDatabase by on(endpointVal).instance(tag = TAG_DB)
+                    val appDatabaseRepo: UmAppDatabase by on(endpointVal).instance(tag = TAG_REPO)
+
+                    downloadJobPreparer.prepare(containerDownloadManager,
+                            appDatabase = appDatabase, appDatabaseRepo = appDatabaseRepo,
+                            onProgress = {})
+                    containerDownloadManager.enqueue(downloadJobUid)
                 }
 
 
@@ -347,19 +329,19 @@ class DownloadNotificationService : Service() {
             }
 
             ACTION_DOWNLOADJOBITEM_STARTED -> {
-                var downloadJobNotificationHolder = activeDownloadJobNotifications
-                        .firstOrNull { it.downloadJobUid == downloadJobUid }
-                if (downloadJobNotificationHolder == null) {
-                    downloadJobNotificationHolder = DownloadJobNotificationHolder(downloadJobUid)
-                    activeDownloadJobNotifications.add(downloadJobNotificationHolder)
-                }
-
-                if (!foregroundActive && foregroundNotificationHolder == null) {
-                    foregroundNotificationHolder = downloadJobNotificationHolder
-                } else {
-                    UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: Starting notification for new download: $downloadJobUid")
-                    downloadJobNotificationHolder.doNotify()
-                }
+//                var downloadJobNotificationHolder = activeDownloadJobNotifications
+//                        .firstOrNull { it.downloadJobUid == downloadJobUid }
+//                if (downloadJobNotificationHolder == null) {
+//                    downloadJobNotificationHolder = DownloadJobNotificationHolder(downloadJobUid)
+//                    activeDownloadJobNotifications.add(downloadJobNotificationHolder)
+//                }
+//
+//                if (!foregroundActive && foregroundNotificationHolder == null) {
+//                    foregroundNotificationHolder = downloadJobNotificationHolder
+//                } else {
+//                    UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: Starting notification for new download: $downloadJobUid")
+//                    downloadJobNotificationHolder.doNotify()
+//                }
             }
 
             ACTION_PAUSE_DOWNLOAD -> {
@@ -421,7 +403,7 @@ class DownloadNotificationService : Service() {
         val mNotificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID,
                 NOTIFICATION_CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH)
         mNotificationChannel.vibrationPattern = longArrayOf(0)
-        mNotificationChannel.enableVibration(true)
+        mNotificationChannel.enableVibration(false)
         mNotificationChannel.setSound(null, null)
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
                 .createNotificationChannel(mNotificationChannel)
@@ -444,9 +426,6 @@ class DownloadNotificationService : Service() {
     @ExperimentalCoroutinesApi
     override fun onDestroy() {
         super.onDestroy()
-        if (mNetworkServiceBound)
-            unbindService(mNetworkServiceConnection)
-
     }
 
     private fun canCreateGroupedNotification(): Boolean {
@@ -464,6 +443,8 @@ class DownloadNotificationService : Service() {
         const val ACTION_PREPARE_DOWNLOAD = "ACTION_PREPARE_DOWNLOAD"
 
         const val ACTION_DOWNLOADJOBITEM_STARTED = "ACTION_DOWNLOADJOBITEM_STARTED"
+
+        const val EXTRA_ENDPOINT = "EXTRA_ENDPOINT"
 
         const val EXTRA_DOWNLOADJOBUID = "EXTRA_DOWNLOADJOBUID"
 
