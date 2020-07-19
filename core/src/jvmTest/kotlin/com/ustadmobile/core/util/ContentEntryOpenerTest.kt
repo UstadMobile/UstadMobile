@@ -13,7 +13,6 @@ import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -23,7 +22,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class TestGoToContentEntryUtil {
+class ContentEntryOpenerTest {
 
     private lateinit var umAppDatabase: UmAppDatabase
 
@@ -82,8 +81,6 @@ class TestGoToContentEntryUtil {
         runBlocking {
             ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
                 true, false, false)
-//            goToContentEntry(contentEntry.contentEntryUid, umAppDatabase, context, impl,
-//                    true, false, false)
             verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
         }
     }
@@ -108,8 +105,8 @@ class TestGoToContentEntryUtil {
             dj.djiStatus = JobStatus.STARTING
             umAppDatabase.downloadJobItemDao.insert(dj)
 
-            goToContentEntry(contentEntry.contentEntryUid, umAppDatabase, context, impl,
-                    true, true, false)
+            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
+                true, true, false)
             verify(impl).go(eq(ContentEntry2DetailView.VIEW_NAME), any(), eq(context))
         }
     }
@@ -118,8 +115,8 @@ class TestGoToContentEntryUtil {
     @Test
     fun givenDownloadNotRequired_whenEntryDownloaded_thenOpenContent(){
         runBlocking {
-            goToContentEntry(contentEntry.contentEntryUid, umAppDatabase, context, impl,
-                    false, false, false)
+            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
+                    false, true, false)
             verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
         }
     }
@@ -127,8 +124,8 @@ class TestGoToContentEntryUtil {
     @Test
     fun givenDownloadNotRequired_whenEntryNotDownloaded_thenOpenContent(){
         runBlocking {
-            goToContentEntry(contentEntry.contentEntryUid, umAppDatabase, context, impl,
-                    false, false, false)
+            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
+                    false, true, false)
             verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
         }
     }
@@ -162,17 +159,11 @@ class TestGoToContentEntryUtil {
             dj.djiStatus = JobStatus.COMPLETE
             umAppDatabase.downloadJobItemDao.insert(dj)
 
-            goToContentEntry(contentEntry.contentEntryUid, umAppDatabase, context, impl,
+            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
                     false, true, false)
             verify(impl).openFileInDefaultViewer(eq(context), any(), eq("video/wav"))
-
         }
 
     }
-
-
-
-
-
 
 }

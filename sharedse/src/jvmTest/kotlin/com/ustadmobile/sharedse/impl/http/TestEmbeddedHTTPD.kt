@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.impl.http
 
+import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
@@ -11,8 +12,6 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.DI
-import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.*
 import java.io.IOException
 
 /**
@@ -20,7 +19,7 @@ import java.io.IOException
  */
 class TestEmbeddedHTTPD {
 
-    private var httpd: EmbeddedHTTPD? = null
+    private lateinit var httpd: EmbeddedHTTPD
 
     private var context: Any = Any()
 
@@ -55,50 +54,42 @@ class TestEmbeddedHTTPD {
         di = DI {
 
         }
-//        UmAccountManager.bindDbForActiveContext(context)
-//        var db = UmAccountManager.getActiveAccount(context)
         httpd = EmbeddedHTTPD(0, di)
-        httpd!!.start()
+        httpd.start()
     }
 
     @After
     fun stopServer() {
-        httpd!!.stop()
-        httpd = null
+        httpd.stop()
     }
 
     @Test
     @Throws(IOException::class)
     fun givenResponseListenerAdded_whenRequestMade_shouldReceiveResponseStartAndFinishedEvent() {
 
-        httpd!!.addRoute(".*", EmbeddeHttpdResponder::class.java)
+        httpd.addRoute(".*", EmbeddeHttpdResponder::class.java)
 
-        val responseListener = mock(EmbeddedHTTPD.ResponseListener::class.java)
-        httpd!!.addResponseListener(responseListener)
+        val responseListener = mock<EmbeddedHTTPD.ResponseListener>()
+        httpd.addResponseListener(responseListener)
 
         val client = HttpClient()
 
         runBlocking {
-            client.get<String>(httpd!!.localHttpUrl + "dir/filename.txt")
+            client.get<String>(httpd.localHttpUrl + "dir/filename.txt")
 
-            //val response = UstadMobileSystemImpl.instance.makeRequestSync(
-           //         UmHttpRequest(context!!, httpd!!.localHttpUrl + "dir/filename.txt"))
-            val sessionArgumentCaptor = ArgumentCaptor.forClass(
-                    NanoHTTPD.IHTTPSession::class.java)
-            val responseArgumentCaptor = ArgumentCaptor.forClass(
-                    NanoHTTPD.Response::class.java)
+            argumentCaptor<NanoHTTPD.IHTTPSession> {
+                verify(responseListener).responseStarted(capture(), any())
+                Assert.assertEquals("Received expected request on response started",
+                        "/dir/filename.txt", firstValue.uri)
+            }
 
-            verify(responseListener).responseStarted(sessionArgumentCaptor.capture(),
-                    responseArgumentCaptor.capture())
-            Assert.assertEquals("Received expected request on response started",
-                    "/dir/filename.txt", sessionArgumentCaptor.value.uri)
+            argumentCaptor<NanoHTTPD.IHTTPSession>() {
+                verify(responseListener, timeout(10000)).responseFinished(capture(), any())
+                Assert.assertEquals("Received expected request on response finished",
+                        "/dir/filename.txt", firstValue.uri)
+            }
 
-            verify(responseListener, timeout(10000)).responseFinished(sessionArgumentCaptor.capture(),
-                    responseArgumentCaptor.capture())
-            Assert.assertEquals("Received expected request on response finished",
-                    "/dir/filename.txt", sessionArgumentCaptor.value.uri)
-
-            httpd!!.removeResponseListener(responseListener)
+            httpd.removeResponseListener(responseListener)
 
         }
     }

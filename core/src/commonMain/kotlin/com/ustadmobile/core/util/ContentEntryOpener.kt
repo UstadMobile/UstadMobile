@@ -14,7 +14,6 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
-import kotlin.js.JsName
 
 private val mimeTypeToViewNameMap = mapOf(
         "application/tincan+zip" to XapiPackageContentView.VIEW_NAME,
@@ -33,13 +32,6 @@ val mimeTypeToPlayStoreIdMap = mapOf(
         "image/jpeg" to "com.pcvirt.ImageViewer",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document" to "com.microsoft.office.word")
 
-typealias GoToEntryFn = suspend (contentEntryUid: Long,
-                                 umAppDatabase: UmAppDatabase,
-                                 context: Any,
-                                 systemImpl: UstadMobileSystemImpl,
-                                 downloadRequired: Boolean,
-                                 goToContentEntryDetailViewIfNotDownloaded: Boolean,
-                                 noIframe: Boolean) -> Unit
 
 
 class ContentEntryOpener(override val di: DI, val endpoint: Endpoint, val appContext: Any) : DIAware {
@@ -98,57 +90,3 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint, val appCon
 }
 
 
-@JsName("goToContentEntry")
-@Deprecated("Use ContentEntryOpener", level = DeprecationLevel.WARNING)
-suspend fun goToContentEntry(contentEntryUid: Long,
-                             umAppDatabase: UmAppDatabase,
-                             context: Any,
-                             systemImpl: UstadMobileSystemImpl,
-                             downloadRequired: Boolean,
-                             goToContentEntryDetailViewIfNotDownloaded: Boolean = true,
-                             noIframe: Boolean = false) {
-
-    val containerToOpen = if (downloadRequired) {
-        umAppDatabase.downloadJobItemDao.findMostRecentContainerDownloaded(contentEntryUid)
-    } else {
-        umAppDatabase.containerDao.getMostRecentContaineUidAndMimeType(contentEntryUid)
-    }
-
-    when {
-        containerToOpen != null -> {
-
-            val viewName = mimeTypeToViewNameMap[containerToOpen.mimeType]
-            if (viewName == null) {
-
-                val container = umAppDatabase.containerEntryDao.findByContainerAsync(containerToOpen.containerUid)
-                require(container.isNotEmpty()) { "No file found" }
-                val containerEntryFilePath = container[0].containerEntryFile?.cefPath
-                if (containerEntryFilePath != null) {
-                    systemImpl.openFileInDefaultViewer(context, containerEntryFilePath,
-                            containerToOpen.mimeType)
-                } else {
-                    throw IllegalArgumentException("No file found")
-                }
-                return
-            }
-
-            val args = HashMap<String, String>()
-            args[ARG_NO_IFRAMES] = noIframe.toString()
-            args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
-            args[ARG_CONTAINER_UID] = containerToOpen.containerUid.toString()
-            systemImpl.go(viewName, args, context)
-
-        }
-        goToContentEntryDetailViewIfNotDownloaded -> {
-
-            val args = HashMap<String, String>()
-            args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
-            systemImpl.go(ContentEntry2DetailView.VIEW_NAME, args, context)
-
-        }
-        else -> {
-            throw IllegalArgumentException("No file found")
-        }
-    }
-
-}

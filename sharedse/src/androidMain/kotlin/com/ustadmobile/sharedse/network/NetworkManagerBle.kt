@@ -50,7 +50,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.networkmanager.defaultGsonSerializer
 import com.ustadmobile.core.networkmanager.defaultOkHttpClient
 import com.ustadmobile.door.DoorDatabaseRepository

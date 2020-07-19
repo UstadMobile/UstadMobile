@@ -7,7 +7,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.core.util.GoToEntryFn
+import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
@@ -43,7 +43,7 @@ class ContentEntry2DetailPresenter(context: Any,
 
     private val containerDownloadManager: ContainerDownloadManager? by di.on(accountManager.activeAccount).instanceOrNull()
 
-    private val goToEntryFn: GoToEntryFn by di.instance<GoToEntryFn>()
+    private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -102,10 +102,10 @@ class ContentEntry2DetailPresenter(context: Any,
     private fun openContentEntry() {
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                entity?.contentEntryUid?.let { goToEntryFn(it, db, context, systemImpl, isDownloadEnabled,
-                            false,
-                            arguments[ARG_NO_IFRAMES]
-                                    ?.toBoolean() ?: false) }
+                entity?.contentEntryUid?.also {
+                    contentEntryOpener.openEntry(it, isDownloadEnabled, false,
+                            arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
+                }
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
                     view.showSnackBar(systemImpl.getString(MessageID.no_app_found,context))
