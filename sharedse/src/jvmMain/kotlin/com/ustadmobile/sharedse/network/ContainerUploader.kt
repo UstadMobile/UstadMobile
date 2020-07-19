@@ -70,21 +70,18 @@ class ContainerUploader(val request: ContainerUploaderRequest,
 
                 urlConnection = connectionOpener(URL(request.uploadToUrl))
 
-                var uploadJob: ContainerUploadJob? = null
-                if (uploadJob == null) {
-                    urlConnection.requestMethod = "GET"
-                    urlConnection.connect()
+                urlConnection.requestMethod = "GET"
+                urlConnection.connect()
 
-                    val sessionId = String(UMIOUtils.readStreamToByteArray(urlConnection.inputStream))
-                    uploadJob = ContainerUploadJob().apply {
-                        this.sessionId = sessionId
-                        this.bytesSoFar = 0
-                        this.containerEntryFileUids = request.fileList
-                    }
-                    uploadJob.cujUid = db.containerUploadJobDao.insert(uploadJob)
-
-                    urlConnection.disconnect()
+                val sessionId = String(UMIOUtils.readStreamToByteArray(urlConnection.inputStream))
+                var uploadJob = ContainerUploadJob().apply {
+                    this.sessionId = sessionId
+                    this.bytesSoFar = 0
+                    this.containerEntryFileUids = request.fileList
                 }
+                uploadJob.cujUid = db.containerUploadJobDao.insert(uploadJob)
+
+                urlConnection.disconnect()
 
                 val start = uploadJob.bytesSoFar ?: 0L
 
@@ -159,7 +156,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     JobStatus.PAUSED
                 }
 
-                db.containerUploadJobDao.setJobStatus(downloadStatus, uploadJob.sessionId?: "")
+                db.containerUploadJobDao.setJobStatus(downloadStatus, uploadJob.sessionId ?: "")
 
             } finally {
                 progressUpdaterJob.cancel()

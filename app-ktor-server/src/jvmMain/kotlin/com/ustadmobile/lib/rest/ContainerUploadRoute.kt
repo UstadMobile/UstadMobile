@@ -22,7 +22,7 @@ fun Route.ContainerUpload(db: UmAppDatabase) {
             val md5SumList = md5sumListStr.split(";")
             val foundEntries = db.containerEntryFileDao.findEntriesByMd5Sums(md5SumList).map { it.cefMd5 }
 
-            val nonExistingMd5SumList = md5SumList.filterNot { it in foundEntries }.joinToString(";")
+            val nonExistingMd5SumList = md5SumList.filterNot { it in foundEntries }
             call.respond(nonExistingMd5SumList)
         }
 
