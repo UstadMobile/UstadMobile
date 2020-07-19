@@ -9,6 +9,8 @@ interface LocalAvailabilityManager {
 
     suspend fun handleNodeDiscovered(bluetoothAddr: String)
 
+    suspend fun handleNodesLost(bluetoothAddrs: List<String>)
+
     fun addMonitoringRequest(request: AvailabilityMonitorRequest)
 
     fun removeMonitoringRequest(request: AvailabilityMonitorRequest)

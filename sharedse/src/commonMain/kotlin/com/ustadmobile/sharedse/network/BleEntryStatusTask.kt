@@ -19,6 +19,8 @@ import kotlinx.coroutines.Runnable
 
 typealias ResponseReceivedListener = (MutableList<EntryStatusResponse>, entryStatusTask: BleEntryStatusTask) -> Unit
 
+data class BleEntryStatusTaskArgs(val containerUids: List<Long>, val networkNode: NetworkNode)
+
 abstract class BleEntryStatusTask : BleMessageResponseListener {
 
     /**
