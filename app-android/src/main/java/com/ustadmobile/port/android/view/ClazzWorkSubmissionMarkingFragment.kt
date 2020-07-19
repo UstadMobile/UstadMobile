@@ -44,8 +44,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         get() = requireContext()
 
     private var submissionHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
-    private var submissionResultRecyclerAdapter
-            : ClazzWorkDetailOverviewFragment.SubmissionResultRecyclerAdapter? = null
+    private var submissionResultRecyclerAdapter: SubmissionResultRecyclerAdapter? = null
 
     private var markingEditRecyclerAdapter
             : ClazzWorkSubmissionScoreEditRecyclerAdapter? = null
@@ -94,8 +93,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         submitWithMetricsRecyclerAdapter =
                 ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(
                         clazzWorkMetrics, entity, mPresenter,false, isMarkingFinished)
-        submissionResultRecyclerAdapter =
-                ClazzWorkDetailOverviewFragment.SubmissionResultRecyclerAdapter(
+        submissionResultRecyclerAdapter = SubmissionResultRecyclerAdapter(
                         clazzWorkWithSubmission)
         submissionResultRecyclerAdapter?.visible = false
 
@@ -105,7 +103,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
         submissionFreeTextRecyclerAdapter =
                 SubmissionTextEntryWithResultRecyclerAdapter(
-                        clazzWorkWithSubmission, visible = false, editMode = false)
+                        visible = false)
         submissionFreeTextRecyclerAdapter?.visible = false
 
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(

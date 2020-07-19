@@ -9,9 +9,9 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 
-class ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(var studentMode: Boolean)
+class ClazzWorkQuestionAndOptionsWithResponseRA(var studentMode: Boolean)
     : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
-        ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter.ClazzWorkQuestionViewHolder>(
+        ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
 
     class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseBinding)

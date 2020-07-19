@@ -8,8 +8,7 @@ import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionTextEntryBindi
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
 
-class SubmissionTextEntryWithResultRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?,
-                                                   visible: Boolean = false, editMode: Boolean = true)
+class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false)
     : ListAdapter<ClazzWorkWithSubmission,
         SubmissionTextEntryWithResultRecyclerAdapter.SubmissionTextEntryWithResultViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKWITHSUBMISSION) {
@@ -22,28 +21,10 @@ class SubmissionTextEntryWithResultRecyclerAdapter(clazzWork: ClazzWorkWithSubmi
             field = value
         }
 
-    var modeEdit: Boolean = editMode
-        set(value){
-            field = value
-            viewHolder?.itemBinding?.editMode = value
-        }
-
     class SubmissionTextEntryWithResultViewHolder(var itemBinding: ItemClazzworkSubmissionTextEntryBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
     private var viewHolder: SubmissionTextEntryWithResultViewHolder? = null
-
-    var _clazzWork : ClazzWorkWithSubmission? = clazzWork
-        get() = field
-        set(value){
-            if(field == value)
-                return
-            notifyDataSetChanged()
-            viewHolder?.itemBinding?.clazzWorkWithSubmission = value
-            viewHolder?.itemView?.tag = value?.clazzWorkUid?:0L
-            notifyDataSetChanged()
-            field = value
-        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionTextEntryWithResultViewHolder {
         return SubmissionTextEntryWithResultViewHolder(
@@ -51,7 +32,6 @@ class SubmissionTextEntryWithResultRecyclerAdapter(clazzWork: ClazzWorkWithSubmi
                         parent, false).also {
                     //it.clazzWorkWithSubmission = _clazzWork
                     it.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
-                    it.editMode = modeEdit
                 })
     }
 

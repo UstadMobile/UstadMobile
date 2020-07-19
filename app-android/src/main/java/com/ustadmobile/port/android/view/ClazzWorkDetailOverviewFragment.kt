@@ -10,17 +10,17 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.paging.DataSource
 import androidx.paging.PagedList
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
-import com.toughra.ustadmobile.databinding.ItemClazzworkDetailDescriptionBinding
-import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionResultBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzWorkDao
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.ListViewMode
@@ -29,7 +29,9 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
+import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 
 interface NewCommentHandler{
     fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String, public: Boolean, to: Long, from: Long)
@@ -53,15 +55,16 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var contentRecyclerAdapter: ContentEntryList2Fragment.ContentEntryListRecyclerAdapter? = null
     private var contentLiveData: LiveData<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
     private val contentObserver = Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
-        t -> {
-        if(t != null && t?.size != null && t?.size >0){
-            contentHeadingRecyclerAdapter?.visible = true
+        t ->
+        run {
+            if (t?.size ?: 0 > 0) {
+                contentHeadingRecyclerAdapter?.visible = true
+            }
+            contentRecyclerAdapter?.submitList(t)
         }
-        contentRecyclerAdapter?.submitList(t)
-    }
     }
 
-    private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter? = null
+    private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRA? = null
     private val quizQuestionAndResponseObserver = Observer<List<ClazzWorkQuestionAndOptionWithResponse>?> {
         t -> quizQuestionsRecyclerAdapter?.submitList(t)
     }
@@ -69,9 +72,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var contentHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var submissionResultRecyclerAdapter: SubmissionResultRecyclerAdapter? = null
     private var submissionFreeTextRecyclerAdapter: SubmissionTextEntryWithResultRecyclerAdapter ? = null
-    private val freeTextObserver = Observer<List<ClazzWorkWithSubmission>?> {
-        t -> submissionFreeTextRecyclerAdapter?.submitList(t)
-    }
+
     private var submissionHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
     private var questionsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
     private var submissionButtonRecyclerAdapter: SimpleButtonRecyclerAdapter? = null
@@ -95,111 +96,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var detailMergerRecyclerView: RecyclerView? = null
 
 
-    class SubmissionResultRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?,
-                                          visible: Boolean = false)
-        : ListAdapter<ClazzWorkWithSubmission,
-            SubmissionResultRecyclerAdapter.SubmissionResultViewHolder>(DU_CLAZZWORKWITHSUBMISSION) {
-
-        var visible: Boolean = visible
-            set(value) {
-                if(field == value)
-                    return
-
-                field = value
-            }
-
-        class SubmissionResultViewHolder(var itemBinding: ItemClazzworkSubmissionResultBinding)
-            : RecyclerView.ViewHolder(itemBinding.root)
-
-        private var viewHolder: SubmissionResultViewHolder? = null
-
-        var _clazzWork : ClazzWorkWithSubmission? = clazzWork
-            get() = field
-            set(value){
-                if(field == value)
-                    return
-                notifyDataSetChanged()
-                viewHolder?.itemBinding?.clazzWorkWithSubmission = value
-                viewHolder?.itemView?.tag = value?.clazzWorkSubmission?.clazzWorkSubmissionUid?:0L
-                notifyDataSetChanged()
-                field = value
-            }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionResultViewHolder {
-            return SubmissionResultViewHolder(
-                    ItemClazzworkSubmissionResultBinding.inflate(LayoutInflater.from(parent.context),
-                            parent, false).also {
-                        it.clazzWorkWithSubmission = _clazzWork
-                        viewHolder?.itemView?.tag = _clazzWork?.clazzWorkSubmission?.clazzWorkSubmissionUid
-
-                    })
-        }
-
-        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-            super.onDetachedFromRecyclerView(recyclerView)
-            viewHolder = null
-        }
-
-        override fun getItemCount(): Int {
-            return if(visible) 1 else 0
-        }
-
-        override fun onBindViewHolder(holder: SubmissionResultViewHolder, position: Int) {
-        }
-    }
-
-
-    class ClazzWorkBasicDetailsRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?,
-                                               visible: Boolean = false)
-        : ListAdapter<ClazzWorkWithSubmission,
-            ClazzWorkBasicDetailsRecyclerAdapter.ClazzWorkDetailViewHolder>(DU_CLAZZWORKWITHSUBMISSION) {
-
-        var visible: Boolean = visible
-            set(value) {
-                if(field == value)
-                    return
-
-                field = value
-            }
-
-        class ClazzWorkDetailViewHolder(var itemBinding: ItemClazzworkDetailDescriptionBinding)
-            : RecyclerView.ViewHolder(itemBinding.root)
-
-        private var viewHolder: ClazzWorkDetailViewHolder? = null
-
-        var _clazzWork: ClazzWorkWithSubmission? = clazzWork
-            get() = field
-            set(value){
-                if(field == value)
-                    return
-                notifyDataSetChanged()
-                viewHolder?.itemBinding?.clazzWorkWithSubmission = value
-                viewHolder?.itemView?.tag = value?.clazzWorkUid?:0L
-                notifyDataSetChanged()
-                field = value
-            }
-
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkDetailViewHolder {
-            return ClazzWorkDetailViewHolder(
-                    ItemClazzworkDetailDescriptionBinding.inflate(LayoutInflater.from(parent.context),
-                            parent, false).also {
-                        it.clazzWorkWithSubmission = _clazzWork
-                    })
-        }
-
-        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-            super.onDetachedFromRecyclerView(recyclerView)
-            viewHolder = null
-        }
-
-        override fun getItemCount(): Int {
-            return if(visible) 1 else 0
-        }
-
-        override fun onBindViewHolder(holder: ClazzWorkDetailViewHolder, position: Int) {
-        }
-    }
 
     override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
                                 public: Boolean, to: Long, from: Long) {
@@ -219,7 +115,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 false).also {
             rootView = it.root
         }
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+        //dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
         //fragment_list_recyclerview
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
@@ -233,7 +131,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 ContentEntryList2Fragment.ContentEntryListRecyclerAdapter(null,
                         ListViewMode.BROWSER.toString())
 
-        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRecyclerAdapter(
+        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA(
                 isStudent)
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
@@ -260,7 +158,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         submissionResultRecyclerAdapter = SubmissionResultRecyclerAdapter(entity)
         submissionResultRecyclerAdapter?.visible = false
 
-        submissionFreeTextRecyclerAdapter = SubmissionTextEntryWithResultRecyclerAdapter(entity)
+        submissionFreeTextRecyclerAdapter = SubmissionTextEntryWithResultRecyclerAdapter()
         submissionFreeTextRecyclerAdapter?.visible = false
 
 
@@ -359,24 +257,27 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     }
 
     override var isStudent: Boolean = false
-        get() = field
         set(value) {
             field = value
-            //submissionButtonRecyclerAdapter?.visible = value
             quizQuestionsRecyclerAdapter?.studentMode = value
             submissionFreeTextRecyclerAdapter?.visible = value
-            if(entity?.clazzWorkCommentsEnabled == false){
-                privateCommentsHeadingRecyclerAdapter?.visible = false
-                newPrivateCommentRecyclerAdapter?.visible = false
-            }else if (isStudent){
-                privateCommentsHeadingRecyclerAdapter?.visible = true
-                newPrivateCommentRecyclerAdapter?.visible = true
-            }else if(entity?.clazzWorkSubmissionType ==
-                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
-                questionsHeadingRecyclerAdapter?.visible = true
-                newPrivateCommentRecyclerAdapter?.visible = false
-            }else{
-                newPrivateCommentRecyclerAdapter?.visible = false
+            when {
+                entity?.clazzWorkCommentsEnabled == false -> {
+                    privateCommentsHeadingRecyclerAdapter?.visible = false
+                    newPrivateCommentRecyclerAdapter?.visible = false
+                }
+                isStudent -> {
+                    privateCommentsHeadingRecyclerAdapter?.visible = true
+                    newPrivateCommentRecyclerAdapter?.visible = true
+                }
+                entity?.clazzWorkSubmissionType ==
+                        ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ -> {
+                    questionsHeadingRecyclerAdapter?.visible = true
+                    newPrivateCommentRecyclerAdapter?.visible = false
+                }
+                else -> {
+                    newPrivateCommentRecyclerAdapter?.visible = false
+                }
             }
 
             submissionButtonRecyclerAdapter?.visible = isStudent &&
@@ -397,7 +298,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
     override var entity: ClazzWorkWithSubmission? = null
-        get() = field
         set(value) {
             field = value
             detailRecyclerAdapter?._clazzWork = entity
@@ -405,7 +305,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
 
             submissionResultRecyclerAdapter?._clazzWork = entity
-            //submissionResultRecyclerAdapter?.visible = true
             submissionResultRecyclerAdapter?.visible = isStudent &&
                     value?.clazzWorkSubmission?.clazzWorkSubmissionMarkerPersonUid != 0L
 
@@ -414,6 +313,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
             if(submissionFreeTextRecyclerAdapter?.visible == true){
                 submissionFreeTextRecyclerAdapter?.submitList(listOf(entity))
+            }else{
+                submissionFreeTextRecyclerAdapter?.submitList(listOf())
             }
 
             if(value?.clazzWorkSubmissionType ==
@@ -446,7 +347,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
     override var clazzWorkContent: DataSource.Factory<Int,
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
-        get() = field
         set(value) {
             contentLiveData?.removeObserver(contentObserver)
             contentLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
@@ -457,7 +357,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
     override var clazzWorkQuizQuestionsAndOptionsWithResponse
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
-        get() = field
         set(value) {
             field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
@@ -465,14 +364,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
     override var timeZone: String = ""
-        get() = field
-        set(value) {
-            field = value
-        }
 
     override var clazzWorkPublicComments: DataSource.Factory<Int, CommentsWithPerson>? = null
-        get() = field
         set(value) {
+            field = value
             val publicCommentsObserverVal = publicCommentsObserver?:return
             publicCommentsLiveData?.removeObserver(publicCommentsObserverVal)
             publicCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
@@ -481,8 +376,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
     override var clazzWorkPrivateComments: DataSource.Factory<Int, CommentsWithPerson>? = null
-        get() = field
         set(value) {
+            field = value
             val privateCommentsObserverVal = privateCommentsObserver?:return
             privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
@@ -495,7 +390,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
 
     companion object {
-        val DIFF_CALLBACK_COMMENTS = object : DiffUtil.ItemCallback<CommentsWithPerson>() {
+        val DIFF_CALLBACK_COMMENTS =
+                object : DiffUtil.ItemCallback<CommentsWithPerson>() {
             override fun areItemsTheSame(oldItem: CommentsWithPerson,
                                          newItem: CommentsWithPerson): Boolean {
                 return oldItem.commentsUid == newItem.commentsUid
@@ -507,7 +403,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }
         }
 
-        val DU_CLAZZWORKWITHSUBMISSION = object: DiffUtil.ItemCallback<ClazzWorkWithSubmission>() {
+        val DU_CLAZZWORKWITHSUBMISSION =
+                object: DiffUtil.ItemCallback<ClazzWorkWithSubmission>() {
             override fun areItemsTheSame(oldItem: ClazzWorkWithSubmission,
                                          newItem: ClazzWorkWithSubmission): Boolean {
                 return oldItem.clazzWorkUid == newItem.clazzWorkUid
@@ -519,8 +416,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }
         }
 
-        val DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE = object
-            : DiffUtil.ItemCallback<ClazzWorkQuestionAndOptionWithResponse>() {
+        val DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE =
+                object: DiffUtil.ItemCallback<ClazzWorkQuestionAndOptionWithResponse>() {
             override fun areItemsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse,
                                          newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
                 return oldItem.clazzWorkQuestion.clazzWorkQuestionUid ==
