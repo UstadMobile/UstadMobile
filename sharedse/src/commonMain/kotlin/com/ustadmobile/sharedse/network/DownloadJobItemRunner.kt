@@ -30,6 +30,7 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_CLO
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOCAL
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.sumByLong
+import com.ustadmobile.sharedse.container.addEntriesFromConcatenatedInputStream
 import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
@@ -437,39 +438,9 @@ class DownloadJobItemRunner
             //TODO Here: Make the download fail if the validation does not check out, don't crash the app
             try {
                 concatenatedInputStream = ConcatenatedInputStream(FileInputStreamSe(destTmpFile))
-                val pathToMd5Map = containerEntriesToDownloadList.map {
-                    (it.cePath ?: "") to (it.cefMd5?.base64StringToByteArray() ?: ByteArray(0))
-                }.toMap()
-
-                var entryCount = 0
-                containerManager.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = true),
-                        pathToMd5Map) {
-
-                    val nextPart = concatenatedInputStream.nextPart()
-                    if(nextPart != null && !(startDownloadFnJobRef.value?.isCancelled ?: false)) {
-                        val partMd5Str = nextPart.id.encodeBase64()
-                        val containerEntry = containerEntriesToDownloadList[entryCount]
-                        if(containerEntry.cefMd5 != partMd5Str) {
-                            Napier.wtf({"Wrong MD5 Sum in response! $partMd5Str"})
-                            throw IllegalStateException("Could not find the path of md5sum $partMd5Str")
-                        }
-
-                        val pathsInContainer = containerEntriesList.filter {
-                            it.cefMd5 == partMd5Str && it.cePath != null
-                        }
-                        if(pathsInContainer.isNotEmpty()) {
-                            entryCount++
-                            ConcatenatedInputStreamEntrySource(nextPart, concatenatedInputStream,
-                                    pathsInContainer.map { it.cePath!! })
-                        }else {
-                            Napier.wtf({"Could not find path for md5sum $partMd5Str"})
-                            throw IllegalStateException("Could not find the path of md5sum $partMd5Str")
-                        }
-                    }else {
-                        null
-                    }
-
-                }
+                val downloadedMd5s = containerEntriesToDownloadList.mapNotNull { it.cefMd5 }
+                containerManager.addEntriesFromConcatenatedInputStream(concatenatedInputStream,
+                        containerEntriesList.filter { entryItem -> entryItem.cefMd5 in downloadedMd5s })
             }finally {
                 concatenatedInputStream?.close()
             }
