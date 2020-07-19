@@ -55,20 +55,17 @@ abstract class BleEntryStatusTask : BleMessageResponseListener {
 
     var statusResponseListener: ResponseReceivedListener? = null
 
-    private lateinit var managerBle: NetworkManagerBleCommon
-
     /**
      * Constructor which will be used when creating new instance of a task
      * @param context Application context.
      * @param entryUidsToCheck List of Id's to be checked for availability from a peer device.
      * @param peerToCheck Peer device for those entries to be checked from.
      */
-    constructor(context: Any, managerBle: NetworkManagerBleCommon, entryUidsToCheck: List<Long>,
+    constructor(context: Any, entryUidsToCheck: List<Long>,
                 peerToCheck: NetworkNode) {
         this.networkNode = peerToCheck
         this.context = context
         this.entryUidsToCheck = entryUidsToCheck
-        this.managerBle = managerBle
     }
 
     /**
@@ -79,12 +76,11 @@ abstract class BleEntryStatusTask : BleMessageResponseListener {
      * @param peerToSendMessageTo Peer to send message to
      * @param responseListener Message response listener object
      */
-    constructor(context: Any, managerBle: NetworkManagerBleCommon, message: BleMessage, peerToSendMessageTo: NetworkNode,
+    constructor(context: Any, message: BleMessage, peerToSendMessageTo: NetworkNode,
                 responseListener: BleMessageResponseListener) {
         this.networkNode = peerToSendMessageTo
         this.context = context
         this.message = message
-        this.managerBle = managerBle
         this.responseListener = responseListener
     }
 

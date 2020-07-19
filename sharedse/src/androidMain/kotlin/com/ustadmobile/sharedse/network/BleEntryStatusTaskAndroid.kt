@@ -50,19 +50,16 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
 
     private var mGattClient: BluetoothGatt? = null
 
-    private var managerBle: NetworkManagerBle? = null
-
     /**
      * Constructor to be used when creating platform specific instance of BleEntryStatusTask
      * @param context Platform specific application context.
      * @param entryUidsToCheck List of Id's to be checked for availability from a peer device.
      * @param peerToCheck Peer device for those entries to be checked from.
      */
-    constructor(gattClientCallbackManager: GattClientCallbackManager, context: Context, managerAndroidBle: NetworkManagerBle,
+    constructor(gattClientCallbackManager: GattClientCallbackManager, context: Context,
                 entryUidsToCheck: List<Long>, peerToCheck: NetworkNode)
-            : super(context, managerAndroidBle, entryUidsToCheck, peerToCheck) {
+            : super(context,  entryUidsToCheck, peerToCheck) {
         this.gattClientCallbackManager = gattClientCallbackManager
-        this.managerBle = managerAndroidBle
         this.context = context
         val messagePayload = BleMessageUtil.bleMessageLongToBytes(entryUidsToCheck)
         this.message = BleMessage(NetworkManagerBleCommon.ENTRY_STATUS_REQUEST,
@@ -82,7 +79,7 @@ class BleEntryStatusTaskAndroid : BleEntryStatusTask {
                 context: Context, managerBle: NetworkManagerBle, message: BleMessage,
                 peerToSendMessageTo: NetworkNode,
                 responseListener: BleMessageResponseListener)
-            : super(context, managerBle, message, peerToSendMessageTo, responseListener) {
+            : super(context, message, peerToSendMessageTo, responseListener) {
         this.gattClientCallbackManager = gattClientCallbackManager
     }
 
