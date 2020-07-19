@@ -3,9 +3,12 @@ package com.ustadmobile.port.android.view
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.observe
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
 import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
 import org.kodein.di.DIAware
@@ -57,6 +60,11 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
                 false, 0, null).also {
                 viewLifecycleOwner.lifecycle.addObserver(it)
             }
+        }
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
+                viewLifecycleOwner) {
+            showSnackBar(it)
         }
     }
 

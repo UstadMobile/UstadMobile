@@ -309,7 +309,7 @@
     <string name="no_account">You do not have an account?</string>
     <string name="enter_url">Enter Url</string>
 
-    <string name="invalid_url">Invalid Url</string>
+    <string name="invalid_link">Invalid link</string>
     <string name="import_link_content_not_supported">Content not supported</string>
     <string name="import_link_big_size">File size too big</string>
     <string name="import_link_error">Import Error</string>
@@ -698,6 +698,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="create_account">Create account</string>
     <string name="my">My %1$s</string>
     <string name="add_another">Add another %1$s </string>
+    <string name="logged_in_as">Logged in as  %1$s on %2$s</string>
 
     <string name="sel_question_type_free_text">Free text</string>
     <string name="sel_question_type_multiple_choice">Multiple choice</string>

@@ -27,6 +27,16 @@
         <item name="android:minHeight">@dimen/dimen_48dp</item>
     </style>
 
+    <style name="UmTheme.Widget.TextButton.IconOnly" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="iconPadding">@dimen/dimen_0dp</item>
+        <item name="android:insetTop">@dimen/dimen_0dp</item>
+        <item name="android:insetBottom">@dimen/dimen_0dp</item>
+        <item name="android:paddingStart">@dimen/dimen_12dp</item>
+        <item name="android:paddingEnd">@dimen/dimen_12dp</item>
+        <item name="android:minWidth">@dimen/dimen_48dp</item>
+        <item name="android:minHeight">@dimen/dimen_48dp</item>
+    </style>
+
    <!-- Stacked buttons-->
     <style name="UmTheme.StackedButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:paddingStart">@dimen/dimen_16dp</item>

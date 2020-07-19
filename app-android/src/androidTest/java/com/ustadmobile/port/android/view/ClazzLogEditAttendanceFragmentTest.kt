@@ -34,7 +34,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@AdbScreenRecord("Attendance recording scren test")
+@AdbScreenRecord("Attendance recording screen test")
 class ClazzLogEditAttendanceFragmentTest  {
 
     lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
@@ -150,11 +150,13 @@ class ClazzLogEditAttendanceFragmentTest  {
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
                 bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.UmTheme_App
-        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+        ){ClazzLogEditAttendanceFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
             recyclerViewIdlingResource.recyclerView = it.mBinding!!.clazzLogEditRecyclerView
         }
 
@@ -190,11 +192,13 @@ class ClazzLogEditAttendanceFragmentTest  {
 
         val clazzLogAttendanceListScenario = launchFragmentInContainer<ClazzLogEditAttendanceFragment>(
                 bundleOf(UstadView.Companion.ARG_ENTITY_UID to clazzLog.clazzLogUid.toString()), themeResId = R.style.UmTheme_App
-        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+        ){ClazzLogEditAttendanceFragment().also {
+            it.installNavController(systemImplNavRule.navController)
+        }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         clazzLogAttendanceListScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
             recyclerViewIdlingResource.recyclerView = it.mBinding!!.clazzLogEditRecyclerView
         }
 
