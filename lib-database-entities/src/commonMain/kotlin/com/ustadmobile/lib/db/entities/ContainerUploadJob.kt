@@ -9,7 +9,6 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = ContainerUploadJob.TABLE_ID)
 @Serializable
 class ContainerUploadJob {
 
@@ -25,19 +24,5 @@ class ContainerUploadJob {
     var bytesSoFar: Long = 0
 
     var containerEntryFileUids: String? = null
-
-    @MasterChangeSeqNum
-    var cujMasterChangeSeqNum: Long = 0
-
-    @LocalChangeSeqNum
-    var cujLocalChangeSeqNum: Long = 0
-
-    @LastChangedBy
-    var cujLastChangedBy: Int = 0
-
-    companion object {
-
-        const val TABLE_ID = 78
-    }
 
 }

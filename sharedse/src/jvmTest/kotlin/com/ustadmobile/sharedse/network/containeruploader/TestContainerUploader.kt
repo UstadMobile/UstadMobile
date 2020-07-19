@@ -5,20 +5,16 @@ import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.io.ConcatenatedInputStream
-import com.ustadmobile.sharedse.network.ContainerDownloadManagerTest
 import com.ustadmobile.sharedse.network.ContainerUploader
 import com.ustadmobile.sharedse.network.ContainerUploader.Companion.CHUNK_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.util.test.extractTestResourceToFile
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
@@ -28,7 +24,6 @@ import org.junit.Before
 import org.junit.Test
 import org.kodein.di.*
 import java.io.*
-import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
@@ -94,8 +89,8 @@ class TestContainerUploader {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.NoContent.value))
         }
 
-        val request = ContainerUploaderRequest(entryListStr,
-                mockWebServer.url("/upload/").toString(), TEST_ENDPOINT
+        val request = ContainerUploaderRequest(,
+                entryListStr, mockWebServer.url("/upload/").toString(), TEST_ENDPOINT
         )
 
         val uploader = ContainerUploader(request, null, di = di)

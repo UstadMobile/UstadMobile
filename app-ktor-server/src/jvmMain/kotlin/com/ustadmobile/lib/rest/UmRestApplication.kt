@@ -93,12 +93,12 @@ fun Application.umRestApplication(devMode: Boolean = false, db: UmAppDatabase = 
         H5PImportRoute(db) { url: String, entryUid: Long, urlContent: String, containerUid: Long ->
             downloadH5PUrl(db, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
         }
-        ContainerUpload(db)
         LoginRoute(db)
         ContainerMountRoute(db)
         val uploadFolder = File(containerDirPath, "upload")
         uploadFolder.mkdir()
         ResumableUploadRoute(uploadFolder)
+        ContainerUpload(db, uploadFolder)
         UmAppDatabase_KtorRoute(db, Gson(), File("attachments/UmAppDatabase").absolutePath)
         WorkSpaceRoute(db)
         db.preload()
