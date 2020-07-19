@@ -12,7 +12,7 @@ import org.kodein.di.instance
 import java.util.concurrent.Executors
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader
 
-class ContainerUplaoderJvm(override val di: DI) : ContainerUploader(), DIAware {
+class ContainerUploaderJvm(override val di: DI) : ContainerUploader(), DIAware {
 
     private val executorService = Executors.newCachedThreadPool()
 

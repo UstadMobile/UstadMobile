@@ -30,9 +30,12 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader
+import com.ustadmobile.sharedse.network.ContainerUploaderJvm
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
+
 import org.kodein.di.*
 
 /**
@@ -82,9 +85,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
             DownloadPreparationRequesterAndroidImpl(applicationContext, context)
         }
 
-        bind<ContainerDownloadRunner>() with factory {
-            arg: DownloadJobItemRunnerDIArgs -> DownloadJobItemRunner(arg.downloadJobItem,
-                arg.endpoint.url, di = di)
+        bind<ContainerDownloadRunner>() with factory { arg: DownloadJobItemRunnerDIArgs ->
+            DownloadJobItemRunner(arg.downloadJobItem,
+                    arg.endpoint.url, di = di)
         }
 
         bind<CoroutineDispatcher>(tag = TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
@@ -95,6 +98,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<ContainerFetcher>() with singleton { ContainerFetcherJvm(di) }
+
+        bind<ContainerUploader>() with singleton { ContainerUploaderJvm(di) }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
