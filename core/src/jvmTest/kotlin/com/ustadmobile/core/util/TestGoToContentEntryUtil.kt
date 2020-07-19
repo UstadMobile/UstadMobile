@@ -1,8 +1,12 @@
 package com.ustadmobile.core.util
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.VideoPlayerView
@@ -12,7 +16,12 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class TestGoToContentEntryUtil {
 
@@ -28,13 +37,28 @@ class TestGoToContentEntryUtil {
         on { currentState }.thenReturn(DoorLifecycleObserver.STARTED)
     } as Any
 
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
+
+    lateinit var di: DI
+
+    private lateinit var accountManager: UstadAccountManager
+
+    private lateinit var endpoint: Endpoint
+
     @Before
     fun setUp() {
-        checkJndiSetup()
-        umAppDatabase = UmAppDatabase.getInstance(context)
-        umAppRepository = umAppDatabase //for this test there is no difference
-        impl = spy()
-        UstadMobileSystemImpl.instance = impl
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+        accountManager = di.direct.instance()
+        endpoint = Endpoint(accountManager.activeAccount.endpointUrl)
+        impl = di.direct.instance()
+
+        umAppDatabase = di.on(endpoint).direct.instance(tag = TAG_DB)
+        umAppRepository = di.on(endpoint).direct.instance(tag = TAG_REPO)
+
 
         contentEntry = ContentEntry()
         contentEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(contentEntry)
@@ -56,9 +80,10 @@ class TestGoToContentEntryUtil {
     @Test
     fun givenDownloadRequired_whenEntryDownloaded_thenOpenContent() {
         runBlocking {
-
-            goToContentEntry(contentEntry.contentEntryUid, umAppDatabase, context, impl,
-                    true, false, false)
+            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
+                true, false, false)
+//            goToContentEntry(contentEntry.contentEntryUid, umAppDatabase, context, impl,
+//                    true, false, false)
             verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
         }
     }

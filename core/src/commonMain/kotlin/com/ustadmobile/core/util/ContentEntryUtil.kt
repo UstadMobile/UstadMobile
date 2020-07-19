@@ -1,12 +1,19 @@
 package com.ustadmobile.core.util
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
+import org.kodein.di.on
 import kotlin.js.JsName
 
 private val mimeTypeToViewNameMap = mapOf(
@@ -34,7 +41,65 @@ typealias GoToEntryFn = suspend (contentEntryUid: Long,
                                  goToContentEntryDetailViewIfNotDownloaded: Boolean,
                                  noIframe: Boolean) -> Unit
 
+
+class ContentEntryOpener(override val di: DI, val endpoint: Endpoint, val appContext: Any) : DIAware {
+
+    private val umAppDatabase: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
+
+    private val systemImpl: UstadMobileSystemImpl by di.instance()
+
+    /**
+     * Opens the given ContentEntry. If the entry is available, then open the relevant view and show the latest container
+     *
+     */
+    suspend fun openEntry(contentEntryUid: Long, downloadRequired: Boolean,
+                          goToContentEntryDetailViewIfNotDownloaded: Boolean, noIframe: Boolean) {
+
+        val containerToOpen = if (downloadRequired) {
+            umAppDatabase.downloadJobItemDao.findMostRecentContainerDownloaded(contentEntryUid)
+        } else {
+            umAppDatabase.containerDao.getMostRecentContaineUidAndMimeType(contentEntryUid)
+        }
+
+        when {
+            containerToOpen != null -> {
+                val viewName = mimeTypeToViewNameMap[containerToOpen.mimeType]
+                if(viewName != null) {
+                    val args = mapOf(ARG_NO_IFRAMES to noIframe.toString(),
+                            ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
+                            ARG_CONTAINER_UID to containerToOpen.containerUid.toString())
+
+                    systemImpl.go(viewName, args, appContext)
+                }else {
+                    val container = umAppDatabase.containerEntryDao.findByContainerAsync(containerToOpen.containerUid)
+                    require(container.isNotEmpty()) { "No file found" }
+                    val containerEntryFilePath = container[0].containerEntryFile?.cefPath
+                    if (containerEntryFilePath != null) {
+                        systemImpl.openFileInDefaultViewer(appContext, containerEntryFilePath,
+                                containerToOpen.mimeType)
+                    } else {
+                        throw IllegalArgumentException("No file found in container")
+                    }
+                    return
+                }
+            }
+
+            goToContentEntryDetailViewIfNotDownloaded -> {
+                systemImpl.go(ContentEntry2DetailView.VIEW_NAME,
+                        mapOf(ARG_ENTITY_UID to contentEntryUid.toString()), appContext)
+            }
+
+            else -> {
+                throw IllegalArgumentException("No file found")
+            }
+        }
+
+    }
+}
+
+
 @JsName("goToContentEntry")
+@Deprecated("Use ContentEntryOpener", level = DeprecationLevel.WARNING)
 suspend fun goToContentEntry(contentEntryUid: Long,
                              umAppDatabase: UmAppDatabase,
                              context: Any,
