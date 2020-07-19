@@ -28,7 +28,6 @@ import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.network.DownloadPreparationRequester
 import com.ustadmobile.sharedse.network.requestDelete
-import com.ustadmobile.sharedse.network.requestDownloadPreparation
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
