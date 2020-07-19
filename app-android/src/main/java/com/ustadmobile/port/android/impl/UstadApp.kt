@@ -20,6 +20,7 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunn
 import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
+import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.asRepository
@@ -95,6 +96,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<ContainerFetcher>() with singleton { ContainerFetcherJvm(di) }
+
+        bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
+            ContentEntryOpener(di, context, applicationContext)
+        }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
