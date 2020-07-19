@@ -1,14 +1,12 @@
-package com.ustadmobile.port.sharedse.contentformats
+package com.ustadmobile.port.sharedse.contentformats.video
 
-import com.ustadmobile.core.catalog.contenttype.VideoType
+import com.ustadmobile.core.catalog.contenttype.VideoTypePlugin
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.port.sharedse.contentformats.ContentTypePlugin
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeFilePlugin
 
 import java.io.File
 
-class VideoTypePlugin : VideoType(), ContentTypePlugin {
+class VideoTypeFilePlugin : VideoTypePlugin(), ContentTypeFilePlugin {
 
     override fun getContentEntry(file: File): ContentEntryWithLanguage? {
 

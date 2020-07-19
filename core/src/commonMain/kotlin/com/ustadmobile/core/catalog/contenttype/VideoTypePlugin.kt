@@ -3,7 +3,7 @@ package com.ustadmobile.core.catalog.contenttype
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.view.VideoPlayerView
 
-open class VideoType : ContentTypePlugin {
+open class VideoTypePlugin : ContentTypePlugin {
 
     override val viewName: String
         get() = VideoPlayerView.VIEW_NAME

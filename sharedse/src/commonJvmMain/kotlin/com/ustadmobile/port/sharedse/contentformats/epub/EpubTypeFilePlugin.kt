@@ -1,12 +1,12 @@
 package com.ustadmobile.port.sharedse.contentformats.epub
 
-import com.ustadmobile.core.catalog.contenttype.EPUBType
+import com.ustadmobile.core.catalog.contenttype.EpubTypePlugin
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.port.sharedse.contentformats.ContentTypePlugin
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeFilePlugin
 
 import org.xmlpull.v1.XmlPullParserException
 
@@ -21,7 +21,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
 /**
  * Class which handles EPUB content import tasks, creates content entry from the H5P file
  */
-class EpubTypePlugin : EPUBType(), ContentTypePlugin {
+class EpubTypeFilePlugin : EpubTypePlugin(), ContentTypeFilePlugin {
 
     override fun getContentEntry(file: File): ContentEntryWithLanguage? {
         var contentEntry: ContentEntryWithLanguage? = null
