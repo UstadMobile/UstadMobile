@@ -159,30 +159,28 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
             { runnable, delay -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun start() {
-            //TODO: Reenable this using DI
-//            if (isBleCapable) {
-//                UMLog.l(UMLog.DEBUG, 689,
-//                        "Starting BLE scanning")
-//                notifyStateChanged(STATE_STARTED)
-//                gattClientCallbackManager = GattClientCallbackManager(context as Context,
-//                        bluetoothAdapter!!, localAvailabilityManager.nodeHistoryHandler)
-//                bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
-//                        bleScanCallback as BluetoothAdapter.LeScanCallback?)
-//                UMLog.l(UMLog.DEBUG, 689,
-//                        "BLE Scanning started ")
-//            } else {
-//                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
-//                UMLog.l(UMLog.ERROR, 689,
-//                        "Not BLE capable, no need to start")
-//            }
+            //TODO: NodeHistory Handler should be networkmanager itself
+            if (isBleCapable) {
+                UMLog.l(UMLog.DEBUG, 689, "Starting BLE scanning")
+                notifyStateChanged(STATE_STARTED)
+                gattClientCallbackManager = GattClientCallbackManager(context as Context,
+                        bluetoothAdapter!!, {nodeAddr: String, evtType: Int -> Unit})
+                bluetoothAdapter!!.startLeScan(arrayOf(parcelServiceUuid.uuid),
+                        bleScanCallback as BluetoothAdapter.LeScanCallback?)
+                UMLog.l(UMLog.DEBUG, 689,
+                        "BLE Scanning started ")
+            } else {
+                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
+                UMLog.l(UMLog.ERROR, 689,
+                        "Not BLE capable, no need to start")
+            }
         }
 
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun stop() {
-            //TODO: Reenable this using DI
-//            bluetoothAdapter!!.stopLeScan(bleScanCallback as BluetoothAdapter.LeScanCallback?)
-//            gattClientCallbackManager = null
-//            notifyStateChanged(STATE_STOPPED)
+            bluetoothAdapter!!.stopLeScan(bleScanCallback as BluetoothAdapter.LeScanCallback?)
+            gattClientCallbackManager = null
+            notifyStateChanged(STATE_STOPPED)
         }
     }
 
@@ -845,12 +843,15 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
      */
     actual override suspend fun makeEntryStatusTask(context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode): BleEntryStatusTask? {
         val gattClientCallbackManagerVal = gattClientCallbackManager
+        //TODO: This should be removed and the task should be created using a kodein di factory
+        /*
         if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION && gattClientCallbackManagerVal != null) {
             val entryStatusTask = BleEntryStatusTaskAndroid(gattClientCallbackManagerVal,
                     context as Context, this, containerUidsToCheck, networkNode)
             entryStatusTask.setBluetoothManager(bluetoothManager as BluetoothManager)
             return entryStatusTask
         }
+         */
         return null
     }
 
