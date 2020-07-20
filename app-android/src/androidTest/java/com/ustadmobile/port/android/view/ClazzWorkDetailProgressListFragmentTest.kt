@@ -460,13 +460,19 @@ class ClazzWorkDetailProgressListFragmentTest  {
 
     private fun reloadFragment(clazzWork: ClazzWork){
 
-        val fragmentScenario = launchFragmentInContainer<ClazzWorkDetailProgressListFragment>(
+        launchFragmentInContainer(
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString()),
                 themeResId = R.style.UmTheme_App
-        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+        ) {
+            ClazzWorkDetailProgressListFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         crudIdlingResourceRule.idlingResource.excludedViewIds.add(R.id.progressBar2)
+
+
     }
 
     private fun withTagInClazzMemberWithProgressList(clazzMemberUid: Long): Matcher<RecyclerView.ViewHolder?>? {
