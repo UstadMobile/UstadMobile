@@ -61,6 +61,7 @@ import java.net.HttpURLConnection
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import kotlinx.coroutines.*
 import org.kodein.di.DI
+import org.kodein.di.instance
 import java.lang.Runnable
 
 /**
@@ -86,7 +87,7 @@ actual open class NetworkManagerBle
 actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispatcher)
     : NetworkManagerBleCommon(context, di, singleThreadDispatcher), EmbeddedHTTPD.ResponseListener, NetworkManagerWithConnectionOpener {
 
-    lateinit var httpd: EmbeddedHTTPD
+    val httpd: EmbeddedHTTPD by instance()
 
     private lateinit var wifiManager: WifiManager
 
