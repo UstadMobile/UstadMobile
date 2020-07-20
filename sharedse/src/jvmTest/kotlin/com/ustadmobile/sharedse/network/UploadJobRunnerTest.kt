@@ -1,11 +1,13 @@
 package com.ustadmobile.sharedse.network
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DatabaseBuilder
@@ -20,23 +22,31 @@ import com.ustadmobile.sharedse.ext.TestContainer
 import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader
 import com.ustadmobile.sharedse.network.containeruploader.UploadJobRunner
+import com.ustadmobile.util.test.ReverseProxyDispatcher
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
+import okhttp3.HttpUrl
+import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okio.Buffer
+import okio.Okio
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.*
 import java.io.File
+import java.util.*
 import javax.naming.InitialContext
 
 class UploadJobRunnerTest {
@@ -63,7 +73,7 @@ class UploadJobRunnerTest {
     private lateinit var containerUploadJob: ContainerUploadJob
 
     @Before
-    fun setup(){
+    fun setup() {
         networkManager = mock()
 
         repo = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
@@ -82,12 +92,10 @@ class UploadJobRunnerTest {
             bind<ContainerUploader>() with singleton { ContainerUploaderJvm(di) }
         }
 
-        endpoint = "http://localhost:$defaultPort/"
+
 
         clientFolder = UmFileUtilSe.makeTempDir("upload", "")
-        serverFolder = UmFileUtilSe.makeTempDir("server","")
-
-        appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)
+        serverFolder = UmFileUtilSe.makeTempDir("server", "")
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {
@@ -106,8 +114,9 @@ class UploadJobRunnerTest {
         UmFileUtilSe.extractResourceToFile(
                 "/com/ustadmobile/port/sharedse/contentformats/ustad-tincan.zip",
                 fileToUpload)
+    }
 
-
+    private fun createContainer(appDb: UmAppDatabase) {
         epubContainer = Container()
         epubContainer.containerUid = appDb.containerDao.insert(epubContainer)
         containerManager = ContainerManager(epubContainer, appDb, appDb, clientFolder.absolutePath)
@@ -126,7 +135,11 @@ class UploadJobRunnerTest {
     }
 
     @Test
-    fun givenAnUploadJob_whenRunnerUploads_thenContentFromServerIsSameAsDb(){
+    fun givenAnUploadJob_whenRunnerUploads_thenContentFromServerIsSameAsDb() {
+
+        endpoint = "http://localhost:$defaultPort/"
+        appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)
+        createContainer(appDb)
 
         val runner = UploadJobRunner(containerUploadJob, endpoint, di)
         runBlocking {
@@ -134,6 +147,39 @@ class UploadJobRunnerTest {
         }
 
         assertContainersHaveSameContent(epubContainer.containerUid, appDb, repo)
+    }
+
+    @Test
+    fun givenRunnerStarts_whenFailExceedsMaxAttempt_thenShouldStopAndSetStatusToFail() {
+        val mockWebServer = MockWebServer()
+        mockWebServer.start()
+
+        endpoint = mockWebServer.url("").toString()
+        appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)
+        createContainer(appDb)
+
+        // existing md5Sum response
+        val md5List = appDb.containerEntryDao.findByContainerWithMd5(containerUploadJob.cujContainerUid).map { it.cefMd5 }
+        mockWebServer.enqueue(MockResponse().addHeader("Content-Type", "application/json")
+                .setBody(Gson().toJson(md5List)))
+
+        // create session
+        val sessionId = UUID.randomUUID().toString()
+        mockWebServer.enqueue(MockResponse().setBody(sessionId))
+
+        // fail to upload - server problem
+        for (i in 0..(fileToUpload.length()) step com.ustadmobile.sharedse.network.ContainerUploader.CHUNK_SIZE.toLong()) {
+            mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.InternalServerError.value).setBody("Server error"))
+        }
+
+        val runner = UploadJobRunner(containerUploadJob, mockWebServer.url("").toString(), di)
+        var status = 0
+        runBlocking {
+            status = runner.startUpload()
+        }
+
+        Assert.assertEquals("Runner failed", JobStatus.FAILED, status)
+
     }
 
 }

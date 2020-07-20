@@ -59,7 +59,8 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                 urlConnection.requestMethod = "GET"
                 urlConnection.connect()
 
-                val uploadJob = db.containerUploadJobDao.findByUid(request.uploadJobUid) ?: ContainerUploadJob()
+                val uploadJob = db.containerUploadJobDao.findByUid(request.uploadJobUid)
+                        ?: ContainerUploadJob()
                 if (uploadJob.sessionId.isNullOrEmpty()) {
                     val sessionId = String(UMIOUtils.readStreamToByteArray(urlConnection.inputStream))
                     uploadJob.sessionId = sessionId
@@ -79,14 +80,17 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                 for (uploadedTo in start..fileSize step chunkSize.toLong()) {
 
                     var readRange = 0
+                    var error = false
                     var errorMessage: String? = null
                     do {
 
-                        if (errorMessage?.isNotEmpty() == true) {
+                        if (error || errorMessage?.isNotEmpty() == true) {
                             // reset the bytes if the server is more ahead than recorded
-                            if (errorMessage.startsWith("Range should start from:")) {
+                            if (errorMessage?.startsWith("Range should start from:") == true) {
                                 errorMessage = errorMessage.substringAfter(":")
                                 bytesSoFar.set(errorMessage.toLong())
+                            } else {
+                                throw Exception()
                             }
                         }
 
@@ -116,14 +120,15 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                         urlConnection.connect()
 
                         val responseCode = urlConnection.responseCode
-
-                        if (responseCode == 400) {
+                        
+                        if (urlConnection.errorStream != null) {
+                            error = true
                             errorMessage = String(urlConnection.errorStream.readBytes())
                         }
 
                         urlConnection.disconnect()
 
-                    } while (responseCode != HttpStatusCode.NoContent.value && errorMessage?.isNotEmpty() == true)
+                    } while (responseCode != HttpStatusCode.NoContent.value)
 
                     val endedAt = bytesSoFar.get() + readRange
                     bytesSoFar.set(endedAt)

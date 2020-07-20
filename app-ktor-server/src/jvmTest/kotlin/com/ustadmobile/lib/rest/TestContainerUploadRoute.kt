@@ -21,6 +21,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 
 class TestContainerUploadRoute {
 
@@ -39,7 +41,7 @@ class TestContainerUploadRoute {
 
         tmpFolder = UmFileUtilSe.makeTempDir("upload", "")
 
-        db.containerEntryFileDao.insertList(  listOf(ContainerEntryFile().apply {
+        db.containerEntryFileDao.insertList(listOf(ContainerEntryFile().apply {
             this.cefMd5 = "1"
         }))
 
@@ -60,13 +62,12 @@ class TestContainerUploadRoute {
     fun givenAListOfMd5Sums_whenRequestMade_ServerShouldReturnListOfMd5ItDoesntHave() {
 
         runBlocking {
-            val data = defaultHttpClient().post<List<String>>{
+            val data = defaultHttpClient().post<List<String>> {
                 url("http://localhost:$defaultPort/ContainerUpload/checkExistingMd5/")
                 body = "1;2;3"
             }
 
-            Assert.assertEquals("list matches", listOf("2","3"), data)
+            Assert.assertEquals("list matches", listOf("2", "3"), data)
         }
     }
-
 }

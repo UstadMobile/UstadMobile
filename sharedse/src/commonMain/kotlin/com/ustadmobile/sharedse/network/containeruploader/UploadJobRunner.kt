@@ -36,7 +36,7 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
      */
     private val downloadStatusLock = Mutex()
 
-    suspend fun startUpload() {
+    suspend fun startUpload(): Int {
 
         val containerEntryWithFileList = db.containerEntryDao
                 .findByContainer(containerUploadJob.cujContainerUid)
@@ -62,8 +62,8 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
             db.containerUploadJobDao.update(containerUploadJob)
         }
 
-        var uploadAttemptStatus = -1
-        if(containerEntryUidList.isNotEmpty()) {
+        var uploadAttemptStatus = JobStatus.FAILED
+        if (containerEntryUidList.isNotEmpty()) {
 
             val request = ContainerUploaderRequest(containerUploadJob.cujUid,
                     containerEntryUidList, UMFileUtil.joinPaths(endpointUrl, "/upload/"), endpointUrl)
@@ -74,25 +74,31 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
             var attemptNum = 0
             while (attemptNum++ < 3) {
 
-                downloadStatusLock.withLock {
+                try {
 
-                    jobDeferred = containerUploader.enqueue(request, object : AbstractContainerUploaderListener() {
-                        override fun onProgress(request: ContainerUploaderRequest, bytesUploaded: Long, contentLength: Long) {
-                            super.onProgress(request, bytesUploaded, contentLength)
+                    downloadStatusLock.withLock {
 
-                        }
-                    })
-                    currentUploadAttempt.value = jobDeferred
+                        jobDeferred = containerUploader.enqueue(request, object : AbstractContainerUploaderListener() {
+                            override fun onProgress(request: ContainerUploaderRequest, bytesUploaded: Long, contentLength: Long) {
+                                super.onProgress(request, bytesUploaded, contentLength)
 
-                }
-                uploadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
+                            }
+                        })
+                        currentUploadAttempt.value = jobDeferred
 
-                if (uploadAttemptStatus == JobStatus.COMPLETE) {
-                    break
+                    }
+                    uploadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
+
+                    if (uploadAttemptStatus == JobStatus.COMPLETE) {
+                        break
+                    }
+
+                } catch (e: Exception) {
+
                 }
             }
 
-        }else{
+        } else {
             uploadAttemptStatus = JobStatus.COMPLETE
         }
 
@@ -100,20 +106,23 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
 
         if (uploadAttemptStatus == JobStatus.COMPLETE) {
 
-            val container = db.containerDao.findByUid(containerUploadJob.cujContainerUid) ?: throw Exception()
+            val container = db.containerDao.findByUid(containerUploadJob.cujContainerUid)
+                    ?: throw Exception()
 
             val job = db.containerUploadJobDao.findByUid(containerUploadJob.cujUid)
             val code = currentHttpClient.post<HttpStatement>() {
                 url(UMFileUtil.joinPaths(endpointUrl, "/ContainerUpload/finalizeEntries/sessionId/${job?.sessionId}/"))
-                header("content-type","application/json")
+                header("content-type", "application/json")
                 body = ContainerWithContainerEntryWithMd5(container, containerEntries)
             }.execute().status
 
-            if(code != HttpStatusCode.NoContent){
+            if (code != HttpStatusCode.NoContent) {
                 throw Exception()
             }
 
         }
+
+        return uploadAttemptStatus
 
     }
 
