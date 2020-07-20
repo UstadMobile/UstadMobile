@@ -5,17 +5,17 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.lib.db.entities.ContainerWithContainerEntryWithMd5
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpStatement
+import io.ktor.http.HttpStatusCode
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -42,58 +42,58 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
                 .findByContainer(containerUploadJob.cujContainerUid)
 
         var containerEntryUidList = containerUploadJob.containerEntryFileUids
-        val md5ListToUpload: String
         if (containerEntryUidList.isNullOrEmpty()) {
 
             val listOfMd5SumStr = containerEntryWithFileList.map { it.containerEntryFile?.cefMd5 }
                     .joinToString(";")
 
             val md5sServerDoesntHave = currentHttpClient.post<List<String>> {
-                url(UMFileUtil.joinPaths(endpointUrl, "/ContainerUpload/checkExistingMd5/", listOfMd5SumStr))
+                url(UMFileUtil.joinPaths(endpointUrl, "/ContainerUpload/checkExistingMd5/"))
+                body = listOfMd5SumStr
             }
 
             val containerEntriesServerDoesntHave = containerEntryWithFileList
                     .filter { it.containerEntryFile?.cefMd5 in md5sServerDoesntHave }
 
             containerEntryUidList = containerEntriesServerDoesntHave.map { it.containerEntryFile?.cefUid }
-                    .joinToString(",")
+                    .joinToString(";")
 
             containerUploadJob.containerEntryFileUids = containerEntryUidList
             db.containerUploadJobDao.update(containerUploadJob)
-
-            md5ListToUpload = containerEntriesServerDoesntHave.map { it.containerEntryFile?.cefMd5 }.joinToString(";")
-
-        } else {
-            md5ListToUpload = db.containerEntryFileDao.findEntriesByUids(
-                    containerEntryUidList.split(";").map { it.toLong() })
-                    .map { it.cefMd5 }.joinToString(";")
         }
 
-        val request = ContainerUploaderRequest(containerUploadJob.cujUid,
-                md5ListToUpload, "$endpointUrl/upload/", endpointUrl)
-
         var uploadAttemptStatus = -1
-        var jobDeferred: Deferred<Int>? = null
+        if(containerEntryUidList.isNotEmpty()) {
 
-        var attemptNum = 0
-        while (attemptNum++ < 3) {
+            val request = ContainerUploaderRequest(containerUploadJob.cujUid,
+                    containerEntryUidList, UMFileUtil.joinPaths(endpointUrl, "/upload/"), endpointUrl)
 
-            downloadStatusLock.withLock {
 
-                jobDeferred = containerUploader.enqueue(request, object : AbstractContainerUploaderListener() {
-                    override fun onProgress(request: ContainerUploaderRequest, bytesUploaded: Long, contentLength: Long) {
-                        super.onProgress(request, bytesUploaded, contentLength)
+            var jobDeferred: Deferred<Int>? = null
 
-                    }
-                })
-                currentUploadAttempt.value = jobDeferred
+            var attemptNum = 0
+            while (attemptNum++ < 3) {
 
+                downloadStatusLock.withLock {
+
+                    jobDeferred = containerUploader.enqueue(request, object : AbstractContainerUploaderListener() {
+                        override fun onProgress(request: ContainerUploaderRequest, bytesUploaded: Long, contentLength: Long) {
+                            super.onProgress(request, bytesUploaded, contentLength)
+
+                        }
+                    })
+                    currentUploadAttempt.value = jobDeferred
+
+                }
+                uploadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
+
+                if (uploadAttemptStatus == JobStatus.COMPLETE) {
+                    break
+                }
             }
-            uploadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
 
-            if (uploadAttemptStatus == JobStatus.COMPLETE) {
-                break
-            }
+        }else{
+            uploadAttemptStatus = JobStatus.COMPLETE
         }
 
         val containerEntries = db.containerEntryDao.findByContainerWithMd5(containerUploadJob.cujContainerUid)
@@ -101,15 +101,17 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
         if (uploadAttemptStatus == JobStatus.COMPLETE) {
 
             val container = db.containerDao.findByUid(containerUploadJob.cujContainerUid) ?: throw Exception()
-            val containerStr = Json.stringify(Container.serializer(), container)
 
             val job = db.containerUploadJobDao.findByUid(containerUploadJob.cujUid)
-            currentHttpClient.post<HttpStatement>() {
-                url(UMFileUtil.joinPaths(endpointUrl, "/upload/sessionId/${job.sessionId}/$containerStr"))
+            val code = currentHttpClient.post<HttpStatement>() {
+                url(UMFileUtil.joinPaths(endpointUrl, "/ContainerUpload/finalizeEntries/sessionId/${job?.sessionId}/"))
                 header("content-type","application/json")
-                body = containerEntries
-            }.execute()
+                body = ContainerWithContainerEntryWithMd5(container, containerEntries)
+            }.execute().status
 
+            if(code != HttpStatusCode.NoContent){
+                throw Exception()
+            }
 
         }
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "0f0f3a2278a8819557f1bddf9f7cb00c",
+    "identityHash": "2a6cb167b4f1741f5be63f69bfe16e8e",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4476,7 +4476,7 @@
       },
       {
         "tableName": "ContainerUploadJob",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cujUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cujContainerUid` INTEGER NOT NULL, `jobStatus` INTEGER NOT NULL, `bytesSoFar` INTEGER NOT NULL, `containerEntryFileUids` TEXT, `cujMasterChangeSeqNum` INTEGER NOT NULL, `cujLocalChangeSeqNum` INTEGER NOT NULL, `cujLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cujUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cujContainerUid` INTEGER NOT NULL, `sessionId` TEXT, `jobStatus` INTEGER NOT NULL, `bytesSoFar` INTEGER NOT NULL, `containerEntryFileUids` TEXT)",
         "fields": [
           {
             "fieldPath": "cujUid",
@@ -4489,6 +4489,12 @@
             "columnName": "cujContainerUid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "jobStatus",
@@ -4507,24 +4513,6 @@
             "columnName": "containerEntryFileUids",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "cujMasterChangeSeqNum",
-            "columnName": "cujMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cujLocalChangeSeqNum",
-            "columnName": "cujLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cujLastChangedBy",
-            "columnName": "cujLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -7459,80 +7447,12 @@
           }
         ],
         "foreignKeys": []
-      },
-      {
-        "tableName": "ContainerUploadJob_trk",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "epk",
-            "columnName": "epk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientId",
-            "columnName": "clientId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "csn",
-            "columnName": "csn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rx",
-            "columnName": "rx",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "reqId",
-            "columnName": "reqId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ts",
-            "columnName": "ts",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "pk"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ContainerUploadJob_trk_clientId_epk_rx_csn",
-            "unique": false,
-            "columnNames": [
-              "clientId",
-              "epk",
-              "rx",
-              "csn"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContainerUploadJob_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
-          }
-        ],
-        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0f0f3a2278a8819557f1bddf9f7cb00c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2a6cb167b4f1741f5be63f69bfe16e8e')"
     ]
   }
 }

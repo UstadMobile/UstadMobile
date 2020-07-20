@@ -8,6 +8,7 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -30,6 +31,7 @@ import javax.naming.InitialContext
 
 class TestContainerUploader {
 
+    private lateinit var epubContainer: Container
     private lateinit var entryListStr: String
     private lateinit var containerManager: ContainerManager
     private lateinit var appDb: UmAppDatabase
@@ -66,7 +68,7 @@ class TestContainerUploader {
                 fileToUpload)
 
 
-        val epubContainer = Container()
+        epubContainer = Container()
         epubContainer.containerUid = appDb.containerDao.insert(epubContainer)
         containerManager = ContainerManager(epubContainer, appDb, appDb, tmpFolder.absolutePath)
         runBlocking {
@@ -83,13 +85,18 @@ class TestContainerUploader {
 
         val inStream = appDb.containerEntryFileDao.generateConcatenatedFilesResponse(entryListStr).dataSrc
 
+        val job = ContainerUploadJob()
+        job.cujContainerUid = epubContainer.containerUid
+        job.cujUid = appDb.containerUploadJobDao.insert(job)
+
         val sessionId = UUID.randomUUID().toString()
         mockWebServer.enqueue(MockResponse().setBody(sessionId))
         for (i in 0..fileToUpload.length() step CHUNK_SIZE.toLong()) {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.NoContent.value))
         }
 
-        val request = ContainerUploaderRequest(,
+
+        val request = ContainerUploaderRequest(job.cujUid,
                 entryListStr, mockWebServer.url("/upload/").toString(), TEST_ENDPOINT
         )
 

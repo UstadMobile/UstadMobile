@@ -21,7 +21,7 @@ abstract class ContainerUploadJobDao : BaseDao<ContainerUploadJob> {
     abstract fun setJobStatus(downloadStatus: Int, sessionId: String)
 
     @Query("SELECT * FROM ContainerUploadJob where cujUid = :uploadId")
-    abstract fun findByUid(uploadId: Long): ContainerUploadJob
+    abstract fun findByUid(uploadId: Long): ContainerUploadJob?
 
     @Update
     abstract override fun update(entity: ContainerUploadJob)

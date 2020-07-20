@@ -94,8 +94,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<CoroutineDispatcher>(tag = TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
 
         bind<LocalAvailabilityManager>() with scoped(EndpointScope.Default).singleton {
-            val db: UmAppDatabase = instance(tag = TAG_DB)
-            LocalAvailabilityManagerImpl(applicationContext, locallyAvailableContainerDao = db.locallyAvailableContainerDao)
+            LocalAvailabilityManagerImpl(di, context)
         }
 
         bind<ContainerFetcher>() with singleton { ContainerFetcherJvm(di) }

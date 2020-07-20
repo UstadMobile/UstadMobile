@@ -4,6 +4,7 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import com.ustadmobile.lib.db.entities.ContainerWithContainerEntryWithMd5
 import com.ustadmobile.sharedse.container.addEntriesFromConcatenatedInputStream
 import com.ustadmobile.sharedse.io.ConcatenatedInputStream
 import io.ktor.application.call
@@ -24,9 +25,9 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
 
     route("ContainerUpload") {
 
-        post("checkExistingMd5/{md5sumList}") {
-            val md5sumListStr = call.parameters["md5sumList"]
-            if (md5sumListStr == null) {
+        post("checkExistingMd5/") {
+            val md5sumListStr = call.receive<String>()
+            if (md5sumListStr.isEmpty()) {
                 call.respond(HttpStatusCode.BadRequest, "md5sum list not provided")
                 return@post
             }
@@ -38,13 +39,13 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
             call.respond(nonExistingMd5SumList)
         }
 
-        post("finalizeEntries/sessionId/{sessionId}/{container}") {
+        post("finalizeEntries/sessionId/{sessionId}/") {
 
             val sessionId = call.parameters["sessionId"] ?: throw Exception()
-            val containerStr  = call.parameters["container"] ?: throw Exception()
-            val container = Json.parse(Container.serializer(), containerStr)
             val sessionFile = File(folder, sessionId)
-            val containerEntriesList = call.receive<Array<ContainerEntryWithMd5>>().toList()
+            val containerWithContainerEntryWithMd5 = call.receive<ContainerWithContainerEntryWithMd5>()
+            val containerEntriesList = containerWithContainerEntryWithMd5.containerEntries
+            val container = containerWithContainerEntryWithMd5.container
             if (containerEntriesList.isEmpty()) {
                 call.respond(HttpStatusCode.BadRequest, "containerEntriesWithMd5Sums not given")
                 return@post
@@ -55,16 +56,18 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
             } else {
 
                 val iContext = InitialContext()
-                val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
+                val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as? String
+                        ?: "./build/container"
                 val containerDir = File(containerDirPath)
                 containerDir.mkdirs()
 
-                val containerFromDb = db.containerDao.findByUid(containerEntriesList[0].ceContainerUid)
+                var containerFromDb = db.containerDao.findByUid(container.containerUid)
                 if (containerFromDb == null) {
                     db.containerDao.insert(container)
+                    containerFromDb = container
                 }
 
-                val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
+                val containerManager = ContainerManager(containerFromDb, db, db, containerDir.absolutePath)
                 val linkedItems = containerManager.linkExistingItems(containerEntriesList)
 
                 var concatenatedInputStream: ConcatenatedInputStream? = null
@@ -73,12 +76,11 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
                     concatenatedInputStream = ConcatenatedInputStream(FileInputStream(sessionFile))
                     containerManager.addEntriesFromConcatenatedInputStream(concatenatedInputStream, linkedItems)
                     call.respond(HttpStatusCode.NoContent)
-                }finally {
+                } finally {
                     concatenatedInputStream?.close()
                 }
 
             }
-
 
         }
 

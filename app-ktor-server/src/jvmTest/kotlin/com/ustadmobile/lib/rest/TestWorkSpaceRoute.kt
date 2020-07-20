@@ -13,7 +13,6 @@ import io.ktor.client.call.receive
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
 import io.ktor.client.statement.HttpStatement
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
@@ -63,7 +62,7 @@ class TestWorkSpaceRoute {
 
     @After
     fun tearDown() {
-        server.stop(0, 5, TimeUnit.SECONDS)
+        server.stop(0, 5000)
         httpClient.close()
     }
 

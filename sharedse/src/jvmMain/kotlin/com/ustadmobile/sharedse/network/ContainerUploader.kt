@@ -3,10 +3,11 @@ package com.ustadmobile.sharedse.network
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
-import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderListener
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderRequest
 import io.ktor.http.HttpStatusCode
@@ -19,9 +20,9 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.InputStream
-import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLConnection
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.min
 
@@ -33,8 +34,6 @@ class ContainerUploader(val request: ContainerUploaderRequest,
     private val contentLength = AtomicLong(0L)
 
     private val bytesSoFar = AtomicLong(0L)
-
-    private val networkManager: NetworkManagerBle by instance()
 
     private val db: UmAppDatabase by di.on(Endpoint(request.endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
 
@@ -54,21 +53,13 @@ class ContainerUploader(val request: ContainerUploaderRequest,
             var inStream: InputStream? = null
             var rangeStream: RangeInputStream? = null
             try {
-                val localConnectionOpenerVal =
-                        (networkManager as NetworkManagerWithConnectionOpener).localConnectionOpener
 
-                val connectionOpener: ConnectionOpener = if (localConnectionOpenerVal != null) {
-                    localConnectionOpenerVal
-                } else {
-                    { url -> url.openConnection() as HttpURLConnection }
-                }
-
-                urlConnection = connectionOpener(URL(request.uploadToUrl))
+                urlConnection = URL(UMFileUtil.joinPaths(request.uploadToUrl, "/createSession/")).openConnection() as HttpURLConnection
 
                 urlConnection.requestMethod = "GET"
                 urlConnection.connect()
 
-                val uploadJob = db.containerUploadJobDao.findByUid(request.uploadJobUid)
+                val uploadJob = db.containerUploadJobDao.findByUid(request.uploadJobUid) ?: ContainerUploadJob()
                 if (uploadJob.sessionId.isNullOrEmpty()) {
                     val sessionId = String(UMIOUtils.readStreamToByteArray(urlConnection.inputStream))
                     uploadJob.sessionId = sessionId
@@ -113,7 +104,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
 
                         val end = bytesSoFar.get() + readRange - 1
 
-                        urlConnection = connectionOpener(URL(request.uploadToUrl))
+                        urlConnection = URL(UMFileUtil.joinPaths(request.uploadToUrl, "/receiveData/")).openConnection() as HttpURLConnection
                         urlConnection.doOutput = true
                         urlConnection.requestMethod = "PUT"
                         urlConnection.setRequestProperty("Content-Length", readRange.toString())

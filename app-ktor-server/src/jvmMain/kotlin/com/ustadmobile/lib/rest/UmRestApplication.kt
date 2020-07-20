@@ -95,8 +95,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db: UmAppDatabase = 
         }
         LoginRoute(db)
         ContainerMountRoute(db)
-        val uploadFolder = File(containerDirPath, "upload")
-        uploadFolder.mkdir()
+        val uploadFolder = Files.createTempDirectory("upload").toFile()
         ResumableUploadRoute(uploadFolder)
         ContainerUpload(db, uploadFolder)
         UmAppDatabase_KtorRoute(db, Gson(), File("attachments/UmAppDatabase").absolutePath)
