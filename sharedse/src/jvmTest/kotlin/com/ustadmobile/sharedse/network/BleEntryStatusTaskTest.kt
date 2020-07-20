@@ -1,19 +1,18 @@
 package com.ustadmobile.sharedse.network
 
 
-import com.ustadmobile.core.db.UmAppDatabase
+import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.db.dao.NetworkNodeDao
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.sharedse.network.BleMessageUtil.bleMessageLongToBytes
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
-import com.ustadmobile.sharedse.test.util.bindDbForActiveContext
+import com.ustadmobile.sharedse.util.UstadTestRule
 import junit.framework.TestCase.*
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.spy
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 
@@ -39,26 +38,18 @@ class BleEntryStatusTaskTest {
 
     private var context = Any()
 
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
+
     @Before
     fun setUp() {
-        UmAccountManager.bindDbForActiveContext(context)
-        val umAppDatabase = UmAccountManager.getActiveDatabase(context)
-        umAppDatabase.clearAllTables()
-
-        managerBle = com.nhaarman.mockitokotlin2.spy {
-
-        }
-        managerBle!!.onCreate()
-
         networkNode = NetworkNode()
         networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
         networkNode.nodeId = 1
-        networkNodeDao = umAppDatabase.networkNodeDao
-        networkNodeDao!!.replace(networkNode)
 
-        mockedEntryStatusTask = spy(BleEntryStatusTask::class.java)
+        mockedEntryStatusTask = spy<BleEntryStatusTask> {}
         mockedEntryStatusTask.context = context
-        mockedEntryStatusTask.setManagerBle(spy(NetworkManagerBle::class.java))
         mockedEntryStatusTask.setEntryUidsToCheck(containerUids)
     }
 

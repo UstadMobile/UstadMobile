@@ -8,7 +8,7 @@ import java.io.File
 /**
  * @author kileha3
  */
-interface ContentTypePlugin : ContentTypePlugin {
+interface ContentTypeFilePlugin : ContentTypePlugin {
 
     /**
      * Get content entry from imported epub file

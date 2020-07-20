@@ -6,7 +6,7 @@ import com.ustadmobile.core.view.EpubContentView
  * Created by mike on 9/9/17.
  */
 
-open class EPUBType : ContentTypePlugin {
+open class EpubTypePlugin : ContentTypePlugin {
 
     override val viewName: String
         get() = EpubContentView.VIEW_NAME
