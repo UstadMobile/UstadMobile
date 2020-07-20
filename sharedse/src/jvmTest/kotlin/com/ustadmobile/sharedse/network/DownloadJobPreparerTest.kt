@@ -25,8 +25,6 @@ import org.kodein.di.on
 
 class DownloadJobPreparerTest {
 
-    private lateinit var mockedNetworkManager: NetworkManagerBleCommon
-
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
