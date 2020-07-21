@@ -84,7 +84,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     var errorMessage: String? = null
                     do {
 
-                        if (error || errorMessage?.isNotEmpty() == true) {
+                        if (error) {
                             // reset the bytes if the server is more ahead than recorded
                             if (errorMessage?.startsWith("Range should start from:") == true) {
                                 errorMessage = errorMessage.substringAfter(":")

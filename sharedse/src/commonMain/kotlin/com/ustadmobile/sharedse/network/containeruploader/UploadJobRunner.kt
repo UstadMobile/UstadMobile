@@ -62,7 +62,7 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
             db.containerUploadJobDao.update(containerUploadJob)
         }
 
-        var uploadAttemptStatus = JobStatus.FAILED
+        var uploadAttemptStatus = -1
         if (containerEntryUidList.isNotEmpty()) {
 
             val request = ContainerUploaderRequest(containerUploadJob.cujUid,
@@ -94,7 +94,7 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
                     }
 
                 } catch (e: Exception) {
-
+                    uploadAttemptStatus = JobStatus.FAILED
                 }
             }
 
