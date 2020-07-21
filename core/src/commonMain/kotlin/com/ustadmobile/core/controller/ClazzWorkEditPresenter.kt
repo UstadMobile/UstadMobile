@@ -67,7 +67,23 @@ class ClazzWorkEditPresenter(context: Any,
     { clazzWorkQuestion.clazzWorkQuestionUid = it }
 
     fun handleAddOrEditClazzQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {
+
+
+        //We could save this
+        GlobalScope.launch {
+            entityClass
+            entityClass.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid = entity?.clazzWorkUid ?: 0L
+            entityClass.clazzWorkQuestion.clazzWorkQuestionUid = 0L
+            val questionUid = repo.clazzWorkQuestionDao.insertAsync(entityClass.clazzWorkQuestion)
+            entityClass.clazzWorkQuestion.clazzWorkQuestionUid = questionUid
+            entityClass.options.forEach {
+                it.clazzWorkQuestionOptionActive = true
+                it.clazzWorkQuestionOptionQuestionUid = questionUid
+            }
+        }
+
         questionAndOptionsEditHelper.onEditResult(entityClass)
+
     }
 
     fun handleRemoveQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {
@@ -183,9 +199,11 @@ class ClazzWorkEditPresenter(context: Any,
                     questionAndOptionsEditHelper.entitiesToUpdate
             etu.forEach {
                 val questionUid = it.clazzWorkQuestion.clazzWorkQuestionUid
+                it.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid = entity.clazzWorkUid
                 it.options.forEach {
                     it.clazzWorkQuestionOptionActive = true
                     it.clazzWorkQuestionOptionQuestionUid = questionUid
+
                 }
             }
             eti.forEach {

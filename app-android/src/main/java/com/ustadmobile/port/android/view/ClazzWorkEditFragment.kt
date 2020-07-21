@@ -126,8 +126,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 ClazzWorkQuestionAndOptions::class.java) {
-            val selQuestionAndOptions = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditClazzQuestionAndOptions(selQuestionAndOptions)
+            val questionAndOptions = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditClazzQuestionAndOptions(questionAndOptions)
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,

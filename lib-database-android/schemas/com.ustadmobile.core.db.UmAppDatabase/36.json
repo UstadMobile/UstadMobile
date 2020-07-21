@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "4bec2958f9a5f35728e1ee43f186a520",
+    "identityHash": "758040099273e1e47464033859f08f0d",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4528,7 +4528,7 @@
       },
       {
         "tableName": "ClazzWorkQuestion",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkQuestionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkQuestionText` TEXT, `clazzWorkQuestionClazzWorkUid` INTEGER NOT NULL, `clazzWorkQuestionIndex` INTEGER NOT NULL, `clazzWorkQuestionType` INTEGER NOT NULL, `clazzWorkQuestionActive` INTEGER NOT NULL, `selQuestionMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkQuestionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkQuestionText` TEXT, `clazzWorkQuestionClazzWorkUid` INTEGER NOT NULL, `clazzWorkQuestionIndex` INTEGER NOT NULL, `clazzWorkQuestionType` INTEGER NOT NULL, `clazzWorkQuestionActive` INTEGER NOT NULL, `clazzWorkQuestionMCSN` INTEGER NOT NULL, `clazzWorkQuestionLCSN` INTEGER NOT NULL, `clazzWorkQuestionLCB` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "clazzWorkQuestionUid",
@@ -4567,20 +4567,20 @@
             "notNull": true
           },
           {
-            "fieldPath": "selQuestionMasterChangeSeqNum",
-            "columnName": "selQuestionMasterChangeSeqNum",
+            "fieldPath": "clazzWorkQuestionMCSN",
+            "columnName": "clazzWorkQuestionMCSN",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "selQuestionLocalChangeSeqNum",
-            "columnName": "selQuestionLocalChangeSeqNum",
+            "fieldPath": "clazzWorkQuestionLCSN",
+            "columnName": "clazzWorkQuestionLCSN",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "selQuestionLastChangedBy",
-            "columnName": "selQuestionLastChangedBy",
+            "fieldPath": "clazzWorkQuestionLCB",
+            "columnName": "clazzWorkQuestionLCB",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -8616,7 +8616,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4bec2958f9a5f35728e1ee43f186a520')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '758040099273e1e47464033859f08f0d')"
     ]
   }
 }

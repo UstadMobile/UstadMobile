@@ -27,13 +27,13 @@ open class ClazzWorkQuestion {
     var clazzWorkQuestionActive: Boolean = false
 
     @MasterChangeSeqNum
-    var selQuestionMasterChangeSeqNum: Long = 0
+    var clazzWorkQuestionMCSN: Long = 0
 
     @LocalChangeSeqNum
-    var selQuestionLocalChangeSeqNum: Long = 0
+    var clazzWorkQuestionLCSN: Long = 0
 
     @LastChangedBy
-    var selQuestionLastChangedBy: Int = 0
+    var clazzWorkQuestionLCB: Int = 0
 
     companion object{
         const val CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT = 1
@@ -52,9 +52,9 @@ open class ClazzWorkQuestion {
         if (clazzWorkQuestionIndex != other.clazzWorkQuestionIndex) return false
         if (clazzWorkQuestionType != other.clazzWorkQuestionType) return false
         if (clazzWorkQuestionActive != other.clazzWorkQuestionActive) return false
-        if (selQuestionMasterChangeSeqNum != other.selQuestionMasterChangeSeqNum) return false
-        if (selQuestionLocalChangeSeqNum != other.selQuestionLocalChangeSeqNum) return false
-        if (selQuestionLastChangedBy != other.selQuestionLastChangedBy) return false
+        if (clazzWorkQuestionMCSN != other.clazzWorkQuestionMCSN) return false
+        if (clazzWorkQuestionLCSN != other.clazzWorkQuestionLCSN) return false
+        if (clazzWorkQuestionLCB != other.clazzWorkQuestionLCB) return false
 
         return true
     }
@@ -66,9 +66,9 @@ open class ClazzWorkQuestion {
         result = 31 * result + clazzWorkQuestionIndex
         result = 31 * result + clazzWorkQuestionType
         result = 31 * result + clazzWorkQuestionActive.hashCode()
-        result = 31 * result + selQuestionMasterChangeSeqNum.hashCode()
-        result = 31 * result + selQuestionLocalChangeSeqNum.hashCode()
-        result = 31 * result + selQuestionLastChangedBy
+        result = 31 * result + clazzWorkQuestionMCSN.hashCode()
+        result = 31 * result + clazzWorkQuestionLCSN.hashCode()
+        result = 31 * result + clazzWorkQuestionLCB
         return result
     }
 
