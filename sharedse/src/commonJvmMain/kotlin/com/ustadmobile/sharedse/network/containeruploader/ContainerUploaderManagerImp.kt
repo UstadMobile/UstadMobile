@@ -1,4 +1,4 @@
-package com.ustadmobile.sharedse.network
+package com.ustadmobile.sharedse.network.containeruploader
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus

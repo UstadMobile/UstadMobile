@@ -1,4 +1,4 @@
-package com.ustadmobile.sharedse.network
+package com.ustadmobile.sharedse.network.containeruploader
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
@@ -8,8 +8,6 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderListener
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderRequest
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -19,12 +17,9 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
-import java.net.SocketTimeoutException
 import java.net.URL
-import java.net.URLConnection
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.min
 

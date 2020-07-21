@@ -27,7 +27,7 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
 
     private val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
 
-    private val containerUploader: ContainerUploader by instance()
+    private val containerUploader: ContainerUploaderCommon by instance()
 
     private val currentUploadAttempt = atomic(null as Deferred<Int>?)
 

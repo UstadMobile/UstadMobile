@@ -9,20 +9,17 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.lib.rest.ContainerUpload
 import com.ustadmobile.lib.rest.ResumableUploadRoute
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.ext.TestContainer
 import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
 import com.ustadmobile.sharedse.network.containeruploader.UploadJobRunner
-import com.ustadmobile.util.test.ReverseProxyDispatcher
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
@@ -35,11 +32,8 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
-import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okio.Buffer
-import okio.Okio
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -89,7 +83,7 @@ class UploadJobRunnerTest {
                     it.clearAllTables()
                 })
             }
-            bind<ContainerUploader>() with singleton { ContainerUploaderJvm(di) }
+            bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
         }
 
 
@@ -168,7 +162,7 @@ class UploadJobRunnerTest {
         mockWebServer.enqueue(MockResponse().setBody(sessionId))
 
         // fail to upload - server problem
-        for (i in 0..(fileToUpload.length()) step com.ustadmobile.sharedse.network.ContainerUploader.CHUNK_SIZE.toLong()) {
+        for (i in 0..(fileToUpload.length()) step ContainerUploader.CHUNK_SIZE.toLong()) {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.InternalServerError.value).setBody("Server error"))
         }
 

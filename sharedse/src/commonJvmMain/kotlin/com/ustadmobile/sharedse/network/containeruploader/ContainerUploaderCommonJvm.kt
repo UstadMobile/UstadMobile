@@ -1,7 +1,6 @@
-package com.ustadmobile.sharedse.network
+package com.ustadmobile.sharedse.network.containeruploader
 
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderListener
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderRequest
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -10,9 +9,8 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import java.util.concurrent.Executors
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader
 
-class ContainerUploaderJvm(override val di: DI) : ContainerUploader(), DIAware {
+class ContainerUploaderCommonJvm(override val di: DI) : ContainerUploaderCommon(), DIAware {
 
     private val executorService = Executors.newCachedThreadPool()
 

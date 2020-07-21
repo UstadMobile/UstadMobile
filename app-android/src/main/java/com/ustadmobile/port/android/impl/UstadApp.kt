@@ -32,8 +32,9 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader
-import com.ustadmobile.sharedse.network.ContainerUploaderJvm
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderManagerImp
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
@@ -110,7 +111,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContentEntryOpener(di, context, applicationContext)
         }
 
-        bind<ContainerUploader>() with singleton { ContainerUploaderJvm(di) }
+        bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }
