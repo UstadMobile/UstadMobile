@@ -35,7 +35,6 @@ kotlin {
                   implementation fileTree(dir: 'libs', include: ['*.jar'])
                   implementation "io.ktor:ktor-server-netty:$version_ktor"
                   implementation "io.ktor:ktor-server-servlet:$version_ktor"
-                  implementation "io.ktor:ktor-server-netty:$version_ktor"
                   implementation "io.ktor:ktor-jackson:$version_ktor"
                   implementation "io.ktor:ktor-gson:$version_ktor"
                   implementation "io.ktor:ktor-client-core:$version_ktor"
@@ -113,7 +112,7 @@ shadowJar {
         attributes 'Main-Class': mainClassName
     }
 
-    configurations += [project.configurations.standaloneRuntime]
+    configurations += [project.configurations.jvmRuntimeClasspath]
 }
 
 sourceSets {
@@ -218,13 +217,13 @@ task devModeWar(type: War) {
 task appRun(type: JavaExec) {
     classpath = files("$buildDir/libs/app-ktor-server-all.jar")
     main = 'io.ktor.server.netty.EngineMain'
-    args '-port', '8087'
+    args '-port=8087'
 }
 
 task appRunDebug(type: JavaExec) {
     classpath = files("$buildDir/libs/app-ktor-server-all.jar")
     main = 'io.ktor.server.netty.EngineMain'
-    args '-port', '8087'
+    args '-port=8087'
     jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
 }
 
@@ -256,64 +255,6 @@ prodModeJar.finalizedBy(removeTempResources)
 
 prodModeWar.dependsOn(prepareResources)
 prodModeWar.finalizedBy(removeTempResources)
-/*
-
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    standaloneRuntime "io.ktor:ktor-server-netty:$version_ktor"
-    servletRuntime "io.ktor:ktor-server-servlet:$version_ktor"
-    implementation "io.ktor:ktor-server-netty:$version_ktor"
-    implementation "io.ktor:ktor-jackson:$version_ktor"
-    implementation "io.ktor:ktor-gson:$version_ktor"
-    implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
-    implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
-    implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
-
-    implementation "commons-io:commons-io:$version_commons_io"
-    implementation "org.jsoup:jsoup:$version_jsoup"
-    implementation "com.google.code.gson:gson:$version_gson"
-    implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
-    implementation "ch.qos.logback:logback-classic:$version_logback"
-
-    implementation project(path: ":core", configuration: "jvmDefault")
-    implementation project(path: ":sharedse", configuration: "jvmDefault")
-    implementation project(path: ":lib-database", configuration: "jvmDefault")
-    implementation project(path: ":lib-database-mpp", configuration: "jvmDefault")
-    implementation project(path: ":lib-room-annotations", configuration: "jvmDefault")
-    implementation project(path: ":lib-database-entities", configuration: "jvmDefault")
-   // implementation project(path: ":lib-door-runtime", configuration: "jvmDefault")
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-
-    testImplementation project(path: ":lib-test-common", configuration: "jvmDefault")
-    testImplementation project(path: ":sharedse", configuration: "jvmDefault")
-
-    testImplementation "junit:junit:$version_junit"
-
-    testImplementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    testImplementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    testImplementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    testImplementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-    testImplementation "io.ktor:ktor-server-netty:$version_ktor"
-    testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-
-    standaloneRuntime "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-    standaloneRuntime "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-    standaloneRuntime "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    standaloneRuntime "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-    standaloneRuntime "org.postgresql:postgresql:$version_postgres_jdbc"
-
-
-    testImplementation "io.ktor:ktor-client-core:$version_ktor"
-    testImplementation "io.ktor:ktor-client-json:$version_ktor"
-    testImplementation "io.ktor:ktor-client-okhttp:$version_ktor"
-    testImplementation "io.ktor:ktor-client-gson:$version_ktor"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-
-}
-*/
-
 
 sourceCompatibility = "8"
 targetCompatibility = "8"
