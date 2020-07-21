@@ -26,24 +26,32 @@ class PersonAccountEditFragment: UstadEditFragment<Person>(), PersonAccountEditV
 
     private var mPresenter: PersonAccountEditPresenter? = null
 
-    override var currentPassword: String? = null
-        get() = mBinding?.currentPassword
+    override var firstPassword: String? = null
+        get() = mBinding?.firstPassword
 
-    override var newPassword: String? = null
-        get() = mBinding?.newPassword
+    override var secondPassword: String? = null
+        get() = mBinding?.secondPassword
 
-    override var newPasswordRequiredErrorVisible: Boolean = false
+    override var secondPasswordFieldRequiredErrorVisible: Boolean = false
         set(value) {
             field = value
-            handleInputError(mBinding?.newPasswordTextinputlayout,
+            handleInputError(mBinding?.secondPasswordTextinputlayout,
                     value,getString(R.string.field_required_prompt))
         }
 
-    override var currentPasswordRequiredErrorVisible: Boolean = false
+    override var firstPasswordFieldRequiredErrorVisible: Boolean = false
         set(value) {
             field = value
-            handleInputError(mBinding?.currentPasswordTextinputlayout,
+            handleInputError(mBinding?.firstPasswordTextinputlayout,
                     value,getString(R.string.field_required_prompt))
+        }
+    override var passwordNoMatchErrorVisible: Boolean? = null
+        set(value) {
+            field = value
+            handleInputError(mBinding?.firstPasswordTextinputlayout,true,
+                    getString(R.string.filed_password_no_match))
+            handleInputError(mBinding?.secondPasswordTextinputlayout,true,
+                    getString(R.string.filed_password_no_match))
         }
 
     override var usernameRequiredErrorVisible: Boolean = false
@@ -58,10 +66,21 @@ class PersonAccountEditFragment: UstadEditFragment<Person>(), PersonAccountEditV
             mBinding?.errorText?.visibility = if(value != null) View.VISIBLE else View.GONE
             mBinding?.errorText?.text = value
         }
+    override var fistPasswordFieldHint: String? = null
+        set(value) {
+            field = value
+            mBinding?.firstPasswordTextinputlayout?.hint = value
+        }
+
+    override var secondPasswordFieldHint: String? = null
+        set(value) {
+            field = value
+            mBinding?.secondPasswordTextinputlayout?.hint = value
+        }
 
     override fun clearFields() {
-        mBinding?.currentPassword = ""
-        mBinding?.newPassword = ""
+        mBinding?.firstPassword = ""
+        mBinding?.secondPassword = ""
     }
 
 
@@ -89,23 +108,23 @@ class PersonAccountEditFragment: UstadEditFragment<Person>(), PersonAccountEditV
         mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        mBinding?.accountNewPasswordText?.addTextChangedListener(object: TextWatcher {
+        mBinding?.firstPasswordText?.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.newPasswordTextinputlayout, false, null)
+                handleInputError(mBinding?.firstPasswordTextinputlayout, false, null)
             }
         })
 
-        mBinding?.accountCurrentPasswordText?.addTextChangedListener(object: TextWatcher {
+        mBinding?.secondPasswordText?.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.currentPasswordTextinputlayout, false, null)
+                handleInputError(mBinding?.secondPasswordTextinputlayout, false, null)
             }
         })
 

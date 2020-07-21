@@ -32,6 +32,8 @@ class PersonAccountEditPresenter(context: Any,
 
     private val impl: UstadMobileSystemImpl by instance()
 
+    private var createAccount: Boolean = false
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         serverUrl = arguments[ARG_SERVER_URL]?:accountManager.activeAccount.endpointUrl
@@ -39,9 +41,16 @@ class PersonAccountEditPresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Person? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: accountManager.activeAccount.personUid
-        return withTimeoutOrNull(2000) {
+        val person =  withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.personDao?.findByUid(entityUid)
         } ?: Person()
+        createAccount = person.username == null
+        view.fistPasswordFieldHint = impl.getString(if(createAccount) MessageID.password
+        else MessageID.current_password,context)
+        view.secondPasswordFieldHint = impl.getString(if(createAccount) MessageID.confirm_password
+        else MessageID.new_password,context)
+
+        return person
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): Person? {
@@ -62,27 +71,36 @@ class PersonAccountEditPresenter(context: Any,
 
     override fun handleClickSave(entity: Person) {
         GlobalScope.launch(doorMainDispatcher()) {
-            if(!entity.admin && view.currentPassword.isNullOrEmpty() || view.newPassword.isNullOrEmpty()
+            if(!entity.admin && view.firstPassword.isNullOrEmpty() || view.secondPassword.isNullOrEmpty()
                     || entity.username.isNullOrEmpty()){
 
                 view.usernameRequiredErrorVisible = entity.username.isNullOrEmpty()
-                view.currentPasswordRequiredErrorVisible = view.currentPassword.isNullOrEmpty() && !entity.admin
-                view.newPasswordRequiredErrorVisible = view.newPassword.isNullOrEmpty()
+                view.firstPasswordFieldRequiredErrorVisible = view.firstPassword.isNullOrEmpty() && !entity.admin
+                view.secondPasswordFieldRequiredErrorVisible = view.secondPassword.isNullOrEmpty()
                 return@launch
             }
-            val currentPassword = view.currentPassword
-            val newPassword = view.newPassword
+            val firstPassword = view.firstPassword
+            val secondPassword = view.secondPassword
             val username = entity.username
-            if(currentPassword != null && newPassword != null && username != null){
-                try{
-                    accountManager.changePassword(username,currentPassword,newPassword, serverUrl)
-                    view.finishWithResult(listOf(entity))
-                } catch (e: Exception){
-                    view.errorMessage = impl.getString(if(e is UnauthorizedException)
-                        MessageID.filed_password_no_match else
-                        MessageID.login_network_error , context)
-                    view.clearFields()
+            try{
+                if(createAccount && firstPassword != null && secondPassword != null){
+                    val noMatch = firstPassword != secondPassword
+                    view.passwordNoMatchErrorVisible = noMatch
+                    if(noMatch){
+                        return@launch
+                    }
+                    accountManager.register(entity,secondPassword, serverUrl)
+                }else{
+                    if(firstPassword != null && secondPassword != null && username != null){
+                        accountManager.changePassword(username,firstPassword,secondPassword, serverUrl)
+                    }
                 }
+                view.finishWithResult(listOf(entity))
+            } catch (e: Exception){
+                view.errorMessage = impl.getString(if(e is UnauthorizedException)
+                    MessageID.filed_password_no_match else
+                    MessageID.login_network_error , context)
+                view.clearFields()
             }
         }
     }

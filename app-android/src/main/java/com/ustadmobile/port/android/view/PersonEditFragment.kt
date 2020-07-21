@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.view
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -103,56 +105,6 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
                 }.show()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView: View
-        mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
-            rootView = it.root
-            it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
-        }
-
-        mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
-        clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this, mPresenter)
-        clazzMemberNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
-                View.OnClickListener { onClickNewClazzMemberWithClazz() },
-                requireContext().getString(R.string.add_person_to_class)).apply {
-            newItemVisible = true
-        }
-        mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzMemberWithClazzRecyclerAdapter,
-                clazzMemberNewItemRecyclerViewAdapter)
-
-        return rootView
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.person)
-        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
-
-        CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->
-            findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                    Clazz::class.java, roleOption.resultKey) {
-                val clazzSelected = it.firstOrNull() ?: return@observeResult
-                mPresenter?.handleAddOrEditClazzMemberWithClazz(ClazzMemberWithClazz().apply {
-                    clazzMemberPersonUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
-                    clazzMemberClazzUid =  clazzSelected.clazzUid
-                    clazzMemberRole = roleOption.roleId
-                    clazz = clazzSelected
-                    clazzMemberActive = true
-                })
-            }
-        }
-
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mPresenter?.onDestroy()
-        mBinding = null
-        mPresenter = null
-        entity = null
-
-    }
 
     override var entity: Person? = null
         get() = field
@@ -283,6 +235,88 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             field = value
             mBinding?.fieldsEnabled = value
         }
+
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val rootView: View
+        mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
+            rootView = it.root
+            it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
+        }
+
+        mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
+                di, viewLifecycleOwner)
+        clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this, mPresenter)
+        clazzMemberNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
+                View.OnClickListener { onClickNewClazzMemberWithClazz() },
+                requireContext().getString(R.string.add_person_to_class)).apply {
+            newItemVisible = true
+        }
+        mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzMemberWithClazzRecyclerAdapter,
+                clazzMemberNewItemRecyclerViewAdapter)
+
+        mBinding?.usernameText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.usernameTextinputlayout, false, null)
+            }
+        })
+
+        mBinding?.passwordText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.passwordTextinputlayout, false, null)
+            }
+        })
+
+        mBinding?.confirmPasswordText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.confirmPasswordTextinputlayout, false, null)
+            }
+        })
+
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.person)
+        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
+
+        CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->
+            findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                    Clazz::class.java, roleOption.resultKey) {
+                val clazzSelected = it.firstOrNull() ?: return@observeResult
+                mPresenter?.handleAddOrEditClazzMemberWithClazz(ClazzMemberWithClazz().apply {
+                    clazzMemberPersonUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
+                    clazzMemberClazzUid =  clazzSelected.clazzUid
+                    clazzMemberRole = roleOption.roleId
+                    clazz = clazzSelected
+                    clazzMemberActive = true
+                })
+            }
+        }
+
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mBinding = null
+        mPresenter = null
+        entity = null
+
+    }
 
     companion object {
 

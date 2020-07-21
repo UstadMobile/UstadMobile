@@ -14,11 +14,11 @@
 
 
         <variable
-            name="newPassword"
+            name="secondPassword"
             type="String" />
 
         <variable
-            name="currentPassword"
+            name="firstPassword"
             type="String" />
 
 
@@ -60,7 +60,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/current_password_textinputlayout"
+                android:id="@+id/first_password_textinputlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -76,17 +76,17 @@
                 app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/account_current_password_text"
+                    android:id="@+id/first_password_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:hint="@string/current_password"
-                    android:text="@={currentPassword}"
+                    android:text="@={firstPassword}"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/new_password_textinputlayout"
+                android:id="@+id/second_password_textinputlayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -98,14 +98,14 @@
                 app:passwordToggleEnabled="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/current_password_textinputlayout">
+                app:layout_constraintTop_toBottomOf="@+id/first_password_textinputlayout">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/account_new_password_text"
+                    android:id="@+id/second_password_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
-                    android:text="@={newPassword}"
+                    android:text="@={secondPassword}"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -119,7 +119,7 @@
                 android:layout_width="match_parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/new_password_textinputlayout"
+                app:layout_constraintTop_toBottomOf="@+id/second_password_textinputlayout"
                 android:layout_height="wrap_content"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 

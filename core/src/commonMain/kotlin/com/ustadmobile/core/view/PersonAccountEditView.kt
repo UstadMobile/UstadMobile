@@ -4,17 +4,23 @@ import com.ustadmobile.lib.db.entities.Person
 
 interface PersonAccountEditView: UstadEditView<Person> {
 
-    var currentPassword: String?
+    var firstPassword: String?
 
-    var newPassword: String?
+    var secondPassword: String?
 
-    var newPasswordRequiredErrorVisible: Boolean
+    var secondPasswordFieldRequiredErrorVisible: Boolean
 
-    var currentPasswordRequiredErrorVisible: Boolean
+    var firstPasswordFieldRequiredErrorVisible: Boolean
+
+    var passwordNoMatchErrorVisible: Boolean?
 
     var usernameRequiredErrorVisible: Boolean
 
     var errorMessage:String?
+
+    var fistPasswordFieldHint: String?
+
+    var secondPasswordFieldHint: String?
 
     fun clearFields()
 

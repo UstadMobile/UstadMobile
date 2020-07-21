@@ -72,16 +72,23 @@ class PersonAccountEditFragmentTest {
         mockWebServer = MockWebServer()
         mockWebServer.start()
         serverUrl = mockWebServer.url("/").toString()
-
-        mockWebServer.enqueue(MockResponse()
-                .setHeader("Content-Type", "application/json")
-                .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
-                        UmAccount(0L)).toByteArray())))
     }
 
     @After
     fun tearDown() {
         mockWebServer.shutdown()
+    }
+
+    private fun enqueueResponse(success:Boolean = true){
+        if(success){
+            mockWebServer.enqueue(MockResponse()
+                    .setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
+                            UmAccount(0L)).toByteArray())))
+        }else{
+
+        }
     }
 
     private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false): Person {
@@ -131,10 +138,10 @@ class PersonAccountEditFragmentTest {
         val person = createPerson(true)
         launchFragment(person, true, leftOutUsername = true)
 
-        onView(withId(R.id.current_password_textinputlayout)).check(matches(
+        onView(withId(R.id.first_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
 
-        onView(withId(R.id.new_password_textinputlayout)).check(matches(
+        onView(withId(R.id.second_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
     }
 
@@ -144,28 +151,61 @@ class PersonAccountEditFragmentTest {
         val person = createPerson(false, isAdmin = true)
         launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = false)
 
-        onView(withId(R.id.new_password_textinputlayout)).check(matches(
+        onView(withId(R.id.second_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
 
     }
 
-    @AdbScreenRecord("given person account edit launched when all fields are filled on save clicked should show no error")
+    @AdbScreenRecord("given person account edit launched in password change mode when all fields are filled on save clicked should change password")
     @Test
-    fun givenPersonAccount_whenAllFieldsAreFilledAndSaveClicked_thenShouldShowNoErrors(){
-        val person = createPerson(false, isAdmin = false)
-        launchFragment(person, true, leftOutUsername = false, fillCurrentPassword = true,
+    fun givenPersonAccountInPasswordChangeMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
+        enqueueResponse()
+        val person = createPerson(true, isAdmin = false)
+        launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = true,
                 fillNewPassword = true)
 
-        onView(withId(R.id.current_password_textinputlayout)).check(matches(
+        onView(withId(R.id.first_password_textinputlayout)).check(matches(
                 not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
 
-        onView(withId(R.id.new_password_textinputlayout)).check(matches(
+        onView(withId(R.id.second_password_textinputlayout)).check(matches(
                 not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
     }
 
 
+    @AdbScreenRecord("given person account edit launched in account creation mode when all fields are filled on save clicked should create and account")
+    @Test
+    fun givenPersonAccountInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
+        enqueueResponse()
+        val person = createPerson(false, isAdmin = false)
+        launchFragment(person, true, leftOutUsername = false, fillCurrentPassword = true,
+                fillNewPassword = true, matchingPassword = true)
+
+        onView(withId(R.id.first_password_textinputlayout)).check(matches(
+                not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
+
+        onView(withId(R.id.second_password_textinputlayout)).check(matches(
+                not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
+    }
+
+    @AdbScreenRecord("given person account edit launched in account creation mode when password doesn't match on save clicked should show errors")
+    @Test
+    fun givenPersonAccountInAccountCreationMode_whenPasswordFieldDoNotMatchAndSaveClicked_thenShouldShowErrors(){
+        enqueueResponse()
+        val person = createPerson(false, isAdmin = false)
+        launchFragment(person, true, leftOutUsername = false, fillCurrentPassword = true,
+                fillNewPassword = true, matchingPassword = false)
+
+        onView(withId(R.id.first_password_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
+
+        onView(withId(R.id.second_password_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
+    }
+
+
     private fun launchFragment(person: Person, fillForm: Boolean = false, leftOutUsername: Boolean = false,
-                               fillCurrentPassword: Boolean = false, fillNewPassword: Boolean = false){
+                               fillCurrentPassword: Boolean = false, fillNewPassword: Boolean = false,
+                               matchingPassword: Boolean = true){
 
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString()).toBundle()
 
@@ -177,17 +217,19 @@ class PersonAccountEditFragmentTest {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
+        val firstPassword = "password"
+        val secondPassword = if(matchingPassword) firstPassword else "password2"
         if(fillForm){
             if(!leftOutUsername){
                 onView(withId(R.id.account_username_text)).perform(click(),typeText("person.username"))
             }
 
             if(fillCurrentPassword){
-                onView(withId(R.id.account_current_password_text)).perform(click(),typeText("password"))
+                onView(withId(R.id.first_password_text)).perform(click(),typeText(firstPassword))
             }
 
             if(fillNewPassword){
-                onView(withId(R.id.account_new_password_text)).perform(click(),typeText("password"))
+                onView(withId(R.id.second_password_text)).perform(click(),typeText(secondPassword))
             }
             scenario.clickOptionMenu(R.id.menu_done)
         }

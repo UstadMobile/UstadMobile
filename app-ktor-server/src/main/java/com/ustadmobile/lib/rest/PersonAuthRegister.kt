@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.lib.db.entities.DeviceSession
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -59,17 +60,23 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
 
             val person = db.personDao.findByUsername(mPerson.username)
 
-            if(person != null){
+            if(person != null && mPerson.personUid == 0L){
                 call.respond(HttpStatusCode.Conflict, "Person already exists, change username")
                 return@post
             }
 
-            val pUid = db.personDao.insert(mPerson)
-            val personAuth = com.ustadmobile.lib.db.entities.PersonAuth(mPerson.personUid,
+            if(person == null) {
+                mPerson.apply {
+                    personUid = db.personDao.insert(mPerson)
+                }
+            } else {
+                db.personDao.update(mPerson)
+            }
+            val personAuth = PersonAuth(mPerson.personUid,
                     PersonAuthDao.PLAIN_PASS_PREFIX+password)
             val aUid = db.personAuthDao.insert(personAuth)
 
-            if(pUid != -1L && aUid != -1L){
+            if(aUid != -1L){
                 val username = mPerson.username
                 if(username != null){
                     val createdPerson = db.personAuthDao.findPersonByUsername(username)
