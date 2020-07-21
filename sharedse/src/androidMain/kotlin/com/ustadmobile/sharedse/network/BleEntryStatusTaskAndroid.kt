@@ -6,12 +6,10 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.NetworkNode
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 /**
  * This class handles all android specific entry status check from a peer device also,
@@ -23,7 +21,7 @@ import java.io.IOException
  * - Once [BleEntryStatusTaskAndroid.run] is called, it creates
  * [BleMessageGattClientCallback] and pass the list of entries to be checked
  * and peer device to be checked from. After entry status check
- * [BleEntryStatusTask.onResponseReceived] will be called to report back the results.
+ * [BleMessageTask.onResponseReceived] will be called to report back the results.
  *
  *
  *
@@ -34,7 +32,7 @@ import java.io.IOException
  *
  * @see BleMessageGattClientCallback
  *
- * @see BleEntryStatusTask
+ * @see BleMessageTask
  *
  * @see NetworkManagerBle
  *
@@ -42,7 +40,7 @@ import java.io.IOException
  * @author kileha3
  */
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-class BleEntryStatusTaskAndroid : BleEntryStatusTask {
+class BleEntryStatusTaskAndroid : BleMessageTask {
 
     private val gattClientCallbackManager: GattClientCallbackManager
 

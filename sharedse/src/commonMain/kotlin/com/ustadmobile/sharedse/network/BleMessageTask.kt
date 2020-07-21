@@ -17,11 +17,11 @@ import kotlinx.coroutines.Runnable
  * @author kileha3
  */
 
-typealias ResponseReceivedListener = (MutableList<EntryStatusResponse>, entryStatusTask: BleEntryStatusTask) -> Unit
+typealias ResponseReceivedListener = (MutableList<EntryStatusResponse>, entryStatusTask: BleMessageTask) -> Unit
 
 data class BleEntryStatusTaskArgs(val containerUids: List<Long>, val networkNode: NetworkNode)
 
-abstract class BleEntryStatusTask : BleMessageResponseListener {
+abstract class BleMessageTask : BleMessageResponseListener {
 
     /**
      * Message object which carries list of entry Ids to be checked for availability.
@@ -89,14 +89,6 @@ abstract class BleEntryStatusTask : BleMessageResponseListener {
      * Default constructor for Mockito to spy on this class
      */
     protected constructor()
-
-    /**
-     * Set content, for test purpose
-     * @param context Mocked context
-     */
-    fun setViewContext(context: Any) {
-        this.context = context
-    }
 
     /**
      * Set list of entry uuids , for test purpose

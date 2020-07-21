@@ -504,7 +504,7 @@ class DownloadJobItemRunner
         val channel = Channel<Boolean>(1)
 
 
-        //TODO: NetworkManager.sendMessage should not need context
+        //TODO: change this to using sendBleMessage instead
         networkManager.sendMessage(Any(), requestGroupCreation, currentNetworkNode!!, object : BleMessageResponseListener {
             override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
                 UMLog.l(UMLog.INFO, 699, mkLogPrefix() +

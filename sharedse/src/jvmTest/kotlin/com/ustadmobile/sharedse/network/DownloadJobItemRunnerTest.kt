@@ -39,6 +39,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import okhttp3.mockwebserver.*
 import okio.Buffer
 import okio.Okio
@@ -109,7 +110,7 @@ class DownloadJobItemRunnerTest {
 
     private var context = Any()
 
-    private lateinit var mockedEntryStatusTask: BleEntryStatusTask
+    private lateinit var mockedEntryStatusTask: BleMessageTask
 
     private lateinit var networkNode: NetworkNode
 
@@ -313,7 +314,7 @@ class DownloadJobItemRunnerTest {
 //        val peerDb = UmAppDatabase.getInstance(context, "peerdb")
 //        peerDb.clearAllTables()
 //        peerServer = EmbeddedHTTPD(0, context, peerDb)
-        mockedEntryStatusTask = mock<BleEntryStatusTask> {}
+        mockedEntryStatusTask = mock<BleMessageTask> {}
 
 
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.network
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
@@ -9,10 +10,13 @@ import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.NetworkNode
+import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.sharedMutableMapOf
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import kotlin.collections.set
@@ -39,8 +43,9 @@ abstract class NetworkManagerBleCommon(
 
     private var isStopMonitoring = false
 
+    private val networkNodeListeners: MutableList<NetworkNodeListener> = copyOnWriteListOf()
 
-    private val availabilityMonitoringRequests = mutableMapOf<Any, List<Long>>()
+    private val knownNetworkNodes: MutableList<NetworkNode> = copyOnWriteListOf()
 
     /**
      * Android 5+ requires using a bound socketFactory from the network object to route traffic over
@@ -51,13 +56,6 @@ abstract class NetworkManagerBleCommon(
      */
     var localHttpClient: HttpClient? = null
         protected set
-
-
-
-    /**
-     * Holds all created entry status tasks
-     */
-    private val entryStatusTasks = mutableListOf<BleEntryStatusTask>()
 
 
     private val locallyAvailableContainerUids = mutableSetOf<Long>()
@@ -115,14 +113,6 @@ abstract class NetworkManagerBleCommon(
      * @return True if enabled otherwise false
      */
     abstract val isBluetoothEnabled: Boolean
-
-    /**
-     * Get all unique entry UUID's to be monitored
-     * @return Set of all unique UUID's
-     */
-    private val allUidsToBeMonitored: Set<Long>
-        get() = availabilityMonitoringRequests.flatMap { it.value }.toSet()
-
 
     abstract val isVersionLollipopOrAbove: Boolean
 
@@ -198,11 +188,13 @@ abstract class NetworkManagerBleCommon(
      */
     @Synchronized
     fun handleNodeDiscovered(node: NetworkNode) {
-//        GlobalScope.launch {
-//            withContext(singleThreadDispatcher) {
-//                localAvailabilityManager.handleNodeDiscovered(node.bluetoothMacAddress ?: "")
-//            }
-//        }
+        if(! knownNetworkNodes.any { it.bluetoothMacAddress == node.bluetoothMacAddress}) {
+            Napier.i("NetworkManagerBle: Discovered new node on ${node.bluetoothMacAddress} ")
+            knownNetworkNodes += node
+            GlobalScope.launch {
+                networkNodeListeners.forEach { it.onNewNodeDiscovered(node) }
+            }
+        }
     }
 
     abstract fun awaitWifiDirectGroupReady(timeout: Long): WiFiDirectGroupBle
@@ -219,19 +211,6 @@ abstract class NetworkManagerBleCommon(
      * @return true if the operation is successful, false otherwise
      */
     abstract fun setWifiEnabled(enabled: Boolean): Boolean
-
-    /**
-     * Get all peer network nodes that we know about
-     * @param networkNodes Known NetworkNode
-     * @return List of all known nodes
-     */
-    private fun getAllKnownNetworkNodeIds(networkNodes: List<NetworkNode>): List<Long> {
-        val nodeIdList = ArrayList<Long>()
-        for (networkNode in networkNodes) {
-            nodeIdList.add(networkNode.nodeId)
-        }
-        return nodeIdList
-    }
 
     /**
      * Connecting a client to a group network for content acquisition
@@ -251,33 +230,6 @@ abstract class NetworkManagerBleCommon(
 
 
     /**
-     * Create entry status task for a specific peer device,
-     * it will request status of the provided entries from the provided peer device
-     * @param context Platform specific mContext
-     * @param entryUidsToCheck List of entries to be checked from the peer device
-     * @param peerToCheck Peer device to request from
-     * @return Created BleEntryStatusTask
-     *
-     * @see BleEntryStatusTask
-     */
-    abstract suspend fun makeEntryStatusTask(context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode): BleEntryStatusTask?
-
-    /**
-     * Create entry status task for a specific peer device,
-     * it will request status of the provided entries from the provided peer device
-     * @param context Platform specific mContext
-     * @param message Message to be sent to the peer device
-     * @param peerToSendMessageTo Peer device to send message to.
-     * @param responseListener Message response listener object
-     * @return Created BleEntryStatusTask
-     *
-     * @see BleEntryStatusTask
-     */
-    abstract fun makeEntryStatusTask(context: Any, message: BleMessage,
-                                     peerToSendMessageTo: NetworkNode,
-                                     responseListener: BleMessageResponseListener): BleEntryStatusTask?
-
-    /**
      * Send message to a specific device
      * @param context Platform specific context
      * @param message Message to be send
@@ -286,20 +238,10 @@ abstract class NetworkManagerBleCommon(
      */
     fun sendMessage(context: Any, message: BleMessage, peerToSendMessageTo: NetworkNode,
                     responseListener: BleMessageResponseListener) {
-        makeEntryStatusTask(context, message, peerToSendMessageTo, responseListener)?.sendRequest()
+
     }
 
-    abstract suspend fun sendBleMessage(context: Any, bleMessage: BleMessage, deviceAddr: String): BleMessage?
-
-//    /**
-//     * Used for unit testing purposes only.
-//     *
-//     * @hide
-//     * @param database
-//     */
-//    fun setDatabase(database: UmAppDatabase) {
-//        this.umAppDatabase = database
-//    }
+    abstract suspend fun sendBleMessage(bleMessage: BleMessage, deviceAddr: String): BleMessage?
 
     open fun lockWifi(lockHolder: Any) {
         wifiLockHolders.add(lockHolder)
@@ -352,6 +294,11 @@ abstract class NetworkManagerBleCommon(
     fun getBadNodeTracker(bluetoothAddress: String): Int? {
         return knownBadNodeTrackList[bluetoothAddress]
     }
+
+    fun addNetworkNodeListener(listener: NetworkNodeListener) = networkNodeListeners.add(listener)
+
+    fun removeNetworkNodeListener(listener: NetworkNodeListener) = networkNodeListeners.remove(listener)
+
 
     /**
      * Clean up the network manager for shutdown
