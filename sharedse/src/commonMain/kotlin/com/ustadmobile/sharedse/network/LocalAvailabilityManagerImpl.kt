@@ -32,6 +32,8 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
 
+    private val networkManager: NetworkManagerBle by di.instance()
+
     init {
         GlobalScope.launch(coroutineDispatcher) {
             db.locallyAvailableContainerDao.deleteAll()
@@ -80,20 +82,27 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
     }
 
     suspend fun sendRequest(networkNode: NetworkNode, containerUids: List<Long>) = withContext(coroutineDispatcher) {
-        val statusTask: BleEntryStatusTask? = di.direct.instance(arg = BleEntryStatusTaskArgs(containerUids, networkNode))
-        if(statusTask != null) {
-            statusTask.statusResponseListener = this@LocalAvailabilityManagerImpl::handleBleTaskResponseReceived
-            statusTask.sendRequest()
+        val destAddr = networkNode.bluetoothMacAddress ?: return@withContext
+        GlobalScope.launch {
+            val request = BleMessage.newEntryStatusRequestMessage(destAddr, endpoint.url,
+                    containerUids.toLongArray())
+            val response = networkManager.sendBleMessage(request, destAddr)
+            val responsePayload = response?.payload ?: return@launch
+            val responseLongArr = BleMessageUtil.bleMessageBytesToLong(responsePayload)
+            val entryResponses = responseLongArr.mapIndexed {index, response ->
+                EntryStatusResponse(erContainerUid = containerUids[index], available = response != 0L)
+            }
+            handleBleTaskResponseReceived(entryResponses, networkNode)
         }
     }
 
-    fun handleBleTaskResponseReceived(entryStatusResponses: MutableList<EntryStatusResponse>, statusTask: BleEntryStatusTask) {
+    fun handleBleTaskResponseReceived(entryStatusResponses: List<EntryStatusResponse>, networkNode: NetworkNode) {
         GlobalScope.launch(coroutineDispatcher) {
-            val networkNode = activeNodes.firstOrNull { it.bluetoothMacAddress == statusTask.networkNode.bluetoothMacAddress }
-            if(networkNode == null)
+            val activeNode = activeNodes.firstOrNull { it.bluetoothMacAddress == networkNode.bluetoothMacAddress }
+            if(activeNode == null)
                 return@launch
 
-            networkNode.statusResponses.putAll(entryStatusResponses.map { it.erContainerUid to it}.toMap())
+            activeNode.statusResponses.putAll(entryStatusResponses.map { it.erContainerUid to it}.toMap())
             val entryStatusResponseContainerUids = entryStatusResponses.map { it.erContainerUid }
             fireAvailabilityChanged(entryStatusResponseContainerUids)
 

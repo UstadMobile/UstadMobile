@@ -12,9 +12,7 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
@@ -24,33 +22,20 @@ import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETERED
-import com.ustadmobile.lib.rest.LoginRoute
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.ext.ConcatenatedHttpResponse
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.util.test.ReverseProxyDispatcher
-import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.util.test.extractTestResourceToFile
-import io.ktor.application.install
-import io.ktor.features.ContentNegotiation
-import io.ktor.gson.GsonConverter
-import io.ktor.gson.gson
-import io.ktor.http.ContentType
-import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 import kotlinx.coroutines.*
-import okhttp3.HttpUrl
 import okhttp3.mockwebserver.*
 import okio.Buffer
 import okio.Okio
@@ -61,13 +46,11 @@ import org.junit.Test
 import org.kodein.di.*
 import java.io.File
 import java.io.IOException
-import java.nio.file.Files
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.zip.ZipFile
 import javax.naming.InitialContext
 
 
@@ -123,7 +106,7 @@ class DownloadJobItemRunnerTest {
 
     private var context = Any()
 
-    private lateinit var mockedEntryStatusTask: BleEntryStatusTask
+    private lateinit var mockedEntryStatusTask: BleMessageTask
 
     private lateinit var networkNode: NetworkNode
 
@@ -327,7 +310,7 @@ class DownloadJobItemRunnerTest {
 //        val peerDb = UmAppDatabase.getInstance(context, "peerdb")
 //        peerDb.clearAllTables()
 //        peerServer = EmbeddedHTTPD(0, context, peerDb)
-        mockedEntryStatusTask = mock<BleEntryStatusTask> {}
+        mockedEntryStatusTask = mock<BleMessageTask> {}
 
 
 

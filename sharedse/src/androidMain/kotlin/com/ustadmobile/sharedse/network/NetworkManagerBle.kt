@@ -28,7 +28,6 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
@@ -40,7 +39,6 @@ import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.get
 import java.io.IOException
 import java.net.InetAddress
 import java.util.*
@@ -52,13 +50,10 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import com.ustadmobile.core.networkmanager.defaultGsonSerializer
 import com.ustadmobile.core.networkmanager.defaultOkHttpClient
-import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
-import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import okhttp3.OkHttpClient
 import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import java.net.HttpURLConnection
-import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -583,8 +578,9 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         if (isBleDeviceSDKVersion && isBleCapable) {
 
             bleScanCallback = BluetoothAdapter.LeScanCallback { device, _, _ ->
-                val networkNode = NetworkNode()
-                networkNode.bluetoothMacAddress = device.address
+                val networkNode = NetworkNode().apply {
+                    bluetoothMacAddress = device.address
+                }
                 handleNodeDiscovered(networkNode)
             }
 
@@ -839,40 +835,7 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         managerHelper.restoreWiFi()
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    actual override suspend fun makeEntryStatusTask(context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode): BleEntryStatusTask? {
-        val gattClientCallbackManagerVal = gattClientCallbackManager
-        //TODO: This should be removed and the task should be created using a kodein di factory
-        /*
-        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION && gattClientCallbackManagerVal != null) {
-            val entryStatusTask = BleEntryStatusTaskAndroid(gattClientCallbackManagerVal,
-                    context as Context, this, containerUidsToCheck, networkNode)
-            entryStatusTask.setBluetoothManager(bluetoothManager as BluetoothManager)
-            return entryStatusTask
-        }
-         */
-        return null
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    actual override fun makeEntryStatusTask(context: Any, message: BleMessage,
-                                            peerToSendMessageTo: NetworkNode,
-                                            responseListener: BleMessageResponseListener): BleEntryStatusTask? {
-        val gattClientCallbackManagerVal = gattClientCallbackManager
-        if (Build.VERSION.SDK_INT > BLE_MIN_SDK_VERSION && gattClientCallbackManagerVal != null) {
-            val task = BleEntryStatusTaskAndroid(gattClientCallbackManagerVal, context as Context,
-                    this, message, peerToSendMessageTo, responseListener)
-            task.setBluetoothManager(bluetoothManager as BluetoothManager)
-            return task
-        }
-        return null
-    }
-
-    override suspend fun sendBleMessage(context: Any, bleMessage: BleMessage, deviceAddr: String): BleMessage? {
+    override suspend fun sendBleMessage(bleMessage: BleMessage, deviceAddr: String): BleMessage? {
         return gattClientCallbackManager?.getGattClient(deviceAddr)?.sendMessage(bleMessage)
     }
 

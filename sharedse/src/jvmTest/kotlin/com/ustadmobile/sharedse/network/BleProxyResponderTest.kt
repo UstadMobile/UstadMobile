@@ -51,15 +51,15 @@ class BleProxyResponderTest {
         println(headerField)
 
         networkManager = mock<NetworkManagerBle> {
-            onBlocking { sendBleMessage(any(), any(), any())}.thenAnswer { invocation ->
-                val destNodeAddr = invocation.arguments[2] as String
+            onBlocking { sendBleMessage(any(), any())}.thenAnswer { invocation ->
+                val destNodeAddr = invocation.arguments[1] as String
                 val nearbyDevice = nearbyDevices.firstOrNull { it.bluetoothMacAddr == destNodeAddr }
                 if(nearbyDevice == null || !nearbyDevice.bleClientResponding) {
                     println ("Nearby device = ${nearbyDevice} : does not exist or is set to not respond")
                     return@thenAnswer Unit //there is no such device around for this scenario
                 }
 
-                val messageIn = invocation.arguments[1] as BleMessage
+                val messageIn = invocation.arguments[0] as BleMessage
 
                 if(!nearbyDevice.bleMessageReturnsError) {
                     val bleRequest = Json.parse(BleHttpRequest.serializer(), String(messageIn.payload!!))

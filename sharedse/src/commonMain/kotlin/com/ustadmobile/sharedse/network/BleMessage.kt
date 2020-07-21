@@ -350,5 +350,11 @@ class BleMessage {
 
             return nextMessageId
         }
+
+        fun newEntryStatusRequestMessage(destAddr: String, endpointUrl: String, containerUids: LongArray): BleMessage {
+            return BleMessage(NetworkManagerBleCommon.ENTRY_STATUS_REQUEST,
+                    getNextMessageIdForReceiver(destAddr),
+                    EntryStatusRequest(endpointUrl, containerUids).toBytes())
+        }
     }
 }

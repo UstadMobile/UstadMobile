@@ -13,11 +13,10 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Test class which tests [BleEntryStatusTask] to make sure it behaves as expected
+ * Test class which tests [BleMessageTask] to make sure it behaves as expected
  * under different circumstances when response received.
  *
  * @author kileha3
@@ -28,7 +27,7 @@ class BleEntryStatusTaskTest {
 
     private val localAvailabilityCheckResponse = listOf(0L, 9076137860000L, 0L, 2912543894000L)
 
-    private lateinit var mockedEntryStatusTask: BleEntryStatusTask
+    private lateinit var mockedEntryStatusTask: BleMessageTask
 
     private var managerBle: NetworkManagerBle? = null
 
@@ -48,7 +47,7 @@ class BleEntryStatusTaskTest {
         networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
         networkNode.nodeId = 1
 
-        mockedEntryStatusTask = spy<BleEntryStatusTask> {}
+        mockedEntryStatusTask = spy<BleMessageTask> {}
         mockedEntryStatusTask.context = context
         mockedEntryStatusTask.setEntryUidsToCheck(containerUids)
     }
