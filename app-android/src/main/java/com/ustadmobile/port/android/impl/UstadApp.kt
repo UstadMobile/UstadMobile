@@ -60,7 +60,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
                     context.url, "", defaultHttpClient()).also {
-                (it as DoorDatabaseRepository).connectivityStatus = DoorDatabaseRepository.STATUS_CONNECTED
+                (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
         }
 
@@ -69,7 +69,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<NetworkManagerBle>() with singleton {
-            NetworkManagerBle(applicationContext, di, newSingleThreadContext("NetworkManager"))
+            NetworkManagerBle(applicationContext, di, newSingleThreadContext("NetworkManager")).also {
+                it.onCreate()
+            }
         }
 
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }

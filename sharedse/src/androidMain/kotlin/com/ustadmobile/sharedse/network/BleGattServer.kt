@@ -39,7 +39,7 @@ class BleGattServer
  * BluetoothManager instance.
  */
 (context: Context, di: DI) :
-        BleGattServerCommon(context, di) {
+        BleGattServerCommon(di) {
 
     class PendingReplyMessage(val destAddr: String, val characteristicUuid: UUID,
                               val message: BleMessage, mtu: Int,
