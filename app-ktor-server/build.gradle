@@ -44,6 +44,12 @@ kotlin {
                   implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
                   implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
+                  implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                  implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                  implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                  implementation "org.postgresql:postgresql:$version_postgres_jdbc"
+
+
                   implementation "commons-io:commons-io:$version_commons_io"
                   implementation "org.jsoup:jsoup:$version_jsoup"
                   implementation "com.google.code.gson:gson:$version_gson"
@@ -112,7 +118,10 @@ shadowJar {
         attributes 'Main-Class': mainClassName
     }
 
-    configurations += [project.configurations.jvmRuntimeClasspath]
+    def target = kotlin.targets.jvm
+    from target.compilations.main.output
+    def runtimeClasspath = target.compilations.main.runtimeDependencyFiles
+    configurations = [runtimeClasspath]
 }
 
 sourceSets {
