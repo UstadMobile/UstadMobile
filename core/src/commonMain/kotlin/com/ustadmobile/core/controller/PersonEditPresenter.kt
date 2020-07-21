@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
+import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
@@ -37,6 +38,8 @@ class PersonEditPresenter(context: Any,
     private lateinit var serverUrl: String
 
     private val impl: UstadMobileSystemImpl by instance()
+
+    private  lateinit var nextDestination: String
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -78,6 +81,11 @@ class PersonEditPresenter(context: Any,
         } else {
             impl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost", context)?:""
         }
+
+        nextDestination = arguments[UstadView.ARG_NEXT] ?: impl.getAppConfigString(
+                AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context) ?:
+                ContentEntryListTabsView.VIEW_NAME
+
         view.classVisible = workSpace.registrationAllowed
     }
 
@@ -145,6 +153,8 @@ class PersonEditPresenter(context: Any,
                 if(password != null){
                    try{
                        val umAccount = accountManager.register(entity, password, serverUrl)
+                       accountManager.activeAccount = umAccount
+                       view.navigateToNextDestination(umAccount,nextDestination)
                    }catch (e:Exception){
                        view.errorMessage = impl.getString(if(e is IllegalArgumentException) MessageID.person_exists
                        else MessageID.login_network_error , context)
@@ -184,9 +194,9 @@ class PersonEditPresenter(context: Any,
                     repo.personPictureDao.setAttachmentDataFromUri(personPicture, null, context)
                     repo.personPictureDao.update(personPicture)
                 }
-            }
 
-            view.finishWithResult(listOf(entity))
+                view.finishWithResult(listOf(entity))
+            }
         }
     }
 

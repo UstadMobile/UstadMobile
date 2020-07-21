@@ -70,8 +70,15 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
             val aUid = db.personAuthDao.insert(personAuth)
 
             if(pUid != -1L && aUid != -1L){
-                call.respond(HttpStatusCode.OK,UmAccount(mPerson.personUid, mPerson.username, "",
-                        "",mPerson.firstNames,mPerson.lastName))
+                val username = mPerson.username
+                if(username != null){
+                    val createdPerson = db.personAuthDao.findPersonByUsername(username)
+                    if(createdPerson != null){
+                        call.respond(HttpStatusCode.OK,UmAccount(createdPerson.personUid,
+                                createdPerson.username, "", "",
+                                createdPerson.firstNames,createdPerson.lastName))
+                    }
+                }
             }else{
                 call.respond(HttpStatusCode.BadRequest, "Failed to register a person")
             }

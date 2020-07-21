@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.PersonDetailView
@@ -11,6 +12,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 
 class PersonDetailPresenter(context: Any,
@@ -74,7 +76,8 @@ class PersonDetailPresenter(context: Any,
     }
 
     fun handleCreateAccount(){
-        handleClickEdit()
+        val personUid = view.entity?.personUid ?: return
+        systemImpl.go(PersonAccountEditView.VIEW_NAME, mapOf(ARG_ENTITY_UID to personUid.toString()), context)
     }
 
     companion object {

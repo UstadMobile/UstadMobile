@@ -92,6 +92,18 @@ class PersonEditFragmentTest {
         onView(withId(R.id.clazzlist_header_textview)).check(matches(isDisplayed()))
     }
 
+    @AdbScreenRecord("given person edit opened in normal mode username and password should be hidden")
+    @Test
+    fun givenPersonEditOpened_whenInNoRegistrationMode_thenUsernameAndPasswordShouldBeHidden(){
+        launchFragment(false, fillForm = false)
+
+        scrollToBottom()
+
+        onView(withId(R.id.username_textinputlayout)).check(matches(not(isDisplayed())))
+        onView(withId(R.id.password_textinputlayout)).check(matches(not(isDisplayed())))
+        onView(withId(R.id.confirm_password_textinputlayout)).check(matches(not(isDisplayed())))
+    }
+
     @AdbScreenRecord("given person edit opened in registration mode classes should be hidden")
     @Test
     fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden(){

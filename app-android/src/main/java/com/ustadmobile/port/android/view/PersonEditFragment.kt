@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.core.net.toFile
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -18,20 +19,19 @@ import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzEditBinding
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import org.kodein.di.instance
 import java.io.File
 
 interface PersonEditFragmentEventHandler {
@@ -258,6 +258,18 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             mBinding?.errorText?.visibility = if(value != null) View.VISIBLE else View.GONE
             mBinding?.errorText?.text = value
         }
+
+    override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
+        val impl: UstadMobileSystemImpl by instance()
+        val navController = findNavController()
+        val umNextDestination = impl.destinationProvider.lookupDestinationName(nextDestination)
+        navController.currentBackStackEntry?.savedStateHandle?.set(UstadView.ARG_SNACK_MESSAGE,
+                String.format(getString(R.string.logged_in_as),account?.username,account?.endpointUrl))
+        if(umNextDestination != null){
+            val navOptions = NavOptions.Builder().setPopUpTo(umNextDestination.destinationId, true).build()
+            navController.navigate(umNextDestination.destinationId,null, navOptions)
+        }
+    }
 
     private fun handleInputError(inputView: TextInputLayout?, error: Boolean, hint: String?){
         inputView?.isErrorEnabled = error

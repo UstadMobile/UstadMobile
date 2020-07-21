@@ -74,14 +74,14 @@ class PersonDetailFragmentTest {
                 R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
     }
 
-    @AdbScreenRecord("given create account visible when clicked should open person edit screen")
+    @AdbScreenRecord("given create account visible when clicked should open person account edit screen")
     @Test
-    fun givenCreateAccountVisible_whenClicked_shouldOpenPersonEditScreen(){
+    fun givenCreateAccountVisible_whenClicked_shouldOpenPersonAccountEditScreen(){
         launchFragment()
         onView(withId(R.id.create_account_view)).check(matches(isDisplayed()))
         onView(withId(R.id.create_account_view)).perform(click())
-        assertEquals("It navigated to account creation screen",
-                R.id.person_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+        assertEquals("It navigated to account edit screen",
+                R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
     }
 
     private fun launchFragment(includeUserName: Boolean = false){

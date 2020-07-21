@@ -4,6 +4,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.UmAccount
 
 interface PersonEditView: UstadEditView<Person> {
 
@@ -28,6 +29,8 @@ interface PersonEditView: UstadEditView<Person> {
     var confirmPasswordErrorVisible: Boolean
 
     var errorMessage: String?
+
+    fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 
     companion object {
 
