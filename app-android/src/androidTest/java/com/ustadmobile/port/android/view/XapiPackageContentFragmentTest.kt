@@ -49,8 +49,6 @@ class XapiPackageContentFragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    private val bleServiceHelper = NetworkManagerBleServiceHelper()
-
 
     @JvmField
     @Rule
@@ -83,7 +81,6 @@ class XapiPackageContentFragmentTest {
 
         val containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo,containerTmpDir.absolutePath)
         addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
-        bleServiceHelper.bindService()
     }
 
     @AdbScreenRecord("Given valid xapi package content when created should be loaded to the view")
@@ -94,7 +91,6 @@ class XapiPackageContentFragmentTest {
                         UstadView.ARG_CONTENT_ENTRY_UID to contentEntry?.contentEntryUid)) {
             XapiPackageContentFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
-                fragment.networkManagerProvider = bleServiceHelper
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)

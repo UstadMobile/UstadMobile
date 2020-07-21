@@ -172,7 +172,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         }
     }
 
-    internal fun clearPrefs() {
+    fun clearPrefs() {
         tmpPrefs.clear()
     }
 

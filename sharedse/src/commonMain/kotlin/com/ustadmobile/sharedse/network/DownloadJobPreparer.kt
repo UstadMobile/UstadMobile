@@ -29,13 +29,6 @@ interface IDownloadJobPreparer {
 }
 
 /**
- * This function is responsible to get the Download Job preparer running. On Android this should be
- * done using WorkManager. On other systems this may be done as a normal coroutine launch. This can
- * be a job that will take some time (e.g. when
- */
-expect fun requestDownloadPreparation(downloadJobUid: Int, context: Any)
-
-/**
  * This runnable sets up a download job so it's ready to run. It starts from a root content entry uid,
  * and then adds all
  */

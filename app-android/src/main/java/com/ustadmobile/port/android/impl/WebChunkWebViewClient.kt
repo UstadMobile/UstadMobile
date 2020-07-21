@@ -10,8 +10,6 @@ import com.google.gson.Gson
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.IndexLog
 import com.ustadmobile.core.controller.WebChunkPresenter
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP

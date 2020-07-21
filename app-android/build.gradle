@@ -386,9 +386,6 @@ dependencies {
     //SVG support for Android
     implementation 'com.pixplicity.sharp:library:1.1.0'
 
-    //Support for encrypted zips
-    implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"
 

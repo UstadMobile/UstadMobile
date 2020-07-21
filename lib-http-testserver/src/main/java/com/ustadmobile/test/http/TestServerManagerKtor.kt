@@ -95,7 +95,7 @@ fun Application.testServerManager() {
             val initialContext = InitialContext()
 
             val dbName = "testserver-$appPort"
-            initialContext.bindNewSqliteDataSourceIfNotExisting(dbName)
+            initialContext.bindNewSqliteDataSourceIfNotExisting(dbName, isPrimary = true)
 
 
             val umDb = UmAppDatabase.getInstance(Any(), dbName)

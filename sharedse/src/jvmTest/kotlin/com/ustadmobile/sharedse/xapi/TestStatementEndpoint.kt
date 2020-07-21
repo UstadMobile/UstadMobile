@@ -73,7 +73,7 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to agent", entity!!.agentUid, agent!!.agentUid)
         Assert.assertEquals("mailto:user@example.com", agent.agentMbox)
 
-        Assert.assertEquals("joined to verb", entity.verbUid, verb!!.verbUid)
+        Assert.assertEquals("joined to verb", entity.statementVerbUid, verb!!.verbUid)
         Assert.assertEquals("joined to object", entity.xObjectUid, xobject!!.xObjectUid)
 
     }
@@ -101,7 +101,7 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to agent", entity.agentUid, agent!!.agentUid)
         Assert.assertEquals("mailto:sally@example.com", agent.agentMbox)
 
-        Assert.assertEquals("joined to verb", entity.verbUid, verb!!.verbUid)
+        Assert.assertEquals("joined to verb", entity.statementVerbUid, verb!!.verbUid)
         Assert.assertEquals("joined to object", entity.xObjectUid, xobject!!.xObjectUid)
 
         Assert.assertEquals("context statement joined with parent flag", ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT.toLong(), contextJoin!!.contextActivityFlag.toLong())
@@ -129,7 +129,7 @@ class TestStatementEndpoint {
                 17, statementEntity?.extensionProgress)
         Assert.assertEquals("Statement has preset Verb UID as expected",
                 VerbEntity.FIXED_UIDS["http://adlnet.gov/expapi/verbs/progressed"],
-                statementEntity?.verbUid)
+                statementEntity?.statementVerbUid)
         Assert.assertEquals("Statement has contentEntryUid set", 1234L,
                 statementEntity?.statementContentEntryUid)
     }
@@ -161,7 +161,7 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to agent", agent?.agentUid, entity?.agentUid)
         Assert.assertEquals("mailto:teampb@example.com", agent?.agentMbox)
 
-        Assert.assertEquals("joined to verb", verb?.verbUid, entity?.verbUid)
+        Assert.assertEquals("joined to verb", verb?.verbUid, entity?.statementVerbUid)
         Assert.assertEquals("joined to object", xobject?.xObjectUid, entity.xObjectUid)
 
         Assert.assertEquals("context registration matched", "ec531277-b57b-4c15-8d91-d292c5b2b8f7", entity.contextRegistration)
@@ -205,7 +205,7 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to agent", agent?.agentUid, entity?.agentUid)
         Assert.assertEquals("mailto:test@example.com", agent?.agentMbox)
 
-        Assert.assertEquals("joined to verb", verb?.verbUid, entity?.verbUid)
+        Assert.assertEquals("joined to verb", verb?.verbUid, entity?.statementVerbUid)
 
         Assert.assertEquals("joined to substatement actor", subActor?.agentUid, entity?.subStatementActorUid)
         Assert.assertEquals("mailto:test@example.com", subActor?.agentMbox)
