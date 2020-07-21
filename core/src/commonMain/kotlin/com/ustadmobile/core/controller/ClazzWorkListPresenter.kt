@@ -1,7 +1,9 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzMember
@@ -45,15 +47,27 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
 
         view.hasResultViewPermission = !isStudent
 
-        return !isStudent
+        if(clazzMember == null){
+            return false
+        }else {
+            return !isStudent
+        }
     }
 
     private fun updateListOnView() {
 
         val clazzUid = arguments.get(UstadView.ARG_CLAZZ_UID)?.toLong()?:0L
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+        val clazzMember: ClazzMember? =
+                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, clazzUid)
+
         view.list = when (currentSortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.clazzWorkDao.findWithMetricsByClazzUidLiveAsc(clazzUid)
-            SortOrder.ORDER_NAME_DSC -> repo.clazzWorkDao.findWithMetricsByClazzUidLiveDesc(clazzUid)
+            SortOrder.ORDER_NAME_ASC -> repo.clazzWorkDao.findWithMetricsByClazzUidLiveAsc(
+                    clazzUid, clazzMember?.clazzMemberRole?:ClazzMember.ROLE_STUDENT,
+                    UMCalendarUtil.getDateInMilliPlusDays(0))
+            SortOrder.ORDER_NAME_DSC -> repo.clazzWorkDao.findWithMetricsByClazzUidLiveDesc(
+                    clazzUid, clazzMember?.clazzMemberRole?:ClazzMember.ROLE_STUDENT,
+                    UMCalendarUtil.getDateInMilliPlusDays(0))
         }
     }
 

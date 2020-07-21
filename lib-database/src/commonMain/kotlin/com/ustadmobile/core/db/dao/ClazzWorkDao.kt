@@ -33,11 +33,13 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     """)
     abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission?
 
-    @Query("$FIND_WITH_METRICS_BY_CLAZZUID ORDER BY ClazzWork.clazzWorkTitle ASC")
-    abstract fun findWithMetricsByClazzUidLiveAsc(clazzUid: Long): DataSource.Factory<Int,ClazzWorkWithMetrics>
+    @Query("$FIND_WITH_METRICS_BY_CLAZZUID_WITH_ROLE ORDER BY ClazzWork.clazzWorkTitle ASC")
+    abstract fun findWithMetricsByClazzUidLiveAsc(clazzUid: Long, role: Int, today: Long)
+            : DataSource.Factory<Int,ClazzWorkWithMetrics>
 
-    @Query("$FIND_WITH_METRICS_BY_CLAZZUID ORDER BY ClazzWork.clazzWorkTitle DESC")
-    abstract fun findWithMetricsByClazzUidLiveDesc(clazzUid: Long): DataSource.Factory<Int,ClazzWorkWithMetrics>
+    @Query("$FIND_WITH_METRICS_BY_CLAZZUID_WITH_ROLE ORDER BY ClazzWork.clazzWorkTitle DESC")
+    abstract fun findWithMetricsByClazzUidLiveDesc(clazzUid: Long, role: Int, today: Long)
+            : DataSource.Factory<Int,ClazzWorkWithMetrics>
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
     abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long)
@@ -118,6 +120,36 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
              FROM ClazzWork 
              LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
              WHERE clazzWorkClazzUid = :clazzUid
+            AND CAST(clazzWorkActive as INTEGER) = 1
+        """
+
+        const val FIND_WITH_METRICS_BY_CLAZZUID_WITH_ROLE = """
+            SELECT ClazzWork.*, 
+            
+            (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
+                AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
+                AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
+                ) as totalStudents, 
+            (
+                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
+            ) as submittedStudents, 
+            0 as notSubmittedStudents,
+            0 as completedStudents, 
+            (
+                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
+                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
+            ) as markedStudents,
+
+             0 as firstContentEntryUid,
+             Clazz.clazzTimeZone as clazzTimeZone 
+             FROM ClazzWork 
+             LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+             WHERE clazzWorkClazzUid = :clazzUid
+             AND (:role = ${ClazzMember.ROLE_TEACHER} OR clazzWorkStartDateTime < :today)
             AND CAST(clazzWorkActive as INTEGER) = 1
         """
 
