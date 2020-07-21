@@ -105,7 +105,7 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
                 }
 
                 if(currentPassword != null && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
-                                && person.passwordHash.substring(2) == currentPassword)
+                                && person.passwordHash.substring(2) != currentPassword)
                                 ||(person.passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) &&
                                 authenticateEncryptedPassword(currentPassword, person.passwordHash.substring(2))))){
                     call.respond(HttpStatusCode.Forbidden, "Current password doesn't match, try again")
