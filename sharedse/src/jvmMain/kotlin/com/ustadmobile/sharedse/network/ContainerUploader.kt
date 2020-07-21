@@ -19,8 +19,10 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
+import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.URLConnection
 import java.util.concurrent.atomic.AtomicLong
@@ -82,59 +84,64 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     var readRange = 0
                     var error = false
                     var errorMessage: String? = null
-                    do {
+                        do {
 
-                        if (error) {
-                            // reset the bytes if the server is more ahead than recorded
-                            if (errorMessage?.startsWith("Range should start from:") == true) {
-                                errorMessage = errorMessage.substringAfter(":")
-                                bytesSoFar.set(errorMessage.toLong())
-                            } else {
-                                throw Exception()
+                            if (error) {
+                                // reset the bytes if the server is more ahead than recorded
+                                if (errorMessage?.startsWith("Range should start from:") == true) {
+                                    errorMessage = errorMessage.substringAfter(":")
+                                    bytesSoFar.set(errorMessage.toLong())
+                                } else {
+                                    throw Exception()
+                                }
                             }
-                        }
 
-                        val response = db.containerEntryFileDao.generateConcatenatedFilesResponse(request.fileList)
-                        inStream = response.dataSrc ?: throw Exception()
-                        rangeStream = RangeInputStream(inStream, bytesSoFar.get(), bytesSoFar.get() + chunkSize)
+                            val response = db.containerEntryFileDao.generateConcatenatedFilesResponse(request.fileList)
+                            inStream = response.dataSrc ?: throw Exception()
+                            rangeStream = RangeInputStream(inStream, bytesSoFar.get(), bytesSoFar.get() + chunkSize)
 
-                        val remaining = fileSize - bytesSoFar.get()
-                        val sizeToRead = min(chunkSize, remaining.toInt())
-                        val buffer = ByteArray(sizeToRead)
+                            val remaining = fileSize - bytesSoFar.get()
+                            val sizeToRead = min(chunkSize, remaining.toInt())
+                            val buffer = ByteArray(sizeToRead)
 
-                        while (readRange < sizeToRead) {
-                            readRange += inStream.read(buffer)
-                        }
+                            while (readRange < sizeToRead) {
+                                readRange += inStream.read(buffer)
+                            }
 
-                        val end = bytesSoFar.get() + readRange - 1
+                            val end = bytesSoFar.get() + readRange - 1
 
-                        urlConnection = URL(UMFileUtil.joinPaths(request.uploadToUrl, "/receiveData/")).openConnection() as HttpURLConnection
-                        urlConnection.doOutput = true
-                        urlConnection.requestMethod = "PUT"
-                        urlConnection.setRequestProperty("Content-Length", readRange.toString())
-                        urlConnection.setRequestProperty("Range", "bytes=${bytesSoFar.get()}-$end")
-                        urlConnection.setRequestProperty("SessionId", uploadJob.sessionId)
-                        urlConnection.outputStream.write(buffer)
-                        urlConnection.outputStream.flush()
-                        urlConnection.outputStream.close()
-                        urlConnection.connect()
 
-                        val responseCode = urlConnection.responseCode
-                        
-                        if (urlConnection.errorStream != null) {
-                            error = true
-                            errorMessage = String(urlConnection.errorStream.readBytes())
-                        }
 
-                        urlConnection.disconnect()
 
-                    } while (responseCode != HttpStatusCode.NoContent.value)
+                            urlConnection = URL(UMFileUtil.joinPaths(request.uploadToUrl, "/receiveData/")).openConnection() as HttpURLConnection
+                            urlConnection.connectTimeout = 5000
+                            urlConnection.doOutput = true
+                            urlConnection.requestMethod = "PUT"
+                            urlConnection.setRequestProperty("Content-Length", readRange.toString())
+                            urlConnection.setRequestProperty("Range", "bytes=${bytesSoFar.get()}-$end")
+                            urlConnection.setRequestProperty("SessionId", uploadJob.sessionId)
+                            urlConnection.outputStream.write(buffer)
+                            urlConnection.outputStream.flush()
+                            urlConnection.outputStream.close()
+                            urlConnection.connect()
+
+                            val responseCode = urlConnection.responseCode
+
+                            if (urlConnection.errorStream != null) {
+                                error = true
+                                errorMessage = String(urlConnection.errorStream.readBytes())
+                            }
+
+                            urlConnection.disconnect()
+
+
+                        } while (responseCode != HttpStatusCode.NoContent.value)
 
                     val endedAt = bytesSoFar.get() + readRange
                     bytesSoFar.set(endedAt)
 
-                    db.containerUploadJobDao.updateBytesSoFarForSessionWithId(uploadJob.sessionId
-                            ?: "", endedAt)
+                    uploadJob.bytesSoFar = endedAt
+                    db.containerUploadJobDao.update(uploadJob)
 
                 }
 
@@ -144,7 +151,8 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     JobStatus.PAUSED
                 }
 
-                db.containerUploadJobDao.setJobStatus(downloadStatus, uploadJob.sessionId ?: "")
+                uploadJob.jobStatus = downloadStatus
+                db.containerUploadJobDao.update(uploadJob)
 
             } finally {
                 progressUpdaterJob.cancel()

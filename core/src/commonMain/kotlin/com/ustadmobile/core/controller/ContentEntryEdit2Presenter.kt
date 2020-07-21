@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
+import com.ustadmobile.core.networkmanager.ContainerUploadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -32,7 +33,7 @@ class ContentEntryEdit2Presenter(context: Any,
                                  di: DI)
     : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view,  di, lifecycleOwner) {
 
-    private val containerDownloadManager: ContainerDownloadManager? by instanceOrNull<ContainerDownloadManager>()
+    private val containerUploadManager: ContainerUploadManager? by instanceOrNull<ContainerUploadManager>()
 
     enum class LicenceOptions(val optionVal: Int, val messageId: Int){
         LICENSE_TYPE_CC_BY(ContentEntry.LICENSE_TYPE_CC_BY, MessageID.licence_type_cc_by),
@@ -138,21 +139,15 @@ class ContentEntryEdit2Presenter(context: Any,
                     val container = view.saveContainerOnExit(entity.contentEntryUid,
                             storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(), db, repo)
 
-                    if (container != null && containerDownloadManager != null) {
-                        val downloadJob = DownloadJob(entity.contentEntryUid, getSystemTimeInMillis())
-                        downloadJob.djStatus = JobStatus.COMPLETE
-                        downloadJob.timeRequested = getSystemTimeInMillis()
-                        downloadJob.bytesDownloadedSoFar = container.fileSize
-                        downloadJob.totalBytesToDownload = container.fileSize
-                        downloadJob.djUid = repo.downloadJobDao.insert(downloadJob).toInt()
+                    if (container != null && containerUploadManager != null) {
 
-                        val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
-                                container.containerUid, container.fileSize)
-                        downloadJobItem.djiUid = repo.downloadJobItemDao.insert(downloadJobItem).toInt()
-                        downloadJobItem.djiStatus = JobStatus.COMPLETE
-                        downloadJobItem.downloadedSoFar = container.fileSize
+                        val uploadJob = ContainerUploadJob().apply {
+                            this.jobStatus = JobStatus.NOT_QUEUED
+                            this.cujContainerUid = container.containerUid
+                            this.cujUid = db.containerUploadJobDao.insert(this)
+                        }
 
-                        containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
+                        containerUploadManager?.enqueue(uploadJob.cujUid)
                     }
                 }
                 view.finishWithResult(listOf(entity))

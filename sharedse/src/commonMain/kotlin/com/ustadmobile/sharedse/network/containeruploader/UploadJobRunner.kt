@@ -12,6 +12,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpStatusCode
+import io.ktor.network.sockets.SocketTimeoutException
+import io.ktor.utils.io.errors.IOException
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.sync.Mutex
@@ -93,6 +95,10 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
                         break
                     }
 
+                } catch (s: SocketTimeoutException){
+                    return JobStatus.QUEUED
+                } catch (s: IOException){
+                    return JobStatus.QUEUED
                 } catch (e: Exception) {
                     uploadAttemptStatus = JobStatus.FAILED
                 }

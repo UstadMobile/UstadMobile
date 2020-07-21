@@ -13,6 +13,7 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.ContainerUploadManager
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -82,6 +83,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<ContainerDownloadManager>() with scoped(EndpointScope.Default).singleton {
             ContainerDownloadManagerImpl(endpoint = context, di = di)
+        }
+
+        bind<ContainerUploadManager>() with scoped(EndpointScope.Default).singleton {
+            ContainerUploaderManagerImp(endpoint = context, di = di)
         }
 
         bind<DownloadPreparationRequester>() with scoped(EndpointScope.Default).singleton {
