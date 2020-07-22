@@ -33,19 +33,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
                           val di: DI,
                           val httpClient: HttpClient = defaultHttpClient()) {
 
-    data class DbPair(val db: UmAppDatabase, val repo: UmAppDatabase)
-
     data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
-
-    interface DbOpener {
-
-        fun openDb(context: Any, name: String) : UmAppDatabase
-
-    }
-
-    private class DefaultDbOpener: DbOpener {
-        override fun openDb(context: Any, name: String) = UmAppDatabase.getInstance(context, name)
-    }
 
     private val _activeAccount: AtomicRef<UmAccount>
 

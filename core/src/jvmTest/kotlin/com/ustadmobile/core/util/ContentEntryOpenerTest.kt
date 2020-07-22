@@ -79,7 +79,7 @@ class ContentEntryOpenerTest {
     @Test
     fun givenDownloadRequired_whenEntryDownloaded_thenOpenContent() {
         runBlocking {
-            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
+            ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, false, false)
             verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
         }
@@ -105,7 +105,7 @@ class ContentEntryOpenerTest {
             dj.djiStatus = JobStatus.STARTING
             umAppDatabase.downloadJobItemDao.insert(dj)
 
-            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
+            ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, true, false)
             verify(impl).go(eq(ContentEntry2DetailView.VIEW_NAME), any(), eq(context))
         }
@@ -115,7 +115,7 @@ class ContentEntryOpenerTest {
     @Test
     fun givenDownloadNotRequired_whenEntryDownloaded_thenOpenContent(){
         runBlocking {
-            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
+            ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
             verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
         }
@@ -124,7 +124,7 @@ class ContentEntryOpenerTest {
     @Test
     fun givenDownloadNotRequired_whenEntryNotDownloaded_thenOpenContent(){
         runBlocking {
-            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
+            ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
             verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
         }
@@ -159,7 +159,7 @@ class ContentEntryOpenerTest {
             dj.djiStatus = JobStatus.COMPLETE
             umAppDatabase.downloadJobItemDao.insert(dj)
 
-            ContentEntryOpener(di, endpoint, context).openEntry(contentEntry.contentEntryUid,
+            ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
             verify(impl).openFileInDefaultViewer(eq(context), any(), eq("video/wav"))
         }
