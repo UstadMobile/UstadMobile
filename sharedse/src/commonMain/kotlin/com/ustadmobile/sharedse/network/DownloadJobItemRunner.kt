@@ -501,39 +501,58 @@ class DownloadJobItemRunner
         connectionRequestActive.value = true
         networkManager.lockWifi(downloadWiFiLock)
 
-        val channel = Channel<Boolean>(1)
+
+
+        //val channel = Channel<Boolean>(1)
 
 
         //TODO: change this to using sendBleMessage instead
-        networkManager.sendMessage(Any(), requestGroupCreation, currentNetworkNode!!, object : BleMessageResponseListener {
-            override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
-                UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-                        " BLE response received: from " + sourceDeviceAddress + ":" + response +
-                        " error: " + error)
-
-                if (connectionRequestActive.value && response != null
-                        && response.requestType == WIFI_GROUP_CREATION_RESPONSE) {
-                    connectionRequestActive.value = false
-                    val lWifiDirectGroup = WiFiDirectGroupBle(response.payload!!)
-                    wiFiDirectGroupBle.value = lWifiDirectGroup
-
-                    val acquiredEndPoint = ("http://" + lWifiDirectGroup.ipAddress + ":"
-                            + lWifiDirectGroup.port + "/")
-                    currentNetworkNode!!.endpointUrl = acquiredEndPoint
-                    currentNetworkNode!!.groupSsid = lWifiDirectGroup.ssid
-                    UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-                            "Connecting to P2P group network with SSID " + lWifiDirectGroup.ssid)
-                    channel.offer(true)
-                }
-
-
+        val nodeBleAddr = currentNetworkNode?.bluetoothMacAddress ?: return@withContext false
+        val response = networkManager.sendBleMessage(requestGroupCreation, nodeBleAddr)
+        val responsePayload = response?.payload
+        if(response?.requestType == WIFI_GROUP_CREATION_RESPONSE && responsePayload != null) {
+            val lWifiDirectGroup = WiFiDirectGroupBle(responsePayload).also {
+                wiFiDirectGroupBle.value = it
             }
 
-        })
-
-        withTimeoutOrNull(20 * 1000) { channel.receive() }
-
+            val acquiredEndPoint = ("http://" + lWifiDirectGroup.ipAddress + ":"
+                    + lWifiDirectGroup.port + "/")
+            currentNetworkNode?.apply {
+                endpointUrl = acquiredEndPoint
+                groupSsid = lWifiDirectGroup.ssid
+            }
+        }
         connectionRequestActive.value = false
+
+//        networkManager.sendMessage(Any(), requestGroupCreation, currentNetworkNode!!, object : BleMessageResponseListener {
+//            override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
+//                UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
+//                        " BLE response received: from " + sourceDeviceAddress + ":" + response +
+//                        " error: " + error)
+//
+//                if (connectionRequestActive.value && response != null
+//                        && response.requestType == WIFI_GROUP_CREATION_RESPONSE) {
+//                    connectionRequestActive.value = false
+//                    val lWifiDirectGroup = WiFiDirectGroupBle(response.payload!!)
+//                    wiFiDirectGroupBle.value = lWifiDirectGroup
+//
+//                    val acquiredEndPoint = ("http://" + lWifiDirectGroup.ipAddress + ":"
+//                            + lWifiDirectGroup.port + "/")
+//                    currentNetworkNode!!.endpointUrl = acquiredEndPoint
+//                    currentNetworkNode!!.groupSsid = lWifiDirectGroup.ssid
+//                    UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
+//                            "Connecting to P2P group network with SSID " + lWifiDirectGroup.ssid)
+//                    channel.offer(true)
+//                }
+//
+//
+//            }
+//
+//        })
+//
+//        withTimeoutOrNull(20 * 1000) { channel.receive() }
+//
+//        connectionRequestActive.value = false
 
 
         //There was an exception trying to communicate with the peer to get the wifi direct group network
