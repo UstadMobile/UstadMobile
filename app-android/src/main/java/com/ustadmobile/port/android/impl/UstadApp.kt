@@ -111,7 +111,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ContainerFetcher>() with singleton { ContainerFetcherJvm(di) }
 
         bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
-            ContentEntryOpener(di, context, applicationContext)
+            ContentEntryOpener(di, context)
         }
 
         bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
