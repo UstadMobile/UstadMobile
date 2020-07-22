@@ -31,7 +31,7 @@
                 android:id="@+id/appbar"
                 layout="@layout/appbar_material_with_progress"/>
 
-            <androidx.viewpager.widget.ViewPager
+            <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/container_epubrunner_pager"
                 android:layout_below="@+id/appbar"
                 android:layout_alignParentBottom="true"

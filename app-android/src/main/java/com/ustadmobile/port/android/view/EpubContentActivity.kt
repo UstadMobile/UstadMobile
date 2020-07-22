@@ -1,39 +1,44 @@
 package com.ustadmobile.port.android.view
 
+import android.annotation.SuppressLint
+import android.app.DownloadManager
+import android.content.Context
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebViewClient
 import android.widget.AdapterView
 import android.widget.TextView
+import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityEpubContentBinding
+import com.toughra.ustadmobile.databinding.ItemEpubcontentViewBinding
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.appbar_material_with_progress.view.*
 import kotlinx.coroutines.CompletableDeferred
-import java.util.*
 
 class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnItemClickListener, TocListView.OnItemClickListener {
 
 
     /** The Page Adapter used to manage swiping between epub pages  */
-    private var mPagerAdapter: ContainerViewPagerAdapter? = null
+    private var mContentPagerAdapter: EpubContentPagerAdapter? = null
 
     private var mPresenter: EpubContentPresenter? = null
 
@@ -52,9 +57,9 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         }
 
     override fun setSpineUrls(urls: Array<String>?, index : Int) {
-        mPagerAdapter = urls?.let { ContainerViewPagerAdapter(supportFragmentManager, it) }
+        mContentPagerAdapter = urls?.let { EpubContentPagerAdapter(this,it) }
         mBinding.containerEpubrunnerPager.offscreenPageLimit = 1
-        mBinding.containerEpubrunnerPager.adapter = mPagerAdapter
+        mBinding.containerEpubrunnerPager.adapter = mContentPagerAdapter
         mBinding.containerEpubrunnerPager.setCurrentItem(index, true)
     }
 
@@ -149,48 +154,69 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
     }
 
 
-    /**
-     * A simple pager adapter that uses an array of urls (as a string
-     * array) to generate a fragment that has a webview showing that
-     * URL
-     *
-     */
-    private class ContainerViewPagerAdapter(fm: FragmentManager,
-                                            /**
-                                             * Array of the page HREF items to be shown
-                                             */
-                                            private val urlList: Array<String>) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+    private class EpubContentPagerAdapter internal constructor(val context: Context,
+                                                               private val urls: Array<String>):
+            RecyclerView.Adapter<EpubContentPagerAdapter.EpubContentViewHolder>() {
 
-        internal var pagesMap: WeakHashMap<String, EpubContentPageFragment> = WeakHashMap()
+        private var webViewTouchHandler: Handler = Handler()
 
-        override
-                /**
-                 * Generate the Fragment for that position
-                 *
-                 * @see com.ustadmobile.contentviewpager.ContentViewPagerPageFragment
-                 *
-                 *
-                 * @param position Position in the list of fragment to create
-                 */
-        fun getItem(position: Int): Fragment {
-            //Using the simple integer key type does not seem to allow the entry to be garbage
-            // collected as expected and leads to a memory leak. Somehow the compiler or other
-            // uses the same key reference.
-            val strKey = "-${urlList[position]}"
-            val existingFrag = pagesMap[strKey]
+        private var gestureDetector: GestureDetectorCompat? = null
 
-            return if (existingFrag != null) {
-                existingFrag
-            } else {
-                val frag = EpubContentPageFragment.newInstance(urlList[position], position)
+        inner class EpubContentViewHolder internal constructor(val mBinding: ItemEpubcontentViewBinding) :
+                RecyclerView.ViewHolder(mBinding.root) {
 
-                this.pagesMap[strKey] = frag
-                frag
+            @SuppressLint("SetJavaScriptEnabled", "ObsoleteSdkInt", "ClickableViewAccessibility")
+            fun bind(spineUrl: String){
+                //Android after Version 17 (4.4) by default requires a gesture before any media playback happens
+                if (Build.VERSION.SDK_INT >= 17) {
+                    mBinding.epubContentview.settings?.mediaPlaybackRequiresUserGesture = false
+                }
+
+                mBinding.epubContentview.settings.javaScriptEnabled = true
+                mBinding.epubContentview.settings.domStorageEnabled = true
+                mBinding.epubContentview.settings.cacheMode = WebSettings.LOAD_DEFAULT
+                mBinding.epubContentview.webViewClient = WebViewClient()
+                mBinding.epubContentview.webChromeClient = WebChromeClient()
+                mBinding.epubContentview.loadUrl(spineUrl)
+                mBinding.epubContentview.setDownloadListener { url, _, _, _, _ ->
+                    val request = DownloadManager.Request(Uri.parse(url))
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                            UMFileUtil.getFilename(url))
+                    val downloadManager = context.getSystemService(
+                            Context.DOWNLOAD_SERVICE) as DownloadManager
+                    downloadManager.enqueue(request)
+                }
+                gestureDetector = GestureDetectorCompat(mBinding.epubContentview.context,
+                        object : GestureDetector.SimpleOnGestureListener() {
+                            override fun onSingleTapUp(e: MotionEvent): Boolean {
+                                webViewTouchHandler.sendEmptyMessageDelayed(HANDLER_CLICK_ON_VIEW, 200)
+                                return super.onSingleTapUp(e)
+                            } })
+
+                mBinding.epubContentview.setOnTouchListener { _, motionEvent ->
+                    gestureDetector?.onTouchEvent(motionEvent)?:false}
             }
         }
 
-        override fun getCount(): Int {
-            return urlList.size
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EpubContentViewHolder {
+            val mBinding = ItemEpubcontentViewBinding.inflate(LayoutInflater.from(parent.context),
+                    parent, false)
+            return EpubContentViewHolder(mBinding)
+        }
+
+        override fun getItemCount(): Int  = urls.size
+
+        override fun onBindViewHolder(holderContent: EpubContentViewHolder, position: Int) {
+            holderContent.bind(urls[position])
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            gestureDetector = null
+        }
+
+        companion object{
+            const val HANDLER_CLICK_ON_VIEW = 2
         }
     }
 
@@ -253,9 +279,10 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     override fun onDestroy() {
         mPresenter?.onDestroy()
+        mBinding.containerEpubrunnerPager.adapter = null
         mSavedInstanceState = null
         mPresenter = null
-        mPagerAdapter = null
+        mContentPagerAdapter = null
         coverImageUrl = null
         containerTitle = null
         tableOfContents = null
