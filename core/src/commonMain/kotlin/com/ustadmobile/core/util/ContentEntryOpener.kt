@@ -34,7 +34,7 @@ val mimeTypeToPlayStoreIdMap = mapOf(
 
 
 
-class ContentEntryOpener(override val di: DI, val endpoint: Endpoint, val appContext: Any) : DIAware {
+class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware {
 
     private val umAppDatabase: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
 
@@ -44,7 +44,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint, val appCon
      * Opens the given ContentEntry. If the entry is available, then open the relevant view and show the latest container
      *
      */
-    suspend fun openEntry(contentEntryUid: Long, downloadRequired: Boolean,
+    suspend fun openEntry(context: Any, contentEntryUid: Long, downloadRequired: Boolean,
                           goToContentEntryDetailViewIfNotDownloaded: Boolean, noIframe: Boolean) {
 
         val containerToOpen = if (downloadRequired) {
@@ -61,13 +61,13 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint, val appCon
                             ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
                             ARG_CONTAINER_UID to containerToOpen.containerUid.toString())
 
-                    systemImpl.go(viewName, args, appContext)
+                    systemImpl.go(viewName, args, context)
                 }else {
                     val container = umAppDatabase.containerEntryDao.findByContainerAsync(containerToOpen.containerUid)
                     require(container.isNotEmpty()) { "No file found" }
                     val containerEntryFilePath = container[0].containerEntryFile?.cefPath
                     if (containerEntryFilePath != null) {
-                        systemImpl.openFileInDefaultViewer(appContext, containerEntryFilePath,
+                        systemImpl.openFileInDefaultViewer(context, containerEntryFilePath,
                                 containerToOpen.mimeType)
                     } else {
                         throw IllegalArgumentException("No file found in container")
@@ -78,7 +78,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint, val appCon
 
             goToContentEntryDetailViewIfNotDownloaded -> {
                 systemImpl.go(ContentEntry2DetailView.VIEW_NAME,
-                        mapOf(ARG_ENTITY_UID to contentEntryUid.toString()), appContext)
+                        mapOf(ARG_ENTITY_UID to contentEntryUid.toString()), context)
             }
 
             else -> {

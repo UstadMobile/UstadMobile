@@ -101,7 +101,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                 try {
                     val entry = repo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
                             ?: throw IllegalArgumentException("No File found")
-                    contentEntryOpener.openEntry(entry.contentEntryUid, true,
+                    contentEntryOpener.openEntry(context, entry.contentEntryUid, true,
                         true, arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {

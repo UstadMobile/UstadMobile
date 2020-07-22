@@ -103,7 +103,7 @@ class ContentEntry2DetailPresenter(context: Any,
         GlobalScope.launch(Dispatchers.Main) {
             try {
                 entity?.contentEntryUid?.also {
-                    contentEntryOpener.openEntry(it, isDownloadEnabled, false,
+                    contentEntryOpener.openEntry(context, it, isDownloadEnabled, false,
                             arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
                 }
             } catch (e: Exception) {
