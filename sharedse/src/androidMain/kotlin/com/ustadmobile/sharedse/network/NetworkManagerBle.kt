@@ -608,7 +608,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         }
 
         updateEnableServicesPromptsRequired()
-        httpd.addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, this)
 
         super.onCreate()
     }
