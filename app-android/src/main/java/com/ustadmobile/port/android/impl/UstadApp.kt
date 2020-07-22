@@ -51,7 +51,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
             val dbName = sanitizeDbNameFromUrl(context.url)
-            getInstance(applicationContext, dbName)
+            getInstance(applicationContext, dbName).also {
+                val networkManager: NetworkManagerBle = di.direct.instance()
+                it.connectivityStatusDao.commitLiveConnectivityStatus(networkManager.connectivityStatus)
+            }
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
