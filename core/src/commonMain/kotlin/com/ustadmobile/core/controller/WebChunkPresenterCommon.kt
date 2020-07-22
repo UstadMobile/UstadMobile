@@ -4,11 +4,9 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.GoToEntryFn
+import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
@@ -53,7 +51,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
     internal var containerUid: Long? = null
 
-    private val goToEntryFn: GoToEntryFn by di.instance<GoToEntryFn>()
+    private val contentEntryOpener: ContentEntryOpener by di.instance()
 
     val accountManager: UstadAccountManager by instance()
 
@@ -103,9 +101,8 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                 try {
                     val entry = repo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
                             ?: throw IllegalArgumentException("No File found")
-                    goToEntryFn(entry.contentEntryUid, repo, context, impl, true,
-                            true,
-                            arguments[ARG_NO_IFRAMES]?.toBoolean()!!)
+                    contentEntryOpener.openEntry(context, entry.contentEntryUid, true,
+                        true, arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
                         view.showNoAppFoundError(impl.getString(MessageID.no_app_found, context),

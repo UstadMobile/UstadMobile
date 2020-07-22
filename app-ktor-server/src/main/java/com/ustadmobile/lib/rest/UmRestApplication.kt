@@ -21,6 +21,7 @@ import io.ktor.gson.gson
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.get
@@ -126,49 +127,37 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
             }
 
             get("UmContainer/addContainer"){
-
-                val indexTempDir = 0; val indexTempFile = 1; val indexContainer = 2
-
                 val resourceName = call.request.queryParameters["resource"]
-                val entryUid = call.request.queryParameters["entryid"]
+                val entryUid = call.request.queryParameters["entryUid"]
                 val contentTye = call.request.queryParameters["type"]
                 val mimeType = when (contentTye) {
                     "tincan" -> "application/tincan+zip"
                     "epub" -> "application/epub+zip"
-                    else -> ""
+                    else -> null
                 }
 
-                handleInvalidRequest(call)
+                if(resourceName == null || entryUid == null || mimeType == null) {
+                    call.respond(HttpStatusCode.BadRequest,
+                            "Invalid request make sure you have included all resource param")
+                    return@get
+                }
 
-                val preparedRes = prepareResources(resourceName,contentTye!!, entryUid, mimeType)
+                val preparedRes = prepareResources(db, resourceName, contentTye!!, entryUid, mimeType)
 
-                val containerManager = ContainerManager(preparedRes[indexContainer] as Container, _restApplicationDb, _restApplicationDb,
-                        (preparedRes[indexTempDir] as File).absolutePath)
+                val containerManager = ContainerManager(preparedRes.tmpContainer, db, db,
+                        preparedRes.tempDir.absolutePath)
 
-                val epubZipFile = ZipFile(preparedRes[indexTempFile] as File)
-                addEntriesFromZipToContainer((preparedRes[indexTempFile] as File).absolutePath, containerManager)
-                epubZipFile.close()
-                val containerUid = (preparedRes[indexContainer] as Container).containerUid
+                addEntriesFromZipToContainer(preparedRes.tempFile.absolutePath, containerManager)
+                val containerUid = preparedRes.tmpContainer.containerUid
                 call.respond(containerUid)
             }
         }
     }
 }
 
-private suspend fun handleInvalidRequest(call: ApplicationCall){
-    val resourceName = call.request.queryParameters["resource"]
-    val entryId = call.request.queryParameters["entryid"]
-    val resourceType = call.request.queryParameters["type"]
-    if((resourceName != null && resourceName.isEmpty()) || resourceName == null
-            || (entryId != null && entryId.isEmpty()) || entryId == null ||
-            (resourceType != null && resourceType.isEmpty()) || resourceType == null){
-        call.respond("Invalid request make sure you have included all resource param")
-        return
-    }
-}
+data class PreparedResource(val tempDir: File, val tempFile: File, val tmpContainer: Container)
 
-
-private fun prepareResources(resourceName: String?, path: String, entryId: String?, mimetype: String): Array<Any>{
+private fun prepareResources(db: UmAppDatabase, resourceName: String?, path: String, entryId: String?, mimetype: String): PreparedResource{
     val epubContainer = Container()
 
     if(entryId!= null && entryId.isNotEmpty()){
@@ -179,9 +168,9 @@ private fun prepareResources(resourceName: String?, path: String, entryId: Strin
 
     epubContainer.cntLastModified = tempFile.lastModified()
     epubContainer.mimeType = mimetype
-    epubContainer.containerUid = _restApplicationDb.containerDao.insert(epubContainer)
+    epubContainer.containerUid = db.containerDao.insert(epubContainer)
 
     UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/$path/${resourceName}", tempFile)
     val tempDir = UmFileUtilSe.makeTempDir("testFile", "containerDirTmp")
-    return arrayOf(tempDir, tempFile, epubContainer)
+    return PreparedResource(tempDir, tempFile, epubContainer)
 }

@@ -9,9 +9,8 @@ import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentRedirectBinding
 import com.ustadmobile.core.controller.RedirectPresenter
-import com.ustadmobile.core.impl.AppConfig
-import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RedirectView
 import org.kodein.di.instance
@@ -37,21 +36,18 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mPresenter = RedirectPresenter(requireContext(),UMAndroidUtil.bundleToMap(arguments),this, di)
+        mPresenter = RedirectPresenter(requireContext(),
+                arguments.toStringMap() + requireActivity().intent.extras.toStringMap(),
+                this, di)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
     }
 
-    override var showGetStarted: Boolean? = null
-        set(value) {
-            field = value
-            val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION,
-                    requireContext())
-            val navOptions = NavOptions.Builder().setPopUpTo(R.id.redirect_dest, true).build()
-            val destination = if(value != null && value){
-                if(canSelectServer) R.id.account_get_started_dest else R.id.login_dest }
-            else R.id.home_content_dest
-            findNavController().navigate(destination,null, navOptions)
-        }
+    override fun showNextScreen(viewName: String, args: Map<String, String>) {
+        val navDestinationId = impl.destinationProvider.lookupDestinationName(viewName)?.destinationId
+                ?: throw IllegalArgumentException("No destination for viewname: $viewName")
+        val navOptions = NavOptions.Builder().setPopUpTo(R.id.redirect_dest, true).build()
+        findNavController().navigate(navDestinationId, args.toBundle(), navOptions)
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

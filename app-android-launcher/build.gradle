@@ -118,7 +118,6 @@ android {
             applicationId "${baseAppId}"
             testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
-            multiDexEnabled true
         }
     }
 

@@ -1,8 +1,10 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -36,13 +38,11 @@ class RedirectPresenterTest {
 
     @Test
     fun givenAppLaunched_whenNavigateFromOnBoardingScreen_thenShouldNavigateToGetStarted() {
+        whenever(impl.getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any())).thenReturn(true)
         mPresenter = RedirectPresenter(context, mapOf(UstadView.ARG_FROM to OnBoardingView.VIEW_NAME),
                 mockedView, di)
         mPresenter.onCreate(null)
-        argumentCaptor<Boolean>{
-            verify(mockedView).showGetStarted = capture()
-            Assert.assertEquals("Get started screen was opened", true, firstValue)
-        }
+        verify(mockedView).showNextScreen(eq(GetStartedView.VIEW_NAME), any())
     }
 
     @Test
@@ -50,11 +50,16 @@ class RedirectPresenterTest {
         mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
         mPresenter.onCreate(null)
-        argumentCaptor<Boolean>{
-            verify(mockedView).showGetStarted = capture()
-            Assert.assertEquals("Content entry list  screen was opened",
-                    false, firstValue)
-        }
+        verify(mockedView).showNextScreen(eq(ContentEntryListTabsView.VIEW_NAME), any())
+    }
+
+    @Test
+    fun givenNextArgProvied_whenOnCreateCalled_thenShouldGoToNextDest() {
+        mPresenter = RedirectPresenter(context, mapOf(ARG_NEXT to "${ContentEntry2DetailView.VIEW_NAME}?entityUid=42"),
+                mockedView, di)
+        mPresenter.onCreate(null)
+        verify(mockedView).showNextScreen(eq(ContentEntry2DetailView.VIEW_NAME),
+            eq(mapOf("entityUid" to "42")))
     }
 
 }
