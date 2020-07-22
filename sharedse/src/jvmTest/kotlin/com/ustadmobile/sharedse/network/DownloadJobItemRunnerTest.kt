@@ -110,8 +110,6 @@ class DownloadJobItemRunnerTest {
 
     private var context = Any()
 
-    private lateinit var mockedEntryStatusTask: BleMessageTask
-
     private lateinit var networkNode: NetworkNode
 
     private lateinit var connectivityStatus: DoorMutableLiveData<ConnectivityStatus>
@@ -246,7 +244,9 @@ class DownloadJobItemRunnerTest {
         clientDb =  clientDi.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
         containerDownloadManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
-        serverDb = UmAppDatabase.getInstance(context)
+        serverDb = UmAppDatabase.getInstance(context).also {
+            it.clearAllTables()
+        }
         mockLocalAvailabilityManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
 
@@ -314,7 +314,6 @@ class DownloadJobItemRunnerTest {
 //        val peerDb = UmAppDatabase.getInstance(context, "peerdb")
 //        peerDb.clearAllTables()
 //        peerServer = EmbeddedHTTPD(0, context, peerDb)
-        mockedEntryStatusTask = mock<BleMessageTask> {}
 
 
 

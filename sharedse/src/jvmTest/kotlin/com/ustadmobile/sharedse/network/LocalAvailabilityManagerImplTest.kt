@@ -133,15 +133,12 @@ class LocalAvailabilityManagerImplTest  {
     @Test
     fun givenStatusAlreadyKnown_whenAvailabilityStatusRequested_noTasksAreCreated() {
         runBlocking {
-            val tasksMade = mutableListOf<BleMessageTask>()
 
             runBlocking {
                 val managerImpl = LocalAvailabilityManagerImpl(di, activeEndpoint)
                 managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
                 managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
                 managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
-
-                val numTasksMadeBeforeSecondRequest = tasksMade.size
 
                 verifyBlocking(mockNetworkManager, timeout(5000).times(2)) { sendBleMessage(any(), any())}
 
@@ -150,10 +147,6 @@ class LocalAvailabilityManagerImplTest  {
                 delay(50)
 
                 verifyNoMoreInteractions(mockNetworkManager)
-
-                Assert.assertEquals("No new tasks made after creating an availability monitor with the same UID",
-                        numTasksMadeBeforeSecondRequest, tasksMade.size)
-
             }
         }
     }
