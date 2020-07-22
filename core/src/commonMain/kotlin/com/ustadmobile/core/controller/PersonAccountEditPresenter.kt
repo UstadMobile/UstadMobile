@@ -88,7 +88,7 @@ class PersonAccountEditPresenter(context: Any,
                         view.showPasswordDoNotMatchError()
                         return@launch
                     }
-                    val umAccount = accountManager.register(entity,secondPassword, serverUrl)
+                    val umAccount = accountManager.register(entity,secondPassword, serverUrl, false)
                     if(umAccount.username != null){
                         repo.personDao.updateAsync(entity)
                     }

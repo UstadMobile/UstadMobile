@@ -106,7 +106,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = _storedAccountsLive
 
 
-    suspend fun register(person: Person, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
+    suspend fun register(person: Person, password: String, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount {
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             parameter("person", Json.stringify(Person.serializer(), person))
@@ -121,11 +121,11 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             }
         }
 
-
         if(status == 200 && account != null) {
             account.endpointUrl = endpointUrl
-            activeAccount = account
-
+            if(makeAccountActive){
+                activeAccount = account
+            }
             return account
         }else if(status == 409){
             throw IllegalArgumentException("Conflict: username already taken")

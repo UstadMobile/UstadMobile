@@ -173,7 +173,7 @@ class PersonEditPresenterTest  {
 
         argumentCaptor<Person>().apply {
             verifyBlocking(accountManager, timeout(timeoutInMill)){
-                register(capture(), any(), eq(serverUrl), eq(false))
+                register(capture(), any(), eq(serverUrl), eq(true))
                 assertEquals("Person registration was done", person.personUid, firstValue.personUid)
             }
         }
