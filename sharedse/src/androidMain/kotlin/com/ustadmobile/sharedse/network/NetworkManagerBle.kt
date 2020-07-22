@@ -309,7 +309,8 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
 
         private val wiFiDirectGroup = AtomicReference<WiFiDirectGroupBle>()
 
-        private val timeoutCheckHandler = Handler()
+        //Disable this temporarily because creating a handler interferes with Espresso testing
+        //private val timeoutCheckHandler = Handler()
 
         //it's working on it, and hasn't failed yet, don't notify status change
         val wifiP2pBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -346,14 +347,14 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
                         && timeNow - networkManager.wifiDirectRequestLastCompletedTime.get() > TIMEOUT_AFTER_LAST_REQUEST)
                 setEnabled(!timedOut)
 
-                if (state != STATE_STOPPED)
-                    timeoutCheckHandler.postDelayed(CheckTimeoutRunnable(),
-                            TIMEOUT_CHECK_INTERVAL.toLong())
+//                if (state != STATE_STOPPED)
+//                    timeoutCheckHandler.postDelayed(CheckTimeoutRunnable(),
+//                            TIMEOUT_CHECK_INTERVAL.toLong())
             }
         }
 
         override fun start() {
-            timeoutCheckHandler.postDelayed(CheckTimeoutRunnable(), TIMEOUT_CHECK_INTERVAL.toLong())
+            //timeoutCheckHandler.postDelayed(CheckTimeoutRunnable(), TIMEOUT_CHECK_INTERVAL.toLong())
             networkManager.wifiP2pManager!!.requestGroupInfo(networkManager.wifiP2pChannel
             ) { wifiP2pGroup ->
                 if (wifiP2pGroup != null) {
