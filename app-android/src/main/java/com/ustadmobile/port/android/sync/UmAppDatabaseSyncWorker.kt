@@ -2,29 +2,36 @@ package com.ustadmobile.port.android.sync
 
 import android.content.Context
 import androidx.work.*
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import kotlinx.coroutines.runBlocking
+import org.kodein.di.DI
+import org.kodein.di.android.di
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.util.concurrent.TimeUnit
 
 class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
-
     override fun doWork(): Result {
-        try {
-//            TODO: SyncWorker would need to iterate over active databases
-//            println("Start sync")
-//            val clientRepo = UmAccountManager.getRepositoryForActiveAccount(applicationContext)
-//            runBlocking {
-//                val syncRepo =(clientRepo as DoorDatabaseSyncRepository)
-//                //syncRepo.sync(null)
-//            }
-//
-//            UMLog.l(UMLog.INFO, 100, "database syncWith repo ran")
-        } catch (e: Exception) {
-            UMLog.l(UMLog.WARN, 101, "Exception running syncWith :" + e.message)
+        val di: DI by di(applicationContext)
+
+        EndpointScope.Default.activeEndpointUrls.forEach { endpointUrl ->
+            try {
+                val clientRepo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = TAG_REPO)
+                runBlocking {
+                    (clientRepo as? DoorDatabaseSyncRepository)?.sync(null)
+                }
+            } catch (e: Exception) {
+                UMLog.l(UMLog.WARN, 101, "Exception running syncWith for $endpointUrl:" + e.message)
+            }
         }
+
 
         if (!isStopped) {
             val appRecentlyActive = UmAppDatabaseSyncService.isInForeground ||
