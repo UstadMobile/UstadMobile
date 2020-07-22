@@ -175,9 +175,9 @@ class PersonAccountEditFragmentTest {
                 not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
     }
 
-    @AdbScreenRecord("given person account edit launched in password change mode when password do not match on save clicked should show errors")
+    @AdbScreenRecord("given person account edit launched in password change mode when on save clicked and password do not match should show errors")
     @Test
-    fun givenPersonAccountInPasswordChangeMode_whenPasswordDoNotMatchAndSaveClicked_thenShouldShowErrors(){
+    fun givenPersonAccountInPasswordChangeMode_whenSaveClickedAndPasswordDoNotMatch_thenShouldShowErrors(){
         enqueueResponse(false, 403)
         val person = createPerson(true, isAdmin = false)
         launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = true,
