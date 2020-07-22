@@ -1,14 +1,14 @@
 package com.ustadmobile.port.android.view
 
 import android.app.Application
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -21,10 +21,12 @@ import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import junit.framework.Assert.assertEquals
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -34,6 +36,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.lang.Thread.sleep
 
 
 @AdbScreenRecord("PersonAccountEdit screen Test")
@@ -79,15 +82,16 @@ class PersonAccountEditFragmentTest {
         mockWebServer.shutdown()
     }
 
-    private fun enqueueResponse(success:Boolean = true){
+    private fun enqueueResponse(success:Boolean = true, responseCode: Int = 200){
         if(success){
             mockWebServer.enqueue(MockResponse()
-                    .setResponseCode(200)
+                    .setResponseCode(responseCode)
                     .setHeader("Content-Type", "application/json")
                     .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
                             UmAccount(0L)).toByteArray())))
         }else{
-
+            mockWebServer.enqueue(MockResponse()
+                    .setResponseCode(responseCode))
         }
     }
 
@@ -158,7 +162,7 @@ class PersonAccountEditFragmentTest {
 
     @AdbScreenRecord("given person account edit launched in password change mode when all fields are filled on save clicked should change password")
     @Test
-    fun givenPersonAccountInPasswordChangeMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
+    fun givenPersonAccountInPasswordChangeMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldChangePassword(){
         enqueueResponse()
         val person = createPerson(true, isAdmin = false)
         launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = true,
@@ -171,21 +175,35 @@ class PersonAccountEditFragmentTest {
                 not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
     }
 
+    @AdbScreenRecord("given person account edit launched in password change mode when password do not match on save clicked should show errors")
+    @Test
+    fun givenPersonAccountInPasswordChangeMode_whenPasswordDoNotMatchAndSaveClicked_thenShouldShowErrors(){
+        enqueueResponse(false, 403)
+        val person = createPerson(true, isAdmin = false)
+        launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = true,
+                fillNewPassword = true, matchingPassword = false)
+
+        //wait for a network call - fixed timeout
+        sleep(1000)
+        onView(withId(R.id.error_text)).check(matches(isDisplayed()))
+                .check(matches(withText(context.getString(R.string.filed_password_no_match))))
+    }
+
 
     @AdbScreenRecord("given person account edit launched in account creation mode when all fields are filled on save clicked should create and account")
     @Test
     fun givenPersonAccountInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
         enqueueResponse()
         val person = createPerson(false, isAdmin = false)
-        launchFragment(person, true, leftOutUsername = false, fillCurrentPassword = true,
+        val fragmentScenario = launchFragment(person, true, leftOutUsername = false, fillCurrentPassword = true,
                 fillNewPassword = true, matchingPassword = true)
 
-        onView(withId(R.id.first_password_textinputlayout)).check(matches(
-                not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
-
-        onView(withId(R.id.second_password_textinputlayout)).check(matches(
-                not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
+        val mPerson = dbRule.db.personDao.findByUidLive(person.personUid).waitUntilWithFragmentScenario(fragmentScenario) {
+            it?.username != null
+        }
+        assertEquals("Account was created successfully", person.username , mPerson?.username)
     }
+
 
     @AdbScreenRecord("given person account edit launched in account creation mode when password doesn't match on save clicked should show errors")
     @Test
@@ -205,9 +223,10 @@ class PersonAccountEditFragmentTest {
 
     private fun launchFragment(person: Person, fillForm: Boolean = false, leftOutUsername: Boolean = false,
                                fillCurrentPassword: Boolean = false, fillNewPassword: Boolean = false,
-                               matchingPassword: Boolean = true){
+                               matchingPassword: Boolean = true): FragmentScenario<PersonAccountEditFragment>{
 
-        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString()).toBundle()
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
+                UstadView.ARG_SERVER_URL to serverUrl).toBundle()
 
         val scenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = args) {
@@ -233,6 +252,7 @@ class PersonAccountEditFragmentTest {
             }
             scenario.clickOptionMenu(R.id.menu_done)
         }
+        return scenario
     }
 
 }

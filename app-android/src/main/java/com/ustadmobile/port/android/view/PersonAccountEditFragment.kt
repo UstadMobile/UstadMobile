@@ -64,6 +64,7 @@ class PersonAccountEditFragment: UstadEditFragment<Person>(), PersonAccountEditV
             field = value
             mBinding?.errorText?.visibility = if(value != null) View.VISIBLE else View.GONE
             mBinding?.errorText?.text = value
+            loading = false
         }
     override var fistPasswordFieldHint: String? = null
         set(value) {
