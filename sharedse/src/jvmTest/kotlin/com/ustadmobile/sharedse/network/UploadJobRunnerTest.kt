@@ -10,6 +10,8 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.lib.rest.ContainerUpload
@@ -17,6 +19,7 @@ import com.ustadmobile.lib.rest.ResumableUploadRoute
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Companion.CHUNK_SIZE
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
 import com.ustadmobile.sharedse.network.containeruploader.UploadJobRunner
@@ -58,7 +61,11 @@ class UploadJobRunnerTest {
     private lateinit var clientFolder: File
     private lateinit var fileToUpload: File
 
+    private lateinit var connectivityStatusLiveData: DoorMutableLiveData<ConnectivityStatus>
+
     private lateinit var di: DI
+
+    lateinit var mockNetworkManager: NetworkManagerBle
 
     private lateinit var networkManager: NetworkManagerBle
 
@@ -68,14 +75,22 @@ class UploadJobRunnerTest {
 
     @Before
     fun setup() {
-        networkManager = mock()
-
         repo = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
         repo.clearAllTables()
 
         val endpointScope = EndpointScope()
+
+        connectivityStatusLiveData = DoorMutableLiveData(ConnectivityStatus().apply {
+            connectedOrConnecting = true
+            connectivityState = ConnectivityStatus.STATE_UNMETERED
+            wifiSsid = "wifi-mock"
+        })
+
+        mockNetworkManager = mock {
+            on { connectivityStatus }.thenReturn(connectivityStatusLiveData)
+        }
+
         di = DI {
-            bind<NetworkManagerBle>() with singleton { networkManager }
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
@@ -84,9 +99,10 @@ class UploadJobRunnerTest {
                 })
             }
             bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
+            bind<NetworkManagerBle>() with singleton { mockNetworkManager }
         }
 
-
+        connectivityStatusLiveData.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_METERED, true, null))
 
         clientFolder = UmFileUtilSe.makeTempDir("upload", "")
         serverFolder = UmFileUtilSe.makeTempDir("server", "")
@@ -162,7 +178,7 @@ class UploadJobRunnerTest {
         mockWebServer.enqueue(MockResponse().setBody(sessionId))
 
         // fail to upload - server problem
-        for (i in 0..(fileToUpload.length()) step ContainerUploader.CHUNK_SIZE.toLong()) {
+        for (i in 0..(fileToUpload.length()) step CHUNK_SIZE.toLong()) {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.InternalServerError.value).setBody("Server error"))
         }
 
@@ -175,5 +191,23 @@ class UploadJobRunnerTest {
         Assert.assertEquals("Runner failed", JobStatus.FAILED, status)
 
     }
+
+    @Test
+    fun givenRunnerStarts_whenServerHasAllMd5_thenShouldCallFinalizeWithoutSession() {
+        endpoint = "http://localhost:$defaultPort/"
+        appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)
+        createContainer(repo)
+        createContainer(appDb)
+
+        val runner = UploadJobRunner(containerUploadJob, endpoint, di)
+        var status = 0
+        runBlocking {
+            status = runner.startUpload()
+        }
+
+        assertContainersHaveSameContent(epubContainer.containerUid, appDb, repo)
+
+    }
+
 
 }

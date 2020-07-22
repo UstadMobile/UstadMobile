@@ -7,6 +7,10 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.networkmanager.ContainerUploadManager
 import com.ustadmobile.sharedse.network.containeruploader.UploadJobRunner
 import com.ustadmobile.sharedse.util.LiveDataWorkQueue
+import kotlinx.coroutines.CoroutineDispatcher
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -16,11 +20,13 @@ class ContainerUploaderManagerImp(val endpoint: Endpoint, override val di: DI) :
 
     private val appDb: UmAppDatabase by on(endpoint).instance(tag = TAG_DB)
 
+    private val mainCoroutineDispatcher: CoroutineDispatcher by di.instance(tag = TAG_MAIN_COROUTINE_CONTEXT)
+
     override suspend fun enqueue(uploadJobId: Long) {
         appDb.containerUploadJobDao.setStatusToQueue(uploadJobId)
-
         LiveDataWorkQueue(appDb.containerUploadJobDao.findJobs(),
-                { item1, item2 -> item1.cujUid == item2.cujUid }) {
+                { item1, item2 -> item1.cujUid == item2.cujUid },
+                mainDispatcher = mainCoroutineDispatcher) {
 
             it.jobStatus = JobStatus.RUNNING
             appDb.containerUploadJobDao.update(it)

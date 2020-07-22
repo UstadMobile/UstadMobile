@@ -39,9 +39,12 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
             call.respond(nonExistingMd5SumList)
         }
 
-        post("finalizeEntries/sessionId/{sessionId}/") {
+        post("finalizeEntries/") {
 
-            val sessionId = call.parameters["sessionId"] ?: throw Exception()
+            val sessionId = call.parameters["sessionId"] ?: ""
+
+            val skipSessionFile = sessionId.isNullOrEmpty()
+
             val sessionFile = File(folder, sessionId)
             val containerWithContainerEntryWithMd5 = call.receive<ContainerWithContainerEntryWithMd5>()
             val containerEntriesList = containerWithContainerEntryWithMd5.containerEntries
@@ -51,7 +54,7 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
                 return@post
             }
 
-            if (!sessionFile.exists()) {
+            if (!sessionFile.exists() && !skipSessionFile) {
                 call.respond(HttpStatusCode.InternalServerError, "session file not found")
             } else {
 
@@ -70,16 +73,19 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
                 val containerManager = ContainerManager(containerFromDb, db, db, containerDir.absolutePath)
                 val linkedItems = containerManager.linkExistingItems(containerEntriesList)
 
-                var concatenatedInputStream: ConcatenatedInputStream? = null
+                if (!skipSessionFile) {
+                    var concatenatedInputStream: ConcatenatedInputStream? = null
 
-                try {
-                    concatenatedInputStream = ConcatenatedInputStream(FileInputStream(sessionFile))
-                    containerManager.addEntriesFromConcatenatedInputStream(concatenatedInputStream, linkedItems)
+                    try {
+                        concatenatedInputStream = ConcatenatedInputStream(FileInputStream(sessionFile))
+                        containerManager.addEntriesFromConcatenatedInputStream(concatenatedInputStream, linkedItems)
+                        call.respond(HttpStatusCode.NoContent)
+                    } finally {
+                        concatenatedInputStream?.close()
+                    }
+                }else{
                     call.respond(HttpStatusCode.NoContent)
-                } finally {
-                    concatenatedInputStream?.close()
                 }
-
             }
 
         }

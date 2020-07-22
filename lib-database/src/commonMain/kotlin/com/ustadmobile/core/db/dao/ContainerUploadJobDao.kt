@@ -25,9 +25,11 @@ abstract class ContainerUploadJobDao : BaseDao<ContainerUploadJob> {
     @Update
     abstract override fun update(entity: ContainerUploadJob)
 
+
+    // add this later -     AND (SELECT connectivityState from ConnectivityStatus WHERE connectivityState IN
+    //             ($STATE_METERED, $STATE_UNMETERED))
     @Query("""SELECT * FROM ContainerUploadJob WHERE jobStatus = $QUEUED
-             AND (SELECT connectivityState from ConnectivityStatus WHERE connectivityState IN 
-             ($STATE_METERED, $STATE_UNMETERED))  
+         
              LIMIT 10""")
     abstract fun findJobs(): DoorLiveData<List<ContainerUploadJob>>
 

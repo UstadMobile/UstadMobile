@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.network.ContainerUploader.Companion.CHUNK_SIZE
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Companion.CHUNK_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.http.HttpStatusCode

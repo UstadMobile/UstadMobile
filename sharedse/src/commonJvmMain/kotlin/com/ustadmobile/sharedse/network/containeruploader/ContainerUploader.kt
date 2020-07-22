@@ -106,8 +106,6 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                             val end = bytesSoFar.get() + readRange - 1
 
 
-
-
                             urlConnection = URL(UMFileUtil.joinPaths(request.uploadToUrl, "/receiveData/")).openConnection() as HttpURLConnection
                             urlConnection.connectTimeout = 5000
                             urlConnection.doOutput = true

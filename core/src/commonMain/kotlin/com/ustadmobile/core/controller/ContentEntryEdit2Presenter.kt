@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -18,24 +19,26 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 
 class ContentEntryEdit2Presenter(context: Any,
                                  arguments: Map<String, String>, view: ContentEntryEdit2View,
                                  lifecycleOwner: DoorLifecycleOwner,
                                  di: DI)
-    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view,  di, lifecycleOwner) {
+    : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, di, lifecycleOwner) {
 
-    private val containerUploadManager: ContainerUploadManager? by instanceOrNull<ContainerUploadManager>()
+    private val containerUploadManager: ContainerUploadManager?
+            by on(accountManager.activeAccount).instanceOrNull<ContainerUploadManager>()
 
-    enum class LicenceOptions(val optionVal: Int, val messageId: Int){
+    private val containerDownloadManager: ContainerDownloadManager?
+            by on(accountManager.activeAccount).instanceOrNull<ContainerDownloadManager>()
+
+    enum class LicenceOptions(val optionVal: Int, val messageId: Int) {
         LICENSE_TYPE_CC_BY(ContentEntry.LICENSE_TYPE_CC_BY, MessageID.licence_type_cc_by),
         LICENSE_TYPE_CC_BY_SA(ContentEntry.LICENSE_TYPE_CC_BY_SA, MessageID.licence_type_cc_by_sa),
         LICENSE_TYPE_CC_BY_SA_NC(ContentEntry.LICENSE_TYPE_CC_BY_SA_NC, MessageID.licence_type_cc_by_sa_nc),
@@ -46,19 +49,19 @@ class ContentEntryEdit2Presenter(context: Any,
         LICENSE_TYPE_OTHER(ContentEntry.LICENSE_TYPE_OTHER, MessageID.other)
     }
 
-    data class UmStorageOptions(var messageId: Int,var label: String)
+    data class UmStorageOptions(var messageId: Int, var label: String)
 
-    private var parentEntryUid:Long = 0
+    private var parentEntryUid: Long = 0
 
 
-    open class StorageOptions(context: Any, val storage: UmStorageOptions): MessageIdOption(storage.messageId,context){
+    open class StorageOptions(context: Any, val storage: UmStorageOptions) : MessageIdOption(storage.messageId, context) {
         override fun toString(): String {
             return storage.label
         }
     }
 
-    class LicenceMessageIdOptions(licence: LicenceOptions,context: Any)
-        : MessageIdOption(licence.messageId,context, licence.optionVal)
+    class LicenceMessageIdOptions(licence: LicenceOptions, context: Any)
+        : MessageIdOption(licence.messageId, context, licence.optionVal)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -68,14 +71,14 @@ class ContentEntryEdit2Presenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
-        parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong()?:0
+        parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
         systemImpl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
             override fun onDone(result: List<UMStorageDir>?) {
                 storageOptions = result
-                if(result != null){
-                   view.runOnUiThread(Runnable {
-                       view.storageOptions = result
-                   })
+                if (result != null) {
+                    view.runOnUiThread(Runnable {
+                        view.storageOptions = result
+                    })
                 }
             }
         })
@@ -95,9 +98,9 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: ContentEntryWithLanguage? = null
-        editEntity = if(entityJsonStr != null) {
+        editEntity = if (entityJsonStr != null) {
             Json.parse(ContentEntryWithLanguage.serializer(), entityJsonStr)
-        }else {
+        } else {
             ContentEntryWithLanguage()
         }
         return editEntity
@@ -117,29 +120,44 @@ class ContentEntryEdit2Presenter(context: Any,
             val canCreate = entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
                     (entity.contentEntryUid == 0L && view.selectedFileUri != null))
 
-            if(canCreate){
+            if (canCreate) {
                 entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
-                if(entity.contentEntryUid == 0L) {
+                if (entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
                     val contentEntryJoin = ContentEntryParentChildJoin().apply {
                         cepcjChildContentEntryUid = entity.contentEntryUid
                         cepcjParentContentEntryUid = parentEntryUid
                     }
                     repo.contentEntryParentChildJoinDao.insertAsync(contentEntryJoin)
-                }else {
+                } else {
                     repo.contentEntryDao.updateAsync(entity)
                 }
 
                 val language = entity.language
-                if(language != null && language.langUid == 0L){
+                if (language != null && language.langUid == 0L) {
                     repo.languageDao.insertAsync(language)
                 }
 
-                if(entity.leaf && view.selectedFileUri != null) {
+                if (entity.leaf && view.selectedFileUri != null) {
                     val container = view.saveContainerOnExit(entity.contentEntryUid,
                             storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(), db, repo)
 
                     if (container != null && containerUploadManager != null) {
+
+                        val downloadJob = DownloadJob(entity.contentEntryUid, getSystemTimeInMillis())
+                        downloadJob.djStatus = JobStatus.COMPLETE
+                        downloadJob.timeRequested = getSystemTimeInMillis()
+                        downloadJob.bytesDownloadedSoFar = container.fileSize
+                        downloadJob.totalBytesToDownload = container.fileSize
+                        downloadJob.djUid = repo.downloadJobDao.insert(downloadJob).toInt()
+
+                        val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
+                                container.containerUid, container.fileSize)
+                        downloadJobItem.djiUid = repo.downloadJobItemDao.insert(downloadJobItem).toInt()
+                        downloadJobItem.djiStatus = JobStatus.COMPLETE
+                        downloadJobItem.downloadedSoFar = container.fileSize
+
+                        containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
 
                         val uploadJob = ContainerUploadJob().apply {
                             this.jobStatus = JobStatus.NOT_QUEUED
@@ -151,7 +169,7 @@ class ContentEntryEdit2Presenter(context: Any,
                     }
                 }
                 view.finishWithResult(listOf(entity))
-            }else{
+            } else {
                 view.titleErrorEnabled = entity.title == null
                 view.fileImportErrorVisible = entity.title != null && entity.leaf
                         && view.selectedFileUri == null
