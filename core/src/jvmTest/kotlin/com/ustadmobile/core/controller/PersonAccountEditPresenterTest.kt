@@ -174,7 +174,7 @@ class PersonAccountEditPresenterTest  {
 
 
     @Test
-    fun givenPresenterCreatedInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldChangePassword(){
+    fun givenPersonAccountInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
         enQueuePasswordChangeResponse()
 
         mockView = mock{
