@@ -45,14 +45,13 @@ class PersonAccountEditFragment: UstadEditFragment<Person>(), PersonAccountEditV
             handleInputError(mBinding?.firstPasswordTextinputlayout,
                     value,getString(R.string.field_required_prompt))
         }
-    override var passwordNoMatchErrorVisible: Boolean? = null
-        set(value) {
-            field = value
-            handleInputError(mBinding?.firstPasswordTextinputlayout,true,
-                    getString(R.string.filed_password_no_match))
-            handleInputError(mBinding?.secondPasswordTextinputlayout,true,
-                    getString(R.string.filed_password_no_match))
-        }
+
+    override fun showPasswordDoNotMatchError() {
+        handleInputError(mBinding?.firstPasswordTextinputlayout,true,
+                getString(R.string.filed_password_no_match))
+        handleInputError(mBinding?.secondPasswordTextinputlayout,true,
+                getString(R.string.filed_password_no_match))
+    }
 
     override var usernameRequiredErrorVisible: Boolean = false
         set(value) {

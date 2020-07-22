@@ -212,10 +212,7 @@ class PersonAccountEditPresenterTest  {
         //wait for onLoadEntityFromDb to be called
         sleep(1000)
         presenter.handleClickSave(person.apply { username = "username" })
-        argumentCaptor<Boolean>{
-            verify(mockView, timeout(defaultTimeOut).atLeastOnce()).passwordNoMatchErrorVisible = capture()
-            assertEquals("Password doesn't match error was shown", true, firstValue)
-        }
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).showPasswordDoNotMatchError()
     }
 
 }

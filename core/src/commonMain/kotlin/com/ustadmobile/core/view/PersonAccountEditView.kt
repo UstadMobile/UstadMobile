@@ -12,7 +12,7 @@ interface PersonAccountEditView: UstadEditView<Person> {
 
     var firstPasswordFieldRequiredErrorVisible: Boolean
 
-    var passwordNoMatchErrorVisible: Boolean?
+    fun showPasswordDoNotMatchError()
 
     var usernameRequiredErrorVisible: Boolean
 

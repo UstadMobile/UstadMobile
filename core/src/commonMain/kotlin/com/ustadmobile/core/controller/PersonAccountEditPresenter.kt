@@ -84,12 +84,14 @@ class PersonAccountEditPresenter(context: Any,
             val username = entity.username
             try{
                 if(createAccount && firstPassword != null && secondPassword != null){
-                    val noMatch = firstPassword != secondPassword
-                    view.passwordNoMatchErrorVisible = noMatch
-                    if(noMatch){
+                    if(firstPassword != secondPassword){
+                        view.showPasswordDoNotMatchError()
                         return@launch
                     }
-                    accountManager.register(entity,secondPassword, serverUrl)
+                    val umAccount = accountManager.register(entity,secondPassword, serverUrl)
+                    if(umAccount.username != null){
+                        repo.personDao.updateAsync(entity)
+                    }
                 }else{
                     if(firstPassword != null && secondPassword != null && username != null){
                         accountManager.changePassword(username,firstPassword,secondPassword, serverUrl)
