@@ -40,6 +40,10 @@ abstract class PersonDao : BaseDao<Person> {
         var passwordHash: String = ""
 
         var personUid: Long = 0
+
+        var firstNames: String? = null
+
+        var lastName: String? = null
     }
 
     inner class PersonWithGroup internal constructor(var personUid: Long, var personGroupUid: Long)
@@ -132,7 +136,7 @@ abstract class PersonDao : BaseDao<Person> {
         accessToken.token = KmpUuid.randomUUID().toString()
 
         insertAccessToken(accessToken)
-        return UmAccount(personUid, username, accessToken.token, null)
+        return UmAccount(personUid, username, accessToken.token, "")
     }
 
     fun authenticate(token: String, personUid: Long): Boolean {
@@ -147,7 +151,7 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun insertAccessToken(token: AccessToken)
 
 
-    @Query("SELECT Person.personUid, PersonAuth.passwordHash " +
+    @Query("SELECT Person.personUid,Person.firstNames, Person.lastName, PersonAuth.passwordHash " +
             " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
             "WHERE Person.username = :username")
     abstract suspend fun findUidAndPasswordHashAsync(username: String): PersonUidAndPasswordHash?

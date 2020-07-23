@@ -86,13 +86,9 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        GlobalScope.launch(Dispatchers.Main) {
-            val thisFrag = this@XapiPackageContentFragment
-            val networkManagerBle = networkManagerProvider?.networkManager?.await()
-            mPresenter = XapiPackageContentPresenter(requireContext(), arguments.toStringMap(),
-                    thisFrag, networkManagerBle?.httpd as ContainerMounter)
-            mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-        }
+        mPresenter = XapiPackageContentPresenter(requireContext(), arguments.toStringMap(),
+                this, di)
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 
 

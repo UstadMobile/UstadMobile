@@ -224,15 +224,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         mBinding.containerDrawerLayout.closeDrawers()
     }
 
-    override fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {
-        super.onBleNetworkServiceBound(networkManagerBle)
-        mPresenter = EpubContentPresenter(this,
-                bundleToMap(intent.extras), this@EpubContentActivity,
-                networkManagerBle.httpd as ContainerMounter)
-        mPresenter?.onCreate(mSavedInstanceState.toStringMap())
-    }
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mSavedInstanceState = savedInstanceState
@@ -245,6 +236,11 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
                         this)) {
             mBinding.containerDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         }
+
+        mPresenter = EpubContentPresenter(this, bundleToMap(intent.extras),
+                this, di)
+        loading = true
+        mPresenter?.onCreate(savedInstanceState.toStringMap())
     }
 
     override fun onBackPressed() {

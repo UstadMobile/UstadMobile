@@ -43,6 +43,11 @@ android {
         abortOnError false
     }
 
+    kotlinOptions {
+        // Setup the Kotlin compiler options for the 'main' compilation:
+        jvmTarget = "$version_kotlin_jvmTarget"
+    }
+
     packagingOptions {
         // .kotlin_metadata files come from multiplatform modules, but are not needed unless we
         // use kotlin reflection, which we don't.
@@ -58,8 +63,8 @@ android {
         applicationId "${baseAppId}.launcher"
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
-        versionCode 1
-        versionName "6.4.29.7"
+        versionCode rootProject.ext.ustadVersionCode
+        versionName rootProject.ext.ustadVersion
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + rootProject.ext.buildConfigProperties["android.acra.url"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
@@ -113,7 +118,6 @@ android {
             applicationId "${baseAppId}"
             testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
-            multiDexEnabled true
         }
     }
 
@@ -169,6 +173,8 @@ dependencies {
     implementation "ch.acra:acra-http:$version_android_acra"
     implementation "ch.acra:acra-dialog:$version_android_acra"
 
+    //dependency injection
+    implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
     api fileTree(dir: 'libs', include: ['*.jar'])
 //    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

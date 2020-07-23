@@ -15,8 +15,6 @@ import com.toughra.ustadmobile.databinding.FragmentRoleEditBinding
 import com.toughra.ustadmobile.databinding.ItemBitmaskBinding
 import com.ustadmobile.core.controller.RoleEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
@@ -86,10 +84,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
         }
 
         mPresenter = RoleEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                di, viewLifecycleOwner)
 
         mRecyclerViewAdapter = BitmaskRecyclerViewAdapter()
         mRecyclerView?.adapter = mRecyclerViewAdapter

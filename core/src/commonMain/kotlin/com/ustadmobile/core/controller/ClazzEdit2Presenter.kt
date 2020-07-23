@@ -2,12 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.requestClazzLogCreation
-import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -15,25 +10,24 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 
 class ClazzEdit2Presenter(context: Any,
-                          arguments: Map<String, String>, view: ClazzEdit2View,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchool>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          arguments: Map<String, String>, view: ClazzEdit2View,  di : DI,
+                          lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<ClazzEdit2View, ClazzWithHolidayCalendarAndSchool>(context, arguments, view,
+         di, lifecycleOwner) {
 
     private val scheduleOneToManyJoinEditHelper
             = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
@@ -103,10 +97,10 @@ class ClazzEdit2Presenter(context: Any,
 
             val fromDateTime = DateTime.now().toOffsetByTimezone(entity.effectiveTimeZone).localMidnight
 
-            requestClazzLogCreation(entity.clazzUid,
-                    UmAccountManager.getActiveDatabaseName(context),
-                    fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong,
-                    context)
+            val clazzLogCreatorManager: ClazzLogCreatorManager by di.instance()
+            clazzLogCreatorManager.requestClazzLogCreation(entity.clazzUid,
+                    accountManager.activeAccount.endpointUrl,
+                    fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
             view.finishWithResult(listOf(entity))
         }

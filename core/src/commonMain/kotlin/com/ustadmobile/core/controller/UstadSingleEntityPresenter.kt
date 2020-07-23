@@ -1,7 +1,9 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -10,18 +12,15 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.*
 
 abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>(
         context: Any,
         arguments: Map<String, String>,
-        view: V,
-        val lifecycleOwner: DoorLifecycleOwner,
-        val systemImpl: UstadMobileSystemImpl,
-        val db: UmAppDatabase, val repo: UmAppDatabase,
-        val activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData): UstadBaseController<V>(context, arguments, view) {
+        view: V, di: DI,
+        val lifecycleOwner: DoorLifecycleOwner): UstadBaseController<V>(context, arguments, view, di) {
 
     protected var entity: RT? = null
 
@@ -34,6 +33,14 @@ abstract class UstadSingleEntityPresenter<V: UstadSingleEntityView<RT>, RT: Any>
     var entityLiveData: DoorLiveData<RT?>? = null
 
     var entityLiveDataObserver: DoorObserver<RT?>? = null
+
+    val systemImpl: UstadMobileSystemImpl by instance()
+
+    val accountManager: UstadAccountManager by instance()
+
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

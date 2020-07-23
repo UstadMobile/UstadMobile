@@ -5,6 +5,12 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
+/**
+ * This class manages multiple DownloadJobs, including:
+ *   Download queue management using the enqueue, pause, and cancel functions
+ *   Adding DownloadJobs and component DownloadJobItems
+ *   Progress tracking including propogating progress up the content child-parent relationship tree
+ */
 abstract class ContainerDownloadManager {
 
     abstract suspend fun getDownloadJobItemByJobItemUid(jobItemUid: Int): DoorLiveData<DownloadJobItem?>

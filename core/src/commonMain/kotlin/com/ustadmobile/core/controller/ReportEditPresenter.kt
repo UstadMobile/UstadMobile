@@ -1,39 +1,34 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
-import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.days
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.doorMainDispatcher
-
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.ReportFilterWithDisplayDetails
+import com.ustadmobile.lib.db.entities.ReportWithFilters
+import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 
 class ReportEditPresenter(context: Any,
                           arguments: Map<String, String>, view: ReportEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<ReportEditView, ReportWithFilters>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          di: DI,
+                          lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<ReportEditView, ReportWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -134,7 +129,7 @@ class ReportEditPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val report = withTimeoutOrNull(2000) {
-            db.reportDao.findByUid(entityUid)
+            db.takeIf { entityUid != 0L }?.reportDao?.findByUid(entityUid)
         } ?: Report()
 
         val reportFilterList = withTimeout(2000) {
@@ -178,12 +173,10 @@ class ReportEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
-                entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
     override fun handleClickSave(entity: ReportWithFilters) {
-
         if (entity.reportTitle.isNullOrEmpty()) {
             view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, context)
             return

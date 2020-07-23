@@ -26,11 +26,5 @@
         <service android:name="com.ustadmobile.sharedse.network.DownloadNotificationService"
             android:enabled="true"/>
 
-        <service android:name="com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService"
-            android:enabled="true"/>
-
-        <service android:name="com.ustadmobile.sharedse.network.EmbeddedHttpdService"
-            android:enabled="true"/>
-
     </application>
 </manifest>

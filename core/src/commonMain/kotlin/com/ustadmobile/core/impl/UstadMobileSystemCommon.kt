@@ -3,7 +3,7 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.Login2View
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
@@ -252,19 +252,6 @@ abstract class UstadMobileSystemCommon {
 
 
     /**
-     * Starts the user interface for the app
-     */
-    open fun startUI(context: Any) {
-        val activeAccount = UmAccountManager.getActiveAccount(context)
-
-        if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context) && activeAccount == null) {
-            go(LoginView.VIEW_NAME, mapOf(), context)
-        } else {
-            go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
-        }
-    }
-
-    /**
      * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
      * method in the implementation instead of using the factory API because
      * it enables the J2ME version to use the minimal jar
@@ -452,5 +439,12 @@ abstract class UstadMobileSystemCommon {
          * As per Android Intent.FLAG_CLEAR_TOP
          */
         const val GO_FLAG_CLEAR_TOP = 67108864
+
+        const val TAG_DOWNLOAD_ENABLED = "dlenabled"
+
+        const val TAG_MAIN_COROUTINE_CONTEXT = 16
+
+        const val TAG_DLMGR_SINGLETHREAD_CONTEXT = 32
+
     }
 }

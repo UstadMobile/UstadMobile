@@ -60,6 +60,7 @@
  */
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
@@ -78,6 +79,8 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.ByteArrayInputStream
 import org.kmp.io.KMPXmlParser
+import org.kodein.di.DI
+import org.kodein.di.instance
 import kotlin.js.JsName
 
 /**
@@ -87,25 +90,32 @@ import kotlin.js.JsName
  */
 class EpubContentPresenter(context: Any,
                            args: Map<String, String>,
-                           private val epubContentView: EpubContentView,
-                           private val mountHandler: ContainerMounter)
-    : UstadBaseController<EpubContentView>(context, args, epubContentView) {
+                           private val epubContentView: EpubContentView, di: DI)
+    : UstadBaseController<EpubContentView>(context, args, epubContentView, di) {
 
     private var ocf: OcfDocument? = null
 
     private var mountedPath: String = ""
 
+    private var mountedEndpoint: String = ""
+
     private var opfBaseUrl: String? = null
 
     private var linearSpineUrls: Array<String> = arrayOf()
+
+    private val accountManager: UstadAccountManager by instance()
+
+    private val mountHandler: ContainerMounter by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
         view.progressValue = -1
         view.progressVisible = true
+        mountedEndpoint = accountManager.activeAccount.endpointUrl
         GlobalScope.launch {
-            mountedPath = mountHandler.mountContainer(containerUid)
+            mountedPath = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,
+                    containerUid)
             handleMountedContainer()
         }
     }
@@ -209,7 +219,7 @@ class EpubContentPresenter(context: Any,
     override fun onDestroy() {
         super.onDestroy()
         if (mountedPath.isNotEmpty()) suspend {
-            mountHandler.unMountContainer(mountedPath)
+            mountHandler.unMountContainer(mountedEndpoint, mountedPath)
         }
     }
 

@@ -1,8 +1,12 @@
 package com.ustadmobile.sharedse.controller
 
+import com.github.aakira.napier.Napier
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UMStorageDir
@@ -22,23 +26,23 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
+import com.ustadmobile.sharedse.network.DownloadPreparationRequester
 import com.ustadmobile.sharedse.network.requestDelete
-import com.ustadmobile.sharedse.network.requestDownloadPreparation
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlin.jvm.Volatile
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
+
 
 class DownloadDialogPresenter(context: Any,
                               arguments: Map<String, String>, view: DownloadDialogView,
-                              private val lifecycleOwner: DoorLifecycleOwner,
-                              private var appDatabase: UmAppDatabase,
-                              private val appDatabaseRepo: UmAppDatabase,
-                              private val containerDownloadManager: ContainerDownloadManager,
-                              private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance,
-                              private val downloadJobPreparationRequester: (Int, Any) -> Unit = ::requestDownloadPreparation)
-    : UstadBaseController<DownloadDialogView>(context, arguments, view), DoorObserver<DownloadJob?> {
+                              di: DI,
+                              private val lifecycleOwner: DoorLifecycleOwner)
+    : UstadBaseController<DownloadDialogView>(context, arguments, view, di), DoorObserver<DownloadJob?> {
 
     private var deleteFileOptions = false
 
@@ -70,6 +74,16 @@ class DownloadDialogPresenter(context: Any,
 
     private var selectedStorageDir: UMStorageDir? = null
 
+    private val accountManager: UstadAccountManager by instance()
+
+    private val impl: UstadMobileSystemImpl by instance()
+
+    private val containerDownloadManager: ContainerDownloadManager by on(accountManager.activeAccount).instance()
+
+    private val appDatabase: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+
+    private val appDatabaseRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
+
     private val downloadJobItemObserver = object: DoorObserver<DownloadJobItem?> {
         override fun onChanged(t: DownloadJobItem?) {
             currentDownloadJobItem = t
@@ -90,8 +104,7 @@ class DownloadDialogPresenter(context: Any,
         super.onCreate(savedState)
 
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0L
-        UMLog.l(UMLog.INFO, 420, "Starting download presenter for " +
-                "content entry uid: " + contentEntryUid)
+        Napier.i("Starting download presenter for $contentEntryUid")
         view.setWifiOnlyOptionVisible(false)
         GlobalScope.launch(doorMainDispatcher()) {
             downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(
@@ -102,11 +115,11 @@ class DownloadDialogPresenter(context: Any,
             downloadJobItemLiveData.observe(lifecycleOwner, downloadJobItemObserver)
 
             val storageDirs = impl.getStorageDirsAsync(context)
-            view.runOnUiThread(Runnable {
-                selectedStorageDir = storageDirs.firstOrNull()
-                view.showStorageOptions(storageDirs)
-                updateWarningMessage(downloadJobItemLiveData.getValue())
-            })
+
+            selectedStorageDir = storageDirs.firstOrNull()
+            view.showStorageOptions(storageDirs)
+            updateWarningMessage(downloadJobItemLiveData.getValue())
+
         }
     }
 
@@ -223,7 +236,8 @@ class DownloadDialogPresenter(context: Any,
         newDownloadJob.meteredNetworkAllowed = !isWifiOnlyChecked
         containerDownloadManager.createDownloadJob(newDownloadJob)
         currentJobId = newDownloadJob.djUid
-        downloadJobPreparationRequester(currentJobId, context)
+        val downloadPrepRequester: DownloadPreparationRequester by on(accountManager.activeAccount).instance()
+        downloadPrepRequester.requestPreparation(currentJobId)
         return currentJobId != 0
     }
 

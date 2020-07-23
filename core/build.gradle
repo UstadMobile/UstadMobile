@@ -29,6 +29,12 @@ android {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
 }
 
 sourceCompatibility = '1.8'
@@ -136,7 +142,9 @@ kotlin {
         }
     }
 
-    android()
+    android {
+
+    }
 
     js("js") {
         nodejs()
@@ -172,6 +180,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation project(':lib-door-runtime')
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
@@ -252,7 +261,6 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
-                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
                 //end SharedSE Android and JVM dependencies
             }
         }
@@ -275,6 +283,9 @@ kotlin {
                 //Image loading library
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"
                 implementation "io.ktor:ktor-client-android:$version_ktor"
+
+                //dependency injection
+                implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
                 implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
                 implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"

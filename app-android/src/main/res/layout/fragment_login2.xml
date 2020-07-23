@@ -1,0 +1,173 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.ustadmobile.port.android.view.GetStartedFragment">
+
+    <data>
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.Login2Presenter" />
+
+        <variable
+            name="isEmptyUsername"
+            type="boolean" />
+        <variable
+            name="isEmptyPassword"
+            type="boolean" />
+
+        <variable
+            name="username"
+            type="String" />
+
+        <variable
+            name="password"
+            type="String" />
+
+        <variable
+            name="buttonEnabled"
+            type="boolean" />
+
+        <variable
+            name="fieldsEnabled"
+            type="boolean" />
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:visibility="gone"
+                android:id="@+id/organisation_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_launcher_icon"
+                app:layout_constraintHorizontal_bias="0.5"
+                android:layout_marginTop="@dimen/dimen_60dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                app:layout_constraintTop_toBottomOf="@+id/organisation_icon"
+                android:layout_marginTop="@dimen/dimen_40dp"
+                android:id="@+id/username_view"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:hint="@string/username"
+                app:errorEnabled="@{isEmptyUsername}"
+                app:errorTextColor="?colorError"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/person_username"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:text="@={username}"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:id="@+id/password_view"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:hint="@string/password"
+                app:errorEnabled="@{isEmptyPassword}"
+                app:errorTextColor="?colorError"
+                app:hintEnabled="true"
+                android:enabled="@{fieldsEnabled}"
+                app:passwordToggleEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/username_view">
+
+                <!-- android:inputType="textCapWords" -->
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/person_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:text="@={password}"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:visibility="gone"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:textColor="?colorError"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                android:id="@+id/login_error_text"
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/password_view"
+                tools:text="@string/wrong_user_pass_combo"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/login_button"
+                android:enabled="@{buttonEnabled}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_20dp"
+                android:backgroundTint="?colorSecondary"
+                android:onClick="@{() -> presenter.handleLogin(username, password)}"
+                android:padding="@dimen/dimen_20dp"
+                android:text="@string/login"
+                android:textColor="?colorOnSecondary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/login_error_text"
+                tools:text="@string/login" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/create_account"
+                style="@style/UmTheme.Widget.OutlinedButton"
+                android:onClick="@{() -> presenter.handleCreateAccount()}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/dimen_16dp"
+                android:enabled="@{buttonEnabled}"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:contentDescription="@string/download"
+                android:text="@string/create_account"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/login_button" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/connect_as_guest"
+                style="@style/UmTheme.Widget.OutlinedButton"
+                android:onClick="@{() -> presenter.handleConnectAsGuest()}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/dimen_16dp"
+                android:enabled="@{buttonEnabled}"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:contentDescription="@string/download"
+                android:text="@string/connect_as_guest"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/create_account" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</layout>

@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
-import android.app.Application
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
@@ -51,8 +49,6 @@ class XapiPackageContentFragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    private val bleServiceHelper = NetworkManagerBleServiceHelper()
-
 
     @JvmField
     @Rule
@@ -85,7 +81,6 @@ class XapiPackageContentFragmentTest {
 
         val containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo,containerTmpDir.absolutePath)
         addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
-        bleServiceHelper.bindService()
     }
 
     @AdbScreenRecord("Given valid xapi package content when created should be loaded to the view")
@@ -96,7 +91,6 @@ class XapiPackageContentFragmentTest {
                         UstadView.ARG_CONTENT_ENTRY_UID to contentEntry?.contentEntryUid)) {
             XapiPackageContentFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
-                fragment.networkManagerProvider = bleServiceHelper
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)

@@ -386,9 +386,6 @@ dependencies {
     //SVG support for Android
     implementation 'com.pixplicity.sharp:library:1.1.0'
 
-    //Support for encrypted zips
-    implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"
 
@@ -416,6 +413,8 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
     implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
+    //dependency injection
+    implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

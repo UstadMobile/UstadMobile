@@ -172,6 +172,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         }
     }
 
+    fun clearPrefs() {
+        tmpPrefs.clear()
+    }
+
+
 
     /**
      * Gives a string with the version number

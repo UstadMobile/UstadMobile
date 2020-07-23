@@ -59,7 +59,6 @@ class VideoContentFragmentTest {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-
     @JvmField
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
@@ -100,14 +99,13 @@ class VideoContentFragmentTest {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        onView(withId(R.id.activity_video_player_description))
-                .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withId(R.id.activity_video_player_description)).check(matches(isDisplayed()))
 
         onView(allOf(withId(R.id.exo_play),
                 isDescendantOfA(withId(R.id.player_view_controls))))
                 .perform(click())
 
-        fragmentScenario.letOnFragment {
+        fragmentScenario.onFragment {
             val playState = it.activity_video_player_view.player?.playbackState
             Assert.assertTrue("player is playing", playState == STATE_BUFFERING || playState == STATE_READY)
         }

@@ -3,23 +3,30 @@ package com.ustadmobile.port.android.view
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.observe
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
 import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
+import org.kodein.di.DIAware
+import org.kodein.di.android.x.di
 import java.util.*
 
 /**
  * Created by mike on 10/15/15.
  */
-open class UstadBaseFragment : Fragment(), UstadView {
+open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     private val runOnAttach = Vector<Runnable>()
 
     protected var titleLifecycleObserver: TitleLifecycleObserver? = null
 
     protected var fabManager: FabManagerLifecycleObserver? = null
+
+    override val di by di()
 
     override var loading: Boolean = false
         get() = field
@@ -53,6 +60,11 @@ open class UstadBaseFragment : Fragment(), UstadView {
                 false, 0, null).also {
                 viewLifecycleOwner.lifecycle.addObserver(it)
             }
+        }
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
+                viewLifecycleOwner) {
+            showSnackBar(it)
         }
     }
 

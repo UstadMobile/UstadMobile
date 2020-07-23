@@ -20,8 +20,6 @@ import com.toughra.ustadmobile.databinding.ItemPersonReportEditBinding
 import com.toughra.ustadmobile.databinding.ItemVerbReportEditBinding
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -103,10 +101,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         contentDisplayRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = ReportEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                di, viewLifecycleOwner)
 
         personRecyclerAdapter?.presenter = mPresenter
         verbDisplayRecyclerAdapter?.presenter = mPresenter
@@ -206,7 +201,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
     override fun onClickNewPerson() {
         onSaveStateToBackStackStateHandle()
         val list = personFilterList?.value?.map { it.entityUid }
-        navigateToPickEntityFromList(ReportFilterWithDisplayDetails::class.java,
+        navigateToPickEntityFromList(Person::class.java,
                 R.id.person_list_dest,
                 bundleOf(PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST to list?.joinToString()))
 

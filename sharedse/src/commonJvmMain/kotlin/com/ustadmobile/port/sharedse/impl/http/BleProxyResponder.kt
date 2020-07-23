@@ -122,8 +122,7 @@ class BleProxyResponder: RouterNanoHTTPD.UriResponder {
 
             try {
                 val messageReceived = withTimeout(20000) {
-                    networkManager.sendBleMessage(networkManager.context, bleMessage,
-                            destDevice.bluetoothMacAddress!!)
+                    networkManager.sendBleMessage(bleMessage, destDevice.bluetoothMacAddress!!)
                 }
                 val payload = messageReceived?.payload
                 val payloadStr = if(payload != null) String(payload) else null
