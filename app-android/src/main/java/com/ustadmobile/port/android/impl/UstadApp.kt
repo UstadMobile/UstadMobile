@@ -13,6 +13,7 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.ContainerUploadManager
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -31,9 +32,13 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderManagerImpl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
+
 import org.kodein.di.*
 
 /**
@@ -89,13 +94,17 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContainerDownloadManagerImpl(endpoint = context, di = di)
         }
 
+        bind<ContainerUploadManager>() with scoped(EndpointScope.Default).singleton {
+            ContainerUploaderManagerImpl(endpoint = context, di = di)
+        }
+
         bind<DownloadPreparationRequester>() with scoped(EndpointScope.Default).singleton {
             DownloadPreparationRequesterAndroidImpl(applicationContext, context)
         }
 
-        bind<ContainerDownloadRunner>() with factory {
-            arg: DownloadJobItemRunnerDIArgs -> DownloadJobItemRunner(arg.downloadJobItem,
-                arg.endpoint.url, di = di)
+        bind<ContainerDownloadRunner>() with factory { arg: DownloadJobItemRunnerDIArgs ->
+            DownloadJobItemRunner(arg.downloadJobItem,
+                    arg.endpoint.url, di = di)
         }
 
         bind<CoroutineDispatcher>(tag = TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
@@ -109,6 +118,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
             ContentEntryOpener(di, context)
         }
+
+        bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }

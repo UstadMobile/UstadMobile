@@ -35,7 +35,7 @@ import javax.naming.InitialContext
 private val _restApplicationDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
 
 
-fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase = _restApplicationDb) {
+fun Application.umRestApplication(devMode: Boolean = false, db: UmAppDatabase = _restApplicationDb) {
 
     val adminuser = db.personDao.findByUsername("admin")
     val iContext = InitialContext()
@@ -49,7 +49,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
     }
     db.workSpaceDao.insert(workSpace)
 
-    if(adminuser == null) {
+    if (adminuser == null) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
         adminPerson.personUid = db.personDao.insert(adminPerson)
@@ -60,7 +60,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
 
 
         val adminPassFile = File(containerDirPath, "admin.txt")
-        if(!adminPassFile.parentFile.isDirectory) {
+        if (!adminPassFile.parentFile.isDirectory) {
             adminPassFile.parentFile.mkdirs()
         }
 
@@ -68,26 +68,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
         println("Saved admin password to ${adminPassFile.absolutePath}")
     }
 
-    //Create teacher and student for testing
-    val testTeacher = db.personDao.findByUsername("testteacher")
-    if(testTeacher == null) {
-        val teacher = Person("testteacher", "Teacher", "One")
-        teacher.personUid = db.personDao.insert(teacher)
-        val teacherPass = "teacher"
-        db.personAuthDao.insert(PersonAuth(teacher.personUid,
-                PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(teacherPass)))
-    }
-
-    val testStudent = db.personDao.findByUsername("teststudent")
-    if(testStudent == null) {
-        val student = Person("teststudent", "Student", "One")
-        student.personUid = db.personDao.insert(student)
-        val studentPass = "teacher"
-        db.personAuthDao.insert(PersonAuth(student.personUid,
-                PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(studentPass)))
-    }
-
-    if(devMode) {
+    if (devMode) {
         install(CORS) {
             method(HttpMethod.Get)
             method(HttpMethod.Post)
@@ -112,21 +93,23 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
         H5PImportRoute(db) { url: String, entryUid: Long, urlContent: String, containerUid: Long ->
             downloadH5PUrl(db, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
         }
-
         LoginRoute(db)
         ContainerMountRoute(db)
+        val uploadFolder = Files.createTempDirectory("upload").toFile()
+        ResumableUploadRoute(uploadFolder)
+        ContainerUpload(db, uploadFolder)
         UmAppDatabase_KtorRoute(db, Gson(), File("attachments/UmAppDatabase").absolutePath)
         WorkSpaceRoute(db)
         db.preload()
 
-        if(devMode) {
+        if (devMode) {
 
             get("UmAppDatabase/clearAllTables") {
                 db.clearAllTables()
                 call.respond("OK - cleared")
             }
 
-            get("UmContainer/addContainer"){
+            get("UmContainer/addContainer") {
                 val resourceName = call.request.queryParameters["resource"]
                 val entryUid = call.request.queryParameters["entryUid"]
                 val contentTye = call.request.queryParameters["type"]
@@ -136,7 +119,7 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
                     else -> null
                 }
 
-                if(resourceName == null || entryUid == null || mimeType == null) {
+                if (resourceName == null || entryUid == null || mimeType == null) {
                     call.respond(HttpStatusCode.BadRequest,
                             "Invalid request make sure you have included all resource param")
                     return@get
@@ -157,10 +140,10 @@ fun Application.umRestApplication(devMode: Boolean = false, db : UmAppDatabase =
 
 data class PreparedResource(val tempDir: File, val tempFile: File, val tmpContainer: Container)
 
-private fun prepareResources(db: UmAppDatabase, resourceName: String?, path: String, entryId: String?, mimetype: String): PreparedResource{
+private fun prepareResources(db: UmAppDatabase, resourceName: String?, path: String, entryId: String?, mimetype: String): PreparedResource {
     val epubContainer = Container()
 
-    if(entryId!= null && entryId.isNotEmpty()){
+    if (entryId != null && entryId.isNotEmpty()) {
         epubContainer.containerContentEntryUid = entryId.toLong()
     }
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "758040099273e1e47464033859f08f0d",
+    "identityHash": "ecf213fb3f8f2d0d72a81c9aa0baa46a",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5145,6 +5145,62 @@
         "foreignKeys": []
       },
       {
+        "tableName": "ContainerUploadJob",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cujUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cujContainerUid` INTEGER NOT NULL, `sessionId` TEXT, `jobStatus` INTEGER NOT NULL, `bytesSoFar` INTEGER NOT NULL, `contentLength` INTEGER NOT NULL, `containerEntryFileUids` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "cujUid",
+            "columnName": "cujUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cujContainerUid",
+            "columnName": "cujContainerUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "jobStatus",
+            "columnName": "jobStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesSoFar",
+            "columnName": "bytesSoFar",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentLength",
+            "columnName": "contentLength",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "containerEntryFileUids",
+            "columnName": "containerEntryFileUids",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "cujUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "ClazzLog_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -8616,7 +8672,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '758040099273e1e47464033859f08f0d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ecf213fb3f8f2d0d72a81c9aa0baa46a')"
     ]
   }
 }

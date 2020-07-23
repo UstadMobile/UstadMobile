@@ -15,10 +15,10 @@ import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkSubmissionMarkingBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzWorkSubmissionMarkingPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.door.DoorMutableLiveData
@@ -26,6 +26,9 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzWorkWithSubmission>(),
@@ -78,7 +81,9 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             rootView = it.root
         }
 
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+        val accountManager: UstadAccountManager by instance()
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+
 
         detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_submission_marking_rv)
 

@@ -15,10 +15,7 @@ import com.toughra.ustadmobile.databinding.FragmentClazzWorkQuestionAndOptionsEd
 import com.toughra.ustadmobile.databinding.ItemClazzWorkQuestionOptionBinding
 import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkQuestionAndOptionsEditView
 import com.ustadmobile.door.DoorMutableLiveData

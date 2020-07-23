@@ -59,6 +59,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
+                implementation "com.github.aakira:napier:$version_napier"
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
                 compileOnly project(":lib-door-runtime")
@@ -74,6 +75,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+                implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
         commonJvmMain {
@@ -104,6 +106,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
             }
         }
 
@@ -116,6 +119,7 @@ kotlin {
                 implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
                 implementation project(":lib-database-android")
                 implementation "androidx.room:room-runtime:$version_android_room"
+                implementation "com.github.aakira:napier-android:$version_napier"
             }
         }
 
