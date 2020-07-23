@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "2a6cb167b4f1741f5be63f69bfe16e8e",
+    "identityHash": "a4636351b28c946d90b08b2ee0274e8a",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4476,7 +4476,7 @@
       },
       {
         "tableName": "ContainerUploadJob",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cujUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cujContainerUid` INTEGER NOT NULL, `sessionId` TEXT, `jobStatus` INTEGER NOT NULL, `bytesSoFar` INTEGER NOT NULL, `containerEntryFileUids` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cujUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cujContainerUid` INTEGER NOT NULL, `sessionId` TEXT, `jobStatus` INTEGER NOT NULL, `bytesSoFar` INTEGER NOT NULL, `contentLength` INTEGER NOT NULL, `containerEntryFileUids` TEXT)",
         "fields": [
           {
             "fieldPath": "cujUid",
@@ -4505,6 +4505,12 @@
           {
             "fieldPath": "bytesSoFar",
             "columnName": "bytesSoFar",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentLength",
+            "columnName": "contentLength",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -7452,7 +7458,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2a6cb167b4f1741f5be63f69bfe16e8e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a4636351b28c946d90b08b2ee0274e8a')"
     ]
   }
 }

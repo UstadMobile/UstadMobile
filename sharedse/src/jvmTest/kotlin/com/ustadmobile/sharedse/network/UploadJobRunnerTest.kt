@@ -178,7 +178,7 @@ class UploadJobRunnerTest {
         mockWebServer.enqueue(MockResponse().setBody(sessionId))
 
         // fail to upload - server problem
-        for (i in 0..(fileToUpload.length()) step DEFAULT_CHUNK_SIZE.toLong()) {
+        for (i in 0..(fileToUpload.length()) step (1024 * 8)) {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.InternalServerError.value).setBody("Server error"))
         }
 

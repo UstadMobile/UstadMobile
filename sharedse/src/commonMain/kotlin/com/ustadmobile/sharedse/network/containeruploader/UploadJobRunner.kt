@@ -17,6 +17,7 @@ import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpStatusCode
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -45,7 +46,7 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
     suspend fun startUpload(): Int {
 
         var attemptNum = 0
-        var uploadAttemptStatus = -1
+        var uploadAttemptStatus = JobStatus.FAILED
         while (attemptNum++ < 3) {
 
             try {
