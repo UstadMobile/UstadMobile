@@ -134,11 +134,12 @@ class PersonEditPresenter(context: Any,
             if(registrationAllowed && (entity.username.isNullOrEmpty()
                             || entity.newPassword.isNullOrEmpty() || entity.confirmedPassword.isNullOrEmpty()
                             || noPasswordMatch)){
-
-                view.usernameRequiredErrorVisible = entity.username.isNullOrEmpty()
-                view.passwordRequiredErrorVisible = entity.newPassword.isNullOrEmpty()
-                view.confirmPasswordErrorVisible = entity.confirmedPassword.isNullOrEmpty()
-                view.noMatchPasswordErrorVisible = noPasswordMatch
+                val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+                view.usernameError = if(entity.username.isNullOrEmpty()) requiredFieldMessage else null
+                view.passwordError = if(entity.newPassword.isNullOrEmpty()) requiredFieldMessage else null
+                view.confirmError = if(entity.confirmedPassword.isNullOrEmpty()) requiredFieldMessage else null
+                view.noMatchPasswordError = if(noPasswordMatch)
+                    impl.getString(MessageID.filed_password_no_match, context) else null
                 return@launch
             }
 

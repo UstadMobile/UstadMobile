@@ -28,41 +28,35 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     private var mPresenter: PersonAccountEditPresenter? = null
 
 
-    override var currentPasswordRequiredErrorVisible: Boolean = false
+    override var currentPasswordError: String? = null
         set(value) {
             field = value
-            handleInputError(mBinding?.currentPasswordTextinputlayout,
-                    value,getString(R.string.field_required_prompt))
+            handleInputError(mBinding?.currentPasswordTextinputlayout, value != null,value)
         }
 
-    override var newPasswordRequiredErrorVisible: Boolean = false
+    override var newPasswordError: String? = null
         set(value) {
             field = value
-            handleInputError(mBinding?.newPasswordTextinputlayout,
-                    value,getString(R.string.field_required_prompt))
+            handleInputError(mBinding?.newPasswordTextinputlayout, value != null,value)
         }
-    override var confirmedPasswordRequiredErrorVisible: Boolean = false
+    override var confirmedPasswordError: String? = null
        set(value) {
             field = value
-            handleInputError(mBinding?.confirmPasswordTextinputlayout,
-                    value,getString(R.string.field_required_prompt))
+            handleInputError(mBinding?.confirmPasswordTextinputlayout, value != null,value)
         }
-
-    override var passwordDoNotMatchErrorVisible: Boolean = false
+    override var noPasswordMatchError: String? = null
         set(value) {
-            field = value
-            handleInputError(mBinding?.newPasswordTextinputlayout,value,
-                    getString(R.string.filed_password_no_match))
-            handleInputError(mBinding?.confirmPasswordTextinputlayout,value,
-                    getString(R.string.filed_password_no_match))
+            if(value != null){
+                handleInputError(mBinding?.newPasswordTextinputlayout, true, value)
+                handleInputError(mBinding?.confirmPasswordTextinputlayout, true, value)
+            }
         }
 
 
-    override var usernameRequiredErrorVisible: Boolean = false
+    override var usernameError: String? = null
         set(value) {
             field = value
-            handleInputError(mBinding?.usernameTextinputlayout,
-                    value,getString(R.string.field_required_prompt))
+            handleInputError(mBinding?.usernameTextinputlayout, value != null,value)
         }
 
 

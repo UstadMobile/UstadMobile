@@ -4,13 +4,13 @@ import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
@@ -23,7 +23,6 @@ import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
-import java.lang.Thread.sleep
 
 
 class PersonAccountEditPresenterTest  {
@@ -124,7 +123,9 @@ class PersonAccountEditPresenterTest  {
         presenter.onCreate(null)
         presenter.handleClickSave(person)
 
-        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).usernameRequiredErrorVisible = eq(true)
+        val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).usernameError = eq(expectedMessage)
     }
 
     @Test
@@ -134,9 +135,10 @@ class PersonAccountEditPresenterTest  {
         val presenter = PersonAccountEditPresenter(context,args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         presenter.handleClickSave(person)
-        argumentCaptor<Boolean>{
-            verify(mockView, timeout(defaultTimeOut).atLeastOnce()).newPasswordRequiredErrorVisible = capture()
-            assertEquals("Current password field error was shown", true, firstValue)
+        val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
+        argumentCaptor<String>{
+            verify(mockView, timeout(defaultTimeOut).atLeastOnce()).currentPasswordError = capture()
+            assertEquals("Current password field error was shown", expectedMessage, firstValue)
         }
     }
 
@@ -147,7 +149,8 @@ class PersonAccountEditPresenterTest  {
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         presenter.handleClickSave(person)
-        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).newPasswordRequiredErrorVisible = eq(true)
+        val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).newPasswordError = eq(expectedMessage)
     }
 
     @Test
@@ -205,7 +208,8 @@ class PersonAccountEditPresenterTest  {
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
 
         presenter.handleClickSave(person.apply { username = "username" })
-        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).passwordDoNotMatchErrorVisible = eq(true)
+        val expectedMessage = impl.getString(MessageID.filed_password_no_match, context)
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).noPasswordMatchError = eq(expectedMessage)
     }
 
 }

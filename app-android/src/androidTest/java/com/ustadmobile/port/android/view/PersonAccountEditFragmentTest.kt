@@ -14,7 +14,7 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
@@ -95,8 +95,11 @@ class PersonAccountEditFragmentTest {
         }
     }
 
-    private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false): Person {
-        return Person().apply {
+    private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false,
+                             matchPassword: Boolean = false): PersonWithAccount {
+        val password = "password"
+        val confirmPassword = if(matchPassword) password else "password1"
+        return PersonWithAccount().apply {
             fatherName = "Doe"
             firstNames = "Jane"
             lastName = "Doe"
@@ -105,6 +108,9 @@ class PersonAccountEditFragmentTest {
             }
             admin = isAdmin
             personUid = mPersonUid
+            newPassword = password
+            currentPassword = password
+            confirmedPassword = confirmPassword
             dbRule.repo.personDao.insert(this)
         }
     }
@@ -130,7 +136,7 @@ class PersonAccountEditFragmentTest {
     @Test
     fun givenPersonAccountEditLaunched_whenUsernameIsNullAndSaveClicked_shouldShowErrors(){
         val person = createPerson(false)
-        launchFragment(person, true, leftOutUsername = true)
+        launchFragment(person, true, fillUsername = false)
         onView(withId(R.id.username_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
 
@@ -140,7 +146,7 @@ class PersonAccountEditFragmentTest {
     @Test
     fun givenPersonAccountEditLaunched_whenUserIsNotAdminAndSaveClicked_shouldShowErrors() {
         val person = createPerson(true)
-        launchFragment(person, true, leftOutUsername = true)
+        launchFragment(person, true, fillUsername = false, fillConfirmPassword = false)
 
         onView(withId(R.id.current_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
@@ -155,8 +161,8 @@ class PersonAccountEditFragmentTest {
     @AdbScreenRecord("given person account edit launched and person is admin when new password not filled on save clicked should show error")
     @Test
     fun givenPersonAccountEditLaunchedAndPersonIsAdmin_whenNewPasswordIsNotFilledAndSaveClicked_thenShouldShowError(){
-        val person = createPerson(false, isAdmin = true)
-        launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = false)
+        val person = createPerson(true, isAdmin = true)
+        launchFragment(person, true, fillUsername = false, fillCurrentPassword = false, fillConfirmPassword = false)
 
         onView(withId(R.id.current_password_textinputlayout)).check(matches(not(isEnabled())))
 
@@ -169,9 +175,9 @@ class PersonAccountEditFragmentTest {
     @Test
     fun givenPersonAccountInPasswordChangeMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldChangePassword(){
         enqueueResponse()
-        val person = createPerson(true, isAdmin = false)
-        launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = true,
-                fillNewPassword = true,matchingPassword = true)
+        val person = createPerson(true, isAdmin = false, matchPassword = true)
+        launchFragment(person, true, fillUsername = false, fillCurrentPassword = true,
+                fillNewPassword = true)
 
         onView(withId(R.id.current_password_textinputlayout)).check(matches(
                 not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
@@ -187,9 +193,9 @@ class PersonAccountEditFragmentTest {
     @Test
     fun givenPersonAccountInPasswordChangeMode_whenSaveClickedAndPasswordDoNotMatch_thenShouldShowErrors(){
         enqueueResponse(false, 403)
-        val person = createPerson(true, isAdmin = false)
-        launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = true,
-                fillNewPassword = true, matchingPassword = false)
+        val person = createPerson(true, isAdmin = false, matchPassword = true)
+        launchFragment(person, true, fillUsername = false, fillCurrentPassword = true,
+                fillNewPassword = true, fillConfirmPassword = true)
 
         //wait for a network call - fixed timeout
         sleep(1000)
@@ -204,9 +210,9 @@ class PersonAccountEditFragmentTest {
     @Test
     fun givenPersonAccountInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
         enqueueResponse()
-        val person = createPerson(false, isAdmin = false)
-        val fragmentScenario = launchFragment(person, true, leftOutUsername = false, fillCurrentPassword = true,
-                fillNewPassword = true, matchingPassword = true)
+        val person = createPerson(false, isAdmin = false, matchPassword = true)
+        val fragmentScenario = launchFragment(person, true, fillUsername = true, fillCurrentPassword = true,
+                fillNewPassword = true)
 
         val mPerson = dbRule.db.personDao.findByUidLive(person.personUid).waitUntilWithFragmentScenario(fragmentScenario) {
             it?.username != null
@@ -219,9 +225,9 @@ class PersonAccountEditFragmentTest {
     @Test
     fun givenPersonAccountInAccountCreationMode_whenPasswordFieldDoNotMatchAndSaveClicked_thenShouldShowErrors(){
         enqueueResponse()
-        val person = createPerson(false, isAdmin = false)
-        launchFragment(person, true, leftOutUsername = false, fillCurrentPassword = true,
-                fillNewPassword = true, matchingPassword = false)
+        val person = createPerson(false, isAdmin = false, matchPassword = false)
+        launchFragment(person, true, fillUsername = true, fillCurrentPassword = true,
+                fillNewPassword = true)
 
         onView(withId(R.id.new_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
@@ -231,9 +237,9 @@ class PersonAccountEditFragmentTest {
     }
 
 
-    private fun launchFragment(person: Person, fillForm: Boolean = false, leftOutUsername: Boolean = false,
+    private fun launchFragment(person: PersonWithAccount, fillForm: Boolean = false, fillUsername: Boolean = false,
                                fillCurrentPassword: Boolean = false, fillNewPassword: Boolean = false,
-                               matchingPassword: Boolean = true): FragmentScenario<PersonAccountEditFragment>{
+                               fillConfirmPassword: Boolean = true): FragmentScenario<PersonAccountEditFragment>{
 
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
                 UstadView.ARG_SERVER_URL to serverUrl).toBundle()
@@ -246,22 +252,22 @@ class PersonAccountEditFragmentTest {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        val newPassword = "password"
-        val confirmedPassword = if(matchingPassword) newPassword else "password2"
         if(fillForm){
-            if(!leftOutUsername){
-                onView(withId(R.id.account_username_text)).perform(click(),typeText("person.username"))
+            if(fillUsername){
+                onView(withId(R.id.account_username_text)).perform(click(),typeText("dummyUser"))
             }
 
             if(fillCurrentPassword){
-                onView(withId(R.id.current_password_text)).perform(click(),typeText(newPassword))
+                onView(withId(R.id.current_password_text)).perform(click(),typeText(person.currentPassword))
             }
 
             if(fillNewPassword){
-                onView(withId(R.id.new_password_text)).perform(click(),typeText(confirmedPassword))
+                onView(withId(R.id.new_password_text)).perform(click(),typeText(person.newPassword))
             }
 
-            onView(withId(R.id.confirm_password_text)).perform(click(),typeText(confirmedPassword))
+            if(fillConfirmPassword){
+                onView(withId(R.id.confirm_password_text)).perform(click(),typeText(person.confirmedPassword))
+            }
             scenario.clickOptionMenu(R.id.menu_done)
         }
         return scenario

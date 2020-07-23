@@ -70,11 +70,18 @@ class PersonAccountEditPresenter(context: Any,
                     || entity.confirmedPassword.isNullOrEmpty()  || entity.username.isNullOrEmpty() ||
                     entity.confirmedPassword != entity.newPassword){
 
-                view.usernameRequiredErrorVisible = entity.username.isNullOrEmpty()
-                view.currentPasswordRequiredErrorVisible = entity.newPassword.isNullOrEmpty() && !entity.admin
-                view.newPasswordRequiredErrorVisible = entity.currentPassword.isNullOrEmpty()
-                view.confirmedPasswordRequiredErrorVisible = entity.confirmedPassword.isNullOrEmpty()
-                view.passwordDoNotMatchErrorVisible = entity.confirmedPassword != entity.newPassword
+                val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+
+                view.usernameError = if(entity.username.isNullOrEmpty())
+                    requiredFieldMessage else null
+                view.currentPasswordError = if(entity.newPassword.isNullOrEmpty() && !entity.admin)
+                    requiredFieldMessage else null
+                view.newPasswordError = if(entity.currentPassword.isNullOrEmpty())
+                    requiredFieldMessage else null
+                view.confirmedPasswordError = if(entity.confirmedPassword.isNullOrEmpty())
+                    requiredFieldMessage else null
+                view.noPasswordMatchError = if(entity.confirmedPassword != entity.newPassword)
+                    impl.getString(MessageID.filed_password_no_match, context) else null
                 return@launch
             }
             try{

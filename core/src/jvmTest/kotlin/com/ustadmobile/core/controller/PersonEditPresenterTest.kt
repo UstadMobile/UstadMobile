@@ -4,6 +4,8 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.view.PersonEditView
@@ -51,6 +53,8 @@ class PersonEditPresenterTest  {
 
     private lateinit var serverUrl: String
 
+    private lateinit var impl: UstadMobileSystemImpl
+
 
     @Before
     fun setUp() {
@@ -58,6 +62,7 @@ class PersonEditPresenterTest  {
         mockLifecycleOwner = mock { }
 
         mockView = mock{}
+        impl = mock()
 
 
         mockWebServer = MockWebServer()
@@ -72,6 +77,7 @@ class PersonEditPresenterTest  {
         di = DI {
             import(ustadTestRule.diModule)
             bind<UstadAccountManager>(overrides = true) with singleton { accountManager }
+            bind<UstadMobileSystemImpl>(overrides = true) with singleton { impl }
         }
 
         repo = di.directActiveRepoInstance()
@@ -101,9 +107,7 @@ class PersonEditPresenterTest  {
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenUsernameAndPasswordNotFilledClickSave_shouldShowErrors() {
-        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
-            registrationAllowed = true
-        }))
+        val args = mapOf(UstadView.ARG_REGISTRATION_ALLOWED to true.toString())
 
         val person = createPerson(leftOutPassword = true)
         val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
@@ -111,21 +115,16 @@ class PersonEditPresenterTest  {
         presenter.onCreate(null)
 
         presenter.handleClickSave(person)
+        val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
 
-        argumentCaptor<Boolean>().apply {
-            verify(mockView, timeout(timeoutInMill)).passwordRequiredErrorVisible = capture()
-            verify(mockView, timeout(timeoutInMill)).usernameRequiredErrorVisible = capture()
-            assertEquals("Required password field errors were shown", true, firstValue)
-            assertEquals("Required username field errors were shown", true, secondValue)
-        }
+        verify(mockView, timeout(timeoutInMill)).passwordError = eq(expectedMessage)
+        verify(mockView, timeout(timeoutInMill)).usernameError = eq(expectedMessage)
 
     }
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenPasswordAndConfirmPasswordDoesNotMatchClickSave_shouldShowErrors() {
-        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
-            registrationAllowed = true
-        }))
+        val args = mapOf(UstadView.ARG_REGISTRATION_ALLOWED to true.toString())
 
         val person = createPerson(false).apply {
             username = "dummyUsername"
@@ -136,11 +135,8 @@ class PersonEditPresenterTest  {
         presenter.onCreate(null)
 
         presenter.handleClickSave(person)
-
-        argumentCaptor<Boolean>().apply {
-            verify(mockView, timeout(timeoutInMill)).noMatchPasswordErrorVisible = capture()
-            assertEquals("Password doesn't match field errors were shown", true, firstValue)
-        }
+        val expectedMessage = impl.getString(MessageID.filed_password_no_match, context)
+        verify(mockView, timeout(timeoutInMill)).noMatchPasswordError = eq(expectedMessage)
 
     }
 
@@ -153,9 +149,7 @@ class PersonEditPresenterTest  {
                 .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
                         UmAccount(0L)).toByteArray())))
 
-        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
-            registrationAllowed = true
-        }), ARG_SERVER_URL to serverUrl)
+        val args = mapOf(UstadView.ARG_REGISTRATION_ALLOWED to true.toString(), ARG_SERVER_URL to serverUrl)
 
         val person = createPerson().apply {
             username = "dummyUsername"
@@ -177,9 +171,7 @@ class PersonEditPresenterTest  {
 
     @Test
     fun givenPresenterCreatedInNonRegistrationMode_whenFormFilledAndClickSave_shouldSaveAPersonInDb() {
-        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
-            registrationAllowed = false
-        }))
+        val args = mapOf(UstadView.ARG_REGISTRATION_ALLOWED to false.toString())
 
         val person = createPerson().apply {
             username = "dummyUsername"

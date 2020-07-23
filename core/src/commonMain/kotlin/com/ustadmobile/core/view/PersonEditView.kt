@@ -16,13 +16,13 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var classVisible: Boolean?
 
-    var usernameRequiredErrorVisible: Boolean
+    var usernameError: String?
 
-    var noMatchPasswordErrorVisible: Boolean
+    var noMatchPasswordError: String?
 
-    var passwordRequiredErrorVisible: Boolean
+    var passwordError: String?
 
-    var confirmPasswordErrorVisible: Boolean
+    var confirmError: String?
 
     var errorMessage: String?
 

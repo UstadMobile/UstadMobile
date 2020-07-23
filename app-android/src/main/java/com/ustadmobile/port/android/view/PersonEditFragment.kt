@@ -165,37 +165,32 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             field = value
         }
 
-    override var usernameRequiredErrorVisible: Boolean = false
+    override var usernameError: String? = null
         set(value) {
             field = value
-            handleInputError(mBinding?.usernameTextinputlayout, value,
-                    getString(R.string.field_required_prompt))
+            handleInputError(mBinding?.usernameTextinputlayout, value != null, value)
         }
 
-    override var passwordRequiredErrorVisible: Boolean = false
+    override var passwordError: String? = null
         set(value) {
-            field = false
-            handleInputError(mBinding?.passwordTextinputlayout, value,
-                    getString(R.string.field_required_prompt))
+            field = null
+            handleInputError(mBinding?.passwordTextinputlayout, value != null, value)
         }
 
 
-    override var noMatchPasswordErrorVisible: Boolean = false
+    override var noMatchPasswordError: String? = null
         set(value) {
             field = value
-            if(value){
-                handleInputError(mBinding?.passwordTextinputlayout, value,
-                        getString(R.string.filed_password_no_match))
-                handleInputError(mBinding?.confirmPasswordTextinputlayout, value,
-                        getString(R.string.filed_password_no_match))
+            if(value != null){
+                handleInputError(mBinding?.passwordTextinputlayout,true, value)
+                handleInputError(mBinding?.confirmPasswordTextinputlayout, true,value)
             }
         }
 
-    override var confirmPasswordErrorVisible: Boolean = false
+    override var confirmError: String? = null
         set(value) {
             field = value
-            handleInputError(mBinding?.confirmPasswordTextinputlayout, value,
-                    getString(R.string.field_required_prompt))
+            handleInputError(mBinding?.confirmPasswordTextinputlayout, value != null, value)
         }
 
     override var errorMessage: String? = null

@@ -22,7 +22,6 @@ import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
@@ -162,9 +161,6 @@ class PersonEditFragmentTest {
     private fun launchFragment(allowedRegistration: Boolean = false,misMatchPassword: Boolean = false,
                                leftOutPassword: Boolean = false, leftOutUsername: Boolean = false, fillForm: Boolean = true){
 
-        val workspace = WorkSpace().apply {
-            registrationAllowed = allowedRegistration
-        }
         val password = "password"
         val confirmedPassword = if(misMatchPassword) "password1" else password
 

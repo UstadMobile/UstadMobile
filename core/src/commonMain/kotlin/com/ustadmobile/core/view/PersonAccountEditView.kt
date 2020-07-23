@@ -4,15 +4,15 @@ import com.ustadmobile.lib.db.entities.PersonWithAccount
 
 interface PersonAccountEditView: UstadEditView<PersonWithAccount> {
 
-    var currentPasswordRequiredErrorVisible: Boolean
+    var currentPasswordError: String?
 
-    var newPasswordRequiredErrorVisible: Boolean
+    var newPasswordError: String?
 
-    var confirmedPasswordRequiredErrorVisible: Boolean
+    var confirmedPasswordError: String?
 
-    var passwordDoNotMatchErrorVisible: Boolean
+    var noPasswordMatchError: String ?
 
-    var usernameRequiredErrorVisible: Boolean
+    var usernameError: String?
 
     fun showErrorMessage(message: String,isPasswordError:Boolean)
 
