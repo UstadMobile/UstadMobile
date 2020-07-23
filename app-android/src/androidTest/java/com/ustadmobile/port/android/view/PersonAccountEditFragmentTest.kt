@@ -211,7 +211,7 @@ class PersonAccountEditFragmentTest {
     fun givenPersonAccountInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
         enqueueResponse()
         val person = createPerson(false, isAdmin = false, matchPassword = true)
-        val fragmentScenario = launchFragment(person, true, fillUsername = true, fillCurrentPassword = true,
+        val fragmentScenario = launchFragment(person, true, fillUsername = true, fillCurrentPassword = false,
                 fillNewPassword = true)
 
         val mPerson = dbRule.db.personDao.findByUidLive(person.personUid).waitUntilWithFragmentScenario(fragmentScenario) {
@@ -226,7 +226,7 @@ class PersonAccountEditFragmentTest {
     fun givenPersonAccountInAccountCreationMode_whenPasswordFieldDoNotMatchAndSaveClicked_thenShouldShowErrors(){
         enqueueResponse()
         val person = createPerson(false, isAdmin = false, matchPassword = false)
-        launchFragment(person, true, fillUsername = true, fillCurrentPassword = true,
+        launchFragment(person, true, fillUsername = true, fillCurrentPassword = false,
                 fillNewPassword = true)
 
         onView(withId(R.id.new_password_textinputlayout)).check(matches(

@@ -66,17 +66,18 @@ class PersonAccountEditPresenter(context: Any,
 
     override fun handleClickSave(entity: PersonWithAccount) {
         GlobalScope.launch(doorMainDispatcher()) {
-            if(!entity.admin && entity.currentPassword.isNullOrEmpty() || entity.newPassword.isNullOrEmpty()
-                    || entity.confirmedPassword.isNullOrEmpty()  || entity.username.isNullOrEmpty() ||
-                    entity.confirmedPassword != entity.newPassword){
+            if(!entity.admin && entity.currentPassword.isNullOrEmpty() && !createAccount
+                    || entity.newPassword.isNullOrEmpty() || entity.confirmedPassword.isNullOrEmpty()
+                    || entity.username.isNullOrEmpty() || entity.confirmedPassword != entity.newPassword){
 
                 val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
 
                 view.usernameError = if(entity.username.isNullOrEmpty())
                     requiredFieldMessage else null
-                view.currentPasswordError = if(entity.newPassword.isNullOrEmpty() && !entity.admin)
+                view.currentPasswordError = if(entity.currentPassword.isNullOrEmpty() && !entity.admin &&
+                        !createAccount)
                     requiredFieldMessage else null
-                view.newPasswordError = if(entity.currentPassword.isNullOrEmpty())
+                view.newPasswordError = if(entity.newPassword.isNullOrEmpty())
                     requiredFieldMessage else null
                 view.confirmedPasswordError = if(entity.confirmedPassword.isNullOrEmpty())
                     requiredFieldMessage else null
