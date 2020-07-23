@@ -1,6 +1,6 @@
 package com.ustadmobile.sharedse.controller
 
-import com.github.aakira.napier.DebugAntilog
+
 import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
