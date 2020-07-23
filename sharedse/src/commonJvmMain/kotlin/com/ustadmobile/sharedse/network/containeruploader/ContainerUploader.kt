@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.min
 
 class ContainerUploader(val request: ContainerUploaderRequest,
-                        val listener: ContainerUploaderListener?,
                         val chunkSize: Int = DEFAULT_CHUNK_SIZE,
                         override val di: DI) : DIAware {
 
@@ -36,7 +35,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
 
     suspend fun progressUpdater() = coroutineScope {
         while (isActive) {
-            listener?.onProgress(request, bytesSoFar.get(), contentLength.get())
+            db.containerUploadJobDao.updateProgress(bytesSoFar.get(), contentLength.get(), request.uploadJobUid)
             delay(500L)
         }
     }
@@ -58,18 +57,20 @@ class ContainerUploader(val request: ContainerUploaderRequest,
 
                 val uploadJob = db.containerUploadJobDao.findByUid(request.uploadJobUid)
                         ?: ContainerUploadJob()
+
+                val fileSize = db.containerEntryFileDao.generateConcatenatedFilesResponse(request.fileList).contentLength
+
                 if (uploadJob.sessionId.isNullOrEmpty()) {
                     val sessionId = String(UMIOUtils.readStreamToByteArray(urlConnection.inputStream))
                     uploadJob.sessionId = sessionId
                     uploadJob.bytesSoFar = 0
+                    uploadJob.contentLength = fileSize
                     db.containerUploadJobDao.update(uploadJob)
                 }
 
                 urlConnection.disconnect()
 
                 val start = uploadJob.bytesSoFar
-
-                val fileSize = db.containerEntryFileDao.generateConcatenatedFilesResponse(request.fileList).contentLength
 
                 bytesSoFar.set(start)
                 contentLength.set(fileSize)
@@ -131,10 +132,8 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                         } while (responseCode != HttpStatusCode.NoContent.value)
 
                     val endedAt = bytesSoFar.get() + readRange
-                    bytesSoFar.set(endedAt)
-
                     uploadJob.bytesSoFar = endedAt
-                    db.containerUploadJobDao.updateProgress(endedAt, uploadJob.cujUid)
+                    bytesSoFar.set(endedAt)
 
                 }
 

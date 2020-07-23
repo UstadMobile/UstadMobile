@@ -6,7 +6,6 @@ data class ContainerUploaderRequest(val uploadJobUid: Long, val fileList: String
 
 abstract class ContainerUploaderCommon() {
 
-    abstract suspend fun enqueue(request: ContainerUploaderRequest,
-                                 listener: ContainerUploaderListener? = null): Deferred<Int>
+    abstract suspend fun enqueue(request: ContainerUploaderRequest): Deferred<Int>
 
 }

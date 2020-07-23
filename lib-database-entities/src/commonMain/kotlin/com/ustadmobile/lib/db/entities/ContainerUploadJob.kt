@@ -23,6 +23,8 @@ class ContainerUploadJob {
 
     var bytesSoFar: Long = 0
 
+    var contentLength: Long = 0
+
     var containerEntryFileUids: String? = null
 
 }

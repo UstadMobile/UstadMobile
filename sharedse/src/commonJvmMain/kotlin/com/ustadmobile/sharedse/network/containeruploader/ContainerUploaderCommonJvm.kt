@@ -18,9 +18,9 @@ class ContainerUploaderCommonJvm(override val di: DI) : ContainerUploaderCommon(
 
     private val networkManager: NetworkManagerBle by di.instance()
 
-    override suspend fun enqueue(request: ContainerUploaderRequest, listener: ContainerUploaderListener?): Deferred<Int> {
+    override suspend fun enqueue(request: ContainerUploaderRequest): Deferred<Int> {
         return GlobalScope.async(coroutineCtx) {
-            ContainerUploader(request, listener, di = di).upload()
+            ContainerUploader(request, di = di).upload()
         }
     }
 

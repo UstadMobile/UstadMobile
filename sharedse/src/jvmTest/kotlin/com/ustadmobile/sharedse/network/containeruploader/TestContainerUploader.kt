@@ -108,7 +108,7 @@ class TestContainerUploader {
                 entryListStr, mockWebServer.url("/upload/").toString(), TEST_ENDPOINT
         )
 
-        val uploader = ContainerUploader(request, null, di = di)
+        val uploader = ContainerUploader(request, di = di)
         val uploadResult = runBlocking { uploader.upload() }
 
         val uploadedFile = File(tmpFolder, "UploadedFile")

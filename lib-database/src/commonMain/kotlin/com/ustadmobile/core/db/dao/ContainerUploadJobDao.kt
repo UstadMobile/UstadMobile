@@ -34,8 +34,8 @@ abstract class ContainerUploadJobDao : BaseDao<ContainerUploadJob> {
     @Query("UPDATE ContainerUploadJob SET jobStatus = $QUEUED WHERE cujUid = :uploadJobId AND jobStatus = $NOT_QUEUED")
     abstract fun setStatusToQueue(uploadJobId: Long)
 
-    @Query("UPDATE ContainerUploadJob SET bytesSoFar = :progress WHERE cujUid = :uploadJobId")
-    abstract fun updateProgress(progress: Long, uploadJobId: Long)
+    @Query("UPDATE ContainerUploadJob SET bytesSoFar = :progress, contentLength = :contentLength WHERE cujUid = :uploadJobId")
+    abstract fun updateProgress(progress: Long, contentLength: Long, uploadJobId: Long)
 
     @Query("UPDATE ContainerUploadJob SET jobStatus = :status WHERE cujUid = :uploadJobId")
     abstract fun updateStatus(status: Int, uploadJobId: Long)
