@@ -32,7 +32,7 @@ import kotlin.jvm.Volatile
     SyncResult::class, School::class,
     TimeZoneEntity::class,
     SchoolMember::class, Report::class, ReportFilter::class,
-    DeviceSession::class, WorkSpace::class
+    DeviceSession::class, WorkSpace::class, ContainerUploadJob::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
@@ -48,6 +48,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         3. Added schoolGender to School
         4. Added schoolHolidayCalendar to School
         5. Added SchoolMember and SchoolMemberDao
+        6. Added ContainerUploadJob
         Changes in 34:
         Added School and Assignment based entities
         Updated Clazz : added clazzFeatures and removed individual feature bits
@@ -170,6 +171,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("reportFilterDao")
     abstract val reportFilterDao: ReportFilterDao
+
+    @JsName("containerUploadJobDao")
+    abstract val containerUploadJobDao: ContainerUploadJobDao
 
     @JsName("statementDao")
     abstract val statementDao: StatementDao

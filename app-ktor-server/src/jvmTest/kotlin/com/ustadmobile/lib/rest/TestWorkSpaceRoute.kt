@@ -9,10 +9,11 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
 import io.ktor.application.install
 import io.ktor.client.HttpClient
+import io.ktor.client.call.receive
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.statement.HttpStatement
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
@@ -61,7 +62,7 @@ class TestWorkSpaceRoute {
 
     @After
     fun tearDown() {
-        server.stop(0, 5, TimeUnit.SECONDS)
+        server.stop(0, 5000)
         httpClient.close()
     }
 
@@ -75,16 +76,17 @@ class TestWorkSpaceRoute {
         workSpace.uid = db.workSpaceDao.insert(workSpace)
 
         runBlocking {
-            val response = httpClient.get<HttpResponse> {
+            val response = httpClient.get<HttpStatement> {
                 url{
                     takeFrom("http://localhost:8097")
                     path("Workspace", "verify")
                 }
-            }
+            }.execute()
+
             val mWorkSpace = response.receive<WorkSpace>()
 
             Assert.assertEquals("Workspace was retrieved, response code is 200",
-                    HttpStatusCode.OK, response.status)
+                    HttpStatusCode.OK, response.status.value)
             Assert.assertEquals("Valid workspace was retrieved",
                     mWorkSpace.uid, workSpace.uid)
         }

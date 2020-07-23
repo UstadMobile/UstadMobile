@@ -12,7 +12,7 @@ import io.ktor.client.call.receive
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.statement.HttpStatement
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
@@ -61,7 +61,7 @@ class TestLoginRoute {
 
     @After
     fun tearDown() {
-        server.stop(0, 5, TimeUnit.SECONDS)
+        server.stop(0, 5000)
         httpClient.close()
     }
 
@@ -73,14 +73,14 @@ class TestLoginRoute {
         db.personAuthDao.insert(personAuth)
 
         runBlocking {
-            val authResponse = httpClient.get<HttpResponse> {
+            val authResponse = httpClient.get<HttpStatement> {
                 url{
                     takeFrom("http://localhost:8097")
                     path("Login", "login")
                     parameter("username", "bobjones")
                     parameter("password", "secret")
                 }
-            }
+            }.execute()
 
             val accountObj = authResponse.receive<UmAccount>()
 
@@ -98,14 +98,14 @@ class TestLoginRoute {
         db.personAuthDao.insert(personAuth)
 
         runBlocking {
-            val authResponse = httpClient.get<HttpResponse> {
+            val authResponse = httpClient.get<HttpStatement> {
                 url {
                     takeFrom("http://localhost:8097")
                     path("Login", "login")
                     parameter("username", "bobjones")
                     parameter("password", "wrongsecret")
                 }
-            }
+            }.execute()
 
             Assert.assertEquals("With invalid login, response code is 403",
                     HttpStatusCode.Forbidden, authResponse.status)
@@ -115,12 +115,12 @@ class TestLoginRoute {
     @Test
     fun givenRequestWithNoUsernameOrPassword_whenLoginCalled_thenShouldReturn400BadRequest() {
         runBlocking {
-            val authResponse = httpClient.get<HttpResponse> {
+            val authResponse = httpClient.get<HttpStatement> {
                 url {
                     takeFrom("http://localhost:8097")
                     path("Login", "login")
                 }
-            }
+            }.execute()
 
             Assert.assertEquals("With invalid login, response code is 403",
                     HttpStatusCode.BadRequest, authResponse.status)
