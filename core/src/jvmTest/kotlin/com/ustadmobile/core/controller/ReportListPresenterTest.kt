@@ -1,22 +1,23 @@
 
 package com.ustadmobile.core.controller
 
+import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ReportDao
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.ext.waitForListToBeSet
+import com.ustadmobile.core.view.ReportDetailView
+import com.ustadmobile.core.view.ReportListView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Report
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.ReportListView
-import com.ustadmobile.core.view.ReportDetailView
-import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.ReportDao
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.*
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.core.util.ext.waitForListToBeSet
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import org.junit.Assert
 import org.kodein.di.DI
 import org.kodein.di.instance
 

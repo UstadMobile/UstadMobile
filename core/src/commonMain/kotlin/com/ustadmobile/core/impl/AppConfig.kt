@@ -41,6 +41,8 @@ object AppConfig {
 
     const val KEY_ALLOW_SERVER_SELECTION = "app.select_server"
 
+    const val KEY_ALLOW_ACCOUNT_MANAGEMENT = "app.account_management"
+
     const val BULK_UPLOAD_VISIBILITY = "bulk_upload_visibility"
 
     const val NAVIGATION_ITEMS = "navigation_items"

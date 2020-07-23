@@ -8,6 +8,7 @@
         <import type="com.ustadmobile.core.controller.PersonConstants"/>
         <import type="com.ustadmobile.port.android.view.PersonDetailFragmentEventHandler"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="com.ustadmobile.core.controller.PersonDetailPresenter"/>
 
         <variable
             name="person"
@@ -28,6 +29,18 @@
         <variable
             name="fragmentEventHandler"
             type="PersonDetailFragmentEventHandler" />
+
+        <variable
+            name="createAccountVisibility"
+            type="Integer" />
+
+        <variable
+            name="changePasswordVisibility"
+            type="Integer" />
+
+        <variable
+            name="presenter"
+            type="PersonDetailPresenter" />
 
     </data>
 
@@ -78,6 +91,8 @@
 
 
                 <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginEnd="@dimen/dimen_8dp"
                     android:id="@+id/fragment_person_detail_call_icon_imageview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -85,6 +100,7 @@
                     app:srcCompat="@drawable/ic_phone_black_24dp" />
 
                 <TextView
+                    android:layout_gravity="center_horizontal"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/fragment_person_detail_call_text"
                     android:layout_width="wrap_content"
@@ -107,6 +123,8 @@
                 app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_image_barrier">
 
                 <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginEnd="@dimen/dimen_8dp"
                     android:tint="?colorOnTintPrimary"
                     android:id="@+id/fragment_person_text_icon"
                     android:layout_width="wrap_content"
@@ -114,6 +132,7 @@
                     app:srcCompat="@drawable/ic_message_bcd4_24dp" />
 
                 <TextView
+                    android:layout_gravity="center_horizontal"
                     android:textColor="?colorOnTintPrimary"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/fragment_person_detail_text_textview"
@@ -137,6 +156,8 @@
                 tools:ignore="UseCompoundDrawables">
 
                 <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginEnd="@dimen/dimen_8dp"
                     android:id="@+id/fragment_person_detail_email_image"
                     android:layout_width="wrap_content"
                     android:tint="?colorOnTintPrimary"
@@ -144,6 +165,7 @@
                     app:srcCompat="@drawable/ic_email_black_24dp" />
 
                 <TextView
+                    android:layout_gravity="center_horizontal"
                     android:textColor="?colorOnTintPrimary"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/textView35"
@@ -152,12 +174,83 @@
                     android:text="@string/email" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/create_account_view"
+                android:visibility="@{createAccountVisibility}"
+                android:background="@drawable/bg_listitem"
+                android:layout_width="@dimen/dimen_110dp"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="@dimen/dimen_8dp"
+                android:onClick="@{() -> presenter.handleCreateAccount()}"
+                android:orientation="vertical"
+                app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_email_linlayout"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_imageview"
+                tools:ignore="UseCompoundDrawables">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginEnd="@dimen/dimen_8dp"
+                    android:id="@+id/create_account_image"
+                    android:layout_width="wrap_content"
+                    android:tint="?colorOnTintPrimary"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/ic_person_black_24dp" />
+
+                <TextView
+                    android:gravity="center"
+                    android:layout_gravity="center_horizontal"
+                    android:textColor="?colorOnTintPrimary"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/create_account_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_account" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/change_account_password_view"
+                android:visibility="@{changePasswordVisibility}"
+                android:background="@drawable/bg_listitem"
+                android:layout_width="@dimen/dimen_110dp"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="@dimen/dimen_8dp"
+                android:orientation="vertical"
+                android:onClick="@{() -> presenter.handleChangePassword()}"
+                app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_email_linlayout"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_picture_imageview"
+                tools:ignore="UseCompoundDrawables">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginEnd="@dimen/dimen_8dp"
+                    android:id="@+id/change_password_image"
+                    android:layout_width="wrap_content"
+                    android:tint="?colorOnTintPrimary"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/person_with_key" />
+
+                <TextView
+                    android:gravity="center"
+                    android:layout_gravity="center_horizontal"
+                    android:textColor="?colorOnTintPrimary"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/change_password_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change_password" />
+            </LinearLayout>
+
+
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/fragment_person_detail_buttonbar_barrier"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="fragment_person_detail_call_linlayout,fragment_person_detail_text_linlayout,fragment_person_detail_email_linlayout"
+                app:constraint_referenced_ids="fragment_person_detail_call_linlayout,fragment_person_detail_text_linlayout,fragment_person_detail_email_linlayout,create_account_view, change_account_password_view"
                 />
 
             <View

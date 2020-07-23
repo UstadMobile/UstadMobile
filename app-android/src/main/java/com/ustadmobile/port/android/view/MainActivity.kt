@@ -21,6 +21,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
@@ -86,7 +87,9 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
-        mBinding.bottomNavView.visibility = if(DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
+        val registrationAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_REGISTRATION, this)
+        mBinding.bottomNavView.visibility = if(DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag) ||
+                registrationAllowed && currentFrag == R.id.person_edit_dest)
             View.GONE else View.VISIBLE
         if(mainScreenItemsVisible){
             setUserProfile(menu.findItem(R.id.menu_main_profile))
