@@ -54,7 +54,8 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
 
             val mPerson = Json.parse(PersonWithAccount.serializer(),personString)
 
-            val person = db.personDao.findByUsername(mPerson.username)
+            val person = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
+            else db.personDao.findByUsername(mPerson.username)
 
             if(person != null && mPerson.personUid == 0L){
                 call.respond(HttpStatusCode.Conflict, "Person already exists, change username")
