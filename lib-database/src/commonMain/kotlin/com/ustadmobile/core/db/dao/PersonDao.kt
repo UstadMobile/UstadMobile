@@ -44,6 +44,8 @@ abstract class PersonDao : BaseDao<Person> {
         var firstNames: String? = null
 
         var lastName: String? = null
+
+        var admin: Boolean = false
     }
 
     inner class PersonWithGroup internal constructor(var personUid: Long, var personGroupUid: Long)
@@ -151,7 +153,7 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun insertAccessToken(token: AccessToken)
 
 
-    @Query("SELECT Person.personUid,Person.firstNames, Person.lastName, PersonAuth.passwordHash " +
+    @Query("SELECT Person.personUid,Person.admin,Person.firstNames, Person.lastName, PersonAuth.passwordHash " +
             " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
             "WHERE Person.username = :username")
     abstract suspend fun findUidAndPasswordHashAsync(username: String): PersonUidAndPasswordHash?
@@ -194,6 +196,11 @@ abstract class PersonDao : BaseDao<Person> {
     @JsName("findByUid")
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract suspend fun findByUid(uid: Long): Person?
+
+    @JsName("findPersonAccountByUid")
+    @Query("SELECT Person.*, null as newPassword, null as currentPassword,null as confirmedPassword" +
+            " FROM PERSON WHERE Person.personUid = :uid")
+    abstract suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount?
 
     @Query("SELECT * From Person WHERE personUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Person?>

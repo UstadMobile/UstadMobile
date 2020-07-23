@@ -9,13 +9,6 @@
             type="com.ustadmobile.core.controller.Login2Presenter" />
 
         <variable
-            name="isEmptyUsername"
-            type="boolean" />
-        <variable
-            name="isEmptyPassword"
-            type="boolean" />
-
-        <variable
             name="username"
             type="String" />
 
@@ -61,7 +54,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:hint="@string/username"
-                app:errorEnabled="@{isEmptyUsername}"
                 app:errorTextColor="?colorError"
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"
@@ -86,7 +78,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:hint="@string/password"
-                app:errorEnabled="@{isEmptyPassword}"
                 app:errorTextColor="?colorError"
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"

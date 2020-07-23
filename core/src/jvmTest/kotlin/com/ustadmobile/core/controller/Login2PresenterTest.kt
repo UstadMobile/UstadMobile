@@ -100,8 +100,7 @@ class Login2PresenterTest {
     }
 
 
-    //Disabled - hardcoded flag to disable registration on presenter
-    //@Test
+    @Test
     fun givenRegistrationIsAllowed_whenLogin_shouldShowRegisterButton(){
         val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())

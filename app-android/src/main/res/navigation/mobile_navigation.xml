@@ -203,4 +203,9 @@
         android:name="com.ustadmobile.port.android.view.WebChunkFragment"
         android:label="" />
 
+    <fragment
+        android:id="@+id/person_account_edit_dest"
+        android:name="com.ustadmobile.port.android.view.PersonAccountEditFragment"
+        android:label="" />
+
 </navigation>
