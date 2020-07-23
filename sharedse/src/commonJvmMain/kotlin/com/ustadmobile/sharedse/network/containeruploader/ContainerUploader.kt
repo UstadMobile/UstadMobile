@@ -134,7 +134,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     bytesSoFar.set(endedAt)
 
                     uploadJob.bytesSoFar = endedAt
-                    db.containerUploadJobDao.update(uploadJob)
+                    db.containerUploadJobDao.updateProgress(endedAt, uploadJob.cujUid)
 
                 }
 
@@ -145,7 +145,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                 }
 
                 uploadJob.jobStatus = downloadStatus
-                db.containerUploadJobDao.update(uploadJob)
+                db.containerUploadJobDao.updateStatus(downloadStatus, uploadJob.cujUid)
 
             } finally {
                 progressUpdaterJob.cancel()

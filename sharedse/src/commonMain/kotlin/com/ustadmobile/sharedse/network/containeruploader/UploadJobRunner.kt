@@ -19,6 +19,7 @@ import io.ktor.network.sockets.SocketTimeoutException
 import io.ktor.utils.io.errors.IOException
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.kodein.di.DI
@@ -26,7 +27,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, private val endpointUrl: String, override val di: DI) : DIAware {
+class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, private val retryDelay: Long = DEFAULT_RETRY_DELAY, private val endpointUrl: String, override val di: DI) : DIAware {
 
     private val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
 
@@ -132,11 +133,18 @@ class UploadJobRunner(private val containerUploadJob: ContainerUploadJob, privat
                 if (connectivityState != ConnectivityStatus.STATE_UNMETERED && connectivityState != ConnectivityStatus.STATE_METERED) {
                     return JobStatus.QUEUED
                 }
+
+                delay(retryDelay)
             }
         }
 
         return uploadAttemptStatus
 
+    }
+
+
+    companion object {
+        const val DEFAULT_RETRY_DELAY = 1000L
     }
 
 

@@ -24,7 +24,7 @@ abstract class ContainerUploadJobDao : BaseDao<ContainerUploadJob> {
 
     @Update
     abstract override fun update(entity: ContainerUploadJob)
-    
+
     @Query("""SELECT * FROM ContainerUploadJob WHERE jobStatus = $QUEUED
            AND (SELECT connectivityState from ConnectivityStatus WHERE connectivityState IN
             ($STATE_METERED, $STATE_UNMETERED))
@@ -33,5 +33,11 @@ abstract class ContainerUploadJobDao : BaseDao<ContainerUploadJob> {
 
     @Query("UPDATE ContainerUploadJob SET jobStatus = $QUEUED WHERE cujUid = :uploadJobId AND jobStatus = $NOT_QUEUED")
     abstract fun setStatusToQueue(uploadJobId: Long)
+
+    @Query("UPDATE ContainerUploadJob SET bytesSoFar = :progress WHERE cujUid = :uploadJobId")
+    abstract fun updateProgress(progress: Long, uploadJobId: Long)
+
+    @Query("UPDATE ContainerUploadJob SET jobStatus = :status WHERE cujUid = :uploadJobId")
+    abstract fun updateStatus(status: Int, uploadJobId: Long)
 
 }

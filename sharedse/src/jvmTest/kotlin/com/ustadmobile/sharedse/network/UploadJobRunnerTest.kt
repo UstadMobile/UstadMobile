@@ -151,7 +151,7 @@ class UploadJobRunnerTest {
         appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)
         createContainer(appDb)
 
-        val runner = UploadJobRunner(containerUploadJob, endpoint, di)
+        val runner = UploadJobRunner(containerUploadJob, retryDelay, endpoint, di)
         runBlocking {
             runner.startUpload()
         }
@@ -182,7 +182,7 @@ class UploadJobRunnerTest {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.InternalServerError.value).setBody("Server error"))
         }
 
-        val runner = UploadJobRunner(containerUploadJob, mockWebServer.url("").toString(), di)
+        val runner = UploadJobRunner(containerUploadJob, retryDelay, mockWebServer.url("").toString(), di)
         var status = 0
         runBlocking {
             status = runner.startUpload()
@@ -199,7 +199,7 @@ class UploadJobRunnerTest {
         createContainer(repo)
         createContainer(appDb)
 
-        val runner = UploadJobRunner(containerUploadJob, endpoint, di)
+        val runner = UploadJobRunner(containerUploadJob, retryDelay, endpoint, di)
         var status = 0
         runBlocking {
             status = runner.startUpload()
@@ -207,6 +207,10 @@ class UploadJobRunnerTest {
 
         assertContainersHaveSameContent(epubContainer.containerUid, appDb, repo)
 
+    }
+
+    companion object{
+        const val retryDelay = 10L
     }
 
 

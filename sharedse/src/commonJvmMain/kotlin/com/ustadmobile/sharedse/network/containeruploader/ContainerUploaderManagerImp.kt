@@ -29,13 +29,13 @@ class ContainerUploaderManagerImp(val endpoint: Endpoint, override val di: DI) :
                 mainDispatcher = mainCoroutineDispatcher) {
 
             it.jobStatus = JobStatus.RUNNING
-            appDb.containerUploadJobDao.update(it)
+            appDb.containerUploadJobDao.updateStatus(it.jobStatus, it.cujUid)
 
-            val runner = UploadJobRunner(it, endpoint.url, di)
+            val runner = UploadJobRunner(it, endpointUrl = endpoint.url, di = di)
             val status = runner.startUpload()
 
             it.jobStatus = status
-            appDb.containerUploadJobDao.update(it)
+            appDb.containerUploadJobDao.updateStatus(status, it.cujUid)
         }.start()
     }
 
