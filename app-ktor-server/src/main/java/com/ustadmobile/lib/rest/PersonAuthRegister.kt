@@ -2,10 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
-import com.ustadmobile.lib.db.entities.DeviceSession
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonAuth
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.application.call
@@ -44,19 +41,18 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
                 call.respond(HttpStatusCode.OK,
                         UmAccount(person.personUid, username, "", "",person.firstNames,person.lastName))
             }else {
-                call.respond(HttpStatusCode.Forbidden, "")
+                call.respond(HttpStatusCode.Forbidden, "${person?.firstNames}, $password, ${person == null} ${person?.passwordHash}")
             }
         }
 
         post("register"){
             val personString = call.request.queryParameters["person"]
-            val password = call.request.queryParameters["password"]
-            if(personString == null || password == null){
-                call.respond(HttpStatusCode.BadRequest, "No password or person information provided")
+            if(personString == null){
+                call.respond(HttpStatusCode.BadRequest, "No person information provided")
                 return@post
             }
 
-            val mPerson = Json.parse(Person.serializer(),personString)
+            val mPerson = Json.parse(PersonWithAccount.serializer(),personString)
 
             val person = db.personDao.findByUsername(mPerson.username)
 
@@ -73,7 +69,7 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
                 db.personDao.update(mPerson)
             }
             val personAuth = PersonAuth(mPerson.personUid,
-                    PersonAuthDao.PLAIN_PASS_PREFIX+password)
+                    PersonAuthDao.PLAIN_PASS_PREFIX+mPerson.newPassword)
             val aUid = db.personAuthDao.insert(personAuth)
 
             if(aUid != -1L){
@@ -107,7 +103,7 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
             if(person != null){
 
                 if(!person.admin && currentPassword == null){
-                    call.respond(HttpStatusCode.Forbidden, "No old password provide")
+                    call.respond(HttpStatusCode.Forbidden, "Current password not provided")
                     return@post
                 }
 
@@ -119,7 +115,7 @@ fun Route.PersonAuthRegister(db: UmAppDatabase) {
                     return@post
                 }
 
-                val personAuth = com.ustadmobile.lib.db.entities.PersonAuth(person.personUid,
+                val personAuth = PersonAuth(person.personUid,
                         PersonAuthDao.PLAIN_PASS_PREFIX+newPassword)
                 db.personAuthDao.update(personAuth)
 

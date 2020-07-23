@@ -8,6 +8,7 @@ import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -94,11 +95,10 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = _storedAccountsLive
 
 
-    suspend fun register(person: Person, password: String, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount {
+    suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount {
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             parameter("person", Json.stringify(Person.serializer(), person))
-            parameter("password", password)
         }
 
         val (account: UmAccount?, status: Int) = httpStmt.execute { response ->

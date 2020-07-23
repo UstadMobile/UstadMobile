@@ -3,18 +3,14 @@ package com.ustadmobile.core.view
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 
-interface PersonEditView: UstadEditView<Person> {
+interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var genderOptions: List<MessageIdOption>?
 
     var personPicturePath: String?
-
-    var password: String ?
-
-    var confirmedPassword: String?
 
     var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>?
 

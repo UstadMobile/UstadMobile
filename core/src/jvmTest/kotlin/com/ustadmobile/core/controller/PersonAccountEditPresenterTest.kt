@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
 import okhttp3.mockwebserver.MockResponse
@@ -96,8 +97,11 @@ class PersonAccountEditPresenterTest  {
     }
 
 
-    private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false): Person {
-        return Person().apply {
+    private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false,
+                             matchPassword: Boolean = false): PersonWithAccount {
+        val password = "password"
+        val confirmPassword = if(matchPassword) password else "password1"
+        return PersonWithAccount().apply {
             fatherName = "Doe"
             firstNames = "Jane"
             lastName = "Doe"
@@ -106,6 +110,8 @@ class PersonAccountEditPresenterTest  {
             }
             admin = isAdmin
             personUid = mPersonUid
+            newPassword = password
+            confirmedPassword = confirmPassword
             repo.personDao.insert(this)
         }
     }
@@ -117,10 +123,8 @@ class PersonAccountEditPresenterTest  {
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         presenter.handleClickSave(person)
-        argumentCaptor<Boolean>{
-            verify(mockView, timeout(defaultTimeOut).atLeastOnce()).usernameRequiredErrorVisible = capture()
-            assertEquals("Username field error was shown", true, firstValue)
-        }
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).usernameRequiredErrorVisible = eq(true)
     }
 
     @Test
@@ -131,7 +135,7 @@ class PersonAccountEditPresenterTest  {
         presenter.onCreate(null)
         presenter.handleClickSave(person)
         argumentCaptor<Boolean>{
-            verify(mockView, timeout(defaultTimeOut).atLeastOnce()).firstPasswordFieldRequiredErrorVisible = capture()
+            verify(mockView, timeout(defaultTimeOut).atLeastOnce()).newPasswordRequiredErrorVisible = capture()
             assertEquals("Current password field error was shown", true, firstValue)
         }
     }
@@ -143,25 +147,21 @@ class PersonAccountEditPresenterTest  {
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         presenter.handleClickSave(person)
-        argumentCaptor<Boolean>{
-            verify(mockView, timeout(defaultTimeOut).atLeastOnce()).secondPasswordFieldRequiredErrorVisible = capture()
-            assertEquals("Password field error was shown", true, firstValue)
-        }
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).newPasswordRequiredErrorVisible = eq(true)
     }
 
     @Test
     fun givenPresenterCreatedInPasswordResetMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldChangePassword(){
         enQueuePasswordChangeResponse()
 
-        mockView = mock{
-            on{firstPassword}.thenReturn("oldPassword")
-            on{secondPassword}.thenReturn("password")
-        }
-        val person = createPerson(isAdmin = true, withUsername = true)
+        val person = createPerson(isAdmin = true, withUsername = true, matchPassword = true)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
                 UstadView.ARG_SERVER_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
+
         presenter.handleClickSave(person)
         argumentCaptor<String>{
             verifyBlocking(accountManager, timeout(defaultTimeOut).atLeastOnce()){
@@ -174,23 +174,20 @@ class PersonAccountEditPresenterTest  {
 
 
     @Test
-    fun givenPersonAccountInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
+    fun givenPresenterCreatedInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
         enQueuePasswordChangeResponse()
 
-        mockView = mock{
-            on{firstPassword}.thenReturn("password")
-            on{secondPassword}.thenReturn("password")
-        }
-        val person = createPerson(isAdmin = true, withUsername = false)
+        val person = createPerson(isAdmin = true, withUsername = false, matchPassword = true)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
                 UstadView.ARG_SERVER_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
-        //wait for onLoadEntityFromDb to be called
-        sleep(1000)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
+
         presenter.handleClickSave(person.apply { username = "username" })
         verifyBlocking(accountManager, timeout(defaultTimeOut).atLeastOnce()){
-            register(any(), any(), any(), any())
+            register(any(), any(), any())
         }
     }
 
@@ -199,20 +196,16 @@ class PersonAccountEditPresenterTest  {
     fun givenPresenterCreatedInAccountCreationMode_whenPasswordDoNotMatchAndSaveClicked_thenShouldErrors(){
         enQueuePasswordChangeResponse()
 
-        mockView = mock{
-            on{firstPassword}.thenReturn("oldPassword")
-            on{secondPassword}.thenReturn("password")
-        }
-        val person = createPerson(isAdmin = true, withUsername = false)
+        val person = createPerson(isAdmin = true, withUsername = false, matchPassword = false)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
                 UstadView.ARG_SERVER_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
-        //wait for onLoadEntityFromDb to be called
-        sleep(1000)
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
+
         presenter.handleClickSave(person.apply { username = "username" })
-        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).showPasswordDoNotMatchError()
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).passwordDoNotMatchErrorVisible = eq(true)
     }
 
 }

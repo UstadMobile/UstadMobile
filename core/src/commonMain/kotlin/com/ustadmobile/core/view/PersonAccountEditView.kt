@@ -1,28 +1,20 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 
-interface PersonAccountEditView: UstadEditView<Person> {
+interface PersonAccountEditView: UstadEditView<PersonWithAccount> {
 
-    var firstPassword: String?
+    var currentPasswordRequiredErrorVisible: Boolean
 
-    var secondPassword: String?
+    var newPasswordRequiredErrorVisible: Boolean
 
-    var secondPasswordFieldRequiredErrorVisible: Boolean
+    var confirmedPasswordRequiredErrorVisible: Boolean
 
-    var firstPasswordFieldRequiredErrorVisible: Boolean
-
-    fun showPasswordDoNotMatchError()
+    var passwordDoNotMatchErrorVisible: Boolean
 
     var usernameRequiredErrorVisible: Boolean
 
-    var errorMessage:String?
-
-    var fistPasswordFieldHint: String?
-
-    var secondPasswordFieldHint: String?
-
-    fun clearFields()
+    fun showErrorMessage(message: String,isPasswordError:Boolean)
 
     companion object {
 

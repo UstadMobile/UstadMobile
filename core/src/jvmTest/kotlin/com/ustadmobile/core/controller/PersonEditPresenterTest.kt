@@ -85,11 +85,17 @@ class PersonEditPresenterTest  {
     }
 
 
-    private fun createPerson(): Person {
-        return Person().apply {
+    private fun createPerson(matchPassword: Boolean = true, leftOutPassword: Boolean = false): PersonWithAccount {
+        val password = "password"
+        val confirmPassword = if(matchPassword) password else "password1"
+        return PersonWithAccount().apply {
             fatherName = "Doe"
             firstNames = "Jane"
             lastName = "Doe"
+            if(!leftOutPassword){
+                newPassword = password
+                confirmedPassword = confirmPassword
+            }
         }
     }
 
@@ -99,7 +105,7 @@ class PersonEditPresenterTest  {
             registrationAllowed = true
         }))
 
-        val person = createPerson()
+        val person = createPerson(leftOutPassword = true)
         val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
 
         presenter.onCreate(null)
@@ -121,12 +127,7 @@ class PersonEditPresenterTest  {
             registrationAllowed = true
         }))
 
-        mockView = mock{
-            on{password}.thenReturn("password")
-            on{confirmedPassword}.thenReturn("password1")
-        }
-
-        val person = createPerson().apply {
+        val person = createPerson(false).apply {
             username = "dummyUsername"
         }
 
@@ -152,12 +153,6 @@ class PersonEditPresenterTest  {
                 .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
                         UmAccount(0L)).toByteArray())))
 
-
-        mockView = mock{
-            on{password}.thenReturn("password")
-            on{confirmedPassword}.thenReturn("password")
-        }
-
         val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
             registrationAllowed = true
         }), ARG_SERVER_URL to serverUrl)
@@ -171,9 +166,9 @@ class PersonEditPresenterTest  {
 
         presenter.handleClickSave(person)
 
-        argumentCaptor<Person>().apply {
+        argumentCaptor<PersonWithAccount>().apply {
             verifyBlocking(accountManager, timeout(timeoutInMill)){
-                register(capture(), any(), eq(serverUrl), eq(true))
+                register(capture(), eq(serverUrl), eq(true))
                 assertEquals("Person registration was done", person.personUid, firstValue.personUid)
             }
         }

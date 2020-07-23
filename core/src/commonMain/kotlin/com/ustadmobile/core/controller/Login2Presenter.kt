@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
 import com.ustadmobile.door.doorMainDispatcher
@@ -101,8 +102,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleCreateAccount(){
-        val args = arguments.plus(Pair(ARG_WORKSPACE, Json.stringify(WorkSpace.serializer(), workSpace)))
-        impl.go(PersonEditView.VIEW_NAME, args, context)
+        impl.go(PersonEditView.VIEW_NAME, mapOf(ARG_REGISTRATION_ALLOWED
+                to workSpace.registrationAllowed.toString(), ARG_SERVER_URL to serverUrl), context)
     }
 
     fun handleConnectAsGuest(){

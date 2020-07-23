@@ -4,7 +4,8 @@ import android.app.Application
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.action.ViewActions.swipeUp
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -18,7 +19,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -29,7 +31,6 @@ import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
-import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.hamcrest.Matchers.not
@@ -167,11 +168,11 @@ class PersonEditFragmentTest {
         val password = "password"
         val confirmedPassword = if(misMatchPassword) "password1" else password
 
-        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), workspace))
-        val bundle = args.plus(mapOf(UstadView.ARG_SERVER_URL to serverUrl)).toBundle()
+        val args = mapOf(ARG_REGISTRATION_ALLOWED to allowedRegistration.toString(),
+                ARG_SERVER_URL to serverUrl)
 
         val scenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundle) {
+                fragmentArgs = args.toBundle()) {
             PersonEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }

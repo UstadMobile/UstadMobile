@@ -17,41 +17,46 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
 
-class PersonAccountEditFragment: UstadEditFragment<Person>(), PersonAccountEditView {
+class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonAccountEditView {
 
     private var mBinding: FragmentPersonAccountEditBinding? = null
 
     private var mPresenter: PersonAccountEditPresenter? = null
 
-    override var firstPassword: String? = null
-        get() = mBinding?.firstPassword
 
-    override var secondPassword: String? = null
-        get() = mBinding?.secondPassword
-
-    override var secondPasswordFieldRequiredErrorVisible: Boolean = false
+    override var currentPasswordRequiredErrorVisible: Boolean = false
         set(value) {
             field = value
-            handleInputError(mBinding?.secondPasswordTextinputlayout,
+            handleInputError(mBinding?.currentPasswordTextinputlayout,
                     value,getString(R.string.field_required_prompt))
         }
 
-    override var firstPasswordFieldRequiredErrorVisible: Boolean = false
+    override var newPasswordRequiredErrorVisible: Boolean = false
         set(value) {
             field = value
-            handleInputError(mBinding?.firstPasswordTextinputlayout,
+            handleInputError(mBinding?.newPasswordTextinputlayout,
+                    value,getString(R.string.field_required_prompt))
+        }
+    override var confirmedPasswordRequiredErrorVisible: Boolean = false
+       set(value) {
+            field = value
+            handleInputError(mBinding?.confirmPasswordTextinputlayout,
                     value,getString(R.string.field_required_prompt))
         }
 
-    override fun showPasswordDoNotMatchError() {
-        handleInputError(mBinding?.firstPasswordTextinputlayout,true,
-                getString(R.string.filed_password_no_match))
-        handleInputError(mBinding?.secondPasswordTextinputlayout,true,
-                getString(R.string.filed_password_no_match))
-    }
+    override var passwordDoNotMatchErrorVisible: Boolean = false
+        set(value) {
+            field = value
+            handleInputError(mBinding?.newPasswordTextinputlayout,value,
+                    getString(R.string.filed_password_no_match))
+            handleInputError(mBinding?.confirmPasswordTextinputlayout,value,
+                    getString(R.string.filed_password_no_match))
+        }
+
 
     override var usernameRequiredErrorVisible: Boolean = false
         set(value) {
@@ -59,43 +64,32 @@ class PersonAccountEditFragment: UstadEditFragment<Person>(), PersonAccountEditV
             handleInputError(mBinding?.usernameTextinputlayout,
                     value,getString(R.string.field_required_prompt))
         }
-    override var errorMessage: String? = null
-        set(value) {
-            field = value
-            mBinding?.errorText?.visibility = if(value != null) View.VISIBLE else View.GONE
-            mBinding?.errorText?.text = value
-            loading = false
-        }
-    override var fistPasswordFieldHint: String? = null
-        set(value) {
-            field = value
-            mBinding?.firstPasswordTextinputlayout?.hint = value
-        }
 
-    override var secondPasswordFieldHint: String? = null
-        set(value) {
-            field = value
-            mBinding?.secondPasswordTextinputlayout?.hint = value
-        }
 
-    override fun clearFields() {
-        mBinding?.firstPassword = ""
-        mBinding?.secondPassword = ""
+    override fun showErrorMessage(message: String, isPasswordError: Boolean) {
+        if(isPasswordError){
+            handleInputError(mBinding?.currentPasswordTextinputlayout,true, message)
+            return
+        }
+        mBinding?.errorText?.visibility =  View.VISIBLE
+        mBinding?.errorText?.text = message
+
     }
 
 
     override var fieldsEnabled: Boolean = true
 
-    override var entity: Person? = null
+    override var entity: PersonWithAccount? = null
         get() = field
         set(value) {
             field = value
             mBinding?.person = value
             if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
                 (activity as? AppCompatActivity)?.supportActionBar?.title = value?.firstNames + " " + value?.lastName
+            mBinding?.currentPasswordTextinputlayout?.isEnabled = value != null && !value.admin
         }
 
-    override val mEditPresenter: UstadEditPresenter<*, Person>?
+    override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
         get() = mPresenter
 
 
@@ -108,23 +102,34 @@ class PersonAccountEditFragment: UstadEditFragment<Person>(), PersonAccountEditV
         mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        mBinding?.firstPasswordText?.addTextChangedListener(object: TextWatcher {
+        mBinding?.currentPasswordText?.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.firstPasswordTextinputlayout, false, null)
+                handleInputError(mBinding?.currentPasswordTextinputlayout, false, null)
             }
         })
 
-        mBinding?.secondPasswordText?.addTextChangedListener(object: TextWatcher {
+        mBinding?.newPasswordText?.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.secondPasswordTextinputlayout, false, null)
+                handleInputError(mBinding?.newPasswordTextinputlayout, false, null)
+            }
+        })
+
+
+        mBinding?.confirmPasswordText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.confirmPasswordTextinputlayout, false, null)
             }
         })
 

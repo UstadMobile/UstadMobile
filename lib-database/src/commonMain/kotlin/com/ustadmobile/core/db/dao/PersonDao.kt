@@ -197,6 +197,11 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract suspend fun findByUid(uid: Long): Person?
 
+    @JsName("findPersonAccountByUid")
+    @Query("SELECT Person.*, null as newPassword, null as currentPassword,null as confirmedPassword" +
+            " FROM PERSON WHERE Person.personUid = :uid")
+    abstract suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount?
+
     @Query("SELECT * From Person WHERE personUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Person?>
 

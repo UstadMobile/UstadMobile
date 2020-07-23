@@ -10,19 +10,12 @@
 
         <variable
             name="person"
-            type="com.ustadmobile.lib.db.entities.Person" />
+            type="com.ustadmobile.lib.db.entities.PersonWithAccount" />
 
         <variable
             name="personPictureUri"
             type="String" />
 
-        <variable
-            name="confirmPassword"
-            type="String" />
-
-        <variable
-            name="password"
-            type="String" />
 
         <variable
             name="loading"
@@ -288,7 +281,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:hint="@string/password"
-                    android:text="@={password}"
+                    android:text="@={person.newPassword}"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -314,7 +307,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
-                    android:text="@={confirmPassword}"
+                    android:text="@={person.confirmedPassword}"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
             </com.google.android.material.textfield.TextInputLayout>
 

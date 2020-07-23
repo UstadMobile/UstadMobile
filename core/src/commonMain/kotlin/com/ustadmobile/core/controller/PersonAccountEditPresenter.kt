@@ -11,7 +11,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -23,7 +23,7 @@ import org.kodein.di.instance
 class PersonAccountEditPresenter(context: Any,
                                  arguments: Map<String, String>, view: PersonAccountEditView, di: DI,
                                  lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<PersonAccountEditView, Person>(context, arguments, view, di, lifecycleOwner) {
+    : UstadEditPresenter<PersonAccountEditView, PersonWithAccount>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -39,27 +39,22 @@ class PersonAccountEditPresenter(context: Any,
         serverUrl = arguments[ARG_SERVER_URL]?:accountManager.activeAccount.endpointUrl
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Person? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: accountManager.activeAccount.personUid
         val person =  withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.personDao?.findByUid(entityUid)
-        } ?: Person()
-        createAccount = person.username == null
-        view.fistPasswordFieldHint = impl.getString(if(createAccount) MessageID.password
-        else MessageID.current_password,context)
-        view.secondPasswordFieldHint = impl.getString(if(createAccount) MessageID.confirm_password
-        else MessageID.new_password,context)
-
+            db.takeIf { entityUid != 0L }?.personDao?.findPersonAccountByUid(entityUid)
+        } ?: PersonWithAccount()
+        createAccount = person.username.isNullOrEmpty()
         return person
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): Person? {
+    override fun onLoadFromJson(bundle: Map<String, String>): PersonWithAccount? {
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         return  if(entityJsonStr != null) {
-            Json.parse(Person.serializer(), entityJsonStr)
+            Json.parse(PersonWithAccount.serializer(), entityJsonStr)
         }else {
-            Person()
+            PersonWithAccount()
         }
     }
 
@@ -69,40 +64,39 @@ class PersonAccountEditPresenter(context: Any,
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
-    override fun handleClickSave(entity: Person) {
+    override fun handleClickSave(entity: PersonWithAccount) {
         GlobalScope.launch(doorMainDispatcher()) {
-            if(!entity.admin && view.firstPassword.isNullOrEmpty() || view.secondPassword.isNullOrEmpty()
-                    || entity.username.isNullOrEmpty()){
+            if(!entity.admin && entity.currentPassword.isNullOrEmpty() || entity.newPassword.isNullOrEmpty()
+                    || entity.confirmedPassword.isNullOrEmpty()  || entity.username.isNullOrEmpty() ||
+                    entity.confirmedPassword != entity.newPassword){
 
                 view.usernameRequiredErrorVisible = entity.username.isNullOrEmpty()
-                view.firstPasswordFieldRequiredErrorVisible = view.firstPassword.isNullOrEmpty() && !entity.admin
-                view.secondPasswordFieldRequiredErrorVisible = view.secondPassword.isNullOrEmpty()
+                view.currentPasswordRequiredErrorVisible = entity.newPassword.isNullOrEmpty() && !entity.admin
+                view.newPasswordRequiredErrorVisible = entity.currentPassword.isNullOrEmpty()
+                view.confirmedPasswordRequiredErrorVisible = entity.confirmedPassword.isNullOrEmpty()
+                view.passwordDoNotMatchErrorVisible = entity.confirmedPassword != entity.newPassword
                 return@launch
             }
-            val firstPassword = view.firstPassword
-            val secondPassword = view.secondPassword
-            val username = entity.username
             try{
-                if(createAccount && firstPassword != null && secondPassword != null){
-                    if(firstPassword != secondPassword){
-                        view.showPasswordDoNotMatchError()
-                        return@launch
-                    }
-                    val umAccount = accountManager.register(entity,secondPassword, serverUrl, false)
+                if(createAccount && !entity.newPassword.isNullOrEmpty() && !entity.confirmedPassword.isNullOrEmpty()){
+                    val umAccount = accountManager.register(entity,serverUrl, false)
                     if(umAccount.username != null){
                         repo.personDao.updateAsync(entity)
                     }
                 }else{
-                    if(firstPassword != null && secondPassword != null && username != null){
-                        accountManager.changePassword(username,firstPassword,secondPassword, serverUrl)
+                    val currentPassword = entity.currentPassword
+                    val newPassword = entity.newPassword
+                    val username = entity.username
+                    if(((currentPassword != null && !entity.admin) || entity.admin) && newPassword != null && username != null){
+                        accountManager.changePassword(username, currentPassword.toString(),newPassword, serverUrl)
                     }
                 }
                 view.finishWithResult(listOf(entity))
             } catch (e: Exception){
-                view.errorMessage = impl.getString(if(e is UnauthorizedException)
-                    MessageID.filed_password_no_match else
-                    MessageID.login_network_error , context)
-                view.clearFields()
+                val isPasswordError = e is UnauthorizedException
+                view.showErrorMessage(impl.getString(if(isPasswordError)
+                    MessageID.incorrect_current_password else
+                    MessageID.login_network_error , context), isPasswordError)
             }
         }
     }

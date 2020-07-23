@@ -14,12 +14,10 @@ import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonPicture
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -33,7 +31,7 @@ import org.kodein.di.instance
 class PersonEditPresenter(context: Any,
                           arguments: Map<String, String>, view: PersonEditView, di: DI,
                           lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<PersonEditView, Person>(context, arguments, view, di, lifecycleOwner) {
+    : UstadEditPresenter<PersonEditView, PersonWithAccount>(context, arguments, view, di, lifecycleOwner) {
 
     private lateinit var serverUrl: String
 
@@ -44,9 +42,7 @@ class PersonEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    private var workSpace: WorkSpace = WorkSpace().apply {
-        registrationAllowed = false
-    }
+    private var registrationAllowed: Boolean = false
 
     private val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
@@ -71,10 +67,8 @@ class PersonEditPresenter(context: Any,
                 MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
         view.clazzList = clazzMemberJoinEditHelper.liveList
-        val mWorkSpace = arguments[UstadView.ARG_WORKSPACE]
-        if(mWorkSpace != null){
-            workSpace = Json.parse(WorkSpace.serializer(), mWorkSpace)
-        }
+
+        registrationAllowed = arguments[ARG_REGISTRATION_ALLOWED]?.toBoolean()?:false
 
         serverUrl = if (arguments.containsKey(UstadView.ARG_SERVER_URL)) {
             arguments.getValue(UstadView.ARG_SERVER_URL)
@@ -86,15 +80,15 @@ class PersonEditPresenter(context: Any,
                 AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context) ?:
                 ContentEntryListTabsView.VIEW_NAME
 
-        view.classVisible = workSpace.registrationAllowed
+        view.classVisible = registrationAllowed
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Person? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val person = withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.personDao?.findByUid(entityUid)
-        } ?: Person()
+            db.takeIf { entityUid != 0L }?.personDao?.findPersonAccountByUid(entityUid)
+        } ?: PersonWithAccount()
 
         val personPicture = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
@@ -113,14 +107,14 @@ class PersonEditPresenter(context: Any,
         return person
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): Person? {
+    override fun onLoadFromJson(bundle: Map<String, String>): PersonWithAccount? {
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Person? = null
         editEntity = if(entityJsonStr != null) {
-            Json.parse(Person.serializer(), entityJsonStr)
+            Json.parse(PersonWithAccount.serializer(), entityJsonStr)
         }else {
-            Person()
+            PersonWithAccount()
         }
 
         return editEntity
@@ -133,26 +127,26 @@ class PersonEditPresenter(context: Any,
                 entityVal)
     }
 
-    override fun handleClickSave(entity: Person) {
+    override fun handleClickSave(entity: PersonWithAccount) {
         GlobalScope.launch(doorMainDispatcher()) {
-            val noPasswordMatch = view.password != view.confirmedPassword
-                    && !view.password.isNullOrEmpty() &&  !view.confirmedPassword.isNullOrEmpty()
-            if(workSpace.registrationAllowed && (entity.username.isNullOrEmpty()
-                            || view.password.isNullOrEmpty() || view.confirmedPassword.isNullOrEmpty()
+            val noPasswordMatch = entity.newPassword != entity.confirmedPassword
+                    && !entity.newPassword.isNullOrEmpty() &&  !entity.confirmedPassword.isNullOrEmpty()
+            if(registrationAllowed && (entity.username.isNullOrEmpty()
+                            || entity.newPassword.isNullOrEmpty() || entity.confirmedPassword.isNullOrEmpty()
                             || noPasswordMatch)){
 
                 view.usernameRequiredErrorVisible = entity.username.isNullOrEmpty()
-                view.passwordRequiredErrorVisible = view.password.isNullOrEmpty()
-                view.confirmPasswordErrorVisible = view.confirmedPassword.isNullOrEmpty()
+                view.passwordRequiredErrorVisible = entity.newPassword.isNullOrEmpty()
+                view.confirmPasswordErrorVisible = entity.confirmedPassword.isNullOrEmpty()
                 view.noMatchPasswordErrorVisible = noPasswordMatch
                 return@launch
             }
 
-            if(workSpace.registrationAllowed){
-                val password = view.password
+            if(registrationAllowed){
+                val password = entity.newPassword
                 if(password != null){
                    try{
-                       val umAccount = accountManager.register(entity, password, serverUrl)
+                       val umAccount = accountManager.register(entity, serverUrl)
                        accountManager.activeAccount = umAccount
                        view.navigateToNextDestination(umAccount,nextDestination)
                    }catch (e:Exception){

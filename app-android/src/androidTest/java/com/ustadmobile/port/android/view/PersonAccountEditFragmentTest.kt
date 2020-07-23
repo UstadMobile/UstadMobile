@@ -142,10 +142,13 @@ class PersonAccountEditFragmentTest {
         val person = createPerson(true)
         launchFragment(person, true, leftOutUsername = true)
 
-        onView(withId(R.id.first_password_textinputlayout)).check(matches(
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
 
-        onView(withId(R.id.second_password_textinputlayout)).check(matches(
+        onView(withId(R.id.new_password_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.field_required_prompt))))
+
+        onView(withId(R.id.confirm_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
     }
 
@@ -155,7 +158,9 @@ class PersonAccountEditFragmentTest {
         val person = createPerson(false, isAdmin = true)
         launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = false)
 
-        onView(withId(R.id.second_password_textinputlayout)).check(matches(
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(not(isEnabled())))
+
+        onView(withId(R.id.new_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
 
     }
@@ -166,12 +171,15 @@ class PersonAccountEditFragmentTest {
         enqueueResponse()
         val person = createPerson(true, isAdmin = false)
         launchFragment(person, true, leftOutUsername = true, fillCurrentPassword = true,
-                fillNewPassword = true)
+                fillNewPassword = true,matchingPassword = true)
 
-        onView(withId(R.id.first_password_textinputlayout)).check(matches(
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(
                 not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
 
-        onView(withId(R.id.second_password_textinputlayout)).check(matches(
+        onView(withId(R.id.new_password_textinputlayout)).check(matches(
+                not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
+
+        onView(withId(R.id.confirm_password_textinputlayout)).check(matches(
                 not(hasInputLayoutError(context.getString(R.string.field_required_prompt)))))
     }
 
@@ -185,8 +193,10 @@ class PersonAccountEditFragmentTest {
 
         //wait for a network call - fixed timeout
         sleep(1000)
-        onView(withId(R.id.error_text)).check(matches(isDisplayed()))
-                .check(matches(withText(context.getString(R.string.filed_password_no_match))))
+
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.incorrect_current_password))))
+
     }
 
 
@@ -213,10 +223,10 @@ class PersonAccountEditFragmentTest {
         launchFragment(person, true, leftOutUsername = false, fillCurrentPassword = true,
                 fillNewPassword = true, matchingPassword = false)
 
-        onView(withId(R.id.first_password_textinputlayout)).check(matches(
+        onView(withId(R.id.new_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
 
-        onView(withId(R.id.second_password_textinputlayout)).check(matches(
+        onView(withId(R.id.confirm_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
     }
 
@@ -236,20 +246,22 @@ class PersonAccountEditFragmentTest {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        val firstPassword = "password"
-        val secondPassword = if(matchingPassword) firstPassword else "password2"
+        val newPassword = "password"
+        val confirmedPassword = if(matchingPassword) newPassword else "password2"
         if(fillForm){
             if(!leftOutUsername){
                 onView(withId(R.id.account_username_text)).perform(click(),typeText("person.username"))
             }
 
             if(fillCurrentPassword){
-                onView(withId(R.id.first_password_text)).perform(click(),typeText(firstPassword))
+                onView(withId(R.id.current_password_text)).perform(click(),typeText(newPassword))
             }
 
             if(fillNewPassword){
-                onView(withId(R.id.second_password_text)).perform(click(),typeText(secondPassword))
+                onView(withId(R.id.new_password_text)).perform(click(),typeText(confirmedPassword))
             }
+
+            onView(withId(R.id.confirm_password_text)).perform(click(),typeText(confirmedPassword))
             scenario.clickOptionMenu(R.id.menu_done)
         }
         return scenario

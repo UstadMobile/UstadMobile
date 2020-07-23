@@ -42,13 +42,13 @@ interface PersonEditFragmentEventHandler {
     
 }
 
-class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEditFragmentEventHandler {
+class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView, PersonEditFragmentEventHandler {
 
     private var mBinding: FragmentPersonEditBinding? = null
 
     private var mPresenter: PersonEditPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, Person>?
+    override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
         get() = mPresenter
 
     override var genderOptions: List<MessageIdOption>? = null
@@ -106,7 +106,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
     }
 
 
-    override var entity: Person? = null
+    override var entity: PersonWithAccount? = null
         get() = field
         set(value) {
             field = value
@@ -158,12 +158,6 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
                 mBinding?.personPictureUri = null
             }
         }
-    override var password: String? = null
-        get() = mBinding?.password
-
-
-    override var confirmedPassword: String? = null
-        get() = mBinding?.confirmPassword
 
     override var classVisible: Boolean? = null
         set(value) {
