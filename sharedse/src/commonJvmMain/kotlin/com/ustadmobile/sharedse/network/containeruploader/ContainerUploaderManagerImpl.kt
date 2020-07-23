@@ -16,7 +16,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class ContainerUploaderManagerImp(val endpoint: Endpoint, override val di: DI) : ContainerUploadManager(), DIAware {
+class ContainerUploaderManagerImpl(val endpoint: Endpoint, override val di: DI) : ContainerUploadManager(), DIAware {
 
     private val appDb: UmAppDatabase by on(endpoint).instance(tag = TAG_DB)
 

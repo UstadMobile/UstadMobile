@@ -25,7 +25,7 @@ import kotlin.math.min
 
 class ContainerUploader(val request: ContainerUploaderRequest,
                         val listener: ContainerUploaderListener?,
-                        val chunkSize: Int = CHUNK_SIZE,
+                        val chunkSize: Int = DEFAULT_CHUNK_SIZE,
                         override val di: DI) : DIAware {
 
     private val contentLength = AtomicLong(0L)
@@ -162,7 +162,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
 
     companion object {
 
-        const val CHUNK_SIZE = 1024 * 8
+        const val DEFAULT_CHUNK_SIZE = 1024 * 200
 
     }
 

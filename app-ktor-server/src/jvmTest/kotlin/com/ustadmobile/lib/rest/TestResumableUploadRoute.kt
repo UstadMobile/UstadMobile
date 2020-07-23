@@ -15,7 +15,9 @@ import io.ktor.server.netty.Netty
 import org.apache.commons.io.IOUtils
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.io.FileInputStream
 import java.net.HttpURLConnection
@@ -29,13 +31,15 @@ class TestResumableUploadRoute {
 
     private val defaultPort = 8098
 
+    @JvmField
+    @Rule
+    var tmpFolderRule = TemporaryFolder()
+
     lateinit var tmpFolder: File
 
     @Before
     fun setup() {
-        tmpFolder = File.createTempFile("upload", "")
-        tmpFolder.delete()
-        tmpFolder.mkdirs()
+        tmpFolder = tmpFolderRule.newFolder()
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(Routing) {

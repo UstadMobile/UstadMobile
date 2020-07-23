@@ -19,7 +19,7 @@ import com.ustadmobile.lib.rest.ResumableUploadRoute
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Companion.CHUNK_SIZE
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Companion.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
 import com.ustadmobile.sharedse.network.containeruploader.UploadJobRunner
@@ -178,7 +178,7 @@ class UploadJobRunnerTest {
         mockWebServer.enqueue(MockResponse().setBody(sessionId))
 
         // fail to upload - server problem
-        for (i in 0..(fileToUpload.length()) step CHUNK_SIZE.toLong()) {
+        for (i in 0..(fileToUpload.length()) step DEFAULT_CHUNK_SIZE.toLong()) {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.InternalServerError.value).setBody("Server error"))
         }
 

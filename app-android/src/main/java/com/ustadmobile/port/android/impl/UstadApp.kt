@@ -34,7 +34,7 @@ import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderManagerImp
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderManagerImpl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
@@ -90,7 +90,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<ContainerUploadManager>() with scoped(EndpointScope.Default).singleton {
-            ContainerUploaderManagerImp(endpoint = context, di = di)
+            ContainerUploaderManagerImpl(endpoint = context, di = di)
         }
 
         bind<DownloadPreparationRequester>() with scoped(EndpointScope.Default).singleton {

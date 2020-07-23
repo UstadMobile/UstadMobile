@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Companion.CHUNK_SIZE
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Companion.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.http.HttpStatusCode
@@ -21,7 +21,9 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import java.io.*
 import java.util.*
@@ -34,7 +36,14 @@ class TestContainerUploader {
     private lateinit var entryListStr: String
     private lateinit var containerManager: ContainerManager
     private lateinit var appDb: UmAppDatabase
+
+    @JvmField
+    @Rule
+    var tmpFolderRule = TemporaryFolder()
+
     private lateinit var tmpFolder: File
+
+
     private lateinit var fileToUpload: File
     private lateinit var mockWebServer: MockWebServer
 
@@ -60,7 +69,7 @@ class TestContainerUploader {
         }
         appDb = di.on(Endpoint(TEST_ENDPOINT)).direct.instance(tag = UmAppDatabase.TAG_DB)
 
-        tmpFolder = UmFileUtilSe.makeTempDir("upload", "")
+        tmpFolder = tmpFolderRule.newFolder()
         fileToUpload = File(tmpFolder, "tincan.zip")
         UmFileUtilSe.extractResourceToFile(
                 "/com/ustadmobile/port/sharedse/contentformats/ustad-tincan.zip",
@@ -90,7 +99,7 @@ class TestContainerUploader {
 
         val sessionId = UUID.randomUUID().toString()
         mockWebServer.enqueue(MockResponse().setBody(sessionId))
-        for (i in 0..fileToUpload.length() step CHUNK_SIZE.toLong()) {
+        for (i in 0..fileToUpload.length() step DEFAULT_CHUNK_SIZE.toLong()) {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.NoContent.value))
         }
 
