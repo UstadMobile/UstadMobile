@@ -41,7 +41,7 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
                 call.respond(HttpStatusCode.OK,
                         UmAccount(person.personUid, username, "", "",person.firstNames,person.lastName))
             }else {
-                call.respond(HttpStatusCode.Forbidden, "${person?.firstNames}, $password, ${person == null} ${person?.passwordHash}")
+                call.respond(HttpStatusCode.Forbidden, "")
             }
         }
 
@@ -109,7 +109,7 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
                     return@post
                 }
 
-                if(currentPassword != null && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
+                if(!person.admin && currentPassword != null && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
                                 && person.passwordHash.substring(2) != currentPassword)
                                 ||(person.passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) &&
                                 authenticateEncryptedPassword(currentPassword, person.passwordHash.substring(2))))){
