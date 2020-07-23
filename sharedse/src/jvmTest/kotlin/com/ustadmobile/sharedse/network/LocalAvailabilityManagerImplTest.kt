@@ -133,21 +133,18 @@ class LocalAvailabilityManagerImplTest  {
     @Test
     fun givenStatusAlreadyKnown_whenAvailabilityStatusRequested_noTasksAreCreated() {
         runBlocking {
+            val managerImpl = LocalAvailabilityManagerImpl(di, activeEndpoint)
+            managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
+            managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
+            managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
 
-            runBlocking {
-                val managerImpl = LocalAvailabilityManagerImpl(di, activeEndpoint)
-                managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
-                managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
-                managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
+            verifyBlocking(mockNetworkManager, timeout(5000).times(2)) { sendBleMessage(any(), any())}
 
-                verifyBlocking(mockNetworkManager, timeout(5000).times(2)) { sendBleMessage(any(), any())}
+            managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
 
-                managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
+            delay(200)
 
-                delay(50)
-
-                verifyNoMoreInteractions(mockNetworkManager)
-            }
+            verifyNoMoreInteractions(mockNetworkManager)
         }
     }
 

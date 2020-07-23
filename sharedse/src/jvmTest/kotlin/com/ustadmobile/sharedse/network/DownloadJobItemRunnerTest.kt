@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
@@ -32,6 +31,7 @@ import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.util.test.ReverseProxyDispatcher
+import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.util.test.extractTestResourceToFile
 import io.ktor.server.engine.ApplicationEngine
@@ -856,7 +856,7 @@ class DownloadJobItemRunnerTest {
         @BeforeClass
         @JvmStatic
         fun setupLog() {
-            Napier.base(DebugAntilog())
+            Napier.baseDebugIfNotEnabled()
         }
     }
 }
