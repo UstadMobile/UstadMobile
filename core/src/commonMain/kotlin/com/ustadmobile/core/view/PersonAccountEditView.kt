@@ -14,7 +14,7 @@ interface PersonAccountEditView: UstadEditView<PersonWithAccount> {
 
     var usernameError: String?
 
-    fun showErrorMessage(message: String,isPasswordError:Boolean)
+    var errorMessage: String?
 
     companion object {
 

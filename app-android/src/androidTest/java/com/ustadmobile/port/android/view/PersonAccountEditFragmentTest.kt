@@ -220,6 +220,22 @@ class PersonAccountEditFragmentTest {
         assertEquals("Account was created successfully", person.username , mPerson?.username)
     }
 
+    @AdbScreenRecord("given person account edit launched in account creation mode when all fields are filled on save clicked but username exists should show error")
+    @Test
+    fun givenPersonAccountInAccountCreationMode_whenAllFieldsAreFilledAndSaveClickedButUsernameExists_thenShouldShowError(){
+        enqueueResponse(false, 409)
+        val person = createPerson(false, isAdmin = false, matchPassword = true)
+        val fragmentScenario = launchFragment(person, true, fillUsername = true, fillCurrentPassword = false,
+                fillNewPassword = true)
+
+        dbRule.db.personDao.findByUidLive(person.personUid).waitUntilWithFragmentScenario(fragmentScenario) {
+            it?.username != null
+        }
+        onView(withId(R.id.username_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.person_exists))))
+
+    }
+
 
     @AdbScreenRecord("given person account edit launched in account creation mode when password doesn't match on save clicked should show errors")
     @Test

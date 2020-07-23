@@ -116,9 +116,9 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             }
             return account
         }else if(status == 409){
-            throw IllegalArgumentException("Conflict: username already taken")
+            throw IllegalStateException("Conflict: username already taken")
         }else {
-            throw IllegalStateException("register request: non-OK status code: $status")
+            throw Exception("register request: non-OK status code: $status")
         }
     }
 

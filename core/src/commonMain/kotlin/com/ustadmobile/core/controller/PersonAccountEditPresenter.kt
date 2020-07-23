@@ -95,16 +95,21 @@ class PersonAccountEditPresenter(context: Any,
                     val currentPassword = entity.currentPassword
                     val newPassword = entity.newPassword
                     val username = entity.username
-                    if(((currentPassword != null && !entity.admin) || entity.admin) && newPassword != null && username != null){
-                        accountManager.changePassword(username, currentPassword.toString(),newPassword, serverUrl)
+                    if(((currentPassword != null && !entity.admin) || entity.admin)
+                            && newPassword != null && username != null){
+                        accountManager.changePassword(username, currentPassword.toString(),
+                                newPassword, serverUrl)
                     }
                 }
                 view.finishWithResult(listOf(entity))
             } catch (e: Exception){
-                val isPasswordError = e is UnauthorizedException
-                view.showErrorMessage(impl.getString(if(isPasswordError)
-                    MessageID.incorrect_current_password else
-                    MessageID.login_network_error , context), isPasswordError)
+                when (e) {
+                    is UnauthorizedException -> view.currentPasswordError =
+                            impl.getString(MessageID.incorrect_current_password, context)
+                    is IllegalStateException -> view.usernameError =
+                            impl.getString(MessageID.person_exists, context)
+                    else -> view.errorMessage = impl.getString(MessageID.login_network_error, context)
+                }
             }
         }
     }

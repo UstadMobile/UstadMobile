@@ -59,16 +59,12 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
             handleInputError(mBinding?.usernameTextinputlayout, value != null,value)
         }
 
-
-    override fun showErrorMessage(message: String, isPasswordError: Boolean) {
-        if(isPasswordError){
-            handleInputError(mBinding?.currentPasswordTextinputlayout,true, message)
-            return
+    override var errorMessage: String? = null
+        set(value) {
+            field = value
+            mBinding?.errorText?.visibility =  View.VISIBLE
+            mBinding?.errorText?.text = value
         }
-        mBinding?.errorText?.visibility =  View.VISIBLE
-        mBinding?.errorText?.text = message
-
-    }
 
 
     override var fieldsEnabled: Boolean = true
