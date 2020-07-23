@@ -148,7 +148,6 @@ class ContainerUploader(val request: ContainerUploaderRequest,
 
             } finally {
                 progressUpdaterJob.cancel()
-                listener?.onProgress(request, bytesSoFar.get(), contentLength.get())
                 inStream?.close()
                 rangeStream?.close()
                 urlConnection?.disconnect()
