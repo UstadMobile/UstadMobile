@@ -17,7 +17,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
@@ -28,6 +27,7 @@ import com.ustadmobile.port.sharedse.ext.ConcatenatedHttpResponse
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.util.test.ReverseProxyDispatcher
@@ -35,6 +35,10 @@ import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.util.test.extractTestResourceToFile
 import io.ktor.server.engine.ApplicationEngine
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.*
 import okhttp3.mockwebserver.*
 import okio.Buffer
@@ -355,49 +359,6 @@ class DownloadJobItemRunnerTest {
 //        peerZipFile.close()
     }
 
-    fun assertContainersHaveSameContent(containerUid1: Long, containerUid2: Long,
-                                        db1: UmAppDatabase, repo1: UmAppDatabase,
-                                        db2: UmAppDatabase, repo2: UmAppDatabase) {
-
-        val container1 = repo1.containerDao.findByUid(containerUid1)!!
-        val manager1 = ContainerManager(container1, db1, repo1)
-
-        val container2 = repo2.containerDao.findByUid(containerUid2)!!
-        val manager2 = ContainerManager(container2, db2, repo2)
-
-        Assert.assertEquals("Containers have same number of entries",
-                container1.cntNumEntries.toLong(),
-                db2.containerEntryDao.findByContainer(containerUid2).size.toLong())
-
-        for (entry in manager1.allEntries) {
-            val entry2 = manager2.getEntry(entry.cePath!!)
-            Assert.assertNotNull("Client container also contains " + entry.cePath!!,
-                    entry2)
-
-
-            val e1Contents: ByteArray
-            try {
-                e1Contents = UMIOUtils.readStreamToByteArray(manager1.getInputStream(entry))
-            } catch(e1: Exception) {
-                throw IOException("Exception reading entry 1 ${entry.cePath} from ${entry.containerEntryFile?.cefPath}",
-                        e1)
-            }
-
-
-            val e2Contents: ByteArray
-
-            try {
-                e2Contents = UMIOUtils.readStreamToByteArray(manager2.getInputStream(entry2!!))
-            } catch(e2: Exception) {
-                throw IOException("Exception reading entry 2 ${entry.cePath} from ${entry2!!.containerEntryFile?.cefPath}",
-                        e2)
-            }
-
-            Assert.assertArrayEquals("${entry.cePath} contents are the same",
-                    e1Contents, e2Contents)
-        }
-    }
-
     @Test
     fun givenDownload_whenRun_shouldDownloadAndComplete() {
         runBlocking {
@@ -432,8 +393,7 @@ class DownloadJobItemRunnerTest {
                     container.cntNumEntries,
                     clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size)
 
-            assertContainersHaveSameContent(item.djiContainerUid, item.djiContainerUid,
-                    serverDb, serverDb, clientDb, clientDb)
+            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
         }
     }
 
@@ -464,8 +424,7 @@ class DownloadJobItemRunnerTest {
             Assert.assertTrue("Number of file get requests > 2",
                     cloudMockWebServer.requestCount > 2)
 
-            assertContainersHaveSameContent(item.djiContainerUid, item.djiContainerUid,
-                    serverDb, serverDb, clientDb, clientDb)
+            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
         }
     }
 

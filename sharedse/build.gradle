@@ -123,6 +123,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"

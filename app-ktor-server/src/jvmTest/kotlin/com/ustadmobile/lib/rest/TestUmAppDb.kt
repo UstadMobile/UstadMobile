@@ -55,7 +55,7 @@ class TestUmAppDb {
 
     @After
     fun tearDown() {
-        server.stop(0, 5, TimeUnit.SECONDS)
+        server.stop(0, 5000)
     }
 
     @Test

@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
 
 private const val DEFAULT_SESSION_LENGTH = (1000L * 60 * 60 * 24 * 365)//One year
 
-fun Route.PersonAuthRegister(db: UmAppDatabase) {
+fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
 
     route("auth") {
         post("login") {
