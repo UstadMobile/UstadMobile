@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
@@ -12,6 +11,7 @@ import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.rest.umRestApplication
 import com.ustadmobile.sharedse.util.UstadTestRule
+import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -44,7 +44,7 @@ class DownloadJobPreparerTest {
 
     @Before
     fun setup(){
-        Napier.base(DebugAntilog())
+        Napier.baseDebugIfNotEnabled()
         serverDb = UmAppDatabase.getInstance(Any())
         serverDb.clearAllTables()
 

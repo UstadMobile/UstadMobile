@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -8,6 +7,7 @@ import com.ustadmobile.port.sharedse.impl.http.BleHttpRequest
 import com.ustadmobile.port.sharedse.impl.http.BleHttpResponse
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
 import com.ustadmobile.port.sharedse.impl.http.asBleHttpResponse
+import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
@@ -41,7 +41,7 @@ class BleProxyResponderTest {
 
     @Before
     fun setup() {
-        Napier.base(DebugAntilog())
+        Napier.baseDebugIfNotEnabled()
         httpClient = HttpClient() {
             install(JsonFeature)
         }
