@@ -182,6 +182,9 @@ class ContentEntry2DetailFragmentTest {
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
+        //TODO: Replace this with IdlingResources
+        Thread.sleep(1000)
+
         onView(withText("Server Title")).check(matches(isDisplayed()))
         onView(withText(R.string.download)).perform(click())
 
