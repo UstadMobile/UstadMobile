@@ -3,13 +3,17 @@ package com.ustadmobile.test.port.android
 import android.view.View
 import android.widget.Checkable
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
+import androidx.test.espresso.ViewAssertion
 import androidx.test.espresso.action.MotionEvents
 import androidx.test.espresso.matcher.BoundedMatcher
+import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import com.google.android.material.textfield.TextInputLayout
 import org.hamcrest.BaseMatcher
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.isA
 import org.hamcrest.Description
 import org.hamcrest.Matcher
@@ -91,6 +95,15 @@ object UmViewActions {
                 return itemMatcher.matches(viewHolder.itemView)
             }
         }
+    }
+
+    fun withItemCount(matcher: Matcher<Int>) = ViewAssertion { view, noViewFoundException ->
+        if(noViewFoundException != null){
+            throw noViewFoundException
+        }
+        val recyclerView = view as RecyclerView
+        val adapter = recyclerView.adapter
+        assertThat(adapter?.itemCount, matcher)
     }
 
 }

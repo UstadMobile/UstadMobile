@@ -41,8 +41,6 @@ class ContentEntryEdit2PresenterTest  {
 
     private lateinit var mockView: ContentEntryEdit2View
 
-    private lateinit var activeAccount: DoorMutableLiveData<UmAccount?>
-
     private lateinit var context: Any
 
     private lateinit var db: UmAppDatabase

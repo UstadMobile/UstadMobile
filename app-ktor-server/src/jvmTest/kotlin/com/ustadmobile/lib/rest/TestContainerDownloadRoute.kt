@@ -4,15 +4,17 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
-import com.ustadmobile.core.io.ConcatenatedInputStream
-import com.ustadmobile.core.io.ConcatenatedPart
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.sharedse.io.ConcatenatedInputStream
+import com.ustadmobile.sharedse.io.ConcatenatedPart
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.get
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
@@ -21,26 +23,17 @@ import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import org.junit.Before
-import org.junit.Test
-import java.io.File
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import io.ktor.client.request.get
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import io.ktor.utils.io.core.IoBuffer
+import io.ktor.utils.io.core.readAvailable
+import io.ktor.utils.io.core.writeFully
+import io.ktor.utils.io.streams.asInput
+import io.ktor.utils.io.streams.asOutput
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.InputStream
-import kotlinx.io.core.IoBuffer
-import kotlinx.io.core.readAvailable
-import kotlinx.io.core.writeFully
-import kotlinx.io.streams.asInput
-import kotlinx.io.streams.asOutput
 import org.junit.After
 import org.junit.Assert
-import java.io.ByteArrayInputStream
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.concurrent.TimeUnit
+import org.junit.Before
+import org.junit.Test
+import java.io.*
 
 class TestContainerDownloadRoute {
 
@@ -86,7 +79,7 @@ class TestContainerDownloadRoute {
 
     @After
     fun tearDown() {
-        server.stop(0, 5, TimeUnit.SECONDS)
+        server.stop(0, 5000)
     }
 
     @Test
