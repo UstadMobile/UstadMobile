@@ -90,3 +90,4 @@ task stopServer(type: Exec) {
 
 appRun.dependsOn(shadowJar)
 appRunDebug.dependsOn(shadowJar)
+startServer.dependsOn(shadowJar)
