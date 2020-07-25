@@ -16,6 +16,8 @@ interface PersonAccountEditView: UstadEditView<PersonWithAccount> {
 
     var errorMessage: String?
 
+    var showCurrentPassword: Boolean
+
     companion object {
 
         const val VIEW_NAME = "PersonAccountEditView"

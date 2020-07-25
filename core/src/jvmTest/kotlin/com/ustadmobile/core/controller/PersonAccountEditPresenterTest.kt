@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -14,6 +15,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
+import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -49,6 +51,8 @@ class PersonAccountEditPresenterTest  {
 
     private val mPersonUid: Long = 234567
 
+    private val loggedPersonUid:Long = 234568
+
     private lateinit var accountManager: UstadAccountManager
 
     private lateinit var impl: UstadMobileSystemImpl
@@ -67,7 +71,7 @@ class PersonAccountEditPresenterTest  {
         serverUrl = mockWebServer.url("/").toString()
 
         accountManager = mock{
-            on{activeAccount}.thenReturn(UmAccount(mPersonUid,"","",serverUrl))
+            on{activeAccount}.thenReturn(UmAccount(loggedPersonUid,"","",serverUrl))
         }
 
         di = DI {
@@ -100,19 +104,28 @@ class PersonAccountEditPresenterTest  {
                              matchPassword: Boolean = false): PersonWithAccount {
         val password = "password"
         val confirmPassword = if(matchPassword) password else "password1"
-        return PersonWithAccount().apply {
+        val person =  PersonWithAccount().apply {
             fatherName = "Doe"
             firstNames = "Jane"
             lastName = "Doe"
             if(withUsername){
                 username = "dummyUserName"
             }
-            admin = isAdmin
             personUid = mPersonUid
             newPassword = password
             confirmedPassword = confirmPassword
             repo.personDao.insert(this)
         }
+
+        PersonWithAccount().apply {
+            admin = isAdmin
+            username = "First"
+            lastName = "User"
+            personUid = loggedPersonUid
+            repo.personDao.insert(this)
+        }
+
+        return person
     }
 
     @Test
@@ -121,6 +134,9 @@ class PersonAccountEditPresenterTest  {
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
+
         presenter.handleClickSave(person)
 
         val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
@@ -134,7 +150,10 @@ class PersonAccountEditPresenterTest  {
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
         val presenter = PersonAccountEditPresenter(context,args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
         presenter.handleClickSave(person)
+
         val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
         argumentCaptor<String>{
             verify(mockView, timeout(defaultTimeOut).atLeastOnce()).currentPasswordError = capture()
@@ -148,6 +167,8 @@ class PersonAccountEditPresenterTest  {
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
         presenter.handleClickSave(person)
         val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).newPasswordError = eq(expectedMessage)
@@ -180,7 +201,7 @@ class PersonAccountEditPresenterTest  {
     fun givenPresenterCreatedInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
         enQueuePasswordChangeResponse()
 
-        val person = createPerson(isAdmin = true, withUsername = false, matchPassword = true)
+        val person = createPerson(isAdmin = false, withUsername = false, matchPassword = true)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
                 UstadView.ARG_SERVER_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
