@@ -188,8 +188,13 @@ class ContentEntry2DetailFragmentTest {
         onView(withText("Server Title")).check(matches(isDisplayed()))
         onView(withText(R.string.download)).perform(click())
 
+        //Click on the dialog
+        onView(withText(R.string.download)).perform(click())
 
+        Thread.sleep(5000)
 
+        //now open it
+        onView(withText(R.string.open)).perform(click())
     }
 
 
