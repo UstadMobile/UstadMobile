@@ -2,12 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.view.AboutView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
-import kotlinx.io.InputStream
 import org.kodein.di.DI
 import org.kodein.di.instance
 

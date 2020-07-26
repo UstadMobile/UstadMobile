@@ -134,6 +134,8 @@ interface UstadView {
          */
         const val ARG_RESULT_DEST_ID = "result_dest"
 
+        const val ARG_REGISTRATION_ALLOWED = "registration_allowed"
+
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L
 

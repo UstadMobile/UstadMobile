@@ -28,12 +28,14 @@ import com.toughra.ustadmobile.databinding.FragmentListBinding
 import com.toughra.ustadmobile.databinding.ItemSimplepersonBinding
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
-import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_WITHDATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
-import com.ustadmobile.test.rules.*
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
+import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assume
 import org.junit.Rule

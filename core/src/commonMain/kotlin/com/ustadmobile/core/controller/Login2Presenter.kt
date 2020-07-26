@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
 import com.ustadmobile.door.doorMainDispatcher
@@ -18,7 +19,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -60,9 +61,6 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         val mWorkSpace = arguments[ARG_WORKSPACE]
         if(mWorkSpace != null){
             workSpace = Json.parse(WorkSpace.serializer(), mWorkSpace)
-
-            //Disabled for now
-            workSpace.registrationAllowed = false
         }else{
             val isRegistrationAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_REGISTRATION,
                     context)
@@ -104,7 +102,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleCreateAccount(){
-        impl.go(PersonEditView.VIEW_NAME, arguments, context)
+        impl.go(PersonEditView.VIEW_NAME, mapOf(ARG_REGISTRATION_ALLOWED
+                to workSpace.registrationAllowed.toString(), ARG_SERVER_URL to serverUrl), context)
     }
 
     fun handleConnectAsGuest(){

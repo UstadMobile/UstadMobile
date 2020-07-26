@@ -19,8 +19,10 @@ import kotlin.collections.HashSet
 import com.ustadmobile.core.util.ext.makeRootDownloadJobItem
 import com.ustadmobile.core.util.ext.isStatusCompleted
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.door.DoorObserver
 import org.kodein.di.*
-
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.door.doorMainDispatcher
 /**
  * This class manages a download queue for a given endpoint.
  */
@@ -30,6 +32,16 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
     var onQueueEmpty: (() -> Unit) = {}
 
     val appDb: UmAppDatabase by on(endpoint).instance(tag = TAG_DB)
+
+    private val networkManager: NetworkManagerBle by instance()
+
+    private val connectivityObserver = object: DoorObserver<ConnectivityStatus> {
+        override fun onChanged(t: ConnectivityStatus) {
+            GlobalScope.launch(singleThreadContext) {
+                handleConnectivityChanged(t)
+            }
+        }
+    }
 
     /**
      * This class ensures that a reference is kept as long as anything still holds a reference to
@@ -194,13 +206,18 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     private val jobsToCommit: MutableSet<DownloadJob> = HashSet()
 
-    override val connectivityLiveData = DoorMutableLiveData<ConnectivityStatus?>(null)
-
     private var currentConnectivityStatus: ConnectivityStatus? = null
 
     private val activeDownloads: MutableMap<Int, ActiveContainerDownload> = ConcurrentHashMap()
 
     val maxNumConcurrentDownloads = 1
+
+    init {
+        GlobalScope.launch(doorMainDispatcher()) {
+            networkManager.connectivityStatus.observeForever(connectivityObserver)
+        }
+    }
+
 
     override suspend fun getDownloadJobItemByJobItemUid(jobItemUid: Int): DoorLiveData<DownloadJobItem?> = withContext(singleThreadContext){
         val holder = loadDownloadJobItemHolder(jobItemUid)
@@ -373,7 +390,7 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         }
 
         val nextDownload = appDb.downloadJobItemDao.findNextDownloadJobItems2(1,
-                currentConnectivityStatus?.connectivityState == ConnectivityStatus.STATE_UNMETERED)
+                currentConnectivityStatus?.connectivityState ?: ConnectivityStatus.STATE_DISCONNECTED)
         if(nextDownload.isNotEmpty()) {
             val containerDownloader: ContainerDownloadRunner = di.direct.instance(
                     arg = DownloadJobItemRunnerDIArgs(endpoint, nextDownload[0]))
@@ -452,7 +469,6 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     override suspend fun handleConnectivityChanged(status: ConnectivityStatus) = withContext(singleThreadContext){
         currentConnectivityStatus = status
-        connectivityLiveData.sendValue(status)
         checkQueue()
     }
 }
