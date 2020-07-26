@@ -18,6 +18,8 @@ interface ContentEntry2DetailView: UstadDetailView<ContentEntryWithMostRecentCon
 
     var downloadJobItem: DownloadJobItem?
 
+    var locallyAvailable: Boolean
+
     companion object {
 
         const val VIEW_NAME = "ContentEntryDetailView"

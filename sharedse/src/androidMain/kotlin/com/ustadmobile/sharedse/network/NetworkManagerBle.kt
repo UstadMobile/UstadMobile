@@ -3,13 +3,7 @@ package com.ustadmobile.sharedse.network
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.AdvertiseCallback
-import android.bluetooth.le.AdvertiseData
-import android.bluetooth.le.AdvertiseSettings
-import android.bluetooth.le.BluetoothLeAdvertiser
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -20,7 +14,6 @@ import android.net.wifi.WifiManager
 import android.net.wifi.p2p.WifiP2pGroup
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.Build
-import android.os.Handler
 import android.os.Looper.getMainLooper
 import android.os.ParcelUuid
 import android.os.SystemClock
@@ -30,16 +23,24 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.networkmanager.defaultGsonSerializer
+import com.ustadmobile.core.networkmanager.defaultOkHttpClient
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
+import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.json.JsonFeature
+import kotlinx.coroutines.CoroutineDispatcher
+import okhttp3.OkHttpClient
+import org.kodein.di.DI
+import org.kodein.di.instance
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.util.*
 import java.util.concurrent.Executors
@@ -48,16 +49,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
-import com.ustadmobile.core.networkmanager.defaultGsonSerializer
-import com.ustadmobile.core.networkmanager.defaultOkHttpClient
-import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
-import okhttp3.OkHttpClient
-import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
-import java.net.HttpURLConnection
-import kotlinx.coroutines.*
-import org.kodein.di.DI
-import org.kodein.di.instance
-import java.lang.Runnable
 
 /**
  * This class provides methods to perform android network related communications.
@@ -93,9 +84,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
     private var bleServiceAdvertiser: Any? = null
 
     private var bleScanCallback: Any? = null
-
-    /* Cast as required to avoid ClassNotFoundException on Android versions that dont support this */
-    private var gattServerAndroid: Any? = null
 
     private val mContext: Context = context as Context
 
@@ -179,94 +167,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
             notifyStateChanged(STATE_STOPPED)
         }
     }
-
-    private val advertisingServiceManager = object : AsyncServiceManager(
-            STATE_STOPPED,
-            { runnable, delay -> delayedExecutor.schedule(runnable, delay, TimeUnit.MILLISECONDS) }) {
-        override fun start() {
-            if (canDeviceAdvertise()) {
-                UMLog.l(UMLog.DEBUG, 689,
-                        "Starting BLE advertising service")
-                val service = BluetoothGattService(parcelServiceUuid.uuid,
-                        BluetoothGattService.SERVICE_TYPE_PRIMARY)
-
-
-                val androidCharacteristics = BLE_CHARACTERISTICS.map {charUuidStr ->
-                    val charUuid = ParcelUuid(UUID.fromString(charUuidStr)).uuid
-                    BluetoothGattCharacteristic(charUuid,
-                            BluetoothGattCharacteristic.PROPERTY_WRITE
-                                    or BluetoothGattCharacteristic.PROPERTY_READ,
-                            BluetoothGattCharacteristic.PERMISSION_WRITE or
-                                    BluetoothGattCharacteristic.PERMISSION_READ)
-                }
-
-                androidCharacteristics.forEach {
-                    service.addCharacteristic(it)
-                }
-
-                gattServerAndroid = BleGattServer(mContext, di)
-                bleServiceAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
-
-
-                if (gattServerAndroid == null
-                        || (gattServerAndroid as BleGattServer).gattServer == null
-                        || bleServiceAdvertiser == null) {
-                    notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
-                    return
-                }
-
-                (gattServerAndroid as BleGattServer).gattServer!!.addService(service)
-
-                val settings = AdvertiseSettings.Builder()
-                        .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
-                        .setConnectable(true)
-                        .setTimeout(0)
-                        .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
-                        .build()
-
-                val data = AdvertiseData.Builder()
-                        .addServiceUuid(parcelServiceUuid).build()
-
-                (bleServiceAdvertiser as BluetoothLeAdvertiser).startAdvertising(settings, data,
-                        object : AdvertiseCallback() {
-                            override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
-                                super.onStartSuccess(settingsInEffect)
-                                bleAdvertisingLastStartTime = System.currentTimeMillis()
-                                notifyStateChanged(STATE_STARTED)
-                                UMLog.l(UMLog.DEBUG, 689,
-                                        "Service advertised successfully")
-                            }
-
-                            override fun onStartFailure(errorCode: Int) {
-                                super.onStartFailure(errorCode)
-                                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
-                                UMLog.l(UMLog.ERROR, 689,
-                                        "Service could'nt start, with error code $errorCode")
-                            }
-                        })
-            } else {
-                notifyStateChanged(STATE_STOPPED, STATE_STOPPED)
-            }
-        }
-
-        override fun stop() {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    val mGattServer = (gattServerAndroid as BleGattServer).gattServer
-                    mGattServer!!.clearServices()
-                    mGattServer.close()
-                }
-                gattServerAndroid = null
-            } catch (e: Exception) {
-                //maybe because bluetooth is actually off?
-                UMLog.l(UMLog.ERROR, 689,
-                        "Exception trying to stop gatt server", e)
-            }
-
-            notifyStateChanged(STATE_STOPPED)
-        }
-    }
-
 
     /**
      * Handle network state change events for android version < Lollipop
@@ -464,11 +364,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         UMLog.l(UMLog.VERBOSE, 42, "NetworkCallback: handleDisconnected")
         _connectivityStatus.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED,
                 false, null))
-
-        //Should not be needed... anything that needs to should be observing the connectivity live data.
-//        GlobalScope.launch {
-//            //containerDownloadManager.handleConnectivityChanged(status)
-//        }
     }
 
 
@@ -665,7 +560,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
         }
 
         scanningServiceManager.setEnabled(scanningEnabled && waitedLongEnoughToStartScanning)
-        advertisingServiceManager.setEnabled(advertisingEnabled)
 
         if (scanningEnabled && !waitedLongEnoughToStartScanning) {
             delayedExecutor.schedule({ this.checkP2PBleServices() },
@@ -906,7 +800,6 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
      */
     override fun onDestroy() {
         scanningServiceManager.setEnabled(false)
-        advertisingServiceManager.setEnabled(false)
         wifiP2pGroupServiceManager!!.setEnabled(false)
 
         if (isBleCapable) {

@@ -79,6 +79,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }
         }
 
+        bind<BleGattServer>() with singleton {
+            BleGattServer(applicationContext, di)
+        }
+
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }
 
         bind<ClazzLogCreatorManager>() with singleton { ClazzLogCreatorManagerAndroidImpl(applicationContext) }
@@ -117,6 +121,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+
+        onReady {
+            val gattServer: BleGattServer = instance()
+        }
     }
 
     override val di: DI by DI.lazy {

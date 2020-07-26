@@ -6,6 +6,8 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
+import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
@@ -29,6 +31,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 import org.kodein.di.on
+import kotlin.jvm.Volatile
 
 
 class ContentEntry2DetailPresenter(context: Any,
@@ -38,29 +41,50 @@ class ContentEntry2DetailPresenter(context: Any,
     : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context,
         arguments, view,  di, lifecycleOwner) {
 
-
     private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
 
     private val containerDownloadManager: ContainerDownloadManager? by di.on(accountManager.activeAccount).instanceOrNull()
 
     private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
+    private val localAvailabilityManager: LocalAvailabilityManager? by on(accountManager.activeAccount).instanceOrNull()
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
     private var downloadJobItemLiveData: DoorLiveData<DownloadJobItem?>? = null
 
+    private var availabilityRequest: AvailabilityMonitorRequest? = null
+
+    private var contentEntryUid = 0L
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        val entryUuid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        contentEntryUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         println(containerDownloadManager)
         containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
-                downloadJobItemLiveData = it.getDownloadJobItemByContentEntryUid(entryUuid).apply {
+                downloadJobItemLiveData = it.getDownloadJobItemByContentEntryUid(contentEntryUid).apply {
                     observeWithLifecycleOwner(lifecycleOwner, this@ContentEntry2DetailPresenter::onDownloadJobItemChanged)
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        availabilityRequest = AvailabilityMonitorRequest(listOf(contentEntryUid)) {availableEntries ->
+            GlobalScope.launch(doorMainDispatcher()) {
+                view.locallyAvailable = availableEntries[contentEntryUid] ?: false
+            }
+        }.also {
+            localAvailabilityManager?.addMonitoringRequest(it)
+        }
+
+    }
+
+    override fun onStop() {
+
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithMostRecentContainer? {

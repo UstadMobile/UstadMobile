@@ -7,7 +7,7 @@ class AvailabilityMonitorRequest(val entryUidsToMonitor: List<Long>,
 
 interface LocalAvailabilityManager {
 
-    suspend fun handleNodeDiscovered(bluetoothAddr: String)
+    suspend fun onNewNodeDiscovered(node: NetworkNode)
 
     suspend fun handleNodesLost(bluetoothAddrs: List<String>)
 

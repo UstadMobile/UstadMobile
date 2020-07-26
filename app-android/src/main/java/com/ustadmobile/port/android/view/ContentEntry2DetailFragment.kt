@@ -5,8 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
+import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
@@ -68,6 +67,24 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             mBinding?.contentEntry = value
         }
 
+    override var locallyAvailable: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.locallyAvailable = value
+        }
+
+
+    private inner class PresenterViewLifecycleObserver: DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) {
+            mPresenter?.onStart()
+        }
+
+        override fun onStop(owner: LifecycleOwner) {
+            mPresenter?.onStop()
+        }
+    }
+
+    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
         get() = field
@@ -190,6 +207,10 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         fabManager?.visible = true
 
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+        presenterLifecycleObserver = PresenterViewLifecycleObserver().also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+
     }
 
     override fun onDestroyView() {
@@ -201,6 +222,12 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         availableTranslationAdapter = null
         availableTranslationsList = null
         entity = null
+        presenterLifecycleObserver?.also {
+            viewLifecycleOwner.lifecycle.removeObserver(it)
+        }
+
+        presenterLifecycleObserver = null
+
         super.onDestroyView()
     }
 

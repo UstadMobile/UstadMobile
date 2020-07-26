@@ -18,7 +18,7 @@ import org.kodein.di.*
 
 class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: Endpoint,
                                    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : LocalAvailabilityManager, DIAware{
+    : LocalAvailabilityManager, DIAware, NetworkNodeListener{
 
     private val activeMonitoringRequests: MutableList<AvailabilityMonitorRequest> = copyOnWriteListOf()
 
@@ -35,8 +35,14 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
     private val networkManager: NetworkManagerBle by di.instance()
 
     init {
+        val networkNodes = networkManager.networkNodes
+        networkManager.addNetworkNodeListener(this)
+
         GlobalScope.launch(coroutineDispatcher) {
             db.locallyAvailableContainerDao.deleteAll()
+            networkNodes.forEach {
+                onNewNodeDiscovered(it)
+            }
         }
     }
 
@@ -55,7 +61,8 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
         }
     }
 
-    override suspend fun handleNodeDiscovered(bluetoothAddr: String) {
+    override suspend fun onNewNodeDiscovered(node: NetworkNode) {
+        val bluetoothAddr = node.bluetoothMacAddress ?: return
         withContext(coroutineDispatcher) {
             val existingNode = activeNodes.firstOrNull { it.bluetoothMacAddress == bluetoothAddr }
             if(existingNode != null) {
@@ -71,6 +78,14 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
                 }
             }
         }
+    }
+
+    override suspend fun onNodeLost(node: NetworkNode) {
+
+    }
+
+    override suspend fun onNodeReputationChanged(node: NetworkNode, reputation: Int) {
+
     }
 
     override suspend fun handleNodesLost(bluetoothAddrs: List<String>) {
@@ -89,9 +104,11 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
             val response = networkManager.sendBleMessage(request, destAddr)
             val responsePayload = response?.payload ?: return@launch
             val responseLongArr = BleMessageUtil.bleMessageBytesToLong(responsePayload)
-            val entryResponses = responseLongArr.mapIndexed {index, response ->
-                EntryStatusResponse(erContainerUid = containerUids[index], available = response != 0L)
+            val entryResponses = containerUids.mapIndexed {index, containerUid ->
+                val availableContainer = if(index < responseLongArr.size) responseLongArr[index] else 0
+                EntryStatusResponse(erContainerUid = containerUids[index], available = availableContainer != 0L)
             }
+
             handleBleTaskResponseReceived(entryResponses, networkNode)
         }
     }
