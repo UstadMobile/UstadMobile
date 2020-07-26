@@ -86,10 +86,6 @@ class ClazzEdit2Presenter(context: Any,
                     entityVal)
     }
 
-    protected val isExistingEntityOrPickerMode
-        get() = (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L) != 0L ||
-                    arguments[ARG_RESULT_DEST_ID] != null
-
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.clazzUid == 0L) {
@@ -111,14 +107,7 @@ class ClazzEdit2Presenter(context: Any,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
             view.finishWithResult(listOf(entity))
-
-            if(!isExistingEntityOrPickerMode) {
-                systemImpl.go(ClazzDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to
-                        entity.clazzUid.toString()), context, UstadMobileSystemCommon.UstadGoOptions(
-                            ClazzEdit2View.VIEW_NAME, popUpToInclusive = true))
-            }else {
-                view.finishWithResult(listOf(entity))
-            }
+            onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
         }
     }
 

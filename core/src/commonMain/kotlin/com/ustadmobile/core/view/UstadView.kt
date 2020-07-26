@@ -119,6 +119,8 @@ interface UstadView {
 
         const val ARG_SNACK_MESSAGE = "snack_message"
 
+        const val CURRENT_DEST = ""
+
         /**
          * Argument to pass to tell a fragment where on the back stack a result (e.g. entity selected
          * from a list or newly created) should be saved. This works along the principles outlined
