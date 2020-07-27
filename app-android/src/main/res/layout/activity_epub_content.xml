@@ -85,6 +85,7 @@
                         android:layout_height="wrap_content"/>
 
                     <TextView
+                        android:layout_marginTop="@dimen/dimen_8dp"
                         android:layout_marginStart="@dimen/dimen_8dp"
                         android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                         android:layout_width="wrap_content"

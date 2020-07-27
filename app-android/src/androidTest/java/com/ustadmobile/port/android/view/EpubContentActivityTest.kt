@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
@@ -35,6 +36,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import java.io.File
+import java.lang.Thread.sleep
 
 
 @AdbScreenRecord("Epub content screen test")
@@ -104,5 +106,26 @@ class EpubContentActivityTest {
         onWebView(allOf(isDisplayed(), isJavascriptEnabled()))
                 .withElement(findElement(Locator.CLASS_NAME, "authors"))
                 .check(webMatches(getText(), containsString("Rukmini Banerji")))
+    }
+
+
+    @AdbScreenRecord("Given valid epub content opened when table of content item is clicked should be loaded to the view")
+    @Test
+    fun givenValidEpubContentOpened_whenTableOfContentItemIsClicked_shouldLoadThatItemIntoTheView(){
+        val intent = Intent(context, EpubContentActivity::class.java)
+        intent.putExtra(ARG_CONTAINER_UID , container.containerUid.toString())
+        val activityScenario = launch<EpubContentActivity>(intent)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+        activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
+
+        onView(allOf(withId(R.id.item_basepoint_cover_title),withText("ರುಮ್ನಿಯಾ"))).check(matches(isDisplayed()))
+
+        onView(allOf(withId(R.id.expandedListItem), withText("Page 7")))
+                .check(matches(isDisplayed())).perform(click())
+
+        //wait for animation to finish
+        sleep(500)
+        onView(allOf(withId(R.id.toolbar), hasDescendant(withText("Page 7")))).check(matches(isDisplayed()))
     }
 }
