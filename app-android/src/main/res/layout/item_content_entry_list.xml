@@ -7,14 +7,14 @@
         <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment"/>
         <import type="android.view.View"/>
-        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment.ContentEntryListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.ContentEntryListRecyclerAdapter"/>
 
         <variable
             name="contentEntry"
             type="ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer" />
         <variable
-            name="presenter"
-            type="com.ustadmobile.core.controller.ContentEntryList2Presenter" />
+            name="itemListener"
+            type="com.ustadmobile.core.controller.ContentEntryListItemListener" />
 
         <variable
             name="isPickerMode"
@@ -31,7 +31,7 @@
         android:padding="@dimen/dimen_10dp"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, contentEntry)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(contentEntry)}"
+        app:onSelectableItemClicked="@{() -> itemListener.onClickContentEntry(contentEntry)}"
         android:id="@+id/item_content_entry_list"
         android:tag="@{contentEntry.contentEntryUid}"
         android:background="@drawable/bg_listitem">
@@ -159,7 +159,7 @@
             <com.ustadmobile.port.android.view.DownloadStatusButton
                 android:id="@+id/content_entry_item_download"
                 style="?android:attr/borderlessButtonStyle"
-                android:onClick="@{() -> presenter.handleDownloadStatusButtonClicked(contentEntry)}"
+                android:onClick="@{() -> itemListener.onClickDownloadContentEntry(contentEntry)}"
                 android:layout_width="@dimen/dimen_40dp"
                 android:layout_height="@dimen/dimen_40dp"
                 android:padding="@dimen/dimen_8dp"
@@ -174,7 +174,7 @@
                 android:id="@+id/content_entry_select_btn"
                 android:visibility="@{isPickerMode ? View.VISIBLE: View.GONE}"
                 style="@style/UmTheme.Widget.OutlinedButton"
-                android:onClick="@{() -> presenter.handleOnSelectClicked(contentEntry)}"
+                android:onClick="@{() -> itemListener.onClickSelectContentEntry(contentEntry)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/dimen_8dp"

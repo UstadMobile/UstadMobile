@@ -7,7 +7,10 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
     fun showContentEntryAddOptions(parentEntryUid: Long)
 
-    var downloadOptions: Map<String, String>?
+    /**
+     * Show the download dialog button. If required by the OS, show a permission dialog first
+     */
+    fun showDownloadDialog(args: Map<String, String>)
 
     companion object {
 

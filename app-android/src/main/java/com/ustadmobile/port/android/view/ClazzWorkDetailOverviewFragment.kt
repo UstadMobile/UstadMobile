@@ -52,7 +52,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
     val accountManager: UstadAccountManager by instance()
 
-    private var contentRecyclerAdapter: ContentEntryList2Fragment.ContentEntryListRecyclerAdapter? = null
+    private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
     private var contentLiveData: LiveData<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
     private val contentObserver = Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
         t ->
@@ -127,9 +127,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         detailRecyclerAdapter = ClazzWorkBasicDetailsRecyclerAdapter(entity)
         detailRecyclerAdapter?.visible = false
 
-        contentRecyclerAdapter =
-                ContentEntryList2Fragment.ContentEntryListRecyclerAdapter(null,
-                        ListViewMode.BROWSER.toString())
+        contentRecyclerAdapter = ContentEntryListRecyclerAdapter(null,
+                ListViewMode.BROWSER.toString())
 
         quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA(
                 isStudent)
