@@ -76,26 +76,12 @@
             android:scaleType="fitCenter"
             android:translationX="8dp"
             android:translationY="-8dp"
-            android:visibility="@{contentEntry.contentEntryProgress == null ? View.GONE :
-            (contentEntry.contentEntryProgress.contentEntryProgressStatusFlag
-                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
-                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED ||
-            contentEntry.contentEntryProgress.contentEntryProgressStatusFlag
-                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED
-                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) ?
-            View.VISIBLE : View.GONE"
+            android:visibility="@{contentEntry.contentEntryProgress == null ? View.GONE : View.VISIBLE}"
+            app:iconStatusFlag="@{contentEntry.contentEntryProgress.contentEntryProgressStatusFlag}"
             app:layout_constraintEnd_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@id/content_entry_item_thumbnail"
-            app:src="@{contentEntry.contentEntryProgress == null ? View.GONE :
-            (contentEntry.contentEntryProgress.contentEntryProgressStatusFlag
-                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
-                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED ?
-                @drawable/ic_baseline_check_circle_24 :
-            contentEntry.contentEntryProgress.contentEntryProgressStatusFlag
-                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED
-                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) ?
-             @drawable/ic_baseline_highlight_off_24 : @drawable/ic_baseline_check_circle_24"
-            tools:src="@drawable/ic_baseline_highlight_off_24" />
+            tools:src="@drawable/ic_baseline_highlight_off_24"/>
+
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/content_entry_status"

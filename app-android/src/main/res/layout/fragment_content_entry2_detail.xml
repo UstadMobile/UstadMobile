@@ -8,6 +8,7 @@
         <import type="android.view.View" />
 
         <import type="com.ustadmobile.core.util.ext.DownloadJobExtKt" />
+
         <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
 
         <variable
@@ -68,7 +69,7 @@
                 tools:src="@drawable/book_24px" />
 
             <ProgressBar
-                android:id="@+id/entry_detail_progress"
+                android:id="@+id/entry_detail_progress_bar"
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/dimen_4dp"
@@ -88,26 +89,12 @@
                 android:scaleType="fitCenter"
                 android:translationX="8dp"
                 android:translationY="-8dp"
-                android:visibility="@{contentEntryProgress == null ? View.GONE :
-            (contentEntryProgress.contentEntryProgressStatusFlag
-                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
-                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED ||
-           contentEntryProgress.contentEntryProgressStatusFlag
-                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED
-                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) ?
-            View.VISIBLE : View.GONE"
+                android:visibility="@{contentEntryProgress == null ? View.GONE : View.VISIBLE}"
+                app:iconStatusFlag="@{contentEntryProgress.contentEntryProgressStatusFlag}"
                 app:layout_constraintEnd_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail"
-                app:src="@{contentEntryProgress == null ? View.GONE :
-            (contentEntryProgress.contentEntryProgressStatusFlag
-                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
-                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED ?
-                @drawable/ic_baseline_check_circle_24 :
-            contentEntryProgress.contentEntryProgressStatusFlag
-                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED
-                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) ?
-             @drawable/ic_baseline_highlight_off_24 : @drawable/ic_baseline_check_circle_24"
-                tools:src="@drawable/ic_baseline_highlight_off_24" />
+                tools:srcCompat="@drawable/ic_baseline_highlight_off_24"
+                />
 
             <TextView
                 android:id="@+id/entry_detail_title"
