@@ -14,6 +14,7 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.GrantPermissionRule
+import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -44,7 +45,7 @@ class ContentEntry2DetailFragmentTest {
     @JvmField
     @Rule
     var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true,
-        controlServerUrl = "http://192.168.70.31:8900")
+        controlServerUrl = "http://${BuildConfig.TEST_HOST}:${BuildConfig.TEST_PORT}")
 
     @JvmField
     @Rule
@@ -146,7 +147,7 @@ class ContentEntry2DetailFragmentTest {
     }
 
     //This test is work-in-progress
-    //@Test
+    @Test
     @UmAppDatabaseServerRequiredTest
     fun givenContentEntryOnServer_whenDownloadClicked_shouldCompleteDownloadAndShowOpenButton() {
         val testEntry = ContentEntryWithLanguage().apply {
@@ -181,13 +182,19 @@ class ContentEntry2DetailFragmentTest {
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        Thread.sleep(10000 * 1000)
+        //TODO: Replace this with IdlingResources
+        Thread.sleep(1000)
 
         onView(withText("Server Title")).check(matches(isDisplayed()))
         onView(withText(R.string.download)).perform(click())
 
+        //Click on the dialog
+        onView(withText(R.string.download)).perform(click())
 
+        Thread.sleep(5000)
 
+        //now open it
+        onView(withText(R.string.open)).perform(click())
     }
 
 

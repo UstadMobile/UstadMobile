@@ -69,13 +69,25 @@ task appRunFork(type: com.github.psxpaul.task.JavaExecFork) {
     //outputs.upToDateWhen { false }
     classpath = sourceSets.test.runtimeClasspath
     main = 'io.ktor.server.netty.EngineMain'
-    args = ['-port=8900']
-    waitForPort = 8900
+    args = [ "-port=${rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"]}", "-host=${rootProject.ext.buildConfigProperties["test.um_http_testserver"]}" ]
+    waitForPort = 8400
     workingDir = "$projectDir/"
     standardOutput = "$projectDir/build/tmp/daemon.log"
     errorOutput = "$projectDir/build/tmp/daemon-error.log"
 }
 
+task startServer(type: Exec) {
+    workingDir = "$projectDir/"
+    commandLine "./start.sh"
+    args = [ "${rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"]}", "${rootProject.ext.buildConfigProperties["test.um_http_testserver"]}" ]
+}
+
+
+task stopServer(type: Exec) {
+    workingDir = "$projectDir"
+    commandLine "./stop.sh"
+}
 
 appRun.dependsOn(shadowJar)
 appRunDebug.dependsOn(shadowJar)
+startServer.dependsOn(shadowJar)
