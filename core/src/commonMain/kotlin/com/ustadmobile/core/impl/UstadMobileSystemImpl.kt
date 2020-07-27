@@ -54,7 +54,8 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
-    override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int)
+    override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
+                    ustadGoOptions: UstadGoOptions)
 
     /**
      * Get a string for use in the UI
