@@ -116,22 +116,29 @@ class TestStatementEndpoint {
             it.readText()
         }
 
-        val statementEndpoint = StatementEndpoint(repo, gson)
+        val entry = ContentEntry().apply{
+            entryId = "http://demo.com/"
+            contentEntryUid = repo.contentEntryDao.insert(this)
+        }
+
+        val statementEndpoint = XapiStatementEndpointImpl(repo, gson)
         statementEndpoint.storeStatement(gson.fromJson(statementStr, Statement::class.java),
-                contentEntryUid = 1234L)
+                contentEntryUid = entry.contentEntryUid)
 
         val statementEntity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
         val xObject = repo.xObjectDao.findByXobjectUid(statementEntity!!.xObjectUid)
+        val progressEntry = repo.contentEntryProgressDao.getProgressByContentAndPerson(statementEntity.statementContentEntryUid, statementEntity.statementPersonUid)
 
         Assert.assertEquals("Statement entity has correctly assigned contententryuid",
-                1234L, xObject?.objectContentEntryUid)
+                entry.contentEntryUid, xObject?.objectContentEntryUid)
         Assert.assertEquals("Statement entity has progress set as per JSON",
                 17, statementEntity?.extensionProgress)
         Assert.assertEquals("Statement has preset Verb UID as expected",
                 VerbEntity.FIXED_UIDS["http://adlnet.gov/expapi/verbs/progressed"],
                 statementEntity?.statementVerbUid)
-        Assert.assertEquals("Statement has contentEntryUid set", 1234L,
+        Assert.assertEquals("Statement has contentEntryUid set", entry.contentEntryUid,
                 statementEntity?.statementContentEntryUid)
+        Assert.assertEquals("progress was updated", 17, progressEntry!!.contentEntryProgressProgress)
     }
 
     @Test
