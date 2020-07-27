@@ -58,7 +58,7 @@ class PersonDetailPresenter(context: Any,
             view.changePasswordVisible = person.username != null
                     && (activePersonUid == entityUid || activePerson.admin)
 
-            view.showCreateAccountVisible =  person.username == null
+            view.showCreateAccountVisible =  person.username == null && activePerson.admin
         }
         return repo.personDao.findByUidWithDisplayDetailsLive(entityUid)
     }

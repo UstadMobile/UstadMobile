@@ -48,9 +48,17 @@ class PersonDetailFragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    @AdbScreenRecord("given person detail when username is null and account management allowed then should show create account option")
+    @AdbScreenRecord("given person detail when username is null and account management allowed then should hide create account option")
     @Test
-    fun givenPersonDetails_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown(){
+    fun givenPersonDetails_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldHidden(){
+        launchFragment(withUsername = false, isAdmin = false)
+        onView(withId(R.id.create_account_view)).check(matches(not(isDisplayed())))
+        onView(withId(R.id.change_account_password_view)).check(matches(not(isDisplayed())))
+    }
+
+    @AdbScreenRecord("given person detail when admin logged and username is null and account management allowed then should show create account option")
+    @Test
+    fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown(){
         launchFragment(withUsername = false)
         onView(withId(R.id.create_account_view)).check(matches(isDisplayed()))
         onView(withId(R.id.change_account_password_view)).check(matches(not(isDisplayed())))

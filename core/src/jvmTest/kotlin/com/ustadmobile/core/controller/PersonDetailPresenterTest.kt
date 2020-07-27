@@ -107,7 +107,18 @@ class PersonDetailPresenterTest {
     }
 
     @Test
-    fun givenPersonDetails_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown(){
+    fun givenPersonDetails_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeHidden(){
+        val person = createPerson(withUsername = false, isAdmin = false)
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val presenter = PersonDetailPresenter(context, args,mockView,di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeout).atLeastOnce()).changePasswordVisible = eq(false)
+        verify(mockView, timeout(defaultTimeout).atLeastOnce()).showCreateAccountVisible = eq(false)
+    }
+
+    @Test
+    fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown(){
         val person = createPerson(withUsername = false)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
         val presenter = PersonDetailPresenter(context, args,mockView,di, mockLifecycleOwner)
