@@ -1,25 +1,36 @@
 
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.timeout
+import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.directActiveRepoInstance
+import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
 
-class AccountListPresenterTest {
+class PersonDetailPresenterTest {
 
-    private lateinit var mockView: AccountListView
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
+
+    private lateinit var mockView: PersonDetailView
 
     private lateinit var context: Any
 
@@ -29,184 +40,102 @@ class AccountListPresenterTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
-    private val  accountListLive = DoorMutableLiveData<List<UmAccount>>()
-
     private val  activeAccountLive = DoorMutableLiveData<UmAccount>()
 
-    private lateinit var mockedAccountListObserver:DoorObserver<List<UmAccount>>
-
-    private lateinit var mockedAccountObserver:DoorObserver<UmAccount>
-
-    private val accountList = listOf(UmAccount(1,"dummy",null,""))
+    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
     private lateinit var di: DI
 
+    private lateinit var mockWebServer: MockWebServer
+
+    private lateinit var repo: UmAppDatabase
+
+    private lateinit var serverUrl: String
+
     @Before
     fun setup() {
-
-        mockView = mock { }
-        impl = mock{}
-
-        accountManager = mock{
-            on{storedAccountsLive}.thenReturn(accountListLive)
-            on{activeAccountLive}.thenReturn(activeAccountLive)
-        }
         context = Any()
+        mockLifecycleOwner = mock { }
 
-        mockedAccountListObserver = mock{
-            on{ onChanged(any()) }.thenAnswer{ accountList }
-        }
+        mockView = mock{}
+        impl = mock()
 
-        mockedAccountObserver = mock{
-            on{ onChanged(any()) }.thenAnswer{ accountList[0] }
+        mockWebServer = MockWebServer()
+        mockWebServer.start()
+
+        serverUrl = mockWebServer.url("/").toString()
+
+    }
+
+    private fun createPerson(isAdmin: Boolean = true, withUsername: Boolean = true, sameUser: Boolean = false): Person{
+        val mPersonUid:Long = 121212
+        val loggedPersonUid: Long = 42
+
+        val activeAccountUid = if(sameUser) mPersonUid else loggedPersonUid
+        accountManager = mock{
+            on{activeAccount}.thenReturn(UmAccount(activeAccountUid,"","",serverUrl))
+            on{activeAccountLive}.thenReturn(activeAccountLive)
         }
 
         di = DI {
-            bind<UstadMobileSystemImpl>() with singleton { impl }
-            bind<UstadAccountManager>() with singleton { accountManager }
+            import(ustadTestRule.diModule)
+            bind<UstadAccountManager>(overrides = true) with singleton { accountManager }
+            bind<UstadMobileSystemImpl>(overrides = true) with singleton { impl }
         }
+
+        repo = di.directActiveRepoInstance()
+
+        val person = Person().apply {
+            fatherName = "Doe"
+            firstNames = "Jane"
+            lastName = "Doe"
+            username = if(withUsername) "jane.Doe" else null
+            personUid = mPersonUid
+            repo.personDao.insert(this)
+        }
+
+        if(!sameUser){
+            Person().apply {
+                admin = isAdmin
+                username = "Admin"
+                lastName = "User"
+                personUid = activeAccountUid
+                repo.personDao.insert(this)
+            }
+        }
+        return person
     }
 
     @Test
-    fun givenStoreAccounts_whenAppLaunched_thenShouldShowAllAccounts(){
-       val presenter = AccountListPresenter(context, mapOf(), mockView, di)
-
+    fun givenPersonDetails_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown(){
+        val person = createPerson(withUsername = false)
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val presenter = PersonDetailPresenter(context, args,mockView,di, mockLifecycleOwner)
         presenter.onCreate(null)
-        accountListLive.observeForever(mockedAccountListObserver)
-        accountListLive.sendValue(accountList)
-        argumentCaptor<List<UmAccount>>{
-            verify(mockedAccountListObserver, timeout(defaultTimeout).atLeastOnce()).onChanged(capture())
-            assertTrue("Account list was displayed", accountList.containsAll(lastValue))
-        }
+
+        verify(mockView, timeout(defaultTimeout).atLeastOnce()).changePasswordVisible = eq(false)
+        verify(mockView, timeout(defaultTimeout).atLeastOnce()).showCreateAccountVisible = eq(true)
     }
 
     @Test
-    fun givenActiveAccountExists_whenAppLaunched_thenShouldShowIt(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
-
+    fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNotNullAndCanManageAccount_thenChangePasswordShouldBeShown(){
+        val person = createPerson(isAdmin = true)
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val presenter = PersonDetailPresenter(context, args,mockView,di, mockLifecycleOwner)
         presenter.onCreate(null)
 
-        activeAccountLive.observeForever(mockedAccountObserver)
-        activeAccountLive.sendValue(accountList[0])
-        argumentCaptor<UmAccount>{
-            verify(mockedAccountObserver, timeout(defaultTimeout).atLeastOnce()).onChanged(capture())
-            assertEquals("Active account was displayed", accountList[0], lastValue)
-        }
+        verify(mockView, timeout(defaultTimeout).atLeastOnce()).changePasswordVisible = eq(true)
+        verify(mockView, timeout(defaultTimeout).atLeastOnce()).showCreateAccountVisible = eq(false)
     }
 
     @Test
-    fun givenSelectServerAllowed_whenAccountButtonClicked_thenShouldOpenGetStartedScreen(){
-        impl = mock {
-            on{getAppConfigBoolean(any(), any())}.thenReturn(true)
-        }
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
-
-        presenter.onCreate(null)
-        presenter.handleClickAddAccount()
-
-        argumentCaptor<String>{
-            verify(impl).go(capture(), any(), any())
-            assertTrue("Get started screen was opened", GetStartedView.VIEW_NAME == firstValue)
-        }
-    }
-
-    @Test
-    fun givenSelectServerNotAllowed_whenAccountButtonClicked_thenShouldOpenLoginScreen(){
-        impl = mock {
-            on{getAppConfigBoolean(any(), any())}.thenReturn(false)
-        }
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
-
-        presenter.onCreate(null)
-        presenter.handleClickAddAccount()
-
-        argumentCaptor<String>{
-            verify(impl).go(capture(), any(), any())
-            assertTrue("Login screen was opened", Login2View.VIEW_NAME == firstValue)
-        }
-    }
-
-
-    @Test
-    fun givenDeleteAccountButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
-
-        val account = UmAccount(1,"dummy", null,"")
+    fun givenPersonDetails_whenOpenedActivePersonDetailPersonAndCanManageAccount_thenChangePasswordShouldBeShown(){
+        val person = createPerson(isAdmin = false, sameUser = true)
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val presenter = PersonDetailPresenter(context, args,mockView,di, mockLifecycleOwner)
         presenter.onCreate(null)
 
-        presenter.handleClickDeleteAccount(account)
-
-        argumentCaptor<UmAccount>{
-            verify(accountManager).removeAccount(capture(), any(), any())
-            assertTrue("Expected account was removed from the device",
-                    account == firstValue)
-        }
-    }
-
-    @Test
-    fun givenLogoutButton_whenClicked_thenShouldRemoveAccountFromTheDevice(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
-
-        val account = UmAccount(1,"dummy", null,"")
-        presenter.onCreate(null)
-
-        activeAccountLive.sendValue(account)
-
-        presenter.handleClickLogout(account)
-        argumentCaptor<UmAccount>{
-            verify(accountManager).removeAccount(capture(), any(), any())
-            assertTrue("Expected account was removed from the device",
-                    account == firstValue)
-        }
-    }
-
-
-    @Test
-    fun givenAccountList_whenAccountIsClicked_shouldBeActive(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
-
-        val account = UmAccount(1,"dummy", null,"")
-        presenter.onCreate(null)
-
-        activeAccountLive.sendValue(account)
-
-        presenter.handleClickAccount(account)
-        argumentCaptor<UmAccount>{
-            verify(accountManager).activeAccount = capture()
-            assertTrue("Expected account was set active",
-                    account == firstValue)
-        }
-    }
-
-
-    @Test
-    fun givenProfileButton_whenClicked_thenShouldGoToProfileView(){
-
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
-
-        val account = UmAccount(1,"dummy", null,"")
-        presenter.onCreate(null)
-
-        presenter.handleClickProfile(account.personUid)
-
-        argumentCaptor<Map<String,String>>{
-            verify(impl).go(eq(PersonDetailView.VIEW_NAME), capture(), any())
-            assertTrue("Person details view was opened with right person id",
-                    account.personUid == firstValue[ARG_ENTITY_UID]?.toLong())
-        }
-    }
-
-    @Test
-    fun givenAboutButton_whenClicked_thenShouldGoToAboutView(){
-        val presenter = AccountListPresenter(context, mapOf(), mockView, di)
-
-        presenter.onCreate(null)
-
-        presenter.handleClickAbout()
-
-        argumentCaptor<String>{
-            verify(impl).go(capture(),any())
-            assertTrue("About screen was opened", AboutView.VIEW_NAME == firstValue)
-        }
+        verify(mockView, timeout(defaultTimeout).atLeastOnce()).changePasswordVisible = eq(true)
+        verify(mockView, timeout(defaultTimeout).atLeastOnce()).showCreateAccountVisible = eq(false)
     }
 }

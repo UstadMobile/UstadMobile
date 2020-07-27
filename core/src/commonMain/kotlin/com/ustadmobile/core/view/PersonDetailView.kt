@@ -8,6 +8,10 @@ interface PersonDetailView: UstadDetailView<PersonWithDisplayDetails> {
 
     var clazzes: DataSource.Factory<Int, ClazzMemberWithClazz>?
 
+    var changePasswordVisible: Boolean
+
+    var showCreateAccountVisible: Boolean
+
     companion object {
 
         const val VIEW_NAME = "PersonDetailView"

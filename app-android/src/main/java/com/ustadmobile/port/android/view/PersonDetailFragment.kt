@@ -58,12 +58,11 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             class ClazzMemberWithClazzViewHolder(val binding: ItemClazzMemberWithClazzDetailBinding): RecyclerView.ViewHolder(binding.root)
 
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzMemberWithClazzViewHolder {
-                val viewHolder = ClazzMemberWithClazzViewHolder(ItemClazzMemberWithClazzDetailBinding.inflate(
+
+                return ClazzMemberWithClazzViewHolder(ItemClazzMemberWithClazzDetailBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false).apply {
                     mPresenter = presenter
                 })
-
-                return viewHolder
             }
 
             override fun onBindViewHolder(holder: ClazzMemberWithClazzViewHolder, position: Int) {
@@ -79,6 +78,20 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             val clazzMemberDao = dbRepo?.clazzMemberDao ?: return
             clazzesLiveData = value?.asRepositoryLiveData(clazzMemberDao)
             clazzesLiveData?.observe(viewLifecycleOwner, clazzMemberWithClazzObserver)
+        }
+
+    override var changePasswordVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.changePasswordVisibility = if(value && canManageAccount)
+                View.VISIBLE else View.GONE
+        }
+
+    override var showCreateAccountVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.createAccountVisibility = if(value && canManageAccount)
+                View.VISIBLE else View.GONE
         }
 
     private var clazzesLiveData: LiveData<PagedList<ClazzMemberWithClazz>>? = null
@@ -138,10 +151,6 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         set(value) {
             field = value
             mBinding?.person = value
-            mBinding?.changePasswordVisibility = if(value?.username != null && canManageAccount)
-                View.VISIBLE else View.GONE
-            mBinding?.createAccountVisibility = if(value?.username == null && canManageAccount)
-                View.VISIBLE else View.GONE
             if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
                 (activity as? AppCompatActivity)?.supportActionBar?.title = value?.firstNames + " " + value?.lastName
         }
