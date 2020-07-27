@@ -11,8 +11,13 @@ import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ClazzList2View
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -29,7 +34,8 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
     override val listPresenter: UstadListPresenter<*, in ClazzWithNumStudents>?
         get() = mPresenter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         val accountManager: UstadAccountManager by instance()
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
@@ -70,5 +76,6 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.clazzDao
+
 
 }

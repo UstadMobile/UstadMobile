@@ -39,8 +39,8 @@ interface ClazzEdit2ActivityEventHandler {
 
 }
 
-
-class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View, ClazzEdit2ActivityEventHandler {
+class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View,
+        ClazzEdit2ActivityEventHandler {
 
     private var mDataBinding: FragmentClazzEditBinding? = null
 
@@ -61,7 +61,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         get() = requireContext()
 
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
-        get() = field
         set(value) {
             field?.removeObserver(scheduleObserver)
             field = value

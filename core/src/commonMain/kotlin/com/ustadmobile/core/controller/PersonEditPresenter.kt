@@ -9,10 +9,8 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -191,6 +189,7 @@ class PersonEditPresenter(context: Any,
                 }
 
                 view.finishWithResult(listOf(entity))
+                onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
             }
         }
     }
