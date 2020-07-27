@@ -16,7 +16,7 @@ interface PersonAccountEditView: UstadEditView<PersonWithAccount> {
 
     var errorMessage: String?
 
-    var showCurrentPassword: Boolean
+    var currentPasswordVisible: Boolean
 
     companion object {
 

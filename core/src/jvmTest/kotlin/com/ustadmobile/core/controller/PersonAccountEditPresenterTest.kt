@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -15,7 +14,6 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
-import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -126,6 +124,27 @@ class PersonAccountEditPresenterTest  {
         }
 
         return person
+    }
+
+    @Test
+    fun givenPersonAccountEditLaunched_whenActivePersonIsNotAdmin_thenShouldShowCurrentPassword(){
+        val person = createPerson(true)
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).currentPasswordVisible = eq(true)
+    }
+
+
+    @Test
+    fun givenPersonAccountEditLaunched_whenActivePersonIsAdmin_thenShouldHideCurrentPassword(){
+        val person = createPerson(true, isAdmin = true)
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).currentPasswordVisible = eq(false)
     }
 
     @Test

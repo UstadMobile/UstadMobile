@@ -13,7 +13,7 @@
             type="com.ustadmobile.lib.db.entities.PersonWithAccount" />
 
         <variable
-            name="newPasswordVisibility"
+            name="currentPasswordVisibility"
             type="Integer" />
 
 
@@ -62,7 +62,7 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
-                android:visibility="@{newPasswordVisibility}"
+                android:visibility="@{currentPasswordVisibility}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:passwordToggleEnabled="true"

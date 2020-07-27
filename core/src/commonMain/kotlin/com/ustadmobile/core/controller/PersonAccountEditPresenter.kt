@@ -51,7 +51,7 @@ class PersonAccountEditPresenter(context: Any,
         } ?: Person()
 
         isActiveUserAdmin = activePerson.admin
-        view.showCurrentPassword = !isActiveUserAdmin
+        view.currentPasswordVisible = !isActiveUserAdmin
 
         val person = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.personDao?.findPersonAccountByUid(entityUid)

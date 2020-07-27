@@ -142,6 +142,23 @@ class PersonAccountEditFragmentTest {
         onView(withId(R.id.username_textinputlayout)).check(matches(isDisplayed()))
     }
 
+    @AdbScreenRecord("given person account edit launched and active person is admin  current password should be hidden")
+    @Test
+    fun givenPersonAccountEditLaunched_whenActivePersonIsAdmin_thenShouldHideCurrentPassword(){
+        val person = createPerson(true, isAdmin = true)
+        launchFragment(person, false)
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(not(isDisplayed())))
+    }
+
+    @AdbScreenRecord("given person account edit launched and active person is not admin  current password should be hidden")
+    @Test
+    fun givenPersonAccountEditLaunched_whenActivePersonIsNotAdmin_thenShouldShowCurrentPassword(){
+        val person = createPerson(true, isAdmin = false)
+        launchFragment(person, false)
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(isDisplayed()))
+    }
+
+
     @AdbScreenRecord("given person account edit launched when username is null should hide username field")
     @Test
     fun givenPersonAccountEditLaunched_whenUsernameIsNotNull_themUsernameFieldShouldBeHidden(){
