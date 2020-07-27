@@ -4,14 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
-        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment"/>
-        <import type="android.view.View"/>
-        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment.ContentEntryListRecyclerAdapter"/>
+
+        <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer" />
+
+        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
+
+        <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
+
+        <import type="android.view.View" />
+
+        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment.ContentEntryListRecyclerAdapter" />
 
         <variable
             name="contentEntry"
             type="ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer" />
+
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.ContentEntryList2Presenter" />
@@ -26,37 +33,69 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_content_entry_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_listitem"
         android:padding="@dimen/dimen_10dp"
-        app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, contentEntry)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(contentEntry)}"
-        android:id="@+id/item_content_entry_list"
         android:tag="@{contentEntry.contentEntryUid}"
-        android:background="@drawable/bg_listitem">
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(contentEntry)}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, contentEntry)}"
+        app:selectableViewHelper="@{selectablePagedListAdapter}">
 
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:scaleType="fitCenter"
             android:id="@+id/content_entry_item_thumbnail"
             android:layout_width="@dimen/dimen_70dp"
             android:layout_height="@dimen/dimen_70dp"
+            android:scaleType="fitCenter"
             app:fallbackDrawable="@{contentEntry.leaf ? @drawable/book_24px:@drawable/ic_folder_black_24dp}"
             app:imageUri="@{contentEntry.thumbnailUrl}"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/book_24px" />
 
         <ProgressBar
-            android:visibility="gone"
             android:id="@+id/content_entry_progress"
-            android:layout_width="@dimen/dimen_70dp"
-            android:layout_marginTop="66dp"
-            android:layout_height="@dimen/dimen_4dp"
-            android:progress="100"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_width="0dp"
+            android:layout_height="@dimen/dimen_4dp"
+            android:max="100"
+            android:progress="@{contentEntry.contentEntryProgress.contentEntryProgressProgress}"
+            android:progressTint="@color/primaryColor"
+            android:visibility="@{contentEntry.contentEntryProgress == null ? View.GONE : View.VISIBLE}"
+            app:layout_constraintEnd_toEndOf="@id/content_entry_item_thumbnail"
+            app:layout_constraintStart_toStartOf="@id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_item_thumbnail"
+            tools:progress="75" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/content_progress_fail_correct"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:scaleType="fitCenter"
+            android:translationX="8dp"
+            android:translationY="-8dp"
+            android:visibility="@{contentEntry.contentEntryProgress == null ? View.GONE :
+            (contentEntry.contentEntryProgress.contentEntryProgressStatusFlag
+                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
+                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED ||
+            contentEntry.contentEntryProgress.contentEntryProgressStatusFlag
+                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED
+                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) ?
+            View.VISIBLE : View.GONE"
+            app:layout_constraintEnd_toEndOf="@id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_item_thumbnail"
+            app:src="@{contentEntry.contentEntryProgress == null ? View.GONE :
+            (contentEntry.contentEntryProgress.contentEntryProgressStatusFlag
+                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
+                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED ?
+                @drawable/ic_baseline_check_circle_24 :
+            contentEntry.contentEntryProgress.contentEntryProgressStatusFlag
+                &amp; ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED
+                == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) ?
+             @drawable/ic_baseline_highlight_off_24 : @drawable/ic_baseline_check_circle_24"
+            tools:src="@drawable/ic_baseline_highlight_off_24" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/content_entry_status"
@@ -71,15 +110,15 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/content_entry_item_title"
-            android:text="@{contentEntry.title}"
             android:layout_width="0dp"
-            android:textStyle="bold"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_10dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
+            android:text="@{contentEntry.title}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toTopOf="parent"
@@ -87,14 +126,14 @@
 
         <TextView
             android:id="@+id/content_entry_item_description"
-            android:text="@{contentEntry.description}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginStart="@dimen/dimen_10dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:maxLines="2"
+            android:text="@{contentEntry.description}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
@@ -102,29 +141,29 @@
             tools:text="Content Description" />
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:visibility="gone"
             android:id="@+id/content_entry_locally_available"
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
-            android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
-            app:srcCompat="@drawable/ic_location_pin_24dp"
             android:tint="?colorOnIconTint"
-            tools:visibility="gone"
+            android:visibility="gone"
             app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
-            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
+            app:srcCompat="@drawable/ic_location_pin_24dp"
+            tools:visibility="gone" />
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             android:id="@+id/content_entry_mimetype_icon"
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="@dimen/dimen_16dp"
-            android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
+            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             app:imageLookupKey="@{contentEntry.contentTypeFlag}"
             app:imageLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP}"
             app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
@@ -132,38 +171,39 @@
 
 
         <TextView
-            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
-            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             android:id="@+id/content_entry_item_mimetype_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:gravity="start"
-            app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
-            app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             android:tint="?colorOnIconTint"
+            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
             app:layout_constraintStart_toEndOf="@id/content_entry_mimetype_icon"
-            app:layout_constraintTop_toBottomOf="@id/content_entry_item_description"/>
+            app:layout_constraintTop_toBottomOf="@id/content_entry_item_description"
+            app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
+            app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}" />
 
 
         <FrameLayout
             android:id="@+id/action_btn_holder"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
             <com.ustadmobile.port.android.view.DownloadStatusButton
                 android:id="@+id/content_entry_item_download"
                 style="?android:attr/borderlessButtonStyle"
-                android:onClick="@{() -> presenter.handleDownloadStatusButtonClicked(contentEntry)}"
                 android:layout_width="@dimen/dimen_40dp"
                 android:layout_height="@dimen/dimen_40dp"
-                android:padding="@dimen/dimen_8dp"
                 android:contentDescription="@string/download"
+                android:onClick="@{() -> presenter.handleDownloadStatusButtonClicked(contentEntry)}"
+                android:padding="@dimen/dimen_8dp"
                 android:tint="?colorOnIconTint"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -172,14 +212,14 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/content_entry_select_btn"
-                android:visibility="@{isPickerMode ? View.VISIBLE: View.GONE}"
                 style="@style/UmTheme.Widget.OutlinedButton"
-                android:onClick="@{() -> presenter.handleOnSelectClicked(contentEntry)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/dimen_8dp"
                 android:contentDescription="@string/download"
+                android:onClick="@{() -> presenter.handleOnSelectClicked(contentEntry)}"
+                android:padding="@dimen/dimen_8dp"
                 android:text="@{@string/select_item(``)}"
+                android:visibility="@{isPickerMode ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_file_download_black_24dp" />

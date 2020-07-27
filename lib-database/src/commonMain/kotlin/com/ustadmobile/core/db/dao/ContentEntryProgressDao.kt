@@ -14,9 +14,21 @@ import com.ustadmobile.lib.db.entities.ContentEntryProgress
 abstract class ContentEntryProgressDao : BaseDao<ContentEntryProgress> {
 
     @Update
-    abstract suspend fun updateAsync(contentEntryProgress: ContentEntryProgress) : Int
+    abstract suspend fun updateAsync(contentEntryProgress: ContentEntryProgress): Int
 
-    companion object{
+    @Query(FIND_PROGRESS_BY_CONTENT_AND_PERSON_QUERY)
+    abstract fun getProgressByContentAndPerson(contentEntryUid: Long, personUid: Long): ContentEntryProgress?
+
+
+    @Query("""UPDATE ContentEntryProgress SET contentEntryProgressProgress = :progress, 
+                    contentEntryProgressStatusFlag = :status WHERE 
+                    contentEntryProgressPersonUid = :personUid AND 
+                    contentEntryProgressContentEntryUid = :contentEntryUid
+                    """)
+    abstract fun updateProgressByContentEntryAndPerson(contentEntryUid: Long, personUid: Long,
+                                                       progress: Int, status: Int): Int
+
+    companion object {
 
         const val FIND_PROGRESS_BY_CONTENT_AND_PERSON_QUERY =
                 """

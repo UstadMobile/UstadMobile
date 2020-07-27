@@ -36,7 +36,7 @@ class ContentEntry2DetailPresenter(context: Any,
                                    di: DI, lifecycleOwner: DoorLifecycleOwner)
 
     : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context,
-        arguments, view,  di, lifecycleOwner) {
+        arguments, view, di, lifecycleOwner) {
 
 
     private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
@@ -71,6 +71,9 @@ class ContentEntry2DetailPresenter(context: Any,
 
         val result = db.contentEntryRelatedEntryJoinDao.findAllTranslationsWithContentEntryUid(entityUid)
         view.availableTranslationsList = result
+
+        view.contentEntryProgress = db.contentEntryProgressDao.getProgressByContentAndPerson(entityUid, accountManager.activeAccount.personUid)
+
         return entity
     }
 
@@ -79,7 +82,7 @@ class ContentEntry2DetailPresenter(context: Any,
                 mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString()), context)
     }
 
-    fun handleOnClickOpenDownloadButton(){
+    fun handleOnClickOpenDownloadButton() {
         val canOpen = !isDownloadEnabled || downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE
         if (canOpen) {
             val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
@@ -91,7 +94,8 @@ class ContentEntry2DetailPresenter(context: Any,
                 openContentEntry()
             }
         } else if (isDownloadEnabled) {
-            view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString() ?: "0")))
+            view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
+                    ?: "0")))
         }
     }
 
@@ -108,10 +112,10 @@ class ContentEntry2DetailPresenter(context: Any,
                 }
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
-                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found,context))
+                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
                 } else {
                     val message = e.message
-                    if(message != null){
+                    if (message != null) {
                         view.showSnackBar(message)
                     }
                 }
@@ -119,7 +123,7 @@ class ContentEntry2DetailPresenter(context: Any,
         }
     }
 
-    fun handleOnTranslationClicked(entryUid: Long){
+    fun handleOnTranslationClicked(entryUid: Long) {
         systemImpl.go(ContentEntry2DetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString()), context)
     }
 

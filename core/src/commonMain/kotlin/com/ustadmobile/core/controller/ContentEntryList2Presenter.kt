@@ -62,10 +62,10 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                         parentEntryUid, 0, 0, loggedPersonUid)
             }
             ARG_DOWNLOADED_CONTENT -> when(sortOrder){
-                SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.downloadedRootItemsAsc()
-                SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.downloadedRootItemsDesc()
+                SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.downloadedRootItemsAsc(loggedPersonUid)
+                SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.downloadedRootItemsDesc(loggedPersonUid)
             }
-            ARG_RECYCLED_CONTENT -> repo.contentEntryDao.recycledItems()
+            ARG_RECYCLED_CONTENT -> repo.contentEntryDao.recycledItems(personUid = loggedPersonUid)
             else -> null
         }
     }

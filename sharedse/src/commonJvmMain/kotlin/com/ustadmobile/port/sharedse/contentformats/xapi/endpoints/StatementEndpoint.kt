@@ -22,6 +22,7 @@ import java.util.*
 class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
     private val verbDao: VerbDao = db.verbDao
     private val statementDao: StatementDao = db.statementDao
+    private val progressDao: ContentEntryProgressDao = db.contentEntryProgressDao
     private val personDao: PersonDao = db.personDao
     private val xobjectDao: XObjectDao = db.xObjectDao
     private val contextJoinDao: ContextXObjectStatementJoinDao = db.contextXObjectStatementJoinDao
@@ -317,6 +318,11 @@ class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
                 agentUid, authorityUid, teamUid,
                 subActorUid, subVerbUid, subObjectUid,
                 contentEntryUid = contentEntryUid)
+
+        val entry = contentEntryDao.findByUid(contentEntryUid)
+        if (xObjectEntity?.objectId == entry?.entryId) {
+            XapiUtil.insertOrUpdateEntryProgress(statementEntity, progressDao, verbEntity)
+        }
 
         if (statement.context != null && statement.context!!.contextActivities != null) {
 

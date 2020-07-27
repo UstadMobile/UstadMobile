@@ -8,7 +8,6 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.contentformats.xapi.*
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.toInt
 import java.util.*
 
 object XapiUtil {
@@ -50,7 +49,7 @@ object XapiUtil {
 
     fun insertOrUpdateVerbLangMap(dao: XLangMapEntryDao, verb: Verb, verbEntity: VerbEntity, languageDao: LanguageDao, languageVariantDao: LanguageVariantDao) {
         val verbDisplay = verb.display
-        if(verbDisplay != null) {
+        if (verbDisplay != null) {
             val listToInsert = verbDisplay.map {
                 val split = it.key.split("-")
                 val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
@@ -98,9 +97,9 @@ object XapiUtil {
         val xObjectId = xobject.id ?: throw IllegalArgumentException("XObject has no id")
         val entity = dao.findByObjectId(xObjectId)
 
-        val contentEntryUidVal = if(contentEntryUid != 0L) {
+        val contentEntryUidVal = if (contentEntryUid != 0L) {
             contentEntryUid
-        }else {
+        } else {
             contentEntryDao.getContentEntryUidFromXapiObjectId(xObjectId)
         }
 
@@ -263,7 +262,8 @@ object XapiUtil {
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
                                       contentEntryUid: Long = 0L): StatementEntity {
 
-        val statementId = statement.id ?: throw IllegalArgumentException("Statement ${statement} to be stored has no id!")
+        val statementId = statement.id
+                ?: throw IllegalArgumentException("Statement $statement to be stored has no id!")
 
         var statementEntity: StatementEntity? = dao.findByStatementId(statementId)
         if (statementEntity == null) {
@@ -303,9 +303,10 @@ object XapiUtil {
                 }
 
                 val progressExtension = statementResult.extensions?.get(StatementEndpoint.EXTENSION_PROGRESS)
-                if(progressExtension != null) {
+                if (progressExtension != null) {
                     //As this is being parsed as JSON - any number is counted as Double type
                     statementEntity.extensionProgress = progressExtension.anyToInt()
+
                 }
             } else {
                 statementEntity.resultSuccess = 0.toByte()
@@ -321,6 +322,39 @@ object XapiUtil {
         }
         return statementEntity
     }
+
+    fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, progressDao: ContentEntryProgressDao, verbEntity: VerbEntity) {
+
+        val status = progressDao.updateProgressByContentEntryAndPerson(
+                statementEntity.statementContentEntryUid, statementEntity.statementPersonUid,
+                statementEntity.extensionProgress, getStatusFlag(verbEntity.urlId))
+
+        // no fields updated
+        if (status == 0) {
+            ContentEntryProgress().also {
+                it.contentEntryProgressContentEntryUid = statementEntity.statementContentEntryUid
+                it.contentEntryProgressProgress = statementEntity.extensionProgress
+                it.contentEntryProgressPersonUid = statementEntity.statementPersonUid
+                it.contentEntryProgressStatusFlag = getStatusFlag(verbEntity.urlId)
+                progressDao.insert(it)
+            }
+        }
+    }
+
+    private fun getStatusFlag(id: String?): Int {
+        return statusFlagMap[id] ?: 0
+    }
+
+    private val statusFlagMap = mapOf(
+            "http://adlnet.gov/expapi/verbs/completed"
+                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED,
+            "http://adlnet.gov/expapi/verbs/passed"
+                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED,
+            "http://adlnet.gov/expapi/verbs/failed"
+                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED,
+            "https://w3id.org/xapi/adl/verbs/satisfied"
+                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED)
+
 
     fun Boolean.toInt() = if (this) 1 else 0
 
