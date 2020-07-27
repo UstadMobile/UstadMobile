@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -8,6 +7,7 @@ import com.ustadmobile.port.sharedse.impl.http.BleHttpRequest
 import com.ustadmobile.port.sharedse.impl.http.BleHttpResponse
 import com.ustadmobile.port.sharedse.impl.http.BleProxyResponder
 import com.ustadmobile.port.sharedse.impl.http.asBleHttpResponse
+import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
@@ -41,7 +41,7 @@ class BleProxyResponderTest {
 
     @Before
     fun setup() {
-        Napier.base(DebugAntilog())
+        Napier.baseDebugIfNotEnabled()
         httpClient = HttpClient() {
             install(JsonFeature)
         }
@@ -51,15 +51,15 @@ class BleProxyResponderTest {
         println(headerField)
 
         networkManager = mock<NetworkManagerBle> {
-            onBlocking { sendBleMessage(any(), any(), any())}.thenAnswer { invocation ->
-                val destNodeAddr = invocation.arguments[2] as String
+            onBlocking { sendBleMessage(any(), any())}.thenAnswer { invocation ->
+                val destNodeAddr = invocation.arguments[1] as String
                 val nearbyDevice = nearbyDevices.firstOrNull { it.bluetoothMacAddr == destNodeAddr }
                 if(nearbyDevice == null || !nearbyDevice.bleClientResponding) {
                     println ("Nearby device = ${nearbyDevice} : does not exist or is set to not respond")
                     return@thenAnswer Unit //there is no such device around for this scenario
                 }
 
-                val messageIn = invocation.arguments[1] as BleMessage
+                val messageIn = invocation.arguments[0] as BleMessage
 
                 if(!nearbyDevice.bleMessageReturnsError) {
                     val bleRequest = Json.parse(BleHttpRequest.serializer(), String(messageIn.payload!!))

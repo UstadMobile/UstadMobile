@@ -1,13 +1,11 @@
 package com.ustadmobile.port.android.view
 
-import android.app.Application
 import android.net.Uri
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.clearText
 import androidx.test.espresso.action.ViewActions.typeText
@@ -29,7 +27,10 @@ import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
-import com.ustadmobile.test.rules.*
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
+import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import junit.framework.Assert.assertTrue
 import org.hamcrest.Matchers.not
 import org.junit.Assert

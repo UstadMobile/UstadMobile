@@ -8,6 +8,7 @@ import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -33,19 +34,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
                           val di: DI,
                           val httpClient: HttpClient = defaultHttpClient()) {
 
-    data class DbPair(val db: UmAppDatabase, val repo: UmAppDatabase)
-
-    data class LoginResponse(val statusCode: Int, val umAccount: UmAccount?)
-
-    interface DbOpener {
-
-        fun openDb(context: Any, name: String) : UmAppDatabase
-
-    }
-
-    private class DefaultDbOpener: DbOpener {
-        override fun openDb(context: Any, name: String) = UmAppDatabase.getInstance(context, name)
-    }
+    data class ResponseWithAccount(val statusCode: Int, val umAccount: UmAccount?)
 
     private val _activeAccount: AtomicRef<UmAccount>
 
@@ -106,11 +95,10 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = _storedAccountsLive
 
 
-    suspend fun register(person: Person, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
-        val httpStmt = httpClient.get<HttpStatement>() {
+    suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount {
+        val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
-            parameter("person", Json.stringify(Person.serializer(), person))
-            parameter("password", password)
+            parameter("person", Json.stringify(PersonWithAccount.serializer(), person))
         }
 
         val (account: UmAccount?, status: Int) = httpStmt.execute { response ->
@@ -121,16 +109,16 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             }
         }
 
-
         if(status == 200 && account != null) {
             account.endpointUrl = endpointUrl
-            activeAccount = account
-
+            if(makeAccountActive){
+                activeAccount = account
+            }
             return account
         }else if(status == 409){
-            throw IllegalArgumentException("Conflict: username already taken")
+            throw IllegalStateException("Conflict: username already taken")
         }else {
-            throw IllegalStateException("register request: non-OK status code: $status")
+            throw Exception("register request: non-OK status code: $status")
         }
     }
 
@@ -188,7 +176,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
                 null
             }
 
-            LoginResponse(response.status.value, responseAccount)
+            ResponseWithAccount(response.status.value, responseAccount)
         }
 
         val responseAccount = loginResponse.umAccount
@@ -210,6 +198,33 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
         return responseAccount
     }
+
+    suspend fun changePassword(username: String, currentPassword: String, newPassword: String, endpointUrl: String): UmAccount?{
+        val httpStmt = httpClient.post<HttpStatement> {
+            url("${endpointUrl.removeSuffix("/")}/password/change")
+            parameter("username", username)
+            parameter("currentPassword", currentPassword)
+            parameter("newPassword", newPassword)
+        }
+
+        val changePasswordResponse = httpStmt.execute { response ->
+            val responseAccount = if (response.status.value == 200) {
+                response.receive<UmAccount>()
+            } else {
+                null
+            }
+            ResponseWithAccount(response.status.value, responseAccount)
+        }
+        val responseAccount = changePasswordResponse.umAccount
+        if (changePasswordResponse.statusCode == 403) {
+            throw UnauthorizedException("Access denied")
+        }else if(responseAccount == null || !(changePasswordResponse.statusCode == 200
+                        || changePasswordResponse.statusCode == 204)) {
+            throw IllegalStateException("Server error - response ${changePasswordResponse.statusCode}")
+        }
+        return responseAccount
+    }
+
 
 
     companion object {

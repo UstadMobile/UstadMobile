@@ -3,9 +3,6 @@ package com.ustadmobile.port.sharedse.impl.http
 import com.ustadmobile.core.util.UMFileUtil
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
-import net.lingala.zip4j.core.ZipFile
-import net.lingala.zip4j.exception.ZipException
-import net.lingala.zip4j.model.FileHeader
 import java.io.*
 import com.ustadmobile.lib.util.RangeResponse
 import com.ustadmobile.lib.util.parseRangeRequestHeader
@@ -100,61 +97,6 @@ abstract class FileResponder {
 
         override val eTag: String?
             get() = null
-    }
-
-    class ZipEntrySource : IFileSource {
-
-        private var entry: FileHeader? = null
-
-        private var zipFile: ZipFile? = null
-
-
-        override val length: Long
-            get() = entry!!.uncompressedSize
-
-        override val lastModifiedTime: Long
-            get() = entry!!.lastModFileTime.toLong()
-
-        override val inputStream: InputStream
-            @Throws(IOException::class)
-            get() {
-                try {
-                    return zipFile!!.getInputStream(entry!!)
-                } catch (ze: ZipException) {
-                    throw IOException(ze)
-                }
-
-            }
-
-        override val name: String
-            get() = entry!!.fileName
-
-        override val exists: Boolean
-            get() =  entry != null//must exist if there is an entry here
-
-        override val eTag: String?
-            get() = null
-
-        /**
-         *
-         * @param entry
-         * @param zipFile
-         */
-        constructor(entry: FileHeader, zipFile: ZipFile) {
-            this.entry = entry
-            this.zipFile = zipFile
-        }
-
-        constructor(zipFile: ZipFile, pathInZip: String) {
-            this.zipFile = zipFile
-            try {
-                this.entry = zipFile.getFileHeader(pathInZip)
-            } catch (e: ZipException) {
-
-            }
-
-        }
-
     }
 
     companion object {

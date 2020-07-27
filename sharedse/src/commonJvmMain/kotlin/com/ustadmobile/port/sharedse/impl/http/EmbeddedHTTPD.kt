@@ -14,7 +14,6 @@ import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.ContainerMounter
 import kotlin.jvm.JvmOverloads
 import org.kodein.di.*
@@ -72,11 +71,15 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
     init {
         id = idCounter
         idCounter++
-//        addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder::class.java, appDatabase)
-//        addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
-//                ContainerEntryListResponder::class.java, appDatabase)
-//        addRoute("/$ENDPOINT_CONCATENATEDFILES/(.*)+", ConcatenatedContainerEntryFileResponder::class.java,
-//                appDatabase)
+
+        addRoute("/:${ContainerEntryListResponder.PATH_VAR_ENDPOINT}/ContainerEntryList/findByContainerWithMd5(.*)+",
+                ContainerEntryListResponder::class.java, di)
+        addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/(.*)+",
+                ConcatenatedContainerEntryFileResponder::class.java, di)
+
+        //TODO: This should provide NetworkManager to the responder, or BleProxyResponder could use DI itself
+        //httpd.addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, this)
+
 //        addRoute("/xapi/:contentEntryUid/statements", XapiStatementResponder::class.java, repository)
 //        addRoute("/xapi/:contentEntryUid/activities/state", XapiStateResponder::class.java, repository)
     }

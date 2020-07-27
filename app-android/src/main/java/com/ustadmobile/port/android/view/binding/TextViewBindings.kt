@@ -11,7 +11,6 @@ import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.lib.db.entities.*
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMFileUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

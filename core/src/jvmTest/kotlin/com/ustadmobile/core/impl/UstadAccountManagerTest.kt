@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -246,12 +247,13 @@ class UstadAccountManagerTest {
     fun givenValidRegistrationRequest_whenNewAccountRequested_thenShouldBeRequestedOnServerAndActive() {
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
-        val personToRegister = Person().apply {
+        val personToRegister = PersonWithAccount().apply {
             firstNames = "Mary"
             lastName = "Poppins"
             phoneNum = "1234567"
             emailAddr = "mary@email.com"
             username = "mary"
+            newPassword = "password"
         }
 
         val accountResponse = UmAccount(42L, "mary", "", "")
@@ -260,7 +262,7 @@ class UstadAccountManagerTest {
                 .addHeader("Content-Type", "application/json; charset=utf-8"))
 
         val accountRegistered = runBlocking {
-            accountManager.register(personToRegister, "password", mockServerUrl)
+            accountManager.register(personToRegister, mockServerUrl)
         }
 
         Assert.assertEquals("Active account is the account registered",

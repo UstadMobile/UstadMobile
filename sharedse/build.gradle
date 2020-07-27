@@ -111,6 +111,7 @@ kotlin {
         all {
             languageSettings {
                 useExperimentalAnnotation('kotlinx.serialization.InternalSerializationApi')
+                useExperimentalAnnotation('kotlin.ExperimentalStdlibApi')
             }
         }
 
@@ -122,9 +123,11 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-io:$version_ktor"
+                implementation "io.ktor:ktor-gson:$version_ktor"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
@@ -141,6 +144,8 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation project(":lib-database-entities")
+                compileOnly project(':lib-database')
 
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
@@ -148,7 +153,6 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
-                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "com.neovisionaries:nv-i18n:$version_nv_lang"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
@@ -156,6 +160,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
 
             }
         }
@@ -198,7 +203,6 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.google.code.gson:gson:$version_gson"
-                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
                 //end SharedSE Android and JVM dependencies
             }
         }
@@ -223,7 +227,6 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.google.code.gson:gson:$version_gson"
-                implementation "net.lingala.zip4j:zip4j:$version_zip4j"
                 //end Android and JVM dependencies
             }
         }

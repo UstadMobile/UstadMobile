@@ -5,6 +5,7 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="com.ustadmobile.core.util.ext.DownloadJobExtKt"/>
 
         <variable
             name="contentEntry"
@@ -29,6 +30,10 @@
         <variable
             name="fragmentEventHandler"
             type="com.ustadmobile.port.android.view.ContentEntryDetailFragmentEventHandler" />
+
+        <variable
+            name="downloadJobItem"
+            type="com.ustadmobile.lib.db.entities.DownloadJobItem" />
 
     </data>
 
@@ -136,7 +141,7 @@
                         android:id="@+id/entryDownloadOpenBtn"
                         android:layout_width="match_parent"
                         android:padding="@dimen/dimen_16dp"
-                        android:text="@{contentEntry.container == null ? @string/download : @string/open}"
+                        android:text="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ?  @string/open : @string/download}"
                         android:layout_height="wrap_content"
                         android:onClick="@{()-> fragmentEventHandler.handleOnClickOpenDownloadButton()}" />
 

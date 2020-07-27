@@ -5,13 +5,13 @@ import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin.Companion.CONT
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.port.sharedse.contentformats.epub.EpubTypePlugin
-import com.ustadmobile.port.sharedse.contentformats.xapi.plugin.TinCanTypePlugin
+import com.ustadmobile.port.sharedse.contentformats.epub.EpubTypeFilePlugin
+import com.ustadmobile.port.sharedse.contentformats.video.VideoTypeFilePlugin
+import com.ustadmobile.port.sharedse.contentformats.xapi.plugin.XapiPackageTypeFilePlugin
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -26,9 +26,9 @@ import java.util.regex.Pattern
  */
 
 
-private val CONTENT_PLUGINS = listOf(EpubTypePlugin(), TinCanTypePlugin(), VideoTypePlugin())
+private val CONTENT_PLUGINS = listOf(EpubTypeFilePlugin(), XapiPackageTypeFilePlugin(), VideoTypeFilePlugin())
 
-suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, plugins: List<ContentTypePlugin> = CONTENT_PLUGINS): ImportedContentEntryMetaData? {
+suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, plugins: List<ContentTypeFilePlugin> = CONTENT_PLUGINS): ImportedContentEntryMetaData? {
     plugins.forEach {
         val pluginResult = it.getContentEntry(file)
         val languageCode = pluginResult?.language?.iso_639_1_standard
@@ -75,7 +75,7 @@ suspend fun importContainerFromFile(contentEntryUid: Long, mimeType: String?, co
 
 
 suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: UmAppDatabase,
-                                       containerBaseDir: String, plugins: List<ContentTypePlugin> = CONTENT_PLUGINS): Pair<ContentEntry, Container>? {
+                                       containerBaseDir: String, plugins: List<ContentTypeFilePlugin> = CONTENT_PLUGINS): Pair<ContentEntry, Container>? {
     val (contentEntry, mimeType, file, isZipped) = extractContentEntryMetadataFromFile(file, db, plugins)
             ?: return null
 

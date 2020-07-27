@@ -3,34 +3,37 @@ package com.ustadmobile.port.android.view
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.net.toFile
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzEditBinding
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import org.kodein.di.instance
 import java.io.File
 
 interface PersonEditFragmentEventHandler {
@@ -39,13 +42,13 @@ interface PersonEditFragmentEventHandler {
     
 }
 
-class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEditFragmentEventHandler {
+class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView, PersonEditFragmentEventHandler {
 
     private var mBinding: FragmentPersonEditBinding? = null
 
     private var mPresenter: PersonEditPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, Person>?
+    override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
         get() = mPresenter
 
     override var genderOptions: List<MessageIdOption>? = null
@@ -80,8 +83,8 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             field?.removeObserver(clazzMemberWithClazzObserver)
             field = value
             value?.observe(this, clazzMemberWithClazzObserver)
-        } 
-    
+        }
+
     private var clazzMemberWithClazzRecyclerAdapter: ClazzMemberWithClazzRecyclerAdapter? = null
 
     private var clazzMemberNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
@@ -102,58 +105,8 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
                 }.show()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView: View
-        mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
-            rootView = it.root
-            it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
-        }
 
-        mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
-        clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this, mPresenter)
-        clazzMemberNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
-                View.OnClickListener { onClickNewClazzMemberWithClazz() },
-                requireContext().getString(R.string.add_person_to_class)).apply {
-            newItemVisible = true
-        }
-        mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzMemberWithClazzRecyclerAdapter,
-                clazzMemberNewItemRecyclerViewAdapter)
-        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
-
-        return rootView
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.person)
-
-        CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->
-            findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                    Clazz::class.java, roleOption.resultKey) {
-                val clazzSelected = it.firstOrNull() ?: return@observeResult
-                mPresenter?.handleAddOrEditClazzMemberWithClazz(ClazzMemberWithClazz().apply {
-                    clazzMemberPersonUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
-                    clazzMemberClazzUid =  clazzSelected.clazzUid
-                    clazzMemberRole = roleOption.roleId
-                    clazz = clazzSelected
-                    clazzMemberActive = true
-                })
-            }
-        }
-
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mPresenter?.onDestroy()
-        mBinding = null
-        mPresenter = null
-        entity = null
-
-    }
-
-    override var entity: Person? = null
+    override var entity: PersonWithAccount? = null
         get() = field
         set(value) {
             field = value
@@ -162,6 +115,7 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             //for some reason setting the options before (and indepently from) the value causes
             // a databinding problem
             mBinding?.genderOptions = genderOptions
+            loading = false
         }
 
 
@@ -205,6 +159,64 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             }
         }
 
+    override var classVisible: Boolean? = null
+        set(value) {
+            mBinding?.classVisibility = if(value != null && value) View.GONE else View.VISIBLE
+            field = value
+        }
+
+    override var usernameError: String? = null
+        set(value) {
+            field = value
+            handleInputError(mBinding?.usernameTextinputlayout, value != null, value)
+        }
+
+    override var passwordError: String? = null
+        set(value) {
+            field = null
+            handleInputError(mBinding?.passwordTextinputlayout, value != null, value)
+        }
+
+
+    override var noMatchPasswordError: String? = null
+        set(value) {
+            field = value
+            if(value != null){
+                handleInputError(mBinding?.passwordTextinputlayout,true, value)
+                handleInputError(mBinding?.confirmPasswordTextinputlayout, true,value)
+            }
+        }
+
+    override var confirmError: String? = null
+        set(value) {
+            field = value
+            handleInputError(mBinding?.confirmPasswordTextinputlayout, value != null, value)
+        }
+
+    override var errorMessage: String? = null
+        set(value) {
+            field = value
+            mBinding?.errorText?.visibility = if(value != null) View.VISIBLE else View.GONE
+            mBinding?.errorText?.text = value
+        }
+
+    override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
+        val impl: UstadMobileSystemImpl by instance()
+        val navController = findNavController()
+        val umNextDestination = impl.destinationProvider.lookupDestinationName(nextDestination)
+        navController.currentBackStackEntry?.savedStateHandle?.set(UstadView.ARG_SNACK_MESSAGE,
+                String.format(getString(R.string.logged_in_as),account?.username,account?.endpointUrl))
+        if(umNextDestination != null){
+            val navOptions = NavOptions.Builder().setPopUpTo(umNextDestination.destinationId, true).build()
+            navController.navigate(umNextDestination.destinationId,null, navOptions)
+        }
+    }
+
+    private fun handleInputError(inputView: TextInputLayout?, error: Boolean, hint: String?){
+        inputView?.isErrorEnabled = error
+        inputView?.error = if(error) hint else null
+    }
+
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -212,6 +224,88 @@ class PersonEditFragment: UstadEditFragment<Person>(), PersonEditView, PersonEdi
             field = value
             mBinding?.fieldsEnabled = value
         }
+
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val rootView: View
+        mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
+            rootView = it.root
+            it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
+        }
+
+        mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
+                di, viewLifecycleOwner)
+        clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this, mPresenter)
+        clazzMemberNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
+                View.OnClickListener { onClickNewClazzMemberWithClazz() },
+                requireContext().getString(R.string.add_person_to_class)).apply {
+            newItemVisible = true
+        }
+        mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzMemberWithClazzRecyclerAdapter,
+                clazzMemberNewItemRecyclerViewAdapter)
+
+        mBinding?.usernameText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.usernameTextinputlayout, false, null)
+            }
+        })
+
+        mBinding?.passwordText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.passwordTextinputlayout, false, null)
+            }
+        })
+
+        mBinding?.confirmPasswordText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.confirmPasswordTextinputlayout, false, null)
+            }
+        })
+
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.person)
+        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
+
+        CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->
+            findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                    Clazz::class.java, roleOption.resultKey) {
+                val clazzSelected = it.firstOrNull() ?: return@observeResult
+                mPresenter?.handleAddOrEditClazzMemberWithClazz(ClazzMemberWithClazz().apply {
+                    clazzMemberPersonUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
+                    clazzMemberClazzUid =  clazzSelected.clazzUid
+                    clazzMemberRole = roleOption.roleId
+                    clazz = clazzSelected
+                    clazzMemberActive = true
+                })
+            }
+        }
+
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter?.onDestroy()
+        mBinding = null
+        mPresenter = null
+        entity = null
+
+    }
 
     companion object {
 

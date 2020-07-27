@@ -131,7 +131,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         init(mContext)
     }
 
-    fun handleActivityDestroy(mContext: Activity) {}
 
 
     /**

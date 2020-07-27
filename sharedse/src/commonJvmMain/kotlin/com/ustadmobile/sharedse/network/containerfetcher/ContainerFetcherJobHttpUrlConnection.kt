@@ -13,17 +13,19 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicLong
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import org.kodein.di.*
 
 typealias ConnectionOpener = (url: URL) -> HttpURLConnection
 
-class ContainerDownloaderJobHttpUrlConnection(val request: ContainerFetcherRequest,
+class ContainerFetcherJobHttpUrlConnection(val request: ContainerFetcherRequest,
                                               val listener: ContainerFetcherListener? = null,
-                                              val networkManager: NetworkManagerBle,
-                                              val extras: Map<Int, Any> = mapOf()) {
+                                              override val di: DI): DIAware {
 
     private val contentLength = AtomicLong(0L)
 
     private val bytesSoFar = AtomicLong(0L)
+
+    private val networkManager: NetworkManagerBle by instance()
 
     suspend fun progressUpdater() = coroutineScope {
         while(isActive) {
