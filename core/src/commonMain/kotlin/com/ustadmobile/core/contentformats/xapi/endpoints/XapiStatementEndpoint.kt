@@ -1,10 +1,11 @@
 package com.ustadmobile.core.contentformats.xapi.endpoints
 
 import com.ustadmobile.core.contentformats.xapi.Statement
+import org.kodein.di.DIAware
 
-interface XapiStatementEndpoint {
+interface XapiStatementEndpoint : DIAware {
 
-    suspend fun storeStatements(statements: List<Statement>, statementId: String,
-                                contentEntryUid: Long): List<String>
+    fun storeStatements(statements: List<Statement>, statementId: String,
+                        contentEntryUid: Long = 0L): List<String>
 
 }

@@ -1,13 +1,15 @@
 package com.ustadmobile.port.sharedse.contentformats.xapi.endpoints
 
 import com.google.gson.Gson
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.xapi.Actor
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.XObject
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.lib.db.entities.XObjectEntity
-import com.ustadmobile.core.contentformats.xapi.Actor
-import com.ustadmobile.core.contentformats.xapi.Statement
-import com.ustadmobile.core.contentformats.xapi.XObject
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.getAgent
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.getPerson
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateContextStatementJoin
@@ -16,10 +18,18 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.inse
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateVerbLangMap
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateXObject
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateXObjectLangMap
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.text.SimpleDateFormat
 import java.util.*
 
-class XapiStatementEndpointImpl(db: UmAppDatabase, private val gson: Gson) {
+class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiStatementEndpoint {
+
+    private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+
+    private val gson: Gson by di.instance()
+
     private val verbDao: VerbDao = db.verbDao
     private val statementDao: StatementDao = db.statementDao
     private val progressDao: ContentEntryProgressDao = db.contentEntryProgressDao
@@ -32,14 +42,13 @@ class XapiStatementEndpointImpl(db: UmAppDatabase, private val gson: Gson) {
     private val langVariantDao = db.languageVariantDao
     private val contentEntryDao = db.contentEntryDao
 
-
     /**
      * @param contentEntryUid - the contentEntryUid when it is already known. E.g. when the xapi
      * endpoint is used by the XapiPackagePresenter then the contentEntryUid is known.
      */
     @Throws(IllegalArgumentException::class)
-    fun storeStatements(statements: List<Statement>, statementId: String,
-                        contentEntryUid: Long = 0L): List<String> {
+    override fun storeStatements(statements: List<Statement>, statementId: String,
+                                 contentEntryUid: Long): List<String> {
 
         hasStatementWithMatchingId(statements, statementId)
 

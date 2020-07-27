@@ -8,13 +8,14 @@ import com.ustadmobile.core.db.dao.StateContentDao
 import com.ustadmobile.core.db.dao.StateDao
 import com.ustadmobile.core.contentformats.xapi.Actor
 import com.ustadmobile.core.contentformats.xapi.State
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.deleteAndInsertNewStateContent
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.getAgent
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateState
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateStateContent
 import java.util.*
 
-class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private val contentType: String?) {
+class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private val contentType: String?) : XapiStateEndpoint {
     private val agentDao: AgentDao = db.agentDao
     private val stateDao: StateDao = db.stateDao
     private val stateContentDao: StateContentDao = db.stateContentDao
@@ -22,7 +23,7 @@ class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private v
 
 
     @Throws(StatementRequestException::class)
-    fun storeState(state: State) {
+    override fun storeState(state: State) {
 
         isContentTypeJson()
 
@@ -36,7 +37,7 @@ class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private v
 
     }
 
-    fun overrideState(state: State) {
+    override fun overrideState(state: State) {
 
         isContentTypeJson()
 
@@ -92,7 +93,7 @@ class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private v
 
     }
 
-    fun deleteStateContent(stateId: String, agentJson: String, activityId: String, registration: String) {
+    override fun deleteStateContent(stateId: String, agentJson: String, activityId: String, registration: String) {
 
         val agent = gson.fromJson(agentJson, Actor::class.java)
 
@@ -102,7 +103,7 @@ class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private v
     }
 
 
-    fun deleteListOfStates(agentJson: String, activityId: String, registration: String) {
+    override fun deleteListOfStates(agentJson: String, activityId: String, registration: String) {
 
         val agent = gson.fromJson(agentJson, Actor::class.java)
 
