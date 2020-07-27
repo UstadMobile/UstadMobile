@@ -47,7 +47,7 @@ class PersonAccountEditPresenter(context: Any,
         val activePersonUid = accountManager.activeAccount.personUid
 
         val activePerson = withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.personDao?.findByUid(activePersonUid)
+            db.personDao.findByUid(activePersonUid)
         } ?: Person()
 
         isActiveUserAdmin = activePerson.admin
