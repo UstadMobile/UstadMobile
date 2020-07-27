@@ -1,10 +1,14 @@
 package com.ustadmobile.sharedse.util
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.ContextActivity
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -14,6 +18,10 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import org.junit.rules.TestWatcher
@@ -63,6 +71,7 @@ class UstadTestRule: TestWatcher() {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
                 spy(UmAppDatabase.getInstance(Any(), dbName).also {
                     it.clearAllTables()
+                    it.preload()
                 })
             }
 
@@ -74,7 +83,17 @@ class UstadTestRule: TestWatcher() {
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 
-            bind<Gson>() with singleton { Gson() }
+            bind<Gson>() with singleton {
+                val builder = GsonBuilder()
+                builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
+                builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
+                builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
+                builder.create()
+            }
+
+            bind<XapiStatementEndpoint>() with singleton {
+                XapiStatementEndpointImpl(Endpoint("http://localhost:8087/"), di)
+            }
         }
     }
 

@@ -58,7 +58,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
     }
 
     override fun put(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val di = uriResource.initParameter(ConcatenatedContainerEntryFileResponder.INIT_PARAM_DI_INDEX, DI::class.java)
+        val di = uriResource.initParameter(PARAM_APPREPO_INDEX, DI::class.java)
         val gson: Gson by di.instance()
 
         val contentEntryUid = urlParams[URLPARAM_CONTENTENTRYUID]?.toLongOrNull() ?: 0L
@@ -114,7 +114,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
     }
 
     override fun post(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val di = uriResource.initParameter(ConcatenatedContainerEntryFileResponder.INIT_PARAM_DI_INDEX, DI::class.java)
+        val di = uriResource.initParameter(PARAM_APPREPO_INDEX, DI::class.java)
         val gson: Gson by di.instance()
 
         val contentEntryUid = urlParams[URLPARAM_CONTENTENTRYUID]?.toLongOrNull() ?: 0L

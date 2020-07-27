@@ -1,14 +1,23 @@
 package com.ustadmobile.sharedse.xapi
 
+import com.nhaarman.mockitokotlin2.mock
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
+import com.ustadmobile.sharedse.util.UstadTestRule
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
@@ -21,22 +30,32 @@ import java.nio.file.Paths
 
 class TestXapiStatementResponder {
 
+    @JvmField
+    @Rule
+    var testRule = UstadTestRule()
+
+
+
     internal lateinit var httpd: RouterNanoHTTPD
     private var appRepo: UmAppDatabase? = null
 
     val context = Any()
 
+    lateinit var di: DI
+
     @Before
     @Throws(IOException::class)
     fun setup() {
-        checkJndiSetup()
-        val appDatabase = UmAppDatabase.Companion.getInstance(context)
-        appDatabase.clearAllTables()
-        appDatabase.preload()
-        appRepo = appDatabase
 
-        httpd = RouterNanoHTTPD(0)
-        httpd.addRoute("/xapi/:contentEntryUid/statements", XapiStatementResponder::class.java, appRepo)
+        di = DI{
+            import(testRule.diModule)
+        }
+
+        checkJndiSetup()
+        appRepo = di.on(Endpoint("http://localhost:8087/")).direct.instance(tag = UmAppDatabase.TAG_DB)
+
+        httpd = EmbeddedHTTPD(0, di)
+        httpd.addRoute("/xapi/:contentEntryUid/statements", XapiStatementResponder::class.java, di)
         httpd.start()
     }
 
