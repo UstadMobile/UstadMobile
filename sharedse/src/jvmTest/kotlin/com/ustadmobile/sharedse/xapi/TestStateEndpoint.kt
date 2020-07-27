@@ -3,10 +3,9 @@ package com.ustadmobile.sharedse.xapi
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.port.sharedse.contentformats.xapi.Actor
-import com.ustadmobile.port.sharedse.contentformats.xapi.State
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StateEndpoint
+import com.ustadmobile.core.contentformats.xapi.Actor
+import com.ustadmobile.core.contentformats.xapi.State
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
@@ -59,7 +58,7 @@ class TestStateEndpoint {
         val contentMap = gson.fromJson<HashMap<String, Any>>(content, contentMapToken)
 
         val state = State(stateId, agent, activityId, contentMap, "")
-        val endpoint = StateEndpoint(repo!!, gson, "application/json")
+        val endpoint = XapiStateEndpointImpl(repo!!, gson, "application/json")
         endpoint.storeState(state)
 
         val agentEntity = XapiUtil.getAgent(repo!!.agentDao, repo!!.personDao, state.agent!!)

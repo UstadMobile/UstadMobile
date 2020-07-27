@@ -5,9 +5,9 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.port.sharedse.contentformats.xapi.Actor
-import com.ustadmobile.port.sharedse.contentformats.xapi.State
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StateEndpoint
+import com.ustadmobile.core.contentformats.xapi.Actor
+import com.ustadmobile.core.contentformats.xapi.State
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import java.io.ByteArrayOutputStream
@@ -44,7 +44,7 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
                 ""
 
             val gson = GsonBuilder().disableHtmlEscaping().create()
-            val endpoint = StateEndpoint(repo, gson, null)
+            val endpoint = XapiStateEndpointImpl(repo, gson, null)
             val json = endpoint.getContent(stateId, agentJson, activityId, registration, since)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
                     "application/octet", json)
@@ -98,7 +98,7 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             contentMap = gson.fromJson(contentJson, contentMapToken)
 
             val state = State(stateId, agent, activityId, contentMap, registration)
-            val endpoint = StateEndpoint(repo, gson, contentType)
+            val endpoint = XapiStateEndpointImpl(repo, gson, contentType)
             endpoint.overrideState(state)
 
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
@@ -143,7 +143,7 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             val contentType = session.headers["content-type"]
 
             val state = State(stateId, agent, activityId, contentMap, registration)
-            val endpoint = StateEndpoint(repo, gson, contentType)
+            val endpoint = XapiStateEndpointImpl(repo, gson, contentType)
             endpoint.storeState(state)
 
             return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.NO_CONTENT,
@@ -179,7 +179,7 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
                 ""
 
             val gson = Gson()
-            val endpoint = StateEndpoint(repo, gson, null)
+            val endpoint = XapiStateEndpointImpl(repo, gson, null)
             if (stateId == null || stateId.isEmpty()) {
                 endpoint.deleteListOfStates(agentJson, activityId, registration)
             } else {

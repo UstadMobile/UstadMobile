@@ -5,9 +5,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.lib.db.entities.XObjectEntity
-import com.ustadmobile.port.sharedse.contentformats.xapi.Actor
-import com.ustadmobile.port.sharedse.contentformats.xapi.Statement
-import com.ustadmobile.port.sharedse.contentformats.xapi.XObject
+import com.ustadmobile.core.contentformats.xapi.Actor
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.XObject
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.getAgent
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.getPerson
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateContextStatementJoin
@@ -19,7 +19,7 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.inse
 import java.text.SimpleDateFormat
 import java.util.*
 
-class StatementEndpoint(db: UmAppDatabase, private val gson: Gson) {
+class XapiStatementEndpointImpl(db: UmAppDatabase, private val gson: Gson) {
     private val verbDao: VerbDao = db.verbDao
     private val statementDao: StatementDao = db.statementDao
     private val progressDao: ContentEntryProgressDao = db.contentEntryProgressDao

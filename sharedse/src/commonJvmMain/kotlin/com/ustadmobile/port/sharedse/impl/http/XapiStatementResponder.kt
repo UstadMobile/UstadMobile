@@ -3,12 +3,15 @@ package com.ustadmobile.port.sharedse.impl.http
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.port.sharedse.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.XContext
+import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StatementEndpoint
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StatementRequestException
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
@@ -85,7 +88,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                 statement = content?.let { String(it) } ?: statement
 
                 val statements = getStatementsFromJson(statement!!.trim { it <= ' ' }, gson)
-                val endpoint = StatementEndpoint(repo, gson)
+                val endpoint = XapiStatementEndpointImpl(repo, gson)
                 endpoint.storeStatements(statements, statementId, contentEntryUid = contentEntryUid)
             } else {
                 throw StatementRequestException("no content found", 204)
@@ -111,6 +114,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
         val builder = GsonBuilder()
         builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
         builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
+        builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
         return builder.create()
     }
 
@@ -139,7 +143,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
             val statements = getStatementsFromJson(statement, gson)
 
-            val endpoint = StatementEndpoint(repo, gson)
+            val endpoint = XapiStatementEndpointImpl(repo, gson)
             uuids = endpoint.storeStatements(statements, "",
                     contentEntryUid = contentEntryUid)
             `is` = ByteArrayInputStream(gson.toJson(uuids).toByteArray())

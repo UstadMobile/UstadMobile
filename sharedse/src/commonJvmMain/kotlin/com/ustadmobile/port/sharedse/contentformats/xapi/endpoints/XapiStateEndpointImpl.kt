@@ -6,15 +6,15 @@ import com.ustadmobile.core.db.dao.AgentDao
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.StateContentDao
 import com.ustadmobile.core.db.dao.StateDao
-import com.ustadmobile.port.sharedse.contentformats.xapi.Actor
-import com.ustadmobile.port.sharedse.contentformats.xapi.State
+import com.ustadmobile.core.contentformats.xapi.Actor
+import com.ustadmobile.core.contentformats.xapi.State
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.deleteAndInsertNewStateContent
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.getAgent
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateState
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateStateContent
 import java.util.*
 
-class StateEndpoint(db: UmAppDatabase, private val gson: Gson, private val contentType: String?) {
+class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private val contentType: String?) {
     private val agentDao: AgentDao = db.agentDao
     private val stateDao: StateDao = db.stateDao
     private val stateContentDao: StateContentDao = db.stateContentDao
@@ -26,7 +26,7 @@ class StateEndpoint(db: UmAppDatabase, private val gson: Gson, private val conte
 
         isContentTypeJson()
 
-        StatementEndpoint.checkValidActor(state.agent!!)
+        XapiStatementEndpointImpl.checkValidActor(state.agent!!)
 
         val agentEntity = getAgent(agentDao, personDao, state.agent!!)
 
@@ -40,7 +40,7 @@ class StateEndpoint(db: UmAppDatabase, private val gson: Gson, private val conte
 
         isContentTypeJson()
 
-        StatementEndpoint.checkValidActor(state.agent!!)
+        XapiStatementEndpointImpl.checkValidActor(state.agent!!)
 
         val agentEntity = getAgent(agentDao, personDao, state.agent!!)
 

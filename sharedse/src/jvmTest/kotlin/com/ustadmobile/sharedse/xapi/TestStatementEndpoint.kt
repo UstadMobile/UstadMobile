@@ -9,10 +9,12 @@ import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.AgentEntity
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.lib.db.entities.VerbEntity
-import com.ustadmobile.port.sharedse.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StatementEndpoint
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import org.junit.Assert
@@ -62,7 +64,7 @@ class TestStatementEndpoint {
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val statement = gson.fromJson(content, Statement::class.java)
-        val endpoint = StatementEndpoint(repo, gson)
+        val endpoint = XapiStatementEndpointImpl(repo, gson)
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
@@ -87,7 +89,7 @@ class TestStatementEndpoint {
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val statement = gson.fromJson(content, Statement::class.java)
-        val endpoint = StatementEndpoint(repo, gson)
+        val endpoint = XapiStatementEndpointImpl(repo, gson)
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
@@ -142,6 +144,49 @@ class TestStatementEndpoint {
     }
 
     @Test
+    fun givenStatementWithProgress_whenProgressAlreadyAvailable_thenProgressShouldUpdate() {
+        val statementStr = this::class.java.getResourceAsStream(statementWithProgress).bufferedReader().use {
+            it.readText()
+        }
+
+        val entry = ContentEntry().apply{
+            entryId = "http://demo.com/"
+            contentEntryUid = repo.contentEntryDao.insert(this)
+        }
+
+        val entryProgress = ContentEntryProgress().apply{
+            contentEntryProgressProgress = 10
+            contentEntryProgressContentEntryUid = entry.contentEntryUid
+            contentEntryProgressPersonUid = 0
+            contentEntryProgressStatusFlag = 0
+            contentEntryProgressActive = true
+            contentEntryProgressUid = repo.contentEntryProgressDao.insert(this)
+        }
+
+
+        val statementEndpoint = XapiStatementEndpointImpl(repo, gson)
+        statementEndpoint.storeStatement(gson.fromJson(statementStr, Statement::class.java),
+                contentEntryUid = entry.contentEntryUid)
+
+        val statementEntity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
+        val xObject = repo.xObjectDao.findByXobjectUid(statementEntity!!.xObjectUid)
+        val progressEntry = repo.contentEntryProgressDao.getProgressByContentAndPerson(statementEntity.statementContentEntryUid, statementEntity.statementPersonUid)
+
+        Assert.assertEquals("Statement entity has correctly assigned contententryuid",
+                entry.contentEntryUid, xObject?.objectContentEntryUid)
+        Assert.assertEquals("Statement entity has progress set as per JSON",
+                17, statementEntity?.extensionProgress)
+        Assert.assertEquals("Statement has preset Verb UID as expected",
+                VerbEntity.FIXED_UIDS["http://adlnet.gov/expapi/verbs/progressed"],
+                statementEntity?.statementVerbUid)
+        Assert.assertEquals("Statement has contentEntryUid set", entry.contentEntryUid,
+                statementEntity?.statementContentEntryUid)
+        Assert.assertEquals("progress was updated", 17, progressEntry!!.contentEntryProgressProgress)
+    }
+
+
+
+    @Test
     @Throws(IOException::class)
     fun givenFullValidStatementWithContext_whenParsed_thenDbAndStatementShouldMatch() {
 
@@ -151,7 +196,7 @@ class TestStatementEndpoint {
         println(content)
 
         val statement = gson.fromJson(content, Statement::class.java)
-        val endpoint = StatementEndpoint(repo, gson)
+        val endpoint = XapiStatementEndpointImpl(repo, gson)
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
@@ -199,7 +244,7 @@ class TestStatementEndpoint {
     fun givenValidStatementWithSubStatement_whenParsed_thenDbAndStatementShouldMatch() {
 
         val statement = gson.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(subStatement)), Statement::class.java)
-        val endpoint = StatementEndpoint(repo, gson)
+        val endpoint = XapiStatementEndpointImpl(repo, gson)
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")

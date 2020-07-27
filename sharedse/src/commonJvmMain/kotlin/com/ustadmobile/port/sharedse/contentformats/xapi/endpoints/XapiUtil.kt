@@ -3,11 +3,11 @@ package com.ustadmobile.port.sharedse.contentformats.xapi.endpoints
 import com.google.gson.Gson
 import com.neovisionaries.i18n.CountryCode
 import com.neovisionaries.i18n.LanguageCode
+import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.sharedse.contentformats.xapi.*
 import java.util.*
 
 object XapiUtil {
@@ -302,7 +302,7 @@ object XapiUtil {
                     statementEntity.resultScoreRaw = resultScore.raw
                 }
 
-                val progressExtension = statementResult.extensions?.get(StatementEndpoint.EXTENSION_PROGRESS)
+                val progressExtension = statementResult.extensions?.get(XapiStatementEndpointImpl.EXTENSION_PROGRESS)
                 if (progressExtension != null) {
                     //As this is being parsed as JSON - any number is counted as Double type
                     statementEntity.extensionProgress = progressExtension.anyToInt()

@@ -1,8 +1,5 @@
-package com.ustadmobile.port.sharedse.contentformats.xapi
+package com.ustadmobile.core.contentformats.xapi
 
-import com.google.gson.annotations.JsonAdapter
-
-@JsonAdapter(ContextDeserializer::class)
 class ContextActivity {
 
     var parent: List<XObject>? = null
@@ -15,7 +12,7 @@ class ContextActivity {
 
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
+        if (o == null || this::class != o::class) return false
 
         val that = o as ContextActivity?
 
