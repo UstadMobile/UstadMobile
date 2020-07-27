@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
@@ -9,6 +11,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -20,6 +24,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
     : UstadBaseController<VideoPlayerView>(context, arguments, view, di) {
 
 
+    private var entryUuid: Long = 0
     internal var containerUid: Long = 0
 
     val accountManager: UstadAccountManager by instance()
@@ -27,6 +32,8 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
     val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
 
     val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+
+    val statementEndpoint by di.instance<XapiStatementEndpoint>()
 
 
     internal lateinit var contentEntryDao: ContentEntryDao
@@ -52,7 +59,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         containerDao = db.containerDao
         contentEntryDao = db.contentEntryDao
 
-        val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
+        entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
         view.loading = true
@@ -69,6 +76,53 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
     fun handleUpNavigation() {
         //This is now handled by jetpack navigation
+    }
+
+    fun updateProgress(position: Long, duration: Long) {
+        val progress = (position.toFloat() / duration * 100).toInt()
+        val flag = if (progress == 100) ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED or ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED else 0
+        //    repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
+
+        createStatement(progress)
+    }
+
+    private fun createStatement(progress: Int) {
+
+
+/*
+
+        val statement = """
+        {
+            "actor": $actor,
+            "verb": {
+                "id": "$verbUrl",
+                "display": {
+                    "en-US": "$verbDisplay"
+                }
+            },
+            "result": {
+                "success" : $completed,
+                "duration" : "$timeTaken",
+                 "extensions": {
+                      "https://w3id.org/xapi/cmi5/result/extensions/progress": $progress
+                    }
+            },
+            "object": {
+                "id" : "$finalUrl",
+                "objectType" : "Activity",
+                "definition" : {
+                        "name": {"en-US":"Exercise $exerciseId : Question $counter"},
+                        "description": {"en-US":"$question"}
+                }
+            }
+        }
+
+        """.trimIndent()
+*/
+
+
+        statementEndpoint.storeStatements(listOf(Statement()), "", entryUuid)
+
     }
 
 

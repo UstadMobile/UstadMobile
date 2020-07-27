@@ -2,11 +2,13 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.ContentEntryProgressDao.Companion.FIND_PROGRESS_BY_CONTENT_AND_PERSON_QUERY
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
+import com.ustadmobile.lib.db.entities.DownloadJobItem
 
 @UmDao
 @UmRepository
@@ -27,6 +29,22 @@ abstract class ContentEntryProgressDao : BaseDao<ContentEntryProgress> {
                     """)
     abstract fun updateProgressByContentEntryAndPerson(contentEntryUid: Long, personUid: Long,
                                                        progress: Int, status: Int): Int
+
+    @Transaction
+    open fun updateProgress(entryUuid: Long,personUid: Long,  currentProgress: Int, statusFlag: Int){
+        val progressOnDb = getProgressByContentAndPerson(entryUuid, personUid) ?: ContentEntryProgress().apply {
+            contentEntryProgressActive = true
+            contentEntryProgressProgress = currentProgress
+            contentEntryProgressContentEntryUid = entryUuid
+            contentEntryProgressPersonUid = personUid
+            contentEntryProgressStatusFlag = statusFlag
+            contentEntryProgressUid = insert(this)
+        }
+
+        if(currentProgress > progressOnDb.contentEntryProgressProgress){
+            updateProgressByContentEntryAndPerson(entryUuid, personUid, currentProgress, statusFlag)
+        }
+    }
 
     companion object {
 

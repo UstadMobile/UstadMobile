@@ -237,6 +237,12 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             if (playbackState == Player.STATE_READY) {
                 loading = false
+                mPresenter?.updateProgress(player?.currentPosition ?: 0L, player?.contentDuration
+                        ?: 100L)
+            }
+            if (playbackState == Player.STATE_ENDED) {
+                mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
+                        ?: 100L)
             }
         }
     }
@@ -281,7 +287,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         playWhenReady = player?.playWhenReady ?: false
         player?.removeListener(videoListener)
         player?.release()
-
+        mPresenter?.updateProgress(playbackPosition, player?.contentDuration ?: 100)
         player = null
     }
 
