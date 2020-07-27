@@ -4,7 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.findClazzTimeZone
+import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -109,7 +109,7 @@ class ClazzWorkEditPresenter(context: Any,
             db.clazzDao.getClazzWithSchool(clazzWork.clazzWorkClazzUid)
         }?: ClazzWithSchool()
 
-        view.timeZone = clazzWithSchool.findClazzTimeZone()
+        view.timeZone = clazzWithSchool.effectiveTimeZone()
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
@@ -154,7 +154,7 @@ class ClazzWorkEditPresenter(context: Any,
                 db.clazzDao.getClazzWithSchool(editEntity.clazzWorkClazzUid)
             } ?: ClazzWithSchool()
 
-            view.timeZone = clazzWithSchool.findClazzTimeZone()
+            view.timeZone = clazzWithSchool.effectiveTimeZone()
         }
 
         view.clazzWorkQuizQuestionsAndOptions = questionAndOptionsEditHelper.liveList

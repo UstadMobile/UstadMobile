@@ -1,14 +1,14 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.util.ext.findClazzTimeZone
+import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -42,7 +42,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             db.clazzDao.getClazzWithSchool(clazzWorkWithSubmission.clazzWorkClazzUid)
         }?: ClazzWithSchool()
 
-        view.timeZone = clazzWithSchool.findClazzTimeZone()
+        view.timeZone = clazzWithSchool.effectiveTimeZone()
 
         //Find Content and questions
         val contentList = withTimeoutOrNull(2000) {
@@ -68,7 +68,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                 clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid?:0L
                 clazzWorkSubmissionPersonUid = loggedInPersonUid
                 clazzWorkSubmissionInactive = false
-                clazzWorkSubmissionDateTimeStarted = UMCalendarUtil.getDateInMilliPlusDays(0)
+                clazzWorkSubmissionDateTimeStarted = getSystemTimeInMillis()
             }
         }
 
@@ -139,16 +139,27 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        //TODO: this
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
-        val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
-            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
-                    entity?.clazzWorkClazzUid?: 0L)
+        val loggedInPerson: Person? = withTimeoutOrNull(2000){
+            db.personDao.findByUid(loggedInPersonUid)
         }
-        val isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-        return !isStudent
+        if(loggedInPerson?.admin == true){
+            return true
+        }else {
+            val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+            val clazzWork: ClazzWork? = withTimeoutOrNull(2000){
+                db.clazzWorkDao.findByUidAsync(entityUid)
+            }
+
+            val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
+                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+                        clazzWork?.clazzWorkClazzUid ?: 0L)
+            }
+            val isTeacher = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_TEACHER)
+            return isTeacher
+        }
 
     }
 
@@ -177,17 +188,15 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                         entity?.clazzWorkClazzUid?:0L)
             }
 
-            var submission = entity?.clazzWorkSubmission
-            if(submission == null) {
-                submission = ClazzWorkSubmission().apply {
-                    clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWorkUid ?: 0L
-                    clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
-                    clazzWorkSubmissionDateTimeFinished = UMCalendarUtil.getDateInMilliPlusDays(0)
-                    clazzWorkSubmissionInactive = false
-                    clazzWorkSubmissionPersonUid = loggedInPersonUid
-                }
+            var submission = entity?.clazzWorkSubmission ?: ClazzWorkSubmission().apply {
+                clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWorkUid ?: 0L
+                clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
+                clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+                clazzWorkSubmissionInactive = false
+                clazzWorkSubmissionPersonUid = loggedInPersonUid
             }
-            submission.clazzWorkSubmissionDateTimeFinished = UMCalendarUtil.getDateInMilliPlusDays(0)
+
+            submission.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
 
             if(submission.clazzWorkSubmissionUid == 0L) {
                 submission.clazzWorkSubmissionUid = db.clazzWorkSubmissionDao.insertAsync(submission)

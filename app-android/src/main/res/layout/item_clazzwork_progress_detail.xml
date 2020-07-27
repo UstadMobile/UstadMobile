@@ -53,18 +53,18 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView11"
+            android:id="@+id/item_clazzwor_progress_detail_marked_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@{`` + clazzWorkWithMetrics.markedStudents}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            app:layout_constraintStart_toStartOf="@+id/textView12"
+            app:layout_constraintStart_toStartOf="@+id/item_clazzwor_progress_detail_marked_title"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="1" />
 
         <TextView
-            android:id="@+id/textView12"
+            android:id="@+id/item_clazzwor_progress_detail_marked_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -72,21 +72,21 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView11" />
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzwor_progress_detail_marked_value" />
 
         <TextView
-            android:id="@+id/textView13"
+            android:id="@+id/item_clazzwor_progress_detail_submitted_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@{`` + clazzWorkWithMetrics.submittedStudents}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            app:layout_constraintStart_toStartOf="@+id/textView14"
+            app:layout_constraintStart_toStartOf="@+id/item_clazzwor_progress_detail_submitted_title"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="2" />
 
         <TextView
-            android:id="@+id/textView14"
+            android:id="@+id/item_clazzwor_progress_detail_submitted_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -94,21 +94,21 @@
             android:text="@string/submitted_cap"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/guideline2"
-            app:layout_constraintTop_toBottomOf="@+id/textView13" />
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzwor_progress_detail_submitted_value" />
 
         <TextView
-            android:id="@+id/textView15"
+            android:id="@+id/item_clazzwor_progress_detail_not_submitted_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@{`` + clazzWorkWithMetrics.calculateNotSubmittedStudents()}"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            app:layout_constraintStart_toStartOf="@+id/textView16"
+            app:layout_constraintStart_toStartOf="@+id/item_clazzwor_progress_detail_not_submitted_title"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="3" />
 
         <TextView
-            android:id="@+id/textView16"
+            android:id="@+id/item_clazzwor_progress_detail_not_submitted_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -116,7 +116,7 @@
             android:text="@string/not_submitted_cap"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/guideline3"
-            app:layout_constraintTop_toBottomOf="@+id/textView15" />
+            app:layout_constraintTop_toBottomOf="@+id/item_clazzwor_progress_detail_not_submitted_value" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

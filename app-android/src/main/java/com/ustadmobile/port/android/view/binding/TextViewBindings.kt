@@ -1,23 +1,19 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.text.format.DateFormat
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
 import com.soywiz.klock.DateTimeTz
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.lib.db.entities.*
-import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.UMFileUtil
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 
@@ -209,37 +205,21 @@ fun TextView.setFileSize(fileSize: Long) {
 
 @BindingAdapter(value=["clazzMemberWithClazzWorkAndProgress"])
 fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMemberWithClazzWorkProgress){
-    val marked = context.getString(R.string.marked_cap)
-    val completed = context.getString(R.string.completed)
-    val submitted = context.getString(R.string.submitted_cap)
-    val notSubmitted = context.getString(R.string.not_submitted_cap)
-    val ofContent = context.getString(R.string.of_content)
-
-    val clazzWorkSubmission = clazzMemberWithClazzWorkAndProgress.mClazzWorkSubmission
-    var line2Bit1 = ""
-    var line2Bit2 = ""
-    if(clazzWorkSubmission == null){
-        line2Bit1 = notSubmitted
-    }else{
-        line2Bit1 = if(clazzWorkSubmission.clazzWorkSubmissionDateTimeFinished > 0){
-            if(clazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0){
-                marked
-            }else{
-                submitted
-            }
-        }else{
-            notSubmitted
-        }
+    var line = clazzMemberWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
+    if(clazzMemberWithClazzWorkAndProgress.clazzWorkHasContent && clazzMemberWithClazzWorkAndProgress.mProgress >= 0) {
+        line += " ${context.getString(R.string.completed)} " +
+                "${clazzMemberWithClazzWorkAndProgress.mProgress.toInt()}% " +
+                context.getString(R.string.of_content)
     }
+    text = line
+}
 
-    if(clazzMemberWithClazzWorkAndProgress.clazzWorkHasContent &&
-            clazzMemberWithClazzWorkAndProgress.mProgress >= 0){
-        line2Bit2 = " - " + completed + " " + clazzMemberWithClazzWorkAndProgress.mProgress.toInt() +
-                "% " + ofContent
-    }
-    val line2 = line2Bit1 + line2Bit2
+fun ClazzWorkSubmission?.statusString(context: Context) = when {
+    this == null -> context.getString(R.string.not_submitted_cap)
+    this.clazzWorkSubmissionDateTimeMarked > 0 -> context.getString(R.string.marked)
+    this.clazzWorkSubmissionDateTimeFinished > 0 -> context.getString(R.string.submitted)
+    else -> context.getString(R.string.not_submitted_cap)
 
-    text = line2
 }
 
 @BindingAdapter(value=["selectedClazzWorkQuestionType"])
@@ -258,14 +238,5 @@ fun TextView.setResponseTextFilled(responseText: String?){
         text = context.getString(R.string.not_answered)
     }else{
         text = responseText
-    }
-}
-
-@BindingAdapter(value=["submissionButtonText"])
-fun Button.setSubmissionButtonText(more: Boolean){
-    if(more!= null && more){
-        text = context.getString(R.string.return_and_mark_next)
-    }else{
-        text = context.getString(R.string.return_only)
     }
 }

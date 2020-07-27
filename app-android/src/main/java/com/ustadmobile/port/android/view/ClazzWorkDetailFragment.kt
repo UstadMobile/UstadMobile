@@ -19,14 +19,9 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
+import kotlinx.android.synthetic.main.appbar_material_tabs_scrollable.view.*
 
-
-interface ClazzWorkDetailFragmentEventHandler {
-
-}
-
-class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetailView,
-        ClazzWorkDetailFragmentEventHandler {
+class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetailView{
 
     private var mBinding: FragmentClazzWorkDetailBinding? = null
 
@@ -38,14 +33,17 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentClazzWorkDetailBinding.inflate(inflater, container, false).also {
+
+        mBinding = FragmentClazzWorkDetailBinding.inflate(inflater, container,
+                false).also {
             rootView = it.root
+            mTabLayout = it.root.tabs
         }
 
         mPager = mBinding?.fragmentClazzworkDetailViewpager
-        mTabLayout = mBinding?.fragmentClazzworkDetailTablayout
 
         mPresenter = ClazzWorkDetailPresenter(requireContext(), arguments.toStringMap(), this,
                 di, this)
@@ -74,7 +72,6 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         mTabLayout = null
     }
 
-
     override var entity: ClazzWork? = null
         get() = field
         set(value) {
@@ -87,8 +84,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         set(value) {
             field = value
             if(value) {
-                mBinding?.fragmentClazzWorkDetailAbl?.visibility = View.GONE
-                mBinding?.fragmentClazzworkDetailTablayout?.visibility = View.GONE
+                mBinding?.root?.tabs?.visibility = View.GONE
             }
 
             val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
@@ -96,11 +92,13 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
             val tabs: List<String>
             tabs = if(isStudent){
                 listOf(
-                        ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +entityUidValue
+                        ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +
+                                entityUidValue
                 )
             }else {
                 listOf(
-                        ClazzWorkDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" + entityUidValue,
+                        ClazzWorkDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
+                                entityUidValue,
                         ClazzWorkDetailProgressListView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
                                 entityUidValue)
             }
@@ -112,7 +110,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
 
             mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
                     FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
-                    VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle        )
+                    VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle)
 
             Handler().post {
                 mPager?.adapter = mPagerAdapter
@@ -120,19 +118,14 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
             }
         }
 
-    override fun setEditVisible(visible: Boolean) {
-        if (!visible) {
-            editButtonMode = EditButtonMode.GONE
-        } else {
-            editButtonMode = EditButtonMode.FAB
-        }
-    }
-
     companion object{
-        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
+        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String,
+                Class<out Fragment>>(
                 ClazzWorkEditView.VIEW_NAME to ClazzWorkEditFragment::class.java,
-                ClazzWorkDetailOverviewView.VIEW_NAME to ClazzWorkDetailOverviewFragment::class.java,
-                ClazzWorkDetailProgressListView.VIEW_NAME to ClazzWorkDetailProgressListFragment::class.java
+                ClazzWorkDetailOverviewView.VIEW_NAME to
+                        ClazzWorkDetailOverviewFragment::class.java,
+                ClazzWorkDetailProgressListView.VIEW_NAME to
+                        ClazzWorkDetailProgressListFragment::class.java
         )
     }
 
