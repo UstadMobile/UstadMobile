@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- activity_screen_slide.xml -->
-
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
@@ -69,6 +67,7 @@
                         android:adjustViewBounds="true"
                         android:layout_height="@dimen/dimen_70dp"
                         android:layout_width="@dimen/dimen_70dp"
+                        android:layout_marginStart="@dimen/dimen_10dp"
                         android:padding="@dimen/dimen_4dp"
                         tools:src="@drawable/cover"
                         />
