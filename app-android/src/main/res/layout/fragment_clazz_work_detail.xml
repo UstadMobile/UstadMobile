@@ -18,14 +18,7 @@
             name="fieldsEnabled"
             type="boolean" />
 
-        <variable
-            name="fragmentEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzWorkDetailFragmentEventHandler" />
-
     </data>
-
-
-
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -33,37 +26,18 @@
         android:layout_height="match_parent">
 
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/fragment_clazz_work_detail_abl"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="4dp">
+        <include
+            android:id="@+id/fragment_clazz_work_detail_appbar_tabs"
+            layout="@layout/appbar_material_tabs_scrollable"/>
 
 
-        <com.google.android.material.tabs.TabLayout
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/fragment_clazzwork_detail_viewpager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/fragment_clazzwork_detail_tablayout"
-            app:tabTextColor="?colorTabText"
-            android:fitsSystemWindows="true"
-            app:tabSelectedTextColor="?colorSelectedTabText"
-            app:tabIndicatorColor="?colorTabIndicator"
-            android:background="?colorPrimaryBackground"
-            android:elevation="@dimen/dimen_4dp"
-            app:tabMode="fixed"
-            />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/fragment_clazzwork_detail_viewpager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/fragment_clazzwork_detail_tablayout"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-    </androidx.viewpager.widget.ViewPager>
+            android:layout_height="match_parent"
+            android:layout_below="@+id/fragment_clazzwork_detail_tablayout"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        </androidx.viewpager.widget.ViewPager>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 

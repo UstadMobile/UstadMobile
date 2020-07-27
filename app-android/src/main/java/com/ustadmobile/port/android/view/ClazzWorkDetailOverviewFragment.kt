@@ -34,7 +34,8 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 interface NewCommentHandler{
-    fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String, public: Boolean, to: Long, from: Long)
+    fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
+                       public: Boolean, to: Long, from: Long)
 }
 
 interface SimpleButtonHandler{
@@ -108,14 +109,12 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                               savedInstanceState: Bundle?): View? {
         val rootView: View
 
-        //The fab will be managed by the underlying tabs
-        fabManagementEnabled = false
+        fabManagementEnabled = true
 
         mBinding = FragmentClazzWorkWithSubmissionDetailBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
         }
-        //dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
@@ -233,6 +232,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         mPresenter = null
         entity = null
         contentLiveData = null
+        detailMergerRecyclerView?.adapter = null
+
         privateCommentsLiveData = null
         publicCommentsLiveData = null
         newPrivateCommentRecyclerAdapter = null
@@ -262,7 +263,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             submissionFreeTextRecyclerAdapter?.visible = value
             when {
                 entity?.clazzWorkCommentsEnabled == false -> {
-                    privateCommentsHeadingRecyclerAdapter?.visible = false
+                    privateCommentsHeadingRecyclerAdapter?.visible = isStudent
                     newPrivateCommentRecyclerAdapter?.visible = false
                 }
                 isStudent -> {

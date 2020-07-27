@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
@@ -35,7 +36,14 @@ class ClazzWorkDetailPresenter(context: Any,
                 db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
                         entity?.clazzWorkClazzUid?: 0L)
 
-        view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        val loggedInPerson: Person? = withTimeoutOrNull(2000){
+            db.personDao.findByUid(loggedInPersonUid)
+        }
+        if(loggedInPerson?.admin == true){
+            view.isStudent = false
+        }else {
+            view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        }
 
         return clazzWork
     }
@@ -56,6 +64,13 @@ class ClazzWorkDetailPresenter(context: Any,
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         val loggedInPersonUid = accountManager.activeAccount.personUid
+
+        val loggedInPerson: Person? = withTimeoutOrNull(2000){
+            db.personDao.findByUid(loggedInPersonUid)
+        }
+        if(loggedInPerson?.admin == true){
+            return true
+        }
 
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
             db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,

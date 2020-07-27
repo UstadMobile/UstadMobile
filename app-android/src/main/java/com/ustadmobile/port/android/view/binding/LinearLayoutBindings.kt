@@ -14,14 +14,17 @@ fun LinearLayout.setQuestionOptionsWithResponse(options: List<ClazzWorkQuestionO
 
     removeAllViews()
     for (item in options) {
-        val option = TextView(context)
-        option.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        option.text = item.clazzWorkQuestionOptionText
-        option.setTag(R.id.tag_clazzwork_quiz_option_uid, item.clazzWorkQuestionOptionUid)
-        option.setTextAppearance(context, R.style.UmTheme_TextAppearance_Subtitle1)
-        option.visibility = View.VISIBLE
-        option.setPadding(8,8,8,8)
-        option.background = context.getDrawable(R.drawable.bg_selected_quiz)
+        val option = TextView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            text = item.clazzWorkQuestionOptionText
+            setTag(R.id.tag_clazzwork_quiz_option_uid, item.clazzWorkQuestionOptionUid)
+            setTextAppearance(context, R.style.UmTheme_TextAppearance_Subtitle1)
+            visibility = View.VISIBLE
+            setPadding(8,8,8,8)
+            background = context.getDrawable(R.drawable.bg_selected_quiz)
+        }
+
+
         if(response == item.clazzWorkQuestionOptionUid){
             option.isSelected = true
             option.setTextColor(ContextCompat.getColor(context, R.color.common_google_signin_btn_text_dark_pressed))

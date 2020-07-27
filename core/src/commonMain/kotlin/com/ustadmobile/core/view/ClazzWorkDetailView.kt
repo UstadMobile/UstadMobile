@@ -5,8 +5,6 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 
 interface ClazzWorkDetailView: UstadDetailView<ClazzWork> {
 
-    fun setEditVisible(visible: Boolean)
-
     var isStudent : Boolean
 
     var clazzWorkTitle: String?
