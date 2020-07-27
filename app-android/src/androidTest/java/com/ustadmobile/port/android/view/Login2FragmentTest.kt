@@ -71,9 +71,8 @@ class Login2FragmentTest {
         mockWebServer.shutdown()
     }
 
-    //Disabled - hardcoded flag to disable registration on presenter
-    //@AdbScreenRecord("given registration is allowed when logging in then should show create account button")
-    //@Test
+    @AdbScreenRecord("given registration is allowed when logging in then should show create account button")
+    @Test
     fun givenRegistrationIsAllowed_whenLogin_shouldShowRegisterButton(){
         launchFragment(registration = true)
         onView(withId(R.id.create_account)).check(matches(isDisplayed()))
@@ -104,9 +103,8 @@ class Login2FragmentTest {
     }
 
 
-    //Disabled - hardcoded flag to disable registration on presenter
-    //@AdbScreenRecord("given create account button is visible when clicked should go to account creation screen")
-    //@Test
+    @AdbScreenRecord("given create account button is visible when clicked should go to account creation screen")
+    @Test
     fun givenCreateAccountIsVisible_whenClicked_shouldOpenAccountCreationSection(){
         launchFragment(registration = true)
         onView(withId(R.id.create_account)).perform(click())

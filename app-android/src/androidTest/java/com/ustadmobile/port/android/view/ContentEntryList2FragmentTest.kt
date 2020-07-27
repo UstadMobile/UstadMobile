@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -22,14 +21,19 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.port.android.UmViewActions.withItemCount
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.*
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
+import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.insertContentEntryWithParentChildJoinAndMostRecentContainer
 import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matchers.greaterThan
 import org.junit.Rule
 import org.junit.Test
 import java.lang.Thread.sleep
@@ -63,7 +67,7 @@ class ContentEntryList2FragmentTest  {
     @Test
     fun givenContentEntryPresent_whenClickOnContentEntry_thenShouldNavigateToContentEntryDetail() {
 
-        val contentEntries = runBlocking {
+        runBlocking {
             dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(4,parentEntryUid) }
 
         launchFragment(bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
@@ -71,10 +75,10 @@ class ContentEntryList2FragmentTest  {
 
         onView(withId(R.id.fragment_list_recyclerview)).check(matches(isDisplayed()))
 
-        onView(withId(R.id.fragment_list_recyclerview)).check(matches(hasChildCount(contentEntries.size)))
+        onView(withId(R.id.fragment_list_recyclerview)).check(withItemCount(greaterThan(0)))
 
         onView(withId(R.id.fragment_list_recyclerview))
-                .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click()))
+                .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
 
 
         assertEquals("After clicking on item, it navigates to detail view",
