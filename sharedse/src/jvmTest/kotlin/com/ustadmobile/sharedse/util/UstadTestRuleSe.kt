@@ -90,10 +90,6 @@ class UstadTestRule: TestWatcher() {
                 builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
                 builder.create()
             }
-
-            bind<XapiStatementEndpoint>() with singleton {
-                XapiStatementEndpointImpl(Endpoint("http://localhost:8087/"), di)
-            }
         }
     }
 

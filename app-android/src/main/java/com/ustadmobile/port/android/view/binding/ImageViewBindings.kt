@@ -123,6 +123,7 @@ fun ImageView.setIconOnStatusFlag(statusFlag: Int){
         (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> {
             setImageResource(R.drawable.ic_baseline_highlight_off_24)
         }
+        statusFlag == 0 -> setImageDrawable(null) 
     }
 }
 

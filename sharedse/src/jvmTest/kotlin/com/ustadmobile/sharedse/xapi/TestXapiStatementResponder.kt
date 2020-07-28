@@ -1,23 +1,33 @@
 package com.ustadmobile.sharedse.xapi
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.contentformats.xapi.ContextActivity
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
 import com.ustadmobile.sharedse.util.UstadTestRule
 import com.ustadmobile.util.test.checkJndiSetup
+import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
@@ -27,14 +37,9 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
+import javax.naming.InitialContext
 
 class TestXapiStatementResponder {
-
-    @JvmField
-    @Rule
-    var testRule = UstadTestRule()
-
-
 
     internal lateinit var httpd: RouterNanoHTTPD
     private var appRepo: UmAppDatabase? = null
@@ -47,8 +52,26 @@ class TestXapiStatementResponder {
     @Throws(IOException::class)
     fun setup() {
 
+        val endpointScope = EndpointScope()
         di = DI{
-            import(testRule.diModule)
+            bind<Gson>() with singleton {
+                val builder = GsonBuilder()
+                builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
+                builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
+                builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
+                builder.create()
+            }
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope!!).singleton {
+                val dbName = sanitizeDbNameFromUrl(context.url)
+                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
+                spy(UmAppDatabase.getInstance(Any(), dbName).also {
+                    it.clearAllTables()
+                    it.preload()
+                })
+            }
+            bind<XapiStatementEndpoint>() with singleton {
+                XapiStatementEndpointImpl(Endpoint("http://localhost:8087/"), di = di)
+            }
         }
 
         checkJndiSetup()
