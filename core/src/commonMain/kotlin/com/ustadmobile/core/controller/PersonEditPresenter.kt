@@ -188,7 +188,6 @@ class PersonEditPresenter(context: Any,
                     repo.personPictureDao.update(personPicture)
                 }
 
-                view.finishWithResult(listOf(entity))
                 onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
             }
         }

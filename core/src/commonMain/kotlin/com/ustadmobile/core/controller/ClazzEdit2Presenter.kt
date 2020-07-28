@@ -106,7 +106,6 @@ class ClazzEdit2Presenter(context: Any,
                     accountManager.activeAccount.endpointUrl,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
-            view.finishWithResult(listOf(entity))
             onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
         }
     }
