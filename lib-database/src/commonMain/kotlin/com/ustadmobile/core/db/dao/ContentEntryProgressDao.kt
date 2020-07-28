@@ -31,17 +31,18 @@ abstract class ContentEntryProgressDao : BaseDao<ContentEntryProgress> {
                                                        progress: Int, status: Int): Int
 
     @Transaction
-    open fun updateProgress(entryUuid: Long,personUid: Long,  currentProgress: Int, statusFlag: Int){
-        val progressOnDb = getProgressByContentAndPerson(entryUuid, personUid) ?: ContentEntryProgress().apply {
-            contentEntryProgressActive = true
-            contentEntryProgressProgress = currentProgress
-            contentEntryProgressContentEntryUid = entryUuid
-            contentEntryProgressPersonUid = personUid
-            contentEntryProgressStatusFlag = statusFlag
-            contentEntryProgressUid = insert(this)
-        }
+    open fun updateProgress(entryUuid: Long, personUid: Long, currentProgress: Int, statusFlag: Int) {
+        val progressOnDb = getProgressByContentAndPerson(entryUuid, personUid)
+                ?: ContentEntryProgress().apply {
+                    contentEntryProgressActive = true
+                    contentEntryProgressProgress = currentProgress
+                    contentEntryProgressContentEntryUid = entryUuid
+                    contentEntryProgressPersonUid = personUid
+                    contentEntryProgressStatusFlag = statusFlag
+                    contentEntryProgressUid = insert(this)
+                }
 
-        if(currentProgress > progressOnDb.contentEntryProgressProgress){
+        if (currentProgress > progressOnDb.contentEntryProgressProgress) {
             updateProgressByContentEntryAndPerson(entryUuid, personUid, currentProgress, statusFlag)
         }
     }

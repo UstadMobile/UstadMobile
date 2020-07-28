@@ -235,15 +235,20 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private var videoListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-            if (playbackState == Player.STATE_READY) {
-                loading = false
-                mPresenter?.updateProgress(player?.currentPosition ?: 0L, player?.contentDuration
+            if (playWhenReady && playbackState == Player.STATE_READY) {
+                // media is now playing
+                mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
+                        ?: 100L, true)
+            } else if (playbackState == Player.STATE_ENDED) {
+                mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
                         ?: 100L)
-            }
-            if (playbackState == Player.STATE_ENDED) {
+            }else if (playbackState == Player.STATE_READY) {
+                // player is ready or paused
+                loading = false
                 mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
                         ?: 100L)
             }
+
         }
     }
 

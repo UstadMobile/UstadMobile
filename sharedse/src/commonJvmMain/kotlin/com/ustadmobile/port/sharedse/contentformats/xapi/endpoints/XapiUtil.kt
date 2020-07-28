@@ -324,21 +324,7 @@ object XapiUtil {
     }
 
     fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, progressDao: ContentEntryProgressDao, verbEntity: VerbEntity) {
-
-        val status = progressDao.updateProgressByContentEntryAndPerson(
-                statementEntity.statementContentEntryUid, statementEntity.statementPersonUid,
-                statementEntity.extensionProgress, getStatusFlag(verbEntity.urlId))
-
-        // no fields updated
-        if (status == 0) {
-            ContentEntryProgress().also {
-                it.contentEntryProgressContentEntryUid = statementEntity.statementContentEntryUid
-                it.contentEntryProgressProgress = statementEntity.extensionProgress
-                it.contentEntryProgressPersonUid = statementEntity.statementPersonUid
-                it.contentEntryProgressStatusFlag = getStatusFlag(verbEntity.urlId)
-                progressDao.insert(it)
-            }
-        }
+        progressDao.updateProgress(statementEntity.statementContentEntryUid, statementEntity.statementPersonUid, statementEntity.extensionProgress, getStatusFlag(verbEntity.urlId))
     }
 
     private fun getStatusFlag(id: String?): Int {

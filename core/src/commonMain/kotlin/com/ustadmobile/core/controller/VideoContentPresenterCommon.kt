@@ -1,15 +1,17 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
+import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
@@ -24,6 +26,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
     : UstadBaseController<VideoPlayerView>(context, arguments, view, di) {
 
 
+    private var entry: ContentEntry? = null
     private var entryUuid: Long = 0
     internal var containerUid: Long = 0
 
@@ -33,8 +36,9 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
     val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
-    val statementEndpoint by di.instance<XapiStatementEndpoint>()
+    val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
 
+    var timeVideoPlayed = 0L
 
     internal lateinit var contentEntryDao: ContentEntryDao
     internal lateinit var containerDao: ContainerDao
@@ -64,7 +68,8 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
         view.loading = true
         GlobalScope.launch(doorMainDispatcher()) {
-            view.entry = contentEntryDao.getContentByUuidAsync(entryUuid)
+            entry = contentEntryDao.getContentByUuidAsync(entryUuid)
+            view.entry = entry
         }
 
     }
@@ -74,54 +79,60 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         handleOnResume()
     }
 
-    fun handleUpNavigation() {
-        //This is now handled by jetpack navigation
-    }
+    fun updateProgress(position: Long, videoLength: Long, playerStarted: Boolean = false) {
 
-    fun updateProgress(position: Long, duration: Long) {
-        val progress = (position.toFloat() / duration * 100).toInt()
+        var playerPlayedVideoDuration = 0L
+        if(playerStarted){
+            // player pressed play, record start time
+            timeVideoPlayed = systemTimeInMillis()
+        }else if(timeVideoPlayed == 0L){
+            // video never started, dont send statement
+            return
+        }else if(!playerStarted && timeVideoPlayed > 0){
+            // player pressed paused or video ended, so calc duration
+            playerPlayedVideoDuration = systemTimeInMillis() - timeVideoPlayed
+            timeVideoPlayed = 0
+        }else {
+            // unhandled cases
+            return
+        }
+
+        val progress = (position.toFloat() / videoLength * 100).toInt()
         val flag = if (progress == 100) ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED or ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED else 0
-        //    repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
+        repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
 
-        createStatement(progress)
+        createStatement(progress, playerPlayedVideoDuration)
     }
 
-    private fun createStatement(progress: Int) {
+    private fun createStatement(progress: Int, duration: Long) {
 
-
-/*
-
-        val statement = """
-        {
-            "actor": $actor,
-            "verb": {
-                "id": "$verbUrl",
-                "display": {
-                    "en-US": "$verbDisplay"
+        val statement = Statement().apply {
+            this.actor = Actor().apply {
+                this.account = Account().apply {
+                    this.homePage = accountManager.activeAccount.endpointUrl
+                    this.name = accountManager.activeAccount.username
                 }
-            },
-            "result": {
-                "success" : $completed,
-                "duration" : "$timeTaken",
-                 "extensions": {
-                      "https://w3id.org/xapi/cmi5/result/extensions/progress": $progress
-                    }
-            },
-            "object": {
-                "id" : "$finalUrl",
-                "objectType" : "Activity",
-                "definition" : {
-                        "name": {"en-US":"Exercise $exerciseId : Question $counter"},
-                        "description": {"en-US":"$question"}
+            }
+            this.verb = Verb().apply {
+                this.id = if (progress == 100) "https://w3id.org/xapi/adl/verbs/satisfied" else "http://adlnet.gov/expapi/verbs/progressed"
+                this.display = mapOf("en-US" to if (progress == 100) "satisfied" else "progressed")
+            }
+            this.result = Result().apply {
+                this.completion = progress == 100
+                this.duration = UMTinCanUtil.format8601Duration(duration)
+                this.extensions = mapOf("https://w3id.org/xapi/cmi5/result/extensions/progress" to progress)
+            }
+            this.`object` = XObject().apply {
+                this.id = "${accountManager.activeAccount.endpointUrl}/contentEntryUid/${entryUuid}"
+                this.objectType = "Activity"
+                this.definition = Definition().apply {
+                    this.name = mapOf("en-US" to (entry?.title ?: ""))
+                    this.description = mapOf("en-US" to (entry?.description ?: ""))
                 }
             }
         }
 
-        """.trimIndent()
-*/
-
-
-        statementEndpoint.storeStatements(listOf(Statement()), "", entryUuid)
+        statementEndpoint.storeStatements(listOf(statement), "", entryUuid)
 
     }
 
