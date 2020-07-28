@@ -76,6 +76,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
                 ContainerEntryListResponder::class.java, di)
         addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/(.*)+",
                 ConcatenatedContainerEntryFileResponder::class.java, di)
+        addRoute("/:${XapiStatementResponder.URI_PARAM_ENDPOINT}/xapi/:contentEntryUid/statements",
+                XapiStatementResponder::class.java, di)
 
         //TODO: This should provide NetworkManager to the responder, or BleProxyResponder could use DI itself
         //httpd.addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, this)
