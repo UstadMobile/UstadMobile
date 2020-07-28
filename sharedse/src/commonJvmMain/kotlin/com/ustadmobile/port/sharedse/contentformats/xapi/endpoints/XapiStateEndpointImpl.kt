@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.contentformats.xapi.endpoints
 
 import com.google.gson.Gson
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.AgentDao
 import com.ustadmobile.core.db.dao.PersonDao
@@ -13,9 +14,17 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.dele
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.getAgent
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateState
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.insertOrUpdateStateContent
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.util.*
 
-class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private val contentType: String?) : XapiStateEndpoint {
+class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiStateEndpoint {
+
+    private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+
+    private val gson: Gson by di.instance()
+
     private val agentDao: AgentDao = db.agentDao
     private val stateDao: StateDao = db.stateDao
     private val stateContentDao: StateContentDao = db.stateContentDao
@@ -24,8 +33,6 @@ class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private v
 
     @Throws(StatementRequestException::class)
     override fun storeState(state: State) {
-
-        isContentTypeJson()
 
         XapiStatementEndpointImpl.checkValidActor(state.agent!!)
 
@@ -39,8 +46,6 @@ class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private v
 
     override fun overrideState(state: State) {
 
-        isContentTypeJson()
-
         XapiStatementEndpointImpl.checkValidActor(state.agent!!)
 
         val agentEntity = getAgent(agentDao, personDao, state.agent!!)
@@ -51,7 +56,7 @@ class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private v
 
     }
 
-    fun getContent(stateId: String, agentJson: String, activityId: String, registration: String, since: String): String {
+    override fun getContent(stateId: String, agentJson: String, activityId: String, registration: String, since: String): String {
         return if (stateId.isEmpty()) {
             getListOfStateId(agentJson, activityId, registration, since)
         } else {
@@ -110,12 +115,6 @@ class XapiStateEndpointImpl(db: UmAppDatabase, private val gson: Gson, private v
         val agentEntity = getAgent(agentDao, personDao, agent)
 
         stateDao.updateStateToInActive(agentEntity.agentUid, activityId, registration, false)
-    }
-
-    private fun isContentTypeJson() {
-        if (contentType?.isEmpty() == true || contentType != "application/json") {
-            throw StatementRequestException("Content Type missing or not set to application/json")
-        }
     }
 
 }

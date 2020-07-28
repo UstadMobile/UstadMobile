@@ -44,7 +44,6 @@ class TestXapiStatementResponder {
 
     private lateinit var mockUriResource: RouterNanoHTTPD.UriResource
     private lateinit var mockSession: NanoHTTPD.IHTTPSession
-    internal lateinit var httpd: RouterNanoHTTPD
     private var db: UmAppDatabase? = null
 
     val context = Any()

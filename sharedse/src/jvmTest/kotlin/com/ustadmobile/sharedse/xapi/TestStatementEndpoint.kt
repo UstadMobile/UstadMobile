@@ -49,6 +49,8 @@ class TestStatementEndpoint {
 
     private lateinit var repo: UmAppDatabase
 
+    private lateinit var endpoint: XapiStatementEndpoint
+
     private lateinit var gson: Gson
 
     private lateinit var di: DI
@@ -59,7 +61,7 @@ class TestStatementEndpoint {
     fun setup() {
         checkJndiSetup()
         val endpointScope = EndpointScope()
-        val endpoint = Endpoint("http://localhost:8087/")
+        val endpointUrl = Endpoint("http://localhost:8087/")
         di = DI {
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
@@ -77,12 +79,13 @@ class TestStatementEndpoint {
                 builder.create()
             }
             bind<XapiStatementEndpoint>() with singleton {
-                XapiStatementEndpointImpl(endpoint, di)
+                XapiStatementEndpointImpl(endpointUrl, di)
             }
         }
 
         gson = di.direct.instance()
-        repo = di.on(endpoint).direct.instance(tag = UmAppDatabase.TAG_DB)
+        repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_DB)
+        endpoint = di.on(endpointUrl).direct.instance()
     }
 
     @Test
@@ -94,7 +97,6 @@ class TestStatementEndpoint {
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val statement = gson.fromJson(content, Statement::class.java)
-        val endpoint = di.direct.instance<XapiStatementEndpoint>()
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
@@ -119,7 +121,6 @@ class TestStatementEndpoint {
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val statement = gson.fromJson(content, Statement::class.java)
-        val endpoint = di.direct.instance<XapiStatementEndpoint>()
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
@@ -153,7 +154,6 @@ class TestStatementEndpoint {
             contentEntryUid = repo.contentEntryDao.insert(this)
         }
 
-        val endpoint = di.direct.instance<XapiStatementEndpoint>()
         endpoint.storeStatements(listOf(gson.fromJson(statementStr, Statement::class.java)),
                 "", contentEntryUid = entry.contentEntryUid)
 
@@ -194,7 +194,6 @@ class TestStatementEndpoint {
         }
 
 
-        val endpoint = di.direct.instance<XapiStatementEndpoint>()
         endpoint.storeStatements(listOf(gson.fromJson(statementStr, Statement::class.java)), "",
                 contentEntryUid = entry.contentEntryUid)
 
@@ -225,7 +224,6 @@ class TestStatementEndpoint {
         println(content)
 
         val statement = gson.fromJson(content, Statement::class.java)
-        val endpoint = di.direct.instance<XapiStatementEndpoint>()
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
@@ -273,7 +271,6 @@ class TestStatementEndpoint {
     fun givenValidStatementWithSubStatement_whenParsed_thenDbAndStatementShouldMatch() {
 
         val statement = gson.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(subStatement)), Statement::class.java)
-        val endpoint = di.direct.instance<XapiStatementEndpoint>()
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
