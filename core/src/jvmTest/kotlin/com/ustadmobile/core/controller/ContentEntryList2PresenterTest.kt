@@ -102,7 +102,7 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
@@ -119,7 +119,7 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<List<ContentEntry>>().apply{
             verify(mockView, timeout(defaultTimeout).times(1)).finishWithResult(capture())
@@ -142,7 +142,7 @@ class ContentEntryList2PresenterTest {
                 args , mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<Long>().apply{
             verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(2)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
@@ -167,11 +167,11 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         mockView.waitForListToBeSet()
 
-        createdChildEntries[0].let { presenter.handleClickEntry(it) }
+        createdChildEntries[0].let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<List<ContentEntry>>().apply{
             verify(mockView, timeout(defaultTimeout).times(1)).finishWithResult(capture())
@@ -196,7 +196,7 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         mockView.waitForListToBeSet()
 

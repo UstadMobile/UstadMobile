@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
@@ -40,6 +41,13 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
         val loggedInPersonUid = accountManager.activeAccount.personUid
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
             db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, clazzUid)
+        }
+
+        val loggedInPerson: Person? = withTimeoutOrNull(2000){
+            db.personDao.findByUid(loggedInPersonUid)
+        }
+        if(loggedInPerson?.admin == true){
+            return true
         }
 
         val isStudent = (clazzMember != null &&

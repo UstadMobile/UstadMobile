@@ -4,24 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
-        <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer" />
-
-        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
-
+        <import type="com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer"/>
+        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment"/>
+        <import type="android.view.View"/>
+        <import type="com.ustadmobile.port.android.view.ContentEntryListRecyclerAdapter"/>
         <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
-
-        <import type="android.view.View" />
-
-        <import type="com.ustadmobile.port.android.view.ContentEntryList2Fragment.ContentEntryListRecyclerAdapter" />
 
         <variable
             name="contentEntry"
             type="ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer" />
-
         <variable
-            name="presenter"
-            type="com.ustadmobile.core.controller.ContentEntryList2Presenter" />
+            name="itemListener"
+            type="com.ustadmobile.core.controller.ContentEntryListItemListener" />
 
         <variable
             name="isPickerMode"
@@ -33,22 +27,22 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/item_content_entry_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_listitem"
         android:padding="@dimen/dimen_10dp"
-        android:tag="@{contentEntry.contentEntryUid}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(contentEntry)}"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, contentEntry)}"
-        app:selectableViewHelper="@{selectablePagedListAdapter}">
+        app:onSelectableItemClicked="@{() -> itemListener.onClickContentEntry(contentEntry)}"
+        android:id="@+id/item_content_entry_list"
+        android:tag="@{contentEntry.contentEntryUid}"
+        android:background="@drawable/bg_listitem">
 
 
         <androidx.appcompat.widget.AppCompatImageView
+            android:scaleType="fitCenter"
             android:id="@+id/content_entry_item_thumbnail"
             android:layout_width="@dimen/dimen_70dp"
             android:layout_height="@dimen/dimen_70dp"
-            android:scaleType="fitCenter"
             app:fallbackDrawable="@{contentEntry.leaf ? @drawable/book_24px:@drawable/ic_folder_black_24dp}"
             app:imageUri="@{contentEntry.thumbnailUrl}"
             app:layout_constraintStart_toStartOf="parent"
@@ -186,11 +180,11 @@
             <com.ustadmobile.port.android.view.DownloadStatusButton
                 android:id="@+id/content_entry_item_download"
                 style="?android:attr/borderlessButtonStyle"
+                android:onClick="@{() -> itemListener.onClickDownloadContentEntry(contentEntry)}"
                 android:layout_width="@dimen/dimen_40dp"
                 android:layout_height="@dimen/dimen_40dp"
-                android:contentDescription="@string/download"
-                android:onClick="@{() -> presenter.handleDownloadStatusButtonClicked(contentEntry)}"
                 android:padding="@dimen/dimen_8dp"
+                android:contentDescription="@string/download"
                 android:tint="?colorOnIconTint"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -199,14 +193,14 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/content_entry_select_btn"
+                android:visibility="@{isPickerMode ? View.VISIBLE: View.GONE}"
                 style="@style/UmTheme.Widget.OutlinedButton"
+                android:onClick="@{() -> itemListener.onClickSelectContentEntry(contentEntry)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/download"
-                android:onClick="@{() -> presenter.handleOnSelectClicked(contentEntry)}"
                 android:padding="@dimen/dimen_8dp"
+                android:contentDescription="@string/download"
                 android:text="@{@string/select_item(``)}"
-                android:visibility="@{isPickerMode ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_file_download_black_24dp" />

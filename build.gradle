@@ -212,6 +212,14 @@ if(project.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
 }
 
+if(System.getenv("TESTSERVER_HOST") != null) {
+    ext.buildConfigProperties["test.um_http_testserver"] = System.getenv("TESTSERVER_HOST")
+}
+
+if(System.getenv("TESTSERVER_PORT") != null) {
+    ext.buildConfigProperties["test.um_http_testserver_controlport"] = System.getenv("TESTSERVER_PORT")
+}
+
 ext.localProperties = new Properties()
 if(project.file("local.properties").exists()) {
     ext.localProperties.load(new FileInputStream(project.file("local.properties")))

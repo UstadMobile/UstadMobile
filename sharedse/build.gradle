@@ -145,6 +145,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation project(":lib-database-entities")
+                compileOnly project(':lib-database')
 
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"

@@ -176,7 +176,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
         }
 
-    private val contentRecyclerAdapter: ContentEntryList2Fragment.ContentEntryListRecyclerAdapter? = null
+    private val contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
 
     private val contentObserver = Observer<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?>{
         t -> contentRecyclerAdapter?.selectedItemsLiveData?.setVal(t?:listOf())

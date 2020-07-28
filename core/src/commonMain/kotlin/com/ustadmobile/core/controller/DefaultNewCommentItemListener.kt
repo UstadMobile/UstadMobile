@@ -2,8 +2,8 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.Comments
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.*
@@ -19,11 +19,11 @@ class DefaultNewCommentItemListener(override val di: DI, val context: Any, var f
         val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
         val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
-        val comment = Comments(entityType, entityId, fromPerson,
-                UMCalendarUtil.getDateInMilliPlusDays(0), comment, public)
-        comment.commentsToPersonUid = toPerson
+        val commentObj = Comments(entityType, entityId, fromPerson,
+                getSystemTimeInMillis(), comment, public)
+        commentObj.commentsToPersonUid = toPerson
         GlobalScope.launch {
-            repo.commentsDao.insertAsync(comment)
+            repo.commentsDao.insertAsync(commentObj)
         }
     }
 
