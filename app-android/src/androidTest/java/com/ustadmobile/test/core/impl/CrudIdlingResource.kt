@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingResource
+import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.UstadBaseFragment
 import com.ustadmobile.port.android.view.UstadDetailFragment
 import com.ustadmobile.port.android.view.UstadEditFragment
@@ -27,6 +28,17 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Note: There is a lot of overlap between this and DataBindingIdlingResource. DataBindingIdlingResource
  * closely tracks example repositories from Google. That is why there is no common parent class
  * between the two.
+ *
+ * Crud Idling Resource will helps monitor:
+ *  RecyclerViews: all visible recycler views must meet the following criteria to be deemed idle:
+ *    a) there are no pending updates
+ *    b) any datasource.factory sources have been set for any adapters using paging
+ *
+ *  ProgressBar: all visible progressbars must meet the following criteria to be deemed idle:
+ *    a) the progress bar has the tag value tag_crudidlingresource_ignore
+ *    b) the progress bar is determinate and the progress bar show full completion
+ *
+ *  Views can be excluded from checking for idle status by adding them to the excludedViewIds list
  */
 class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     // list of registered callbacks
@@ -153,7 +165,7 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     }
 
     private fun ProgressBar.isIdle(): Boolean {
-        return visibility != VISIBLE || (!isIndeterminate && progress >= max)
+        return visibility != VISIBLE ||  tag == R.id.tag_crudidlingresource_ignore || (!isIndeterminate && progress >= max)
     }
 
     private fun RecyclerView.isIdle() : Boolean{

@@ -21,4 +21,7 @@
 
     <item name="tag_graphlookup_key" type="id"/>
 
+
+    <item name="tag_crudidlingresource_ignore" type="id"/>
+
 </resources>
