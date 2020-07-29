@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -34,14 +35,25 @@ class PersonAccountEditPresenter(context: Any,
 
     private var createAccount: Boolean = false
 
+    private var isActiveUserAdmin: Boolean = false
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         serverUrl = arguments[ARG_SERVER_URL]?:accountManager.activeAccount.endpointUrl
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount? {
-        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: accountManager.activeAccount.personUid
-        val person =  withTimeoutOrNull(2000) {
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        val activePersonUid = accountManager.activeAccount.personUid
+
+        val activePerson = withTimeoutOrNull(2000) {
+            db.personDao.findByUid(activePersonUid)
+        } ?: Person()
+
+        isActiveUserAdmin = activePerson.admin
+        view.currentPasswordVisible = !isActiveUserAdmin
+
+        val person = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.personDao?.findPersonAccountByUid(entityUid)
         } ?: PersonWithAccount()
         createAccount = person.username.isNullOrEmpty()
@@ -66,16 +78,19 @@ class PersonAccountEditPresenter(context: Any,
 
     override fun handleClickSave(entity: PersonWithAccount) {
         GlobalScope.launch(doorMainDispatcher()) {
-            if(!entity.admin && entity.currentPassword.isNullOrEmpty() && !createAccount
-                    || entity.newPassword.isNullOrEmpty() || entity.confirmedPassword.isNullOrEmpty()
-                    || entity.username.isNullOrEmpty() || entity.confirmedPassword != entity.newPassword){
+            val hasErrors = !isActiveUserAdmin && entity.currentPassword.isNullOrEmpty()
+                    && !createAccount || entity.newPassword.isNullOrEmpty()
+                    || entity.confirmedPassword.isNullOrEmpty() || entity.username.isNullOrEmpty()
+                    || entity.confirmedPassword != entity.newPassword
+
+            if(hasErrors){
 
                 val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
 
                 view.usernameError = if(entity.username.isNullOrEmpty())
                     requiredFieldMessage else null
-                view.currentPasswordError = if(entity.currentPassword.isNullOrEmpty() && !entity.admin &&
-                        !createAccount)
+                view.currentPasswordError = if(entity.currentPassword.isNullOrEmpty()
+                        && !isActiveUserAdmin && !createAccount)
                     requiredFieldMessage else null
                 view.newPasswordError = if(entity.newPassword.isNullOrEmpty())
                     requiredFieldMessage else null
@@ -86,7 +101,8 @@ class PersonAccountEditPresenter(context: Any,
                 return@launch
             }
             try{
-                if(createAccount && !entity.newPassword.isNullOrEmpty() && !entity.confirmedPassword.isNullOrEmpty()){
+                if(createAccount && !entity.newPassword.isNullOrEmpty()
+                        && !entity.confirmedPassword.isNullOrEmpty()){
                     val umAccount = accountManager.register(entity,serverUrl, false)
                     if(umAccount.username != null){
                         repo.personDao.updateAsync(entity)
@@ -95,9 +111,9 @@ class PersonAccountEditPresenter(context: Any,
                     val currentPassword = entity.currentPassword
                     val newPassword = entity.newPassword
                     val username = entity.username
-                    if(((currentPassword != null && !entity.admin) || entity.admin)
+                    if(((currentPassword != null && !isActiveUserAdmin) || isActiveUserAdmin)
                             && newPassword != null && username != null){
-                        accountManager.changePassword(username, currentPassword.toString(),
+                        accountManager.changePassword(username, currentPassword,
                                 newPassword, serverUrl)
                     }
                 }

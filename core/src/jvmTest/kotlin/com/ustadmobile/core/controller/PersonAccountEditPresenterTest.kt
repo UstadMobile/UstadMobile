@@ -49,6 +49,8 @@ class PersonAccountEditPresenterTest  {
 
     private val mPersonUid: Long = 234567
 
+    private val loggedPersonUid:Long = 234568
+
     private lateinit var accountManager: UstadAccountManager
 
     private lateinit var impl: UstadMobileSystemImpl
@@ -67,7 +69,7 @@ class PersonAccountEditPresenterTest  {
         serverUrl = mockWebServer.url("/").toString()
 
         accountManager = mock{
-            on{activeAccount}.thenReturn(UmAccount(mPersonUid,"","",serverUrl))
+            on{activeAccount}.thenReturn(UmAccount(loggedPersonUid,"","",serverUrl))
         }
 
         di = DI {
@@ -100,19 +102,49 @@ class PersonAccountEditPresenterTest  {
                              matchPassword: Boolean = false): PersonWithAccount {
         val password = "password"
         val confirmPassword = if(matchPassword) password else "password1"
-        return PersonWithAccount().apply {
+        val person =  PersonWithAccount().apply {
             fatherName = "Doe"
             firstNames = "Jane"
             lastName = "Doe"
             if(withUsername){
                 username = "dummyUserName"
             }
-            admin = isAdmin
             personUid = mPersonUid
             newPassword = password
             confirmedPassword = confirmPassword
             repo.personDao.insert(this)
         }
+
+        PersonWithAccount().apply {
+            admin = isAdmin
+            username = "First"
+            lastName = "User"
+            personUid = loggedPersonUid
+            repo.personDao.insert(this)
+        }
+
+        return person
+    }
+
+    @Test
+    fun givenPersonAccountEditLaunched_whenActivePersonIsNotAdmin_thenShouldShowCurrentPassword(){
+        val person = createPerson(true)
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).currentPasswordVisible = eq(true)
+    }
+
+
+    @Test
+    fun givenPersonAccountEditLaunched_whenActivePersonIsAdmin_thenShouldHideCurrentPassword(){
+        val person = createPerson(true, isAdmin = true)
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).currentPasswordVisible = eq(false)
     }
 
     @Test
@@ -121,6 +153,9 @@ class PersonAccountEditPresenterTest  {
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
+
         presenter.handleClickSave(person)
 
         val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
@@ -134,7 +169,10 @@ class PersonAccountEditPresenterTest  {
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
         val presenter = PersonAccountEditPresenter(context,args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
         presenter.handleClickSave(person)
+
         val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
         argumentCaptor<String>{
             verify(mockView, timeout(defaultTimeOut).atLeastOnce()).currentPasswordError = capture()
@@ -148,6 +186,8 @@ class PersonAccountEditPresenterTest  {
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
+
+        verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
         presenter.handleClickSave(person)
         val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).newPasswordError = eq(expectedMessage)
@@ -165,13 +205,15 @@ class PersonAccountEditPresenterTest  {
 
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
 
+        person.newPassword = "new"
+        person.confirmedPassword = "new"
         presenter.handleClickSave(person)
-        argumentCaptor<String>{
-            verifyBlocking(accountManager, timeout(defaultTimeOut).atLeastOnce()){
-                changePassword(capture(), any(), any(), any())
-                assertEquals("Password change task was started", person.username, firstValue)
-            }
+
+        verifyBlocking(accountManager, timeout(defaultTimeOut)) {
+            changePassword(eq(person.username!!), anyOrNull(), eq(person.newPassword!!),
+                    eq(serverUrl))
         }
+
         verify(mockView, timeout(defaultTimeOut)).finishWithResult(any())
     }
 
@@ -180,7 +222,7 @@ class PersonAccountEditPresenterTest  {
     fun givenPresenterCreatedInAccountCreationMode_whenAllFieldsAreFilledAndSaveClicked_thenShouldCreateAnAccount(){
         enQueuePasswordChangeResponse()
 
-        val person = createPerson(isAdmin = true, withUsername = false, matchPassword = true)
+        val person = createPerson(isAdmin = false, withUsername = false, matchPassword = true)
         val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString(),
                 UstadView.ARG_SERVER_URL to serverUrl)
         val presenter = PersonAccountEditPresenter(context, args,mockView, di, mockLifecycleOwner)

@@ -199,11 +199,13 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         return responseAccount
     }
 
-    suspend fun changePassword(username: String, currentPassword: String, newPassword: String, endpointUrl: String): UmAccount?{
+    suspend fun changePassword(username: String, currentPassword: String?, newPassword: String, endpointUrl: String): UmAccount?{
         val httpStmt = httpClient.post<HttpStatement> {
             url("${endpointUrl.removeSuffix("/")}/password/change")
             parameter("username", username)
-            parameter("currentPassword", currentPassword)
+            if(currentPassword != null) {
+                parameter("currentPassword", currentPassword)
+            }
             parameter("newPassword", newPassword)
         }
 
