@@ -25,11 +25,9 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-
 import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
 import io.ktor.client.request.get
@@ -38,8 +36,9 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import org.junit.Assert.assertEquals
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matchers.not
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
@@ -78,7 +77,7 @@ class ContentEntry2DetailFragmentTest {
 
     @AdbScreenRecord("Given content entry exists should show user selected content entry")
     @Test
-    fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntry() {
+    fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryWithProgressComplete() {
 
         di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
         val entryTitle = "Dummy Title"
@@ -92,7 +91,7 @@ class ContentEntry2DetailFragmentTest {
         val accountManager: UstadAccountManager by di.instance()
         val activeAccount = accountManager.activeAccount
 
-        val progress = ContentEntryProgress().apply {
+        ContentEntryProgress().apply {
             contentEntryProgressContentEntryUid = testEntry.contentEntryUid
             contentEntryProgressProgress = 100
             contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
@@ -111,6 +110,36 @@ class ContentEntry2DetailFragmentTest {
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         onView(withText(entryTitle)).check(matches(isDisplayed()))
+
+        onView(withId(R.id.entry_detail_progress_bar)).check(matches(isDisplayed()))
+        onView(withId(R.id.content_progress_fail_correct)).check(matches(isDisplayed()))
+    }
+
+    @AdbScreenRecord("Given content entry exists should show user selected content entry with no progress")
+    @Test
+    fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryWithProgressHidden() {
+
+        di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
+        val entryTitle = "Dummy Title"
+        val testEntry = ContentEntryWithLanguage().apply {
+            title = entryTitle
+            description = "Dummy description"
+            leaf = true
+            contentEntryUid = dbRule.db.contentEntryDao.insert(this)
+        }
+
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
+            ContentEntry2DetailFragment().also { fragment ->
+                fragment.installNavController(systemImplNavRule.navController)
+            }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+
+        onView(withText(entryTitle)).check(matches(isDisplayed()))
+
+        onView(withId(R.id.entry_detail_progress_bar)).check(matches(not(isDisplayed())))
+        onView(withId(R.id.content_progress_fail_correct)).check(matches(not(isDisplayed())))
     }
 
 
