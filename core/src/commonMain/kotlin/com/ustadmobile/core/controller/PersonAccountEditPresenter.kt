@@ -113,7 +113,7 @@ class PersonAccountEditPresenter(context: Any,
                     val username = entity.username
                     if(((currentPassword != null && !isActiveUserAdmin) || isActiveUserAdmin)
                             && newPassword != null && username != null){
-                        accountManager.changePassword(username, currentPassword.toString(),
+                        accountManager.changePassword(username, currentPassword,
                                 newPassword, serverUrl)
                     }
                 }

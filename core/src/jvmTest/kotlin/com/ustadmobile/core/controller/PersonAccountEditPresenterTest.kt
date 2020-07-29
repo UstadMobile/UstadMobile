@@ -205,13 +205,15 @@ class PersonAccountEditPresenterTest  {
 
         verify(mockView, timeout(defaultTimeOut).atLeastOnce()).entity = any()
 
+        person.newPassword = "new"
+        person.confirmedPassword = "new"
         presenter.handleClickSave(person)
-        argumentCaptor<String>{
-            verifyBlocking(accountManager, timeout(defaultTimeOut).atLeastOnce()){
-                changePassword(capture(), any(), any(), any())
-                assertEquals("Password change task was started", person.username, firstValue)
-            }
+
+        verifyBlocking(accountManager, timeout(defaultTimeOut)) {
+            changePassword(eq(person.username!!), anyOrNull(), eq(person.newPassword!!),
+                    eq(serverUrl))
         }
+
         verify(mockView, timeout(defaultTimeOut)).finishWithResult(any())
     }
 

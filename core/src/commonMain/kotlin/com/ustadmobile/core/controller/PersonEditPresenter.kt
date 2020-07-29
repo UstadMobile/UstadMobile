@@ -40,7 +40,7 @@ class PersonEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    private var registrationAllowed: Boolean = false
+    private var registrationMode: Boolean = false
 
     private val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
@@ -66,7 +66,7 @@ class PersonEditPresenter(context: Any,
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
         view.clazzList = clazzMemberJoinEditHelper.liveList
 
-        registrationAllowed = arguments[ARG_REGISTRATION_ALLOWED]?.toBoolean()?:false
+        registrationMode = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toBoolean()?:false
 
         serverUrl = if (arguments.containsKey(UstadView.ARG_SERVER_URL)) {
             arguments.getValue(UstadView.ARG_SERVER_URL)
@@ -78,7 +78,7 @@ class PersonEditPresenter(context: Any,
                 AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context) ?:
                 ContentEntryListTabsView.VIEW_NAME
 
-        view.classVisible = registrationAllowed
+        view.registrationMode = registrationMode
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount? {
@@ -129,7 +129,7 @@ class PersonEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             val noPasswordMatch = entity.newPassword != entity.confirmedPassword
                     && !entity.newPassword.isNullOrEmpty() &&  !entity.confirmedPassword.isNullOrEmpty()
-            if(registrationAllowed && (entity.username.isNullOrEmpty()
+            if(registrationMode && (entity.username.isNullOrEmpty()
                             || entity.newPassword.isNullOrEmpty() || entity.confirmedPassword.isNullOrEmpty()
                             || noPasswordMatch)){
                 val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
@@ -141,7 +141,7 @@ class PersonEditPresenter(context: Any,
                 return@launch
             }
 
-            if(registrationAllowed){
+            if(registrationMode){
                 val password = entity.newPassword
                 if(password != null){
                    try{

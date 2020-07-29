@@ -21,7 +21,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
@@ -82,14 +81,13 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
 
-        val currentFrag =
-                findNavController(R.id.activity_main_navhost_fragment).currentDestination?.id ?: 0
+        val navController = findNavController(R.id.activity_main_navhost_fragment)
+        val currentFrag = navController.currentDestination?.id ?: 0
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
-        val registrationAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_REGISTRATION, this)
-        mBinding.bottomNavView.visibility = if(DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag) ||
-                registrationAllowed && currentFrag == R.id.person_edit_dest)
+
+        mBinding.bottomNavView.visibility = if(DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
             View.GONE else View.VISIBLE
         if(mainScreenItemsVisible){
             setUserProfile(menu.findItem(R.id.menu_main_profile))
@@ -139,6 +137,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                 R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
 
         val DEST_TO_HIDE_BOTTOM_NAV = listOf(R.id.login_dest, R.id.account_get_started_dest,
-                R.id.workspace_enterlink_dest, R.id.settings_list_dest)
+                R.id.workspace_enterlink_dest, R.id.settings_list_dest, R.id.person_edit_register_dest)
     }
 }
