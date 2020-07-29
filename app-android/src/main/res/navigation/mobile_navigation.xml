@@ -63,6 +63,14 @@
         android:id="@+id/person_edit_dest"
         android:name="com.ustadmobile.port.android.view.PersonEditFragment" />
 
+    <!--
+     This is repeated so that it can be explicitly recognized for purposes of controlling
+     the visibility of the bottom navigation bar
+     -->
+    <fragment
+        android:id="@+id/person_edit_register_dest"
+        android:name="com.ustadmobile.port.android.view.PersonEditFragment"/>
+
     <fragment
         android:id="@+id/person_detail_dest"
         android:name="com.ustadmobile.port.android.view.PersonDetailFragment" />

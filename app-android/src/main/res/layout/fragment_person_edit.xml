@@ -31,8 +31,8 @@
             type="List&lt;MessageIdOption&gt;" />
 
         <variable
-            name="classVisibility"
-            type="Integer" />
+            name="registrationMode"
+            type="boolean" />
 
         <variable
             name="activityEventHandler"
@@ -236,7 +236,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{classVisibility == View.VISIBLE ? View.GONE: View.VISIBLE}"
+                android:visibility="@{registrationMode ?  View.VISIBLE: View.GONE}"
                 android:id="@+id/username_textinputlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -259,7 +259,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{classVisibility == View.VISIBLE ? View.GONE: View.VISIBLE}"
+                android:visibility="@{registrationMode ?  View.VISIBLE: View.GONE}"
                 android:id="@+id/password_textinputlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -286,7 +286,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:visibility="@{classVisibility == View.VISIBLE ? View.GONE: View.VISIBLE}"
+                android:visibility="@{registrationMode ?  View.VISIBLE: View.GONE}"
                 android:id="@+id/confirm_password_textinputlayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -325,7 +325,7 @@
                 android:layout_height="wrap_content"/>
 
             <TextView
-                android:visibility="@{classVisibility}"
+                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/clazzlist_header_textview"
                 android:layout_width="match_parent"
@@ -336,7 +336,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/error_text" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:visibility="@{classVisibility}"
+                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:id="@+id/clazzlist_recyclerview"
                 android:layout_width="match_parent"
