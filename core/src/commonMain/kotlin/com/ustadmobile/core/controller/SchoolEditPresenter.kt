@@ -116,7 +116,6 @@ class SchoolEditPresenter(context: Any,
             repo.clazzDao.assignClassesToSchool(
                     clazzOneToManyJoinEditHelper.primaryKeysToDeactivate, 0L)
 
-            view.finishWithResult(listOf(entity))
             onFinish(SchoolDetailView.VIEW_NAME, entity.schoolUid, entity)
         }
     }
