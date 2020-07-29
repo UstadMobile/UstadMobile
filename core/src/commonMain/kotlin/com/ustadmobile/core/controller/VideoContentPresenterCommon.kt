@@ -81,6 +81,11 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
     fun updateProgress(position: Long, videoLength: Long, playerStarted: Boolean = false) {
 
+        if(accountManager.activeAccount.personUid == 0L){
+            return
+        }
+
+
         var playerPlayedVideoDuration = 0L
         if(playerStarted){
             // player pressed play, record start time
