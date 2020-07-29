@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view.binding
 
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.view.View
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistry
@@ -115,15 +116,21 @@ fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallb
 fun ImageView.setIconOnStatusFlag(statusFlag: Int){
     when {
         (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> {
-            setImageResource(R.drawable.ic_baseline_check_circle_24)
+            setImageResource(R.drawable.ic_content_complete)
+            visibility = View.VISIBLE
         }
         (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED -> {
-            setImageResource(R.drawable.ic_baseline_check_circle_24)
+            setImageResource(R.drawable.ic_content_complete)
+            visibility = View.VISIBLE
         }
         (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> {
-            setImageResource(R.drawable.ic_baseline_highlight_off_24)
+            setImageResource(R.drawable.ic_content_fail)
+            visibility = View.VISIBLE
         }
-        else -> setImageDrawable(null)
+        else -> {
+            setImageDrawable(null)
+            visibility = View.GONE
+        }
     }
 }
 

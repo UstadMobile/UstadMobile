@@ -89,12 +89,10 @@
                 android:scaleType="fitCenter"
                 android:translationX="8dp"
                 android:translationY="-8dp"
-                android:background="@android:color/white"
-                android:visibility="@{contentEntryProgress == null ? View.GONE : View.VISIBLE}"
                 app:iconStatusFlag="@{contentEntryProgress.contentEntryProgressStatusFlag}"
                 app:layout_constraintEnd_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail"
-                tools:srcCompat="@drawable/ic_baseline_check_circle_24"
+                tools:srcCompat="@drawable/ic_content_complete"
                 />
 
             <TextView
