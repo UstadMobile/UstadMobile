@@ -65,6 +65,11 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
             mBinding?.errorText?.visibility =  View.VISIBLE
             mBinding?.errorText?.text = value
         }
+    override var currentPasswordVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.currentPasswordVisibility = if(value) View.VISIBLE else View.GONE
+        }
 
 
     override var fieldsEnabled: Boolean = true

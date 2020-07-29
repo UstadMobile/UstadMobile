@@ -102,8 +102,9 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleCreateAccount(){
-        impl.go(PersonEditView.VIEW_NAME, mapOf(ARG_REGISTRATION_ALLOWED
-                to workSpace.registrationAllowed.toString(), ARG_SERVER_URL to serverUrl), context)
+        impl.go(PersonEditView.VIEW_NAME_REGISTER, mapOf(
+                PersonEditView.ARG_REGISTRATION_MODE to true.toString(),
+                ARG_SERVER_URL to serverUrl), context)
     }
 
     fun handleConnectAsGuest(){

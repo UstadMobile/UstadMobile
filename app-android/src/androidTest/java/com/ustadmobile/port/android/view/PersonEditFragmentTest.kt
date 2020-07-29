@@ -19,7 +19,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
+import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.generated.MessageIDMap
@@ -118,7 +118,7 @@ class PersonEditFragmentTest {
     @AdbScreenRecord("given person edit opened in registration mode when username and password are not filled and save is clicked should show errors")
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenUserNameAndPasswordAreNotFilled_thenShouldShowErrors(){
-        launchFragment(allowedRegistration = true,leftOutPassword = true, leftOutUsername = true)
+        launchFragment(registrationMode = true,leftOutPassword = true, leftOutUsername = true)
 
         scrollToBottom()
 
@@ -132,7 +132,7 @@ class PersonEditFragmentTest {
     @AdbScreenRecord("given person edit opened in registration mode when password doesn't match and save is clicked should show errors")
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenPasswordDoNotMatch_thenShouldShowErrors(){
-        launchFragment(allowedRegistration = true,misMatchPassword = true)
+        launchFragment(registrationMode = true,misMatchPassword = true)
 
         scrollToBottom()
 
@@ -147,7 +147,7 @@ class PersonEditFragmentTest {
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenTryToRegisterExistingPerson_thenShouldShowErrors(){
         mockWebServer.enqueue(MockResponse().setResponseCode(409))
-        launchFragment(allowedRegistration = true,misMatchPassword = false, leftOutUsername = false)
+        launchFragment(registrationMode = true,misMatchPassword = false, leftOutUsername = false)
 
         sleep(5000)
 
@@ -158,13 +158,13 @@ class PersonEditFragmentTest {
 
 
 
-    private fun launchFragment(allowedRegistration: Boolean = false,misMatchPassword: Boolean = false,
+    private fun launchFragment(registrationMode: Boolean = false, misMatchPassword: Boolean = false,
                                leftOutPassword: Boolean = false, leftOutUsername: Boolean = false, fillForm: Boolean = true){
 
         val password = "password"
         val confirmedPassword = if(misMatchPassword) "password1" else password
 
-        val args = mapOf(ARG_REGISTRATION_ALLOWED to allowedRegistration.toString(),
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to registrationMode.toString(),
                 ARG_SERVER_URL to serverUrl)
 
         val scenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,

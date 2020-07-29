@@ -159,9 +159,9 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             }
         }
 
-    override var classVisible: Boolean? = null
+    override var registrationMode: Boolean? = null
         set(value) {
-            mBinding?.classVisibility = if(value != null && value) View.GONE else View.VISIBLE
+            mBinding?.registrationMode = (value == true)
             field = value
         }
 

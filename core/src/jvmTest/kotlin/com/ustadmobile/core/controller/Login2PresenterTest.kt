@@ -138,12 +138,7 @@ class Login2PresenterTest {
         val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()
-        argumentCaptor<String>{
-            verify(impl).go(capture(), any(), any())
-            Assert.assertEquals("Account creation screen was opened",
-                    PersonEditView.VIEW_NAME, firstValue)
-        }
-
+        verify(impl).go(eq(PersonEditView.VIEW_NAME_REGISTER), any(), any())
     }
 
     @Test

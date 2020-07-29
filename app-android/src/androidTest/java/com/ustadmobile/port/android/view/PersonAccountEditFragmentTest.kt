@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.app.Application
+import android.content.Context
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
@@ -8,12 +9,14 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.test.core.impl.CrudIdlingResource
@@ -36,6 +39,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import java.lang.Thread.sleep
 
 
@@ -70,11 +75,14 @@ class PersonAccountEditFragmentTest {
 
     private val mPersonUid: Long = 121212
 
+    private lateinit var di: DI
+
     @Before
     fun setUp(){
         mockWebServer = MockWebServer()
         mockWebServer.start()
         serverUrl = mockWebServer.url("/").toString()
+        di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
     }
 
     @After
@@ -97,8 +105,19 @@ class PersonAccountEditFragmentTest {
 
     private fun createPerson(withUsername: Boolean = false, isAdmin: Boolean = false,
                              matchPassword: Boolean = false): PersonWithAccount {
+
+        Person().apply {
+            admin = isAdmin
+            username = "First"
+            lastName = "User"
+            personUid = 42
+            dbRule.repo.personDao.insert(this)
+        }
+
+
         val password = "password"
         val confirmPassword = if(matchPassword) password else "password1"
+
         return PersonWithAccount().apply {
             fatherName = "Doe"
             firstNames = "Jane"
@@ -106,7 +125,6 @@ class PersonAccountEditFragmentTest {
             if(withUsername){
                 username = "dummyUserName"
             }
-            admin = isAdmin
             personUid = mPersonUid
             newPassword = password
             currentPassword = password
@@ -123,6 +141,23 @@ class PersonAccountEditFragmentTest {
         launchFragment(person)
         onView(withId(R.id.username_textinputlayout)).check(matches(isDisplayed()))
     }
+
+    @AdbScreenRecord("given person account edit launched and active person is admin  current password should be hidden")
+    @Test
+    fun givenPersonAccountEditLaunched_whenActivePersonIsAdmin_thenShouldHideCurrentPassword(){
+        val person = createPerson(true, isAdmin = true)
+        launchFragment(person, false)
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(not(isDisplayed())))
+    }
+
+    @AdbScreenRecord("given person account edit launched and active person is not admin  current password should be hidden")
+    @Test
+    fun givenPersonAccountEditLaunched_whenActivePersonIsNotAdmin_thenShouldShowCurrentPassword(){
+        val person = createPerson(true, isAdmin = false)
+        launchFragment(person, false)
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(isDisplayed()))
+    }
+
 
     @AdbScreenRecord("given person account edit launched when username is null should hide username field")
     @Test
@@ -162,9 +197,10 @@ class PersonAccountEditFragmentTest {
     @Test
     fun givenPersonAccountEditLaunchedAndPersonIsAdmin_whenNewPasswordIsNotFilledAndSaveClicked_thenShouldShowError(){
         val person = createPerson(true, isAdmin = true)
-        launchFragment(person, true, fillUsername = false, fillCurrentPassword = false, fillConfirmPassword = false)
+        launchFragment(person, true, fillUsername = false,
+                fillCurrentPassword = false, fillConfirmPassword = false)
 
-        onView(withId(R.id.current_password_textinputlayout)).check(matches(not(isEnabled())))
+        onView(withId(R.id.current_password_textinputlayout)).check(matches(not(isDisplayed())))
 
         onView(withId(R.id.new_password_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
@@ -242,7 +278,7 @@ class PersonAccountEditFragmentTest {
     fun givenPersonAccountInAccountCreationMode_whenPasswordFieldDoNotMatchAndSaveClicked_thenShouldShowErrors(){
         enqueueResponse()
         val person = createPerson(false, isAdmin = false, matchPassword = false)
-        launchFragment(person, true, fillUsername = true, fillCurrentPassword = false,
+        launchFragment(person, true, fillUsername = true, fillCurrentPassword = true,
                 fillNewPassword = true)
 
         onView(withId(R.id.new_password_textinputlayout)).check(matches(
