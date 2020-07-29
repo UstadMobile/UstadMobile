@@ -70,9 +70,17 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         invalidateOptionsMenu()
         mBinding.root.appbar.setExpanded(true)
 
+        slideBottomNavigation(true)
+    }
+
+    fun slideBottomNavigation(visible: Boolean) {
         val layoutParams = (mBinding.bottomNavView.layoutParams as? CoordinatorLayout.LayoutParams)
         val bottomNavBehavior = layoutParams?.behavior as? HideBottomViewOnScrollBehavior
-        bottomNavBehavior?.slideUp(mBinding.bottomNavView)
+
+        if (visible)
+            bottomNavBehavior?.slideUp(mBinding.bottomNavView)
+        else
+            bottomNavBehavior?.slideDown(mBinding.bottomNavView)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -88,10 +96,10 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
         val registrationAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_REGISTRATION, this)
-        mBinding.bottomNavView.visibility = if(DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag) ||
+        mBinding.bottomNavView.visibility = if (DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag) ||
                 registrationAllowed && currentFrag == R.id.person_edit_dest)
             View.GONE else View.VISIBLE
-        if(mainScreenItemsVisible){
+        if (mainScreenItemsVisible) {
             setUserProfile(menu.findItem(R.id.menu_main_profile))
         }
         return super.onCreateOptionsMenu(menu)
@@ -109,9 +117,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override var networkManager: CompletableDeferred<NetworkManagerBle>? = null
 
     override fun onBackPressed() {
-        val fragment = supportFragmentManager.primaryNavigationFragment?.
-        childFragmentManager?.fragments?.get(0)
-        if((fragment as? FragmentBackHandler)?.onHostBackPressed() != true){
+        val fragment = supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.get(0)
+        if ((fragment as? FragmentBackHandler)?.onHostBackPressed() != true) {
             super.onBackPressed()
         }
     }
@@ -126,10 +133,10 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         impl.go(SettingsView.VIEW_NAME, mapOf(), this)
     }
 
-    private fun setUserProfile(menuItem: MenuItem){
+    private fun setUserProfile(menuItem: MenuItem) {
         val accountManager: UstadAccountManager by instance()
         val profileIconLetter = accountManager.activeAccount.firstName?.first().toString()
-        val profileLetterView:TextView = menuItem.actionView.findViewById(R.id.person_name_letter)
+        val profileLetterView: TextView = menuItem.actionView.findViewById(R.id.person_name_letter)
         profileLetterView.text = profileIconLetter.toUpperCase(Locale.ROOT)
         profileLetterView.setOnClickListener { impl.go(AccountListView.VIEW_NAME, mapOf(), this) }
     }
