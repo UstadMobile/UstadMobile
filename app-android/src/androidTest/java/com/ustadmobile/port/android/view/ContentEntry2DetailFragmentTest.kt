@@ -147,7 +147,7 @@ class ContentEntry2DetailFragmentTest {
     }
 
     //This test is work-in-progress
-    @Test
+    //@Test
     @UmAppDatabaseServerRequiredTest
     fun givenContentEntryOnServer_whenDownloadClicked_shouldCompleteDownloadAndShowOpenButton() {
         val testEntry = ContentEntryWithLanguage().apply {
