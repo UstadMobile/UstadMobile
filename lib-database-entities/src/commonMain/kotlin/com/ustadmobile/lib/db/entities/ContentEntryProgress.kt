@@ -23,7 +23,7 @@ open class ContentEntryProgress {
 
     var contentEntryProgressPersonUid : Long = 0L
 
-    var contentEntryProgressProgress: Float = 0.0F
+    var contentEntryProgressProgress: Int = 0
 
     var contentEntryProgressStatusFlag : Int = 0
 
@@ -40,10 +40,9 @@ open class ContentEntryProgress {
         const val CONTENT_ENTRY_PROGRESS_TABLE_ID = 210
 
         const val CONTENT_ENTRY_PROGRESS_FLAG_PASSED = 1
-        const val CONTENT_ENTRY_PROGRESS_FLAG_FAILEd = 2
-        const val CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED = 3
-        const val CONTENT_ENTRY_PROGRESS_FLAG_SUCCESSFUL = 4
-        const val CONTENT_ENTRY_PROGRESS_FLAG_UNSUCCESSFUL = 5
+        const val CONTENT_ENTRY_PROGRESS_FLAG_FAILED = 2
+        const val CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED = 4
+        const val CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED = 8
     }
 
 }

@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.contentformats.video
 
 import com.ustadmobile.core.catalog.contenttype.VideoTypePlugin
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeFilePlugin
 
@@ -16,6 +17,7 @@ class VideoTypeFilePlugin : VideoTypePlugin(), ContentTypeFilePlugin {
             this.title = ""
             this.description = ""
             this.leaf = true
+            this.contentTypeFlag = ContentEntry.TYPE_VIDEO
         }
     }
 

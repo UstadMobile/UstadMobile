@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.contentformats.xapi
+package com.ustadmobile.core.contentformats.xapi
 
 class Attachment {
 

@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
-import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -16,7 +16,7 @@ class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = nul
 
     val systemImpl: UstadMobileSystemImpl by instance()
 
-    override fun onClickContentEntry(entry: ContentEntry) {
+    override fun onClickContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         when{
             mListMode == ListViewMode.PICKER && !entry.leaf -> {
                 presenter?.openContentEntryBranchPicker(entry)
@@ -36,14 +36,11 @@ class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = nul
         }
     }
 
-    override fun onClickSelectContentEntry(entry: ContentEntry) {
-        when(entry.leaf){
-            true -> onClickContentEntry(entry)
-            false -> view?.finishWithResult(listOf(entry))
-        }
+    override fun onClickSelectContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+        view?.finishWithResult(listOf(entry))
     }
 
-    override fun onClickDownloadContentEntry(entry: ContentEntry) {
+    override fun onClickDownloadContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         view?.showDownloadDialog(mapOf(ARG_PARENT_ENTRY_UID to entry.toString()))
     }
 }

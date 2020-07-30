@@ -3,9 +3,15 @@ package com.ustadmobile.port.android.impl
 import android.content.Context
 import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.ContextActivity
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -28,6 +34,11 @@ import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
+import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
+import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
@@ -120,6 +131,21 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
+
+        bind<Gson>() with singleton {
+            val builder = GsonBuilder()
+            builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
+            builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
+            builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
+            builder.create()
+        }
+
+        bind<XapiStatementEndpoint>() with scoped(EndpointScope.Default).singleton {
+            XapiStatementEndpointImpl(endpoint = context, di = di)
+        }
+        bind<XapiStateEndpoint>() with scoped(EndpointScope.Default).singleton {
+            XapiStateEndpointImpl(endpoint = context, di = di)
+        }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
     }

@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.contentformats.xapi
+package com.ustadmobile.core.contentformats.xapi
 
 class XContext {
 
@@ -22,7 +22,7 @@ class XContext {
 
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
+        if (o == null || this::class != o::class) return false
 
         val xContext = o as XContext?
 
