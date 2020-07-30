@@ -122,6 +122,9 @@ class VideoContentFragmentTest {
         onView(withId(R.id.player_view_controls))
                 .check(matches(withEffectiveVisibility(Visibility.GONE)))
 
+        val contentProgress = dbRule.db.contentEntryProgressDao.getProgressByContentAndPerson(container!!.containerContentEntryUid, dbRule.account.personUid)
+        Assert.assertEquals("progress started since user pressed play", 0, contentProgress!!.contentEntryProgressProgress)
+
     }
 
 }

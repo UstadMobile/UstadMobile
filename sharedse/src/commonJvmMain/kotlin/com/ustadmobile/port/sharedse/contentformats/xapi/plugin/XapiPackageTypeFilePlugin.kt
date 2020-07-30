@@ -37,6 +37,7 @@ class XapiPackageTypeFilePlugin : XapiPackageTypePlugin(), ContentTypeFilePlugin
                             author = ""
                             description = activity.desc
                             leaf = true
+                            entryId = activity.id
                         }
                         break
                     }

@@ -263,7 +263,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                     contentEntryProgressActive = true
                     contentEntryProgressContentEntryUid = it.contentEntryUid
                     contentEntryProgressPersonUid = student1.clazzMemberPersonUid
-                    contentEntryProgressProgress = 42.0F
+                    contentEntryProgressProgress = 42
                     contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
                     contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
                 }
@@ -272,7 +272,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                     contentEntryProgressActive = true
                     contentEntryProgressContentEntryUid = it.contentEntryUid
                     contentEntryProgressPersonUid = student3.clazzMemberPersonUid
-                    contentEntryProgressProgress = 24.0F
+                    contentEntryProgressProgress = 24
                     contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
                     contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
                 }
@@ -281,7 +281,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                     contentEntryProgressActive = true
                     contentEntryProgressContentEntryUid = it.contentEntryUid
                     contentEntryProgressPersonUid = student4.clazzMemberPersonUid
-                    contentEntryProgressProgress = 100.0F
+                    contentEntryProgressProgress = 100
                     contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
                     contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
                 }
@@ -356,7 +356,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                     contentEntryProgressActive = true
                     contentEntryProgressContentEntryUid = it.contentEntryUid
                     contentEntryProgressPersonUid = student1.clazzMemberPersonUid
-                    contentEntryProgressProgress = 42.0F
+                    contentEntryProgressProgress = 42
                     contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
                     contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
                 }
@@ -365,7 +365,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                     contentEntryProgressActive = true
                     contentEntryProgressContentEntryUid = it.contentEntryUid
                     contentEntryProgressPersonUid = student3.clazzMemberPersonUid
-                    contentEntryProgressProgress = 24.0F
+                    contentEntryProgressProgress = 24
                     contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
                     contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
                 }
@@ -374,7 +374,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
                     contentEntryProgressActive = true
                     contentEntryProgressContentEntryUid = it.contentEntryUid
                     contentEntryProgressPersonUid = student4.clazzMemberPersonUid
-                    contentEntryProgressProgress = 100.0F
+                    contentEntryProgressProgress = 100
                     contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
                     contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insertAsync(this)
                 }

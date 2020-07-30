@@ -35,9 +35,11 @@ abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin> {
     companion object{
         const val FINDBY_CLAZZWORK_UID =
             """SELECT ContentEntry.*, ContentEntryStatus.*, ContentEntryParentChildJoin.*, 
-            Container.*
+            Container.*, ContentEntryProgress.*
             FROM ClazzWorkContentJoin
-            LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = clazzWorkContentJoinContentUid
+            LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = clazzWorkContentJoinContentUid 
+            LEFT JOIN ContentEntryProgress ON ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid 
+                 AND ContentEntryProgress.contentEntryProgressPersonUid = :personUid AND ContentEntryProgress.contentEntryProgressActive 
             LEFT JOIN ContentEntryParentChildJoin ON 
                 ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid 
             LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid

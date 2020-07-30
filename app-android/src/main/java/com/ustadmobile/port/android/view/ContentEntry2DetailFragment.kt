@@ -27,6 +27,7 @@ import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
@@ -140,6 +141,12 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
                 }
             }
             field = value
+        }
+    override var contentEntryProgress: ContentEntryProgress? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.contentEntryProgress = value
         }
 
     class AvailableTranslationRecyclerAdapter(var activityEventHandler: ContentEntryDetailFragmentEventHandler?,
