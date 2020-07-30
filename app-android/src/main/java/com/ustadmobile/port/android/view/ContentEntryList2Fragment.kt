@@ -74,7 +74,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     }
 
     /**
-     * OnClick function that will handle when the user clicks to create a new item
+     * OnClick function that will handle
+     * when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)

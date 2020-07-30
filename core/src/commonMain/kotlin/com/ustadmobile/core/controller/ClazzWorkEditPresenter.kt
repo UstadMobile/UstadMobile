@@ -50,7 +50,9 @@ class ClazzWorkEditPresenter(context: Any,
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
             this) { contentEntryUid = it }
 
-    fun handleAddOrEditContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+    fun handleAddOrEditContent(entityClass: ContentEntry) {
+        val entityClassWithExra : ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+        entityClassWithExra.apply {  }
         contentJoinEditHelper.onEditResult(entityClass)
     }
 

@@ -23,6 +23,8 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
@@ -130,8 +132,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             mPresenter?.handleAddOrEditClazzQuestionAndOptions(questionAndOptions)
         }
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class.java){
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                ContentEntry::class.java){
             val contentEntrySelected = it.firstOrNull()?:return@observeResult
             mPresenter?.handleAddOrEditContent(contentEntrySelected)
         }
@@ -228,7 +230,9 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         navigateToPickEntityFromList(ContentEntry::class.java,
                 R.id.content_entry_list_dest,
                 bundleOf(ContentEntryList2View.ARG_CLAZZWORK_FILTER to
-                        entity?.clazzWorkUid.toString()))
+                        entity?.clazzWorkUid.toString(),
+                        ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+                UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString()))
 
     }
 
