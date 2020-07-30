@@ -165,7 +165,7 @@ class EpubContentPresenter(context: Any,
 
             epubContentView.runOnUiThread(Runnable {
                 epubContentView.containerTitle = opf.title
-                epubContentView.setSpineUrls(linearSpineUrls, if(position >= 0) position else 0)
+                epubContentView.spineUrls = linearSpineUrls.toList()
                 if (opfCoverImageItem != null) {
                     epubContentView.coverImageUrl = opfCoverImageItem.href?.let {
                         opfBaseUrl?.let { url -> UMFileUtil.resolveLink(url, it) }

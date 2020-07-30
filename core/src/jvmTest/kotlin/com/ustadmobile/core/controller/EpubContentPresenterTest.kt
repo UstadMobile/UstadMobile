@@ -1,9 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.anyArray
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
@@ -34,7 +31,6 @@ import org.xmlpull.v1.XmlPullParserException
 import java.io.File
 import java.io.IOException
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
 
 class EpubContentPresenterTest {
@@ -110,35 +106,31 @@ class EpubContentPresenterTest {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
 
-        val hrefListReference = AtomicReference<Any>()
-
-        whenever(mockEpubView.setSpineUrls(anyArray(), eq(0))).thenAnswer {
-            hrefListReference.set(it.getArgument(0))
-            Unit
-        }
-
         val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
         presenter.onCreate(args)
 
 
         verify(mockEpubView, timeout(15000)).containerTitle = opf!!.title!!
-        verify(mockEpubView, timeout(20000)).setSpineUrls(any(), eq(0))
 
-        val linearSpineUrls = hrefListReference.get() as Array<String>
-        val client = HttpClient()
-        runBlocking {
-            for (i in linearSpineUrls.indices) {
-                Assert.assertTrue("Spine itemk $i ends with expected url",
-                        linearSpineUrls[i].endsWith(opf!!.linearSpineHREFs[i]))
+        argumentCaptor<List<String>>().apply {
+            verify(mockEpubView, timeout(20000)).spineUrls = capture()
 
-                val responseStatusCode = client.get<HttpStatement>(linearSpineUrls[i]).execute {
-                    it.status.value
+            val client = HttpClient()
+            runBlocking {
+                firstValue.forEachIndexed {index, url ->
+                    Assert.assertTrue("Spine itemk $index ends with expected url",
+                            url.endsWith(opf!!.linearSpineHREFs[index]))
+
+                    val responseStatusCode = client.get<HttpStatement>(url).execute {
+                        it.status.value
+                    }
+                    Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
+                            responseStatusCode)
                 }
-                Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
-                        responseStatusCode)
             }
+            client.close()
         }
-        client.close()
+
     }
 
 }

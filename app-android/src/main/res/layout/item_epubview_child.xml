@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <TextView
-        android:id="@+id/expandedListItem"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:paddingStart="?android:attr/expandableListPreferredChildPaddingLeft"
-        android:paddingEnd="?android:attr/expandableListPreferredChildPaddingLeft"
-        android:paddingTop="@dimen/dimen_10dp"
-        android:paddingBottom="@dimen/dimen_10dp" />
-</LinearLayout>
+    android:layout_height="wrap_content"
+    android:id="@+id/expandedListItem"
+    android:padding="@dimen/dimen_16dp"
+    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+    android:paddingStart="?android:attr/expandableListPreferredChildPaddingLeft"
+    android:paddingEnd="?android:attr/expandableListPreferredChildPaddingLeft"/>
