@@ -1,12 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import android.annotation.SuppressLint
-import android.app.DownloadManager
-import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.view.*
 import android.webkit.WebChromeClient
@@ -18,6 +14,8 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityEpubContentBinding
@@ -27,7 +25,6 @@ import com.ustadmobile.core.controller.EpubContentPresenter
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
@@ -56,12 +53,12 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
             mBinding.containerTitle = value
         }
 
-    override fun setSpineUrls(urls: Array<String>?, index : Int) {
-        mContentPagerAdapter = urls?.let { EpubContentPagerAdapter(this,it) }
-        mBinding.containerEpubrunnerPager.offscreenPageLimit = 1
-        mBinding.containerEpubrunnerPager.adapter = mContentPagerAdapter
-        mBinding.containerEpubrunnerPager.setCurrentItem(index, true)
-    }
+
+    override var spineUrls: List<String>? = null
+        set(value) {
+            value?.also { mContentPagerAdapter?.submitList(value) }
+            field = value
+        }
 
     override var pageTitle: String? = null
         set(value) {
@@ -154,60 +151,46 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
     }
 
 
-    private class EpubContentPagerAdapter internal constructor(val context: Context,
-                                                               private val urls: Array<String>):
-            RecyclerView.Adapter<EpubContentPagerAdapter.EpubContentViewHolder>() {
+    private class EpubContentPagerAdapter :
+            ListAdapter<String, EpubContentPagerAdapter.EpubContentViewHolder>(URL_DIFFUTIL) {
 
         private var webViewTouchHandler: Handler = Handler()
 
         private var gestureDetector: GestureDetectorCompat? = null
 
         inner class EpubContentViewHolder internal constructor(val mBinding: ItemEpubcontentViewBinding) :
-                RecyclerView.ViewHolder(mBinding.root) {
+                RecyclerView.ViewHolder(mBinding.root)
 
-            @SuppressLint("SetJavaScriptEnabled", "ObsoleteSdkInt", "ClickableViewAccessibility")
-            fun bind(spineUrl: String){
-                //Android after Version 17 (4.4) by default requires a gesture before any media playback happens
-                if (Build.VERSION.SDK_INT >= 17) {
-                    mBinding.epubContentview.settings?.mediaPlaybackRequiresUserGesture = false
-                }
-
-                mBinding.epubContentview.settings.javaScriptEnabled = true
-                mBinding.epubContentview.settings.domStorageEnabled = true
-                mBinding.epubContentview.settings.cacheMode = WebSettings.LOAD_DEFAULT
-                mBinding.epubContentview.webViewClient = WebViewClient()
-                mBinding.epubContentview.webChromeClient = WebChromeClient()
-                mBinding.epubContentview.loadUrl(spineUrl)
-                mBinding.epubContentview.setDownloadListener { url, _, _, _, _ ->
-                    val request = DownloadManager.Request(Uri.parse(url))
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
-                            UMFileUtil.getFilename(url))
-                    val downloadManager = context.getSystemService(
-                            Context.DOWNLOAD_SERVICE) as DownloadManager
-                    downloadManager.enqueue(request)
-                }
-                gestureDetector = GestureDetectorCompat(mBinding.epubContentview.context,
-                        object : GestureDetector.SimpleOnGestureListener() {
-                            override fun onSingleTapUp(e: MotionEvent): Boolean {
-                                webViewTouchHandler.sendEmptyMessageDelayed(HANDLER_CLICK_ON_VIEW, 200)
-                                return super.onSingleTapUp(e)
-                            } })
-
-                mBinding.epubContentview.setOnTouchListener { _, motionEvent ->
-                    gestureDetector?.onTouchEvent(motionEvent)?:false}
-            }
-        }
-
+        @SuppressLint("SetJavaScriptEnabled", "ObsoleteSdkInt", "ClickableViewAccessibility")
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EpubContentViewHolder {
             val mBinding = ItemEpubcontentViewBinding.inflate(LayoutInflater.from(parent.context),
                     parent, false)
+
+            if (Build.VERSION.SDK_INT >= 17) {
+                mBinding.epubContentview.settings?.mediaPlaybackRequiresUserGesture = false
+            }
+
+            mBinding.epubContentview.settings.javaScriptEnabled = true
+            mBinding.epubContentview.settings.domStorageEnabled = true
+            mBinding.epubContentview.settings.cacheMode = WebSettings.LOAD_DEFAULT
+            mBinding.epubContentview.webViewClient = WebViewClient()
+            mBinding.epubContentview.webChromeClient = WebChromeClient()
+
+
+            gestureDetector = GestureDetectorCompat(mBinding.epubContentview.context,
+                    object : GestureDetector.SimpleOnGestureListener() {
+                        override fun onSingleTapUp(e: MotionEvent): Boolean {
+                            webViewTouchHandler.sendEmptyMessageDelayed(HANDLER_CLICK_ON_VIEW, 200)
+                            return super.onSingleTapUp(e)
+                        } })
+
+            mBinding.epubContentview.setOnTouchListener { _, motionEvent ->
+                gestureDetector?.onTouchEvent(motionEvent)?:false}
             return EpubContentViewHolder(mBinding)
         }
 
-        override fun getItemCount(): Int  = urls.size
-
         override fun onBindViewHolder(holderContent: EpubContentViewHolder, position: Int) {
-            holderContent.bind(urls[position])
+            holderContent.mBinding.epubContentview.loadUrl(getItem(position))
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -263,6 +246,10 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
             mBinding.containerDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         }
 
+        mContentPagerAdapter = EpubContentPagerAdapter()
+        mBinding.containerEpubrunnerPager.offscreenPageLimit = 1
+        mBinding.containerEpubrunnerPager.adapter = mContentPagerAdapter
+
         mPresenter = EpubContentPresenter(this, bundleToMap(intent.extras),
                 this, di)
         loading = true
@@ -288,6 +275,20 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         tableOfContents = null
         pageTitle = null
         super.onDestroy()
+    }
+
+    companion object {
+
+        private val URL_DIFFUTIL = object:  DiffUtil.ItemCallback<String>() {
+            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+                return oldItem == newItem
+            }
+
+            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+                return oldItem == newItem
+            }
+        }
+
     }
 
 }
