@@ -402,7 +402,7 @@ suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: In
 }
 
 suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentContainer(
-        numEntries: Int, parentEntryUid: Long, nonLeafIndexes: MutableList<Int> = mutableListOf()): List<ContentEntry> {
+        numEntries: Int, parentEntryUid: Long, nonLeafIndexes: MutableList<Int> = mutableListOf()): List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
     return (1 .. numEntries).map {
         val entry = ContentEntry().apply {
             leaf = !(nonLeafIndexes.isNotEmpty() && nonLeafIndexes.indexOf(it - 1) != -1)
@@ -410,20 +410,30 @@ suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentCont
             description = "Dummy description $it"
             contentEntryUid = contentEntryDao.insertAsync(this)
         }
-        ContentEntryParentChildJoin().apply {
+        val parentChildJoin = ContentEntryParentChildJoin().apply {
             cepcjChildContentEntryUid = entry.contentEntryUid
             cepcjParentContentEntryUid = parentEntryUid
             cepcjUid = contentEntryParentChildJoinDao.insertAsync(this)
         }
 
-        Container().apply {
+        val container = Container().apply {
             fileSize = 10000
             cntLastModified = getSystemTimeInMillis()
             containerContentEntryUid = entry.contentEntryUid
             containerUid = containerDao.insertAsync(this)
-
         }
-        entry
+
+
+
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+            mostRecentContainer = container
+            contentEntryParentChildJoin = parentChildJoin
+            contentEntryUid = entry.contentEntryUid
+            leaf = entry.leaf
+            title = entry.title
+            description = entry.description
+            contentEntryUid = entry.contentEntryUid
+        }
     }
 }
 

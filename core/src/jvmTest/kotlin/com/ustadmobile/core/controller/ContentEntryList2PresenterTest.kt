@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.util.test.ext.insertContentEntryWithParentChildJoinAndMostRecentContainer
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
@@ -46,7 +47,7 @@ class ContentEntryList2PresenterTest {
 
     private val parentEntryUid = 100001L
 
-    private var createdEntries: List<ContentEntry>? = null
+    private var createdEntries: List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
 
     val presenterArgs = mapOf(ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT,
             ARG_PARENT_ENTRY_UID to parentEntryUid.toString())

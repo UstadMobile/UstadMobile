@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
@@ -106,41 +107,11 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         val flag = if (progress == 100) ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED or ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED else 0
         repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
 
-        createStatement(progress, playerPlayedVideoDuration)
-    }
-
-    private fun createStatement(progress: Int, duration: Long) {
-
-        val statement = Statement().apply {
-            this.actor = Actor().apply {
-                this.account = Account().apply {
-                    this.homePage = accountManager.activeAccount.endpointUrl
-                    this.name = accountManager.activeAccount.username
-                }
-            }
-            this.verb = Verb().apply {
-                this.id = if (progress == 100) "https://w3id.org/xapi/adl/verbs/satisfied" else "http://adlnet.gov/expapi/verbs/progressed"
-                this.display = mapOf("en-US" to if (progress == 100) "satisfied" else "progressed")
-            }
-            this.result = Result().apply {
-                this.completion = progress == 100
-                this.duration = UMTinCanUtil.format8601Duration(duration)
-                this.extensions = mapOf("https://w3id.org/xapi/cmi5/result/extensions/progress" to progress)
-            }
-            this.`object` = XObject().apply {
-                this.id = "${accountManager.activeAccount.endpointUrl}/contentEntryUid/${entryUuid}"
-                this.objectType = "Activity"
-                this.definition = Definition().apply {
-                    this.name = mapOf("en-US" to (entry?.title ?: ""))
-                    this.description = mapOf("en-US" to (entry?.description ?: ""))
-                }
-            }
+        entry?.also {
+            statementEndpoint.storeProgressStatement(accountManager.activeAccount, it, progress,
+                    playerPlayedVideoDuration)
         }
-
-        statementEndpoint.storeStatements(listOf(statement), "", entryUuid)
-
     }
-
 
     companion object {
 
