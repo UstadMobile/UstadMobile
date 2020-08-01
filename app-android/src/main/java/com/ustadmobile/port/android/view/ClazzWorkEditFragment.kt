@@ -17,12 +17,14 @@ import com.toughra.ustadmobile.databinding.FragmentClazzWorkEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzworkquestionBinding
 import com.ustadmobile.core.controller.ClazzWorkEditPresenter
 import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
+import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorMutableLiveData
@@ -43,7 +45,10 @@ interface ClazzWorkEditFragmentEventHandler {
 
 class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>,
-        ClazzWorkEditFragmentEventHandler {
+        ClazzWorkEditFragmentEventHandler, ContentEntryListItemListener {
+
+    override val viewContext: Any
+        get() = requireContext()
 
     private var mBinding: FragmentClazzWorkEditBinding? = null
 
@@ -52,49 +57,19 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
     override val mEditPresenter: UstadEditPresenter<*, ClazzWork>?
         get() = mPresenter
 
+
     private var questionRecyclerAdapter: ClazzWorkQuestionRecyclerAdapter? = null
-
     private var questionRecyclerView: RecyclerView? = null
-
     private val questionObserver = Observer<List<ClazzWorkQuestionAndOptions>?> {
         t -> questionRecyclerAdapter?.submitList(t)
     }
 
-    override val viewContext: Any
-        get() = requireContext()
-
-    override var clazzWorkQuizQuestionsAndOptions: DoorMutableLiveData<List<ClazzWorkQuestionAndOptions>>? = null
-        get() = field
-        set(value) {
-            field?.removeObserver(questionObserver)
-            field = value
-            value?.observe(this, questionObserver)
-        }
-
-    class ClazzWorkQuestionRecyclerAdapter(
-            val activityEventHandler: ClazzWorkEditFragmentEventHandler,
-            var presenter: ClazzWorkEditPresenter?)
-        : ListAdapter<ClazzWorkQuestionAndOptions,
-            ClazzWorkQuestionRecyclerAdapter.ClazzWorkQuestionViewHolder>(DIFF_CALLBACK_CLAZZ_WORK_QUESTION_OPTION) {
-
-        class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionBinding)
-            : RecyclerView.ViewHolder(binding.root)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkQuestionViewHolder {
-            val viewHolder = ClazzWorkQuestionViewHolder(ItemClazzworkquestionBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false))
-            viewHolder.binding.mPresenter = presenter
-            viewHolder.binding.mActivity = activityEventHandler
-            viewHolder.binding.questionTypeList =
-                    ClazzWorkQuestionAndOptionsEditPresenter.ClazzWorkQuestionOptions.values()
-                            .map { MessageIdOption(it.messageId, parent.context, it.optionVal) }
-            return viewHolder
-        }
-
-        override fun onBindViewHolder(holder: ClazzWorkQuestionViewHolder, position: Int) {
-            holder.binding.clazzWorkQuestionAndOptions = getItem(position)
-        }
+    private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
+    private var contentRecyclerView: RecyclerView? = null
+    private val contentObserver = Observer<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?>{
+        t -> contentRecyclerAdapter?.selectedItemsLiveData?.setVal(t?:listOf())
     }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -103,6 +78,12 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             it.activityEventHandler = this
             it.typeSelectionListener = this
         }
+
+        contentRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_edit_content_rv)
+        contentRecyclerAdapter = ContentEntryListRecyclerAdapter(this,
+                ListViewMode.BROWSER.toString() )
+        contentRecyclerView?.adapter = contentRecyclerAdapter
+        contentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         questionRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_edit_questions_rv)
         questionRecyclerAdapter = ClazzWorkQuestionRecyclerAdapter(this, null)
@@ -133,10 +114,11 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                ContentEntry::class.java){
+                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class.java){
             val contentEntrySelected = it.firstOrNull()?:return@observeResult
             mPresenter?.handleAddOrEditContent(contentEntrySelected)
         }
+
     }
 
     override var timeZone: String = ""
@@ -146,22 +128,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
                     getText(R.string.class_timezone).toString() + " " + value
             field = value
         }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mBinding = null
-        mPresenter = null
-        entity = null
-        questionRecyclerView?.adapter = null
-        questionRecyclerAdapter = null
-        questionRecyclerView = null
-        clazzWorkQuizQuestionsAndOptions = null
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setEditFragmentTitle(R.string.clazz_work)
-    }
 
     override var entity: ClazzWork? = null
         get() = field
@@ -175,29 +141,28 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             }else{
                 View.GONE
             }
-
         }
 
-    private val contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
-
-    private val contentObserver = Observer<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?>{
-        t -> contentRecyclerAdapter?.selectedItemsLiveData?.setVal(t?:listOf())
-    }
-
-
-    override var clazzWorkContent: DoorMutableLiveData<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
+    override var clazzWorkQuizQuestionsAndOptions:
+            DoorMutableLiveData<List<ClazzWorkQuestionAndOptions>>? = null
         get() = field
+        set(value) {
+            field?.removeObserver(questionObserver)
+            field = value
+            value?.observe(this, questionObserver)
+        }
+
+
+    override var clazzWorkContent: DoorMutableLiveData<List<
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
         set(value) {
             field?.removeObserver(contentObserver)
             field = value
             value?.observe(this, contentObserver)
         }
 
-    override var submissionTypeOptions: List<ClazzWorkEditPresenter.SubmissionOptionsMessageIdOption>? = null
-        get() = field
-        set(value) {
-            field = value
-        }
+    override var submissionTypeOptions: List<
+            ClazzWorkEditPresenter.SubmissionOptionsMessageIdOption>? = null
 
     override var fieldsEnabled: Boolean = false
         get() = field
@@ -227,17 +192,53 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
     override fun onClickNewContent() {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(ContentEntry::class.java,
+        navigateToPickEntityFromList(
+                ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class.java,
                 R.id.content_entry_list_dest,
                 bundleOf(ContentEntryList2View.ARG_CLAZZWORK_FILTER to
                         entity?.clazzWorkUid.toString(),
-                        ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+                        ContentEntryList2View.ARG_CONTENT_FILTER to
+                                ContentEntryList2View.ARG_LIBRARIES_CONTENT,
                 UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString()))
 
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mBinding = null
+        mPresenter = null
+        entity = null
+        questionRecyclerView?.adapter = null
+        questionRecyclerAdapter = null
+        questionRecyclerView = null
+        clazzWorkQuizQuestionsAndOptions = null
+        contentRecyclerView?.adapter = null
+        contentRecyclerAdapter = null
+        contentRecyclerView = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setEditFragmentTitle(R.string.clazz_work)
+    }
+
     override fun handleRemoveClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions) {
         mPresenter?.handleRemoveQuestionAndOptions(clazzWorkQuestion)
+    }
+
+    override fun onClickContentEntry(
+            entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+
+    }
+
+    override fun onClickSelectContentEntry(
+            entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+
+    }
+
+    override fun onClickDownloadContentEntry(
+            entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+
     }
 
     companion object {
@@ -255,4 +256,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             }
         }
     }
+
+
 }

@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -50,9 +51,18 @@ class ClazzWorkEditPresenter(context: Any,
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
             this) { contentEntryUid = it }
 
-    fun handleAddOrEditContent(entityClass: ContentEntry) {
-        val entityClassWithExra : ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-        entityClassWithExra.apply {  }
+    fun handleAddOrEditContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+
+        //We could save this
+        GlobalScope.launch {
+            val newLink = ClazzWorkContentJoin().apply {
+                clazzWorkContentJoinContentUid = entityClass.contentEntryUid
+                clazzWorkContentJoinClazzWorkUid = entity?.clazzWorkUid?:0L
+                clazzWorkContentJoinDateAdded = systemTimeInMillis()
+            }
+            newLink.clazzWorkContentJoinUid = repo.clazzWorkContentJoinDao.insert(newLink)
+        }
+
         contentJoinEditHelper.onEditResult(entityClass)
     }
 
@@ -69,7 +79,6 @@ class ClazzWorkEditPresenter(context: Any,
     { clazzWorkQuestion.clazzWorkQuestionUid = it }
 
     fun handleAddOrEditClazzQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {
-
 
         //We could save this
         GlobalScope.launch {
@@ -190,9 +199,32 @@ class ClazzWorkEditPresenter(context: Any,
                 repo.clazzWorkDao.updateAsync(entity)
             }
 
-            //TODO: Replace with right thingi.
-            // Not committing as this will change anyway
-            //contentJoinEditHelper.commitToDatabase(repo.contentEntryDao)
+            val contentToInsert = contentJoinEditHelper.entitiesToInsert
+            val contentToUpdate = contentJoinEditHelper.entitiesToUpdate
+            val contentToDelete = contentJoinEditHelper.primaryKeysToDeactivate
+
+            contentToInsert.forEach {
+                val newLink = ClazzWorkContentJoin().apply {
+                    clazzWorkContentJoinContentUid = it.contentEntryUid
+                    clazzWorkContentJoinClazzWorkUid = entity?.clazzWorkUid?:0L
+                    clazzWorkContentJoinDateAdded = systemTimeInMillis()
+                }
+                newLink.clazzWorkContentJoinUid = repo.clazzWorkContentJoinDao.insert(newLink)
+            }
+            contentToUpdate.forEach {
+
+            }
+
+            repo.clazzWorkContentJoinDao.deactivateByUids(contentToDelete)
+
+//            GlobalScope.launch {
+//                val newLink = ClazzWorkContentJoin().apply {
+//                    clazzWorkContentJoinContentUid = entityClass.contentEntryUid
+//                    clazzWorkContentJoinClazzWorkUid = entity?.clazzWorkUid?:0L
+//                    clazzWorkContentJoinDateAdded = systemTimeInMillis()
+//                }
+//                newLink.clazzWorkContentJoinUid = repo.clazzWorkContentJoinDao.insert(newLink)
+//            }
 
 
             val eti : List<ClazzWorkQuestionAndOptions> =

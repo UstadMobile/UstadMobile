@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 @UmDao
 @UmRepository
 @Dao
-abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin> {
+abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin>, OneToManyJoinDao<ClazzWorkContentJoin> {
 
     @Query("SELECT * FROM ClazzWorkContentJoin " +
             "WHERE clazzWorkContentJoinUid = :clazzWorkContentJoinUid " +
@@ -31,6 +31,17 @@ abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin> {
     @Query(FINDBY_CLAZZWORK_UID)
     abstract fun findAllContentByClazzWorkUidDF(clazzWorkUid: Long, personUid : Long)
             :DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+
+    @Query("UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinInactive = :active " +
+            "WHERE clazzWorkContentJoinUid = :uid ")
+    abstract suspend fun updateInActiveByClazzWorkQuestionUid(uid: Long, active : Boolean)
+
+
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+            updateInActiveByClazzWorkQuestionUid(it, true)
+        }
+    }
 
     companion object{
         const val FINDBY_CLAZZWORK_UID =
