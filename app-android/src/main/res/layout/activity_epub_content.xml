@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- activity_screen_slide.xml -->
-
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
@@ -31,7 +29,7 @@
                 android:id="@+id/appbar"
                 layout="@layout/appbar_material_with_progress"/>
 
-            <androidx.viewpager.widget.ViewPager
+            <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/container_epubrunner_pager"
                 android:layout_below="@+id/appbar"
                 android:layout_alignParentBottom="true"
@@ -69,6 +67,7 @@
                         android:adjustViewBounds="true"
                         android:layout_height="@dimen/dimen_70dp"
                         android:layout_width="@dimen/dimen_70dp"
+                        android:layout_marginStart="@dimen/dimen_10dp"
                         android:padding="@dimen/dimen_4dp"
                         tools:src="@drawable/cover"
                         />
@@ -86,6 +85,7 @@
                         android:layout_height="wrap_content"/>
 
                     <TextView
+                        android:layout_marginTop="@dimen/dimen_8dp"
                         android:layout_marginStart="@dimen/dimen_8dp"
                         android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                         android:layout_width="wrap_content"
