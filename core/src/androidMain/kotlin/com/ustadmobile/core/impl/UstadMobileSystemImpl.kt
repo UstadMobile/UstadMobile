@@ -216,7 +216,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
                 val popUpToViewName = ustadGoOptions.popUpToViewName
                 if(popUpToViewName != null) {
-                    val popUpToDestId = if(viewName == UstadView.CURRENT_DEST) {
+                    val popUpToDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
                         navController.currentDestination?.id ?: 0
                     }else {
                         destinationProvider.lookupDestinationName(popUpToViewName)
