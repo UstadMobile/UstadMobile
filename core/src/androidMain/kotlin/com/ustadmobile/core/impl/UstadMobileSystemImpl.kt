@@ -216,12 +216,14 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
                 val popUpToViewName = ustadGoOptions.popUpToViewName
                 if(popUpToViewName != null) {
-                    popUpTo = destinationProvider.lookupDestinationName(popUpToViewName)
-                                ?.destinationId?:0
+                    val popUpToDestId = if(viewName == UstadView.CURRENT_DEST) {
+                        navController.currentDestination?.id ?: 0
+                    }else {
+                        destinationProvider.lookupDestinationName(popUpToViewName)
+                                ?.destinationId ?: 0
+                    }
 
-                    popUpTo(destinationProvider.lookupDestinationName(popUpToViewName)
-                            ?.destinationId?:0) { inclusive = ustadGoOptions.popUpToInclusive}
-
+                    popUpTo(popUpToDestId) { inclusive = ustadGoOptions.popUpToInclusive }
                 }
             }
 
