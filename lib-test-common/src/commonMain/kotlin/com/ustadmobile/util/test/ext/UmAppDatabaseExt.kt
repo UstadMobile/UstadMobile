@@ -367,3 +367,48 @@ suspend fun UmAppDatabase.insertVideoContent(): Container {
 
     return container
 }
+
+suspend fun UmAppDatabase.insertPersonWithRole(person: Person, role: Role,
+    entityRole: EntityRole = EntityRole()) {
+    person.also {
+        if(it.personUid == 0L) {
+            it.personUid = personDao.insertAsync(it)
+        }else {
+            personDao.insertOrReplace(it)
+        }
+    }
+
+    role.also {
+        if(it.roleUid == 0L) {
+            it.roleUid = roleDao.insert(it)
+        }else {
+            roleDao.insertOrReplace(it)
+        }
+    }
+
+    //Create and insert PersonGroup and PersonGroupmember
+    val personGroup = PersonGroup().also {
+        it.groupActive = true
+        it.groupName = "${person.firstNames} group"
+        it.groupPersonUid = person.personUid
+        it.groupUid = personGroupDao.insert(it)
+    }
+
+    val personGroupMember = PersonGroupMember().also {
+        it.groupMemberGroupUid = personGroup.groupUid
+        it.groupMemberActive = true
+        it.groupMemberPersonUid = person.personUid
+        it.groupMemberPersonUid = personGroupMemberDao.insertAsync(it)
+    }
+
+    entityRole.also {
+        it.erGroupUid = personGroup.groupUid
+        it.erRoleUid = role.roleUid
+        it.erActive = true
+        if(it.erUid == 0L) {
+            it.erUid = entityRoleDao.insertAsync(it)
+        }else {
+            entityRoleDao.insertOrReplace(it)
+        }
+    }
+}

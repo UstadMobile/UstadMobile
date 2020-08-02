@@ -8,7 +8,7 @@ import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.core.util.ext.waitUntil
+import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner

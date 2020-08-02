@@ -74,6 +74,14 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
                     PersonAuthDao.PLAIN_PASS_PREFIX+mPerson.newPassword)
             val aUid = db.personAuthDao.insert(personAuth)
 
+            //create PersonGroup
+            val personGroup = PersonGroup().apply {
+                groupPersonUid = mPerson.personUid
+                groupUid = db.personGroupDao.insert(this)
+            }
+
+            db.personGroupMemberDao.insert(PersonGroupMember(mPerson.personUid, personGroup.groupUid))
+
             if(aUid != -1L){
                 val username = mPerson.username
                 if(username != null){

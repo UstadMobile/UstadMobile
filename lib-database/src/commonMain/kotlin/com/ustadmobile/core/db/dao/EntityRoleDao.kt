@@ -1,8 +1,6 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.core.db.dao.RoleDao.Companion.SELECT_ACCOUNT_IS_ADMIN
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -45,6 +43,9 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
 
     @Update
     abstract suspend fun updateAsync(entity: EntityRole) :Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertOrReplace(entity: EntityRole)
 
     companion object {
         const val SELECT_ROLE_ASSIGNMENT_QUERY =
