@@ -120,7 +120,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         view.clazzWorkPublicComments = publicComments
 
 
-        if(clazzWorkWithSubmission.clazzWorkCommentsEnabled && view.isStudent) {
+        if(view.isStudent) {
             val privateComments = withTimeoutOrNull(2000) {
                 db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(ClazzWork.CLAZZ_WORK_TABLE_ID,
                         clazzWorkWithSubmission.clazzWorkUid, loggedInPersonUid)
