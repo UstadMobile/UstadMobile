@@ -21,16 +21,17 @@ class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false)
             field = value
         }
 
-    class SubmissionTextEntryWithResultViewHolder(var itemBinding: ItemClazzworkSubmissionTextEntryBinding)
+    class SubmissionTextEntryWithResultViewHolder(
+            var itemBinding: ItemClazzworkSubmissionTextEntryBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
     private var viewHolder: SubmissionTextEntryWithResultViewHolder? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SubmissionTextEntryWithResultViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
+            : SubmissionTextEntryWithResultViewHolder {
         return SubmissionTextEntryWithResultViewHolder(
                 ItemClazzworkSubmissionTextEntryBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                    //it.clazzWorkWithSubmission = _clazzWork
                     it.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
                 })
     }
