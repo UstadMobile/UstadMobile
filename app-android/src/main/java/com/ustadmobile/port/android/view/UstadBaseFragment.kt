@@ -41,7 +41,7 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
      */
     protected var fabManagementEnabled: Boolean = true
 
-    var title: String?
+    var clazzWorkTitle: String?
         get() = titleLifecycleObserver?.title
         set(value) {
             titleLifecycleObserver?.title = value

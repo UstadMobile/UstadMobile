@@ -12,4 +12,7 @@ class ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer : ContentEn
     @Embedded
     var contentEntryParentChildJoin: ContentEntryParentChildJoin? = null
 
+    @Embedded
+    var contentEntryProgress: ContentEntryProgress? = null
+
 }

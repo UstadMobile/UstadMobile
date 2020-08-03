@@ -4,7 +4,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.Actor
+import com.ustadmobile.core.contentformats.xapi.*
 
 import java.lang.reflect.Type
 

@@ -73,6 +73,9 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //The fab will be managed by the underlying tabs
+        fabManagementEnabled = false
+
         val navController = findNavController()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
@@ -115,6 +118,12 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         }
     }
 
+    override var title: String? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null
@@ -129,7 +138,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         set(value) {
             field = value
             mBinding?.school = value
-            title = value?.schoolName
+            clazzWorkTitle = value?.schoolName
         }
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE

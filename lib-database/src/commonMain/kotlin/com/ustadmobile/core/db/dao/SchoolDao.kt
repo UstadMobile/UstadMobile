@@ -17,16 +17,8 @@ import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 @Dao
 abstract class SchoolDao : BaseDao<School> {
 
-    @Query("SELECT * FROM School WHERE schoolName=:schoolName AND CAST(schoolActive AS INTEGER) = 1")
-    abstract fun findByNameAsync(schoolName: String): School?
-
     @Query("SELECT * FROM School WHERE schoolUid = :schoolUid AND CAST(schoolActive AS INTEGER) = 1")
     abstract fun findByUidAsync(schoolUid: Long): School?
-
-    @Query("SELECT * FROM School WHERE CAST(schoolActive AS INTEGER) = 1 " +
-            " AND schoolName LIKE :searchBit ORDER BY schoolName ASC")
-    abstract fun findAllActiveSchoolsNameAsc(searchBit: String): DataSource.Factory<Int, School>
-
 
     @Query("""SELECT School.*, HolidayCalendar.* FROM School 
             LEFT JOIN HolidayCalendar ON School.schoolHolidayCalendarUid = HolidayCalendar.umCalendarUid
