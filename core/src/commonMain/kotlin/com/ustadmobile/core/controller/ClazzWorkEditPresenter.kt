@@ -169,7 +169,6 @@ class ClazzWorkEditPresenter(context: Any,
         }
 
         view.clazzWorkQuizQuestionsAndOptions = questionAndOptionsEditHelper.liveList
-        view.clazzWorkContent = contentJoinEditHelper.liveList
         view.submissionTypeOptions = SubmissionOptions.values().map{SubmissionOptionsMessageIdOption(it, context)}
 
         contentJoinEditHelper.liveList.sendValue(listOf())
@@ -216,15 +215,6 @@ class ClazzWorkEditPresenter(context: Any,
             }
 
             repo.clazzWorkContentJoinDao.deactivateByUids(contentToDelete)
-
-//            GlobalScope.launch {
-//                val newLink = ClazzWorkContentJoin().apply {
-//                    clazzWorkContentJoinContentUid = entityClass.contentEntryUid
-//                    clazzWorkContentJoinClazzWorkUid = entity?.clazzWorkUid?:0L
-//                    clazzWorkContentJoinDateAdded = systemTimeInMillis()
-//                }
-//                newLink.clazzWorkContentJoinUid = repo.clazzWorkContentJoinDao.insert(newLink)
-//            }
 
 
             val eti : List<ClazzWorkQuestionAndOptions> =

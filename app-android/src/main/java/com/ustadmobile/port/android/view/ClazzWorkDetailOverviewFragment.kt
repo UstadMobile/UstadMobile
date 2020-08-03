@@ -18,6 +18,7 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkWithSubmissionDetailBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzWorkDetailOverviewPresenter
+import com.ustadmobile.core.controller.DefaultContentEntryListItemListener
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzWorkDao
@@ -126,7 +127,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         detailRecyclerAdapter = ClazzWorkBasicDetailsRecyclerAdapter(entity)
         detailRecyclerAdapter?.visible = false
 
-        contentRecyclerAdapter = ContentEntryListRecyclerAdapter(null,
+        contentRecyclerAdapter = ContentEntryListRecyclerAdapter(
+                DefaultContentEntryListItemListener(context = requireContext(), di = di),
                 ListViewMode.BROWSER.toString())
 
         quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA(

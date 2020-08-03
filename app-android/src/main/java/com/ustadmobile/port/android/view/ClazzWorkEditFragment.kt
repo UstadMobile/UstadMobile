@@ -6,8 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.core.os.bundleOf
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.paging.DataSource
+import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -15,10 +18,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzworkquestionBinding
+import com.toughra.ustadmobile.databinding.ItemContentEntrySimpleListBinding
 import com.ustadmobile.core.controller.ClazzWorkEditPresenter
 import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -28,6 +33,7 @@ import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -47,6 +53,31 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>,
         ClazzWorkEditFragmentEventHandler, ContentEntryListItemListener {
 
+
+    class ContentEntryListAdapterRA(
+            val activityEventHandler: ClazzWorkEditFragmentEventHandler,
+            var presenter: ClazzWorkEditPresenter?): ListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
+            ContentEntryListAdapterRA.ContentEntryListAdapterRAViewHolder>(ContentEntryList2Fragment.DIFF_CALLBACK) {
+
+        class ContentEntryListAdapterRAViewHolder(
+                val binding: ItemContentEntrySimpleListBinding)
+            : RecyclerView.ViewHolder(binding.root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
+                : ContentEntryListAdapterRAViewHolder {
+            val viewHolder = ContentEntryListAdapterRAViewHolder(
+                    ItemContentEntrySimpleListBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false))
+            return viewHolder
+        }
+
+        override fun onBindViewHolder(holder: ContentEntryListAdapterRAViewHolder, position: Int) {
+            holder.binding.contentEntry = getItem(position)
+        }
+    }
+
+
+
     override val viewContext: Any
         get() = requireContext()
 
@@ -64,10 +95,11 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         t -> questionRecyclerAdapter?.submitList(t)
     }
 
-    private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
+    private var contentRecyclerAdapter: ContentEntryListAdapterRA? = null
     private var contentRecyclerView: RecyclerView? = null
-    private val contentObserver = Observer<List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?>{
-        t -> contentRecyclerAdapter?.selectedItemsLiveData?.setVal(t?:listOf())
+    private val contentObserver = Observer<List<
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?>{
+        t -> contentRecyclerAdapter?.submitList(t)
     }
 
 
@@ -80,8 +112,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         }
 
         contentRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_edit_content_rv)
-        contentRecyclerAdapter = ContentEntryListRecyclerAdapter(this,
-                ListViewMode.BROWSER.toString() )
+        contentRecyclerAdapter = ContentEntryListAdapterRA(this, null)
         contentRecyclerView?.adapter = contentRecyclerAdapter
         contentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
@@ -158,7 +189,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         set(value) {
             field?.removeObserver(contentObserver)
             field = value
-            value?.observe(this, contentObserver)
+            value?.observe(viewLifecycleOwner, contentObserver)
         }
 
     override var submissionTypeOptions: List<
