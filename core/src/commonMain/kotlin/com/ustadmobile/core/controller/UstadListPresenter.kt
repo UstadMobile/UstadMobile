@@ -21,7 +21,7 @@ import org.kodein.di.on
 abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>,
                                                                view: V, di: DI,
                                                     val lifecycleOwner: DoorLifecycleOwner)
-    : UstadBaseController<V>(context, arguments, view, di), DIAware {
+    : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected {
 
     protected var mListMode = ListViewMode.BROWSER
 
@@ -38,6 +38,9 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
 
     val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+
+    open val sortOptions: List<SortOrderOption>
+        get() = listOf()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -90,7 +93,12 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
         return listOf()
     }
 
+    @Deprecated("Use onSortOptionSelected")
     open fun handleClickSortOrder(sortOption: MessageIdOption) {
+
+    }
+
+    override fun onClickSort(sortOption: SortOrderOption) {
 
     }
 

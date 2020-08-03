@@ -59,8 +59,11 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.person))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText, onClickSort = this).apply {
+        //TODO: better to pass the sortoptions using the constructor of newitemrecyclerviewadapter
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
+                onClickSort = this).apply {
             sortVisible = true
+            sortOptions = mPresenter?.sortOptions
         }
         return view
     }

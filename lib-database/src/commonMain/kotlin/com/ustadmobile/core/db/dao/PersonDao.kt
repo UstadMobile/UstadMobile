@@ -213,9 +213,13 @@ abstract class PersonDao : BaseDao<Person> {
             AND (Person.personUid NOT IN (:excludeSelected))
             AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_SELECT_PERMISSION) 
             ORDER BY CASE(:sortOrder)
-                WHEN ${SORT_NAME_ASC} THEN Person.firstNames
-                ELSE Person.firstNames
-            END ASC
+                WHEN $SORT_NAME_ASC THEN Person.firstNames
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_NAME_DESC THEN Person.firstNames
+                ELSE 0
+            END DESC
     """)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
@@ -304,6 +308,8 @@ abstract class PersonDao : BaseDao<Person> {
     companion object {
 
         const val SORT_NAME_ASC = 1
+
+        const val SORT_NAME_DESC = 2
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
             SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm

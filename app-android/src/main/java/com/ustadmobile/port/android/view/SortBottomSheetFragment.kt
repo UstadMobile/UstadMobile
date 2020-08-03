@@ -9,7 +9,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.util.SortOrderOption
 
-class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, val onSortOptionSelected: OnSortOptionSelected) : BottomSheetDialogFragment(), View.OnClickListener {
+class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSortOptionSelected: OnSortOptionSelected?) : BottomSheetDialogFragment(), View.OnClickListener {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -18,11 +18,18 @@ class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, val onSor
         return rootView
     }
 
+    //TODO: this goes into the view XML
     override fun onClick(v: View?) {
         val isShowing = this.dialog?.isShowing
 
 
-        onSortOptionSelected.onClickSort(SortOrderOption())
+        onSortOptionSelected?.onClickSort(SortOrderOption())
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        onSortOptionSelected = null
     }
 }

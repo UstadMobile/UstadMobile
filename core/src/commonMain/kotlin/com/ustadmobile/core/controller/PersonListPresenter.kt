@@ -25,6 +25,9 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     private var filterAlreadySelectedList = listOf<Long>()
 
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
+
     /*  enum class SortOrder(val fieldMessageId: Int, val flag: Int, val order: Boolean) {
           ORDER_NAME_ASC(MessageID.sort_by_name_asc, PersonDao.SORT_NAME_ASC, true),
           ORDER_NAME_DSC(MessageID.sort_by_name_desc, PersonDao.SORT_NAME_ASC, false)
@@ -37,8 +40,8 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() }
                 ?: listOf()
 
-        view.sortOptions = sortOptions
-        selectedSortOption = sortOptions[0]
+        view.sortOptions = SORT_OPTIONS
+        selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()
 
     }
@@ -76,9 +79,9 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     companion object {
 
-        val sortOptions = listOf(
-                SortOrderOption(MessageID.sort_by_name_asc, PersonDao.SORT_NAME_ASC, true),
-                SortOrderOption(MessageID.sort_by_name_desc, PersonDao.SORT_NAME_ASC, false)
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.name, PersonDao.SORT_NAME_ASC, true),
+                SortOrderOption(MessageID.name, PersonDao.SORT_NAME_DESC, false)
         )
     }
 }

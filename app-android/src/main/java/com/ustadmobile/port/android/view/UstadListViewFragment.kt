@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentListBinding
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -40,7 +41,8 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
-        UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener {
+        UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener,
+        OnSortOptionSelected{
 
     protected var mRecyclerView: RecyclerView? = null
 
@@ -219,6 +221,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         fabManager?.icon = R.drawable.ic_add_white_24dp
 
 
+
+
         listPresenter?.onCreate(savedInstanceState.toStringMap())
     }
 
@@ -270,6 +274,12 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         listPresenter?.handleClickSortOrder(messageIdOption)
     }
 
+    override fun onClickSort(sortOption: SortOrderOption) {
+        //TODO 1: update the newitemrecyclerviewadapter to show the current sorting order
+        //TODO 2: pass this event to the presenter
+        listPresenter?.onClickSort(sortOption)
+    }
+
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
         //do nothing
     }
@@ -281,7 +291,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         }
 
     fun showSortOptionsFrag(){
-        val sortFrag = SortBottomSheetFragment(sortOptions)
+        val sortFrag = SortBottomSheetFragment(sortOptions, listPresenter)
         sortFrag.show(childFragmentManager, sortFrag.tag)
     }
 
