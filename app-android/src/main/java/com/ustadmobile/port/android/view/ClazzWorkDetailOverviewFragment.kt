@@ -338,12 +338,15 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             newPublicCommentRecyclerAdapter?.entityUid = entity?.clazzWorkUid?:0L
             newPublicCommentRecyclerAdapter?.entityUid = entity?.clazzWorkUid?:0L
 
-            if(entity?.clazzWorkCommentsEnabled == false){
-                privateCommentsHeadingRecyclerAdapter?.visible = false
+            if(entity?.clazzWorkCommentsEnabled == false && isStudent ){
+                privateCommentsHeadingRecyclerAdapter?.visible = true
                 newPrivateCommentRecyclerAdapter?.visible = false
             }else if (isStudent){
                 privateCommentsHeadingRecyclerAdapter?.visible = true
                 newPrivateCommentRecyclerAdapter?.visible = true
+            }else{
+                privateCommentsHeadingRecyclerAdapter?.visible = false
+                newPrivateCommentRecyclerAdapter?.visible = false
             }
         }
 
