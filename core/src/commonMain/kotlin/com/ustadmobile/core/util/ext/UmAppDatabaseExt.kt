@@ -64,7 +64,11 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     }
 
     if(personGroupUid != null) {
-        personGroupMemberDao.insertAsync(PersonGroupMember(personToEnrol.personUid, personGroupUid))
+        val personGroupMember = PersonGroupMember().also {
+            it.groupMemberPersonUid = personToEnrol.personUid
+            it.groupMemberGroupUid = personGroupUid
+            it.groupMemberUid = personGroupMemberDao.insertAsync(it)
+        }
     }
 
     return clazzMember

@@ -80,7 +80,7 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout) {
-            val clazzUid = arguments?.get(UstadView.ARG_CLAZZ_UID).toString().toLong() ?: 0L
+            val clazzUid = arguments?.get(UstadView.ARG_FILTER_BY_CLAZZUID).toString().toLong() ?: 0L
             val newClazzWork: ClazzWork = ClazzWork().apply {
                 clazzWorkClazzUid = clazzUid
             }

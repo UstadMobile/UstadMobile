@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.view.ClazzWorkDetailView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -186,9 +187,6 @@ class ClazzWorkEditPresenter(context: Any,
                 entityVal)
     }
 
-    var finishFragment : Boolean= true
-
-
     override fun handleClickSave(entity: ClazzWork) {
 
         GlobalScope.launch(doorMainDispatcher()) {
@@ -254,10 +252,7 @@ class ClazzWorkEditPresenter(context: Any,
 
             repo.clazzWorkQuestionDao.deactivateByUids(questionAndOptionsEditHelper.primaryKeysToDeactivate)
 
-
-            if(finishFragment) {
-                view.finishWithResult(listOf(entity))
-            }
+            onFinish(ClazzWorkDetailView.VIEW_NAME, entity.clazzWorkUid, entity)
         }
     }
 

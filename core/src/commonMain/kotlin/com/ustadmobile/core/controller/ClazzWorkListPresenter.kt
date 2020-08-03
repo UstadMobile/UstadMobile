@@ -1,16 +1,11 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmCallbackUtil
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.withTimeoutOrNull
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
@@ -36,35 +31,14 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        val clazzUid = arguments.get(UstadView.ARG_CLAZZ_UID)?.toLong()?:0L
-
-        val loggedInPersonUid = accountManager.activeAccount.personUid
-        val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
-            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, clazzUid)
-        }
-
-        val loggedInPerson: Person? = withTimeoutOrNull(2000){
-            db.personDao.findByUid(loggedInPersonUid)
-        }
-        if(loggedInPerson?.admin == true){
-            return true
-        }
-
-        val isStudent = (clazzMember != null &&
-                clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-
-        view.hasResultViewPermission = !isStudent
-
-        if(clazzMember == null){
-            return false
-        }else {
-            return !isStudent
-        }
+        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong()?:0L
+        return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
+            clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE)
     }
 
     private fun updateListOnView() {
 
-        val clazzUid = arguments.get(UstadView.ARG_CLAZZ_UID)?.toLong()?:0L
+        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong()?:0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
         val clazzMember: ClazzMember? =
                 db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, clazzUid)
@@ -88,7 +62,7 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     override fun handleClickCreateNewFab() {
-        val clazzUid = arguments.get(UstadView.ARG_CLAZZ_UID)?.toLong()?:0L
+        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong()?:0L
 
         val clazzWork: ClazzWork = ClazzWork().apply {
             clazzWorkClazzUid = clazzUid

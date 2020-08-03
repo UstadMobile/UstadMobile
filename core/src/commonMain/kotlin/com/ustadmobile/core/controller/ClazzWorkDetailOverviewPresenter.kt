@@ -139,28 +139,13 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
+        val clazzUid = withTimeoutOrNull(2000) {
+            repo.clazzWorkDao.findByUidAsync(arguments[ARG_ENTITY_UID]?.toLong()
+                    ?: 0)?.clazzWorkClazzUid
+        } ?: 0L
 
-        val loggedInPersonUid = accountManager.activeAccount.personUid
-
-        val loggedInPerson: Person? = withTimeoutOrNull(2000){
-            db.personDao.findByUid(loggedInPersonUid)
-        }
-        if(loggedInPerson?.admin == true){
-            return true
-        }else {
-            val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-            val clazzWork: ClazzWork? = withTimeoutOrNull(2000){
-                db.clazzWorkDao.findByUidAsync(entityUid)
-            }
-
-            val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
-                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
-                        clazzWork?.clazzWorkClazzUid ?: 0L)
-            }
-            val isTeacher = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_TEACHER)
-            return isTeacher
-        }
-
+        return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
+                    clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE)
     }
 
     fun handleClickSubmit(){
