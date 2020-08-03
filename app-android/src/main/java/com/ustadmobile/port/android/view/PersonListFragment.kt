@@ -59,7 +59,9 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.person))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText, onClickSort = this).apply {
+            sortVisible = true
+        }
         return view
     }
 
@@ -76,6 +78,8 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java)
+        else if(view?.id == R.id.item_sort_layout)
+            showSortOptionsFrag()
     }
 
     override fun onDestroyView() {

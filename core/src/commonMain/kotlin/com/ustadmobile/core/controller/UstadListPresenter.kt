@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -27,6 +28,8 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     protected var mLoggedInPersonUid: Long = 0
 
     protected var mSearchQuery: String = "%"
+
+    protected var selectedSortOption: SortOrderOption? = null
 
     val accountManager: UstadAccountManager by instance()
 

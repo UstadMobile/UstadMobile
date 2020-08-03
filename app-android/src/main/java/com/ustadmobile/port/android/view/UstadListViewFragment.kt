@@ -25,6 +25,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
@@ -200,7 +201,6 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         super.onViewCreated(view, savedInstanceState)
 
         mDataBinding?.presenter = listPresenter
-        mDataBinding?.onSortSelected = this
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
         if(autoMergeRecyclerViewAdapter) {
@@ -274,12 +274,16 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         //do nothing
     }
 
-    override var sortOptions: List<MessageIdOption>? = null
+    override var sortOptions: List<SortOrderOption>? = null
         get() = field
         set(value) {
-            mDataBinding?.sortOptions = value
             field = value
         }
+
+    fun showSortOptionsFrag(){
+        val sortFrag = SortBottomSheetFragment(sortOptions)
+        sortFrag.show(childFragmentManager, sortFrag.tag)
+    }
 
     override fun finishWithResult(result: List<RT>) {
         saveResultToBackStackSavedStateHandle(result)

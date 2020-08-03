@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View.OnClickListener" />
+
+        <variable
+            name="onClickSort"
+            type="OnClickListener" />
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_sort_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/selectableItemBackground"
+        android:onClick="@{(view) -> onClickSort.onClick(view)}">
+
+        <TextView
+            android:id="@+id/item_sort_selected_text"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_margin="@dimen/dimen_16dp"
+            android:gravity="center_vertical"
+            android:text="Sorted"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Name" />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_sort_asc_desc"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:padding="@dimen/dimen_8dp"
+            android:tint="?colorOnIconTint"
+            app:layout_constraintStart_toEndOf="@id/item_sort_selected_text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_arrow_drop_up_black_24dp" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>
