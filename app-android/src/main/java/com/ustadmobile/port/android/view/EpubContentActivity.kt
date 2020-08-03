@@ -17,6 +17,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityEpubContentBinding
 import com.toughra.ustadmobile.databinding.ItemEpubcontentViewBinding
@@ -210,6 +211,14 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         mBinding.containerDrawerLayout.closeDrawers()
     }
 
+    val onPageChangeCallback = object: ViewPager2.OnPageChangeCallback() {
+
+        override fun onPageSelected(position: Int) {
+            mPresenter?.handlePageChanged(position)
+        }
+
+    }
+
 
     /**
      * Override the onCreateOptionsMenu : In Container mode we don't show the standard app menu
@@ -247,6 +256,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         }
 
         mContentPagerAdapter = EpubContentPagerAdapter()
+        mBinding.containerEpubrunnerPager.registerOnPageChangeCallback(onPageChangeCallback)
         mBinding.containerEpubrunnerPager.offscreenPageLimit = 1
         mBinding.containerEpubrunnerPager.adapter = mContentPagerAdapter
 
@@ -254,6 +264,18 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
                 this, di)
         loading = true
         mPresenter?.onCreate(savedInstanceState.toStringMap())
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        mPresenter?.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        mPresenter?.onStop()
     }
 
     override fun onBackPressed() {
@@ -266,6 +288,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     override fun onDestroy() {
         mPresenter?.onDestroy()
+        mBinding.containerEpubrunnerPager.unregisterOnPageChangeCallback(onPageChangeCallback)
         mBinding.containerEpubrunnerPager.adapter = null
         mSavedInstanceState = null
         mPresenter = null

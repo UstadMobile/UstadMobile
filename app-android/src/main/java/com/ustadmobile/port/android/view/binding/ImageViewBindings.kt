@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view.binding
 
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.view.View
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistry
@@ -12,6 +13,7 @@ import androidx.databinding.InverseBindingListener
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
+import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.port.android.util.ext.getActivityContext
 
@@ -108,6 +110,28 @@ fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallb
     setTag(R.id.tag_imagelookup_map, imageLookupMap)
     setTag(R.id.tag_imagelookup_fallback, imageLookupFallback)
     updateFromImageLookupMap()
+}
+
+@BindingAdapter(value=["iconStatusFlag"])
+fun ImageView.setIconOnStatusFlag(statusFlag: Int){
+    when {
+        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> {
+            setImageResource(R.drawable.ic_content_complete)
+            visibility = View.VISIBLE
+        }
+        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED -> {
+            setImageResource(R.drawable.ic_content_complete)
+            visibility = View.VISIBLE
+        }
+        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> {
+            setImageResource(R.drawable.ic_content_fail)
+            visibility = View.VISIBLE
+        }
+        else -> {
+            setImageDrawable(null)
+            visibility = View.GONE
+        }
+    }
 }
 
 @Suppress("UNCHECKED_CAST")

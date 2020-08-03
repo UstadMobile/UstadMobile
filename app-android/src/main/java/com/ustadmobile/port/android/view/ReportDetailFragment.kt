@@ -189,7 +189,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         set(value) {
             field = value
             mBinding?.report = value
-            title = value?.reportTitle
+            clazzWorkTitle = value?.reportTitle
         }
 
 

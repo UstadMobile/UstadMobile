@@ -1,10 +1,13 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.annotation.SuppressLint
+import android.text.InputFilter
+import android.text.Spanned
 import android.text.format.DateFormat
 import android.widget.EditText
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
+import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
@@ -13,6 +16,7 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.db.entities.TimeZoneEntity
 import java.text.MessageFormat
 import java.util.*
+
 
 private val MS_PER_HOUR = 3600000
 private val MS_PER_MIN = 60000
@@ -85,4 +89,36 @@ fun TextInputEditText.setRunOnClickWhenFocused(runOnClickWhenFocused: Boolean) {
     }else {
         setOnFocusChangeListener(null)
     }
+}
+
+@BindingAdapter("dontShowZeroInt")
+fun TextInputEditText.setValueIfZero(value: Int){
+    if(value == 0){
+        setText("")
+    }else{
+        setText(Integer.toString(value))
+    }
+}
+
+@InverseBindingAdapter(attribute = "dontShowZeroInt")
+fun getRealValueInt(et: TextView): Int {
+    return et.text.toString().toInt()?:0
+}
+
+@BindingAdapter(value = ["minValue", "setMaxValue"])
+fun EditText.setMinMax(min: String, max: Int){
+    filters =   arrayOf(InputFilterMinMax(Integer.valueOf(min), max))
+}
+
+
+class InputFilterMinMax(private val minimumValue: Int, private val maximumValue: Int) : InputFilter {
+    override fun filter(source: CharSequence, start: Int, end: Int, dest: Spanned, dstart: Int, dend: Int): CharSequence? {
+        try {
+            val input = (dest.subSequence(0, dstart).toString() + source + dest.subSequence(dend, dest.length)).toInt()
+            if(input in minimumValue..maximumValue) return null
+        } catch (nfe: NumberFormatException) {
+        }
+        return ""
+    }
+
 }

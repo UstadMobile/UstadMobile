@@ -99,8 +99,6 @@ interface UstadView {
 
         const val ARG_SCHOOLMEMBER_FILTER_STAFF = "schoolMemberFilterStaff"
 
-        const val ARG_CLAZZ_ASSIGNMENT_UID = "clazzAssignmentUid"
-
         const val ARG_LISTMODE = "listMode"
 
         const val ARG_GETRESULTMODE = "getResultMode"
@@ -108,6 +106,10 @@ interface UstadView {
         const val ARG_LISTADDMODE = "listAddMode"
 
         const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
+
+        const val ARG_CLAZZWORK_UID = "clazzworkUid"
+
+        const val ARG_CLAZZMEMBER_UID = "clazzMemberUid"
 
         const val ARG_NEXT = "next"
 
