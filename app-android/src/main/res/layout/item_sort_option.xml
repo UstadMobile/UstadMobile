@@ -5,14 +5,53 @@
 
     <data>
 
+        <import type="android.view.View" />
+        <import type="com.ustadmobile.core.util.ext.StringExtKt" />
+
+        <variable
+            name="sortListener"
+            type="com.ustadmobile.core.controller.OnSortOptionSelected" />
+
+        <variable
+            name="sortOption"
+            type="com.ustadmobile.core.util.SortOrderOption" />
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_sort_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/selectableItemBackground"
+        android:onClick="@{(view) -> sortListener.onClickSort(sortOption)}">
+
+        <TextView
+            android:id="@+id/item_sort_selected_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dimen_16dp"
+            android:gravity="center_vertical"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:textMessageId="@{sortOption.fieldMessageId}"
+            tools:text="Name" />
+
+        <TextView
+            android:layout_width="@dimen/dimen_0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:text="@{StringExtKt.inBrackets(sortOption.order ? @string/ascending : @string/descending)}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/item_sort_selected_text"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Ascending" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </layout>

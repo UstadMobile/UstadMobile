@@ -40,9 +40,9 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
+abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener,
-        OnSortOptionSelected{
+        OnSortOptionSelected {
 
     protected var mRecyclerView: RecyclerView? = null
 
@@ -78,13 +78,12 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
              The getter will return null so that if the current fragment is not actually visible
              no changes will be sent through
              */
-            return if(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            return if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
                 field
-            }else {
+            } else {
                 null
             }
         }
-
         set(value) {
             field = value
         }
@@ -104,7 +103,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
     private class ListViewActionModeCallback<RT, DT>(var fragmentHost: UstadListViewFragment<RT, DT>?) : ActionMode.Callback {
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            val selectedItemsList = fragmentHost?.mDataRecyclerViewAdapter?.selectedItemsLiveData?.value ?: return false
+            val selectedItemsList = fragmentHost?.mDataRecyclerViewAdapter?.selectedItemsLiveData?.value
+                    ?: return false
             val option = SelectionOption.values().first { it.commandId == item.itemId }
             fragmentHost?.listPresenter?.handleClickSelectionOption(selectedItemsList, option)
             mode.finish()
@@ -118,7 +118,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
                 menu.add(0, item.commandId, index,
                         systemImpl.getString(item.messageId, fragmentContext)).apply {
-                    val drawable = fragmentContext.getDrawable(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp) ?: return@forEachIndexed
+                    val drawable = fragmentContext.getDrawable(SELECTION_ICONS_MAP[item]
+                            ?: R.drawable.ic_delete_black_24dp) ?: return@forEachIndexed
                     DrawableCompat.setTint(drawable, ContextCompat.getColor(fragmentContext, R.color.onBackgroundColor))
                     icon = drawable
                 }
@@ -138,7 +139,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
                 it.isSelected = false
 
                 //Check if this is the first item where the data view is actually nested
-                if(it is ViewGroup && it.id == R.id.item_createnew_linearlayout1) {
+                if (it is ViewGroup && it.id == R.id.item_createnew_linearlayout1) {
                     it.children.forEach { it.isSelected = false }
                 }
             }
@@ -153,23 +154,23 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     private var numItemsSelected = 0
 
-    protected val selectionObserver = object: Observer<List<DT>> {
+    protected val selectionObserver = object : Observer<List<DT>> {
         override fun onChanged(t: List<DT>?) {
             val actionModeVal = actionMode
 
-            if(!t.isNullOrEmpty() && actionModeVal == null) {
+            if (!t.isNullOrEmpty() && actionModeVal == null) {
                 val actionModeCallbackVal =
                         ListViewActionModeCallback(this@UstadListViewFragment).also {
-                    this@UstadListViewFragment.actionModeCallback = it
-                }
+                            this@UstadListViewFragment.actionModeCallback = it
+                        }
                 actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(
                         actionModeCallbackVal)
-            }else if(actionModeVal != null && t.isNullOrEmpty()) {
+            } else if (actionModeVal != null && t.isNullOrEmpty()) {
                 actionModeVal.finish()
             }
 
             val listSize = t?.size ?: 0
-            if(listSize > 0) {
+            if (listSize > 0) {
                 actionMode?.title = requireContext().getString(R.string.items_selected, listSize)
             }
         }
@@ -205,7 +206,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         mDataBinding?.presenter = listPresenter
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
-        if(autoMergeRecyclerViewAdapter) {
+        if (autoMergeRecyclerViewAdapter) {
             mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
                     mDataRecyclerViewAdapter, mListStatusAdapter)
             mRecyclerView?.adapter = mMergeRecyclerViewAdapter
@@ -275,8 +276,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
-        //TODO 1: update the newitemrecyclerviewadapter to show the current sorting order
-        //TODO 2: pass this event to the presenter
+        mNewItemRecyclerViewAdapter?.sortOptionSelected = sortOption
         listPresenter?.onClickSort(sortOption)
     }
 
@@ -284,14 +284,20 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         //do nothing
     }
 
-    override var sortOptions: List<SortOrderOption>? = null
+    override var sortOptions: List<MessageIdOption>? = null
         get() = field
         set(value) {
             field = value
         }
 
-    fun showSortOptionsFrag(){
-        val sortFrag = SortBottomSheetFragment(sortOptions, listPresenter)
+    override var sortOrderOptions: List<SortOrderOption>? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
+    fun showSortOptionsFrag() {
+        val sortFrag = SortBottomSheetFragment(sortOrderOptions, listPresenter)
         sortFrag.show(childFragmentManager, sortFrag.tag)
     }
 
@@ -320,7 +326,7 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
         val SELECTION_ICONS_MAP =
                 mapOf(SelectionOption.EDIT to R.drawable.ic_edit_white_24dp,
-            SelectionOption.DELETE to R.drawable.ic_delete_black_24dp)
+                        SelectionOption.DELETE to R.drawable.ic_delete_black_24dp)
 
     }
 

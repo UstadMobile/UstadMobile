@@ -33,7 +33,9 @@ interface UstadListView<RT, DT>: UstadView {
 
     var list: DataSource.Factory<Int, DT>?
 
-    var sortOptions: List<SortOrderOption>?
+    var sortOptions: List<MessageIdOption>?
+
+    var sortOrderOptions: List<SortOrderOption>?
 
     var selectionOptions: List<SelectionOption>?
 

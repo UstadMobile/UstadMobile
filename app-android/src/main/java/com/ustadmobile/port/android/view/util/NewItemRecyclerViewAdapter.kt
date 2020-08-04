@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCreatenewBinding
-import com.toughra.ustadmobile.databinding.ItemSortListBinding
+import com.toughra.ustadmobile.databinding.ItemSortHeaderOptionBinding
 import com.ustadmobile.core.util.SortOrderOption
 import java.lang.IllegalArgumentException
 
@@ -20,21 +20,16 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
                                  createNewText: String? = null,
                                  var headerStringId: Int = 0,
                                  var headerLayoutId: Int = 0,
-                                 onClickSort: View.OnClickListener? = null) : ListAdapter<Int, RecyclerView.ViewHolder>(DIFFUTIL_NEWITEM) {
+                                 onClickSort: View.OnClickListener? = null,
+                                 val sortOrderOptionsList: List<SortOrderOption>?= null) : ListAdapter<Int, RecyclerView.ViewHolder>(DIFFUTIL_NEWITEM) {
 
     val currentHolderList: List<Int>
         get() = (if (headerLayoutId != 0) listOf(ITEM_HEADERHOLDER) else listOf()) +
                 (if (newItemVisible) listOf(ITEM_NEWITEMHOLDER) else listOf()) +
-                (if (sortVisible) listOf(ITEM_SORT_HOLDER) else listOf())
+                (if (sortOrderOptionsList?.isNullOrEmpty() == true) listOf(ITEM_SORT_HOLDER) else listOf())
 
 
     var newItemVisible: Boolean = false
-        set(value) {
-            field = value
-            submitList(currentHolderList)
-        }
-
-    var sortVisible: Boolean = false
         set(value) {
             field = value
             submitList(currentHolderList)
@@ -56,6 +51,14 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
             }
         }
 
+    var sortOptionSelected: SortOrderOption? = null
+        set(value ){
+            field = value
+            boundSortItemViewHolders.forEach{
+                it.itemBinding.sortOption = value
+            }
+        }
+
     var onClickNewItem: View.OnClickListener? = onClickNewItem
         set(value) {
             field = value
@@ -68,7 +71,7 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
 
     class HeaderItemViewHolder(var view: View) : RecyclerView.ViewHolder(view)
 
-    class SortItemViewHolder(var itemBinding: ItemSortListBinding) : RecyclerView.ViewHolder(itemBinding.root)
+    class SortItemViewHolder(var itemBinding: ItemSortHeaderOptionBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     private val boundNewItemViewHolders = mutableListOf<NewItemViewHolder>()
 
@@ -83,9 +86,10 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
             })
             ITEM_HEADERHOLDER -> HeaderItemViewHolder(LayoutInflater.from(parent.context)
                     .inflate(headerLayoutId, parent, false))
-            ITEM_SORT_HOLDER -> SortItemViewHolder(ItemSortListBinding.inflate(LayoutInflater.from(parent.context),
+            ITEM_SORT_HOLDER -> SortItemViewHolder(ItemSortHeaderOptionBinding.inflate(LayoutInflater.from(parent.context),
                     parent, false).also {
                 it.onClickSort = onClickSort
+                it.sortOption = sortOrderOptionsList?.get(0)
             })
             else -> throw IllegalArgumentException("Illegal viewType")
         }
@@ -102,7 +106,6 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
             (holder.view as? TextView)?.text = holder.view.context.getText(headerStringId)
         } else if (holder is SortItemViewHolder) {
             boundSortItemViewHolders + holder
-            // TODO set text based on sort selected
         }
     }
 

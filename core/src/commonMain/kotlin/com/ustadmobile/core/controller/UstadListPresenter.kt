@@ -99,7 +99,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
-
+        selectedSortOption = sortOption
     }
 
     abstract fun handleClickCreateNewFab()

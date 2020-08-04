@@ -17,7 +17,7 @@ import org.kodein.di.DI
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
                           di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<PersonListView, Person>(context, arguments, view, di, lifecycleOwner) {
+    : UstadListPresenter<PersonListView, Person>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected {
 
     private var filterExcludeMembersOfClazz: Long = 0
 
@@ -28,11 +28,6 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
-    /*  enum class SortOrder(val fieldMessageId: Int, val flag: Int, val order: Boolean) {
-          ORDER_NAME_ASC(MessageID.sort_by_name_asc, PersonDao.SORT_NAME_ASC, true),
-          ORDER_NAME_DSC(MessageID.sort_by_name_desc, PersonDao.SORT_NAME_ASC, false)
-      }*/
-
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         filterExcludeMembersOfClazz = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
@@ -40,7 +35,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() }
                 ?: listOf()
 
-        view.sortOptions = SORT_OPTIONS
+        view.sortOrderOptions = SORT_OPTIONS
         selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()
 
@@ -68,6 +63,13 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     override fun handleClickCreateNewFab() {
         systemImpl.go(PersonEditView.VIEW_NAME, mapOf(), context)
     }
+
+
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        updateListOnView()
+    }
+
 
     /* override fun handleClickSortOrder(sortOption: MessageIdOption) {
          val sortOrder = (sortOption as? PersonListSortOption)?.sortOrder ?: return

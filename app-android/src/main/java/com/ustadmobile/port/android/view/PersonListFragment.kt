@@ -6,18 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersonListItemBinding
 import com.ustadmobile.core.controller.PersonListPresenter
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
-import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.toughra.ustadmobile.R
+import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetails>(),
         PersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -59,12 +59,8 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.person))
-        //TODO: better to pass the sortoptions using the constructor of newitemrecyclerviewadapter
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
-                onClickSort = this).apply {
-            sortVisible = true
-            sortOptions = mPresenter?.sortOptions
-        }
+                onClickSort = this, sortOrderOptionsList = mPresenter?.sortOptions)
         return view
     }
 

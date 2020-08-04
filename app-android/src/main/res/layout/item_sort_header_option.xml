@@ -11,6 +11,10 @@
             name="onClickSort"
             type="OnClickListener" />
 
+        <variable
+            name="sortOption"
+            type="com.ustadmobile.core.util.SortOrderOption" />
+
     </data>
 
 
@@ -27,7 +31,7 @@
             android:layout_height="@dimen/dimen_40dp"
             android:layout_margin="@dimen/dimen_16dp"
             android:gravity="center_vertical"
-            android:text="Sorted"
+            app:textMessageId="@{sortOption.fieldMessageId}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -43,7 +47,7 @@
             android:tint="?colorOnIconTint"
             app:layout_constraintStart_toEndOf="@id/item_sort_selected_text"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_arrow_drop_up_black_24dp" />
+            />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
