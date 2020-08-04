@@ -110,6 +110,8 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
                 SubmissionTextEntryWithResultRecyclerAdapter(
                         visible = false)
         submissionFreeTextRecyclerAdapter?.visible = false
+        submissionFreeTextRecyclerAdapter?.markingMode = true
+
 
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())

@@ -62,7 +62,7 @@
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:hint="@{hintText}"
-            android:inputType="textCapSentences"
+            android:inputType="textCapSentences|textMultiLine"
             android:singleLine="false"
             android:text="@={commentText}"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -14,6 +14,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
+import kotlin.math.log
 
 
 class ClazzWorkDetailOverviewPresenter(context: Any,
@@ -33,6 +34,10 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
+
+        val loggedInPerson = withTimeoutOrNull(2000){
+            db.personDao.findByUidAsync(loggedInPersonUid)
+        }
 
         val clazzWorkWithSubmission = withTimeoutOrNull(2000){
             db.clazzWorkDao.findWithSubmissionByUidAndPerson(entityUid, loggedInPersonUid)
@@ -58,8 +63,12 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                     clazzWorkWithSubmission.clazzWorkClazzUid)
         }
 
-        view.isStudent = (clazzMember != null &&
-                clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        if(loggedInPerson?.admin == true){
+            view.isStudent = false
+        }else{
+            view.isStudent = (clazzMember != null &&
+                    clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        }
 
         //If Submission object doesnt exist, create it.
         if(clazzWorkWithSubmission.clazzWorkSubmission == null){
