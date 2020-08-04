@@ -29,10 +29,6 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-interface ClazzDetailOverviewEventHandler {
-
-}
-
 class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(),
         ClazzDetailOverviewView, ClazzDetailFragmentEventHandler, Observer<PagedList<Schedule>> {
 

@@ -42,6 +42,7 @@ class EpubTypeFilePlugin : EpubTypePlugin(), ContentTypeFilePlugin {
                         contentEntryVal.author = opfDocument.getCreator(0)?.creator
                         contentEntryVal.description = opfDocument.description
                         contentEntryVal.leaf = true
+                        contentEntryVal.entryId = opfDocument.id
                         val languageCode = opfDocument.getLanguage(0)
                         if (languageCode != null) {
                             val language = Language()

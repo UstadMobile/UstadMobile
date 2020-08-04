@@ -31,7 +31,10 @@ import kotlin.jvm.Volatile
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
     SyncResult::class, School::class,
     TimeZoneEntity::class,
-    SchoolMember::class, Report::class, ReportFilter::class,
+    SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
+    ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
+    ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
+    Report::class, ReportFilter::class,
     DeviceSession::class, WorkSpace::class, ContainerUploadJob::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
@@ -48,7 +51,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         3. Added schoolGender to School
         4. Added schoolHolidayCalendar to School
         5. Added SchoolMember and SchoolMemberDao
-        6. Added ContainerUploadJob
+        6. Added ClazzWork, ClazzWorkContentJoin, Comments,ClazzWorkQuestion,ClazzWorkQuestionOption
+        7. Added ContainerUploadJob
         Changes in 34:
         Added School and Assignment based entities
         Updated Clazz : added clazzFeatures and removed individual feature bits
@@ -190,6 +194,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("agentDao")
     abstract val agentDao: AgentDao
 
+    @JsName("contentEntryProgressDao")
+    abstract val contentEntryProgressDao: ContentEntryProgressDao
+
     abstract val syncresultDao : SyncResultDao
 
 
@@ -219,6 +226,27 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("schoolMemberDao")
     abstract val schoolMemberDao: SchoolMemberDao
+
+    @JsName("clazzWorkDao")
+    abstract val clazzWorkDao: ClazzWorkDao
+
+    @JsName("clazzWorkSubmissionDao")
+    abstract val clazzWorkSubmissionDao: ClazzWorkSubmissionDao
+
+    @JsName("clazzWorkContentJoinDao")
+    abstract val clazzWorkContentJoinDao: ClazzWorkContentJoinDao
+
+    @JsName("clazzWorkQuestionDao")
+    abstract val clazzWorkQuestionDao: ClazzWorkQuestionDao
+
+    @JsName("clazzWorkQuestionOptionDao")
+    abstract val clazzWorkQuestionOptionDao: ClazzWorkQuestionOptionDao
+
+    @JsName("commentsDao")
+    abstract val commentsDao: CommentsDao
+
+    @JsName("clazzWorkQuestionResponseDao")
+    abstract val clazzWorkQuestionResponseDao: ClazzWorkQuestionResponseDao
 
     @JsName("syncNodeDao")
     abstract val syncNodeDao: SyncNodeDao

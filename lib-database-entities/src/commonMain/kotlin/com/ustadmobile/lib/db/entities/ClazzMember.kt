@@ -17,6 +17,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = 65)
+@Serializable
 open class ClazzMember()  {
 
     /**
@@ -67,6 +68,10 @@ open class ClazzMember()  {
         this.clazzMemberPersonUid = personUid
         this.clazzMemberRole = role
         this.clazzMemberActive = true
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
     }
 
     companion object {

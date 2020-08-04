@@ -36,7 +36,6 @@
             app:imageLookupKey="@{customField.customFieldIconId}"
             />
 
-
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_presenter_field_row_view_text_value"

@@ -118,7 +118,17 @@ class Role() {
 
         const val PERMISSION_CLAZZ_ASSIGNMENT_VIEW : Long = 8388608
 
-        const val PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE : Long = 16777216
+        //There is no "insert" for CLAZZ_ASSIGNMENT as they are all tied to classes, so are considered updates
+        const val PERMISSION_CLAZZ_ASSIGNMENT_UPDATE : Long = 16777216
+
+        const val PERMISSION_CLAZZ_ASSIGNMENT_VIEWSTUDENTPROGRESS : Long= 33554432
+
+        const val PERMISSION_CONTENT_SELECT : Long= 67108864
+
+        const val PERMISSION_CONTENT_INSERT : Long= 134217728
+
+        const val PERMISSION_CONTENT_UPDATE : Long= 268435456
+
 
         /**
          * Permission to view reports. In reality, this is really just a UI permission, and does not
@@ -144,11 +154,19 @@ class Role() {
                 PERMISSION_PERSON_INSERT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT or
-                PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE
+                PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
+                PERMISSION_CLAZZ_ASSIGNMENT_VIEW or
+                PERMISSION_CLAZZ_ASSIGNMENT_UPDATE
+
 
         const val ROLE_STUDENT_NAME = "Student"
 
         const val ROLE_STUDENT_UID = 1000
+
+        const val ROLE_STUDENT_PERMISSIONS_DEFAULT: Long =
+                PERMISSION_CLAZZ_SELECT or
+                PERMISSION_PERSON_SELECT or
+                PERMISSION_CLAZZ_ASSIGNMENT_VIEW
 
 
 
