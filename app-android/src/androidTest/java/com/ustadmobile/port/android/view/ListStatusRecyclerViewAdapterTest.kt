@@ -26,6 +26,7 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentListBinding
 import com.toughra.ustadmobile.databinding.ItemSimplepersonBinding
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
@@ -127,7 +128,7 @@ class ListStatusRecyclerViewAdapterTest {
         lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
         val loadingStatusLiveData = MutableLiveData(loadingStatus)
         fragmentScenario.onFragment { fragment ->
-            val dataSource = dbRule.db.personDao.findAllPeopleWithDisplayDetailsSortNameDesc(0, 0, 0, listOf())
+            val dataSource = dbRule.db.personDao.findPersonsWithPermission(0, 0, 0, listOf(),0, PersonDao.SORT_NAME_DESC)
             val livePagedList = LivePagedListBuilder(dataSource, 20).build()
             fragment.listStatusAdapter?.pagedListLiveData = livePagedList
             livePagedList.observe(fragment.viewLifecycleOwner, Observer {
