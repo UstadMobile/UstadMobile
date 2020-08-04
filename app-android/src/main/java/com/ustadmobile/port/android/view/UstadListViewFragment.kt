@@ -293,11 +293,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
             field = value
         }
 
-    override var sortOrderOptions: List<SortOrderOption>? = null
-        get() = field
-        set(value) {
-            field = value
-        }
 
     fun showSortOptionsFrag() {
         sortBottomFragment = SortBottomSheetFragment(listPresenter?.sortOptions, this)

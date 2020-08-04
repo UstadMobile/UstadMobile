@@ -105,7 +105,7 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
         else if (holder is HeaderItemViewHolder) {
             (holder.view as? TextView)?.text = holder.view.context.getText(headerStringId)
         } else if (holder is SortItemViewHolder) {
-            boundSortItemViewHolders + holder
+            boundSortItemViewHolders += holder
         }
     }
 
