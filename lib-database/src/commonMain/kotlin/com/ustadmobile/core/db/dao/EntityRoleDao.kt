@@ -14,7 +14,7 @@ import com.ustadmobile.lib.db.entities.EntityRole
 @Dao
 abstract class EntityRoleDao : BaseDao<EntityRole> {
 
-    @Query("""SELECT COALESCE((SELECT admin FROM Person WHERE personUid = 1000), FALSE) 
+    @Query("""SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), FALSE) 
             OR EXISTS(SELECT EntityRole.erUid FROM EntityRole 
              JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
              JOIN PersonGroupMember ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
