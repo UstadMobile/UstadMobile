@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.SortOrderOption
 
 class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSortOptionSelected: OnSortOptionSelected?) : BottomSheetDialogFragment() {
 
+    private var mRecyclerViewAdapter: SortListRecyclerViewAdapter? = null
     private var mBinding: FragmentSortOptionListBinding? = null
 
     private var mRecyclerView: RecyclerView? = null
@@ -28,10 +29,10 @@ class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSor
             mRecyclerView = it.fragmentSortOrderList
         }
 
-        val mRecyclerViewAdapter = SortListRecyclerViewAdapter(onSortOptionSelected)
-        mRecyclerViewAdapter.submitList(sortOptions)
+        mRecyclerViewAdapter = SortListRecyclerViewAdapter(onSortOptionSelected)
         mRecyclerView?.adapter = mRecyclerViewAdapter
         mRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+        mRecyclerViewAdapter?.submitList(sortOptions)
         return rootView
     }
 
@@ -69,5 +70,6 @@ class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSor
         onSortOptionSelected = null
         mBinding = null
         mRecyclerView = null
+        mRecyclerViewAdapter = null
     }
 }

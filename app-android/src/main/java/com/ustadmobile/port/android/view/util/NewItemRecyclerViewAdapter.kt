@@ -26,7 +26,7 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
     val currentHolderList: List<Int>
         get() = (if (headerLayoutId != 0) listOf(ITEM_HEADERHOLDER) else listOf()) +
                 (if (newItemVisible) listOf(ITEM_NEWITEMHOLDER) else listOf()) +
-                (if (sortOrderOptionsList?.isNullOrEmpty() == true) listOf(ITEM_SORT_HOLDER) else listOf())
+                (if (sortOrderOptionsList?.isNullOrEmpty() == false) listOf(ITEM_SORT_HOLDER) else listOf())
 
 
     var newItemVisible: Boolean = false

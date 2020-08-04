@@ -21,7 +21,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/item_sort_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
         android:onClick="@{(view) -> onClickSort.onClick(view)}">
 
@@ -32,7 +32,8 @@
             android:layout_margin="@dimen/dimen_16dp"
             android:gravity="center_vertical"
             app:textMessageId="@{sortOption.fieldMessageId}"
-            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:textColor="?android:textColorPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Name" />
@@ -47,7 +48,7 @@
             android:tint="?colorOnIconTint"
             app:layout_constraintStart_toEndOf="@id/item_sort_selected_text"
             app:layout_constraintTop_toTopOf="parent"
-            />
+            android:src="@{sortOption.order ? @drawable/ic_arrow_drop_up_black_24dp : @drawable/ic_arrow_drop_down_black_24dp}" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

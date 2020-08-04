@@ -44,6 +44,8 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener,
         OnSortOptionSelected {
 
+    private var sortBottomFragment: SortBottomSheetFragment? = null
+
     protected var mRecyclerView: RecyclerView? = null
 
     protected var mNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
@@ -276,6 +278,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
+        sortBottomFragment?.dismiss()
         mNewItemRecyclerViewAdapter?.sortOptionSelected = sortOption
         listPresenter?.onClickSort(sortOption)
     }
@@ -297,8 +300,8 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         }
 
     fun showSortOptionsFrag() {
-        val sortFrag = SortBottomSheetFragment(sortOrderOptions, listPresenter)
-        sortFrag.show(childFragmentManager, sortFrag.tag)
+        sortBottomFragment = SortBottomSheetFragment(listPresenter?.sortOptions, this)
+        sortBottomFragment?.show(childFragmentManager, sortBottomFragment?.tag)
     }
 
     override fun finishWithResult(result: List<RT>) {

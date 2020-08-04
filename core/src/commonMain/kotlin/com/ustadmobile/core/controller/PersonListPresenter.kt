@@ -70,15 +70,6 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         updateListOnView()
     }
 
-
-    /* override fun handleClickSortOrder(sortOption: MessageIdOption) {
-         val sortOrder = (sortOption as? PersonListSortOption)?.sortOrder ?: return
-         if (sortOrder != currentSortOrder) {
-             currentSortOrder = sortOrder
-             updateListOnView()
-         }
-     }*/
-
     companion object {
 
         val SORT_OPTIONS = listOf(
