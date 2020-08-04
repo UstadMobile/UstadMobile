@@ -35,7 +35,6 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() }
                 ?: listOf()
 
-        view.sortOrderOptions = SORT_OPTIONS
         selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()
 
