@@ -48,7 +48,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     protected var mRecyclerView: RecyclerView? = null
 
-    protected var mNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    internal var mNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
 
     protected var mListStatusAdapter: ListStatusRecyclerViewAdapter<DT>? = null
 

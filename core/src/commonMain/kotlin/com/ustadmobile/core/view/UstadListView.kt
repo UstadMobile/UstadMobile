@@ -33,6 +33,7 @@ interface UstadListView<RT, DT>: UstadView {
 
     var list: DataSource.Factory<Int, DT>?
 
+    @Deprecated("impl sortOptions from UstadListPresenter")
     var sortOptions: List<MessageIdOption>?
 
     var selectionOptions: List<SelectionOption>?

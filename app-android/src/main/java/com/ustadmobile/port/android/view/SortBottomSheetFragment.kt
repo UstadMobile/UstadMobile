@@ -46,7 +46,9 @@ class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSor
         }
 
         override fun onBindViewHolder(holder: SortListHolder, position: Int) {
-            holder.itemBinding.sortOption = getItem(position)
+            val item = getItem(position)
+            holder.itemBinding.sortOption = item
+            holder.itemView.tag = item.flag
             holder.itemBinding.sortListener = onSortOptionSelected
         }
 

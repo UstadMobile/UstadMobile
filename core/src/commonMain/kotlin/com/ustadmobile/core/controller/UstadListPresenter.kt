@@ -29,8 +29,6 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     protected var mSearchQuery: String = "%"
 
-    protected var selectedSortOption: SortOrderOption? = null
-
     val accountManager: UstadAccountManager by instance()
 
     val systemImpl: UstadMobileSystemImpl by instance()
@@ -41,6 +39,8 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     open val sortOptions: List<SortOrderOption>
         get() = listOf()
+
+    protected var selectedSortOption: SortOrderOption? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

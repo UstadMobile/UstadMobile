@@ -51,7 +51,7 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
             }
         }
 
-    var sortOptionSelected: SortOrderOption? = null
+    var sortOptionSelected: SortOrderOption? = sortOrderOptionsList?.get(0)
         set(value ){
             field = value
             boundSortItemViewHolders.forEach{
