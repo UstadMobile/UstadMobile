@@ -53,17 +53,6 @@ class ClazzWorkEditPresenter(context: Any,
             this) { contentEntryUid = it }
 
     fun handleAddOrEditContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-
-        //We could save this
-        GlobalScope.launch {
-            val newLink = ClazzWorkContentJoin().apply {
-                clazzWorkContentJoinContentUid = entityClass.contentEntryUid
-                clazzWorkContentJoinClazzWorkUid = entity?.clazzWorkUid?:0L
-                clazzWorkContentJoinDateAdded = systemTimeInMillis()
-            }
-            newLink.clazzWorkContentJoinUid = repo.clazzWorkContentJoinDao.insert(newLink)
-        }
-
         contentJoinEditHelper.onEditResult(entityClass)
     }
 
