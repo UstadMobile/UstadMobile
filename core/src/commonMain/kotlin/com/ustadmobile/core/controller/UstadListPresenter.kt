@@ -55,7 +55,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     suspend open fun onLoadFromDb() {
         val listView = (view as? UstadListView<*, *>) ?: return
-        val hasAddPermission = true //onCheckAddPermission(accountManager.activeAccount)
+        val hasAddPermission = onCheckAddPermission(accountManager.activeAccount)
         listView.addMode = when {
             hasAddPermission && mListMode == ListViewMode.BROWSER -> ListViewAddMode.FAB
             hasAddPermission && mListMode == ListViewMode.PICKER -> ListViewAddMode.FIRST_ITEM

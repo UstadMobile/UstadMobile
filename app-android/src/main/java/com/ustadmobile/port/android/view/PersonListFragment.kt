@@ -77,7 +77,7 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java)
-        else if(view?.id == R.id.item_sort_layout)
+        else if(view?.id == R.id.item_sort_selected_layout)
             showSortOptionsFrag()
     }
 
