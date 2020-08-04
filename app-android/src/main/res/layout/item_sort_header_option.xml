@@ -33,6 +33,7 @@
             android:gravity="center_vertical"
             app:textMessageId="@{sortOption.fieldMessageId}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:textSize="12sp"
             android:textColor="?android:textColorPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -41,14 +42,16 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_sort_asc_desc"
-            android:layout_width="@dimen/dimen_40dp"
-            android:layout_height="@dimen/dimen_40dp"
+            android:layout_width="@dimen/dimen_12dp"
+            android:layout_height="@dimen/dimen_12dp"
             android:layout_marginTop="@dimen/dimen_16dp"
-            android:padding="@dimen/dimen_8dp"
+            android:layout_marginStart="@dimen/dimen_4dp"
             android:tint="?colorOnIconTint"
             app:layout_constraintStart_toEndOf="@id/item_sort_selected_text"
             app:layout_constraintTop_toTopOf="parent"
-            android:src="@{sortOption.order ? @drawable/ic_arrow_drop_up_black_24dp : @drawable/ic_arrow_drop_down_black_24dp}" />
+            app:layout_constraintBottom_toBottomOf="@id/item_sort_selected_text"
+            tools:src="@drawable/ic_arrow_upward_24"
+            android:src="@{sortOption.order ? @drawable/ic_arrow_upward_24 : @drawable/ic_arrow_downward_24}" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
