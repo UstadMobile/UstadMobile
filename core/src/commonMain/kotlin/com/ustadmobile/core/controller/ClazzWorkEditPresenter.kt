@@ -32,8 +32,6 @@ class ClazzWorkEditPresenter(context: Any,
                 MessageID.no_submission_required),
         SHORT_TEXT(ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT,
                 MessageID.short_text),
-        ATTACHMENT(ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_ATTACHMENT,
-                MessageID.attachment),
         QUIZ(ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ,
                 MessageID.quiz),
     }

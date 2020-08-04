@@ -25,6 +25,8 @@
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_8dp"
             android:text="@{headingText}"
+            tools:text="Heading topic"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

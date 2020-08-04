@@ -40,6 +40,7 @@
             android:layout_marginEnd="@dimen/dimen_16dp"
             android:text='@{commentwithperson.commentsPerson.fullName()}'
             app:layout_constraintEnd_toEndOf="parent"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             app:layout_constraintStart_toEndOf="@+id/item_comments_list_newitemicon"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Bob Dylan" />
