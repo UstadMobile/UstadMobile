@@ -25,6 +25,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.get
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
 import java.io.File
 import java.nio.file.Files
@@ -67,6 +68,8 @@ fun Application.umRestApplication(devMode: Boolean = false, db: UmAppDatabase = 
         adminPassFile.writeText(adminPass)
         println("Saved admin password to ${adminPassFile.absolutePath}")
     }
+
+    runBlocking { db.roleDao.insertDefaultRolesIfRequired() }
 
     if (devMode) {
         install(CORS) {

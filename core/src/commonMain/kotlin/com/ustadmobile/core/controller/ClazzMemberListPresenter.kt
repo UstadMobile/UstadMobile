@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -32,9 +33,9 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     class ClazzMemberListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
         filterByClazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: -1
-        updateListOnView()
+        super.onCreate(savedState)
+
         view.sortOptions = SortOrder.values().toList().map { ClazzMemberListSortOption(it, context) }
     }
 
@@ -42,15 +43,21 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         return false
     }
 
-    private fun updateListOnView() {
+    override suspend fun onLoadFromDb() {
+        super.onLoadFromDb()
+
         view.list = repo.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzMember.ROLE_TEACHER)
         view.studentList = repo.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
-            ClazzMember.ROLE_STUDENT)
-        view.addStudentVisible = true
-        view.addTeacherVisible = true
+                ClazzMember.ROLE_STUDENT)
+        val activePersonUid = accountManager.activeAccount.personUid
 
+        view.addStudentVisible = db.clazzDao.personHasPermissionWithClazz(activePersonUid,
+                filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_STUDENT)
+        view.addTeacherVisible = db.clazzDao.personHasPermissionWithClazz(activePersonUid,
+                filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_TEACHER)
     }
+
 
     override fun handleClickEntry(entry: ClazzMember) {
         //Just go to PersonDetail - this view is not used as a picker
@@ -73,7 +80,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         val sortOrder = (sortOption as? ClazzMemberListSortOption)?.sortOrder ?: return
         if(sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder
-            updateListOnView()
+
         }
     }
 }

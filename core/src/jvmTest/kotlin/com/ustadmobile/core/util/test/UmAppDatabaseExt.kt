@@ -1,4 +1,4 @@
-package com.ustadmobile.core.util.ext
+package com.ustadmobile.core.util.test
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorDatabase

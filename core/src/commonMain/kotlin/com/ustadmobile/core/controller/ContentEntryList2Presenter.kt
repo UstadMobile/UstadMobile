@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
@@ -52,7 +53,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return true
+        return db.entityRoleDao.userHasTableLevelPermission(accountManager.activeAccount.personUid,
+            ContentEntry.TABLE_ID, Role.PERMISSION_CONTENT_INSERT)
     }
 
     private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {

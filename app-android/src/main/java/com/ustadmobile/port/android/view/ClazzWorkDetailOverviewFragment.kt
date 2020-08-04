@@ -406,7 +406,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
             override fun areContentsTheSame(oldItem: CommentsWithPerson,
                                             newItem: CommentsWithPerson): Boolean {
-                return oldItem == newItem
+                return oldItem.commentsPersonUid == newItem.commentsPersonUid &&
+                        oldItem.commentsText == newItem.commentsText &&
+                        oldItem.commentsDateTimeUpdated == newItem.commentsDateTimeUpdated
             }
         }
 

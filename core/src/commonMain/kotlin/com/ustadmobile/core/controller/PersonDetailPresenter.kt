@@ -73,7 +73,9 @@ class PersonDetailPresenter(context: Any,
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        return true
+        return repo.personDao.personHasPermission(account?.personUid ?: 0,
+                arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+                    Role.PERMISSION_PERSON_UPDATE)
     }
 
     override fun handleClickEdit() {

@@ -13,11 +13,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
+import com.ustadmobile.lib.db.entities.Role
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
-
-typealias ClazzPermissionChecker = suspend (db: UmAppDatabase, personUid: Long, clazzUid: Long) -> Boolean
 
 class ClazzDetailPresenter(context: Any,
                            arguments: Map<String, String>, view: ClazzDetailView, di: DI,
@@ -38,7 +38,7 @@ class ClazzDetailPresenter(context: Any,
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        return true
+        return false //This has no effect because the button is controlled by the overview presenter
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): Clazz? {
@@ -52,19 +52,10 @@ class ClazzDetailPresenter(context: Any,
             editEntity = Clazz()
         }
 
-        val activePersonUid = accountManager.activeAccount.personUid
-
-        val entityUid = editEntity.clazzUid
-
-        GlobalScope.launch(Dispatchers.Main) {
-            view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                    "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid") +
-                    CLAZZ_FEATURES.filter {
-                        PERMISSION_CHECKER_MAP[it]?.invoke(db, activePersonUid, entityUid) ?: false
-                    }.map {
-                        (VIEWNAME_MAP[it] ?: "INVALID}") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"
-                    }
+        GlobalScope.launch {
+            setupTabs()
         }
+
         return editEntity
     }
 
@@ -74,30 +65,36 @@ class ClazzDetailPresenter(context: Any,
              db.clazzDao.findByUid(entityUid)
         } ?: Clazz()
 
-        val activePersonUid = accountManager.activeAccount.personUid
-
-        view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid",
-                "${ClazzWorkListView.VIEW_NAME}?$ARG_CLAZZ_UID=$entityUid") +
-                CLAZZ_FEATURES.filter {
-                PERMISSION_CHECKER_MAP[it]?.invoke(db, activePersonUid, entityUid) ?: false
-        }.map { (VIEWNAME_MAP[it] ?: "INVALID}") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"}
+        setupTabs()
 
         return clazz
     }
 
+    private suspend fun setupTabs() {
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        val personUid = accountManager.activeAccount.personUid
+        view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
+                "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid") +
+                CLAZZ_FEATURES.filter {
+                    db.clazzDao.personHasPermissionWithClazz(personUid, entityUid,
+                        FEATURE_PERMISSION_MAP[it] ?: -1)
+                }.map {
+                    (VIEWNAME_MAP[it] ?: "INVALID") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"
+                }
+    }
+
     companion object {
 
-        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE)
+        val CLAZZ_FEATURES = listOf(Clazz.CLAZZ_FEATURE_ATTENDANCE, Clazz.CLAZZ_FEATURE_ASSIGNMENT)
 
-        val PERMISSION_CHECKER_MAP = mapOf<Long, ClazzPermissionChecker>(
-                Clazz.CLAZZ_FEATURE_ATTENDANCE to {db, personUid, clazzUid ->
-                    true /*db.clazzDao.personHasPermissionWithClazz(personUid, clazzUid, Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT)*/
-                }
-        )
+        //Map of the feature flag to the permission flag required for that tab to be visible
+        val FEATURE_PERMISSION_MAP = mapOf(
+                Clazz.CLAZZ_FEATURE_ATTENDANCE to Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT,
+                Clazz.CLAZZ_FEATURE_ASSIGNMENT to Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW)
 
         val VIEWNAME_MAP = mapOf<Long, String>(
-                Clazz.CLAZZ_FEATURE_ATTENDANCE to ClazzLogListAttendanceView.VIEW_NAME
+                Clazz.CLAZZ_FEATURE_ATTENDANCE to ClazzLogListAttendanceView.VIEW_NAME,
+                Clazz.CLAZZ_FEATURE_ASSIGNMENT to ClazzWorkListView.VIEW_NAME
         )
     }
 

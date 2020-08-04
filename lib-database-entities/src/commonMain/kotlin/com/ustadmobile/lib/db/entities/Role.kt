@@ -40,14 +40,35 @@ class Role() {
     }
 
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Role
+
+        if (roleUid != other.roleUid) return false
+        if (roleName != other.roleName) return false
+        if (roleActive != other.roleActive) return false
+        if (roleMasterCsn != other.roleMasterCsn) return false
+        if (roleLocalCsn != other.roleLocalCsn) return false
+        if (roleLastChangedBy != other.roleLastChangedBy) return false
+        if (rolePermissions != other.rolePermissions) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = roleUid.hashCode()
+        result = 31 * result + (roleName?.hashCode() ?: 0)
+        result = 31 * result + roleActive.hashCode()
+        result = 31 * result + roleMasterCsn.hashCode()
+        result = 31 * result + roleLocalCsn.hashCode()
+        result = 31 * result + roleLastChangedBy
+        result = 31 * result + rolePermissions.hashCode()
+        return result
+    }
 
     companion object {
-
-        const val ROLE_NAME_TEACHER = "teacher"
-        const val ROLE_NAME_OFFICER = "officer"
-        const val ROLE_NAME_MNE = "mne"
-        const val ROLE_NAME_SEL = "sel"
-        const val ROLE_NAME_SITE_STAFF = "sitestaff"
 
         const val PERMISSION_CLAZZ_SELECT: Long = 1
 
@@ -97,40 +118,57 @@ class Role() {
 
         const val PERMISSION_CLAZZ_ASSIGNMENT_VIEW : Long = 8388608
 
-        const val PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE : Long = 16777216
+        //There is no "insert" for CLAZZ_ASSIGNMENT as they are all tied to classes, so are considered updates
+        const val PERMISSION_CLAZZ_ASSIGNMENT_UPDATE : Long = 16777216
+
+        const val PERMISSION_CLAZZ_ASSIGNMENT_VIEWSTUDENTPROGRESS : Long= 33554432
+
+        const val PERMISSION_CONTENT_SELECT : Long= 67108864
+
+        const val PERMISSION_CONTENT_INSERT : Long= 134217728
+
+        const val PERMISSION_CONTENT_UPDATE : Long= 268435456
+
 
         /**
          * Permission to view reports. In reality, this is really just a UI permission, and does not
          * affect access to the underlying data.
          */
         val PERMISSION_REPORTS_VIEW: Long = 8388608
-    }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
 
-        other as Role
+        //Predefined roles that are added by the system
+        const val ROLE_TEACHER_NAME = "Teacher"
 
-        if (roleUid != other.roleUid) return false
-        if (roleName != other.roleName) return false
-        if (roleActive != other.roleActive) return false
-        if (roleMasterCsn != other.roleMasterCsn) return false
-        if (roleLocalCsn != other.roleLocalCsn) return false
-        if (roleLastChangedBy != other.roleLastChangedBy) return false
-        if (rolePermissions != other.rolePermissions) return false
+        const val ROLE_TEACHER_UID = 1001
 
-        return true
-    }
+        const val ROLE_TEACHER_PERMISSIONS_DEFAULT: Long =
+                PERMISSION_CLAZZ_SELECT or
+                PERMISSION_CLAZZ_UPDATE or
+                PERMISSION_CLAZZ_ADD_STUDENT or
+                PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or
+                PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT or
+                PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE or
+                PERMISSION_PERSON_SELECT or
+                PERMISSION_PERSON_UPDATE or
+                PERMISSION_PERSON_INSERT or
+                PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
+                PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT or
+                PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
+                PERMISSION_CLAZZ_ASSIGNMENT_VIEW or
+                PERMISSION_CLAZZ_ASSIGNMENT_UPDATE
 
-    override fun hashCode(): Int {
-        var result = roleUid.hashCode()
-        result = 31 * result + (roleName?.hashCode() ?: 0)
-        result = 31 * result + roleActive.hashCode()
-        result = 31 * result + roleMasterCsn.hashCode()
-        result = 31 * result + roleLocalCsn.hashCode()
-        result = 31 * result + roleLastChangedBy
-        result = 31 * result + rolePermissions.hashCode()
-        return result
+
+        const val ROLE_STUDENT_NAME = "Student"
+
+        const val ROLE_STUDENT_UID = 1000
+
+        const val ROLE_STUDENT_PERMISSIONS_DEFAULT: Long =
+                PERMISSION_CLAZZ_SELECT or
+                PERMISSION_PERSON_SELECT or
+                PERMISSION_CLAZZ_ASSIGNMENT_VIEW
+
+
+
     }
 }

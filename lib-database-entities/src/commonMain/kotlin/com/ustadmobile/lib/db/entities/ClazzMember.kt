@@ -76,9 +76,9 @@ open class ClazzMember()  {
 
     companion object {
 
-        const val ROLE_STUDENT = 1
+        const val ROLE_STUDENT = 1000
 
-        const val ROLE_TEACHER = 2
+        const val ROLE_TEACHER = 1001
 
         const val TABLE_ID = 13
     }

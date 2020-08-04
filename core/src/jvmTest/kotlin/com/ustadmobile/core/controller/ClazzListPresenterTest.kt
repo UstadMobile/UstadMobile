@@ -70,13 +70,12 @@ class ClazzListPresenterTest {
         //TODO: add any arguments required for the presenter here e.g.
         // ClazzList2View.ARG_SOME_FILTER to "filterValue"
         val presenterArgs = mapOf<String,String>()
-        val presenter = ClazzListPresenter(context,
-                presenterArgs, mockView, di, mockLifecycleOwner)
+        val presenter = ClazzListPresenter(context, presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoClazzDaoSpy, timeout(5000)).findAllActiveClazzesSortByNameAsc(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(0))
+        verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(0), any())
         verify(mockView, timeout(5000)).list = any()
 
         //TODO: verify any other properties that the presenter should set on the view
@@ -94,8 +93,8 @@ class ClazzListPresenterTest {
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoClazzDaoSpy, timeout(5000)).findAllActiveClazzesSortByNameAsc(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(excludeFromSchool))
+        verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(excludeFromSchool), any())
         verify(mockView, timeout(5000)).list = any()
     }
 
