@@ -42,9 +42,7 @@ import org.kodein.di.on
 
 abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener,
-        OnSortOptionSelected {
-
-    private var sortBottomFragment: SortBottomSheetFragment? = null
+        OnSortOptionSelected, View.OnClickListener {
 
     protected var mRecyclerView: RecyclerView? = null
 
@@ -278,7 +276,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
-        sortBottomFragment?.dismiss()
         mNewItemRecyclerViewAdapter?.sortOptionSelected = sortOption
         listPresenter?.onClickSort(sortOption)
     }
@@ -295,8 +292,14 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
 
     fun showSortOptionsFrag() {
-        sortBottomFragment = SortBottomSheetFragment(listPresenter?.sortOptions, this)
-        sortBottomFragment?.show(childFragmentManager, sortBottomFragment?.tag)
+        SortBottomSheetFragment(listPresenter?.sortOptions, this).also {
+            it.show(childFragmentManager, it.tag)
+        }
+    }
+
+    override fun onClick(v: View?) {
+        if(v?.id == R.id.item_sort_selected_layout)
+            showSortOptionsFrag()
     }
 
     override fun finishWithResult(result: List<RT>) {

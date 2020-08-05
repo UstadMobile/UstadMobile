@@ -19,15 +19,15 @@ import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetails>(),
-        PersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDetails>(),
+        PersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
     private var mPresenter: PersonListPresenter? = null
 
     override val listPresenter: UstadListPresenter<*, in PersonWithDisplayDetails>?
         get() = mPresenter
 
-    class PersonListViewHolder(val itemBinding: ItemPersonListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class PersonListViewHolder(val itemBinding: ItemPersonListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class PersonListRecyclerAdapter(var presenter: PersonListPresenter?)
         : SelectablePagedListAdapter<PersonWithDisplayDetails, PersonListViewHolder>(DIFF_CALLBACK) {
@@ -54,13 +54,13 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = PersonListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this,  di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.person))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
-                onClickSort = this, sortOrderOptionsList = mPresenter?.sortOptions)
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view
     }
 
@@ -75,10 +75,11 @@ class PersonListFragment(): UstadListViewFragment<Person, PersonWithDisplayDetai
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
+        if (view?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java)
-        else if(view?.id == R.id.item_sort_selected_layout)
-            showSortOptionsFrag()
+        else {
+            super.onClick(view)
+        }
     }
 
     override fun onDestroyView() {

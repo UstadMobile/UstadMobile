@@ -21,12 +21,12 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
                                  var headerStringId: Int = 0,
                                  var headerLayoutId: Int = 0,
                                  onClickSort: View.OnClickListener? = null,
-                                 val sortOrderOptionsList: List<SortOrderOption>?= null) : ListAdapter<Int, RecyclerView.ViewHolder>(DIFFUTIL_NEWITEM) {
+                                 val sortOrderOption: SortOrderOption? = null) : ListAdapter<Int, RecyclerView.ViewHolder>(DIFFUTIL_NEWITEM) {
 
     val currentHolderList: List<Int>
         get() = (if (headerLayoutId != 0) listOf(ITEM_HEADERHOLDER) else listOf()) +
                 (if (newItemVisible) listOf(ITEM_NEWITEMHOLDER) else listOf()) +
-                (if (sortOrderOptionsList?.isNullOrEmpty() == false) listOf(ITEM_SORT_HOLDER) else listOf())
+                (if (sortOrderOption != null) listOf(ITEM_SORT_HOLDER) else listOf())
 
 
     var newItemVisible: Boolean = false
@@ -51,10 +51,10 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
             }
         }
 
-    var sortOptionSelected: SortOrderOption? = sortOrderOptionsList?.get(0)
-        set(value ){
+    var sortOptionSelected: SortOrderOption? = sortOrderOption
+        set(value) {
             field = value
-            boundSortItemViewHolders.forEach{
+            boundSortItemViewHolders.forEach {
                 it.itemBinding.sortOption = value
             }
         }
@@ -89,7 +89,7 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
             ITEM_SORT_HOLDER -> SortItemViewHolder(ItemSortHeaderOptionBinding.inflate(LayoutInflater.from(parent.context),
                     parent, false).also {
                 it.onClickSort = onClickSort
-                it.sortOption = sortOrderOptionsList?.get(0)
+                it.sortOption = sortOptionSelected
             })
             else -> throw IllegalArgumentException("Illegal viewType")
         }
@@ -112,7 +112,7 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         if (holder is NewItemViewHolder)
             boundNewItemViewHolders -= holder
-        else if(holder is SortItemViewHolder)
+        else if (holder is SortItemViewHolder)
             boundSortItemViewHolders -= holder
     }
 

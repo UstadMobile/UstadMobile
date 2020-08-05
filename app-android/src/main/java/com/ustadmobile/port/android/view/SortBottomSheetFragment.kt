@@ -14,7 +14,7 @@ import com.toughra.ustadmobile.databinding.ItemSortOptionBinding
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.util.SortOrderOption
 
-class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSortOptionSelected: OnSortOptionSelected?) : BottomSheetDialogFragment() {
+class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, private var onSortOptionSelected: OnSortOptionSelected?) : BottomSheetDialogFragment(), OnSortOptionSelected {
 
     private var mRecyclerViewAdapter: SortListRecyclerViewAdapter? = null
     private var mBinding: FragmentSortOptionListBinding? = null
@@ -29,7 +29,7 @@ class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSor
             mRecyclerView = it.fragmentSortOrderList
         }
 
-        mRecyclerViewAdapter = SortListRecyclerViewAdapter(onSortOptionSelected)
+        mRecyclerViewAdapter = SortListRecyclerViewAdapter(this)
         mRecyclerView?.adapter = mRecyclerViewAdapter
         mRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
         mRecyclerViewAdapter?.submitList(sortOptions)
@@ -38,7 +38,7 @@ class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSor
 
     class SortListHolder(val itemBinding: ItemSortOptionBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
-    class SortListRecyclerViewAdapter(var onSortOptionSelected: OnSortOptionSelected?) : ListAdapter<SortOrderOption, SortListHolder>(DIFFUTIL_SORT) {
+    class SortListRecyclerViewAdapter(var selectedListener: OnSortOptionSelected) : ListAdapter<SortOrderOption, SortListHolder>(DIFFUTIL_SORT) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SortListHolder {
             return SortListHolder(ItemSortOptionBinding.inflate(LayoutInflater.from(parent.context),
@@ -48,10 +48,17 @@ class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSor
         override fun onBindViewHolder(holder: SortListHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.sortOption = item
+            holder.itemBinding.sortListener = selectedListener
             holder.itemView.tag = item.flag
-            holder.itemBinding.sortListener = onSortOptionSelected
         }
+    }
 
+    override fun onClickSort(sortOption: SortOrderOption) {
+        val isShowing = this.dialog?.isShowing
+        if (isShowing != null && isShowing) {
+            dismiss()
+        }
+        onSortOptionSelected?.onClickSort(sortOption)
     }
 
     companion object {
@@ -74,4 +81,6 @@ class SortBottomSheetFragment(val sortOptions: List<SortOrderOption>?, var onSor
         mRecyclerView = null
         mRecyclerViewAdapter = null
     }
+
+
 }
