@@ -44,7 +44,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_assignment_24px" />
+            app:srcCompat="@drawable/ic_outline_assignment_outline_24" />
 
         <!-- Line 1-->
 
@@ -60,6 +60,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_newitemicon"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Read assignment" />
 
@@ -92,12 +93,13 @@
 
         <ImageView
             android:id="@+id/imageView11"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/dimen_16dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:visibility="@{clazzWork.clazzWorkDueDateTime>0?View.VISIBLE:View.GONE}"
             app:layout_constraintStart_toStartOf="@+id/line1_text"
             app:layout_constraintTop_toBottomOf="@+id/line2_text"
+            android:tint="#7A7A7A"
             android:src="@drawable/ic_event_available_black_24dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

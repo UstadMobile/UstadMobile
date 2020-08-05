@@ -121,6 +121,13 @@ class ListStatusRecyclerViewAdapterTest {
     private fun createScenario(
             loadingStatus: RepositoryLoadHelper.RepoLoadStatus = RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA)): ListStatusScenario {
 
+        val adminPerson = Person().apply {
+            firstNames = "Admin"
+            lastName = "Admin"
+            admin = true
+            personUid = dbRule.db.personDao.insert(this)
+        }
+
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
             ListStatusRecyclerViewAdapterTestFragment()
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
@@ -128,7 +135,8 @@ class ListStatusRecyclerViewAdapterTest {
         lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
         val loadingStatusLiveData = MutableLiveData(loadingStatus)
         fragmentScenario.onFragment { fragment ->
-            val dataSource = dbRule.db.personDao.findPersonsWithPermission(0, 0, 0, listOf(),0, PersonDao.SORT_NAME_DESC)
+            val dataSource = dbRule.db.personDao.findPersonsWithPermission(0, 0, 0, listOf(),
+                adminPerson.personUid, PersonDao.SORT_NAME_ASC)
             val livePagedList = LivePagedListBuilder(dataSource, 20).build()
             fragment.listStatusAdapter?.pagedListLiveData = livePagedList
             livePagedList.observe(fragment.viewLifecycleOwner, Observer {

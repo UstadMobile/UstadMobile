@@ -183,6 +183,8 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             if(submission  != null) {
                 submission.clazzWorkSubmissionDateTimeMarked =
                         UMCalendarUtil.getDateInMilliPlusDays(0)
+                submission.clazzWorkSubmissionMarkerPersonUid =
+                        accountManager.activeAccount.personUid
                 if(submission.clazzWorkSubmissionUid != 0L) {
                     repo.clazzWorkSubmissionDao.updateAsync(submission)
                 }else{

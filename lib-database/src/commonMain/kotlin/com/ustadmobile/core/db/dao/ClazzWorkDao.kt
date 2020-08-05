@@ -172,6 +172,8 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             AND CAST(clazzWorkActive as INTEGER) = 1
                 """
 
+        //Removed:
+        //AND ContentEntryProgress.contentEntryProgressStatusFlag = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED}
         const val STUDENT_PROGRESS_QUERY = """
             SELECT 
                 Person.*, ClazzMember.*, cws.*,
@@ -179,8 +181,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                     (
                         SELECT SUM(ContentEntryProgress.contentEntryProgressProgress) 
                         FROM ContentEntryProgress WHERE
-                        CAST(ContentEntryProgress.contentEntryProgressActive AS INTEGER) = 1 
-                        AND ContentEntryProgress.contentEntryProgressStatusFlag = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED}
+                        CAST(ContentEntryProgress.contentEntryProgressActive AS INTEGER) = 1
                         AND ContentEntryProgress.contentEntryProgressPersonUid = Person.personUid
                     ) 
                     /

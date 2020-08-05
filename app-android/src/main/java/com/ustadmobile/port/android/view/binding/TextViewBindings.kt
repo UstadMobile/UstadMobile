@@ -216,9 +216,9 @@ fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMembe
 
 fun ClazzWorkSubmission?.statusString(context: Context) = when {
     this == null -> context.getString(R.string.not_submitted_cap)
-    this.clazzWorkSubmissionDateTimeMarked > 0 -> context.getString(R.string.marked)
-    this.clazzWorkSubmissionDateTimeFinished > 0 -> context.getString(R.string.submitted)
-    else -> context.getString(R.string.not_submitted_cap)
+    this.clazzWorkSubmissionDateTimeMarked > 0 -> context.getString(R.string.marked).capitalize()
+    this.clazzWorkSubmissionDateTimeFinished > 0 -> context.getString(R.string.submitted).capitalize()
+    else -> context.getString(R.string.not_submitted_cap).capitalize()
 
 }
 

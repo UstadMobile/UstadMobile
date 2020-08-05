@@ -81,7 +81,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
     override val viewContext: Any
         get() = requireContext()
 
-    private var mBinding: FragmentClazzWorkEditBinding? = null
+    var mBinding: FragmentClazzWorkEditBinding? = null
 
     private var mPresenter: ClazzWorkEditPresenter? = null
 

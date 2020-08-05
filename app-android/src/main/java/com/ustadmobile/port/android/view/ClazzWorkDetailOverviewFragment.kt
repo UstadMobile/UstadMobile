@@ -224,8 +224,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     }
 
     override fun onClickButton(view: View) {
-        //TODO: Disable Submission views.
         mPresenter?.handleClickSubmit()
+        //Update RV?
+        submissionFreeTextRecyclerAdapter?.notifyDataSetChanged()
+        quizQuestionsRecyclerAdapter?.notifyDataSetChanged()
     }
 
     override fun onDestroyView() {
