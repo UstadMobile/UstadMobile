@@ -49,4 +49,40 @@ open class Container() {
     constructor(contentEntry: ContentEntry) : this() {
         this.containerContentEntryUid = contentEntry.contentEntryUid
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Container) return false
+
+        if (containerUid != other.containerUid) return false
+        if (cntLocalCsn != other.cntLocalCsn) return false
+        if (cntMasterCsn != other.cntMasterCsn) return false
+        if (cntLastModBy != other.cntLastModBy) return false
+        if (fileSize != other.fileSize) return false
+        if (containerContentEntryUid != other.containerContentEntryUid) return false
+        if (cntLastModified != other.cntLastModified) return false
+        if (mimeType != other.mimeType) return false
+        if (remarks != other.remarks) return false
+        if (mobileOptimized != other.mobileOptimized) return false
+        if (cntNumEntries != other.cntNumEntries) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = containerUid.hashCode()
+        result = 31 * result + cntLocalCsn.hashCode()
+        result = 31 * result + cntMasterCsn.hashCode()
+        result = 31 * result + cntLastModBy
+        result = 31 * result + fileSize.hashCode()
+        result = 31 * result + containerContentEntryUid.hashCode()
+        result = 31 * result + cntLastModified.hashCode()
+        result = 31 * result + (mimeType?.hashCode() ?: 0)
+        result = 31 * result + (remarks?.hashCode() ?: 0)
+        result = 31 * result + mobileOptimized.hashCode()
+        result = 31 * result + cntNumEntries
+        return result
+    }
+
+
 }

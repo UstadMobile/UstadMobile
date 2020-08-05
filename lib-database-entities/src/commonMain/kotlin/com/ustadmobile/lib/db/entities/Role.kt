@@ -129,13 +129,11 @@ class Role() {
 
         const val PERMISSION_CONTENT_UPDATE : Long= 268435456
 
+        const val PERMISSION_SCHOOL_SELECT: Long = 536870912
 
-        /**
-         * Permission to view reports. In reality, this is really just a UI permission, and does not
-         * affect access to the underlying data.
-         */
-        val PERMISSION_REPORTS_VIEW: Long = 8388608
+        const val PERMISSION_SCHOOL_INSERT: Long = 1073741824
 
+        const val PERMISSION_SCHOOL_UPDATE: Long = 2147483648L
 
         //Predefined roles that are added by the system
         const val ROLE_TEACHER_NAME = "Teacher"
