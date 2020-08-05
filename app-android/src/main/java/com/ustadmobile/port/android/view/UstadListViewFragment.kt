@@ -276,6 +276,9 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
+        if(mNewItemRecyclerViewAdapter?.sortOptionSelected == sortOption){
+            return
+        }
         mNewItemRecyclerViewAdapter?.sortOptionSelected = sortOption
         listPresenter?.onClickSort(sortOption)
     }
