@@ -1,13 +1,13 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersonListItemBinding
+import com.ustadmobile.core.controller.OnSearchSubmitted
 import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -20,7 +20,7 @@ import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDetails>(),
-        PersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
+        PersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener, OnSearchSubmitted {
 
     private var mPresenter: PersonListPresenter? = null
 
@@ -49,6 +49,16 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
             super.onDetachedFromRecyclerView(recyclerView)
             presenter = null
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        searchManager?.searchListener = this
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -104,5 +114,9 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
                 return oldItem == newItem
             }
         }
+    }
+
+    override fun onSearchSubmitted(text: String?) {
+        println(text)
     }
 }

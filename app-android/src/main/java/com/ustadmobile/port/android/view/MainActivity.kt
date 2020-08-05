@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
@@ -94,8 +95,10 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
+        menu.findItem(R.id.menu_search).isVisible = SEARCH_DEST.contains(currentFrag)
 
-        mBinding.bottomNavView.visibility = if(DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
+
+        mBinding.bottomNavView.visibility = if (DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
             View.GONE else View.VISIBLE
         if (mainScreenItemsVisible) {
             setUserProfile(menu.findItem(R.id.menu_main_profile))
@@ -145,5 +148,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         val DEST_TO_HIDE_BOTTOM_NAV = listOf(R.id.login_dest, R.id.account_get_started_dest,
                 R.id.workspace_enterlink_dest, R.id.settings_list_dest, R.id.person_edit_register_dest)
+
+        val SEARCH_DEST = listOf(R.id.home_personlist_dest)
     }
 }

@@ -2,11 +2,15 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
-import androidx.lifecycle.observe
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
@@ -20,11 +24,15 @@ import java.util.*
  */
 open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
+    private var searchView: SearchView? = null
+
     private val runOnAttach = Vector<Runnable>()
 
     protected var titleLifecycleObserver: TitleLifecycleObserver? = null
 
     protected var fabManager: FabManagerLifecycleObserver? = null
+
+    protected var searchManager: SearchViewManagerLifecycleObserver? = null
 
     override val di by di()
 
@@ -35,6 +43,19 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
             field = value
         }
 
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        searchView = menu.findItem(R.id.menu_search).actionView as SearchView
+        searchManager = SearchViewManagerLifecycleObserver(searchView).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+    }
 
     /**
      * If enabled, the fab will be managed by this fragment when its view is active.
