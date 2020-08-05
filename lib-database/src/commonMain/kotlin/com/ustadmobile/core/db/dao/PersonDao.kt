@@ -212,6 +212,7 @@ abstract class PersonDao : BaseDao<Person> {
             AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
             AND (Person.personUid NOT IN (:excludeSelected))
             AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_SELECT_PERMISSION) 
+            AND Person.firstNames LIKE :searchText
             ORDER BY CASE(:sortOrder)
                 WHEN $SORT_NAME_ASC THEN Person.firstNames
                 ELSE 0
@@ -223,7 +224,7 @@ abstract class PersonDao : BaseDao<Person> {
     """)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int): DataSource.Factory<Int, PersonWithDisplayDetails>
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%%"): DataSource.Factory<Int, PersonWithDisplayDetails>
 
 
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")

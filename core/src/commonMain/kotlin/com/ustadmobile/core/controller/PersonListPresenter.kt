@@ -17,7 +17,7 @@ import org.kodein.di.DI
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
                           di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<PersonListView, Person>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected {
+    : UstadListPresenter<PersonListView, Person>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
     private var filterExcludeMembersOfClazz: Long = 0
 
@@ -45,10 +45,11 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
                 Person.TABLE_ID, Role.PERMISSION_PERSON_INSERT)
     }
 
-    private fun updateListOnView() {
+    private fun updateListOnView(searchText: String? = null) {
         view.list = repo.personDao.findPersonsWithPermission(getSystemTimeInMillis(), filterExcludeMembersOfClazz,
                 filterExcludeMemberOfSchool, filterAlreadySelectedList,
-                accountManager.activeAccount.personUid, selectedSortOption?.flag ?: 0)
+                accountManager.activeAccount.personUid, selectedSortOption?.flag ?: 0,
+                if(searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
     }
 
     override fun handleClickEntry(entry: Person) {
@@ -67,6 +68,11 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     override fun onClickSort(sortOption: SortOrderOption) {
         super.onClickSort(sortOption)
         updateListOnView()
+    }
+
+
+    override fun onSearchSubmitted(text: String?) {
+        updateListOnView(text)
     }
 
     companion object {

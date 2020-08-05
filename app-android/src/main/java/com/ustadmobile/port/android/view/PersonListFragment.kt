@@ -20,7 +20,7 @@ import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDetails>(),
-        PersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener, OnSearchSubmitted {
+        PersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
     private var mPresenter: PersonListPresenter? = null
 
@@ -57,8 +57,9 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        menu.findItem(R.id.menu_search).isVisible = true
         super.onCreateOptionsMenu(menu, inflater)
-        searchManager?.searchListener = this
+        searchManager?.searchListener = mPresenter
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -114,9 +115,5 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
                 return oldItem == newItem
             }
         }
-    }
-
-    override fun onSearchSubmitted(text: String?) {
-        println(text)
     }
 }

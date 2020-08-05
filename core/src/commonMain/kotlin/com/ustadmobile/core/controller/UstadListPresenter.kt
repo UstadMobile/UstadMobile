@@ -21,7 +21,7 @@ import org.kodein.di.on
 abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>,
                                                                view: V, di: DI,
                                                     val lifecycleOwner: DoorLifecycleOwner)
-    : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected {
+    : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected, OnSearchSubmitted {
 
     protected var mListMode = ListViewMode.BROWSER
 
@@ -100,6 +100,9 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     override fun onClickSort(sortOption: SortOrderOption) {
         selectedSortOption = sortOption
+    }
+    override fun onSearchSubmitted(text: String?) {
+
     }
 
     abstract fun handleClickCreateNewFab()
