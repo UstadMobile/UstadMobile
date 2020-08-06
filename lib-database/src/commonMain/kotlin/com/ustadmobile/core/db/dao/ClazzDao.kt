@@ -69,8 +69,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
     @Query("""
         SELECT Clazz.*,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 1) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 2) AS numTeachers,
+        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = ${ClazzMember.ROLE_STUDENT}) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = ${ClazzMember.ROLE_TEACHER}) AS numTeachers,
         '' AS teacherNames,
         0 AS lastRecorded
         FROM 
@@ -84,14 +84,20 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         $ENTITY_PERSON_WITH_SELECT_PERMISSION
         )
         ORDER BY CASE :sortOrder
-            WHEN $SORT_CLAZZNAME_ASC THEN Clazz.clazzName
             WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
             ELSE 0
         END ASC,
         CASE :sortOrder
-            WHEN $SORT_CLAZZNAME_DESC THEN Clazz.clazzName
+            WHEN $SORT_CLAZZNAME_ASC THEN Clazz.clazzName
+            ELSE ''
+        END ASC,
+        CASE :sortOrder
             WHEN $SORT_ATTENDANCE_DESC THEN Clazz.attendanceAverage
             ELSE 0
+        END DESC,
+        CASE :sortOrder
+            WHEN $SORT_CLAZZNAME_DESC THEN clazz.Clazzname
+            ELSE ''
         END DESC
     """)
     abstract fun findClazzesWithPermission(searchQuery: String, personUid: Long, excludeSchoolUid: Long, sortOrder: Int): DataSource.Factory<Int, ClazzWithNumStudents>
