@@ -5,34 +5,38 @@ import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentListBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.UstadListPresenter
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
-import androidx.appcompat.view.ActionMode
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.children
-import androidx.recyclerview.widget.MergeAdapter
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.repoLoadingStatus
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         UstadListView<RT, DT>, Observer<PagedList<DT>>, MessageIdSpinner.OnMessageIdOptionSelectedListener {
@@ -151,10 +155,12 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             val actionModeVal = actionMode
 
             if(!t.isNullOrEmpty() && actionModeVal == null) {
-                val actionModeCallbackVal = ListViewActionModeCallback(this@UstadListViewFragment).also {
+                val actionModeCallbackVal =
+                        ListViewActionModeCallback(this@UstadListViewFragment).also {
                     this@UstadListViewFragment.actionModeCallback = it
                 }
-                actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(actionModeCallbackVal)
+                actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(
+                        actionModeCallbackVal)
             }else if(actionModeVal != null && t.isNullOrEmpty()) {
                 actionModeVal.finish()
             }
@@ -175,7 +181,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
 
     protected abstract val listPresenter: UstadListPresenter<*, in DT>?
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
         mDataBinding = FragmentListBinding.inflate(inflater, container, false).also {
             rootView = it.root
@@ -183,7 +190,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             it.fragmentListRecyclerview.layoutManager = LinearLayoutManager(requireContext())
         }
 
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+        val accountManager: UstadAccountManager by instance()
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
 
         return rootView
     }
@@ -206,7 +214,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         fabManager?.onClickListener = {
             mDataBinding?.presenter?.handleClickCreateNewFab()
         }
-        fabManager?.takeIf { autoShowFabOnAddPermission }?.visible = (addMode == ListViewAddMode.FAB)
+        fabManager?.takeIf { autoShowFabOnAddPermission }?.visible =
+                (addMode == ListViewAddMode.FAB)
         fabManager?.icon = R.drawable.ic_add_white_24dp
 
 
@@ -234,7 +243,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
             mDataBinding?.addMode = value
             mNewItemRecyclerViewAdapter.takeIf { autoMergeRecyclerViewAdapter }?.newItemVisible =
                     (value == ListViewAddMode.FIRST_ITEM)
-            fabManager?.takeIf { autoShowFabOnAddPermission }?.visible = (value == ListViewAddMode.FAB)
+            fabManager?.takeIf { autoShowFabOnAddPermission }?.visible =
+                    (value == ListViewAddMode.FAB)
 
             field = value
         }
@@ -255,7 +265,8 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         mDataRecyclerViewAdapter?.submitList(t)
     }
 
-    override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
+    override fun onMessageIdOptionSelected(view: AdapterView<*>?,
+                                           messageIdOption: MessageIdOption) {
         listPresenter?.handleClickSortOrder(messageIdOption)
     }
 
@@ -291,15 +302,10 @@ abstract class UstadListViewFragment<RT, DT>: UstadBaseFragment(),
         mActivityWithFab = null
     }
 
-    override fun onResume() {
-        super.onResume()
-
-
-    }
-
     companion object {
 
-        val SELECTION_ICONS_MAP = mapOf(SelectionOption.EDIT to R.drawable.ic_edit_white_24dp,
+        val SELECTION_ICONS_MAP =
+                mapOf(SelectionOption.EDIT to R.drawable.ic_edit_white_24dp,
             SelectionOption.DELETE to R.drawable.ic_delete_black_24dp)
 
     }

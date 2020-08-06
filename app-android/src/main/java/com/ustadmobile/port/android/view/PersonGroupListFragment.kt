@@ -7,20 +7,21 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersongroupListItemBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.PersonGroupListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonGroupListView
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupWithMemberCount>(),
@@ -55,12 +56,10 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        dbRepo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+        val accountManager: UstadAccountManager by instance()
+        dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         mPresenter = PersonGroupListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this,  di, viewLifecycleOwner)
         mDataBinding?.presenter = mPresenter
         mDataBinding?.onSortSelected = this
         mDataRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter)

@@ -1,25 +1,22 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS_LIST
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import org.kodein.di.DI
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<PersonListView, Person>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<PersonListView, Person>(context, arguments, view, di,  lifecycleOwner) {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
@@ -30,9 +27,9 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     private var filterAlreadySelectedList = listOf<Long>()
 
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
+    enum class SortOrder(val messageId: Int, val sortCode: Int) {
+        ORDER_NAME_ASC(MessageID.sort_by_name_asc, PersonDao.SORT_NAME_ASC),
+        ORDER_NAME_DSC(MessageID.sort_by_name_desc, PersonDao.SORT_NAME_ASC)
     }
 
     class PersonListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
@@ -48,20 +45,14 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //TODO: update this
-        return true
+        return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0L,
+            Person.TABLE_ID, Role.PERMISSION_PERSON_INSERT)
     }
 
     private fun updateListOnView() {
-        val timestamp = getSystemTimeInMillis()
-        view.list = when(currentSortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.personDao
-                    .findAllPeopleWithDisplayDetailsSortNameAsc(timestamp,
-                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool, filterAlreadySelectedList)
-            SortOrder.ORDER_NAME_DSC -> repo.personDao
-                    .findAllPeopleWithDisplayDetailsSortNameDesc(timestamp,
-                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool, filterAlreadySelectedList)
-        }
+        view.list = repo.personDao.findPersonsWithPermission(getSystemTimeInMillis(), filterExcludeMembersOfClazz,
+                filterExcludeMemberOfSchool, filterAlreadySelectedList,
+                accountManager.activeAccount.personUid, currentSortOrder.sortCode)
     }
 
     override fun handleClickEntry(entry: Person) {

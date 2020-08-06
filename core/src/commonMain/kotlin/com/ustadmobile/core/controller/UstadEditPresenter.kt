@@ -1,25 +1,18 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_ID
+import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.copyOnWriteListOf
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import org.kodein.di.DI
 
 abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(context: Any,
-    arguments: Map<String, String>, view: V,
-    lifecycleOwner: DoorLifecycleOwner,
-    systemImpl: UstadMobileSystemImpl,
-    db: UmAppDatabase,
-    repo: UmAppDatabase,
-    activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadSingleEntityPresenter<V, RT>(context, arguments, view, lifecycleOwner, systemImpl, db, repo, activeAccount) {
+    arguments: Map<String, String>, view: V, di: DI, lifecycleOwner: DoorLifecycleOwner)
+
+    : UstadSingleEntityPresenter<V, RT>(context, arguments, view, di, lifecycleOwner) {
 
     private val jsonLoadListeners: MutableList<JsonLoadListener> = copyOnWriteListOf()
 
@@ -45,5 +38,19 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         jsonLoadListeners.forEach { it.onSaveState(savedState) }
         super.onSaveInstanceState(savedState)
+    }
+
+    protected val isExistingEntityOrPickerMode
+        get() = (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L) != 0L ||
+                arguments[ARG_RESULT_DEST_ID] != null
+
+    fun onFinish(detailViewName: String, entityUid: Long, entity: RT) {
+
+        if(!isExistingEntityOrPickerMode) {
+            systemImpl.go(detailViewName, mapOf(ARG_ENTITY_UID to entityUid.toString()), context,
+                    UstadMobileSystemCommon.UstadGoOptions(CURRENT_DEST, popUpToInclusive = true))
+        }  else {
+            view.finishWithResult(listOf(entity))
+        }
     }
 }

@@ -12,14 +12,9 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
 import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ClazzDetailOverviewView
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzLogListAttendanceView
-import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
@@ -78,10 +73,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         }
 
         mPresenter = ClazzDetailPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                di, viewLifecycleOwner)
 
         return rootView
     }
@@ -112,7 +104,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         get() = field
         set(value) {
             field = value
-            title = value?.clazzName
+            clazzWorkTitle = value?.clazzName
             mBinding?.clazz = value
         }
 
@@ -120,12 +112,16 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
                 ClazzDetailOverviewView.VIEW_NAME to ClazzDetailOverviewFragment::class.java,
                 ClazzMemberListView.VIEW_NAME to ClazzMemberListFragment::class.java,
-                ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java)
+                ClazzLogListAttendanceView.VIEW_NAME to ClazzLogListAttendanceFragment::class.java,
+                ClazzWorkListView.VIEW_NAME to ClazzWorkListFragment::class.java
+
+        )
 
         val viewNameToTitleMap = mapOf(
                 ClazzDetailOverviewView.VIEW_NAME to R.string.overview,
                 ClazzMemberListView.VIEW_NAME to R.string.members,
-                ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance
+                ClazzLogListAttendanceView.VIEW_NAME to R.string.attendance,
+                ClazzWorkListView.VIEW_NAME to R.string.clazz_work
         )
 
     }

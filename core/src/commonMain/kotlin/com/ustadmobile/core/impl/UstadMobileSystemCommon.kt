@@ -3,7 +3,7 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.Login2View
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
@@ -33,6 +33,9 @@ abstract class UstadMobileSystemCommon {
     private var locale: String = ""
 
     internal data class LastGoToDest(val viewName: String, val args: Map<String, String?>)
+
+    data class UstadGoOptions(val popUpToViewName: String? = null,
+                              val popUpToInclusive: Boolean = false)
 
     /**
      * The last destination that was called via the go method. This is used for testing purposes.
@@ -131,7 +134,11 @@ abstract class UstadMobileSystemCommon {
     }
 
     open fun go(viewName: String, args: Map<String, String?>, context: Any) {
-        go(viewName, args, context, 0)
+        go(viewName, args, context, 0, UstadGoOptions("", false))
+    }
+
+    open fun go(viewName: String, args: Map<String, String?>, context: Any, ustadGoOptions: UstadGoOptions) {
+        go(viewName, args, context, 0, ustadGoOptions)
     }
 
     /**
@@ -145,7 +152,8 @@ abstract class UstadMobileSystemCommon {
      * @param context System context object
      */
     @JsName("go")
-    abstract fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int)
+    abstract fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
+                    ustadGoOptions: UstadGoOptions)
 
     /**
      * Provides the currently active locale
@@ -250,19 +258,6 @@ abstract class UstadMobileSystemCommon {
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
-
-    /**
-     * Starts the user interface for the app
-     */
-    open fun startUI(context: Any) {
-        val activeAccount = UmAccountManager.getActiveAccount(context)
-
-        if (getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context) && activeAccount == null) {
-            go(LoginView.VIEW_NAME, mapOf(), context)
-        } else {
-            go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context)
-        }
-    }
 
     /**
      * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
@@ -452,5 +447,12 @@ abstract class UstadMobileSystemCommon {
          * As per Android Intent.FLAG_CLEAR_TOP
          */
         const val GO_FLAG_CLEAR_TOP = 67108864
+
+        const val TAG_DOWNLOAD_ENABLED = "dlenabled"
+
+        const val TAG_MAIN_COROUTINE_CONTEXT = 16
+
+        const val TAG_DLMGR_SINGLETHREAD_CONTEXT = 32
+
     }
 }

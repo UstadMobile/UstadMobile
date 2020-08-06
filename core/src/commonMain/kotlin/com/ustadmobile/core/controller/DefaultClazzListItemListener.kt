@@ -6,11 +6,16 @@ import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 
 class DefaultClazzListItemListener(var view: ClazzList2View?,
                                    var listViewMode: ListViewMode,
-                                   val systemImpl: UstadMobileSystemImpl,
-                                   val context: Any): ClazzListItemListener {
+                                   val context: Any,
+                                   override val di: DI): ClazzListItemListener, DIAware {
+
+    val systemImpl: UstadMobileSystemImpl by instance<UstadMobileSystemImpl>()
 
     override fun onClickClazz(clazz: Clazz) {
         if(listViewMode == ListViewMode.BROWSER) {

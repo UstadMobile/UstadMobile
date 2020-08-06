@@ -28,22 +28,19 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadBaseController
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.core.view.UstadViewWithProgress
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
-import com.ustadmobile.port.sharedse.util.RunnableQueue
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import com.ustadmobile.sharedse.network.NetworkManagerBleAndroidService
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Runnable
 import org.acra.ACRA
+import org.kodein.di.DIAware
+import org.kodein.di.android.di
 import java.util.*
 
 /**
@@ -52,7 +49,10 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications, UstadView, ShakeDetector.Listener, UstadViewWithProgress, BleNetworkManagerProvider {
+abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications,
+        UstadView, ShakeDetector.Listener, UstadViewWithProgress, BleNetworkManagerProvider, DIAware {
+
+    override val di by di()
 
     private var baseController: UstadBaseController<*>? = null
 
@@ -73,14 +73,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     protected lateinit var baseProgressBar: ProgressBar
 
-    /**
-     * Currently running instance of NetworkManagerBleCommon
-     */
-    /**
-     * @return Active NetworkManagerBleCommon
-     */
-    val networkManagerBle = CompletableDeferred<NetworkManagerBle>()
-
     @Volatile
     private var bleServiceBound = false
 
@@ -97,8 +89,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         private set
 
     private var permissionRequestRationalesShown = false
-
-    private val runWhenServiceConnectedQueue = RunnableQueue()
 
     private var permissionDialogTitle: String? = null
 
@@ -175,39 +165,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         }
     }
 
-    /**
-     * Ble service connection
-     */
-    private val bleServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            val serviceVal = (service as NetworkManagerBleAndroidService.LocalServiceBinder)
-                    .service
-            serviceVal.runWhenNetworkManagerReady {
-                UMLog.l(UMLog.DEBUG, 0, "BleService Connection: service = $serviceVal")
-
-                val networkManagerBleVal = serviceVal.networkManagerBle
-                networkManager = networkManagerBle
-
-                if(networkManagerBleVal != null){
-                    //this runs after service is ready
-                    networkManagerBle.complete(networkManagerBleVal)
-                    //networkManagerBle = serviceVal.networkManagerBle
-                    bleServiceBound = true
-                    onBleNetworkServiceBound(networkManagerBleVal)
-                }
-                runWhenServiceConnectedQueue.setReady(true)
-
-//                //TODO: this is being used for testing purposes only and should be removed
-                UstadMobileSystemImpl.instance.networkManager = networkManagerBleVal
-            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName) {
-            bleServiceBound = false
-            onBleNetworkServiceUnbound()
-        }
-    }
-
     private var mSyncServiceBound = false
 
 
@@ -234,11 +191,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
         val syncServiceIntent = Intent(this, UmAppDatabaseSyncService::class.java)
         bindService(syncServiceIntent, mSyncServiceConnection,
-                Context.BIND_AUTO_CREATE or Context.BIND_ADJUST_WITH_ACTIVITY)
-
-        //bind ble service
-        val bleServiceIntent = Intent(this, NetworkManagerBleAndroidService::class.java)
-        bindService(bleServiceIntent, bleServiceConnection,
                 Context.BIND_AUTO_CREATE or Context.BIND_ADJUST_WITH_ACTIVITY)
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -287,9 +239,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
      */
     protected open fun onBleNetworkServiceBound(networkManagerBle: NetworkManagerBle) {}
 
-    protected fun onBleNetworkServiceUnbound() {
-
-    }
 
     override fun onResume() {
         super.onResume()
@@ -356,11 +305,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
     public override fun onDestroy() {
-        if (bleServiceBound) {
-            unbindService(bleServiceConnection)
-        }
-
-        instance.handleActivityDestroy(this)
         if (mSyncServiceBound) {
             unbindService(mSyncServiceConnection)
         }
@@ -447,14 +391,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
                 FILE_SELECTION_REQUEST_CODE)
     }
 
-    /**
-     * Make sure NetworkManagerBleCommon is not null when running a certain logic
-     *
-     * @param runnable Future task to be executed
-     */
-    fun runAfterServiceConnection(runnable: Runnable) {
-        runWhenServiceConnectedQueue.runWhenReady(runnable)
-    }
 
     companion object {
 

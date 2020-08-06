@@ -7,6 +7,12 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import java.io.InputStream
 import com.ustadmobile.port.sharedse.ext.newUnsupportedMethodResponse
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
+import org.kodein.di.direct
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 
 class ConcatenatingFileSource(val response: ConcatenatedHttpResponse): FileResponder.IFileSource {
     override val length: Long
@@ -47,17 +53,13 @@ class ConcatenatedContainerEntryFileResponder: FileResponder(), RouterNanoHTTPD.
         = newUnsupportedMethodResponse()
 
     fun serve(method: NanoHTTPD.Method, uriResource: RouterNanoHTTPD.UriResource, urlParams: MutableMap<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val db = uriResource.initParameter(INIT_PARAM_DB_INDEX, UmAppDatabase::class.java)
+        val di = uriResource.initParameter(INIT_PARAM_DI_INDEX, DI::class.java)
+        val endpointUrl = urlParams.get(URI_PARAM_ENDPOINT) ?: throw IllegalArgumentException("No endpoint")
 
-        val url = RouterNanoHTTPD.normalizeUri(session.uri)
-        val lastSlashPos = url.lastIndexOf('/')
-        if (lastSlashPos == -1) {
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
-                    "application/octet", null)
-        }
 
-        val entryFileUidsStr = url.substring(lastSlashPos + 1)
+        val db : UmAppDatabase = di.on(Endpoint(endpointUrl)).direct.instance(tag = TAG_DB)
 
+        val entryFileUidsStr = session.uri.substringAfterLast("/")
         val concatenatedResponseInfo = db.containerEntryFileDao
                 .generateConcatenatedFilesResponse(entryFileUidsStr)
 
@@ -67,7 +69,9 @@ class ConcatenatedContainerEntryFileResponder: FileResponder(), RouterNanoHTTPD.
 
     companion object {
 
-        val INIT_PARAM_DB_INDEX = 0
+        val INIT_PARAM_DI_INDEX = 0
+
+        const val URI_PARAM_ENDPOINT = "endpoint"
 
     }
 }

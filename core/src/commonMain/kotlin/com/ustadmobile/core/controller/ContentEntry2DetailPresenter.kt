@@ -5,15 +5,14 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.core.util.GoToEntryFn
+import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.LoginView
+import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -21,24 +20,31 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
+import org.kodein.di.on
 
 
 class ContentEntry2DetailPresenter(context: Any,
                                    arguments: Map<String, String>, view: ContentEntry2DetailView,
-                                   lifecycleOwner: DoorLifecycleOwner,
-                                   systemImpl: UstadMobileSystemImpl,
-                                   private val isDownloadEnabled: Boolean,
-                                   db: UmAppDatabase, repo: UmAppDatabase,
-                                   private val containerDownloadManager: ContainerDownloadManager?,
-                                   activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData,
-                                   private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
-    : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                                   di: DI, lifecycleOwner: DoorLifecycleOwner)
+
+    : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context,
+        arguments, view, di, lifecycleOwner) {
+
+
+    private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
+
+    private val containerDownloadManager: ContainerDownloadManager? by di.on(accountManager.activeAccount).instanceOrNull()
+
+    private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -48,9 +54,10 @@ class ContentEntry2DetailPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val entryUuid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        if (containerDownloadManager != null) {
+        println(containerDownloadManager)
+        containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
-                downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(entryUuid).apply {
+                downloadJobItemLiveData = it.getDownloadJobItemByContentEntryUid(entryUuid).apply {
                     observeWithLifecycleOwner(lifecycleOwner, this@ContentEntry2DetailPresenter::onDownloadJobItemChanged)
                 }
             }
@@ -65,6 +72,9 @@ class ContentEntry2DetailPresenter(context: Any,
 
         val result = db.contentEntryRelatedEntryJoinDao.findAllTranslationsWithContentEntryUid(entityUid)
         view.availableTranslationsList = result
+
+        view.contentEntryProgress = db.contentEntryProgressDao.getProgressByContentAndPerson(entityUid, accountManager.activeAccount.personUid)
+
         return entity
     }
 
@@ -73,19 +83,20 @@ class ContentEntry2DetailPresenter(context: Any,
                 mapOf(ARG_ENTITY_UID to entity?.contentEntryUid.toString()), context)
     }
 
-    fun handleOnClickOpenDownloadButton(){
+    fun handleOnClickOpenDownloadButton() {
         val canOpen = !isDownloadEnabled || downloadJobItemLiveData?.getValue()?.djiStatus == JobStatus.COMPLETE
         if (canOpen) {
             val loginFirst = systemImpl.getAppConfigString(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN,
                     "false", context)!!.toBoolean()
-            val account = UmAccountManager.getActiveAccount(context)
-            if (loginFirst && (account == null || account.personUid == 0L)) {
-                systemImpl.go(LoginView.VIEW_NAME, arguments, context)
+            val account = accountManager.activeAccount
+            if (loginFirst && account.personUid == 0L) {
+                systemImpl.go(Login2View.VIEW_NAME, arguments, context)
             } else {
                 openContentEntry()
             }
         } else if (isDownloadEnabled) {
-            view.downloadOptions = arguments
+            view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
+                    ?: "0")))
         }
     }
 
@@ -96,16 +107,16 @@ class ContentEntry2DetailPresenter(context: Any,
     private fun openContentEntry() {
         GlobalScope.launch(Dispatchers.Main) {
             try {
-                entity?.contentEntryUid?.let { goToEntryFn(it, db, context, systemImpl, isDownloadEnabled,
-                            false,
-                            arguments[ARG_NO_IFRAMES]
-                                    ?.toBoolean() ?: false) }
+                entity?.contentEntryUid?.also {
+                    contentEntryOpener.openEntry(context, it, isDownloadEnabled, false,
+                            arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
+                }
             } catch (e: Exception) {
                 if (e is NoAppFoundException) {
-                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found,context))
+                    view.showSnackBar(systemImpl.getString(MessageID.no_app_found, context))
                 } else {
                     val message = e.message
-                    if(message != null){
+                    if (message != null) {
                         view.showSnackBar(message)
                     }
                 }
@@ -113,12 +124,13 @@ class ContentEntry2DetailPresenter(context: Any,
         }
     }
 
-    fun handleOnTranslationClicked(entryUid: Long){
+    fun handleOnTranslationClicked(entryUid: Long) {
         systemImpl.go(ContentEntry2DetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString()), context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        return true
+        return db.contentEntryDao.personHasPermissionWithContentEntry(accountManager.activeAccount.personUid,
+            arguments[ARG_ENTITY_UID]?.toLong() ?: 0, Role.PERMISSION_CONTENT_UPDATE)
     }
 
 }

@@ -13,9 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?colorPrimaryBackground"
-        app:elevation="@dimen/dimen_0dp"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:theme="@style/ThemeOverlay.MaterialComponents.Light"
         android:minHeight="?actionBarSize"
         app:contentScrim="?colorPrimaryBackground"
         app:expandedTitleMarginStart="@dimen/dimen_0dp"
@@ -23,11 +21,12 @@
         app:titleEnabled="false">
 
         <com.google.android.material.appbar.MaterialToolbar
+            style="?toolbarStyle"
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?colorPrimaryBackground"
             app:elevation="@dimen/dimen_4dp"
+            android:paddingEnd="@dimen/dimen_16dp"
             android:minHeight="?actionBarSize"/>
 
 

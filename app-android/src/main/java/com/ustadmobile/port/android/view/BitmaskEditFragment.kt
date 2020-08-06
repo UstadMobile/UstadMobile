@@ -13,8 +13,6 @@ import com.toughra.ustadmobile.databinding.FragmentBitmaskEditBinding
 import com.toughra.ustadmobile.databinding.ItemBitmaskBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.toNullableStringMap
@@ -81,10 +79,7 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
         }
 
         mPresenter = BitmaskEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                 di, viewLifecycleOwner)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         mRecyclerViewAdapter = BitmaskRecyclerViewAdapter()

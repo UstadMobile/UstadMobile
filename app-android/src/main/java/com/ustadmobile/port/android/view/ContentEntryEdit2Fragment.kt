@@ -12,12 +12,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -37,6 +37,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.kodein.di.instance
+import org.kodein.di.on
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -150,8 +152,9 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                     output.close()
                     input?.close()
                     GlobalScope.launch {
-                        val metaData = extractContentEntryMetadataFromFile(tmpFile.absoluteFile,
-                                UmAccountManager.getActiveDatabase(requireContext()))
+                        val accountManager: UstadAccountManager by instance()
+                        val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+                        val metaData = extractContentEntryMetadataFromFile(tmpFile.absoluteFile, db)
                         entryMetaData = metaData
                         when (entryMetaData) {
                             null -> {
@@ -207,26 +210,16 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
-        title = getString(R.string.content)
+        clazzWorkTitle = getString(R.string.content)
 
-        GlobalScope.launch {
-            val thisFrag = this@ContentEntryEdit2Fragment
-            val networkManagerBle = (activity as? MainActivity)?.networkManagerBle?.await()
-            withContext(Dispatchers.Main){
-                mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), thisFrag,
-                        thisFrag, UstadMobileSystemImpl.instance,
-                        UmAccountManager.getActiveDatabase(requireContext()),
-                        UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                        networkManagerBle?.containerDownloadManager,
-                        UmAccountManager.activeAccountLiveData)
-                mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
-                navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                        Language::class.java) {
-                    val language = it.firstOrNull() ?: return@observeResult
-                    entity?.language = language
-                    entity?.primaryLanguageUid = language.langUid
-                }
-            }
+        mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,
+                viewLifecycleOwner, di)
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                Language::class.java) {
+            val language = it.firstOrNull() ?: return@observeResult
+            entity?.language = language
+            entity?.primaryLanguageUid = language.langUid
         }
     }
 

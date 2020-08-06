@@ -26,9 +26,6 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
 
     var newItemVisible: Boolean = false
         set(value) {
-            if(field == value)
-                return
-
             field = value
             submitList(currentHolderList)
         }

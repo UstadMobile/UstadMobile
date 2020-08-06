@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/home_content_dest">
+    app:startDestination="@id/redirect_dest">
 
     <fragment
         android:id="@+id/home_clazzlist_dest"
@@ -62,6 +62,14 @@
     <fragment
         android:id="@+id/person_edit_dest"
         android:name="com.ustadmobile.port.android.view.PersonEditFragment" />
+
+    <!--
+     This is repeated so that it can be explicitly recognized for purposes of controlling
+     the visibility of the bottom navigation bar
+     -->
+    <fragment
+        android:id="@+id/person_edit_register_dest"
+        android:name="com.ustadmobile.port.android.view.PersonEditFragment"/>
 
     <fragment
         android:id="@+id/person_detail_dest"
@@ -124,19 +132,36 @@
         android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment"
         android:label="SchoolMemberListFragment" />
     <fragment
+        android:id="@+id/clazzwork_list_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkListFragment"
+        android:label="ClazzWorkListFragment" />
+    <fragment
+        android:id="@+id/clazzwork_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkEditFragment"
+        android:label="ClazzWorkEditFragment" />
+    <fragment
+        android:id="@+id/clazzworkquestionandoptions_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkQuestionAndOptionsEditFragment"
+        android:label="ClazzWorkQuestionAndOptionsEditFragment" />
+    <fragment
+        android:id="@+id/clazzwork_detail_list"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment"
+        android:label="ClazzWorkDetailFragment" />
+
+    <fragment
         android:id="@+id/home_content_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryListTabsFragment"
         android:label="@string/content">
         <argument
             android:name="parentUid"
-            app:argType="long"
-            android:defaultValue="-4103245208651563007L" />
+            android:defaultValue="-4103245208651563007L"
+            app:argType="long" />
     </fragment>
 
     <fragment
         android:id="@+id/content_entry_list_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
-        android:label="@string/content"/>
+        android:label="@string/content" />
 
     <fragment
         android:id="@+id/content_entry_edit_dest"
@@ -152,6 +177,15 @@
         android:id="@+id/content_entry_details_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
         android:label="" />
+    <fragment
+        android:id="@+id/clazzwork_detail_progress_list"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment"
+        android:label="ClazzWorkDetailProgressListFragment" />
+
+    <fragment
+        android:id="@+id/clazzworksubmission_marking_edit"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkSubmissionMarkingFragment"
+        android:label="ClazzWorkSubmissionMarkingFragment" />
 
     <fragment
         android:id="@+id/report_detail_dest"
@@ -168,5 +202,44 @@
         android:name="com.ustadmobile.port.android.view.VideoContentFragment"
         android:label="" />
 
+    <fragment
+        android:id="@+id/account_get_started_dest"
+        android:name="com.ustadmobile.port.android.view.GetStartedFragment"
+        android:label="@string/lets_get_started_label"
+        />
+
+    <fragment
+        android:id="@+id/workspace_enterlink_dest"
+        android:name="com.ustadmobile.port.android.view.WorkspaceEnterLinkFragment"
+        android:label="@string/workspace"
+        />
+
+    <fragment
+        android:id="@+id/login_dest"
+        android:name="com.ustadmobile.port.android.view.Login2Fragment"
+        android:label="@string/login"
+        />
+
+    <fragment
+        android:id="@+id/account_list_dest"
+        android:name="com.ustadmobile.port.android.view.AccountListFragment"
+        android:label="@string/accounts"
+        />
+
+    <fragment
+        android:id="@+id/redirect_dest"
+        android:name="com.ustadmobile.port.android.view.RedirectFragment"
+        android:label=""
+        />
+
+    <fragment
+        android:id="@+id/webchunk_view"
+        android:name="com.ustadmobile.port.android.view.WebChunkFragment"
+        android:label="" />
+
+    <fragment
+        android:id="@+id/person_account_edit_dest"
+        android:name="com.ustadmobile.port.android.view.PersonAccountEditFragment"
+        android:label="" />
 
 </navigation>

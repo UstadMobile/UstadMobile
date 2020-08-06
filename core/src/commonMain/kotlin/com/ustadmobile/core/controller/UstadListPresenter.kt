@@ -1,24 +1,26 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
+import org.kodein.di.on
 
-abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>, view: V,
-                                                    val lifecycleOwner: DoorLifecycleOwner,
-                                                    val systemImpl: UstadMobileSystemImpl,
-                                                    val db: UmAppDatabase, val repo: UmAppDatabase,
-                                                    val activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadBaseController<V>(context, arguments, view) {
+abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>,
+                                                               view: V, di: DI,
+                                                    val lifecycleOwner: DoorLifecycleOwner)
+    : UstadBaseController<V>(context, arguments, view, di), DIAware {
 
     protected var mListMode = ListViewMode.BROWSER
 
@@ -26,26 +28,35 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     protected var mSearchQuery: String = "%"
 
+    val accountManager: UstadAccountManager by instance()
+
+    val systemImpl: UstadMobileSystemImpl by instance()
+
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         mListMode = ListViewMode.valueOf(
                 arguments[UstadView.ARG_LISTMODE] ?: ListViewMode.BROWSER.toString())
-        activeAccount.observeWithLifecycleOwner(lifecycleOwner, this::onAccountChanged)
+        view.loading = true
+        GlobalScope.launch(doorMainDispatcher()) {
+            onLoadFromDb()
+            view.loading = false
+        }
     }
 
-    protected open fun onAccountChanged(account: UmAccount?) {
+    suspend open fun onLoadFromDb() {
         val listView = (view as? UstadListView<*, *>) ?: return
-
-        GlobalScope.launch(doorMainDispatcher()) {
-            val hasAddPermission = onCheckAddPermission(account)
-            listView.addMode = when {
-                hasAddPermission && mListMode == ListViewMode.BROWSER -> ListViewAddMode.FAB
-                hasAddPermission && mListMode == ListViewMode.PICKER -> ListViewAddMode.FIRST_ITEM
-                else -> ListViewAddMode.NONE
-            }
-
-            listView.selectionOptions = onCheckListSelectionOptions(account)
+        val hasAddPermission = onCheckAddPermission(accountManager.activeAccount)
+        listView.addMode = when {
+            hasAddPermission && mListMode == ListViewMode.BROWSER -> ListViewAddMode.FAB
+            hasAddPermission && mListMode == ListViewMode.PICKER -> ListViewAddMode.FIRST_ITEM
+            else -> ListViewAddMode.NONE
         }
+
+        listView.selectionOptions = onCheckListSelectionOptions(accountManager.activeAccount)
     }
 
     /**

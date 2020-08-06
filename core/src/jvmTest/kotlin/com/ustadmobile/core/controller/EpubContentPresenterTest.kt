@@ -1,24 +1,32 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil.joinPaths
-import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
-import org.junit.*
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.*
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.timeout
@@ -27,14 +35,14 @@ import org.xmlpull.v1.XmlPullParserException
 import java.io.File
 import java.io.IOException
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
 
 class EpubContentPresenterTest {
 
-    private lateinit var db: UmAppDatabase
 
-    private lateinit var repo: UmAppDatabase
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var epubTmpFile: File
 
@@ -42,43 +50,58 @@ class EpubContentPresenterTest {
     @JvmField
     val tmpFileRule = TemporaryFolder()
 
-    private var containerDirTmp: File? = null
+    private lateinit var containerDirTmp: File
 
     private lateinit var mockEpubView: EpubContentView
 
-    private lateinit var mockHandler: ContainerMounter
-
     private var epubContainer: Container? = null
 
-    private lateinit var httpd: EmbeddedHTTPD
-
     private var opf: OpfDocument? = null
+
+    lateinit var di: DI
+
+    lateinit var mockStatementEndpoint: XapiStatementEndpoint
+
+    lateinit var contentEntry: ContentEntry
 
     @Before
     @Throws(IOException::class, XmlPullParserException::class)
     fun setup() {
-        db = UmAppDatabase.getInstance(Any())
-        repo = db
-        db.clearAllTables()
+        mockStatementEndpoint = mock { }
 
-        epubContainer = Container()
-        epubContainer!!.containerUid = repo.containerDao.insert(epubContainer!!)
+        di = DI {
+            import(ustadTestRule.diModule)
+            bind<XapiStatementEndpoint>() with singleton { mockStatementEndpoint }
+        }
+
+        val accountManager: UstadAccountManager = di.direct.instance()
+        accountManager.activeAccount = UmAccount(42L, "user", "",
+                "http://localhost:4200/", "bob", "jones")
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
+        val db: UmAppDatabase by di.activeDbInstance()
+
+        contentEntry = ContentEntry("Test epub", "test", true, true).apply {
+            contentEntryUid = db.contentEntryDao.insert(this)
+        }
+
+        epubContainer = Container().apply {
+            containerContentEntryUid = contentEntry.contentEntryUid
+            containerUid = repo.containerDao.insert(this)
+        }
 
         epubTmpFile = tmpFileRule.newFile("epubTmpFile")
 
         UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/epub/test.epub",
-                epubTmpFile!!)
+                epubTmpFile)
 
         containerDirTmp = tmpFileRule.newFolder("containerDirTmp")
         val containerManager = ContainerManager(epubContainer!!, db, repo,
-                containerDirTmp!!.absolutePath)
+                containerDirTmp.absolutePath)
 
-        val epubZipFile = ZipFile(epubTmpFile!!)
-        addEntriesFromZipToContainer(epubTmpFile!!.absolutePath, containerManager)
+        val epubZipFile = ZipFile(epubTmpFile)
+        addEntriesFromZipToContainer(epubTmpFile.absolutePath, containerManager)
         epubZipFile.close()
-
-        httpd = EmbeddedHTTPD(0, Any(), db, repo)
-        httpd.start()
 
         mockEpubView = mock {
 
@@ -88,13 +111,6 @@ class EpubContentPresenterTest {
             }
         }
 
-        mockHandler = mock{
-            onBlocking { mountContainer(eq(epubContainer!!.containerUid)) }.doAnswer{
-                val mountedUrl = joinPaths(httpd.localHttpUrl,
-                        httpd.mountContainer(it.getArgument(0), null)!!)
-                mountedUrl
-            }
-        }
 
         //Used for verification purposes
         val opfIn = containerManager.getInputStream(containerManager.getEntry("OEBPS/package.opf")!!)
@@ -107,44 +123,46 @@ class EpubContentPresenterTest {
     @Suppress("UNCHECKED_CAST")
     @Test
     @Throws(IOException::class)
-    fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefs() {
+    fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefsAndRecordProgress() {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
 
-        val hrefListReference = AtomicReference<Any>()
-
-        whenever(mockEpubView.setSpineUrls(anyArray(), eq(0))).thenAnswer {
-            hrefListReference.set(it.getArgument(0))
-            Unit
-        }
-
-        val presenter = EpubContentPresenter(Any(),
-                args, mockEpubView, mockHandler)
+        val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
         presenter.onCreate(args)
+        presenter.onStart()
 
 
-        verifyBlocking(mockHandler, timeout(15000)){
-            mountContainer(eq(epubContainer!!.containerUid))
-        }
         verify(mockEpubView, timeout(15000)).containerTitle = opf!!.title!!
 
-        verify(mockEpubView, timeout(20000)).setSpineUrls(any(), eq(0))
+        presenter.handlePageChanged(2)
 
-        val linearSpineUrls = hrefListReference.get() as Array<String>
-        val client = HttpClient()
-        runBlocking {
-            for (i in linearSpineUrls.indices) {
-                Assert.assertTrue("Spine itemk $i ends with expected url",
-                        linearSpineUrls[i].endsWith(opf!!.linearSpineHREFs[i]))
+        presenter.onStop()
 
-                val responseStatusCode = client.get<HttpStatement>(linearSpineUrls[i]).execute {
-                    it.status.value
+        verify(mockStatementEndpoint, timeout(5000)).storeStatements(argWhere {
+            val progressRecorded = it.firstOrNull()?.result?.extensions?.get("https://w3id.org/xapi/cmi5/result/extensions/progress") as? Int
+            progressRecorded != null && progressRecorded > 0
+        }, anyOrNull(), eq(contentEntry.contentEntryUid))
+
+        argumentCaptor<List<String>>().apply {
+            verify(mockEpubView, timeout(20000)).spineUrls = capture()
+
+            val client = HttpClient()
+            runBlocking {
+                firstValue.forEachIndexed {index, url ->
+                    Assert.assertTrue("Spine itemk $index ends with expected url",
+                            url.endsWith(opf!!.linearSpineHREFs[index]))
+
+                    val responseStatusCode = client.get<HttpStatement>(url).execute {
+                        it.status.value
+                    }
+                    Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
+                            responseStatusCode)
                 }
-                Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
-                        responseStatusCode)
             }
+            client.close()
         }
-        client.close()
+
     }
 
 }

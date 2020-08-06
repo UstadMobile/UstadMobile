@@ -8,11 +8,13 @@ import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.Container
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
-actual class VideoContentPresenter actual constructor(context: Any, arguments: Map<String, String>?,
-                                                      view: VideoPlayerView, private val db: UmAppDatabase,
-                                                      private val repo: UmAppDatabase)
-    : VideoContentPresenterCommon(context, arguments, view, db, repo) {
+actual class VideoContentPresenter actual constructor(context: Any, arguments: Map<String, String>,
+                                                      view: VideoPlayerView, di: DI)
+    : VideoContentPresenterCommon(context, arguments, view, di) {
 
     var container: Container? = null
 

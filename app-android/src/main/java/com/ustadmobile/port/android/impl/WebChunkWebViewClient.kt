@@ -10,8 +10,6 @@ import com.google.gson.Gson
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.IndexLog
 import com.ustadmobile.core.controller.WebChunkPresenter
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
@@ -25,23 +23,16 @@ import java.util.regex.Pattern
 
 
 @ExperimentalStdlibApi
-class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter, context: Any) : WebViewClient() {
+class WebChunkWebViewClient(private val containerManager: ContainerManager, mPresenter: WebChunkPresenter?) : WebViewClient() {
 
-
-    private lateinit var containerManager: ContainerManager
-    private lateinit var presenter: WebChunkPresenter
+    private var presenter: WebChunkPresenter? = null
     private val indexMap = HashMap<String, IndexLog.IndexEntry>()
     private val linkPatterns = HashMap<Pattern, String>()
-    var url: String? = null
+    lateinit var url: String
 
     init {
         try {
             this.presenter = mPresenter
-            val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)
-            val appDatabase = UmAccountManager.getActiveDatabase(context)
-
-            containerManager = ContainerManager(pathToZip, appDatabase, repoAppDatabase)
-
             val index = containerManager.getEntry("index.json")
 
             val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager.getInputStream(index!!)), IndexLog::class.java)
@@ -56,11 +47,11 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
             val linksMap = indexLog.links
             if (linksMap != null && linksMap.isNotEmpty()) {
                 for (link in linksMap.keys) {
-                    linkPatterns[Pattern.compile(link)] = linksMap[link]!!
+                    linkPatterns[Pattern.compile(link)] = linksMap.getValue(link)
                 }
             }
         } catch (e: Exception) {
-            System.err.println("Error opening Zip File from path $pathToZip")
+            System.err.println("Error opening Zip File")
         }
 
     }
@@ -68,7 +59,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         val requestUrl = checkWithPattern(request.url.toString())
         if (requestUrl != null) {
-            presenter.handleUrlLinkToContentEntry(requestUrl)
+            presenter?.handleUrlLinkToContentEntry(requestUrl)
             return true
         }
         return super.shouldOverrideUrlLoading(view, request)
@@ -79,7 +70,7 @@ class WebChunkWebViewClient(pathToZip: Container, mPresenter: WebChunkPresenter,
         val requestUrl = StringBuilder(request.url.toString())
         val sourceUrl = checkWithPattern(requestUrl.toString())
         if (sourceUrl != null) {
-            presenter.handleUrlLinkToContentEntry(sourceUrl)
+            presenter?.handleUrlLinkToContentEntry(sourceUrl)
             Handler(Looper.getMainLooper()).post { view.loadUrl(url) }
             return WebResourceResponse("text/html", "utf-8", null)
         }
