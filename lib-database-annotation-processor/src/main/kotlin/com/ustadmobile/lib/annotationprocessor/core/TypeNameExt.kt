@@ -10,7 +10,7 @@ internal fun TypeName.toSqlType(dbType: Int = 0) = when {
     this == INT ->  "INTEGER"
     this == LONG -> "BIGINT"
     this == FLOAT -> "FLOAT"
-    this == DOUBLE -> "DOUBLE"
+    this == DOUBLE -> "DOUBLE PRECISION"
     this == String::class.asClassName() -> "TEXT"
 
     else -> "ERR_UNSUPPORTED_TPYE-$this"
