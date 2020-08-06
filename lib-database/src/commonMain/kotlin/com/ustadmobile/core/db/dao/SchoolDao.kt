@@ -7,10 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.lib.db.entities.SchoolMember
-import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
+import com.ustadmobile.lib.db.entities.*
 
 @UmDao
 @UmRepository
@@ -56,5 +53,25 @@ abstract class SchoolDao : BaseDao<School> {
 
     @Update
     abstract suspend fun updateAsync(entity: School): Int
+
+    companion object {
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
+            SELECT DISTINCT Person.PersonUid FROM Person
+            LEFT JOIN PersonGroupMember ON Person.personUid = PersonGroupMember.groupMemberPersonUid
+            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
+            WHERE 
+            CAST(Person.admin AS INTEGER) = 1
+            OR 
+            (EntityRole.ertableId = ${School.TABLE_ID} AND 
+            EntityRole.erEntityUid = School.schoolUid AND
+            (Role.rolePermissions &  
+        """
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
+
+
+    }
 
 }
