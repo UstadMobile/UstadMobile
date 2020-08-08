@@ -9,10 +9,8 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -42,7 +40,7 @@ class PersonEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    private var registrationAllowed: Boolean = false
+    private var registrationMode: Boolean = false
 
     private val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
@@ -68,7 +66,7 @@ class PersonEditPresenter(context: Any,
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
         view.clazzList = clazzMemberJoinEditHelper.liveList
 
-        registrationAllowed = arguments[ARG_REGISTRATION_ALLOWED]?.toBoolean()?:false
+        registrationMode = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toBoolean()?:false
 
         serverUrl = if (arguments.containsKey(UstadView.ARG_SERVER_URL)) {
             arguments.getValue(UstadView.ARG_SERVER_URL)
@@ -80,7 +78,7 @@ class PersonEditPresenter(context: Any,
                 AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context) ?:
                 ContentEntryListTabsView.VIEW_NAME
 
-        view.classVisible = registrationAllowed
+        view.registrationMode = registrationMode
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount? {
@@ -131,7 +129,7 @@ class PersonEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             val noPasswordMatch = entity.newPassword != entity.confirmedPassword
                     && !entity.newPassword.isNullOrEmpty() &&  !entity.confirmedPassword.isNullOrEmpty()
-            if(registrationAllowed && (entity.username.isNullOrEmpty()
+            if(registrationMode && (entity.username.isNullOrEmpty()
                             || entity.newPassword.isNullOrEmpty() || entity.confirmedPassword.isNullOrEmpty()
                             || noPasswordMatch)){
                 val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
@@ -143,7 +141,7 @@ class PersonEditPresenter(context: Any,
                 return@launch
             }
 
-            if(registrationAllowed){
+            if(registrationMode){
                 val password = entity.newPassword
                 if(password != null){
                    try{
@@ -190,7 +188,7 @@ class PersonEditPresenter(context: Any,
                     repo.personPictureDao.update(personPicture)
                 }
 
-                view.finishWithResult(listOf(entity))
+                onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
             }
         }
     }

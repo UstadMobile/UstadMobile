@@ -1,9 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.core.db.dao.RoleDao.Companion.SELECT_ACCOUNT_IS_ADMIN
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -18,6 +16,9 @@ abstract class RoleDao : BaseDao<Role> {
 
     @Query("SELECT * FROM Role WHERE roleName=:roleName")
     abstract suspend fun findByName(roleName: String): Role?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertOrReplace(entity: Role)
 
     @Query("SELECT * FROM Role WHERE roleName = :roleName")
     abstract fun findByNameSync(roleName: String): Role?
@@ -45,6 +46,24 @@ abstract class RoleDao : BaseDao<Role> {
 
     @Update
     abstract suspend fun updateAsync(entitiy: Role):Int
+
+
+    suspend fun insertDefaultRolesIfRequired() {
+        val teacherRole = findByUidAsync(Role.ROLE_TEACHER_UID.toLong())
+        if(teacherRole == null) {
+            insertOrReplace(Role(Role.ROLE_TEACHER_NAME, Role.ROLE_TEACHER_PERMISSIONS_DEFAULT).apply {
+                roleUid = Role.ROLE_TEACHER_UID.toLong()
+            })
+        }
+
+        val studentRole = findByUidAsync(Role.ROLE_STUDENT_UID.toLong())
+        if(studentRole == null) {
+            insertOrReplace(Role(Role.ROLE_STUDENT_NAME, Role.ROLE_STUDENT_PERMISSIONS_DEFAULT).apply {
+                roleUid = Role.ROLE_STUDENT_UID.toLong()
+            })
+        }
+    }
+
 
     companion object {
 

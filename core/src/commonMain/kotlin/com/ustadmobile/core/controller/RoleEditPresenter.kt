@@ -140,7 +140,7 @@ class RoleEditPresenter(context: Any,
 
         BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW , MessageID.permission_clazz_assignment_view , false),
 
-        BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE , MessageID.permission_clazz_asignment_edit , false)
+        BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit , false)
         )
 
     }

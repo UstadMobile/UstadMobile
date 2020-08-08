@@ -3,13 +3,21 @@ package com.ustadmobile.port.sharedse.impl.http
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.port.sharedse.contentformats.xapi.Actor
-import com.ustadmobile.port.sharedse.contentformats.xapi.State
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StateEndpoint
+import com.ustadmobile.core.contentformats.xapi.Actor
+import com.ustadmobile.core.contentformats.xapi.State
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StatementRequestException
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.IOException
@@ -22,7 +30,8 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
 
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase::class.java)
+        val di = uriResource.initParameter(PARAM_APPREPO_INDEX, DI::class.java)
+        val endpointUrl = urlParams[URI_PARAM_ENDPOINT] ?: throw IllegalArgumentException("No endpoint")
         try {
 
             val map = HashMap<String, String>()
@@ -43,9 +52,8 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             else
                 ""
 
-            val gson = GsonBuilder().disableHtmlEscaping().create()
-            val endpoint = StateEndpoint(repo, gson, null)
-            val json = endpoint.getContent(stateId, agentJson, activityId, registration, since)
+            val stateEndpoint: XapiStateEndpoint =  di.on(Endpoint(endpointUrl)).direct.instance()
+            val json = stateEndpoint.getContent(stateId, agentJson, activityId, registration, since)
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
                     "application/octet", json)
 
@@ -60,25 +68,18 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
     }
 
     override fun put(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase::class.java)
-
-        val content: ByteArray
-        var fin: FileInputStream? = null
-        var bout: ByteArrayOutputStream? = null
-        val tmpFileName: String
+        val di = uriResource.initParameter(PARAM_APPREPO_INDEX, DI::class.java)
+        val endpointUrl = urlParams[URI_PARAM_ENDPOINT] ?: throw IllegalArgumentException("No endpoint")
+        val gson: Gson by di.instance()
+        val content: String?
         try {
 
             val map = HashMap<String, String>()
             session.parseBody(map)
-            if (map.containsKey("content")) {
-                tmpFileName = map["content"]!!
-                fin = FileInputStream(tmpFileName)
-                bout = ByteArrayOutputStream()
-                UMIOUtils.readFully(fin, bout)
-                bout.flush()
-                content = bout.toByteArray()
+            content = if (map.containsKey("content")) {
+                map["content"]
             } else {
-                content = session.queryParameterString.toByteArray()
+                session.queryParameterString
             }
             val queryParams = session.parameters
             val activityId = queryParams["activityId"]?.get(0)
@@ -89,17 +90,14 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             else
                 ""
 
-            val contentType = session.headers["content-type"]
+            isContentTypeJson(session.headers["content-type"])
 
-            val gson = Gson()
             val agent = gson.fromJson(agentJson, Actor::class.java)
-            val contentJson = String(content)
-            val contentMap: HashMap<String, Any>
-            contentMap = gson.fromJson(contentJson, contentMapToken)
+            val contentMap: HashMap<String, Any> = gson.fromJson(content, contentMapToken)
 
             val state = State(stateId, agent, activityId, contentMap, registration)
-            val endpoint = StateEndpoint(repo, gson, contentType)
-            endpoint.overrideState(state)
+            val stateEndpoint: XapiStateEndpoint =  di.on(Endpoint(endpointUrl)).direct.instance()
+            stateEndpoint.overrideState(state)
 
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
                     "application/octet", null)
@@ -111,17 +109,14 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
         } catch (e: NullPointerException) {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
-        } finally {
-            UMIOUtils.closeInputStream(fin)
-            UMIOUtils.closeOutputStream(bout)
-
         }
 
     }
 
     override fun post(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase::class.java)
-
+        val di = uriResource.initParameter(PARAM_APPREPO_INDEX, DI::class.java)
+        val endpointUrl = urlParams[URI_PARAM_ENDPOINT] ?: throw IllegalArgumentException("No endpoint")
+        val gson: Gson by di.instance()
         try {
 
             val map = HashMap<String, String>()
@@ -135,16 +130,15 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             else
                 ""
 
-            val gson = Gson()
             val agent = gson.fromJson(agentJson, Actor::class.java)
             val contentMap: HashMap<String, Any>
             contentMap = gson.fromJson(map["postData"], contentMapToken)
 
-            val contentType = session.headers["content-type"]
+            isContentTypeJson(session.headers["content-type"])
 
             val state = State(stateId, agent, activityId, contentMap, registration)
-            val endpoint = StateEndpoint(repo, gson, contentType)
-            endpoint.storeState(state)
+            val stateEndpoint: XapiStateEndpoint =  di.on(Endpoint(endpointUrl)).direct.instance()
+            stateEndpoint.storeState(state)
 
             return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.NO_CONTENT,
                     "application/octet", null)
@@ -160,8 +154,17 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
 
     }
 
+    private fun isContentTypeJson(contentType: String?) {
+        if (contentType?.isEmpty() == true || contentType != "application/json") {
+            throw StatementRequestException("Content Type missing or not set to application/json")
+        }
+    }
+
     override fun delete(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase::class.java)
+        val di = uriResource.initParameter(PARAM_APPREPO_INDEX, DI::class.java)
+        val endpointUrl = urlParams[URI_PARAM_ENDPOINT] ?: throw IllegalArgumentException("No endpoint")
+        val gson: Gson by di.instance()
+
         try {
 
             val map = HashMap<String, String>()
@@ -178,12 +181,12 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
             else
                 ""
 
-            val gson = Gson()
-            val endpoint = StateEndpoint(repo, gson, null)
+
+            val stateEndpoint: XapiStateEndpoint =  di.on(Endpoint(endpointUrl)).direct.instance()
             if (stateId == null || stateId.isEmpty()) {
-                endpoint.deleteListOfStates(agentJson, activityId, registration)
+                stateEndpoint.deleteListOfStates(agentJson, activityId, registration)
             } else {
-                endpoint.deleteStateContent(stateId, agentJson, activityId, registration)
+                stateEndpoint.deleteStateContent(stateId, agentJson, activityId, registration)
 
             }
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
@@ -206,5 +209,7 @@ class XapiStateResponder : RouterNanoHTTPD.UriResponder {
     companion object {
 
         const val PARAM_APPREPO_INDEX = 0
+
+        const val URI_PARAM_ENDPOINT = "endpoint"
     }
 }

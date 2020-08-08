@@ -65,7 +65,6 @@
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true" />
 
-
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"

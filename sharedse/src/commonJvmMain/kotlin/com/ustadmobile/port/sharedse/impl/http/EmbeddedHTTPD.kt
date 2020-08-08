@@ -34,7 +34,7 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
  *
  * Created by mike on 8/14/15.
  */
-open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di: DI) : RouterNanoHTTPD(portNum), DIAware, ContainerMounter{
+open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di: DI) : RouterNanoHTTPD(portNum), DIAware, ContainerMounter {
 
     private val id: Int
 
@@ -79,6 +79,10 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
                 ContainerEntryListResponder::class.java, di)
         addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/(.*)+",
                 ConcatenatedContainerEntryFileResponder::class.java, di)
+        addRoute("/:${XapiStatementResponder.URI_PARAM_ENDPOINT}/xapi/:contentEntryUid/statements",
+                XapiStatementResponder::class.java, di)
+        addRoute("/:${XapiStateResponder.URI_PARAM_ENDPOINT}/xapi/activities/state",
+                XapiStateResponder::class.java, di)
 
         //TODO: This should provide NetworkManager to the responder, or BleProxyResponder could use DI itself
         addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, networkManager)
@@ -118,7 +122,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
         val endpointDb: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
         val endpointRepo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
-        val container = endpointRepo.containerDao.findByUid(containerUid) ?: throw IllegalArgumentException("Container $containerUid on $endpointUrl not found")
+        val container = endpointRepo.containerDao.findByUid(containerUid)
+                ?: throw IllegalArgumentException("Container $containerUid on $endpointUrl not found")
         val containerManager = ContainerManager(container, endpointDb, endpointRepo)
 
         val mountPath = "/${sanitizeDbNameFromUrl(endpointUrl)}/container/$containerUid/"

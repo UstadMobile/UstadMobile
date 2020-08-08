@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation"
+    >
     <string name="app_name">Ustad Mobile</string>
     <string name='login'>Login</string>
     <string name='error'>Error</string>
@@ -635,11 +637,24 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="untitled">Untitled</string>
     <string name="present_late_absent">%1$d present, %2$d late, %3$d absent</string>
 
+    <string name="marked_cap">Marked</string>
+    <string name="submitted_cap">Submited</string>
+    <string name="not_submitted_cap">Not submitted</string>
+    <string name="submitliteral">Submit</string>
+
+
     <!-- Used to show the percentage attendance e.g. "50% attendance".
     Translators note: translate only the word attendance, do not modify %1.0f%%-->
     <string name="x_percent_attended">%1.0f%% attendance</string>
 
+    <string name="answer">Answer</string>
+
+    <string name="of_content">of content</string>
+
     <string name="nothing_here">Nothing here</string>
+
+    <string name="not_answered">Not answered</string>
+
 
     <string name="clazz_work">Class work</string>
     <string name="marked">marked</string>
@@ -687,5 +702,11 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="logged_in_as">Logged in as  %1$s on %2$s</string>
     <string name="person_exists">Person already exist, pick another username</string>
     <string name="incorrect_current_password">Current password incorrect</string>
+
+    <string name="sel_question_type_free_text">Free text</string>
+    <string name="sel_question_type_multiple_choice">Multiple choice</string>
+    <string name="question_text">Question text</string>
+    <string name="question_type">Question type</string>
+    <string name="add_option">Add option</string>
 
 </resources>

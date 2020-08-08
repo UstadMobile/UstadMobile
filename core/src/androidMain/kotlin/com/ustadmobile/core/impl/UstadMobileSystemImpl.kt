@@ -46,9 +46,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
-import androidx.navigation.navOptions
+import androidx.navigation.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
@@ -58,7 +56,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
 import java.util.*
-import java.util.concurrent.Executors
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -100,7 +97,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
-
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
@@ -201,7 +197,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
-    actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
+    actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
+                           flags: Int, ustadGoOptions: UstadGoOptions) {
         val ustadDestination = destinationProvider.lookupDestinationName(viewName)
         if(ustadDestination != null) {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
@@ -214,7 +211,20 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                     popEnter = androidx.navigation.ui.R.anim.fragment_open_enter
                     popExit = androidx.navigation.ui.R.anim.fragment_close_exit
                 }
+
+                val popUpToViewName = ustadGoOptions.popUpToViewName
+                if(popUpToViewName != null) {
+                    val popUpToDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
+                        navController.currentDestination?.id ?: 0
+                    }else {
+                        destinationProvider.lookupDestinationName(popUpToViewName)
+                                ?.destinationId ?: 0
+                    }
+
+                    popUpTo(popUpToDestId) { inclusive = ustadGoOptions.popUpToInclusive }
+                }
             }
+
             navController.navigate(ustadDestination.destinationId, args.toBundleWithNullableValues(),
                 options)
 

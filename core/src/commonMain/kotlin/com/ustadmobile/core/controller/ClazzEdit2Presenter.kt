@@ -4,8 +4,10 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
@@ -85,7 +87,7 @@ class ClazzEdit2Presenter(context: Any,
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.clazzUid == 0L) {
-                entity.clazzUid = repo.clazzDao.insertAsync(entity)
+                repo.createNewClazzAndGroups(entity, systemImpl, context)
             }else {
                 repo.clazzDao.updateAsync(entity)
             }
@@ -102,7 +104,7 @@ class ClazzEdit2Presenter(context: Any,
                     accountManager.activeAccount.endpointUrl,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
-            view.finishWithResult(listOf(entity))
+            onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
         }
     }
 

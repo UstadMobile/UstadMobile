@@ -1,12 +1,11 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.anyArray
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
@@ -15,6 +14,8 @@ import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -25,7 +26,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.DI
+import org.kodein.di.*
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.timeout
@@ -34,7 +35,6 @@ import org.xmlpull.v1.XmlPullParserException
 import java.io.File
 import java.io.IOException
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
 
 class EpubContentPresenterTest {
@@ -60,18 +60,35 @@ class EpubContentPresenterTest {
 
     lateinit var di: DI
 
+    lateinit var mockStatementEndpoint: XapiStatementEndpoint
+
+    lateinit var contentEntry: ContentEntry
+
     @Before
     @Throws(IOException::class, XmlPullParserException::class)
     fun setup() {
+        mockStatementEndpoint = mock { }
+
         di = DI {
             import(ustadTestRule.diModule)
+            bind<XapiStatementEndpoint>() with singleton { mockStatementEndpoint }
         }
+
+        val accountManager: UstadAccountManager = di.direct.instance()
+        accountManager.activeAccount = UmAccount(42L, "user", "",
+                "http://localhost:4200/", "bob", "jones")
 
         val repo: UmAppDatabase by di.activeRepoInstance()
         val db: UmAppDatabase by di.activeDbInstance()
 
-        epubContainer = Container()
-        epubContainer!!.containerUid = repo.containerDao.insert(epubContainer!!)
+        contentEntry = ContentEntry("Test epub", "test", true, true).apply {
+            contentEntryUid = db.contentEntryDao.insert(this)
+        }
+
+        epubContainer = Container().apply {
+            containerContentEntryUid = contentEntry.contentEntryUid
+            containerUid = repo.containerDao.insert(this)
+        }
 
         epubTmpFile = tmpFileRule.newFile("epubTmpFile")
 
@@ -106,39 +123,46 @@ class EpubContentPresenterTest {
     @Suppress("UNCHECKED_CAST")
     @Test
     @Throws(IOException::class)
-    fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefs() {
+    fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefsAndRecordProgress() {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
-
-        val hrefListReference = AtomicReference<Any>()
-
-        whenever(mockEpubView.setSpineUrls(anyArray(), eq(0))).thenAnswer {
-            hrefListReference.set(it.getArgument(0))
-            Unit
-        }
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
 
         val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
         presenter.onCreate(args)
+        presenter.onStart()
 
 
         verify(mockEpubView, timeout(15000)).containerTitle = opf!!.title!!
-        verify(mockEpubView, timeout(20000)).setSpineUrls(any(), eq(0))
 
-        val linearSpineUrls = hrefListReference.get() as Array<String>
-        val client = HttpClient()
-        runBlocking {
-            for (i in linearSpineUrls.indices) {
-                Assert.assertTrue("Spine itemk $i ends with expected url",
-                        linearSpineUrls[i].endsWith(opf!!.linearSpineHREFs[i]))
+        presenter.handlePageChanged(2)
 
-                val responseStatusCode = client.get<HttpStatement>(linearSpineUrls[i]).execute {
-                    it.status.value
+        presenter.onStop()
+
+        verify(mockStatementEndpoint, timeout(5000)).storeStatements(argWhere {
+            val progressRecorded = it.firstOrNull()?.result?.extensions?.get("https://w3id.org/xapi/cmi5/result/extensions/progress") as? Int
+            progressRecorded != null && progressRecorded > 0
+        }, anyOrNull(), eq(contentEntry.contentEntryUid))
+
+        argumentCaptor<List<String>>().apply {
+            verify(mockEpubView, timeout(20000)).spineUrls = capture()
+
+            val client = HttpClient()
+            runBlocking {
+                firstValue.forEachIndexed {index, url ->
+                    Assert.assertTrue("Spine itemk $index ends with expected url",
+                            url.endsWith(opf!!.linearSpineHREFs[index]))
+
+                    val responseStatusCode = client.get<HttpStatement>(url).execute {
+                        it.status.value
+                    }
+                    Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
+                            responseStatusCode)
                 }
-                Assert.assertEquals("Making HTTP request to spine url status code is 200 OK", 200,
-                        responseStatusCode)
             }
+            client.close()
         }
-        client.close()
+
     }
 
 }

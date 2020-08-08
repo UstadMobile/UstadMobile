@@ -14,7 +14,7 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>?
 
-    var classVisible: Boolean?
+    var registrationMode: Boolean?
 
     var usernameError: String?
 
@@ -31,6 +31,18 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
     companion object {
 
         const val VIEW_NAME = "PersonEditView"
+
+        /** This is a different view name that is mapped to a different NavController destination
+         * This allows it to be recognized for purposes of controlling the visibility of the bottom
+         * navigation bar
+         */
+        const val VIEW_NAME_REGISTER = "PersonEditRegisterView"
+
+        /**
+         * If true, the view will show space for the user to enter a username and password to register.
+         * The presenter will then register the new user with the server (provided via ARG_SERVER_URL)
+         */
+        const val ARG_REGISTRATION_MODE = "RegMode"
 
     }
 

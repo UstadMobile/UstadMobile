@@ -1,6 +1,10 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_RESULT_DEST_ID
+import com.ustadmobile.core.view.UstadView.Companion.CURRENT_DEST
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import org.kodein.di.DI
@@ -34,5 +38,19 @@ abstract class UstadEditPresenter<V: UstadEditView<RT>, RT: Any>(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         jsonLoadListeners.forEach { it.onSaveState(savedState) }
         super.onSaveInstanceState(savedState)
+    }
+
+    protected val isExistingEntityOrPickerMode
+        get() = (arguments[ARG_ENTITY_UID]?.toLong() ?: 0L) != 0L ||
+                arguments[ARG_RESULT_DEST_ID] != null
+
+    fun onFinish(detailViewName: String, entityUid: Long, entity: RT) {
+
+        if(!isExistingEntityOrPickerMode) {
+            systemImpl.go(detailViewName, mapOf(ARG_ENTITY_UID to entityUid.toString()), context,
+                    UstadMobileSystemCommon.UstadGoOptions(CURRENT_DEST, popUpToInclusive = true))
+        }  else {
+            view.finishWithResult(listOf(entity))
+        }
     }
 }

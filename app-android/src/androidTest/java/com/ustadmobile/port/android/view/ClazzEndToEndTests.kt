@@ -45,9 +45,10 @@ class ClazzEndToEndTests {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    @AdbScreenRecord("Given an empty class list, when the user clicks add class and fills in form, then the new class is shown in list")
+    @AdbScreenRecord("Given an empty class list, when the user clicks add class and " +
+            "fills in form, then it should go to the new class")
     @Test
-    fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndShownInList() {
+    fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndGoneInto() {
         val calendarUid = dbRule.db.holidayCalendarDao.insert(HolidayCalendar().apply {
             this.umCalendarName = "Test Calendar"
         })
@@ -82,8 +83,7 @@ class ClazzEndToEndTests {
 
 
         val createdClazz = dbRule.db.clazzDao.findByClazzName("Test Class").first()
-        onView(allOf(withId(R.id.item_clazzlist_clazz_cl), withTagValue(equalTo(createdClazz.clazzUid))))
-                .check(matches(isDisplayed()))
+        onView(withText("Test Class")).perform(click())
     }
 
 }

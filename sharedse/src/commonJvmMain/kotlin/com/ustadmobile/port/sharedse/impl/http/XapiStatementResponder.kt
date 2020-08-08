@@ -3,15 +3,24 @@ package com.ustadmobile.port.sharedse.impl.http
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.port.sharedse.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.XContext
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StatementEndpoint
+import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.StatementRequestException
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.*
 import java.util.*
 
@@ -19,9 +28,6 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase::class.java)
-
-
         if (urlParams.containsKey(PARAM_STATEMENT_ID) || urlParams.containsKey(PARAM_VOID_STATEMENT_ID)) {
 
             // single statement
@@ -52,28 +58,21 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
     }
 
     override fun put(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase::class.java)
+        val di = uriResource.initParameter(PARAM_APPREPO_INDEX, DI::class.java)
+        val gson: Gson by di.instance()
+        val endpointUrl = urlParams[URI_PARAM_ENDPOINT] ?: throw IllegalArgumentException("No endpoint")
+
 
         val contentEntryUid = urlParams[URLPARAM_CONTENTENTRYUID]?.toLongOrNull() ?: 0L
-        val gson = createGson()
-        var content: ByteArray? = null
-        var fin: FileInputStream? = null
-        var bout: ByteArrayOutputStream? = null
-        val tmpFileName: String
         try {
 
-            var statement: String? = null
+            val statement: String?
             val map = HashMap<String, String>()
             session.parseBody(map)
-            if (map.containsKey("content")) {
-                tmpFileName = map["content"]!!
-                fin = FileInputStream(tmpFileName)
-                bout = ByteArrayOutputStream()
-                UMIOUtils.readFully(fin, bout)
-                bout.flush()
-                content = bout.toByteArray()
+            statement = if (map.containsKey("content")) {
+                map["content"]
             } else {
-                statement = session.queryParameterString
+                session.queryParameterString
             }
             val queryParams = session.parameters
             var statementId = ""
@@ -81,12 +80,10 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                 statementId = queryParams["statementId"]!![0]
             }
 
-            if (content != null || statement != null) {
-                statement = content?.let { String(it) } ?: statement
-
-                val statements = getStatementsFromJson(statement!!.trim { it <= ' ' }, gson)
-                val endpoint = StatementEndpoint(repo, gson)
-                endpoint.storeStatements(statements, statementId, contentEntryUid = contentEntryUid)
+            if (statement != null) {
+                val statements = getStatementsFromJson(statement.trim { it <= ' ' }, gson)
+                val statementEndpoint: XapiStatementEndpoint =  di.on(Endpoint(endpointUrl)).direct.instance()
+                statementEndpoint.storeStatements(statements, statementId, contentEntryUid = contentEntryUid)
             } else {
                 throw StatementRequestException("no content found", 204)
             }
@@ -98,26 +95,17 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                     "application/octet", e.message)
         } catch (e: NanoHTTPD.ResponseException) {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
-        } finally {
-            UMIOUtils.closeInputStream(fin)
-            UMIOUtils.closeOutputStream(bout)
-
         }
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NO_CONTENT,
                 "application/octet", null)
     }
 
-    private fun createGson(): Gson {
-        val builder = GsonBuilder()
-        builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
-        builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
-        return builder.create()
-    }
-
     override fun post(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val repo = uriResource.initParameter(PARAM_APPREPO_INDEX, UmAppDatabase::class.java)
+        val di = uriResource.initParameter(PARAM_APPREPO_INDEX, DI::class.java)
+        val gson: Gson by di.instance()
+        val endpointUrl = urlParams.get(URI_PARAM_ENDPOINT) ?: throw IllegalArgumentException("No endpoint")
+
         val contentEntryUid = urlParams[URLPARAM_CONTENTENTRYUID]?.toLongOrNull() ?: 0L
-        val gson = createGson()
         val uuids: List<String>
         var `is`: InputStream? = null
         try {
@@ -139,8 +127,8 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
             val statements = getStatementsFromJson(statement, gson)
 
-            val endpoint = StatementEndpoint(repo, gson)
-            uuids = endpoint.storeStatements(statements, "",
+            val statementEndpoint: XapiStatementEndpoint =  di.on(Endpoint(endpointUrl)).direct.instance()
+            uuids = statementEndpoint.storeStatements(statements, "",
                     contentEntryUid = contentEntryUid)
             `is` = ByteArrayInputStream(gson.toJson(uuids).toByteArray())
 
@@ -200,5 +188,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
         private const val PARAM_APPREPO_INDEX = 0
 
         const val URLPARAM_CONTENTENTRYUID = "contentEntryUid"
+
+        const val URI_PARAM_ENDPOINT = "endpoint"
     }
 }

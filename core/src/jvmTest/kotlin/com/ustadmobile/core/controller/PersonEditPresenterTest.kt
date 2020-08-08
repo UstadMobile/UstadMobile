@@ -107,7 +107,7 @@ class PersonEditPresenterTest  {
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenUsernameAndPasswordNotFilledClickSave_shouldShowErrors() {
-        val args = mapOf(UstadView.ARG_REGISTRATION_ALLOWED to true.toString())
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString())
 
         val person = createPerson(leftOutPassword = true)
         val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
@@ -124,7 +124,7 @@ class PersonEditPresenterTest  {
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenPasswordAndConfirmPasswordDoesNotMatchClickSave_shouldShowErrors() {
-        val args = mapOf(UstadView.ARG_REGISTRATION_ALLOWED to true.toString())
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString())
 
         val person = createPerson(false).apply {
             username = "dummyUsername"
@@ -149,7 +149,7 @@ class PersonEditPresenterTest  {
                 .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
                         UmAccount(0L)).toByteArray())))
 
-        val args = mapOf(UstadView.ARG_REGISTRATION_ALLOWED to true.toString(), ARG_SERVER_URL to serverUrl)
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString(), ARG_SERVER_URL to serverUrl)
 
         val person = createPerson().apply {
             username = "dummyUsername"

@@ -74,6 +74,14 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
                     PersonAuthDao.PLAIN_PASS_PREFIX+mPerson.newPassword)
             val aUid = db.personAuthDao.insert(personAuth)
 
+            //create PersonGroup
+            val personGroup = PersonGroup().apply {
+                groupPersonUid = mPerson.personUid
+                groupUid = db.personGroupDao.insert(this)
+            }
+
+            db.personGroupMemberDao.insert(PersonGroupMember(mPerson.personUid, personGroup.groupUid))
+
             if(aUid != -1L){
                 val username = mPerson.username
                 if(username != null){
@@ -104,12 +112,7 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
             val person = db.personDao.findUidAndPasswordHashAsync(username)
             if(person != null){
 
-                if(!person.admin && currentPassword == null){
-                    call.respond(HttpStatusCode.Forbidden, "Current password not provided")
-                    return@post
-                }
-
-                if(!person.admin && currentPassword != null && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
+                if(currentPassword != null && ((person.passwordHash.startsWith(PersonAuthDao.PLAIN_PASS_PREFIX)
                                 && person.passwordHash.substring(2) != currentPassword)
                                 ||(person.passwordHash.startsWith(PersonAuthDao.ENCRYPTED_PASS_PREFIX) &&
                                 authenticateEncryptedPassword(currentPassword, person.passwordHash.substring(2))))){

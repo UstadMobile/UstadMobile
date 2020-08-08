@@ -40,22 +40,23 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
         super.onCreate(savedState)
         mListMode = ListViewMode.valueOf(
                 arguments[UstadView.ARG_LISTMODE] ?: ListViewMode.BROWSER.toString())
-        accountManager.activeAccountLive.observeWithLifecycleOwner(lifecycleOwner, this::onAccountChanged)
+        view.loading = true
+        GlobalScope.launch(doorMainDispatcher()) {
+            onLoadFromDb()
+            view.loading = false
+        }
     }
 
-    protected open fun onAccountChanged(account: UmAccount?) {
+    suspend open fun onLoadFromDb() {
         val listView = (view as? UstadListView<*, *>) ?: return
-
-        GlobalScope.launch(doorMainDispatcher()) {
-            val hasAddPermission = onCheckAddPermission(account)
-            listView.addMode = when {
-                hasAddPermission && mListMode == ListViewMode.BROWSER -> ListViewAddMode.FAB
-                hasAddPermission && mListMode == ListViewMode.PICKER -> ListViewAddMode.FIRST_ITEM
-                else -> ListViewAddMode.NONE
-            }
-
-            listView.selectionOptions = onCheckListSelectionOptions(account)
+        val hasAddPermission = onCheckAddPermission(accountManager.activeAccount)
+        listView.addMode = when {
+            hasAddPermission && mListMode == ListViewMode.BROWSER -> ListViewAddMode.FAB
+            hasAddPermission && mListMode == ListViewMode.PICKER -> ListViewAddMode.FIRST_ITEM
+            else -> ListViewAddMode.NONE
         }
+
+        listView.selectionOptions = onCheckListSelectionOptions(accountManager.activeAccount)
     }
 
     /**

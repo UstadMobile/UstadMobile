@@ -63,6 +63,14 @@
         android:id="@+id/person_edit_dest"
         android:name="com.ustadmobile.port.android.view.PersonEditFragment" />
 
+    <!--
+     This is repeated so that it can be explicitly recognized for purposes of controlling
+     the visibility of the bottom navigation bar
+     -->
+    <fragment
+        android:id="@+id/person_edit_register_dest"
+        android:name="com.ustadmobile.port.android.view.PersonEditFragment"/>
+
     <fragment
         android:id="@+id/person_detail_dest"
         android:name="com.ustadmobile.port.android.view.PersonDetailFragment" />
@@ -124,6 +132,23 @@
         android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment"
         android:label="SchoolMemberListFragment" />
     <fragment
+        android:id="@+id/clazzwork_list_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkListFragment"
+        android:label="ClazzWorkListFragment" />
+    <fragment
+        android:id="@+id/clazzwork_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkEditFragment"
+        android:label="ClazzWorkEditFragment" />
+    <fragment
+        android:id="@+id/clazzworkquestionandoptions_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkQuestionAndOptionsEditFragment"
+        android:label="ClazzWorkQuestionAndOptionsEditFragment" />
+    <fragment
+        android:id="@+id/clazzwork_detail_list"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment"
+        android:label="ClazzWorkDetailFragment" />
+
+    <fragment
         android:id="@+id/home_content_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryListTabsFragment"
         android:label="@string/content">
@@ -152,6 +177,15 @@
         android:id="@+id/content_entry_details_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
         android:label="" />
+    <fragment
+        android:id="@+id/clazzwork_detail_progress_list"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment"
+        android:label="ClazzWorkDetailProgressListFragment" />
+
+    <fragment
+        android:id="@+id/clazzworksubmission_marking_edit"
+        android:name="com.ustadmobile.port.android.view.ClazzWorkSubmissionMarkingFragment"
+        android:label="ClazzWorkSubmissionMarkingFragment" />
 
     <fragment
         android:id="@+id/report_detail_dest"

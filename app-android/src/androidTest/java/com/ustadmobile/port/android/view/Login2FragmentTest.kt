@@ -109,7 +109,7 @@ class Login2FragmentTest {
         launchFragment(registration = true)
         onView(withId(R.id.create_account)).perform(click())
         assertEquals("It navigated to account creation screen",
-                R.id.person_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+                R.id.person_edit_register_dest, systemImplNavRule.navController.currentDestination?.id)
     }
 
     @AdbScreenRecord("given connect as guest button is visible when clicked should go to content screen")

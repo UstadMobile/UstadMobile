@@ -38,6 +38,7 @@ import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
+import kotlinx.android.synthetic.main.fragment_video_content.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
@@ -82,6 +83,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             val isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
             it.isPortrait = isPortrait
             it.activityVideoPlayerView.useController = !isPortrait
+            (context as? MainActivity)?.slideBottomNavigation(isPortrait)
         }
 
         if (savedInstanceState != null) {
@@ -107,6 +109,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         val isPortrait = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
         mBinding?.isPortrait = isPortrait
         mBinding?.activityVideoPlayerView?.useController = !isPortrait
+        (context as? MainActivity)?.slideBottomNavigation(isPortrait)
     }
 
     override fun onDestroyView() {
@@ -123,7 +126,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     override var entry: ContentEntry? = null
         set(value) {
             field = value
-            title = value?.title
+            clazzWorkTitle = value?.title
             mBinding?.entry = value
         }
 
@@ -235,9 +238,20 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private var videoListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-            if (playbackState == Player.STATE_READY) {
+            if (playWhenReady && playbackState == Player.STATE_READY) {
+                // media is now playing
+                mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
+                        ?: 100L, true)
+            } else if (playbackState == Player.STATE_ENDED) {
+                mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
+                        ?: 100L)
+            }else if (playbackState == Player.STATE_READY) {
+                // player is ready or paused
                 loading = false
+                mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
+                        ?: 100L)
             }
+
         }
     }
 
@@ -281,7 +295,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         playWhenReady = player?.playWhenReady ?: false
         player?.removeListener(videoListener)
         player?.release()
-
+        mPresenter?.updateProgress(playbackPosition, player?.contentDuration ?: 100)
         player = null
     }
 
