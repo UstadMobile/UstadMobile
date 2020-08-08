@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LISTMODE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions.withItemCount
@@ -34,6 +35,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.greaterThan
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.lang.Thread.sleep
@@ -62,6 +64,17 @@ class ContentEntryList2FragmentTest  {
     val adbScreenRecordRule = AdbScreenRecordRule()
 
     private val parentEntryUid = 10000L
+
+
+    @Before
+    fun setup() {
+        dbRule.insertPersonForActiveUser(Person().apply {
+            firstNames = "Test"
+            lastName = "User"
+            username = "admin"
+            admin = true
+        })
+    }
 
     @AdbScreenRecord("Given Content entry present when user clicks on an entry then should navigate to entry")
     @Test
