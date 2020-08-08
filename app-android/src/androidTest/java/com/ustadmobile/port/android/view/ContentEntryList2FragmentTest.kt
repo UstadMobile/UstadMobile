@@ -85,6 +85,8 @@ class ContentEntryList2FragmentTest  {
 
         launchFragment(bundleOf(ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
                 ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT))
+                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         onView(withId(R.id.fragment_list_recyclerview)).check(matches(isDisplayed()))
 
