@@ -172,6 +172,8 @@ abstract class PersonDao : BaseDao<Person> {
             "Person.personUid = :personUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PARAM))")
     abstract fun personHasPermission(accountPersonUid: Long, personUid: Long, permission: Long): Boolean
 
+    @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
+    abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean
 
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?

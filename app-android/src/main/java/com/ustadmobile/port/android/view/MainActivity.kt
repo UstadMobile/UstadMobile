@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -20,17 +21,26 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 import java.util.*
 
 
@@ -44,7 +54,23 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private lateinit var mBinding: ActivityMainBinding
 
-    private val impl = UstadMobileSystemImpl.instance
+    private val impl : UstadMobileSystemImpl by instance()
+
+    private val accountManager: UstadAccountManager by instance()
+
+    private var mIsAdmin: Boolean? = null
+
+    //Observe the active account to show/hide the settings based on whether or not the user is admin
+    private val mActiveUserObserver = Observer<UmAccount> {account ->
+        GlobalScope.launch(Dispatchers.Main) {
+            val db: UmAppDatabase = di.on(Endpoint(account.endpointUrl)).direct.instance(tag = TAG_DB)
+            val isNewUserAdmin = db.personDao.personIsAdmin(account.personUid)
+            if(isNewUserAdmin != mIsAdmin) {
+                mIsAdmin = isNewUserAdmin
+                invalidateOptionsMenu()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +89,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         setupActionBarWithNavController(navController, AppBarConfiguration(mBinding.bottomNavView.menu))
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
+        accountManager.activeAccountLive.observe(this, mActiveUserObserver)
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
@@ -93,7 +120,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val navController = findNavController(R.id.activity_main_navhost_fragment)
         val currentFrag = navController.currentDestination?.id ?: 0
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
-        menu.findItem(R.id.menu_main_settings).isVisible = mainScreenItemsVisible
+        menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
 
         mBinding.bottomNavView.visibility = if (DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))

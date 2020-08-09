@@ -12,6 +12,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -49,6 +50,12 @@ class ClazzListFragmentTest  {
             isClazzActive = true
             clazzUid = dbRule.db.clazzDao.insert(this)
         }
+
+        dbRule.insertPersonForActiveUser(Person().apply {
+            admin = true
+            firstNames = "Test"
+            lastName = "User"
+        })
 
         val fragmentScenario = launchFragmentInContainer(
             bundleOf(), themeResId = R.style.UmTheme_App){

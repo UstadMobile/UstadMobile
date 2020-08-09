@@ -141,17 +141,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findByUid")
     abstract fun findByUid(entryUid: Long): ContentEntry?
 
-    @Query("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +
-            "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
-            "WHERE ContentEntry.contentEntryUid = :contentEntryUid")
-    @JsName("findByUidWithContentEntryStatusAsync")
-    abstract suspend fun findByUidWithContentEntryStatusAsync(contentEntryUid: Long): ContentEntryWithContentEntryStatus?
 
-    @Query("SELECT ContentEntry.*, ContentEntryStatus.* FROM ContentEntry " +
-            "LEFT JOIN ContentEntryStatus ON ContentEntryStatus.cesUid = ContentEntry.contentEntryUid " +
+    @Query("SELECT ContentEntry.* FROM ContentEntry " +
             "WHERE ContentEntry.sourceUrl = :sourceUrl")
     @JsName("findBySourceUrlWithContentEntryStatusAsync")
-    abstract suspend fun findBySourceUrlWithContentEntryStatusAsync(sourceUrl: String): ContentEntryWithContentEntryStatus?
+    abstract suspend fun findBySourceUrlWithContentEntryStatusAsync(sourceUrl: String): ContentEntry?
 
     @Query("""SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, Container.*, ContentEntryProgress.* 
             FROM ContentEntry 
