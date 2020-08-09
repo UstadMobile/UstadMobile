@@ -59,6 +59,9 @@ class SortBottomSheetFragment(private val sortOptions: List<SortOrderOption>?, p
         if (isShowing != null && isShowing) {
             dismiss()
         }
+        if(selectedSort == sortOption){
+            return
+        }
         onSortOptionSelected?.onClickSort(sortOption)
     }
 

@@ -286,9 +286,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
-        if(mNewItemRecyclerViewAdapter?.sortOptionSelected == sortOption){
-            return
-        }
         mNewItemRecyclerViewAdapter?.sortOptionSelected = sortOption
         listPresenter?.onClickSort(sortOption)
     }
@@ -305,7 +302,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
 
     fun showSortOptionsFrag() {
-        SortBottomSheetFragment(listPresenter?.sortOptions, listPresenter?.selectedSortOption, this).also {
+        SortBottomSheetFragment(listPresenter?.sortOptions, mNewItemRecyclerViewAdapter?.sortOptionSelected, this).also {
             it.show(childFragmentManager, it.tag)
         }
     }
