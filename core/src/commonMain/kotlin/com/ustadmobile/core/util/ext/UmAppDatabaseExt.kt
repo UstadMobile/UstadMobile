@@ -73,3 +73,43 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
 
     return clazzMember
 }
+
+suspend fun UmAppDatabase.enrollPersonToSchool(dateNow: Long, schoolUid: Long,
+                                 personUid:Long, role: Int): SchoolMember{
+
+    val school = schoolDao.findByUidAsync(schoolUid)?:
+    throw IllegalArgumentException("Class does not exist")
+
+    //Check if relationship already exists
+    val matches = schoolMemberDao.findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
+    if(matches.isEmpty()) {
+
+        val schoolMember = SchoolMember()
+        schoolMember.schoolMemberActive = true
+        schoolMember.schoolMemberPersonUid = personUid
+        schoolMember.schoolMemberSchoolUid = schoolUid
+        schoolMember.schoolMemberRole = role
+        schoolMember.schoolMemberCreateDate = dateNow
+        schoolMember.schoolMemberJoinDate = dateNow
+
+        schoolMember.schoolMemberUid = schoolMemberDao.insert(schoolMember)
+
+        val personGroupUid = when(role) {
+            SchoolMember.SCHOOL_ROLE_TEACHER -> school.schoolTeachersPersonGroupUid
+            SchoolMember.SCHOOL_ROLE_STUDENT -> school.schoolStudentsPersonGroupUid
+            else -> null
+        }
+
+        if(personGroupUid != null) {
+            val personGroupMember = PersonGroupMember().also {
+                it.groupMemberPersonUid = schoolMember.schoolMemberPersonUid
+                it.groupMemberGroupUid = personGroupUid
+                it.groupMemberUid = personGroupMemberDao.insertAsync(it)
+            }
+        }
+
+        return schoolMember
+    }else{
+        return matches[0]
+    }
+}

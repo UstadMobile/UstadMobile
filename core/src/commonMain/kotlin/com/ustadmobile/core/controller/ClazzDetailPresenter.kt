@@ -27,15 +27,6 @@ class ClazzDetailPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    /*
-     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
-     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
-     */
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-
-        //TODO: Set any additional fields (e.g. joinlist) on the view
-    }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         return false //This has no effect because the button is controlled by the overview presenter

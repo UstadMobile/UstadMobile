@@ -58,6 +58,10 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
+
+        //The fab will be managed by the underlying tabs
+        fabManagementEnabled = false
+
         mBinding = FragmentSchoolDetailBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
@@ -73,8 +77,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //The fab will be managed by the underlying tabs
-        fabManagementEnabled = false
 
         val navController = findNavController()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -109,15 +111,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         }
     }
 
-    override fun setSettingsVisible(visible: Boolean){
-
-        if(!visible){
-            editButtonMode = EditButtonMode.GONE
-        }else{
-            editButtonMode = EditButtonMode.FAB
-        }
-    }
-
     override var title: String? = null
         get() = field
         set(value) {
@@ -141,12 +134,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
             clazzWorkTitle = value?.schoolName
         }
 
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
-        }
 
 
     companion object{

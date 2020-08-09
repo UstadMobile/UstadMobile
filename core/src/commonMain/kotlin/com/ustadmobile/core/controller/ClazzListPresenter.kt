@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
@@ -63,7 +64,11 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
     }
 
     override fun handleClickCreateNewFab() {
-        systemImpl.go(ClazzEdit2View.VIEW_NAME, mapOf(), context)
+        var args = mapOf<String, String>()
+        if(filterExcludeMembersOfSchool != 0L){
+            args = mapOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())
+        }
+        systemImpl.go(ClazzEdit2View.VIEW_NAME, args, context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {

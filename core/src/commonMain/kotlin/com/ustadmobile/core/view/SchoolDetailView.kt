@@ -5,8 +5,6 @@ import com.ustadmobile.lib.db.entities.School
 
 interface SchoolDetailView: UstadDetailView<School> {
 
-    fun setSettingsVisible(visible: Boolean)
-
     var title : String?
 
     companion object {

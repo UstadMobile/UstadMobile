@@ -37,6 +37,8 @@ interface ClazzEdit2ActivityEventHandler {
 
     fun showFeaturePicker()
 
+    fun handleClickSchool()
+
 }
 
 class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>(), ClazzEdit2View,
@@ -122,6 +124,11 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         navigateToPickEntityFromList(HolidayCalendar::class.java, R.id.holidaycalendar_list_dest)
     }
 
+    override fun handleClickSchool() {
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(School::class.java, R.id.home_schoollist_dest)
+    }
+
     override fun showFeaturePicker() {
         onSaveStateToBackStackStateHandle()
         navigateToEditEntity(LongWrapper(entity?.clazzFeatures ?: 0L), R.id.bitmask_edit_dest,
@@ -171,6 +178,14 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             val holidayCalendar = it.firstOrNull() ?: return@observeResult
             entity?.holidayCalendar = holidayCalendar
             entity?.clazzHolidayUMCalendarUid = holidayCalendar.umCalendarUid
+            mDataBinding?.clazz = entity
+        }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                School::class.java) {
+            val school = it.firstOrNull() ?: return@observeResult
+            entity?.clazzSchoolUid = school.schoolUid
+            mDataBinding?.fragmentClazzEditSchoolText?.setText(school.schoolName)
             mDataBinding?.clazz = entity
         }
 

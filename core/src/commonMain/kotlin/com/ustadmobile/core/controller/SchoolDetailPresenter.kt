@@ -32,8 +32,7 @@ class SchoolDetailPresenter(context: Any,
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        //TODO: this
-        return true
+        return false //This has no effect because the button is controlled by the overview presenter
     }
 
 }

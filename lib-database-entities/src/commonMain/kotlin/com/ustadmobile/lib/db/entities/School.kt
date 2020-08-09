@@ -45,6 +45,10 @@ open class School() {
 
     var schoolEmailAddress : String?= null
 
+    var schoolTeachersPersonGroupUid: Long = 0
+
+    var schoolStudentsPersonGroupUid: Long = 0
+
     @MasterChangeSeqNum
     var schoolMasterChangeSeqNum: Long = 0
 
