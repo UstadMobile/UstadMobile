@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.os.Handler
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -14,11 +15,22 @@ class SearchViewManagerLifecycleObserver(searchView: SearchView?) : DefaultLifec
     var searchView: SearchView? = searchView
         set(value) {
             field = value
-            if(active && value != null){
+            if (active && value != null) {
                 value.setOnQueryTextListener(this)
                 value.setOnCloseListener(this)
             }
         }
+
+    private var query: String? = null
+
+    private var inputCheckHandler: Handler? = Handler()
+
+    private val inputCheckDelay: Long = 500
+
+    private val inputCheckerCallback = Runnable {
+        val typedText = query ?: ""
+        searchListener?.onSearchSubmitted(typedText)
+    }
 
     override fun onResume(owner: LifecycleOwner) {
         searchView?.setOnQueryTextListener(this)
@@ -32,18 +44,24 @@ class SearchViewManagerLifecycleObserver(searchView: SearchView?) : DefaultLifec
         active = false
     }
 
+    private fun postText(query: String?) {
+        this.query = query
+        inputCheckHandler?.removeCallbacks(inputCheckerCallback)
+        inputCheckHandler?.postDelayed(inputCheckerCallback, inputCheckDelay)
+    }
+
     override fun onQueryTextSubmit(query: String?): Boolean {
-        searchListener?.onSearchSubmitted(query)
+        postText(query)
         return false
     }
 
     override fun onQueryTextChange(newText: String?): Boolean {
-        searchListener?.onSearchSubmitted(newText)
+        postText(newText)
         return false
     }
 
     override fun onClose(): Boolean {
-        searchListener?.onSearchSubmitted("")
+        postText("")
         return false
     }
 
@@ -52,8 +70,8 @@ class SearchViewManagerLifecycleObserver(searchView: SearchView?) : DefaultLifec
         super.onDestroy(owner)
         searchView = null
         searchListener = null
+        inputCheckHandler = null
     }
-
 
 
 }
