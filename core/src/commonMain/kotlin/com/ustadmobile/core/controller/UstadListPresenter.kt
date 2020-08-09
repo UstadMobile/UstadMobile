@@ -40,7 +40,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     open val sortOptions: List<SortOrderOption>
         get() = listOf()
 
-    protected var selectedSortOption: SortOrderOption? = null
+    var selectedSortOption: SortOrderOption? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

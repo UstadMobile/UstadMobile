@@ -16,6 +16,10 @@
             name="sortOption"
             type="com.ustadmobile.core.util.SortOrderOption" />
 
+        <variable
+            name="alreadySelectedOption"
+            type="com.ustadmobile.core.util.SortOrderOption" />
+
     </data>
 
 
@@ -24,7 +28,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_16dp"
-        style="@style/selectableItemThemeBackground"
+        android:theme="@style/SelectableItemTheme"
+        android:background="@{sortOption.equals(alreadySelectedOption) ? @color/primaryColor : @android:color/white}"
+        android:foreground="?attr/selectableItemBackground"
         android:onClick="@{(view) -> sortListener.onClickSort(sortOption)}">
 
         <TextView

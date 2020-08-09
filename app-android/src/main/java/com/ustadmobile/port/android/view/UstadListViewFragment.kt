@@ -6,7 +6,6 @@ import android.view.*
 import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.children
@@ -306,7 +305,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
 
     fun showSortOptionsFrag() {
-        SortBottomSheetFragment(listPresenter?.sortOptions, this).also {
+        SortBottomSheetFragment(listPresenter?.sortOptions, listPresenter?.selectedSortOption, this).also {
             it.show(childFragmentManager, it.tag)
         }
     }
