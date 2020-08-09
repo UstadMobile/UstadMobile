@@ -5,11 +5,20 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.ustadmobile.core.controller.OnSearchSubmitted
 
-class SearchViewManagerLifecycleObserver(private var searchView: SearchView?) : DefaultLifecycleObserver, SearchView.OnQueryTextListener, SearchView.OnCloseListener {
+class SearchViewManagerLifecycleObserver(searchView: SearchView?) : DefaultLifecycleObserver, SearchView.OnQueryTextListener, SearchView.OnCloseListener {
 
     private var active: Boolean = false
 
     var searchListener: OnSearchSubmitted? = null
+
+    var searchView: SearchView? = searchView
+        set(value) {
+            field = value
+            if(active && value != null){
+                value.setOnQueryTextListener(this)
+                value.setOnCloseListener(this)
+            }
+        }
 
     override fun onResume(owner: LifecycleOwner) {
         searchView?.setOnQueryTextListener(this)

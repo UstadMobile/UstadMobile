@@ -52,9 +52,7 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         searchView = menu.findItem(R.id.menu_search).actionView as SearchView
-        searchManager = SearchViewManagerLifecycleObserver(searchView).also {
-            viewLifecycleOwner.lifecycle.addObserver(it)
-        }
+        searchManager?.searchView = searchView
     }
 
     /**
@@ -81,6 +79,10 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
                 false, 0, null).also {
                 viewLifecycleOwner.lifecycle.addObserver(it)
             }
+        }
+
+        searchManager = SearchViewManagerLifecycleObserver(searchView).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
         }
 
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(

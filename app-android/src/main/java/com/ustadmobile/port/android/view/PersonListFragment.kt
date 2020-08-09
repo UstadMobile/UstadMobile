@@ -57,9 +57,8 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        menu.findItem(R.id.menu_search).isVisible = true
         super.onCreateOptionsMenu(menu, inflater)
-        searchManager?.searchListener = mPresenter
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

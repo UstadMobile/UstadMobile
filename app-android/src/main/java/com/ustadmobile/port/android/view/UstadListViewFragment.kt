@@ -6,6 +6,7 @@ import android.view.*
 import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.children
@@ -198,6 +199,16 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
 
         return rootView
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        searchManager?.searchListener = listPresenter
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

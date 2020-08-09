@@ -46,7 +46,7 @@ class SortListFragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    @AdbScreenRecord("")
+    @AdbScreenRecord("given a person list, when sort option clicked, then show Sort List and change sort")
     @Test
     fun givenPersonPresent_whenOnSortOptionClicked_thenShoulShowBottomFragAndChangeSort() {
 
