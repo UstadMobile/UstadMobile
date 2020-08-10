@@ -70,7 +70,7 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
     fun handleEnrolMember(schoolUid: Long, personUid: Long, role:Int){
 
         GlobalScope.launch {
-            db.enrollPersonToSchool(getSystemTimeInMillis(), schoolUid, personUid, role)
+            db.enrollPersonToSchool(schoolUid, personUid, role)
 //            db.schoolMemberDao.enrollPersonToSchool(UMCalendarUtil.getDateInMilliPlusDays(0),
 //                    0, schoolUid, personUid, role)
         }

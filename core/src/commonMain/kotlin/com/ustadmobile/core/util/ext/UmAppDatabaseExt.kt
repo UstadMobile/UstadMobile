@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 
 fun UmAppDatabase.runPreload() {
@@ -74,11 +75,35 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     return clazzMember
 }
 
-suspend fun UmAppDatabase.enrollPersonToSchool(dateNow: Long, schoolUid: Long,
+/**
+ * Insert a new school
+ */
+suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
+                                                   impl: UstadMobileSystemImpl, context: Any)
+                                                    :Long {
+    school.schoolTeachersPersonGroupUid = personGroupDao.insertAsync(
+            PersonGroup("${school.schoolName} - " +
+                    impl.getString(MessageID.teachers_literal, context)))
+
+    school.schoolStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup(
+            "${school.schoolName} - " +
+            impl.getString(MessageID.students, context)))
+
+    school.schoolUid = schoolDao.insertAsync(school)
+
+    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
+            school.schoolTeachersPersonGroupUid, Role.ROLE_TEACHER_UID.toLong()))
+    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
+            school.schoolStudentsPersonGroupUid, Role.ROLE_STUDENT_UID.toLong()))
+
+    return school.schoolUid
+}
+
+suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
                                  personUid:Long, role: Int): SchoolMember{
 
     val school = schoolDao.findByUidAsync(schoolUid)?:
-    throw IllegalArgumentException("Class does not exist")
+    throw IllegalArgumentException("School does not exist")
 
     //Check if relationship already exists
     val matches = schoolMemberDao.findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
@@ -89,8 +114,8 @@ suspend fun UmAppDatabase.enrollPersonToSchool(dateNow: Long, schoolUid: Long,
         schoolMember.schoolMemberPersonUid = personUid
         schoolMember.schoolMemberSchoolUid = schoolUid
         schoolMember.schoolMemberRole = role
-        schoolMember.schoolMemberCreateDate = dateNow
-        schoolMember.schoolMemberJoinDate = dateNow
+        schoolMember.schoolMemberCreateDate = systemTimeInMillis()
+        schoolMember.schoolMemberJoinDate = systemTimeInMillis()
 
         schoolMember.schoolMemberUid = schoolMemberDao.insert(schoolMember)
 

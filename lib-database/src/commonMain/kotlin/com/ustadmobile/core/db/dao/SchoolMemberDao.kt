@@ -60,28 +60,4 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
         ORDER BY Person.firstNames DESC""")
     abstract suspend fun findAllTest(schoolUid: Long, role: Int, searchQuery: String): List<SchoolMemberWithPerson>
 
-
-    suspend fun enrollPersonToSchool(dateNow: Long, enrollDate: Long, schoolUid: Long,
-                                     personUid:Long, role: Int): SchoolMember{
-
-
-        //Check if relationship already exists
-        val matches = findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
-        if(matches.isEmpty()) {
-
-            val schoolMember = SchoolMember()
-            schoolMember.schoolMemberActive = true
-            schoolMember.schoolMemberPersonUid = personUid
-            schoolMember.schoolMemberSchoolUid = schoolUid
-            schoolMember.schoolMemberRole = role
-            schoolMember.schoolMemberCreateDate = dateNow
-            schoolMember.schoolMemberJoinDate = dateNow
-
-            schoolMember.schoolMemberUid = insert(schoolMember)
-            return schoolMember
-        }else{
-            return matches[0]
-        }
-    }
-
 }

@@ -64,6 +64,11 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
     }
 
     override fun handleClickCreateNewFab() {
+        systemImpl.go(ClazzEdit2View.VIEW_NAME, mapOf(), context)
+    }
+
+    fun handleClickNewClass(){
+
         var args = mapOf<String, String>()
         if(filterExcludeMembersOfSchool != 0L){
             args = mapOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())

@@ -54,7 +54,6 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         return db.schoolDao.personHasPermissionWithSchool(account?.personUid ?: 0L,
                 arguments[ARG_ENTITY_UID]?.toLong() ?: 0L, Role.PERMISSION_SCHOOL_UPDATE)
-//        return true
     }
 
 }

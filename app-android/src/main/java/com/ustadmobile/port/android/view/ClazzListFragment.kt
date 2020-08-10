@@ -62,8 +62,9 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
 
 
     override fun onClick(v: View?) {
-        if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.clazz_edit_dest, Clazz::class.java)
+        if(v?.id == R.id.item_createnew_layout) {
+            mPresenter?.handleClickNewClass()
+        }
     }
 
     override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
