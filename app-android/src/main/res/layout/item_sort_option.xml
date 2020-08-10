@@ -29,8 +29,7 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_16dp"
         android:theme="@style/SelectableItemTheme"
-        android:background="@{sortOption.equals(alreadySelectedOption) ? @color/primaryColor : @android:color/white}"
-        android:foreground="?attr/selectableItemBackground"
+        android:background="@{sortOption.equals(alreadySelectedOption) ? @drawable/bg_selected_item : @drawable/bg_listitem}"
         android:onClick="@{(view) -> sortListener.onClickSort(sortOption)}">
 
         <TextView
@@ -38,6 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:textColor="@{sortOption.equals(alreadySelectedOption) ? @color/onPrimaryColor : @color/onSecondaryColor}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -49,6 +49,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:layout_marginStart="@dimen/dimen_8dp"
+            android:textColor="@{sortOption.equals(alreadySelectedOption) ? @color/onPrimaryColor : @color/onSecondaryColor}"
             android:text="@{StringExtKt.inBrackets(sortOption.order ? @string/ascending : @string/descending)}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintEnd_toEndOf="parent"
