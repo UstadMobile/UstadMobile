@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">‫أستاد موبايل‬</string>
+    <string name="app_name">‫لمسة الاستاذ</string>
     <string name="location_permission_title">مطلوب اذن للحصول على الموقع</string>
     <!--Content editor-->
     <string name="content_type_multimedia">وسائط متعددة (صوت و صورة)</string>

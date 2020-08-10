@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--  Color scheme as per https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=9C27B0&secondary.color=FFA000  -->
 
+    <color name="primaryLightColor">#d05ce3</color><!-- @200 Intensity -->
+    <color name="primaryLightVariantColor">#ce93d8</color>
+    <color name="primaryColor">#9c27b0</color><!-- @500 Intensity -->
+    <color name="primaryVariantColor">#8e24aa</color><!-- @600 Intensity -->
+    <color name="primaryDarkColor">#6a0080</color><!-- @700 Intensity -->
+    <color name="secondaryColor">#ffa000</color><!-- @500 Intensity -->
+    <color name="secondaryDarkColor">#c66900</color>
+    <!-- @700 Intensity -->
+    <color name="errorLightColor">#cf6679</color>
+    <!-- @200 Intensity -->
+    <color name="errorColor">#b00020</color>
+    <!-- @500 Intensity -->
+    <color name="surfaceColor">#ffffff</color>
+    <color name="backgroundColor">#ffffff</color>
+    <color name="onPrimaryColor">#ffffff</color>
+    <color name="onSecondaryColor">#000000</color>
+    <color name="onSurfaceColor">#000000</color>
+    <color name="onBackgroundColor">#121212</color>
+    <color name="onPrimaryColorLight">#E8EAED</color>
+    <color name="onErrorColor">#ffffff</color>
+    <color name="navigationBarColor">#000000</color>
+    <color name="iconTintColor">#727272</color>
+    <color name="successColor">#4CAF50</color>
 </resources>
