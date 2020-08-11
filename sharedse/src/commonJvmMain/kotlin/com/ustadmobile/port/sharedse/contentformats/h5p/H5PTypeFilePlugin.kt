@@ -1,20 +1,35 @@
 package com.ustadmobile.port.sharedse.contentformats.h5p
 
-import com.google.gson.Gson
 import com.ustadmobile.core.catalog.contenttype.H5PTypePlugin
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeFilePlugin
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.H5P
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.content
 import org.xmlpull.v1.XmlPullParserException
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.io.Reader
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-data class H5PJson(var title: String? = null)
+
+val licenseMap = mapOf(
+        "CC-BY" to ContentEntry.LICENSE_TYPE_CC_BY,
+        "CC BY-SA" to ContentEntry.LICENSE_TYPE_CC_BY_SA,
+        "CC BY-ND" to ContentEntry.LICENSE_TYPE_CC_BY,
+        "CC BY-NC" to ContentEntry.LICENSE_TYPE_OTHER,
+        "CC BY-NC-SA" to ContentEntry.LICENSE_TYPE_CC_BY_NC_SA,
+        "CC CC-BY-NC-CD" to ContentEntry.LICENSE_TYPE_OTHER,
+        "CC0 1.0" to ContentEntry.LICENSE_TYPE_CC_0,
+        "GNU GPL" to ContentEntry.LICENSE_TYPE_OTHER,
+        "PD" to ContentEntry.LICENSE_TYPE_PUBLIC_DOMAIN,
+        "ODC PDDL" to ContentEntry.LICENSE_TYPE_OTHER,
+        "CC PDM" to ContentEntry.LICENSE_TYPE_OTHER,
+        "C" to ContentEntry.ALL_RIGHTS_RESERVED,
+        "U" to ContentEntry.LICENSE_TYPE_OTHER
+)
 
 class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
 
@@ -30,17 +45,32 @@ class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
 
                         val data = String(it.readBytes())
 
-                        val json = Gson().fromJson(data, H5PJson::class.java)
+                        val json = Json.parseJson(data)
+
+                        // take the name from the role Author otherwise take last one
+                        var author: String? = ""
+                        var name: String? = ""
+                        json.jsonObject["authors"]?.jsonArray?.forEach {
+                            name = it.jsonObject["name"]?.content ?: ""
+                            val role = it.jsonObject["role"]?.content ?: ""
+                            if (role == "Author") {
+                                author = name
+                            }
+                        }
+                        if (author.isNullOrEmpty()) {
+                            author = name
+                        }
 
                         contentEntry = ContentEntryWithLanguage().apply {
                             contentFlags = ContentEntry.FLAG_IMPORTED
-                            licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                            title = json.title
-                            contentFlags = ContentEntry.FLAG_IMPORTED
-                            author = ""
+                            contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
+                            licenseType = licenseMap[json.jsonObject["license"] ?: ""]
+                                    ?: ContentEntry.LICENSE_TYPE_OTHER
+                            title = json.jsonObject["title"]?.content ?: ""
+                            this.author = author
                             description = ""
                             leaf = true
-                            entryId = file.name// TODO foldername
+                            entryId = file.name
                         }
                         break
                     }

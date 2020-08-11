@@ -29,9 +29,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.sharedse.contentformats.ImportedContentEntryMetaData
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
+import com.ustadmobile.port.sharedse.contentformats.*
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -190,7 +188,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         val file = entryMetaData?.file
         val importMode = entryMetaData?.importMode
         val container = if (file != null && importMode != null) {
-            importContainerFromFile(entryUid, entryMetaData?.mimeType, selectedBaseDir, file, db, repo, importMode)
+            importContainerFromFile(entryUid, entryMetaData?.mimeType, selectedBaseDir, file, db, repo, importMode, requireContext())
         } else null
         loading = true
         return container
