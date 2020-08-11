@@ -6,6 +6,7 @@ import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeFilePlugin
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil
 import org.xmlpull.v1.XmlPullParserException
 import java.io.File
 import java.io.FileInputStream
@@ -53,7 +54,7 @@ class XapiPackageTypeFilePlugin : XapiPackageTypePlugin(), ContentTypeFilePlugin
         return contentEntry
     }
 
-    override fun isZipped(): Boolean{
-        return true
+    override fun importMode(): Int {
+        return ContentTypeUtil.ZIPPED
     }
 }
