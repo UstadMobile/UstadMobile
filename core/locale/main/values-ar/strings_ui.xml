@@ -717,7 +717,7 @@
     <string name="remove_from">ازالة من %1$s</string>
     <string name="add_to">اضف الى %1$s</string>
     <string name="edit_entity">تعديل %1$s</string>
-    <string name="new_entity">جديد %1$s</string>
+    <string name="new_entity">%1$s جديد</string>
     <string name="add_a">اضف %1$s</string>
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="num_items_with_name">%1$d %2$s</string>
