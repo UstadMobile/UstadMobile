@@ -86,6 +86,7 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
                 }else{
                     call.respond(HttpStatusCode.NoContent)
                 }
+                sessionFile.delete()
             }
 
         }
