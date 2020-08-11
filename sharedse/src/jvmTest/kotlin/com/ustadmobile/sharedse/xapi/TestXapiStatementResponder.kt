@@ -30,14 +30,13 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.File
 import java.io.IOException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Paths
 import javax.naming.InitialContext
 
 class TestXapiStatementResponder {
@@ -51,6 +50,10 @@ class TestXapiStatementResponder {
     lateinit var accountManager: UstadAccountManager
 
     lateinit var di: DI
+
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
 
     @Before
     @Throws(IOException::class)
@@ -95,49 +98,53 @@ class TestXapiStatementResponder {
 
     @Test
     @Throws(IOException::class)
-    fun givenValidPutRequest_whenDataInQueryParamString_thenDbShouldBeUpdated() {
-
-        val tmpFile = File.createTempFile("testStatement", "statement")
+    fun givenValidPostRequest_whenDataInQueryParamString_thenDbShouldBeUpdated() {
+        val tmpFile = temporaryFolder.newFile("statement.json")
         extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
-        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val contentEntryUid = 1234L
 
         mockSession = mock {
+            on { method }.thenReturn(NanoHTTPD.Method.POST)
             on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid")
-            on { queryParameterString }.thenReturn(content)
+            on { parseBody(any()) }.doAnswer {
+                val map = it.arguments[0] as MutableMap<String, String>
+                map["postData"] = tmpFile.absolutePath
+                Unit
+            }
         }
 
         val responder = XapiStatementResponder()
-        val response = responder.put(mockUriResource,
+        val response = responder.post(mockUriResource,
                 mutableMapOf(URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl,
                         XapiStatementResponder.URLPARAM_CONTENTENTRYUID to contentEntryUid.toString()), mockSession)
 
-        Assert.assertEquals(NanoHTTPD.Response.Status.NO_CONTENT, response.status)
+        Assert.assertEquals(NanoHTTPD.Response.Status.OK, response.status)
         val statement = db!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
         Assert.assertEquals("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", statement!!.statementId)
-
         val xObject = db!!.xObjectDao.findByXobjectUid(statement.xObjectUid)
         Assert.assertNotNull("Joined XObject is not null", xObject)
         Assert.assertEquals("Statement is associated with expected contentEntryUid",
-                1234L, xObject!!.objectContentEntryUid)
+                contentEntryUid, xObject!!.objectContentEntryUid)
+        Assert.assertEquals("ContentEntry itself has contentEntryUid set", contentEntryUid,
+                statement?.statementContentEntryUid)
     }
 
     @Test
     @Throws(IOException::class)
     fun givenValidPutRequest_whenDataInContentMap_thenDbShouldBeUpdated() {
 
-        val tmpFile = File.createTempFile("testStatement", "statement")
+        val tmpFile = temporaryFolder.newFile("testStatement")
         extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
-        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val contentEntryUid = 1234L
 
         mockSession = mock {
+            on { method }.thenReturn(NanoHTTPD.Method.PUT)
             on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid")
             on { parseBody(any()) }.doAnswer {
                 val map = it.arguments[0] as MutableMap<String, String>
-                map["content"] = content
+                map["content"] = tmpFile.absolutePath
                 Unit
             }
         }
@@ -161,17 +168,20 @@ class TestXapiStatementResponder {
     @Throws(IOException::class)
     fun givenAValidPutRequest_whenPutRequestHasStatementIdParam_thenShouldUpdateDb() {
 
-        val tmpFile = File.createTempFile("testStatement", "statement")
+        val tmpFile = temporaryFolder.newFile("testStatement")
         extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
-        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
-        println(content)
 
         val contentEntryUid = 1234L
 
         mockSession = mock {
+            on { method }.thenReturn(NanoHTTPD.Method.PUT)
             on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid")
             on { parameters }.thenReturn(mapOf("statementId"  to listOf(URLEncoder.encode("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", StandardCharsets.UTF_8.toString()))))
-            on { queryParameterString }.thenReturn(content)
+            on { parseBody(any()) }.doAnswer {
+                val map = it.arguments[0] as MutableMap<String, String>
+                map["content"] = tmpFile.absolutePath
+                Unit
+            }
         }
 
         val responder = XapiStatementResponder()
@@ -182,65 +192,6 @@ class TestXapiStatementResponder {
         Assert.assertEquals(NanoHTTPD.Response.Status.NO_CONTENT, response.status)
         val statement = db!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
         Assert.assertEquals("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", statement!!.statementId)
-    }
-
-
-    @Test
-    @Throws(IOException::class)
-    fun givenValidPostRequest_whenDataInQueryParamString_thenDbShouldBeUpdated() {
-        val tmpFile = File.createTempFile("testStatement", "statement")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
-        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
-
-        val contentEntryUid = 1234L
-
-        mockSession = mock {
-            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid")
-            on { queryParameterString }.thenReturn(content)
-        }
-
-        val responder = XapiStatementResponder()
-        val response = responder.post(mockUriResource,
-                mutableMapOf(URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl,
-                        XapiStatementResponder.URLPARAM_CONTENTENTRYUID to contentEntryUid.toString()), mockSession)
-
-        Assert.assertEquals(NanoHTTPD.Response.Status.OK, response.status)
-        val statement = db!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
-        Assert.assertEquals("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", statement!!.statementId)
-        val xObject = db!!.xObjectDao.findByXobjectUid(statement.xObjectUid)
-        Assert.assertNotNull("Joined XObject is not null", xObject)
-        Assert.assertEquals("Statement is associated with expected contentEntryUid",
-                contentEntryUid, xObject!!.objectContentEntryUid)
-        Assert.assertEquals("ContentEntry itself has contentEntryUid set", contentEntryUid,
-                statement?.statementContentEntryUid)
-    }
-
-
-    @Test
-    @Throws(IOException::class)
-    fun givenAValidStatement_whenPostRequestHasQueryParamsWithMethodisPut_thenShouldReturn204() {
-
-        val tmpFile = File.createTempFile("testStatement", "statement")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
-        val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
-
-        val contentEntryUid = 1234L
-
-        mockSession = mock {
-            on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/xapi/$contentEntryUid")
-            on { queryParameterString }.thenReturn(content)
-            on { parameters }.thenReturn(mapOf("method" to listOf("PUT")))
-        }
-
-        val responder = XapiStatementResponder()
-        val response = responder.post(mockUriResource,
-                mutableMapOf(URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl,
-                        XapiStatementResponder.URLPARAM_CONTENTENTRYUID to contentEntryUid.toString()), mockSession)
-
-        Assert.assertEquals(NanoHTTPD.Response.Status.NO_CONTENT, response.status)
-        val statement = db!!.statementDao.findByStatementId("6690e6c9-3ef0-4ed3-8b37-7f3964730bee")
-        Assert.assertEquals("6690e6c9-3ef0-4ed3-8b37-7f3964730bee", statement!!.statementId)
-
     }
 
 }

@@ -65,15 +65,9 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
 
         val contentEntryUid = urlParams[URLPARAM_CONTENTENTRYUID]?.toLongOrNull() ?: 0L
         try {
-
-            val statement: String?
-            val map = HashMap<String, String>()
-            session.parseBody(map)
-            statement = if (map.containsKey("content")) {
-                map["content"]
-            } else {
-                session.queryParameterString
-            }
+            val statement : String = session.parseRequestBody() ?:
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
+                    "application/octet", "no body")
             val queryParams = session.parameters
             var statementId = ""
             if (queryParams != null && queryParams.containsKey("statementId")) {
@@ -121,9 +115,11 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                 }
 
             }
-            val map = HashMap<String, String>()
-            session.parseBody(map)
-            val statement = session.queryParameterString.trim { it <= ' ' }
+
+            val requestBody: String = session.parseRequestBody() ?:
+                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
+                "application/octet", "no body")
+            val statement = requestBody.trim { it <= ' ' }
 
             val statements = getStatementsFromJson(statement, gson)
 

@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_PREFKEY
-import com.ustadmobile.core.account.UstadAccountManager.Companion.MANIFEST_DEFAULT_SERVER
 import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.userAtServer
@@ -50,7 +49,7 @@ class UstadAccountManagerTest {
     @Before
     fun setup() {
         mockSystemImpl = mock {
-            on { getManifestPreference(eq(MANIFEST_DEFAULT_SERVER), any()) }
+            on { getAppConfigString(eq(AppConfig.KEY_API_URL), any(), any()) }
                     .thenReturn("http://app.ustadmobile.com/")
         }
 
