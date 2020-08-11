@@ -8,14 +8,101 @@
     tools:context="com.ustadmobile.port.android.view.SplashScreenActivity">
 
 
+   <TextView
+       android:id="@+id/textView"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="@string/app_name"
+       android:textAppearance="@style/TextAppearance.AppCompat.Title"
+       android:textColor="?attr/colorPrimary"
+       app:layout_constraintBottom_toTopOf="@+id/appCompatImageView"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.5"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="parent" />
+
+
+   <androidx.appcompat.widget.AppCompatImageView
+       android:id="@+id/appCompatImageView"
+       android:layout_width="@dimen/dimen_150dp"
+       android:layout_height="@dimen/dimen_150dp"
+       app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+       app:layout_constraintTop_toBottomOf="@+id/textView"
+       app:srcCompat="@drawable/ic_lamsustad_char"
+       tools:layout_editor_absoluteX="130dp" />
+
+
+   <LinearLayout
+       android:id="@+id/linearLayout"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
+       app:layout_constraintTop_toBottomOf="@+id/appCompatImageView"
+       tools:layout_editor_absoluteX="0dp">
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:text="Supported by:" />
+
+      <androidx.appcompat.widget.AppCompatImageView
+          android:layout_width="@dimen/dimen_150dp"
+          android:layout_height="63dp"
+          android:layout_gravity="center"
+          android:layout_marginVertical="@dimen/dimen_8dp"
+          app:srcCompat="@drawable/ic_dubaicares_logo_horizontal" />
+
+      <androidx.appcompat.widget.AppCompatImageView
+          android:layout_width="@dimen/dimen_150dp"
+          android:layout_height="63dp"
+          android:layout_gravity="center"
+          android:layout_marginVertical="@dimen/dimen_8dp"
+          app:srcCompat="@drawable/ic_plan_international" />
+   </LinearLayout>
+
+
+   <LinearLayout
+       android:id="@+id/linearLayout2"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+       tools:layout_editor_absoluteX="16dp">
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:text="Powered by:" />
+
+      <androidx.appcompat.widget.AppCompatImageView
+          android:layout_width="@dimen/dimen_100dp"
+          android:layout_height="63dp"
+          android:layout_gravity="center"
+          android:layout_marginVertical="@dimen/dimen_8dp"
+          app:srcCompat="@drawable/ic_ustad_logo" />
+
+      <androidx.appcompat.widget.AppCompatImageView
+          android:layout_width="@dimen/dimen_100dp"
+          android:layout_height="63dp"
+          android:layout_gravity="center"
+          android:layout_marginVertical="@dimen/dimen_8dp"
+          app:srcCompat="@drawable/ic_lamsa_logo" />
+
+   </LinearLayout>
+
    <androidx.appcompat.widget.AppCompatImageView
        android:id="@+id/organisation_icon"
        android:layout_width="@dimen/dimen_300dp"
-       android:minHeight="@dimen/dimen_100dp"
        android:layout_height="0dp"
+       android:minHeight="@dimen/dimen_100dp"
+       android:visibility="gone"
+       app:layout_constraintBottom_toTopOf="@+id/expo_logo"
        app:layout_constraintHeight_max="@dimen/dimen_300dp"
        app:layout_constraintHeight_min="@dimen/dimen_100dp"
-       app:layout_constraintBottom_toTopOf="@+id/expo_logo"
        app:layout_constraintHorizontal_bias="0.5"
        app:layout_constraintLeft_toLeftOf="parent"
        app:layout_constraintRight_toRightOf="parent"
@@ -29,6 +116,7 @@
        android:layout_width="@dimen/dimen_100dp"
        android:layout_height="@dimen/dimen_100dp"
        android:layout_marginVertical="@dimen/dimen_8dp"
+       android:visibility="gone"
        app:layout_constraintBottom_toTopOf="@+id/partnership_with_linearlayout"
        app:layout_constraintHorizontal_bias="0.5"
        app:layout_constraintLeft_toLeftOf="parent"
@@ -43,6 +131,7 @@
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:orientation="vertical"
+       android:visibility="gone"
        app:layout_constraintBottom_toBottomOf="parent"
        app:layout_constraintHorizontal_bias="0.5"
        app:layout_constraintLeft_toLeftOf="parent"
@@ -57,13 +146,13 @@
           android:textAppearance="@style/UmTheme.TextAppearance.Body2" />
 
       <androidx.appcompat.widget.AppCompatImageView
-          android:layout_marginTop="@dimen/dimen_8dp"
           android:id="@+id/irc_logo"
           android:layout_width="match_parent"
           android:layout_height="@dimen/dimen_80dp"
-          android:minHeight="@dimen/dimen_70dp"
-          android:maxHeight="@dimen/dimen_150dp"
+          android:layout_marginTop="@dimen/dimen_8dp"
           android:layout_marginBottom="@dimen/dimen_30dp"
+          android:maxHeight="@dimen/dimen_150dp"
+          android:minHeight="@dimen/dimen_70dp"
           app:srcCompat="@drawable/ic_irc"
           tools:ignore="ContentDescription" />
 
