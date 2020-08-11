@@ -9,6 +9,7 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
+import com.ustadmobile.core.util.parse8601Duration
 
 object XapiUtil {
 
@@ -290,7 +291,7 @@ object XapiUtil {
             val statementResult = statement.result
             if (statementResult != null) {
                 statementEntity.resultCompletion = statementResult.completion
-                statementEntity.resultDuration = UMTinCanUtil.parse8601DurationOrDefault(statementResult.duration, 0L)
+                statementEntity.resultDuration = statementResult.duration?.let { parse8601Duration(it) } ?: 0L
                 statementEntity.resultResponse = statementResult.response
                 statementEntity.resultSuccess = statementResult.success.toInt().toByte()
 

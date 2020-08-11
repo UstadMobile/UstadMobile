@@ -172,6 +172,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                 R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
 
         val DEST_TO_HIDE_BOTTOM_NAV = listOf(R.id.login_dest, R.id.account_get_started_dest,
-                R.id.workspace_enterlink_dest, R.id.settings_list_dest, R.id.person_edit_register_dest)
+                R.id.workspace_enterlink_dest, R.id.settings_list_dest, R.id.person_edit_register_dest,
+                R.id.content_xapi_dest)
     }
 }
