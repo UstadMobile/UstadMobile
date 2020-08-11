@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -122,7 +123,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
 
-        mBinding.bottomNavView.visibility = if(DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
+        mBinding.bottomNavView.visibility = if (DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
             View.GONE else View.VISIBLE
         if (mainScreenItemsVisible) {
             setUserProfile(menu.findItem(R.id.menu_main_profile))

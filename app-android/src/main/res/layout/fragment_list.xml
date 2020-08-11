@@ -15,14 +15,6 @@
             name="addMode"
             type="com.ustadmobile.core.view.ListViewAddMode" />
 
-        <variable
-            name="sortOptions"
-            type="java.util.List&lt;com.ustadmobile.core.util.MessageIdOption&gt;"/>
-
-        <variable
-            name="onSortSelected"
-            type="com.ustadmobile.port.android.view.MessageIdSpinner.OnMessageIdOptionSelectedListener" />
-
     </data>
 
     <!-- Padding bottom:

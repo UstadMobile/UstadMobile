@@ -343,7 +343,7 @@
     <string name="people">People</string>
     <string name="record_attendance">Record attendance</string>
     <string name="today">Today</string>
-    <string name="sort_by">sort_by</string>
+    <string name="sort_by">Sort by</string>
     <string name="log">Log</string>
     <string name="schedule">Schedule</string>
     <string name="first">first</string>
@@ -401,6 +401,8 @@
     <string name="sort_by_name">Sort by name</string>
     <string name="sort_by_name_asc">name (ascending)</string>
     <string name="sort_by_name_desc">name (descending)</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
     <string name="sort_by_text">Sort by</string>
     <string name="attendance_high_to_low">Attendance (high to low)</string>
     <string name="attendance_low_to_high">Attendance (low to high)</string>
