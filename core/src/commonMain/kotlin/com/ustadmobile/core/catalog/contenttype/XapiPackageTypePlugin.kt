@@ -14,14 +14,14 @@ open class XapiPackageTypePlugin : ContentTypePlugin {
         get() = XapiPackageContentView.VIEW_NAME
 
     override val mimeTypes:  Array<String>
-        get() = arrayOf(*MIME_TYPES)
+        get() = MIME_TYPES
 
     override val fileExtensions:  Array<String>
-        get() = arrayOf(*FILE_EXTENSIONS)
+        get() = FILE_EXTENSIONS
 
     companion object {
 
-        private val MIME_TYPES = arrayOf("application/zip")
+        private val MIME_TYPES = arrayOf("application/tincan+zip", "application/zip")
 
         private val FILE_EXTENSIONS = arrayOf("zip")
 
