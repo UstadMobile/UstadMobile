@@ -71,8 +71,6 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>, vi
 
         GlobalScope.launch {
             db.enrollPersonToSchool(schoolUid, personUid, role)
-//            db.schoolMemberDao.enrollPersonToSchool(UMCalendarUtil.getDateInMilliPlusDays(0),
-//                    0, schoolUid, personUid, role)
         }
     }
 

@@ -114,7 +114,6 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
         schoolMember.schoolMemberPersonUid = personUid
         schoolMember.schoolMemberSchoolUid = schoolUid
         schoolMember.schoolMemberRole = role
-        schoolMember.schoolMemberCreateDate = systemTimeInMillis()
         schoolMember.schoolMemberJoinDate = systemTimeInMillis()
 
         schoolMember.schoolMemberUid = schoolMemberDao.insert(schoolMember)
