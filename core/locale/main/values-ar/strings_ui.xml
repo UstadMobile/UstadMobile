@@ -715,10 +715,10 @@
     <string name="x_teachers_y_students">%1$d معلمين، %2$d طلاب</string>
     <string name="items_selected">%1$d مختار</string>
     <string name="remove_from">ازالة من %1$s</string>
-    <string name="add_to">%1$s اضف الى</string>
-    <string name="edit_entity">%1$s تعديل</string>
+    <string name="add_to">اضف الى %1$s</string>
+    <string name="edit_entity">تعديل %1$s</string>
     <string name="new_entity">%1$s جديد</string>
-    <string name="add_a">%1$s اضف</string>
+    <string name="add_a">اضف %1$s</string>
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
     <string name="num_items_with_name">%1$d %2$s</string>
     <string name="from_to_date">%1$s - %2$s</string>
@@ -820,7 +820,7 @@
     <string name="not_submitted_cap">لم يتم ارسال</string>
     <string name="submitted_cap">تم الارسال</string>
     <string name="marked_cap">تم وضع العلامة</string>
-    <string name="add_a_new">%1$s اضف جديد</string>
+    <string name="add_a_new">اضف %1$s جديد</string>
     <string name="descending">تنازلي</string>
     <string name="ascending">تصاعدي</string>
     <string name="invalid_link">رابط غير صالح</string>
