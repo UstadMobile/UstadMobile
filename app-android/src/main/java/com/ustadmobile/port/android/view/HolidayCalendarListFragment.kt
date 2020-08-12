@@ -63,7 +63,7 @@ class HolidayCalendarListFragment()
                 this,  di, viewLifecycleOwner)
         mDataRecyclerViewAdapter = HolidayCalendarListRecyclerAdapter(mPresenter)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
-                requireContext().getString(R.string.create_new, requireContext().getString(R.string.holiday_calendar)))
+                requireContext().getString(R.string.add_a_new, requireContext().getString(R.string.holiday_calendar)))
         return view
     }
 
