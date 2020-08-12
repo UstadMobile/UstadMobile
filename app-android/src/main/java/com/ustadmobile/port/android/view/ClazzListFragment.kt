@@ -11,13 +11,8 @@ import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ClazzList2View
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -42,7 +37,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
         mPresenter = ClazzListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
-            requireContext().getString(R.string.create_new,
+            requireContext().getString(R.string.add_a_new,
                     requireContext().getString(R.string.clazz)))
         mDataRecyclerViewAdapter = ClazzListRecyclerAdapter(mPresenter)
 

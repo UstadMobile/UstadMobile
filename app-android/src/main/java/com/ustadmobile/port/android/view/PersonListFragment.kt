@@ -2,12 +2,10 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersonListItemBinding
-import com.ustadmobile.core.controller.OnSearchSubmitted
 import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -67,7 +65,7 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.create_new,
+        val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.person))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
