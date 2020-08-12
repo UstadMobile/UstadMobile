@@ -37,7 +37,7 @@ class ContentTypePluginsTest {
         runBlocking {
             //TODO: Make this more rigorous
             val (contentEntry, container) = importContentEntryFromFile(tempEpubFile, db, dbRepo,
-                    containerTmpDir.absolutePath)!!
+                    containerTmpDir.absolutePath, Any())!!
             Assert.assertNotNull(contentEntry)
             Assert.assertNotNull(container)
         }

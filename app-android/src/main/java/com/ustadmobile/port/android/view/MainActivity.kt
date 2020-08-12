@@ -95,9 +95,13 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
                                       arguments: Bundle?) {
         invalidateOptionsMenu()
-        mBinding.root.appbar.setExpanded(true)
+        onAppBarExpand(true)
 
         slideBottomNavigation(true)
+    }
+
+    fun onAppBarExpand(expand: Boolean){
+        mBinding.root.appbar.setExpanded(expand)
     }
 
     fun slideBottomNavigation(visible: Boolean) {

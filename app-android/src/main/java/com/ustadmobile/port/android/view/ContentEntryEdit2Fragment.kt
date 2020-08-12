@@ -29,9 +29,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.sharedse.contentformats.ImportedContentEntryMetaData
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
+import com.ustadmobile.port.sharedse.contentformats.*
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -48,7 +46,7 @@ interface ContentEntryEdit2FragmentEventHandler {
     fun handleClickLanguage()
 }
 
-class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null): UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler{
+class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null) : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler {
 
     private var mBinding: FragmentContentEntryEdit2Binding? = null
 
@@ -86,7 +84,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         get() = field
         set(value) {
             field = value
-            mBinding?.fileImportInfoVisibility = if(selectedFileUri != null)
+            mBinding?.fileImportInfoVisibility = if (selectedFileUri != null)
                 View.VISIBLE else View.GONE
             mBinding?.selectedFileUri = value
         }
@@ -101,9 +99,9 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override var fileImportErrorVisible: Boolean = false
         set(value) {
             val typedVal = TypedValue()
-            requireActivity().theme.resolveAttribute(if(value) R.attr.colorError
-            else R.attr.colorOnSurface, typedVal,true)
-            mBinding?.fileImportInfoVisibility = if(value) View.VISIBLE else View.GONE
+            requireActivity().theme.resolveAttribute(if (value) R.attr.colorError
+            else R.attr.colorOnSurface, typedVal, true)
+            mBinding?.fileImportInfoVisibility = if (value) View.VISIBLE else View.GONE
             mBinding?.importErrorColor = typedVal.data
             mBinding?.isImportError = value
             field = value
@@ -124,7 +122,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     override fun onClickContentImportSourceSelection() {
         onSaveStateToBackStackStateHandle()
-        val builder:AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
         builder.setItems(R.array.content_source_option) { dialog, which ->
             when (which) {
                 0 -> handleFileSelection()
@@ -138,11 +136,11 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     }
 
-    internal fun handleFileSelection(){
+    internal fun handleFileSelection() {
         registerForActivityResult(ActivityResultContracts.GetContent(),
                 registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
-            if(uri != null){
-                try{
+            if (uri != null) {
+                try {
                     val input = requireContext().contentResolver.openInputStream(uri)
                     val tmpFile = findNavController().createTempFileForDestination(requireContext(),
                             "import-${System.currentTimeMillis()}.${UMFileUtil.getExtension(uri.toString())}")
@@ -166,13 +164,13 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                         }
                         val entry = entryMetaData?.contentEntry
                         val entryUid = arguments?.get(ARG_ENTITY_UID)
-                        if(entry != null){
-                            if(entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
+                        if (entry != null) {
+                            if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                             fileImportErrorVisible = false
                             entity = entry
                         }
                     }
-                }catch(e: Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
@@ -186,12 +184,12 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     }
 
 
-    override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String,db: UmAppDatabase, repo: UmAppDatabase): Container ?{
+    override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container? {
         val file = entryMetaData?.file
-        val isZipped = entryMetaData?.isZipped
-        val container =  if(file != null && isZipped != null){
-            importContainerFromFile(entryUid,entryMetaData?.mimeType,selectedBaseDir,file,db,repo, isZipped)
-        }else null
+        val importMode = entryMetaData?.importMode
+        val container = if (file != null && importMode != null) {
+            importContainerFromFile(entryUid, entryMetaData?.mimeType, selectedBaseDir, file, db, repo, importMode, requireContext())
+        } else null
         loading = true
         return container
     }

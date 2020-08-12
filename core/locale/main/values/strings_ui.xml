@@ -338,6 +338,8 @@
     <!-- All rights reserved license -->
     <string name="licence_type_all_rights">All Rights Reserved</string>
 
+    <string name="license_type_cc_0">CC0</string>
+
     <string name="syncing">Syncing..</string>
     <string name="feed">Feed</string>
     <string name="people">People</string>
