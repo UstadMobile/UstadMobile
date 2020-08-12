@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.core.os.bundleOf
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzListPresenter
@@ -14,10 +15,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.ClazzList2View
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -63,7 +61,14 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
 
     override fun onClick(v: View?) {
         if(v?.id == R.id.item_createnew_layout) {
-            mPresenter?.handleClickNewClass()
+            var args = bundleOf()
+            val filterExcludeMembersOfSchool =
+                    arguments?.get(PersonListView.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL)?.toString()?.toLong()?:0L
+            if(filterExcludeMembersOfSchool != 0L){
+                args = bundleOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())
+            }
+            navigateToEditEntity(null, R.id.clazz_edit_dest, Clazz::class.java,
+                    argBundle = args)
         }
     }
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "6c13f7b8a048a5c9a7948a9cadb68ddf",
+    "identityHash": "9f5f95c11e26b2b61e901fdcd2335f53",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4173,7 +4173,7 @@
       },
       {
         "tableName": "SchoolMember",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolMemberPersonUid` INTEGER NOT NULL, `schoolMemberSchoolUid` INTEGER NOT NULL, `schoolMemberCreateDate` INTEGER NOT NULL, `schoolMemberJoinDate` INTEGER NOT NULL, `schoolMemberLeftDate` INTEGER NOT NULL, `schoolMemberRole` INTEGER NOT NULL, `schoolMemberActive` INTEGER NOT NULL, `schoolMemberLocalChangeSeqNum` INTEGER NOT NULL, `schoolMemberMasterChangeSeqNum` INTEGER NOT NULL, `schoolMemberLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolMemberPersonUid` INTEGER NOT NULL, `schoolMemberSchoolUid` INTEGER NOT NULL, `schoolMemberJoinDate` INTEGER NOT NULL, `schoolMemberLeftDate` INTEGER NOT NULL, `schoolMemberRole` INTEGER NOT NULL, `schoolMemberActive` INTEGER NOT NULL, `schoolMemberLocalChangeSeqNum` INTEGER NOT NULL, `schoolMemberMasterChangeSeqNum` INTEGER NOT NULL, `schoolMemberLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "schoolMemberUid",
@@ -4190,12 +4190,6 @@
           {
             "fieldPath": "schoolMemberSchoolUid",
             "columnName": "schoolMemberSchoolUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolMemberCreateDate",
-            "columnName": "schoolMemberCreateDate",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8696,7 +8690,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6c13f7b8a048a5c9a7948a9cadb68ddf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9f5f95c11e26b2b61e901fdcd2335f53')"
     ]
   }
 }

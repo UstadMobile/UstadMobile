@@ -27,15 +27,16 @@ import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
-        SchoolMemberListView, MessageIdSpinner.OnMessageIdOptionSelectedListener,
-        View.OnClickListener{
+class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
+        SchoolMemberListView, View.OnClickListener{
 
     private var mPresenter: SchoolMemberListPresenter? = null
 
     private var addNewStringId : Int = 0
 
     private var filterBySchoolUid : Long = 0
+
+    private var filterByRole: Int = 0
 
     override val listPresenter: UstadListPresenter<*, in SchoolMemberWithPerson>?
         get() = mPresenter
@@ -76,14 +77,15 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         addPersonKeyName = "Person_${arguments?.get(UstadView.ARG_FILTER_BY_ROLE)}"
         addMode = ListViewAddMode.FAB
 
-        addNewStringId =
-            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
-                R.string.teacher
-            }else{
-                R.string.student
-            }
+        filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt()?:0
 
-        filterBySchoolUid = arguments?.getString(UstadView.ARG_SCHOOL_UID)?.toLong()?:0
+        addNewStringId = if(filterByRole == SchoolMember.SCHOOL_ROLE_TEACHER){
+            R.string.teacher
+        }else{
+            R.string.student
+        }
+
+        filterBySchoolUid = arguments?.getString(UstadView.ARG_FILTER_BY_SCHOOLUID)?.toLong()?:0
 
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = SchoolMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
@@ -93,7 +95,6 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         val createNewText = requireContext().getString(R.string.add_new,
                 requireContext().getString(addNewStringId))
 
-        //mDataBinding?.presenter = mPresenter
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
 
         return view
@@ -115,13 +116,13 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     override fun onResume() {
         super.onResume()
 
-        addNewStringId =
-            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF)
-                == true){
-                R.string.teacher
-            }else{
-                R.string.student
-            }
+        filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt()?:0
+
+        addNewStringId = if(filterByRole == SchoolMember.SCHOOL_ROLE_TEACHER){
+            R.string.teacher
+        }else{
+            R.string.student
+        }
         addMode = ListViewAddMode.FAB
 
         mActivityWithFab?.activityFloatingActionButton?.text =
@@ -131,7 +132,8 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
-    override fun onClick(view: View?) {       if(view?.id == R.id.item_createnew_layout)
+    override fun onClick(v: View?) {
+        if(v?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.person_detail_dest, Person::class.java)
     }
 

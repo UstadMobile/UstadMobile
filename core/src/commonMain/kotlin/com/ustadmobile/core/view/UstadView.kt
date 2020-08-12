@@ -89,17 +89,9 @@ interface UstadView {
 
         const val ARG_NO_IFRAMES = "noiframe"
 
-        const val ARG_CLAZZ_UID = "clazzUid"
-
         const val ARG_SCHOOL_UID = "schoolUid"
 
         const val ARG_LEAF = "content_type"
-
-        @Deprecated("Use filter by school / role")
-        const val ARG_SCHOOLMEMBER_FILTER_STUDENTS ="schoolMemberFilterStudents"
-
-        @Deprecated("Use filter by school / role")
-        const val ARG_SCHOOLMEMBER_FILTER_STAFF = "schoolMemberFilterStaff"
 
         const val ARG_FILTER_BY_SCHOOLUID = "filterBySchoolUid"
 

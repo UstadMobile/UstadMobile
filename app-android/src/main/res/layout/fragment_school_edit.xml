@@ -28,10 +28,6 @@
             type="java.util.List&lt;MessageIdOption&gt;"/>
 
         <variable
-            name="genderSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
-
-        <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.SchoolEditFragmentEventHandler" />
 
