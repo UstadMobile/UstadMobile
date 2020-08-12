@@ -95,7 +95,7 @@
     <string name="new_tab">العرض على شاشة جديدة</string>
     <string name="loading">تحميل</string>
     <string name="error_opening_file">خطأ في فتح الملف:</string>
-    <string name="supported_files">الملفات المدعمة: <b>Epub, TinCan (XAPI) Zip</b>
+    <string name="supported_files">الملفات المدعمة: <b>Vídeo, Audio, EPUB, Xapi Zip,H5P</b>
     </string>
     <string name="logout">تسجيل الخروج</string>
     <string name="about">حول</string>
@@ -797,4 +797,35 @@
     <string name="update_content">تعديل المحتوى</string>
     <string name="select_language">اختر لغة</string>
     <string name="description">وصف</string>
+    <string name="sel_question_type_multiple_choice">اختيار من متعدد</string>
+    <string name="incorrect_current_password">كلمة السر خاطئة</string>
+    <string name="person_exists">الشخص مسجل، اختر اسم مستخدم آخر</string>
+    <string name="logged_in_as">التسجيل ك %1$s على %2$s</string>
+    <string name="add_another">اضف %1$s آخر</string>
+    <string name="my">%1$s ي</string>
+    <string name="create_account">انشاء حساب</string>
+    <string name="connect_as_guest">الاتصال كضيف</string>
+    <string name="create_workspace_organisation">انشاء مساحة عمل جديدة لطلاب و معلمات المنظمة على استاذ موبايل</string>
+    <string name="create_organisation">انشاء مساحة عمل جديدة للمنظمة</string>
+    <string name="existing_organisation">المنظمة تستخدم استاذ موبايل</string>
+    <string name="join_existing_workspace">الانضمام إلى مساحة عمل في منظمة موجودة</string>
+    <string name="access_open_education">الحصول على الالاف من مصادر التعليم المفتوحة شخصيا</string>
+    <string name="use_public_library">استخدم المكتبة العامة</string>
+    <string name="organisation">%1$s منظمة</string>
+    <string name="workspace">مساحة عمل</string>
+    <string name="not_answered">لم يتم الاجابة</string>
+    <string name="of_content">من المحتوى</string>
+    <string name="answer">جواب</string>
+    <string name="submitliteral">قم بالارسال</string>
+    <string name="not_submitted_cap">لم يتم ارسال</string>
+    <string name="submitted_cap">تم الارسال</string>
+    <string name="marked_cap">تم وضع العلامة</string>
+    <string name="add_a_new">%1$s اضف جديد</string>
+    <string name="descending">تنازلي</string>
+    <string name="ascending">تصاعدي</string>
+    <string name="invalid_link">رابط غير صالح</string>
+    <string name="link">رابط</string>
+    <string name="lets_get_started_label">لنبدأ</string>
+    <string name="accounts">حسابات</string>
+    <string name="register_now">سجل الان</string>
 </resources>
