@@ -1,25 +1,19 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.impl.UmCallback
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlin.js.JsName
 
 interface WebChunkView : UstadView {
 
-    @JsName("mountChunk")
-    fun mountChunk(container: Container?, callback: UmCallback<String>)
+    var entry: ContentEntry?
 
-    @JsName("loadUrl")
-    fun loadUrl(url: String)
+    var containerManager: ContainerManager?
 
-    @JsName("showError")
-    fun showError(message: String)
-
-    @JsName("setToolbarTitle")
-    fun setToolbarTitle(title: String)
-
-    @JsName("showErrorWithAction")
-    fun showErrorWithAction(message: String, actionMessageId: Int, mimeType: String)
+    @JsName("showNoAppFoundError")
+    fun showNoAppFoundError(message: String, actionMessageId: Int, mimeType: String)
 
     companion object {
 

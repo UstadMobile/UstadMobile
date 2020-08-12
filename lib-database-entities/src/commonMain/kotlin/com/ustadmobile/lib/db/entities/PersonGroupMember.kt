@@ -19,7 +19,7 @@ class PersonGroupMember() {
     var groupMemberUid: Long = 0
 
 
-    var groupMemberActive: Boolean = false
+    var groupMemberActive: Boolean = true
 
     @ColumnInfo(index = true)
     var groupMemberPersonUid: Long = 0

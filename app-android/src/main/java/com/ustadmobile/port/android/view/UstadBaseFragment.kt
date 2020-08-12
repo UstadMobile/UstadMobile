@@ -2,24 +2,39 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.observe
+import androidx.navigation.fragment.findNavController
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
 import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
+import org.kodein.di.DIAware
+import org.kodein.di.android.x.di
 import java.util.*
 
 /**
  * Created by mike on 10/15/15.
  */
-open class UstadBaseFragment : Fragment(), UstadView {
+open class UstadBaseFragment : Fragment(), UstadView, DIAware {
+
+    private var searchView: SearchView? = null
 
     private val runOnAttach = Vector<Runnable>()
 
     protected var titleLifecycleObserver: TitleLifecycleObserver? = null
 
     protected var fabManager: FabManagerLifecycleObserver? = null
+
+    protected var searchManager: SearchViewManagerLifecycleObserver? = null
+
+    override val di by di()
 
     override var loading: Boolean = false
         get() = field
@@ -29,12 +44,23 @@ open class UstadBaseFragment : Fragment(), UstadView {
         }
 
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        searchView = menu.findItem(R.id.menu_search).actionView as SearchView
+        searchManager?.searchView = searchView
+    }
+
     /**
      * If enabled, the fab will be managed by this fragment when its view is active.
      */
     protected var fabManagementEnabled: Boolean = true
 
-    var title: String?
+    var clazzWorkTitle: String?
         get() = titleLifecycleObserver?.title
         set(value) {
             titleLifecycleObserver?.title = value
@@ -53,6 +79,15 @@ open class UstadBaseFragment : Fragment(), UstadView {
                 false, 0, null).also {
                 viewLifecycleOwner.lifecycle.addObserver(it)
             }
+        }
+
+        searchManager = SearchViewManagerLifecycleObserver(searchView).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
+                viewLifecycleOwner) {
+            showSnackBar(it)
         }
     }
 
@@ -89,20 +124,7 @@ open class UstadBaseFragment : Fragment(), UstadView {
 
     companion object {
 
-        /**
-         * Argument to pass to tell a fragment where on the back stack a result (e.g. entity selected
-         * from a list or newly created) should be saved. This works along the principles outlined
-         * here: https://developer.android.com/guide/navigation/navigation-programmatic#returning_a_result .
-         *
-         * The difference between the approach taken here and the approach in the link above is that
-         * we do not automatically save the result to the previous entry in the back stack. When the
-         * user goes from fragment a to a list to pick an entity, and then selects to create a new
-         * entity, we want to go back directly back from the new entity edit fragment to fragment a
-         * (e.g. skip the intermediary list).
-         *
-         * @see com.ustadmobile.port.android.view.ext.FragmentExtKt#saveResultToBackStackSavedStateHandle
-         */
-        const val ARG_RESULT_DEST_ID = "result_dest"
+
 
         /**
          * The key to use in the SavedStateHandle to save the result

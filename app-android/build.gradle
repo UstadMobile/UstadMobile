@@ -17,7 +17,7 @@ buildscript {
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha04"
+    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha05"
 }
 
 apply plugin: 'com.android.library'
@@ -57,10 +57,11 @@ afterEvaluate {
     }
 }
 
+//Start the test server that Espresso tests can use when we need to test communicating with a real server
 tasks.whenTaskAdded { task ->
-    if (task.name.toLowerCase().endsWith("androidtest")) {
-        //TODO: This needs to depend on the new lib-http-testserver for end-to-end tests
-        //task.dependsOn(":lib-http-testserver:startDaemon")
+    if (task.name.toLowerCase().startsWith("connected") && task.name.toLowerCase().endsWith("androidtest")) {
+        task.dependsOn(":lib-http-testserver:startServer")
+        task.finalizedBy(":lib-http-testserver:stopServer")
     }
 }
 
@@ -85,6 +86,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
     testOptions {
@@ -123,6 +125,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
+        multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
@@ -162,7 +165,6 @@ android {
         vanillamultidex {
             dimension "config"
             minSdkVersion 18
-            multiDexEnabled true
             multiDexKeepProguard file('multidex-config.pro')
         }
 
@@ -295,6 +297,8 @@ configurations.all {
 }
 
 dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+
     implementation project(':core')
     implementation project(':sharedse')
 
@@ -386,9 +390,6 @@ dependencies {
     //SVG support for Android
     implementation 'com.pixplicity.sharp:library:1.1.0'
 
-    //Support for encrypted zips
-    implementation "net.lingala.zip4j:zip4j:$version_zip4j"
-
     //Gson for JSON serializing and deserializing
     implementation "com.google.code.gson:gson:$version_gson"
 
@@ -416,6 +417,8 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
     implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"
 
+    //dependency injection
+    implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

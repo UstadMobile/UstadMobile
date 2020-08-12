@@ -2,9 +2,11 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryList2View
@@ -17,23 +19,21 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.util.test.ext.insertContentEntryWithParentChildJoinAndMostRecentContainer
-import junit.framework.Assert
-import junit.framework.Assert.*
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 class ContentEntryList2PresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ContentEntryList2View
 
@@ -47,10 +47,12 @@ class ContentEntryList2PresenterTest {
 
     private val parentEntryUid = 100001L
 
-    private var createdEntries: List<ContentEntry>? = null
+    private var createdEntries: List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
 
     val presenterArgs = mapOf(ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT,
             ARG_PARENT_ENTRY_UID to parentEntryUid.toString())
+
+    private lateinit var di: DI
 
     @Before
     fun setup() {
@@ -59,14 +61,21 @@ class ContentEntryList2PresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoContentEntrySpyDao = spy(clientDbRule.db.contentEntryDao)
-        whenever(clientDbRule.db.contentEntryDao).thenReturn(repoContentEntrySpyDao)
 
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        repoContentEntrySpyDao = spy(repo.contentEntryDao)
+        whenever(repo.contentEntryDao).thenReturn(repoContentEntrySpyDao)
     }
 
     private fun createEntries(nonLeafs: MutableList<Int> = mutableListOf()){
+        val db: UmAppDatabase by di.activeRepoInstance()
         createdEntries = runBlocking {
-            clientDbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6,parentEntryUid, nonLeafIndexes = nonLeafs)
         }
     }
@@ -75,13 +84,12 @@ class ContentEntryList2PresenterTest {
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         createEntries()
         val presenter = ContentEntryList2Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
+        val accountManager: UstadAccountManager by di.instance()
         verify(repoContentEntrySpyDao, timeout(defaultTimeout)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                eq(parentEntryUid), eq(0), eq(0), eq(clientDbRule.account.personUid))
+                eq(parentEntryUid), eq(0), eq(0), eq(accountManager.activeAccount.personUid))
 
         verify(mockView, timeout(defaultTimeout)).list = any()
     }
@@ -91,15 +99,15 @@ class ContentEntryList2PresenterTest {
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
         createEntries()
         val presenter = ContentEntryList2Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
-        verify(systemImplRule.systemImpl, timeout(defaultTimeout)).go(eq(ContentEntry2DetailView.VIEW_NAME),
+        val systemImpl: UstadMobileSystemImpl by di.instance()
+
+        verify(systemImpl, timeout(defaultTimeout)).go(eq(ContentEntry2DetailView.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to createdEntries?.get(0)?.contentEntryUid.toString())), any())
     }
 
@@ -108,16 +116,14 @@ class ContentEntryList2PresenterTest {
         createEntries()
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<List<ContentEntry>>().apply{
-            verify(mockView, after(defaultTimeout).times(1)).finishWithResult(capture())
+            verify(mockView, timeout(defaultTimeout).times(1)).finishWithResult(capture())
             assertEquals("Got expected result", firstValue[0], createdEntries?.get(0))
         }
     }
@@ -125,22 +131,23 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnAFolder_thenShouldOpenIt(){
         createEntries(mutableListOf(0))
+        val db: UmAppDatabase by di.activeDbInstance()
+        val accountManager: UstadAccountManager by di.instance()
+
         runBlocking {
-            clientDbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<Long>().apply{
             verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(2)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                    capture(), eq(0), eq(0), eq(clientDbRule.account.personUid))
+                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid))
             assertEquals("Expected folder was opened", secondValue, createdEntries?.get(0)?.contentEntryUid)
         }
     }
@@ -149,26 +156,26 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnAFolderForEntrySelection_thenShouldOpenItAndFinishWithResultWhenSelected(){
         createEntries(mutableListOf(0))
+        val db: UmAppDatabase by di.activeDbInstance()
+
         val createdChildEntries = runBlocking {
-            clientDbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         mockView.waitForListToBeSet()
 
-        createdChildEntries[0].let { presenter.handleClickEntry(it) }
+        createdChildEntries[0].let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<List<ContentEntry>>().apply{
-            verify(mockView, after(defaultTimeout).times(1)).finishWithResult(capture())
+            verify(mockView, timeout(defaultTimeout).times(1)).finishWithResult(capture())
             assertEquals("Got expected result", firstValue[0], createdChildEntries[0])
         }
     }
@@ -177,19 +184,20 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnBackPressedWhileInAFolder_thenShouldGoBackToThePreviousParentEntry(){
         createEntries(mutableListOf(0))
+        val db: UmAppDatabase by di.activeDbInstance()
+        val accountManager: UstadAccountManager by di.instance()
+
         val createdChildEntries = runBlocking {
-            clientDbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         mockView.waitForListToBeSet()
 
@@ -199,7 +207,7 @@ class ContentEntryList2PresenterTest {
 
         argumentCaptor<Long>().apply{
             verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(3)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                    capture(), eq(0), eq(0), eq(clientDbRule.account.personUid))
+                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid))
             assertEquals("Went back to the expected folder", thirdValue, parentEntryUid)
         }
     }
@@ -210,9 +218,7 @@ class ContentEntryList2PresenterTest {
         createEntries()
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
         val presenter = ContentEntryList2Presenter(context,
-                args , mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                args , mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 

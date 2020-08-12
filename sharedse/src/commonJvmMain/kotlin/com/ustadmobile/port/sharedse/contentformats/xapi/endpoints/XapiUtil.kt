@@ -3,13 +3,13 @@ package com.ustadmobile.port.sharedse.contentformats.xapi.endpoints
 import com.google.gson.Gson
 import com.neovisionaries.i18n.CountryCode
 import com.neovisionaries.i18n.LanguageCode
+import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.sharedse.contentformats.xapi.*
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil.toInt
 import java.util.*
+import com.ustadmobile.core.util.parse8601Duration
 
 object XapiUtil {
 
@@ -50,7 +50,7 @@ object XapiUtil {
 
     fun insertOrUpdateVerbLangMap(dao: XLangMapEntryDao, verb: Verb, verbEntity: VerbEntity, languageDao: LanguageDao, languageVariantDao: LanguageVariantDao) {
         val verbDisplay = verb.display
-        if(verbDisplay != null) {
+        if (verbDisplay != null) {
             val listToInsert = verbDisplay.map {
                 val split = it.key.split("-")
                 val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
@@ -98,9 +98,9 @@ object XapiUtil {
         val xObjectId = xobject.id ?: throw IllegalArgumentException("XObject has no id")
         val entity = dao.findByObjectId(xObjectId)
 
-        val contentEntryUidVal = if(contentEntryUid != 0L) {
+        val contentEntryUidVal = if (contentEntryUid != 0L) {
             contentEntryUid
-        }else {
+        } else {
             contentEntryDao.getContentEntryUidFromXapiObjectId(xObjectId)
         }
 
@@ -263,7 +263,8 @@ object XapiUtil {
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
                                       contentEntryUid: Long = 0L): StatementEntity {
 
-        val statementId = statement.id ?: throw IllegalArgumentException("Statement ${statement} to be stored has no id!")
+        val statementId = statement.id
+                ?: throw IllegalArgumentException("Statement $statement to be stored has no id!")
 
         var statementEntity: StatementEntity? = dao.findByStatementId(statementId)
         if (statementEntity == null) {
@@ -290,7 +291,7 @@ object XapiUtil {
             val statementResult = statement.result
             if (statementResult != null) {
                 statementEntity.resultCompletion = statementResult.completion
-                statementEntity.resultDuration = UMTinCanUtil.parse8601DurationOrDefault(statementResult.duration, 0L)
+                statementEntity.resultDuration = statementResult.duration?.let { parse8601Duration(it) } ?: 0L
                 statementEntity.resultResponse = statementResult.response
                 statementEntity.resultSuccess = statementResult.success.toInt().toByte()
 
@@ -302,10 +303,11 @@ object XapiUtil {
                     statementEntity.resultScoreRaw = resultScore.raw
                 }
 
-                val progressExtension = statementResult.extensions?.get(StatementEndpoint.EXTENSION_PROGRESS)
-                if(progressExtension != null) {
+                val progressExtension = statementResult.extensions?.get(XapiStatementEndpointImpl.EXTENSION_PROGRESS)
+                if (progressExtension != null) {
                     //As this is being parsed as JSON - any number is counted as Double type
                     statementEntity.extensionProgress = progressExtension.anyToInt()
+
                 }
             } else {
                 statementEntity.resultSuccess = 0.toByte()
@@ -321,6 +323,25 @@ object XapiUtil {
         }
         return statementEntity
     }
+
+    fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, progressDao: ContentEntryProgressDao, verbEntity: VerbEntity) {
+        progressDao.updateProgress(statementEntity.statementContentEntryUid, statementEntity.statementPersonUid, statementEntity.extensionProgress, getStatusFlag(verbEntity.urlId))
+    }
+
+    private fun getStatusFlag(id: String?): Int {
+        return statusFlagMap[id] ?: 0
+    }
+
+    private val statusFlagMap = mapOf(
+            "http://adlnet.gov/expapi/verbs/completed"
+                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED,
+            "http://adlnet.gov/expapi/verbs/passed"
+                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED,
+            "http://adlnet.gov/expapi/verbs/failed"
+                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED,
+            "https://w3id.org/xapi/adl/verbs/satisfied"
+                    to ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED)
+
 
     fun Boolean.toInt() = if (this) 1 else 0
 

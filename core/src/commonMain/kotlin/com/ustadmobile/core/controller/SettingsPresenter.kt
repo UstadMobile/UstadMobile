@@ -2,10 +2,14 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: SettingsView,
-                        val impl : UstadMobileSystemImpl = UstadMobileSystemImpl.instance) :
-        UstadBaseController<SettingsView>(context, arguments!!, view) {
+                        di: DI) :
+        UstadBaseController<SettingsView>(context, arguments!!, view, di) {
+
+    private val impl: UstadMobileSystemImpl by instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

@@ -1,10 +1,15 @@
 package com.ustadmobile.port.sharedse.impl.http
 
-import com.google.gson.Gson
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UMLog
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import org.kodein.di.DI
+import com.ustadmobile.core.account.Endpoint
+import org.kodein.di.instance
+import org.kodein.di.on
+import com.google.gson.Gson
 
 /**
  * NanoHTTPD router that will provide a list of all ContainEntry objects (and their MD5 sum) so that
@@ -13,32 +18,24 @@ import fi.iki.elonen.router.RouterNanoHTTPD
  */
 class ContainerEntryListResponder : RouterNanoHTTPD.UriResponder {
 
+    private fun newBadRequestResponse(errorMessage: String): NanoHTTPD.Response =
+            NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "text/plain", errorMessage)
+
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
-        val appDatabase = uriResource.initParameter(PARAM_APPDB_INDEX, UmAppDatabase::class.java)
+        val di = uriResource.initParameter(PARAM_DI_INDEX, DI::class.java)
+        val endpoint = urlParams[PATH_VAR_ENDPOINT] ?: return newBadRequestResponse("No endpoint in urlParams")
+        val appDatabase: UmAppDatabase by di.on(Endpoint(endpoint)).instance(tag = TAG_DB)
+        val containerUid = session.parameters.get(PARAM_CONTAINER_UID)?.firstOrNull()?.toLong()
+                ?: return newBadRequestResponse("No containerUid param")
+        val entryList = appDatabase.containerEntryDao.findByContainerWithMd5(containerUid)
+        val gson: Gson by di.instance()
 
-        try {
-            val containerUid = if (session.parameters.containsKey(PARAM_CONTAINER_UID) && session.parameters[PARAM_CONTAINER_UID]!!.isNotEmpty())
-                session.parameters[PARAM_CONTAINER_UID]!![0].toLong()
-            else
-                null
-            if (containerUid != null) {
-                val entryList = appDatabase.containerEntryDao
-                        .findByContainerWithMd5(containerUid)
-                val status = if (entryList.isEmpty())
-                    NanoHTTPD.Response.Status.NOT_FOUND
-                else
-                    NanoHTTPD.Response.Status.OK
-                return NanoHTTPD.newFixedLengthResponse(status, "application/json",
-                        Gson().toJson(entryList))
-            }
-        } catch (e: NumberFormatException) {
-            UMLog.l(UMLog.WARN, 700,
-                    "ContainerEntryListResponder received bad uid")
-        }
+        val status = if (entryList.isEmpty())
+            NanoHTTPD.Response.Status.NOT_FOUND
+        else
+            NanoHTTPD.Response.Status.OK
 
-
-        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
-                "application/json", null)
+        return NanoHTTPD.newFixedLengthResponse(status, "application/json", gson.toJson(entryList))
     }
 
     override fun put(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response? {
@@ -59,7 +56,9 @@ class ContainerEntryListResponder : RouterNanoHTTPD.UriResponder {
 
     companion object {
 
-        const val PARAM_APPDB_INDEX = 0
+        const val PARAM_DI_INDEX = 0
+
+        const val PATH_VAR_ENDPOINT = "endpoint"
 
         const val PARAM_CONTAINER_UID = "containerUid"
     }

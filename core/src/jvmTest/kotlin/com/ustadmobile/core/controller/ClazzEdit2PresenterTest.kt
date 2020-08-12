@@ -1,24 +1,31 @@
 
 package com.ustadmobile.core.controller
 
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.whenever
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ClazzDao
+import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Clazz
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.ClazzDetailView
-import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
-import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.ClazzDao
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import org.junit.Assert
-import com.ustadmobile.core.db.waitUntil
-import kotlinx.coroutines.runBlocking
-import com.ustadmobile.core.util.ext.captureLastEntityValue
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.scoped
+import org.kodein.di.singleton
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -29,11 +36,7 @@ class ClazzEdit2PresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ClazzEdit2View
 
@@ -43,6 +46,8 @@ class ClazzEdit2PresenterTest {
 
     private lateinit var repoClazzDaoSpy: ClazzDao
 
+    private lateinit var di: DI
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -50,20 +55,30 @@ class ClazzEdit2PresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoClazzDaoSpy = spy(clientDbRule.db.clazzDao)
-        whenever(clientDbRule.db.clazzDao).thenReturn(repoClazzDaoSpy)
 
-        //TODO: insert any entities required for all tests
+        val mockClazzLogCreator = mock<ClazzLogCreatorManager>()
+
+        di = DI {
+            import(ustadTestRule.diModule)
+            bind<ClazzLogCreatorManager>() with scoped(ustadTestRule.endpointScope!!).singleton { mockClazzLogCreator }
+        }
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        repoClazzDaoSpy = spy(repo.clazzDao)
+        whenever(repo.clazzDao).thenReturn(repoClazzDaoSpy)
     }
+
 
     @Test
     fun givenNoExistingEntity_whenOnCreateAndHandleClickSaveCalled_thenShouldSaveToDatabase() {
         val presenterArgs = mapOf<String, String>()
 
-        val presenter = ClazzEdit2Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        val presenter = ClazzEdit2Presenter(context, presenterArgs, mockView, di, mockLifecycleOwner)
+
         presenter.onCreate(null)
 
         val initialEntity = mockView.captureLastEntityValue()!!
@@ -73,7 +88,7 @@ class ClazzEdit2PresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        val existingEntitiesLive = clientDbRule.db.clazzDao.findAllLive()
+        val existingEntitiesLive = db.clazzDao.findAllLive()
         val entitySaved = runBlocking {
             existingEntitiesLive.waitUntil { it.size == 1 }
         }.getValue()!!.first()
@@ -83,16 +98,18 @@ class ClazzEdit2PresenterTest {
 
     @Test
     fun givenExistingClazz_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+
         val testEntity = Clazz().apply {
             clazzName = "Spelling Clazz"
-            clazzUid = clientDbRule.repo.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
         val presenter = ClazzEdit2Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         val initialEntity = mockView.captureLastEntityValue()!!
@@ -103,7 +120,7 @@ class ClazzEdit2PresenterTest {
         presenter.handleClickSave(initialEntity)
 
         val entitySaved = runBlocking {
-            clientDbRule.db.clazzDao.findByUidLive(testEntity.clazzUid)
+            db.clazzDao.findByUidLive(testEntity.clazzUid)
                     .waitUntil(5000) { it?.clazzName == "New Spelling Clazz" }.getValue()
         }
 

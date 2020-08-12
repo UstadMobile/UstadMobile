@@ -1,6 +1,7 @@
 package com.ustadmobile.test.port.android.util
 
 import androidx.fragment.app.testing.FragmentScenario
+import androidx.test.core.app.ActivityScenario
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import kotlinx.coroutines.CompletableDeferred
@@ -20,7 +21,7 @@ fun <T> DoorLiveData<T>.waitUntilWithFragmentScenario(fragmentScenario: Fragment
     val completableDeferred = CompletableDeferred<T>()
     val observerFn = object : DoorObserver<T> {
         override fun onChanged(t: T) {
-            if(checker.invoke(t))
+            if (checker.invoke(t))
                 completableDeferred.complete(t)
         }
     }
@@ -38,3 +39,29 @@ fun <T> DoorLiveData<T>.waitUntilWithFragmentScenario(fragmentScenario: Fragment
         value
     }
 }
+
+fun <T> DoorLiveData<T>.waitUntilWithActivityScenario(activityScenario: ActivityScenario<*>,
+                                                      timeout: Long = 5000, checker: (T) -> Boolean): T? {
+    val completableDeferred = CompletableDeferred<T>()
+    val observerFn = object : DoorObserver<T> {
+        override fun onChanged(t: T) {
+            if (checker.invoke(t))
+                completableDeferred.complete(t)
+        }
+    }
+
+    activityScenario.onActivity {
+        observeForever(observerFn)
+    }
+
+    runBlocking {
+        withTimeoutOrNull(timeout) { completableDeferred.await() }
+    }
+
+    activityScenario.onActivity {
+        removeObserver(observerFn)
+    }
+
+    return value
+}
+

@@ -1,19 +1,22 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.GoToEntryFn
+import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.goToContentEntry
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
+import com.ustadmobile.core.view.WebChunkView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import kotlin.js.JsName
 
 open class IndexLog {
@@ -42,16 +45,19 @@ open class IndexLog {
 
 abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, String>,
                                        view: WebChunkView,
-                                       private val isDownloadEnabled: Boolean,
-                                       private val appRepo: UmAppDatabase,
-                                       val umAppDb: UmAppDatabase,
-                                       private val goToEntryFn: GoToEntryFn = ::goToContentEntry)
+                                       di: DI)
 
-    : UstadBaseController<WebChunkView>(context, arguments, view) {
-
-    private var navigation: String? = null
+    : UstadBaseController<WebChunkView>(context, arguments, view, di) {
 
     internal var containerUid: Long? = null
+
+    private val contentEntryOpener: ContentEntryOpener by di.instance()
+
+    val accountManager: UstadAccountManager by instance()
+
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
     @JsName("handleMountChunk")
     abstract suspend fun handleMountChunk()
@@ -59,22 +65,18 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        var entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID)!!.toLong()
-        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID)!!.toLong()
-
-        navigation = arguments[ARG_REFERRER] ?: ""
+        var entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
+        containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
         GlobalScope.launch {
             try {
-                val result = umAppDb.contentEntryDao.getContentByUuidAsync(entryUuid)
+                val result = repo.contentEntryDao.getContentByUuidAsync(entryUuid)
                 view.runOnUiThread(Runnable {
-                    val resultTitle = result?.title
-                    if (resultTitle != null)
-                        view.setToolbarTitle(resultTitle)
+                    view.entry = result
                 })
             } catch (e: Exception) {
                 view.runOnUiThread(Runnable {
-                    view.showError(UstadMobileSystemImpl.instance
+                    view.showSnackBar(UstadMobileSystemImpl.instance
                             .getString(MessageID.error_opening_file, context))
                 })
             }
@@ -97,18 +99,17 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
             GlobalScope.launch {
                 try {
-                    val entry = appRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
+                    val entry = repo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
                             ?: throw IllegalArgumentException("No File found")
-                    goToEntryFn(entry.contentEntryUid, umAppDb, context, impl, true,
-                            true,
-                            arguments[ARG_NO_IFRAMES]?.toBoolean()!!)
+                    contentEntryOpener.openEntry(context, entry.contentEntryUid, true,
+                        true, arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
-                        view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
+                        view.showNoAppFoundError(impl.getString(MessageID.no_app_found, context),
                                 MessageID.get_app,
-                                e.mimeType!!)
+                                e.mimeType ?: "")
                     } else {
-                        view.showError(e.message!!)
+                        view.showSnackBar(e.message ?: "")
                     }
                 }
 

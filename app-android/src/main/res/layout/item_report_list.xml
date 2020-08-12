@@ -29,6 +29,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/item_reportlist_report_cl"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, report)}"
         app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(report)}"

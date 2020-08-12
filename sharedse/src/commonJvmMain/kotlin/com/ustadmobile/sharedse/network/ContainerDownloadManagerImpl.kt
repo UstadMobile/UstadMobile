@@ -2,6 +2,7 @@ package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.door.DoorLiveData
 import java.lang.IllegalStateException
 import java.util.*
@@ -17,14 +18,30 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import com.ustadmobile.core.util.ext.makeRootDownloadJobItem
 import com.ustadmobile.core.util.ext.isStatusCompleted
-
-
-typealias ContainerDownloaderMaker = suspend (downloadJob: DownloadJobItem, downloadJobManager: ContainerDownloadManager) -> ContainerDownloadRunner
-
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.door.DoorObserver
+import org.kodein.di.*
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.door.doorMainDispatcher
+/**
+ * This class manages a download queue for a given endpoint.
+ */
 class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineContext = newSingleThreadContext("UstadDownloadManager"),
-                                   private val appDb: UmAppDatabase,
-                                   private val onQueueEmpty: () -> Unit = {},
-                                   private val containerDownloaderMaker: ContainerDownloaderMaker): ContainerDownloadManager() {
+                                   val endpoint: Endpoint, override val di: DI): ContainerDownloadManager(), DIAware {
+
+    var onQueueEmpty: (() -> Unit) = {}
+
+    val appDb: UmAppDatabase by on(endpoint).instance(tag = TAG_DB)
+
+    private val networkManager: NetworkManagerBle by instance()
+
+    private val connectivityObserver = object: DoorObserver<ConnectivityStatus> {
+        override fun onChanged(t: ConnectivityStatus) {
+            GlobalScope.launch(singleThreadContext) {
+                handleConnectivityChanged(t)
+            }
+        }
+    }
 
     /**
      * This class ensures that a reference is kept as long as anything still holds a reference to
@@ -189,13 +206,18 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     private val jobsToCommit: MutableSet<DownloadJob> = HashSet()
 
-    override val connectivityLiveData = DoorMutableLiveData<ConnectivityStatus?>(null)
-
     private var currentConnectivityStatus: ConnectivityStatus? = null
 
     private val activeDownloads: MutableMap<Int, ActiveContainerDownload> = ConcurrentHashMap()
 
     val maxNumConcurrentDownloads = 1
+
+    init {
+        GlobalScope.launch(doorMainDispatcher()) {
+            networkManager.connectivityStatus.observeForever(connectivityObserver)
+        }
+    }
+
 
     override suspend fun getDownloadJobItemByJobItemUid(jobItemUid: Int): DoorLiveData<DownloadJobItem?> = withContext(singleThreadContext){
         val holder = loadDownloadJobItemHolder(jobItemUid)
@@ -368,9 +390,11 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         }
 
         val nextDownload = appDb.downloadJobItemDao.findNextDownloadJobItems2(1,
-                currentConnectivityStatus?.connectivityState == ConnectivityStatus.STATE_UNMETERED)
+                currentConnectivityStatus?.connectivityState ?: ConnectivityStatus.STATE_DISCONNECTED)
         if(nextDownload.isNotEmpty()) {
-            val containerDownloader = containerDownloaderMaker(nextDownload[0], this@ContainerDownloadManagerImpl)
+            val containerDownloader: ContainerDownloadRunner = di.direct.instance(
+                    arg = DownloadJobItemRunnerDIArgs(endpoint, nextDownload[0]))
+
             activeDownloads[nextDownload[0].djiUid] = ActiveContainerDownload(nextDownload[0],
                     containerDownloader)
             GlobalScope.launch(Dispatchers.IO) {
@@ -445,7 +469,6 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
     override suspend fun handleConnectivityChanged(status: ConnectivityStatus) = withContext(singleThreadContext){
         currentConnectivityStatus = status
-        connectivityLiveData.sendValue(status)
         checkQueue()
     }
 }

@@ -17,7 +17,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.android.tools.build:gradle:4.0.1'
         classpath 'com.google.gms:google-services:4.3.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -70,12 +70,12 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.3.1"
+version = "0.3.2"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 179
+    ustadVersionCode = 181
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.5"
@@ -90,7 +90,6 @@ ext {
 
     version_junit = "4.13"
     version_nanohttpd = "2.3.1"
-    version_zip4j = "1.3.2"
     version_kxml = "2.3.0"
     version_json = "20160212"
 
@@ -127,12 +126,14 @@ ext {
     version_napier = "1.3.0"
     version_tellh_recyclertreeview = "1.2.0"
     version_logback = "1.0.13"
+    version_kodein_di = "7.0.0"
 
     version_android_buildtools = "29.0.0"
     version_android_compile_sdk = 29
     version_android_target_sdk = 29
     version_android_min_sdk = 18
     version_android_picasso = 2.71828
+    version_android_desugar_jdk_libs = "1.0.10"
 
     //Androidx versions as per https://developer.android.com/jetpack/androidx/versions
     version_androidx_annotation = "1.1.0"
@@ -210,6 +211,14 @@ ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
 if(project.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
+}
+
+if(System.getenv("TESTSERVER_HOST") != null) {
+    ext.buildConfigProperties["test.um_http_testserver"] = System.getenv("TESTSERVER_HOST")
+}
+
+if(System.getenv("TESTSERVER_PORT") != null) {
+    ext.buildConfigProperties["test.um_http_testserver_controlport"] = System.getenv("TESTSERVER_PORT")
 }
 
 ext.localProperties = new Properties()

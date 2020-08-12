@@ -19,6 +19,7 @@ import com.ustadmobile.core.controller.OnBoardingPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.CompletableDeferred
 
@@ -103,7 +104,9 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
         pageIndicatorView?.setAnimationType(AnimationType.WORM)
 
         getStartedBtn?.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
+            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra(ARG_FROM,OnBoardingView.VIEW_NAME)
+            startActivity(intent)
         }
 
         screenList =  OnBoardScreen.values().toList()
@@ -136,7 +139,7 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
 
         presenter = OnBoardingPresenter(this,
-                bundleToMap(intent.extras), this, UstadMobileSystemImpl.instance)
+                bundleToMap(intent.extras), this, di)
         presenter?.onCreate(bundleToMap(savedInstanceState))
     }
 

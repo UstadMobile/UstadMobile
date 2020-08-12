@@ -7,6 +7,14 @@
         <item name="android:src">@drawable/ic_closed_caption_white_24dp</item>
     </style>
 
+    <style name="SelectableItemTheme">
+        <item name="colorControlHighlight">@color/primaryColor</item>
+    </style>
+
+    <style name="selectableItemThemeBackground">
+        <item name="android:theme">@style/SelectableItemTheme</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
 
     <style name="CustomDatePickerDialogTheme" parent="android:Theme.Material.Light.Dialog">
         <item name="android:datePickerStyle">@style/MyDatePickerStyle</item>
@@ -18,6 +26,16 @@
 
     <!-- As per https://material.io/develop/android/components/buttons/#toggle-button - Implementing an icon-only toggle button -->
     <style name="UmTheme.Widget.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="iconPadding">@dimen/dimen_0dp</item>
+        <item name="android:insetTop">@dimen/dimen_0dp</item>
+        <item name="android:insetBottom">@dimen/dimen_0dp</item>
+        <item name="android:paddingStart">@dimen/dimen_12dp</item>
+        <item name="android:paddingEnd">@dimen/dimen_12dp</item>
+        <item name="android:minWidth">@dimen/dimen_48dp</item>
+        <item name="android:minHeight">@dimen/dimen_48dp</item>
+    </style>
+
+    <style name="UmTheme.Widget.TextButton.IconOnly" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="iconPadding">@dimen/dimen_0dp</item>
         <item name="android:insetTop">@dimen/dimen_0dp</item>
         <item name="android:insetBottom">@dimen/dimen_0dp</item>

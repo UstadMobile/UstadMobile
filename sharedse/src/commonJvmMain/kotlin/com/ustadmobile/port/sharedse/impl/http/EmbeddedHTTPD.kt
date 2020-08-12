@@ -2,13 +2,10 @@ package com.ustadmobile.port.sharedse.impl.http
 
 
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.util.UMFileUtil
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
-import net.lingala.zip4j.core.ZipFile
-import net.lingala.zip4j.exception.ZipException
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
@@ -17,9 +14,13 @@ import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.view.ContainerMounter
 import kotlin.jvm.JvmOverloads
+import org.kodein.di.*
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -32,15 +33,11 @@ import kotlin.jvm.JvmOverloads
  *
  * Created by mike on 8/14/15.
  */
-open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val context: Any,
-                                                   private val appDatabase: UmAppDatabase = UmAccountManager.getActiveDatabase(context),
-                                                   private val repository: UmAppDatabase = UmAccountManager.getRepositoryForActiveAccount(context)) : RouterNanoHTTPD(portNum) ,ContainerMounter{
+open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di: DI) : RouterNanoHTTPD(portNum), DIAware, ContainerMounter {
 
     private val id: Int
 
     private val responseListeners = Vector<ResponseListener>()
-
-    private val mountedZips = Hashtable<String, ZipFile>()
 
     private val mountedContainers = Hashtable<String, ContainerManager>()
 
@@ -74,13 +71,21 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
     init {
         id = idCounter
         idCounter++
-        addRoute("/ContainerEntryFile/(.*)+", ContainerEntryFileResponder::class.java, appDatabase)
-        addRoute("/ContainerEntryList/findByContainerWithMd5(.*)+",
-                ContainerEntryListResponder::class.java, appDatabase)
-        addRoute("/$ENDPOINT_CONCATENATEDFILES/(.*)+", ConcatenatedContainerEntryFileResponder::class.java,
-                appDatabase)
-        addRoute("/xapi/:contentEntryUid/statements", XapiStatementResponder::class.java, repository)
-        addRoute("/xapi/:contentEntryUid/activities/state", XapiStateResponder::class.java, repository)
+
+        addRoute("/:${ContainerEntryListResponder.PATH_VAR_ENDPOINT}/ContainerEntryList/findByContainerWithMd5(.*)+",
+                ContainerEntryListResponder::class.java, di)
+        addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/(.*)+",
+                ConcatenatedContainerEntryFileResponder::class.java, di)
+        addRoute("/:${XapiStatementResponder.URI_PARAM_ENDPOINT}/xapi/:contentEntryUid/statements",
+                XapiStatementResponder::class.java, di)
+        addRoute("/:${XapiStateResponder.URI_PARAM_ENDPOINT}/xapi/activities/state",
+                XapiStateResponder::class.java, di)
+
+        //TODO: This should provide NetworkManager to the responder, or BleProxyResponder could use DI itself
+        //httpd.addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, this)
+
+//        addRoute("/xapi/:contentEntryUid/statements", XapiStatementResponder::class.java, repository)
+//        addRoute("/xapi/:contentEntryUid/activities/state", XapiStateResponder::class.java, repository)
     }
 
 
@@ -108,115 +113,29 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
     }
 
 
-    /**
-     * Mount a zip to the given path.  The contents of the zip file will then be accessible by
-     * HTTP using http://IP:PORT/mount/mountPath
-     *
-     * Zips should be unmounted when they are no longer needed.  Depending on how Android feels
-     * this service may live on after an activity is finished.  The mounted zip keeps a cached
-     * copy of the ZipFile object containing entry names, file sizes, data positions etc.
-     *
-     * For performance the mountPath should include a time/date component.  All files served will be
-     * with cache a 1 year maxage cache header
-     *
-     * @param mountPath The path to use after /mount .
-     * @param zipPath The local filesystem path to the zip file (e.g. /path/to/file.epub)
-     */
-    @Deprecated("")
-    fun mountZip(zipPath: String, mountPath: String?): String? {
-        var mountPath = mountPath
-        if (mountPath == null) {
-            mountPath = UMFileUtil.getFilename(zipPath) + '-'.toString() +
-                    SimpleDateFormat("yyyyMMddHHmmss").format(Date())
-        }
-
-        try {
-            val zipFile = ZipFile(zipPath)
-            addRoute(PREFIX_MOUNT + mountPath + "/" + MountedZipHandler.URI_ROUTE_POSTFIX,
-                    MountedZipHandler::class.java, zipFile)
-            val fullPath = toFullZipMountPath(mountPath)
-            mountedZips[fullPath!!] = zipFile
-            return toFullZipMountPath(mountPath)
-        } catch (e: ZipException) {
-            UMLog.l(UMLog.ERROR, 90, zipPath, e)
-        }
-
-        return null
-    }
-
     @JvmOverloads
-    override suspend fun mountContainer(containerUid: Long): String {
-        val contPath = mountContainer(containerUid, null)
-        return UMFileUtil.joinPaths(localHttpUrl, contPath!!)
+    override suspend fun mountContainer(endpointUrl: String, containerUid: Long): String {
+        val endpoint = Endpoint(endpointUrl)
+        val endpointDb: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+        val endpointRepo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+
+        val container = endpointRepo.containerDao.findByUid(containerUid)
+                ?: throw IllegalArgumentException("Container $containerUid on $endpointUrl not found")
+        val containerManager = ContainerManager(container, endpointDb, endpointRepo)
+
+        val mountPath = "/${sanitizeDbNameFromUrl(endpointUrl)}/container/$containerUid/"
+
+//        val contPath = mountContainer(containerUid, null)
+//        return UMFileUtil.joinPaths(localHttpUrl, contPath!!)
+
+        addRoute("$mountPath${MountedContainerResponder.URI_ROUTE_POSTFIX}",
+                MountedContainerResponder::class.java, containerUid.toString(), endpointDb, listOf<MountedContainerResponder.MountedContainerFilter>())
+        return UMFileUtil.joinPaths(localHttpUrl, mountPath)
     }
 
 
-    override suspend fun unMountContainer(mountPath: String) {
+    override suspend fun unMountContainer(endpointUrl: String, mountPath: String) {
         removeRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX)
-    }
-
-    @JvmOverloads
-    fun mountContainer(containerUid: Long, mountPath: String?,
-                       filters: List<MountedContainerResponder.MountedContainerFilter> = ArrayList()): String? {
-        val container = repository.containerDao.findByUid(containerUid) ?: return null
-        val containerManager = ContainerManager(container, appDatabase, repository)
-        return mountContainer(containerManager, mountPath, filters)
-    }
-
-    fun mountContainer(containerManager: ContainerManager, mountPath: String?,
-                       filters: List<MountedContainerResponder.MountedContainerFilter>): String {
-        var mountPath = mountPath
-        if (mountPath == null) {
-            mountPath = "/container/" + containerManager.containerUid + "/" +
-                    System.currentTimeMillis() + "/"
-        }
-
-        addRoute(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX,
-                MountedContainerResponder::class.java, context, filters, appDatabase)
-
-        return mountPath
-    }
-
-
-    private fun toFullZipMountPath(mountPath: String): String? {
-        try {
-            return PREFIX_MOUNT + URLEncoder.encode(mountPath, "UTF-8")
-        } catch (e: UnsupportedEncodingException) {
-            //Should enver happen
-            UMLog.l(UMLog.ERROR, 0, null, e)
-        }
-
-        return null
-    }
-
-    /**
-     * Unmount a zip that was mounted with mountZip
-     *
-     * @param mountPath The mount path given to mount the zip
-     */
-    fun unmountZip(mountPath: String) {
-        val encodedPath = mountPath.substring(PREFIX_MOUNT.length)
-        try {
-            val route = (PREFIX_MOUNT + URLDecoder.decode(encodedPath, "UTF-8") + "/"
-                    + MountedZipHandler.URI_ROUTE_POSTFIX)
-            removeRoute(route)
-            mountedZips.remove(toFullZipMountPath(mountPath)!!)
-        } catch (e: UnsupportedEncodingException) {
-            UMLog.l(UMLog.ERROR, 20, mountPath, e)
-        }
-
-    }
-
-    /**
-     * Convenience method to make the ZipFile object accessible if a presenter needs it after
-     * mounting it on http. This will avoid having to read the file again.
-     *
-     * @param mountPath The path as returned by mountZip
-     *
-     * @return ZipFile object for the zip that was mounted on that path, null if it's not mounted.
-     */
-    fun getMountedZip(mountPath: String): ZipFile? {
-        return mountedZips[mountPath]
     }
 
     /**
@@ -252,26 +171,6 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, private val con
                 listener.responseFinished(session, response)
             }
         }
-    }
-
-    /**
-     * Mount a Zip File to the http server.  Optionally specify a preferred mount point (useful if
-     * the activity is being created from a saved state)
-     *
-     * ***PORTED FROM NetworkManager***. TODO: refactor / clean this up somewhat.
-     *
-     * @param zipPath Path to the zip that should be mounted (mandatory)
-     * @param mountName Directory name that this should be mounted as e.g. something.epub-timestamp. Can be null
-     *
-     * @return The mountname that was used - the content will then be accessible on getZipMountURL()/return value
-     */
-    fun mountZipOnHttp(zipPath: String, mountName: String?): String? {
-        var mountName = mountName
-        UMLog.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
-                + this + "httpd server = " + this + " listening port = " + listeningPort)
-
-        mountName = mountZip(zipPath, mountName)
-        return mountName
     }
 
     fun newSession(inputStream: InputStream, outputStream: OutputStream): IHTTPSession =

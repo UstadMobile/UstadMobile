@@ -5,7 +5,7 @@ package com.ustadmobile.core.view
  */
 interface ContainerMounter {
 
-    suspend fun mountContainer(containerUid: Long): String
+    suspend fun mountContainer(endpointUrl: String, containerUid: Long): String
 
-    suspend fun unMountContainer(mountPath: String)
+    suspend fun unMountContainer(endpointUrl: String, mountPath: String)
 }

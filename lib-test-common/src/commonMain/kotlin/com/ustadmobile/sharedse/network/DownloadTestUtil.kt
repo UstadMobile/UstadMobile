@@ -53,9 +53,12 @@ fun insertTestContentEntries(db: UmAppDatabase, lastModifiedTime: Long): Recursi
     val totalBytesToDownload = cEntry2.fileSize + cEntry4.fileSize
 
     db.contentEntryParentChildJoinDao.insertList(
-            listOf(ContentEntryParentChildJoin(rootEntry, entry2, 0),
-                    ContentEntryParentChildJoin(rootEntry, entry3, 0),
-                    ContentEntryParentChildJoin(entry3, entry4, 0)))
+            listOf(ContentEntryParentChildJoin(cepcjParentContentEntryUid = rootEntry.contentEntryUid,
+                    cepcjChildContentEntryUid = entry2.contentEntryUid, childIndex = 0),
+                    ContentEntryParentChildJoin(cepcjParentContentEntryUid = rootEntry.contentEntryUid,
+                            cepcjChildContentEntryUid = entry3.contentEntryUid, childIndex = 0),
+                    ContentEntryParentChildJoin(cepcjParentContentEntryUid = entry3.contentEntryUid,
+                            cepcjChildContentEntryUid = entry4.contentEntryUid, childIndex = 0)))
     return RecursiveContentEntrySet(rootEntry, container, listOf(entry2, entry3, entry4),
             listOf(cEntry2, cEntry4), totalBytesToDownload)
 }

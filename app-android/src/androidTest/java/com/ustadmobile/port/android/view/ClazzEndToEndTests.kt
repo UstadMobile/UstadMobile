@@ -3,8 +3,7 @@ package com.ustadmobile.port.android.view
 import android.widget.DatePicker
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.launchActivity
-import androidx.test.espresso.Espresso.closeSoftKeyboard
-import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.*
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -16,6 +15,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.rules.*
@@ -45,12 +45,20 @@ class ClazzEndToEndTests {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    @AdbScreenRecord("Given an empty class list, when the user clicks add class and fills in form, then the new class is shown in list")
+    @AdbScreenRecord("Given an empty class list, when the user clicks add class and " +
+            "fills in form, then it should go to the new class")
     @Test
-    fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndShownInList() {
+    fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndGoneInto() {
         val calendarUid = dbRule.db.holidayCalendarDao.insert(HolidayCalendar().apply {
             this.umCalendarName = "Test Calendar"
         })
+
+        dbRule.insertPersonForActiveUser(Person().apply {
+            firstNames = "Bob"
+            lastName = "Jones"
+            admin = true
+        })
+
 
         val activityScenario = launchActivity<MainActivity>()
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
@@ -82,8 +90,9 @@ class ClazzEndToEndTests {
 
 
         val createdClazz = dbRule.db.clazzDao.findByClazzName("Test Class").first()
-        onView(allOf(withId(R.id.item_clazzlist_clazz_cl), withTagValue(equalTo(createdClazz.clazzUid))))
-                .check(matches(isDisplayed()))
+        onView(withText("Test Class")).perform(click())
+
+        onView(allOf(withParent(withId(R.id.toolbar)), withText(createdClazz.clazzName))).check(matches(isDisplayed()))
     }
 
 }

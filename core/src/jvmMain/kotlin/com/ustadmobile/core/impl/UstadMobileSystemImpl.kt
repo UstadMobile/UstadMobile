@@ -67,7 +67,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
-    actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int){
+    actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
+        ustadGoOptions: UstadGoOptions){
         lastDestination = LastGoToDest(viewName, args)
     }
 
@@ -171,6 +172,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
             tmpPrefs.remove(key)
         }
     }
+
+    fun clearPrefs() {
+        tmpPrefs.clear()
+    }
+
 
 
     /**

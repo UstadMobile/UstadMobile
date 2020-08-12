@@ -14,8 +14,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolDetailBinding
 import com.ustadmobile.core.controller.SchoolDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.School
@@ -67,16 +65,16 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         mPager = mBinding?.fragmentSchoolDetailViewpager
 
         mPresenter = SchoolDetailPresenter(requireContext(),arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                di, viewLifecycleOwner)
 
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        //The fab will be managed by the underlying tabs
+        fabManagementEnabled = false
 
         val navController = findNavController()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -120,6 +118,12 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         }
     }
 
+    override var title: String? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null
@@ -134,7 +138,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         set(value) {
             field = value
             mBinding?.school = value
-            title = value?.schoolName
+            clazzWorkTitle = value?.schoolName
         }
 
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE

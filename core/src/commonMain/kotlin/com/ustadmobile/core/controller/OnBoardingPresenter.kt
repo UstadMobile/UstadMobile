@@ -4,9 +4,13 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LOCALE_USE_SY
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
 import com.ustadmobile.core.view.OnBoardingView.Companion.PREF_TAG
+import org.kodein.di.DI
+import org.kodein.di.instance
 
-class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: OnBoardingView, val impl: UstadMobileSystemImpl) :
-        UstadBaseController<OnBoardingView>(context, arguments, view) {
+class OnBoardingPresenter(context: Any, arguments: Map<String, String>, view: OnBoardingView, di: DI) :
+        UstadBaseController<OnBoardingView>(context, arguments, view, di) {
+
+    private val impl: UstadMobileSystemImpl by instance()
 
     private val languageOptions = impl.getAllUiLanguagesList(context)
 

@@ -59,6 +59,11 @@ open class Clazz() {
      */
     var clazzTimeZone: String? = null
 
+    var clazzStudentsPersonGroupUid: Long = 0
+
+    var clazzTeachersPersonGroupUid: Long = 0
+
+
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
         this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_ASSIGNMENT

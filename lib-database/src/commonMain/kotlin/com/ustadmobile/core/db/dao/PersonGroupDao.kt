@@ -25,6 +25,9 @@ abstract class PersonGroupDao : BaseDao<PersonGroup> {
     @Query("SELECT * FROM PersonGroup WHERE groupUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<PersonGroup?>
 
+    @Query("SELECT * FROM PersonGroup WHERE groupPersonUid = :personUid")
+    abstract suspend fun findIndividualPersonGroup(personUid: Long): PersonGroup?
+
     @Update
     abstract suspend fun updateAsync(entity: PersonGroup) : Int
 

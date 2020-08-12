@@ -9,7 +9,6 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.ComponentNameMatchers.hasClassName
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
-import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -57,7 +56,7 @@ class OnBoardingActivityTest {
     @Test
     fun givenOnBoardingDisplays_whenUserClicksOnArabic_thenActivityRecreatedInArabic() {
 
-        val activityScenario = launchActivity<OnBoardingActivity>()
+        launchActivity<OnBoardingActivity>()
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
@@ -81,7 +80,7 @@ class OnBoardingActivityTest {
 
         Intents.init()
 
-        val activityScenario = launchActivity<OnBoardingActivity>()
+        launchActivity<OnBoardingActivity>()
 
         onView(withId(R.id.get_started_btn)).perform(click())
 

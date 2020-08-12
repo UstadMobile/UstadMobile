@@ -31,7 +31,6 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
-import com.ustadmobile.core.impl.UmCallback
 import kotlin.js.JsName
 
 /**
@@ -43,8 +42,10 @@ interface EpubContentView : UstadView {
     @JsName("setContainerTitle")
     var containerTitle: String?
 
+
     @JsName("setSpineUrls")
-    fun setSpineUrls(urls: Array<String>?, index :Int)
+    var spineUrls: List<String>?
+
 
     @JsName("setPageTitle")
     var pageTitle: String?
