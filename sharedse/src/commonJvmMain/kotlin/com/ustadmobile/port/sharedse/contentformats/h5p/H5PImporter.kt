@@ -49,7 +49,7 @@ class H5PImporter(prefixContainer: String) : DefaultContainerImporter(prefixCont
         containerManager.addEntries(ContainerManager.FileEntrySource(tinCanFile, tinCanFile.name))
 
         // generate index.html
-        val indexInput = this::class.java.getResourceAsStream("/com/ustadmobile/sharedse/h5p/index.html")
+        val indexInput =  getAssetFromResource("/com/ustadmobile/sharedse/h5p/index.html", context)
                 ?: return container
         val indexFile = File(tmpFolder, "index.html")
         indexFile.copyInputStreamToFile(indexInput)
