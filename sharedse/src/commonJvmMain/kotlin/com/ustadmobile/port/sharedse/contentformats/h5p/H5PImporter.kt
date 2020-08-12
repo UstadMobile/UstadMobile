@@ -54,7 +54,7 @@ class H5PImporter(prefixContainer: String) : DefaultContainerImporter(prefixCont
         val indexFile = File(tmpFolder, "index.html")
         indexFile.copyInputStreamToFile(indexInput)
         containerManager.addEntries(ContainerManager.FileEntrySource(indexFile, indexFile.name))
-        tmpFolder.delete()
+        tmpFolder.deleteRecursively()
 
 
         return container
