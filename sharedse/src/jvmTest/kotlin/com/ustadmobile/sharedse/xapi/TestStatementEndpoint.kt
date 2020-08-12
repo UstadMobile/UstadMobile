@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.util.parse8601Duration
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -261,7 +262,8 @@ class TestStatementEndpoint {
         Assert.assertEquals("result success matched", RESULT_SUCCESS, entity.resultSuccess)
         Assert.assertTrue("result completion matched", entity.resultCompletion)
         Assert.assertEquals("result response matched", "We agreed on some example actions.", entity.resultResponse)
-        Assert.assertEquals("result duration matched", UMTinCanUtil.parse8601Duration("PT1H0M0S"), entity.resultDuration)
+        Assert.assertEquals("result duration matched", parse8601Duration("PT1H0M0S"),
+                entity.resultDuration)
 
     }
 
