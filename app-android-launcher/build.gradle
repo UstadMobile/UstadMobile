@@ -57,6 +57,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
     defaultConfig {
@@ -65,6 +66,7 @@ android {
         targetSdkVersion rootProject.ext.version_android_target_sdk
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
+        multiDexEnabled true //required for all variants to use java library desugaring
         buildConfigField "String", "ACRA_HTTP_URI", "\"" + rootProject.ext.buildConfigProperties["android.acra.url"] + "\""
         buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + rootProject.ext.buildConfigProperties["android.acra.user"] + "\""
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + rootProject.ext.buildConfigProperties["android.acra.auth"] + "\""
@@ -109,7 +111,6 @@ android {
             applicationId "${baseAppId}"
             testApplicationId "${baseAppId}.test"
             versionCode rootProject.ext.ustadVersionCode
-            multiDexEnabled true
         }
 
         devMinApi21 {
@@ -151,6 +152,8 @@ configurations.all {
 
 
 dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+
     api project(':core')
     api project(':sharedse')
 

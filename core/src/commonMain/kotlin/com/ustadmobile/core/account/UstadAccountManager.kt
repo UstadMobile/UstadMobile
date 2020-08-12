@@ -1,6 +1,7 @@
 package com.ustadmobile.core.account
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.ext.userAtServer
@@ -50,7 +51,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         val accounts: UstadAccounts = systemImpl.getAppPref(ACCOUNTS_PREFKEY, appContext)?.let {
             Json.parse(UstadAccounts.serializer(), it)
         } ?: defaultAccount.let { defAccount ->
-            UstadAccounts(defaultAccount.userAtServer, listOf(defAccount))
+            UstadAccounts(defAccount.userAtServer, listOf(defAccount))
         }
 
         _storedAccounts = copyOnWriteListOf(*accounts.storedAccounts.toTypedArray())
@@ -64,7 +65,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     private val defaultAccount: UmAccount
         get() = UmAccount(0L, "guest", "",
-                (systemImpl.getManifestPreference(MANIFEST_DEFAULT_SERVER, appContext) ?: MANIFEST_URL_FALLBACK),
+                systemImpl.getAppConfigString(AppConfig.KEY_API_URL, MANIFEST_URL_FALLBACK, appContext) ?: MANIFEST_URL_FALLBACK,
                 "Guest", "User")
 
 
@@ -232,8 +233,6 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     companion object {
 
         const val ACCOUNTS_PREFKEY = "um.accounts"
-
-        const val MANIFEST_DEFAULT_SERVER = "defaultApiUrl"
 
         const val MANIFEST_URL_FALLBACK = "http://localhost/"
 

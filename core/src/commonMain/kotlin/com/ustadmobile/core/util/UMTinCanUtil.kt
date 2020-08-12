@@ -154,7 +154,6 @@ object UMTinCanUtil {
         return "PT" + hours + "H" + mins + "M" + secs + "S"
     }
 
-
     fun parse8601Duration(duration: String): Long {
         val time = ISO8601.INTERVAL_COMPLETE0.tryParse(duration, false)
         return time?.totalMilliseconds?.toLong() ?: 0L

@@ -66,7 +66,7 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
 
                 var containerFromDb = db.containerDao.findByUid(container.containerUid)
                 if (containerFromDb == null) {
-                    db.containerDao.insert(container)
+                    db.containerDao.insertWithReplace(container)
                     containerFromDb = container
                 }
 
@@ -86,6 +86,7 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
                 }else{
                     call.respond(HttpStatusCode.NoContent)
                 }
+                sessionFile.delete()
             }
 
         }
