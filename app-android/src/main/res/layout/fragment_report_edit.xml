@@ -6,10 +6,14 @@
     <data>
 
         <import type="android.view.View" />
+
         <import type="android.text.InputType" />
-        <import type="com.ustadmobile.core.util.MessageIdOption"/>
-        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
-        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
+
+        <import type="com.ustadmobile.core.util.MessageIdOption" />
+
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView" />
+
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener" />
 
         <variable
             name="report"
@@ -25,7 +29,7 @@
 
         <variable
             name="titleErrorText"
-            type="String"/>
+            type="String" />
 
         <variable
             name="activityEventHandler"
@@ -63,7 +67,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fragment_report_edit_edit_clx"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/dimen_56dp">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fragment_report_edit_title_layout"
@@ -100,9 +105,9 @@
                     android:id="@+id/fragment_edit_report_dialog_visual_type_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/xapi_options_visual_type"
                     app:messageIdOptions="@{chartOptions}"
-                    app:selectedMessageIdOption="@={report.chartType}"
-                    android:hint="@string/xapi_options_visual_type"/>
+                    app:selectedMessageIdOption="@={report.chartType}" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -138,8 +143,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/xapi_options_x_axes"
-                    app:onMessageIdOptionSelected="@{xAxisSelectionListener}"
                     app:messageIdOptions="@{xAxisOptions}"
+                    app:onMessageIdOptionSelected="@{xAxisSelectionListener}"
                     app:selectedMessageIdOption="@={report.XAxis}" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -181,8 +186,8 @@
                     android:cursorVisible="false"
                     android:hint="@string/from"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:runOnClickWhenFocused="@{true}"
-                    app:dateLong="@={report.fromDate}" />
+                    app:dateLong="@={report.fromDate}"
+                    app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -205,8 +210,8 @@
                     android:layout_height="wrap_content"
                     android:cursorVisible="false"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:runOnClickWhenFocused="@{true}"
-                    app:dateLong="@={report.toDate}" />
+                    app:dateLong="@={report.toDate}"
+                    app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
