@@ -828,4 +828,15 @@
     <string name="lets_get_started_label">لنبدأ</string>
     <string name="accounts">حسابات</string>
     <string name="register_now">سجل الان</string>
+
+    <string name="onboarding_lamsustad_headline1">للأطفال</string>
+    <string name="onboarding_lamsustad_subheadline1">قصص الكترونية تفاعلية للاطفال لمخاطبة المواضيع الاجتماعية العاطفية</string>
+
+    <string name="onboarding_lamsustad_headline2">للأهل</string>
+    <string name="onboarding_lamsustad_subheadline2">انشطة مقترحة و محتوى لمشاركته مع اطفالكم</string>
+
+    <string name="onboarding_lamsustad_headline3">للمعلمات</string>
+    <string name="onboarding_lamsustad_subheadline3">الوصول لمواد تكميلية في اي وقت و اي مكان. نظام سهل الاستخدام لمتابعة الواجبات</string>
+
+
 </resources>

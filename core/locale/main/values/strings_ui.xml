@@ -727,4 +727,13 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="question_type">Question type</string>
     <string name="add_option">Add option</string>
 
+    <string name="onboarding_lamsustad_headline1">For children</string>
+    <string name="onboarding_lamsustad_subheadline1">Engaging digital stories for children addressing social-emotional topics.</string>
+
+    <string name="onboarding_lamsustad_headline2">For parents</string>
+    <string name="onboarding_lamsustad_subheadline2">Activity suggestions and content to share with your Kindgergarten age child.</string>
+
+    <string name="onboarding_lamsustad_headline3">For teachers</string>
+    <string name="onboarding_lamsustad_subheadline3">Access to supplementary materials anytime, anywhere. Easy-to-use assignment tracking system.</string>
+
 </resources>
