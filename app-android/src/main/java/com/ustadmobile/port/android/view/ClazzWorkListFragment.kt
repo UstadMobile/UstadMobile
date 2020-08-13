@@ -63,7 +63,7 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
 
         mDataRecyclerViewAdapter = ClazzWorkListRecyclerAdapter(mPresenter, hasResultViewPermission)
 
-        val createNewText = requireContext().getString(R.string.create_new,
+        val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.clazz_work))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view

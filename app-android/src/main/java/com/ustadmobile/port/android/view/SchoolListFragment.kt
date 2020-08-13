@@ -60,7 +60,7 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = SchoolListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.create_new,
+        val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.schools))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view

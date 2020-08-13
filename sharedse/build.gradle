@@ -88,15 +88,14 @@ kotlin {
     //The section below can be uncommented for development so that autocomplete works for JVM libraries
     // see https://youtrack.jetbrains.com/issue/KT-28194
     // It should be commented out again before running jvmTest.
-//    jvm("commonJvm") {
-//        compilations.main.kotlinOptions {
-//            // Setup the Kotlin compiler options for the 'main' compilation:
-//            jvmTarget = "$version_kotlin_jvmTarget"
-//        }
-//    }
+    /*jvm("commonJvm") {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+    }*/
 
     android()
-
 
     jvm {
         compilations.main.kotlinOptions {

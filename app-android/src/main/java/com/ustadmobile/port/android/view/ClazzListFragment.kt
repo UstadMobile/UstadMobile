@@ -40,7 +40,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
         mPresenter = ClazzListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
-            requireContext().getString(R.string.create_new,
+            requireContext().getString(R.string.add_a_new,
                     requireContext().getString(R.string.clazz)))
         mDataRecyclerViewAdapter = ClazzListRecyclerAdapter(mPresenter)
 

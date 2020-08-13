@@ -7,6 +7,14 @@
         <item name="android:src">@drawable/ic_closed_caption_white_24dp</item>
     </style>
 
+    <style name="SelectableItemTheme">
+        <item name="colorControlHighlight">@color/primaryColor</item>
+    </style>
+
+    <style name="selectableItemThemeBackground">
+        <item name="android:theme">@style/SelectableItemTheme</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
 
     <style name="CustomDatePickerDialogTheme" parent="android:Theme.Material.Light.Dialog">
         <item name="android:datePickerStyle">@style/MyDatePickerStyle</item>
