@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT

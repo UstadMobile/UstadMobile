@@ -19,8 +19,8 @@ import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountAndLocation>(),
-        SchoolListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAndLocation>(),
+        SchoolListView, View.OnClickListener{
 
     private var mPresenter: SchoolListPresenter? = null
 
@@ -68,7 +68,6 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         fabManager?.text = requireContext().getText(R.string.school)
     }
 
@@ -81,8 +80,8 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
-    override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout) {
+    override fun onClick(v: View?) {
+        if(v?.id == R.id.item_createnew_layout) {
             navigateToEditEntity(null, R.id.school_edit_dest, School::class.java)
         }
     }

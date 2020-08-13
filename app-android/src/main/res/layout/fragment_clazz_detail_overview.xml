@@ -19,10 +19,6 @@
             type="boolean" />
 
         <variable
-            name="editButtonMode"
-            type="com.ustadmobile.core.view.EditButtonMode"/>
-
-        <variable
             name="fragmentEventHandler"
             type="com.ustadmobile.port.android.view.ClazzDetailFragmentEventHandler" />
 

@@ -29,12 +29,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_4dp"
                 android:text="@{school.schoolName}"
-                android:textStyle="bold"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:textStyle="bold"
                 app:layout_constraintStart_toEndOf="@+id/imageView10"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imageView10"
                 tools:text="School A" />
 
             <androidx.constraintlayout.widget.Barrier
@@ -103,25 +103,16 @@
                 app:layout_constraintStart_toEndOf="@+id/item_school_list_item_members_iv"
                 app:layout_constraintTop_toBottomOf="@+id/barrierMemberDetails" />
 
-            <View
-                android:id="@+id/item_school_list_item_horizontal_divider"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_1dp"
-                android:layout_marginStart="@dimen/dimen_8dp"
-                android:layout_marginTop="@dimen/dimen_10dp"
-                android:background="?android:listDivider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView10" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/imageView10"
                 android:layout_width="@dimen/dimen_80dp"
                 android:layout_height="@dimen/dimen_80dp"
                 android:layout_marginStart="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
                 android:contentDescription="@string/school"
                 android:tint="?colorOnIconTint"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_account_balance_black_24dp" />
