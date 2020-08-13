@@ -338,12 +338,14 @@
     <!-- All rights reserved license -->
     <string name="licence_type_all_rights">All Rights Reserved</string>
 
+    <string name="license_type_cc_0">CC0</string>
+
     <string name="syncing">Syncing..</string>
     <string name="feed">Feed</string>
     <string name="people">People</string>
     <string name="record_attendance">Record attendance</string>
     <string name="today">Today</string>
-    <string name="sort_by">sort_by</string>
+    <string name="sort_by">Sort by</string>
     <string name="log">Log</string>
     <string name="schedule">Schedule</string>
     <string name="first">first</string>
@@ -401,6 +403,13 @@
     <string name="sort_by_name">Sort by name</string>
     <string name="sort_by_name_asc">name (ascending)</string>
     <string name="sort_by_name_desc">name (descending)</string>
+
+    <!--Ascending: used in the context of a sort order -->
+    <string name="ascending">Ascending</string>
+
+    <!-- Descending: used in the context of a sort order -->
+    <string name="descending">Descending</string>
+
     <string name="sort_by_text">Sort by</string>
     <string name="attendance_high_to_low">Attendance (high to low)</string>
     <string name="attendance_low_to_high">Attendance (low to high)</string>
@@ -575,8 +584,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <!-- The title shown when we ask the user to select a specific type of item. E.g. "Select class", or "select person".-->
     <string name="select_item">Select %1$s</string>
 
-    <!-- Allow the user to create a new item - e.g. when the user is selecting a class it would say "Create a new class" -->
-    <string name="create_new">Create a new %1$s</string>
+    <!-- Allow the user to add a new item - e.g. when the user is selecting a class it would say
+    "Add a new class", "Add a new person", etc -->
+    <string name="add_a_new">Add a new %1$s</string>
 
     <!-- This is used to display a duration - e.g. "04/Apr/2020 - 03/May/2020". %1$s and %1$2s will
     be replaced with the from and to date respectively and will be formatted according to the
@@ -638,7 +648,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="present_late_absent">%1$d present, %2$d late, %3$d absent</string>
 
     <string name="marked_cap">Marked</string>
-    <string name="submitted_cap">Submited</string>
+    <string name="submitted_cap">Submitted</string>
     <string name="not_submitted_cap">Not submitted</string>
     <string name="submitliteral">Submit</string>
 
@@ -697,8 +707,16 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="create_workspace_organisation">Create a new workspace for your organization\'s students and teachers on Ustad Mobile</string>
     <string name="connect_as_guest">Connect as guest</string>
     <string name="create_account">Create account</string>
+
+    <!-- Substitution used to create "My X" - e.g. My submission, My work, etc %1$s will be replaced
+    by the app-->
     <string name="my">My %1$s</string>
+
+    <!-- Susbtitution used to create "Add another X" where X is something to be added E.g. "Add another account" -->
     <string name="add_another">Add another %1$s </string>
+
+    <!-- Shows the message when the person is logged in. %1$s is replaced with the username and
+    %2$s is replaced with the server url - e.g. Logged in as admin on https://app.ustadmobile.com/ -->
     <string name="logged_in_as">Logged in as  %1$s on %2$s</string>
     <string name="person_exists">Person already exist, pick another username</string>
     <string name="incorrect_current_password">Current password incorrect</string>

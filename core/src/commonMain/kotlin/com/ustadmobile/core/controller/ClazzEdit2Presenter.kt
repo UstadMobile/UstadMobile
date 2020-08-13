@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
@@ -46,12 +47,15 @@ class ClazzEdit2Presenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchool? {
         val clazzUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
+
         val clazz = withTimeoutOrNull(2000) {
             db.clazzDao.takeIf {clazzUid != 0L }?.findByUidWithHolidayCalendarAsync(clazzUid)
-        }  ?: ClazzWithHolidayCalendarAndSchool().also {
-            it.clazzName = ""
-            it.isClazzActive = true
-            it.clazzTimeZone = getDefaultTimeZoneId()
+        }  ?: ClazzWithHolidayCalendarAndSchool().also { newClazz ->
+            newClazz.clazzName = ""
+            newClazz.isClazzActive = true
+            newClazz.clazzTimeZone = getDefaultTimeZoneId()
+            newClazz.clazzSchoolUid = arguments[ARG_SCHOOL_UID]?.toLong() ?: 0L
+            newClazz.school = db.schoolDao.takeIf { newClazz.clazzSchoolUid != 0L }?.findByUidAsync(newClazz.clazzSchoolUid)
         }
 
         val schedules = withTimeoutOrNull(2000) {

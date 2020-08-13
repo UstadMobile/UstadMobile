@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.withTimeoutOrNull
@@ -51,8 +52,8 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        //TODO: this
-        return true
+        return db.schoolDao.personHasPermissionWithSchool(account?.personUid ?: 0L,
+                arguments[ARG_ENTITY_UID]?.toLong() ?: 0L, Role.PERMISSION_SCHOOL_UPDATE)
     }
 
 }

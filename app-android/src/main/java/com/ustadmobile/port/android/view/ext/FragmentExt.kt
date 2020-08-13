@@ -66,9 +66,9 @@ private val fragmentNavDefaultOptions: NavOptions by lazy {
 fun <T> Fragment.navigateToEditEntity(entity: T?, destinationId: Int, entityClass: Class<T>,
                                            destinationResultKey: String = entityClass.simpleName,
                                            overwriteDestination: Boolean? = null,
-                                            navOptions: NavOptions? = fragmentNavDefaultOptions) {
+                                            navOptions: NavOptions? = fragmentNavDefaultOptions,
+                                            argBundle:Bundle = Bundle()) {
     val navController = findNavController()
-    val argBundle = Bundle()
     val backStateEntryVal = navController.currentBackStackEntry
 
     if(backStateEntryVal != null) {

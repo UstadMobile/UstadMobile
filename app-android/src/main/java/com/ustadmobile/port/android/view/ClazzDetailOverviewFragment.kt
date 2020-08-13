@@ -102,11 +102,6 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         entity = null
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        //TODO: Set title here
-    }
 
     override var entity: ClazzWithDisplayDetails? = null
         get() = field

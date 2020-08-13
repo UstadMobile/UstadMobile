@@ -23,6 +23,16 @@ abstract class SchoolDao : BaseDao<School> {
     abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): SchoolWithHolidayCalendar?
 
 
+
+
+    /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
+    @Query("SELECT EXISTS(SELECT 1 FROM School WHERE " +
+            "School.schoolUid = :schoolUid AND :accountPersonUid IN " +
+            "(${ENTITY_PERSONS_WITH_PERMISSION}))")
+    abstract suspend fun personHasPermissionWithSchool(accountPersonUid: Long,
+                                                       schoolUid: Long,
+                                                      permission: Long) : Boolean
+
     @Query("""SELECT School.*, 
          (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
          CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
@@ -70,6 +80,9 @@ abstract class SchoolDao : BaseDao<School> {
         """
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
+
+        const val ENTITY_PERSONS_WITH_PERMISSION = "${ENTITY_PERSONS_WITH_PERMISSION_PT1} " +
+                ":permission ${ENTITY_PERSONS_WITH_PERMISSION_PT2}"
 
 
     }

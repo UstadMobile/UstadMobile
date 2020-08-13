@@ -17,6 +17,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.ZIPPED
 
 /**
  * Class which handles EPUB content import tasks, creates content entry from the H5P file
@@ -64,7 +65,8 @@ class EpubTypeFilePlugin : EpubTypePlugin(), ContentTypeFilePlugin {
         return contentEntry
     }
 
-    override fun isZipped(): Boolean {
-        return true
+    override fun importMode(): Int {
+        return ZIPPED
     }
+
 }

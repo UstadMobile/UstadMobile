@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "496689361484c2353ea694466576c27a",
+    "identityHash": "9f5f95c11e26b2b61e901fdcd2335f53",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1995,29 +1995,11 @@
       },
       {
         "tableName": "ContentEntryParentChildJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cepcjChildContentEntryUid` INTEGER NOT NULL, `cepcjParentContentEntryUid` INTEGER NOT NULL, `childIndex` INTEGER NOT NULL, `cepcjLocalChangeSeqNum` INTEGER NOT NULL, `cepcjMasterChangeSeqNum` INTEGER NOT NULL, `cepcjLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cepcjLocalChangeSeqNum` INTEGER NOT NULL, `cepcjMasterChangeSeqNum` INTEGER NOT NULL, `cepcjLastChangedBy` INTEGER NOT NULL, `cepcjParentContentEntryUid` INTEGER NOT NULL, `cepcjChildContentEntryUid` INTEGER NOT NULL, `childIndex` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cepcjUid",
             "columnName": "cepcjUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjChildContentEntryUid",
-            "columnName": "cepcjChildContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjParentContentEntryUid",
-            "columnName": "cepcjParentContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "childIndex",
-            "columnName": "childIndex",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2036,6 +2018,24 @@
           {
             "fieldPath": "cepcjLastChangedBy",
             "columnName": "cepcjLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cepcjParentContentEntryUid",
+            "columnName": "cepcjParentContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cepcjChildContentEntryUid",
+            "columnName": "cepcjChildContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "childIndex",
+            "columnName": "childIndex",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -2057,20 +2057,20 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `parent_child` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`, `cepcjParentContentEntryUid`)"
           },
           {
-            "name": "index_ContentEntryParentChildJoin_cepcjChildContentEntryUid",
-            "unique": false,
-            "columnNames": [
-              "cepcjChildContentEntryUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjChildContentEntryUid` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`)"
-          },
-          {
             "name": "index_ContentEntryParentChildJoin_cepcjParentContentEntryUid",
             "unique": false,
             "columnNames": [
               "cepcjParentContentEntryUid"
             ],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjParentContentEntryUid` ON `${TABLE_NAME}` (`cepcjParentContentEntryUid`)"
+          },
+          {
+            "name": "index_ContentEntryParentChildJoin_cepcjChildContentEntryUid",
+            "unique": false,
+            "columnNames": [
+              "cepcjChildContentEntryUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjChildContentEntryUid` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`)"
           }
         ],
         "foreignKeys": []
@@ -4025,7 +4025,7 @@
       },
       {
         "tableName": "School",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolEmailAddress` TEXT, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL, `schoolTimeZone` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolEmailAddress` TEXT, `schoolTeachersPersonGroupUid` INTEGER NOT NULL, `schoolStudentsPersonGroupUid` INTEGER NOT NULL, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL, `schoolTimeZone` TEXT)",
         "fields": [
           {
             "fieldPath": "schoolUid",
@@ -4100,6 +4100,18 @@
             "notNull": false
           },
           {
+            "fieldPath": "schoolTeachersPersonGroupUid",
+            "columnName": "schoolTeachersPersonGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "schoolStudentsPersonGroupUid",
+            "columnName": "schoolStudentsPersonGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "schoolMasterChangeSeqNum",
             "columnName": "schoolMasterChangeSeqNum",
             "affinity": "INTEGER",
@@ -4161,7 +4173,7 @@
       },
       {
         "tableName": "SchoolMember",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolMemberPersonUid` INTEGER NOT NULL, `schoolMemberSchoolUid` INTEGER NOT NULL, `schoolMemberCreateDate` INTEGER NOT NULL, `schoolMemberJoinDate` INTEGER NOT NULL, `schoolMemberLeftDate` INTEGER NOT NULL, `schoolMemberRole` INTEGER NOT NULL, `schoolMemberActive` INTEGER NOT NULL, `schoolMemberLocalChangeSeqNum` INTEGER NOT NULL, `schoolMemberMasterChangeSeqNum` INTEGER NOT NULL, `schoolMemberLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolMemberPersonUid` INTEGER NOT NULL, `schoolMemberSchoolUid` INTEGER NOT NULL, `schoolMemberJoinDate` INTEGER NOT NULL, `schoolMemberLeftDate` INTEGER NOT NULL, `schoolMemberRole` INTEGER NOT NULL, `schoolMemberActive` INTEGER NOT NULL, `schoolMemberLocalChangeSeqNum` INTEGER NOT NULL, `schoolMemberMasterChangeSeqNum` INTEGER NOT NULL, `schoolMemberLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "schoolMemberUid",
@@ -4178,12 +4190,6 @@
           {
             "fieldPath": "schoolMemberSchoolUid",
             "columnName": "schoolMemberSchoolUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolMemberCreateDate",
-            "columnName": "schoolMemberCreateDate",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -8684,7 +8690,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '496689361484c2353ea694466576c27a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9f5f95c11e26b2b61e901fdcd2335f53')"
     ]
   }
 }

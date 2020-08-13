@@ -3,6 +3,7 @@ package com.ustadmobile.core.view
 import androidx.paging.DataSource
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 
 enum class ListViewMode(val mode: String) {
     BROWSER("browser"),
@@ -32,6 +33,7 @@ interface UstadListView<RT, DT>: UstadView {
 
     var list: DataSource.Factory<Int, DT>?
 
+    @Deprecated("impl sortOptions from UstadListPresenter")
     var sortOptions: List<MessageIdOption>?
 
     var selectionOptions: List<SelectionOption>?

@@ -6,10 +6,10 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile,
-                     override val compression: Int = 0) : ContainerManagerCommon.EntrySource {
+                     override val compression: Int = 0, prefixPath: String = "") : ContainerManagerCommon.EntrySource {
     override val length = zipEntry.size
 
-    override val pathsInContainer = listOf(zipEntry.name)
+    override val pathsInContainer = listOf(prefixPath + zipEntry.name)
 
     override val inputStream by lazy { zipFile.getInputStream(zipEntry) }
 
@@ -35,14 +35,14 @@ class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile,
 }
 
 
-actual fun addEntriesFromZipToContainer(zipPath: String, containerManager: ContainerManager) {
+actual fun addEntriesFromZipToContainer(zipPath: String, containerManager: ContainerManager, prefix: String) {
     runBlocking {
         var zipFile = null as ZipFile?
         try {
             zipFile = ZipFile(zipPath)
             val entryList = zipFile.entries().toList()
                     .filter { !it.isDirectory() }
-                    .map { ZipEntrySource(it, zipFile) }.toTypedArray()
+                    .map { ZipEntrySource(it, zipFile, prefixPath = prefix) }.toTypedArray()
             containerManager.addEntries(*entryList)
         } catch (e: Exception) {
             throw e
