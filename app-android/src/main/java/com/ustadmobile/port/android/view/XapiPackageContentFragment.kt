@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -63,6 +64,8 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
             it.activityXapiPackageWebview.settings.domStorageEnabled = true
             it.activityXapiPackageWebview.settings.cacheMode = WebSettings.LOAD_DEFAULT
             it.activityXapiPackageWebview.webViewClient = WebViewClient()
+            val isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+            (context as? MainActivity)?.onAppBarExpand(isPortrait)
         }
 
         mBinding?.activityXapiPackageWebview?.webChromeClient = object : WebChromeClient() {
@@ -91,6 +94,12 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val isPortrait = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
+        (context as? MainActivity)?.onAppBarExpand(isPortrait)
+    }
 
     override fun onDestroy() {
         super.onDestroy()

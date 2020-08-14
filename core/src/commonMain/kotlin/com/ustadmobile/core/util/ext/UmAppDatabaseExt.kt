@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 
 fun UmAppDatabase.runPreload() {
@@ -72,4 +73,67 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     }
 
     return clazzMember
+}
+
+/**
+ * Insert a new school
+ */
+suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
+                                                   impl: UstadMobileSystemImpl, context: Any)
+                                                    :Long {
+    school.schoolTeachersPersonGroupUid = personGroupDao.insertAsync(
+            PersonGroup("${school.schoolName} - " +
+                    impl.getString(MessageID.teachers_literal, context)))
+
+    school.schoolStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup(
+            "${school.schoolName} - " +
+            impl.getString(MessageID.students, context)))
+
+    school.schoolUid = schoolDao.insertAsync(school)
+
+    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
+            school.schoolTeachersPersonGroupUid, Role.ROLE_TEACHER_UID.toLong()))
+    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
+            school.schoolStudentsPersonGroupUid, Role.ROLE_STUDENT_UID.toLong()))
+
+    return school.schoolUid
+}
+
+suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
+                                 personUid:Long, role: Int): SchoolMember{
+
+    val school = schoolDao.findByUidAsync(schoolUid)?:
+    throw IllegalArgumentException("School does not exist")
+
+    //Check if relationship already exists
+    val matches = schoolMemberDao.findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
+    if(matches.isEmpty()) {
+
+        val schoolMember = SchoolMember()
+        schoolMember.schoolMemberActive = true
+        schoolMember.schoolMemberPersonUid = personUid
+        schoolMember.schoolMemberSchoolUid = schoolUid
+        schoolMember.schoolMemberRole = role
+        schoolMember.schoolMemberJoinDate = systemTimeInMillis()
+
+        schoolMember.schoolMemberUid = schoolMemberDao.insert(schoolMember)
+
+        val personGroupUid = when(role) {
+            SchoolMember.SCHOOL_ROLE_TEACHER -> school.schoolTeachersPersonGroupUid
+            SchoolMember.SCHOOL_ROLE_STUDENT -> school.schoolStudentsPersonGroupUid
+            else -> null
+        }
+
+        if(personGroupUid != null) {
+            val personGroupMember = PersonGroupMember().also {
+                it.groupMemberPersonUid = schoolMember.schoolMemberPersonUid
+                it.groupMemberGroupUid = personGroupUid
+                it.groupMemberUid = personGroupMemberDao.insertAsync(it)
+            }
+        }
+
+        return schoolMember
+    }else{
+        return matches[0]
+    }
 }

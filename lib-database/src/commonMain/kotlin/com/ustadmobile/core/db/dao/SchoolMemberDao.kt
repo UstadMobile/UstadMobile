@@ -5,9 +5,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.SchoolMember
-import com.ustadmobile.lib.db.entities.SchoolMemberWithPerson
+import com.ustadmobile.lib.db.entities.*
 
 @UmDao
 @UmRepository
@@ -61,27 +59,5 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
         AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery
         ORDER BY Person.firstNames DESC""")
     abstract suspend fun findAllTest(schoolUid: Long, role: Int, searchQuery: String): List<SchoolMemberWithPerson>
-
-
-    suspend fun enrollPersonToSchool(dateNow: Long, enrollDate: Long, schoolUid: Long, personUid:Long, role: Int): SchoolMember{
-
-        //Check if relationship already exists
-        val matches = findBySchoolAndPersonAndRole(schoolUid, personUid,  role)
-        if(matches.isEmpty()) {
-
-            val schoolMember = SchoolMember()
-            schoolMember.schoolMemberActive = true
-            schoolMember.schoolMemberPersonUid = personUid
-            schoolMember.schoolMemberSchoolUid = schoolUid
-            schoolMember.schoolMemberRole = role
-            schoolMember.schoolMemberCreateDate = dateNow
-            schoolMember.schoolMemberJoinDate = dateNow
-
-            schoolMember.schoolMemberUid = insert(schoolMember)
-            return schoolMember
-        }else{
-            return matches[0]
-        }
-    }
 
 }

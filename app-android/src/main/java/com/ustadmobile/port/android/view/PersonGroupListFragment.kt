@@ -61,7 +61,6 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
         mPresenter = PersonGroupListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this,  di, viewLifecycleOwner)
         mDataBinding?.presenter = mPresenter
-        mDataBinding?.onSortSelected = this
         mDataRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view

@@ -26,9 +26,7 @@ open class SchoolMember {
     var schoolMemberPersonUid: Long = 0
 
     @ColumnInfo(index = true)
-        var schoolMemberSchoolUid: Long = 0
-
-    var schoolMemberCreateDate: Long = 0
+    var schoolMemberSchoolUid: Long = 0
 
     var schoolMemberJoinDate : Long = 0
 

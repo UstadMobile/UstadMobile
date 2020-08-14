@@ -11,7 +11,7 @@ import org.kodein.di.DI
 
 
 class SchoolDetailPresenter(context: Any,
-                          arguments: Map<String, String>, view: SchoolDetailView,
+                            arguments: Map<String, String>, view: SchoolDetailView,
                             di: DI,
                             lifecycleOwner: DoorLifecycleOwner)
     : UstadDetailPresenter<SchoolDetailView, School>(context, arguments, view, di, lifecycleOwner) {
@@ -31,9 +31,9 @@ class SchoolDetailPresenter(context: Any,
         return school
     }
 
+    //This has no effect because the button is controlled by the overview presenter
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        //TODO: this
-        return true
+        return false
     }
 
 }

@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.SchoolDetailView
@@ -105,7 +106,7 @@ class SchoolEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.schoolUid == 0L) {
                 entity.schoolActive = true
-                entity.schoolUid = repo.schoolDao.insertAsync(entity)
+                entity.schoolUid = repo.createNewSchoolAndGroups(entity, systemImpl, context)
             }else {
                 repo.schoolDao.updateAsync(entity)
             }

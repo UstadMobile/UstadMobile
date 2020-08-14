@@ -19,11 +19,6 @@
             name="loading"
             type="boolean" />
 
-        <variable
-            name="editButtonMode"
-            type="com.ustadmobile.core.view.EditButtonMode"/>
-
-
     </data>
 
     <androidx.core.widget.NestedScrollView

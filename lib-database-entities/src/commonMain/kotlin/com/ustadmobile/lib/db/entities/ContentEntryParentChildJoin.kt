@@ -42,6 +42,11 @@ class ContentEntryParentChildJoin(
     var cepcjLastChangedBy: Int = 0
 
 
+    constructor(parentEntry: ContentEntry, childEntry: ContentEntry, index: Int) : this(){
+        cepcjParentContentEntryUid = parentEntry.contentEntryUid
+        cepcjChildContentEntryUid = childEntry.contentEntryUid
+        childIndex = index
+    }
 
     companion object {
 

@@ -4,6 +4,7 @@ import com.ustadmobile.core.catalog.contenttype.VideoTypePlugin
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeFilePlugin
+import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil
 
 import java.io.File
 
@@ -21,7 +22,7 @@ class VideoTypeFilePlugin : VideoTypePlugin(), ContentTypeFilePlugin {
         }
     }
 
-   override fun isZipped(): Boolean{
-        return false
+    override fun importMode(): Int {
+        return ContentTypeUtil.FILE
     }
 }

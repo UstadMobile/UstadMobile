@@ -5,10 +5,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -84,4 +81,29 @@ class UmAppDatabaseExtTest {
                 personGroups.first().groupMemberGroupUid)
     }
 
+
+    @Test
+    fun givenExistingSchool_whenEnrolMemberCalled_thenSchoolMemberIsCreatedAndPersonGroupMemberCreated() = runBlocking {
+        val testSchool = School("School A")
+        testSchool.schoolActive =true
+        val testPerson = Person("teacher", "Teacher", "Test")
+
+        testSchool.schoolUid = db.createNewSchoolAndGroups(testSchool, mockSystemImpl, context)
+        testPerson.personUid = db.personDao.insert(testPerson)
+
+        db.enrollPersonToSchool(testSchool.schoolUid, testPerson.personUid,
+                SchoolMember.SCHOOL_ROLE_TEACHER)
+
+        val schoolMembers = db.schoolMemberDao.findBySchoolAndPersonAndRole(
+                testSchool.schoolUid,
+                testPerson.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
+
+        Assert.assertTrue("PersonMember was created", schoolMembers.any {
+            it.schoolMemberSchoolUid == testSchool.schoolUid })
+
+        val personGroups = db.personGroupMemberDao.findAllGroupWherePersonIsIn(testPerson.personUid)
+        Assert.assertEquals("Person is now teacher group",
+                testSchool.schoolTeachersPersonGroupUid,
+                personGroups.first().groupMemberGroupUid)
+    }
 }

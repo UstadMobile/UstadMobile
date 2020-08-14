@@ -98,7 +98,7 @@ actual class ContainerManager actual constructor(container: Container,
 
         val entryMd5Sums = newPathsToMd5Map.values.map { it.encodeBase64() }
         mutex.withLock {
-            val existingFiles = db.containerEntryFileDao.findEntriesByMd5Sums(entryMd5Sums)
+            val existingFiles = db.containerEntryFileDao.findEntriesByMd5SumsSafe(entryMd5Sums, db)
                     .map { it.cefMd5!! to it }.toMap()
 
             val newContainerEntries = mutableListOf<ContainerEntryWithContainerEntryFile>()
@@ -220,8 +220,8 @@ actual class ContainerManager actual constructor(container: Container,
             val remainingItemsToDownload = itemsToDownload.filter { !pathToEntryMap.containsKey(it.cePath) }
             val existingEntryMd5List = pathToEntryMap.values.map { it.containerEntryFile!!.cefMd5 }
             val md5ToFilesToEntryToDownloadMap = remainingItemsToDownload.map { it.cefMd5!! to it }.toMap()
-            val existingEntryFiles = db.containerEntryFileDao.findEntriesByMd5Sums(
-                    md5ToFilesToEntryToDownloadMap.keys.toList())
+            val existingEntryFiles = db.containerEntryFileDao.findEntriesByMd5SumsSafe(
+                    md5ToFilesToEntryToDownloadMap.keys.toList(), db)
             val md5ToExistingEntryFilesMap = existingEntryFiles.map { it.cefMd5 to it }.toMap()
             val itemsToDownloadPartitioned = remainingItemsToDownload.partition {
                 it.cefMd5 in existingEntryMd5List || it.cefMd5 in md5ToExistingEntryFilesMap.keys }
