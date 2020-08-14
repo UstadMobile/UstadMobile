@@ -14,6 +14,7 @@ import java.io.IOException
 import java.util.concurrent.atomic.AtomicLong
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import org.kodein.di.*
+import kotlin.coroutines.coroutineContext
 
 typealias ConnectionOpener = (url: URL) -> HttpURLConnection
 
@@ -35,60 +36,62 @@ class ContainerFetcherJobHttpUrlConnection(val request: ContainerFetcherRequest,
     }
 
     suspend fun download(): Int {
-        return coroutineScope {
-            val progressUpdaterJob = async { progressUpdater() }
-            val startTime = System.currentTimeMillis()
-            var downloadStatus = 0
+        val progressUpdaterJob = GlobalScope.async(Dispatchers.Default) {
+            progressUpdater()
+        }
 
-            var urlConnection: HttpURLConnection? = null
-            var inStream: InputStream? = null
-            var fileOut: FileOutputStream? = null
-            try {
-                val localConnectionOpenerVal =
-                        (networkManager as NetworkManagerWithConnectionOpener).localConnectionOpener
+        val startTime = System.currentTimeMillis()
+        var downloadStatus = 0
 
-                val connectionOpener: ConnectionOpener = if(localConnectionOpenerVal != null) {
-                    localConnectionOpenerVal
-                }else {
-                    {url -> url.openConnection() as HttpURLConnection}
-                }
+        var urlConnection: HttpURLConnection? = null
+        var inStream: InputStream? = null
+        var fileOut: FileOutputStream? = null
+        try {
+            val localConnectionOpenerVal =
+                    (networkManager as NetworkManagerWithConnectionOpener).localConnectionOpener
 
-                urlConnection = connectionOpener(URL(request.url))
-                val contentLengthField = urlConnection.getHeaderField("Content-Length")
-                if(contentLength != null) {
-                    contentLength.set(contentLengthField.toLong())
-                }
-
-                inStream = urlConnection.inputStream
-                fileOut = FileOutputStream(request.fileDest)
-
-                val buf = ByteArray(8192)
-                var bytesRead = 0
-                var totalBytesRead = 0L
-                while(isActive && inStream.read(buf).also { bytesRead = it } != -1) {
-                    fileOut.write(buf, 0, bytesRead)
-                    totalBytesRead += bytesRead
-                    bytesSoFar.set(totalBytesRead)
-                }
-                fileOut.flush()
-
-                downloadStatus = if(isActive) {
-                    JobStatus.COMPLETE
-                } else {
-                    JobStatus.PAUSED
-                }
-
-                Napier.d({"Container download done in ${System.currentTimeMillis() - startTime}"})
-            }finally {
-                progressUpdaterJob.cancel()
-                listener?.onProgress(request, bytesSoFar.get(), contentLength.get())
-                inStream?.close()
-                fileOut?.close()
-                inStream?.close()
+            val connectionOpener: ConnectionOpener = if(localConnectionOpenerVal != null) {
+                localConnectionOpenerVal
+            }else {
+                {url -> url.openConnection() as HttpURLConnection}
             }
 
-            downloadStatus
+            urlConnection = connectionOpener(URL(request.url))
+            val contentLengthField = urlConnection.getHeaderField("Content-Length")
+            if(contentLength != null) {
+                contentLength.set(contentLengthField.toLong())
+            }
+
+            inStream = urlConnection.inputStream
+            fileOut = FileOutputStream(request.fileDest)
+
+            val buf = ByteArray(8192)
+            var bytesRead = 0
+            var totalBytesRead = 0L
+            while(coroutineContext.isActive && inStream.read(buf).also { bytesRead = it } != -1) {
+                fileOut.write(buf, 0, bytesRead)
+                totalBytesRead += bytesRead
+                bytesSoFar.set(totalBytesRead)
+            }
+            fileOut.flush()
+
+            downloadStatus = if(coroutineContext.isActive) {
+                JobStatus.COMPLETE
+            } else {
+                JobStatus.PAUSED
+            }
+
+            Napier.d({"Container download done in ${System.currentTimeMillis() - startTime}"})
+        }finally {
+            progressUpdaterJob.cancel()
+            listener?.onProgress(request, bytesSoFar.get(), contentLength.get())
+            inStream?.close()
+            fileOut?.close()
+            inStream?.close()
         }
+
+        return downloadStatus
+
 
     }
 
