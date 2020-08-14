@@ -144,7 +144,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         }
     }
 
-    suspend fun doRequest(resetAttemptCount: Boolean = false, runAgain: Boolean = false) : T{
+    suspend fun doRequest(resetAttemptCount: Boolean = false, runAgain: Boolean = false) : T = withContext(Dispatchers.Default){
         requestLock.withLock {
             Napier.d("$logPrefix doRequest: resetAttemptCount = $resetAttemptCount")
             if(resetAttemptCount) {
@@ -158,7 +158,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             }
 
             var mirrorToUse: MirrorEndpoint? = null
-            while(!completed.value && coroutineContext.isActive && attemptCount <= maxAttempts) {
+            while(!completed.value && isActive && attemptCount <= maxAttempts) {
                 var endpointToUse: String? = null
                 try {
                     attemptCount++
@@ -229,7 +229,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
 
                         Napier.d({"$logPrefix doRequest: completed successfully from $endpointToUse ."})
-                        return t
+                        return@withContext t
                     }else {
                         Napier.e({"$logPrefix doRequest: loadFn completed from $endpointToUse but " +
                                 "not successful. IsNullOrEmpty=$isNullOrEmpty, " +
@@ -257,7 +257,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
             Napier.d("$logPrefix doRequest: over. Is completed=${loadedVal.isCompleted}")
             if(loadedVal.isCompleted) {
-                return loadedVal.getCompleted()
+                return@withContext loadedVal.getCompleted()
             }else {
                 val isConnected = repository.connectivityStatus == DoorDatabaseRepository.STATUS_CONNECTED
                 val newStatus = if(isConnected || mirrorToUse != null) {
