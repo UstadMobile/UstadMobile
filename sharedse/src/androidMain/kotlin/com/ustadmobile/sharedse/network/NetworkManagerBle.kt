@@ -547,13 +547,17 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
     /**
      * Check that the required
      */
-    fun checkP2PBleServices() {
+    fun checkP2PBleServices(bleAdvertisingStartTime: Long = -1L) {
         val permissionGranted = ActivityCompat.checkSelfPermission(mContext,
                 Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         val scanningEnabled = permissionGranted && isBluetoothEnabled && isBleCapable && wifiManager.isWifiEnabled
         val advertisingEnabled = scanningEnabled and canDeviceAdvertise()
         var waitedLongEnoughToStartScanning = true
         val timeNow = System.currentTimeMillis()
+
+        if(bleAdvertisingStartTime != -1L) {
+            bleAdvertisingLastStartTime = bleAdvertisingStartTime
+        }
 
         if (advertisingEnabled) {
             waitedLongEnoughToStartScanning = bleAdvertisingLastStartTime != 0L && timeNow - bleAdvertisingLastStartTime > BLE_SCAN_WAIT_AFTER_ADVERTISING

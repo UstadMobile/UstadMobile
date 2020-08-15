@@ -24,10 +24,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
@@ -57,6 +54,8 @@ class ContentEntry2DetailPresenter(context: Any,
 
     private var availabilityRequest: AvailabilityMonitorRequest? = null
 
+    private val availabilityRequestDeferred = CompletableDeferred<AvailabilityMonitorRequest>()
+
     private var contentEntryUid = 0L
 
     override fun onCreate(savedState: Map<String, String>?) {
@@ -74,18 +73,15 @@ class ContentEntry2DetailPresenter(context: Any,
 
     override fun onStart() {
         super.onStart()
-        availabilityRequest = AvailabilityMonitorRequest(listOf(contentEntryUid)) {availableEntries ->
-            GlobalScope.launch(doorMainDispatcher()) {
-                view.locallyAvailable = availableEntries[contentEntryUid] ?: false
-            }
-        }.also {
-            localAvailabilityManager?.addMonitoringRequest(it)
+        GlobalScope.launch {
+            localAvailabilityManager?.addMonitoringRequest(availabilityRequestDeferred.await())
         }
-
     }
 
     override fun onStop() {
-
+        GlobalScope.launch {
+            localAvailabilityManager?.removeMonitoringRequest(availabilityRequestDeferred.await())
+        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithMostRecentContainer? {
@@ -98,6 +94,17 @@ class ContentEntry2DetailPresenter(context: Any,
         view.availableTranslationsList = result
 
         view.contentEntryProgress = db.contentEntryProgressDao.getProgressByContentAndPerson(entityUid, accountManager.activeAccount.personUid)
+
+        if(db == repo) {
+            val containerUid = entity.container?.containerUid ?: 0L
+            availabilityRequest = AvailabilityMonitorRequest(listOf(containerUid)) {availableEntries ->
+                GlobalScope.launch(doorMainDispatcher()) {
+                    view.locallyAvailable = availableEntries[containerUid] ?: false
+                }
+            }.also {
+                availabilityRequestDeferred.complete(it)
+            }
+        }
 
         return entity
     }

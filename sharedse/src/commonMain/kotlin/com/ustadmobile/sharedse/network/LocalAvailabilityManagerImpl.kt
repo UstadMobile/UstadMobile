@@ -72,7 +72,7 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
                 val networkNode = NetworkNodeWithStatusResponsesAndHistory()
                 networkNode.bluetoothMacAddress = bluetoothAddr
                 activeNodes.add(networkNode)
-                val statusRequestUids = activeMonitoringRequests.flatMap { it.entryUidsToMonitor }.toSet()
+                val statusRequestUids = activeMonitoringRequests.flatMap { it.containerUidsToMonitor }.toSet()
                 if(statusRequestUids.isNotEmpty()) {
                     sendRequest(networkNode, statusRequestUids.toList())
                 }
@@ -133,17 +133,17 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
 
     suspend fun fireAvailabilityChanged(entryStatusResponseContainerUids: List<Long>) {
         activeMonitoringRequests.filter { monitorRequest ->
-            monitorRequest.entryUidsToMonitor.any { it in entryStatusResponseContainerUids }
+            monitorRequest.containerUidsToMonitor.any { it in entryStatusResponseContainerUids }
         }.forEach {
-            val intersecting = it.entryUidsToMonitor.intersect(entryStatusResponseContainerUids)
-            it.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
+            val intersecting = it.containerUidsToMonitor.intersect(entryStatusResponseContainerUids)
+            it.onContainerAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
         }
     }
 
     override fun addMonitoringRequest(request: AvailabilityMonitorRequest) {
         //compute what we don't know here
         activeMonitoringRequests.add(request)
-        val allMonitoredUids = activeMonitoringRequests.flatMap { it.entryUidsToMonitor }.toSet()
+        val allMonitoredUids = activeMonitoringRequests.flatMap { it.containerUidsToMonitor }.toSet()
 
         //provide an immediate callback to provide statuses as far as we know for this request
         GlobalScope.launch {
@@ -153,7 +153,7 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
                 sendRequest(responseNeeded.key, responseNeeded.value)
             }
 
-            request.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(request.entryUidsToMonitor))
+            request.onContainerAvailabilityChanged(areContentEntriesLocallyAvailable(request.containerUidsToMonitor))
         }
     }
 

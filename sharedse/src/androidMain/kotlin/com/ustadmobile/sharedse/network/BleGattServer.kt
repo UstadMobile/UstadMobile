@@ -33,6 +33,11 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
+ *
+ * BleGattServer on Android contains the Gatt Server and an AdvertisingManager. Advertising must
+ * be started before discovery. In production the BleGattServer is instantiated by the dependency
+ * injection startup. After advertising has started it will tell the networkmanager to start discovery.
+ *
  * This class handle all the GATT server device's Bluetooth Low Energy callback
  *
  * Operation flow:
@@ -49,7 +54,6 @@ class BleGattServer
 /**
  * Constructor which will be used when creating new instance of BleGattServer
  * @param context Application context
- * @param networkManager Instance of a NetworkManagerBle for getting
  * BluetoothManager instance.
  */
 (val context: Context, di: DI) : BleGattServerCommon(di) {
@@ -205,10 +209,12 @@ class BleGattServer
                         object : AdvertiseCallback() {
                             override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
                                 super.onStartSuccess(settingsInEffect)
-                                //bleAdvertisingLastStartTime = System.currentTimeMillis()
                                 notifyStateChanged(STATE_STARTED)
                                 UMLog.l(UMLog.DEBUG, 689,
                                         "Service advertised successfully")
+
+                                //Now that advertising has started, tell the networkmanager to start discovery
+                                networkManager.checkP2PBleServices(bleAdvertisingStartTime = System.currentTimeMillis())
                             }
 
                             override fun onStartFailure(errorCode: Int) {

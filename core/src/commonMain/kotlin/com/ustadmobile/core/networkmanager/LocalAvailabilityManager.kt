@@ -2,8 +2,8 @@ package com.ustadmobile.core.networkmanager
 
 import com.ustadmobile.lib.db.entities.NetworkNode
 
-class AvailabilityMonitorRequest(val entryUidsToMonitor: List<Long>,
-                                 val onEntityAvailabilityChanged: (Map<Long, Boolean>) -> Unit = {})
+class AvailabilityMonitorRequest(val containerUidsToMonitor: List<Long>,
+                                 val onContainerAvailabilityChanged: (Map<Long, Boolean>) -> Unit = {})
 
 interface LocalAvailabilityManager {
 

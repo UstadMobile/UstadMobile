@@ -154,7 +154,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 
         onReady {
-            val gattServer: BleGattServer = instance()
+            instance<BleGattServer>()
+            instance<NetworkManagerBle>()
         }
     }
 

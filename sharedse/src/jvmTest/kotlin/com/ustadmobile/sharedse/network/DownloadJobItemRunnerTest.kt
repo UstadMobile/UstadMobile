@@ -451,15 +451,13 @@ class DownloadJobItemRunnerTest {
         }
     }
 
-    //TODO: this does not seem to pause and stop as quickly as it should
     @Test
     fun givenDownloadUnmeteredConnectivityOnly_whenConnectivitySwitchesToMetered_shouldStopAndSetStatusToQueued() {
-        var item = clientDb.downloadJobItemDao.findByUid(
-                downloadJobItem.djiUid)!!
+        val item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
         runBlocking {
             cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 512kbps (period unit by default is milliseconds)
-                throttleBytesPerPeriod = (64 * 1000)
+                throttleBytesPerPeriod = (8 * 1000)
                 throttlePeriod = 1000
             })
 
@@ -479,11 +477,16 @@ class DownloadJobItemRunnerTest {
 
             connectivityStatusLiveData.sendValue(ConnectivityStatus(STATE_METERED, true, null))
 
-            queuedStatusLatch.await(5, TimeUnit.SECONDS)
+            queuedStatusLatch.await(2, TimeUnit.SECONDS)
+
+            //Wait to make sure that nothing else happens after status is switched to queued
+            delay(2000)
+
             argumentCaptor<DownloadJobItem>() {
                 verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
                 Assert.assertEquals("Final status update was jobstatus = queued", JobStatus.QUEUED,
                         lastValue.djiStatus)
+
             }
         }
 

@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
@@ -13,14 +14,18 @@ import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.singleton
 import java.lang.Thread.sleep
 
 class ContentEntry2DetailPresenterTest {
@@ -39,11 +44,15 @@ class ContentEntry2DetailPresenterTest {
 
     private var createdEntry: ContentEntry? = null
 
+    private lateinit var entryContainer: Container
+
     private val defaultTimeout = 3000L
 
     private lateinit var containerManager: ContainerDownloadManager
 
     private var presenterArgs: Map<String, String>? = null
+
+    private lateinit var localAvailabilityManager: LocalAvailabilityManager
 
     private lateinit var di: DI
 
@@ -54,10 +63,12 @@ class ContentEntry2DetailPresenterTest {
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
+        localAvailabilityManager = mock {  }
         context = Any()
 
         di = DI {
             import(ustadTestRule.diModule)
+            bind<LocalAvailabilityManager>() with singleton { localAvailabilityManager }
         }
 
         val db: UmAppDatabase by di.activeDbInstance()
@@ -71,11 +82,17 @@ class ContentEntry2DetailPresenterTest {
             contentEntryUid = db.contentEntryDao.insert(this)
         }
 
+        entryContainer = Container().apply {
+            containerContentEntryUid = createdEntry?.contentEntryUid ?: 0L
+            cntLastModified = getSystemTimeInMillis()
+            containerUid = db.containerDao.insert(this)
+        }
+
         presenterArgs = mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString())
     }
 
     @Test
-    fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntry(){
+    fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryAndMonitorAvailability(){
         val presenter = ContentEntry2DetailPresenter(context,
                 presenterArgs!!, mockView, di, mockLifecycleOwner)
 
@@ -86,6 +103,12 @@ class ContentEntry2DetailPresenterTest {
             Assert.assertEquals("Expected entry was set on view",
                     createdEntry?.contentEntryUid, lastValue!!.contentEntryUid)
         }
+
+        presenter.onStart()
+
+        verify(localAvailabilityManager, timeout(5000)).addMonitoringRequest(argWhere {
+            entryContainer.containerUid in it.containerUidsToMonitor
+        })
     }
 
 
