@@ -73,11 +73,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }
         }
 
-//        bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
-//            instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
-//                    context.url, "", defaultHttpClient())
-//        }
-
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
                     context.url, "", defaultHttpClient()).also {
@@ -86,7 +81,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<EmbeddedHTTPD>() with singleton {
-            EmbeddedHTTPD(0, di).also { it.start() }
+            EmbeddedHTTPD(0, di).also {
+                it.start()
+                Napier.i("EmbeddedHTTPD started on port ${it.listeningPort}")
+            }
         }
 
         bind<NetworkManagerBle>() with singleton {
@@ -166,12 +164,12 @@ open class UstadApp : BaseUstadApp(), DIAware {
     override fun onCreate() {
         super.onCreate()
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
+        Napier.base(DebugAntilog())
         initPicasso(applicationContext)
     }
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
-        Napier.base(DebugAntilog())
     }
 
 }

@@ -18,6 +18,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
@@ -146,7 +147,8 @@ class DownloadJobItemRunnerTest {
     @Rule
     var temporaryFolder = TemporaryFolder()
 
-    class ContainerDownloadDispatcher(val serverDb: UmAppDatabase, val container: Container): Dispatcher() {
+    class ContainerDownloadDispatcher(val serverDb: UmAppDatabase, val container: Container,
+        val endpointPrefix: String = ""): Dispatcher() {
 
         val numTimesToFail = AtomicInteger(0)
 
@@ -161,6 +163,13 @@ class DownloadJobItemRunnerTest {
 
         override fun dispatch(request: RecordedRequest): MockResponse {
             return when {
+                (endpointPrefix != "") && !request.requestUrl.encodedPath().startsWith(endpointPrefix) -> {
+                    MockResponse()
+                            .setResponseCode(404)
+                            .addHeader("Content-Type", "text/plain")
+                            .setBody("Not found")
+                }
+
                 request.requestUrl.toString().endsWith("/${DownloadJobItemRunner.CONTAINER_ENTRY_LIST_PATH}?containerUid=${container.containerUid}") -> {
                     val entryList = serverDb.containerEntryDao.findByContainerWithMd5(container.containerUid)
                     MockResponse()
@@ -734,7 +743,8 @@ class DownloadJobItemRunnerTest {
             val item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
 
-            peerMockDispatcher  = ContainerDownloadDispatcher(serverDb, container)
+            peerMockDispatcher  = ContainerDownloadDispatcher(serverDb, container,
+                    endpointPrefix = "/${UMURLEncoder.encodeUTF8(cloudEndPoint)}/")
             peerMockWebServer.setDispatcher(peerMockDispatcher)
 
             cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container))

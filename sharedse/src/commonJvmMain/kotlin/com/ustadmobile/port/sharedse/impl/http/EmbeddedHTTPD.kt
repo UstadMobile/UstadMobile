@@ -75,9 +75,9 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
         id = idCounter
         idCounter++
 
-        addRoute("/:${ContainerEntryListResponder.PATH_VAR_ENDPOINT}/ContainerEntryList/findByContainerWithMd5(.*)+",
+        addRoute("/:${ContainerEntryListResponder.PATH_VAR_ENDPOINT}/ContainerEntryList/findByContainerWithMd5",
                 ContainerEntryListResponder::class.java, di)
-        addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/(.*)+",
+        addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/:entryList",
                 ConcatenatedContainerEntryFileResponder::class.java, di)
         addRoute("/:${XapiStatementResponder.URI_PARAM_ENDPOINT}/xapi/:contentEntryUid/statements",
                 XapiStatementResponder::class.java, di)
@@ -86,9 +86,6 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
 
         //TODO: This should provide NetworkManager to the responder, or BleProxyResponder could use DI itself
         addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, networkManager)
-
-//        addRoute("/xapi/:contentEntryUid/statements", XapiStatementResponder::class.java, repository)
-//        addRoute("/xapi/:contentEntryUid/activities/state", XapiStateResponder::class.java, repository)
     }
 
 
