@@ -21,6 +21,8 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadMana
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTED_LOCAL
+import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTING_LOCAL
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETERED
@@ -45,10 +47,8 @@ import kotlinx.coroutines.*
 import okhttp3.mockwebserver.*
 import okio.Buffer
 import okio.Okio
-import org.junit.Assert
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.*
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import java.io.File
 import java.io.IOException
@@ -70,9 +70,9 @@ class DownloadJobItemRunnerTest {
 
     private lateinit var peerServer: EmbeddedHTTPD
 
-    private var peerMockDispatcher: ReverseProxyDispatcher? = null
+    private var peerMockDispatcher: ContainerDownloadDispatcher? = null
 
-    private var peerMockWebServer: MockWebServer? = null
+    private lateinit var peerMockWebServer: MockWebServer
 
 //    private lateinit var mockedNetworkManager: NetworkManagerBle
 
@@ -142,6 +142,10 @@ class DownloadJobItemRunnerTest {
 
     private lateinit var mockLocalAvailabilityManager: LocalAvailabilityManager
 
+    @JvmField
+    @Rule
+    var temporaryFolder = TemporaryFolder()
+
     class ContainerDownloadDispatcher(val serverDb: UmAppDatabase, val container: Container): Dispatcher() {
 
         val numTimesToFail = AtomicInteger(0)
@@ -151,6 +155,8 @@ class DownloadJobItemRunnerTest {
         var throttlePeriod = 0L
 
         var throttlePeriodUnit: TimeUnit = TimeUnit.MILLISECONDS
+
+        var reachable = true
 
 
         override fun dispatch(request: RecordedRequest): MockResponse {
@@ -180,6 +186,7 @@ class DownloadJobItemRunnerTest {
                 }
             }.also {
                 it.takeIf { numTimesToFail.decrementAndGet() >= 0}?.setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY)
+                it.takeIf { !reachable }?.setSocketPolicy(SocketPolicy.NO_RESPONSE)
                 it.takeIf { throttleBytesPerPeriod != 0L }?.throttleBody(throttleBytesPerPeriod,
                         throttlePeriod, throttlePeriodUnit)
             }
@@ -198,8 +205,35 @@ class DownloadJobItemRunnerTest {
             wifiSsid = "wifi-mock"
         })
 
+        groupBle = WiFiDirectGroupBle("DIRECT-PeerNode", "networkPass123").also {
+            it.ipAddress = "127.0.0.1"
+        }
+
         mockNetworkManager = mock {
             on { connectivityStatus }.thenReturn(connectivityStatusLiveData)
+            onBlocking { sendBleMessage(any(), any())}.thenAnswer {
+                if(mockedNetworkManagerBleWorking.get()) {
+                    return@thenAnswer BleMessage(NetworkManagerBleCommon.WIFI_GROUP_CREATION_RESPONSE,
+                            42.toByte(), groupBle.toBytes())
+                }
+
+                Unit
+            }
+
+            on { connectToWiFi(eq(groupBle.ssid), eq(groupBle.passphrase))}.thenAnswer {
+                peerMockDispatcher?.reachable = true
+                connectivityStatusLiveData.sendValue(ConnectivityStatus(
+                        STATE_DISCONNECTED, true, groupBle.ssid))
+                GlobalScope.launch {
+                    delay(100)
+                    connectivityStatusLiveData.sendValue(ConnectivityStatus(
+                            STATE_CONNECTING_LOCAL, true, groupBle.ssid))
+                    delay(200)
+                    connectivityStatusLiveData.sendValue(ConnectivityStatus(
+                            STATE_CONNECTED_LOCAL, true, groupBle.ssid))
+                }
+                Unit
+            }
         }
 
         clientDi = DI {
@@ -239,6 +273,10 @@ class DownloadJobItemRunnerTest {
 
 
         cloudMockWebServer = MockWebServer()
+        peerMockWebServer = MockWebServer().also {
+            it.start()
+            groupBle.port = it.port
+        }
 
         val accountManager: UstadAccountManager by clientDi.instance()
         accountManager.activeAccount = UmAccount(0, "guest", "",
@@ -257,16 +295,16 @@ class DownloadJobItemRunnerTest {
 //        clientDb = UmAppDatabase.getInstance(context, "clientdb")
 //        clientDb.clearAllTables()
 
-        groupBle = WiFiDirectGroupBle("DIRECT-PeerNode", "networkPass123")
+
 
 
         clientContainerDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis())
 
         //clientRepo = clientDb//.getRepository("http://localhost/dummy/", "")
-//        networkNode = NetworkNode()
-//        networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
-//        networkNode.lastUpdateTimeStamp = System.currentTimeMillis()
-//        networkNode.nodeId = clientDb.networkNodeDao.replace(networkNode)
+        networkNode = NetworkNode()
+        networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
+        networkNode.lastUpdateTimeStamp = System.currentTimeMillis()
+        networkNode.nodeId = clientDb.networkNodeDao.replace(networkNode)
 
 //        serverDb = UmAppDatabase.getInstance(context)
 //        serverDb.clearAllTables()
@@ -345,6 +383,7 @@ class DownloadJobItemRunnerTest {
 //        cloudMockWebServer.setDispatcher(cloudMockDispatcher)
 
         cloudEndPoint = cloudMockWebServer.url("/").toString()
+
 
 
 //        val peerRepo = peerDb//.getRepository("http://localhost/dummy/", "")
@@ -687,50 +726,49 @@ class DownloadJobItemRunnerTest {
         }
 
     }
-//
-//
-//
-//    @Test
-//    fun givenDownloadLocallyAvailable_whenRun_shouldDownloadFromLocalPeer() {
-//        runBlocking {
-//            val item = clientDb.downloadJobItemDao.findByUid(
-//                    downloadJobItem.djiUid)!!
-//            val mockAvailabilityManager = mock<LocalAvailabilityManager> {
-//                onBlocking { findBestLocalNodeForContentEntryDownload(any()) }.thenReturn(networkNode)
-//            }
-//
-//            val jobItemRunner = DownloadJobItemRunner(context, item, containerDownloadManager,
-//                    mockedNetworkManager, clientDb,
-//                    cloudEndPoint, connectivityStatus,
-//                    localAvailabilityManager = mockAvailabilityManager,
-//                    connectivityStatusLiveData = connectivityStatusLiveData)
-//
-//            val startTime = System.currentTimeMillis()
-//            jobItemRunner.download().await()
-//
-//            val runTime = System.currentTimeMillis() - startTime
-//            println("Download job completed in $runTime ms")
-//
-//            Assert.assertTrue("Request was made to peer server",
-//                    peerMockWebServer!!.requestCount >= 2)
-//            Assert.assertEquals("No requests sent to cloud server",
-//                    0, cloudMockWebServer.requestCount)
-//
-//
-//            verify(mockedNetworkManager).connectToWiFi(groupBle.ssid, groupBle.passphrase)
-//
-//            argumentCaptor<DownloadJobItem>().apply {
-//                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
-//                Assert.assertEquals("Last status update was completed", JobStatus.COMPLETE,
-//                        lastValue.djiStatus)
-//            }
-//
-//            assertContainersHaveSameContent(item.djiContainerUid, item.djiContainerUid,
-//                    serverDb, serverRepo, clientDb, clientRepo)
-//        }
-//
-//    }
-//
+
+
+    @Test
+    fun givenDownloadLocallyAvailable_whenRun_shouldDownloadFromLocalPeer() {
+        runBlocking {
+            val item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+
+            peerMockDispatcher  = ContainerDownloadDispatcher(serverDb, container)
+            peerMockWebServer.setDispatcher(peerMockDispatcher)
+
+            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container))
+
+            mockLocalAvailabilityManager.stub {
+                onBlocking { findBestLocalNodeForContentEntryDownload(any()) }.thenReturn(networkNode)
+            }
+
+            val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
+
+            val startTime = System.currentTimeMillis()
+            jobItemRunner.download().await()
+
+            val runTime = System.currentTimeMillis() - startTime
+            println("Download job completed in $runTime ms")
+
+            Assert.assertTrue("Request was made to peer server",
+                    peerMockWebServer.requestCount >= 2)
+            Assert.assertEquals("No requests sent to cloud server",
+                    0, cloudMockWebServer.requestCount)
+
+
+            verify(mockNetworkManager).connectToWiFi(groupBle.ssid, groupBle.passphrase)
+
+            argumentCaptor<DownloadJobItem>().apply {
+                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
+                Assert.assertEquals("Last status update was completed", JobStatus.COMPLETE,
+                        lastValue.djiStatus)
+            }
+
+            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+        }
+    }
+
 //    /**
 //     * The container system avoids the need to download duplicate entries (files that are already
 //     * present in other containers). When a download contains entries that the device already has
