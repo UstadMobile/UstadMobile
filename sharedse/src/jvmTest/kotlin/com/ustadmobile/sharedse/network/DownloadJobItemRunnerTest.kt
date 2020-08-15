@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.network
 
+import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
@@ -20,6 +21,7 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadMana
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETERED
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -188,6 +190,7 @@ class DownloadJobItemRunnerTest {
     @Throws(IOException::class)
     fun setup() {
         val endpointScope = EndpointScope()
+        Napier.baseDebugIfNotEnabled()
 
         connectivityStatusLiveData = DoorMutableLiveData(ConnectivityStatus().apply {
             connectedOrConnecting = true
@@ -491,210 +494,199 @@ class DownloadJobItemRunnerTest {
         }
 
     }
-//
-//    @Test
-//    fun givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus() {
-//        runBlocking {
-//            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
-//            cloudMockDispatcher.throttlePeriod = 1000
-//
-//            var item = clientDb.downloadJobItemDao.findByUid(
-//                    downloadJobItem.djiUid)!!
-//            val jobItemRunner = DownloadJobItemRunner(context, item, containerDownloadManager,
-//                    mockedNetworkManager, clientDb,
-//                    cloudEndPoint, connectivityStatus,
-//                    localAvailabilityManager = mock<LocalAvailabilityManager>(),
-//                    connectivityStatusLiveData = connectivityStatusLiveData)
-//
-//            val pauseCountdownLatch = CountDownLatch(1)
-//            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).thenAnswer {
-//                val downloadJobItemArg = it.arguments[0] as DownloadJobItem
-//                if(downloadJobItemArg.djiStatus == JobStatus.PAUSED)
-//                    pauseCountdownLatch.countDown()
-//
-//                Unit
-//            }
-//
-//            launch {
-//                jobItemRunner.download()
-//            }
-//
-//            delay(1000)
-//
-//            jobItemRunner.pause()
-//
-//            pauseCountdownLatch.await(5, TimeUnit.SECONDS)
-//            argumentCaptor<DownloadJobItem>().apply {
-//                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
-//                Assert.assertEquals("Last status update returns status_paused", JobStatus.PAUSED,
-//                        lastValue.djiStatus)
-//            }
-//        }
-//    }
-//
-//    /**
-//     * DownloadJobItemRunner should stop when connectivity is lost, and then a new
-//     * DownloadJobItemRunner will be created when connectivity is restored. A DownloadJobItemRunner
-//     * must be capable of picking up from where the last one left off.
-//     */
-//    @Test
-//    fun givenDownloadJobItemRunnerStartedAndStopped_whenNextJobItemRunnerRuns_shouldFinishAndContentShouldMatch() {
-//        runBlocking {
-//            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
-//            cloudMockDispatcher.throttlePeriod = 1000
-//
-//            val item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
-//            val jobItemRunner1 = DownloadJobItemRunner(context, item, containerDownloadManager,
-//                    mockedNetworkManager, clientDb,
-//                    cloudEndPoint, connectivityStatus,
-//                    localAvailabilityManager = mock<LocalAvailabilityManager>(),
-//                    connectivityStatusLiveData = connectivityStatusLiveData)
-//
-//            val queuedStatusDeferred = CompletableDeferred<Int>()
-//            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
-//                if((it.arguments[0] as DownloadJobItem).djiStatus == JobStatus.QUEUED)
-//                    queuedStatusDeferred.complete(JobStatus.QUEUED)
-//
-//                Unit
-//            }
-//
-//            launch {
-//                jobItemRunner1.download()
-//            }
-//
-//            delay(2000)
-//
-//            connectivityStatusLiveData.sendValue(
-//                    ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED, false, null))
-//
-//            val statusAfterDisconnect = withTimeout(5000) { queuedStatusDeferred.await() }
-//
-//            connectivityStatusLiveData.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED,
-//                    true, "wifi"))
-//
-//            val downloadJobItemRunner2 = DownloadJobItemRunner(context, item, containerDownloadManager,
-//                    mockedNetworkManager, clientDb,
-//                    cloudEndPoint, connectivityStatus,
-//                    localAvailabilityManager = mock<LocalAvailabilityManager>(),
-//                    connectivityStatusLiveData = connectivityStatusLiveData)
-//
-//            val completedStatusDeferred = CompletableDeferred<Int>()
-//            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
-//                if((it.arguments[0] as DownloadJobItem).djiStatus == JobStatus.COMPLETE)
-//                    completedStatusDeferred.complete(JobStatus.COMPLETE)
-//                Unit
-//            }
-//
-//            downloadJobItemRunner2.download()
-//
-//            val completedStatus = withTimeout(15000) { completedStatusDeferred.await() }
-//
-//
-//            Assert.assertEquals("First download job item runner status was WAITING_FOR_CONNECTION after disconnect",
-//                    JobStatus.QUEUED, statusAfterDisconnect)
-//            Assert.assertEquals("File download task completed successfully",
-//                    JobStatus.COMPLETE, completedStatus)
-//
-//            Assert.assertEquals("Correct number of ContainerEntry items available in client db",
-//                    container.cntNumEntries,
-//                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size)
-//
-//            assertContainersHaveSameContent(item.djiContainerUid, item.djiContainerUid,
-//                    serverDb, serverRepo, clientDb, clientRepo)
-//        }
-//    }
-//
-//    @Test
-//    fun givenDownloadStartsOnMeteredConnection_whenJobSetChangedToDisableMeteredConnection_shouldStopAndSetStatus() {
-//        var item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
-//        var statusAfterWaitingForDownload = -1
-//        runBlocking {
-//            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
-//            cloudMockDispatcher.throttlePeriod = 1000
-//
-//
-//            clientDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(
-//                    item.djiDjUid, true)
-//
-//            connectivityStatus = ConnectivityStatus(STATE_METERED, true, null)
-//            connectivityStatusLiveData.sendValue(connectivityStatus)
-//
-//            val jobItemRunner = DownloadJobItemRunner(context, item, containerDownloadManager,
-//                    mockedNetworkManager, clientDb,
-//                    cloudEndPoint, connectivityStatus,
-//                    localAvailabilityManager = mock<LocalAvailabilityManager>(),
-//                    connectivityStatusLiveData = connectivityStatusLiveData)
-//
-//            UMLog.l(UMLog.DEBUG, 699,
-//                    " Running DownloadJobItemRunner for " + item.djiUid)
-//            val runningCountdownLatch = CountDownLatch(1)
-//            val queuedCountdownLatch = CountDownLatch(1)
-//            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
-//                when((it.arguments[0] as DownloadJobItem).djiStatus) {
-//                    JobStatus.RUNNING -> runningCountdownLatch.countDown()
-//                    JobStatus.QUEUED -> queuedCountdownLatch.countDown()
-//                }
-//            }
-//
-//            launch { jobItemRunner.download() }
-//
-//            runningCountdownLatch.await(5, TimeUnit.SECONDS)
-//
-//            delay(2000)
-//            jobItemRunner.meteredDataAllowed = false
-//
-//            queuedCountdownLatch.await(5, TimeUnit.SECONDS)
-//            argumentCaptor<DownloadJobItem>().apply {
-//                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
-//                Assert.assertEquals("Last item status update was QUEUED", JobStatus.QUEUED,
-//                        lastValue.djiStatus)
-//            }
-//        }
-//    }
-//
-//    @Test
-//    fun givenDownloadStarted_whenConnectionGoesOff_shouldStopAndSetStatusToWaiting() {
-//        var item = clientDb.downloadJobItemDao.findByUid(
-//                downloadJobItem.djiUid)!!
-//
-//        runBlocking {
-//            cloudMockDispatcher.throttleBytesPerPeriod = (128 * 1000)
-//            cloudMockDispatcher.throttlePeriod = 1000
-//
-//
-//            val jobItemRunner = DownloadJobItemRunner(context, item, containerDownloadManager,
-//                    mockedNetworkManager, clientDb,
-//                    cloudEndPoint, connectivityStatus,
-//                    localAvailabilityManager = mock<LocalAvailabilityManager>(),
-//                    connectivityStatusLiveData = connectivityStatusLiveData)
-//
-//            val runningCountdownLatch = CountDownLatch(1)
-//            val queuedCountdownLatch = CountDownLatch(1)
-//            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
-//                when((it.arguments[0] as DownloadJobItem).djiStatus) {
-//                    JobStatus.RUNNING -> runningCountdownLatch.countDown()
-//                    JobStatus.QUEUED -> queuedCountdownLatch.countDown()
-//                }
-//            }
-//
-//            launch { jobItemRunner.download() }
-//
-//            //let the download runner start
-//            runningCountdownLatch.await(5, TimeUnit.SECONDS)
-//            delay(1000)
-//
-//            connectivityStatusLiveData.sendValue(
-//                    ConnectivityStatus(STATE_DISCONNECTED, false, null))
-//
-//            queuedCountdownLatch.await(5, TimeUnit.SECONDS)
-//            argumentCaptor<DownloadJobItem>().apply {
-//                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
-//                Assert.assertEquals("Final status is queued", JobStatus.QUEUED,
-//                        lastValue.djiStatus)
-//            }
-//        }
-//
-//    }
+
+    @Test
+    fun givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus() {
+        runBlocking {
+            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+                //set speed to 512kbps (period unit by default is milliseconds)
+                throttleBytesPerPeriod = (8 * 1000)
+                throttlePeriod = 1000
+            })
+
+            var item = clientDb.downloadJobItemDao.findByUid(
+                    downloadJobItem.djiUid)!!
+            val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
+
+            val pauseCountdownLatch = CountDownLatch(1)
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).thenAnswer {
+                val downloadJobItemArg = it.arguments[0] as DownloadJobItem
+                if(downloadJobItemArg.djiStatus == JobStatus.PAUSED)
+                    pauseCountdownLatch.countDown()
+
+                Unit
+            }
+
+            launch {
+                jobItemRunner.download()
+            }
+
+            delay(1000)
+
+            jobItemRunner.pause()
+
+            pauseCountdownLatch.await(5, TimeUnit.SECONDS)
+            argumentCaptor<DownloadJobItem>().apply {
+                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
+                Assert.assertEquals("Last status update returns status_paused", JobStatus.PAUSED,
+                        lastValue.djiStatus)
+            }
+        }
+    }
+
+    /**
+     * DownloadJobItemRunner should stop when connectivity is lost, and then a new
+     * DownloadJobItemRunner will be created when connectivity is restored. A DownloadJobItemRunner
+     * must be capable of picking up from where the last one left off.
+     */
+    @Test
+    fun givenDownloadJobItemRunnerStartedAndStopped_whenNextJobItemRunnerRuns_shouldFinishAndContentShouldMatch() {
+        runBlocking {
+            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+                //set speed to 1Mbps (period unit by default is milliseconds)
+                throttleBytesPerPeriod = (128 * 1000)
+                throttlePeriod = 1000
+            })
+
+            val item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+            val jobItemRunner1 = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
+
+            val queuedStatusDeferred = CompletableDeferred<Int>()
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
+                if((it.arguments[0] as DownloadJobItem).djiStatus == JobStatus.QUEUED)
+                    queuedStatusDeferred.complete(JobStatus.QUEUED)
+
+                Unit
+            }
+
+            launch {
+                jobItemRunner1.download()
+            }
+
+            delay(2000)
+
+            connectivityStatusLiveData.sendValue(
+                    ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED, false, null))
+
+            val statusAfterDisconnect = withTimeout(5000) { queuedStatusDeferred.await() }
+
+            connectivityStatusLiveData.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED,
+                    true, "wifi"))
+
+            val downloadJobItemRunner2 = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
+
+            val completedStatusDeferred = CompletableDeferred<Int>()
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
+                if((it.arguments[0] as DownloadJobItem).djiStatus == JobStatus.COMPLETE)
+                    completedStatusDeferred.complete(JobStatus.COMPLETE)
+                Unit
+            }
+
+            downloadJobItemRunner2.download()
+
+            val completedStatus = withTimeout(15000) { completedStatusDeferred.await() }
+
+
+            Assert.assertEquals("First download job item runner status was QUEUED after disconnect",
+                    JobStatus.QUEUED, statusAfterDisconnect)
+            Assert.assertEquals("File download task completed successfully",
+                    JobStatus.COMPLETE, completedStatus)
+
+            Assert.assertEquals("Correct number of ContainerEntry items available in client db",
+                    container.cntNumEntries,
+                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size)
+
+            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+        }
+    }
+
+    @Test
+    fun givenDownloadStartsOnMeteredConnection_whenJobSetChangedToDisableMeteredConnection_shouldStopAndSetStatus() {
+        var item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
+        var statusAfterWaitingForDownload = -1
+        runBlocking {
+            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+                //set speed to 1Mbps (period unit by default is milliseconds)
+                throttleBytesPerPeriod = (128 * 1000)
+                throttlePeriod = 1000
+            })
+
+
+            clientDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(
+                    item.djiDjUid, true)
+
+            connectivityStatusLiveData.sendValue(ConnectivityStatus(STATE_METERED, true, null))
+
+            val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
+
+
+            val runningCountdownLatch = CountDownLatch(1)
+            val queuedCountdownLatch = CountDownLatch(1)
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
+                when((it.arguments[0] as DownloadJobItem).djiStatus) {
+                    JobStatus.RUNNING -> runningCountdownLatch.countDown()
+                    JobStatus.QUEUED -> queuedCountdownLatch.countDown()
+                }
+            }
+
+            launch { jobItemRunner.download() }
+
+            runningCountdownLatch.await(5, TimeUnit.SECONDS)
+
+            delay(2000)
+            jobItemRunner.meteredDataAllowed = false
+
+            queuedCountdownLatch.await(5, TimeUnit.SECONDS)
+            argumentCaptor<DownloadJobItem>().apply {
+                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
+                Assert.assertEquals("Last item status update was QUEUED", JobStatus.QUEUED,
+                        lastValue.djiStatus)
+            }
+        }
+    }
+
+    @Test
+    fun givenDownloadStarted_whenConnectionGoesOff_shouldStopAndSetStatusToWaiting() {
+        var item = clientDb.downloadJobItemDao.findByUid(
+                downloadJobItem.djiUid)!!
+
+        runBlocking {
+            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+                //set speed to 1Mbps (period unit by default is milliseconds)
+                throttleBytesPerPeriod = (128 * 1000)
+                throttlePeriod = 1000
+            })
+
+
+            val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
+
+            val runningCountdownLatch = CountDownLatch(1)
+            val queuedCountdownLatch = CountDownLatch(1)
+            whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).doAnswer {
+                when((it.arguments[0] as DownloadJobItem).djiStatus) {
+                    JobStatus.RUNNING -> runningCountdownLatch.countDown()
+                    JobStatus.QUEUED -> queuedCountdownLatch.countDown()
+                }
+            }
+
+            launch { jobItemRunner.download() }
+
+            //let the download runner start
+            runningCountdownLatch.await(5, TimeUnit.SECONDS)
+            delay(1000)
+
+            connectivityStatusLiveData.sendValue(
+                    ConnectivityStatus(STATE_DISCONNECTED, false, null))
+
+            queuedCountdownLatch.await(5, TimeUnit.SECONDS)
+            argumentCaptor<DownloadJobItem>().apply {
+                verify(containerDownloadManager, atLeastOnce()).handleDownloadJobItemUpdated(capture(), any())
+                Assert.assertEquals("Final status is queued", JobStatus.QUEUED,
+                        lastValue.djiStatus)
+            }
+        }
+
+    }
 //
 //
 //
@@ -812,13 +804,4 @@ class DownloadJobItemRunnerTest {
 //        }
 //    }
 
-
-    companion object {
-
-        @BeforeClass
-        @JvmStatic
-        fun setupLog() {
-            Napier.baseDebugIfNotEnabled()
-        }
-    }
 }
