@@ -42,7 +42,8 @@ class PersonEditPresenter(context: Any,
 
     private var registrationMode: Boolean = false
 
-    private val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
+    private val clazzMemberJoinEditHelper =
+            DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
             ClazzMemberWithClazz.serializer().list, this) { clazzMemberUid = it }
 
@@ -54,17 +55,28 @@ class PersonEditPresenter(context: Any,
         clazzMemberJoinEditHelper.onDeactivateEntity(clazzMemberWithClazz)
     }
 
+    private val rolesAndPermissionEditHelper = DefaultOneToManyJoinEditHelper<EntityRoleWithNameAndRole>(
+            EntityRoleWithNameAndRole::erUid,
+            "state_EntityRoleWithNameAndRole_list", EntityRoleWithNameAndRole.serializer().list,
+            EntityRoleWithNameAndRole.serializer().list, this) { erUid = it }
 
-    /*
-     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
-     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
-     */
+    fun handleAddOrEditRoleAndPermission(entityRoleWithNameAndRole: EntityRoleWithNameAndRole) {
+        rolesAndPermissionEditHelper.onEditResult(entityRoleWithNameAndRole)
+    }
+
+    fun handleRemoveRoleAndPermission(entityRoleWithNameAndRole: EntityRoleWithNameAndRole) {
+        rolesAndPermissionEditHelper.onDeactivateEntity(entityRoleWithNameAndRole)
+    }
+
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
                 MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
         view.clazzList = clazzMemberJoinEditHelper.liveList
+
+        view.rolesAndPermissionsList = rolesAndPermissionEditHelper.liveList
 
         registrationMode = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toBoolean()?:false
 
@@ -100,6 +112,12 @@ class PersonEditPresenter(context: Any,
             db.takeIf { entityUid != 0L }?.clazzMemberDao?.findAllClazzesByPersonWithClazzAsList(entityUid, getSystemTimeInMillis())
         } ?: listOf()
         clazzMemberJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
+
+
+        val rolesAndPermissionList = withTimeoutOrNull(2000){
+            db.takeIf{entityUid != 0L}?.entityRoleDao?.filterByPersonWithExtraAsList(entityUid)
+        }?:listOf()
+        rolesAndPermissionEditHelper.liveList.sendValue(rolesAndPermissionList)
 
 
         return person
@@ -160,6 +178,20 @@ class PersonEditPresenter(context: Any,
                 }else {
                     repo.personDao.updateAsync(entity)
                 }
+
+
+                rolesAndPermissionEditHelper.entitiesToInsert.forEach {
+                    //TODO: This
+                }
+
+                rolesAndPermissionEditHelper.entitiesToUpdate.forEach {
+                    //TODO: This
+                }
+
+                rolesAndPermissionEditHelper.primaryKeysToDeactivate.forEach {
+                    //TODO: This
+                }
+
 
                 clazzMemberJoinEditHelper.entitiesToInsert.forEach {
                     repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzMemberClazzUid,

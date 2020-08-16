@@ -9,11 +9,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemRoleListItemBinding
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.controller.RoleEditPresenter
 import com.ustadmobile.core.controller.RoleListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RoleListView
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -52,6 +52,7 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
             val item = getItem(position)
             holder.itemBinding.role = item
             holder.itemBinding.presenter = presenter
+            holder.itemBinding.bitMaskFlags = RoleEditPresenter.FLAGS_AVAILABLE
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
@@ -73,7 +74,6 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
                 requireContext().getString(R.string.add_a_new,
                         requireContext().getString(R.string.role)))
         mDataRecyclerViewAdapter = RoleListRecyclerAdapter(mPresenter)
-        mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }
 

@@ -39,10 +39,13 @@ import java.io.File
 interface PersonEditFragmentEventHandler {
 
     fun onClickNewClazzMemberWithClazz()
+
+    fun onClickNewRoleAndAssignment()
     
 }
 
-class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView, PersonEditFragmentEventHandler {
+class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView,
+        PersonEditFragmentEventHandler, EntityRoleItemHandler {
 
     private var mBinding: FragmentPersonEditBinding? = null
 
@@ -60,9 +63,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
     private data class ClassRoleOption(val roleId: Int, val resultKey: String, val stringId: Int)
 
     class ClazzMemberWithClazzRecyclerAdapter(val eventHandler: PersonEditFragmentEventHandler,
-        var presenter: PersonEditPresenter?): ListAdapter<ClazzMemberWithClazz, ClazzMemberWithClazzRecyclerAdapter.ClazzMemberWithClazzViewHolder>(DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ) {
+        var presenter: PersonEditPresenter?): ListAdapter<ClazzMemberWithClazz,
+            ClazzMemberWithClazzRecyclerAdapter.ClazzMemberWithClazzViewHolder>(
+            DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ) {
 
-        class ClazzMemberWithClazzViewHolder(val binding: ItemClazzMemberWithClazzEditBinding): RecyclerView.ViewHolder(binding.root)
+        class ClazzMemberWithClazzViewHolder(val binding: ItemClazzMemberWithClazzEditBinding)
+            : RecyclerView.ViewHolder(binding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzMemberWithClazzViewHolder {
             val viewHolder = ClazzMemberWithClazzViewHolder(ItemClazzMemberWithClazzEditBinding.inflate(
@@ -85,12 +91,26 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             value?.observe(this, clazzMemberWithClazzObserver)
         }
 
+    override var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>? = null
+        set(value) {
+            field?.removeObserver(rolesAndPermissionObserver)
+            field = value
+            value?.observe(this, rolesAndPermissionObserver)
+        }
+
     private var clazzMemberWithClazzRecyclerAdapter: ClazzMemberWithClazzRecyclerAdapter? = null
 
     private var clazzMemberNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+
+    private var rolesAndPermissionNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
     
     private val clazzMemberWithClazzObserver = Observer<List<ClazzMemberWithClazz>?> {
         t -> clazzMemberWithClazzRecyclerAdapter?.submitList(t)
+    }
+
+    private var rolesAndPermissionRecyclerAdapter: EntityRoleRecyclerAdapter? = null
+    private val rolesAndPermissionObserver = Observer<List<EntityRoleWithNameAndRole>?> {
+        t -> rolesAndPermissionRecyclerAdapter?.submitList(t)
     }
 
     override fun onClickNewClazzMemberWithClazz()  {
@@ -105,6 +125,21 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 }.show()
     }
 
+    override fun onClickNewRoleAndAssignment() {
+        //TODO: This
+    }
+
+    override fun handleClickEntityRole(entityRole: EntityRoleWithNameAndRole) {
+        //TODO: This
+    }
+
+    override fun handleAddOrEditEntityRole(entityRole: EntityRoleWithNameAndRole) {
+        mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
+    }
+
+    override fun handleRemoveEntityRole(entityRole: EntityRoleWithNameAndRole) {
+        mPresenter?.handleRemoveRoleAndPermission(entityRole)
+    }
 
     override var entity: PersonWithAccount? = null
         get() = field
@@ -231,18 +266,28 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
+            it.rolesAndPermissionsRv.layoutManager = LinearLayoutManager(requireContext())
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
         clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this, mPresenter)
+        rolesAndPermissionRecyclerAdapter = EntityRoleRecyclerAdapter(true, this)
         clazzMemberNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
                 View.OnClickListener { onClickNewClazzMemberWithClazz() },
                 requireContext().getString(R.string.add_person_to_class)).apply {
             newItemVisible = true
         }
+        rolesAndPermissionNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
+                View.OnClickListener { onClickNewRoleAndAssignment() },
+                requireContext().getString(R.string.add_role_permission)).apply {
+            newItemVisible = true
+        }
         mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzMemberWithClazzRecyclerAdapter,
                 clazzMemberNewItemRecyclerViewAdapter)
+
+        mBinding?.rolesAndPermissionsRv?.adapter = MergeAdapter(rolesAndPermissionRecyclerAdapter,
+                rolesAndPermissionNewItemRecyclerViewAdapter)
 
         mBinding?.usernameText?.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}

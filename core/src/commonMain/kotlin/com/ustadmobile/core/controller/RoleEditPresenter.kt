@@ -91,56 +91,31 @@ class RoleEditPresenter(context: Any,
     companion object {
 
         val FLAGS_AVAILABLE = listOf(
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_SELECT, MessageID.permission_clazz_select , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_INSERT, MessageID.permission_clazz_insert , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_UPDATE, MessageID.permission_clazz_update , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT, MessageID.permission_attendance_insert , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT, MessageID.permission_activity_insert , false),
-
-        BitmaskFlag(Role.PERMISSION_SEL_QUESTION_RESPONSE_INSERT, MessageID.permission_sel_question_insert , false),
-
-        BitmaskFlag(Role.PERMISSION_PERSON_SELECT, MessageID.permission_person_select , false),
-
-        BitmaskFlag(Role.PERMISSION_PERSON_INSERT, MessageID.permission_person_insert , false),
-
-        BitmaskFlag(Role.PERMISSION_PERSON_UPDATE, MessageID.permission_person_update , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_ADD_TEACHER, MessageID.permission_clazz_add_teacher , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_ADD_STUDENT, MessageID.permission_clazz_add_student , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT, MessageID.permission_attendance_select , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE, MessageID.permission_attendance_update , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE, MessageID.permission_activity_update , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT, MessageID.permission_activity_select , false),
-
-        BitmaskFlag(Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT, MessageID.permission_sel_select , false),
-
-        BitmaskFlag(Role.PERMISSION_SEL_QUESTION_RESPONSE_UPDATE, MessageID.permission_sel_update , false),
-
-        BitmaskFlag(Role.PERMISSION_SEL_QUESTION_SELECT, MessageID.permission_sel_question_select , false),
-
-        BitmaskFlag(Role.PERMISSION_SEL_QUESTION_INSERT, MessageID.permission_sel_question_insert , false),
-
-        BitmaskFlag(Role.PERMISSION_SEL_QUESTION_UPDATE, MessageID.permission_sel_question_update , false),
-
-        BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_SELECT, MessageID.permission_person_picture_select , false),
-
-        BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_INSERT, MessageID.permission_person_picture_insert , false),
-
-        BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_UPDATE, MessageID.permission_person_picture_update , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW , MessageID.permission_clazz_assignment_view , false),
-
-        BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit , false)
+            BitmaskFlag(Role.PERMISSION_CLAZZ_SELECT, MessageID.permission_clazz_select),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_INSERT, MessageID.permission_clazz_insert),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_UPDATE, MessageID.permission_clazz_update),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT, MessageID.permission_attendance_insert),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT, MessageID.permission_activity_insert),
+            BitmaskFlag(Role.PERMISSION_SEL_QUESTION_RESPONSE_INSERT, MessageID.permission_sel_question_insert),
+            BitmaskFlag(Role.PERMISSION_PERSON_SELECT, MessageID.permission_person_select),
+            BitmaskFlag(Role.PERMISSION_PERSON_INSERT, MessageID.permission_person_insert),
+            BitmaskFlag(Role.PERMISSION_PERSON_UPDATE, MessageID.permission_person_update),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_ADD_TEACHER, MessageID.permission_clazz_add_teacher),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_ADD_STUDENT, MessageID.permission_clazz_add_student),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT, MessageID.permission_attendance_select),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE, MessageID.permission_attendance_update),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE, MessageID.permission_activity_update),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT, MessageID.permission_activity_select),
+            BitmaskFlag(Role.PERMISSION_SEL_QUESTION_RESPONSE_SELECT, MessageID.permission_sel_select),
+            BitmaskFlag(Role.PERMISSION_SEL_QUESTION_RESPONSE_UPDATE, MessageID.permission_sel_update),
+            BitmaskFlag(Role.PERMISSION_SEL_QUESTION_SELECT, MessageID.permission_sel_question_select),
+            BitmaskFlag(Role.PERMISSION_SEL_QUESTION_INSERT, MessageID.permission_sel_question_insert),
+            BitmaskFlag(Role.PERMISSION_SEL_QUESTION_UPDATE, MessageID.permission_sel_question_update),
+            BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_SELECT, MessageID.permission_person_picture_select),
+            BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_INSERT, MessageID.permission_person_picture_insert),
+            BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_UPDATE, MessageID.permission_person_picture_update),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW , MessageID.permission_clazz_assignment_view),
+            BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit)
         )
 
     }

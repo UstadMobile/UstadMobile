@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = 45)
 @Serializable
-class Role() {
+open class Role() {
 
     @PrimaryKey(autoGenerate = true)
     var roleUid: Long = 0
@@ -32,7 +32,6 @@ class Role() {
 
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0
-
 
     constructor(roleName: String, rolePermissions: Long):this() {
         this.roleName = roleName
@@ -165,8 +164,6 @@ class Role() {
                 PERMISSION_CLAZZ_SELECT or
                 PERMISSION_PERSON_SELECT or
                 PERMISSION_CLAZZ_ASSIGNMENT_VIEW
-
-
 
     }
 }

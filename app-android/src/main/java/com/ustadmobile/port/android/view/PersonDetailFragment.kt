@@ -28,9 +28,7 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
-import com.ustadmobile.lib.db.entities.CustomField
-import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.lib.db.entities.*
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -39,7 +37,8 @@ interface PersonDetailFragmentEventHandler {
 
 }
 
-class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), PersonDetailView, PersonDetailFragmentEventHandler {
+class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), PersonDetailView,
+        EntityRoleItemHandler{
 
     private var mBinding: FragmentPersonDetailBinding? = null
 
@@ -52,12 +51,16 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
 
     var dbRepo: UmAppDatabase? = null
 
-    class ClazzMemberWithClazzRecyclerAdapter(val activityEventHandler: PersonDetailFragmentEventHandler,
-            var presenter: PersonDetailPresenter?): ListAdapter<ClazzMemberWithClazz, ClazzMemberWithClazzRecyclerAdapter.ClazzMemberWithClazzViewHolder>(DIFFUTIL_CLAZZMEMBERWITHCLAZZ) {
+    class ClazzMemberWithClazzRecyclerAdapter(var presenter: PersonDetailPresenter?)
+        : ListAdapter<ClazzMemberWithClazz,
+                ClazzMemberWithClazzRecyclerAdapter.ClazzMemberWithClazzViewHolder>(
+                    DIFFUTIL_CLAZZMEMBERWITHCLAZZ) {
 
-            class ClazzMemberWithClazzViewHolder(val binding: ItemClazzMemberWithClazzDetailBinding): RecyclerView.ViewHolder(binding.root)
+            class ClazzMemberWithClazzViewHolder(val binding: ItemClazzMemberWithClazzDetailBinding)
+                    : RecyclerView.ViewHolder(binding.root)
 
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzMemberWithClazzViewHolder {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
+                    : ClazzMemberWithClazzViewHolder {
 
                 return ClazzMemberWithClazzViewHolder(ItemClazzMemberWithClazzDetailBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false).apply {
@@ -68,6 +71,15 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             override fun onBindViewHolder(holder: ClazzMemberWithClazzViewHolder, position: Int) {
                 holder.binding.clazzMemberWithClazz = getItem(position)
             }
+        }
+
+    override var rolesAndPermissions: DataSource.Factory<Int, EntityRoleWithNameAndRole>? = null
+        set(value) {
+            rolesAndPermissionsLiveData?.removeObserver(rolesAndPermissionsObserver)
+            field = value
+            val entityRoleDao = dbRepo?.entityRoleDao?: return
+            rolesAndPermissionsLiveData = value?.asRepositoryLiveData(entityRoleDao)
+            rolesAndPermissionsLiveData?.observe(viewLifecycleOwner, rolesAndPermissionsObserver)
         }
 
     override var clazzes: DataSource.Factory<Int, ClazzMemberWithClazz>? = null
@@ -102,20 +114,30 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         t -> clazzMemberWithClazzRecyclerAdapter?.submitList(t)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    private var rolesAndPermissionsLiveData: LiveData<PagedList<EntityRoleWithNameAndRole>>? = null
+    private var rolesAndPermissionsRecyclerAdapter: EntityRoleRecyclerAdapter? = null
+    private val rolesAndPermissionsObserver = Observer<PagedList<EntityRoleWithNameAndRole>?> {
+        t -> rolesAndPermissionsRecyclerAdapter?.submitList(t)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
 
         val impl: UstadMobileSystemImpl by instance()
-        canManageAccount = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_ACCOUNT_MANAGEMENT, requireContext())
-        clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this,
+        canManageAccount = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_ACCOUNT_MANAGEMENT,
+                requireContext())
+        clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(
             null)
+        rolesAndPermissionsRecyclerAdapter = EntityRoleRecyclerAdapter(false, this)
         mBinding = FragmentPersonDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
-            it.fragmentEventHandler = this
             it.createAccountVisibility = View.GONE
             it.changePasswordVisibility = View.GONE
             it.classesRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.classesRecyclerview.adapter = clazzMemberWithClazzRecyclerAdapter
+            it.rolesAndPermissionsRecyclerview.layoutManager = LinearLayoutManager(requireContext())
+            it.rolesAndPermissionsRecyclerview.adapter = rolesAndPermissionsRecyclerAdapter
         }
 
         val accountManager: UstadAccountManager by instance()
@@ -132,6 +154,8 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         super.onDestroyView()
         mBinding?.classesRecyclerview?.adapter = null
         clazzMemberWithClazzRecyclerAdapter = null
+        mBinding?.rolesAndPermissionsRecyclerview?.adapter = null
+        rolesAndPermissionsRecyclerAdapter = null
         dbRepo = null
         mBinding = null
         mPresenter = null
@@ -142,7 +166,8 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         super.onResume()
 
         if(mBinding?.person != null) {
-            (activity as? AppCompatActivity)?.supportActionBar?.title = mBinding?.person?.firstNames + " " + mBinding?.person?.lastName
+            (activity as? AppCompatActivity)?.supportActionBar?.title =
+                    mBinding?.person?.firstNames + " " + mBinding?.person?.lastName
         }
     }
 
@@ -152,18 +177,22 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             field = value
             mBinding?.person = value
             if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
-                (activity as? AppCompatActivity)?.supportActionBar?.title = value?.firstNames + " " + value?.lastName
+                (activity as? AppCompatActivity)?.supportActionBar?.title =
+                        value?.firstNames + " " + value?.lastName
         }
 
 
     companion object {
 
-        val DIFFUTIL_CLAZZMEMBERWITHCLAZZ = object: DiffUtil.ItemCallback<ClazzMemberWithClazz>() {
-            override fun areItemsTheSame(oldItem: ClazzMemberWithClazz, newItem: ClazzMemberWithClazz): Boolean {
+        val DIFFUTIL_CLAZZMEMBERWITHCLAZZ =
+                object: DiffUtil.ItemCallback<ClazzMemberWithClazz>() {
+            override fun areItemsTheSame(oldItem: ClazzMemberWithClazz,
+                                         newItem: ClazzMemberWithClazz): Boolean {
                 return oldItem.clazzMemberUid == newItem.clazzMemberUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzMemberWithClazz, newItem: ClazzMemberWithClazz): Boolean {
+            override fun areContentsTheSame(oldItem: ClazzMemberWithClazz,
+                                            newItem: ClazzMemberWithClazz): Boolean {
                 return oldItem == newItem
             }
         }
@@ -176,6 +205,18 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
                     CustomField.ICON_EMAIL to R.drawable.ic_email_black_24dp,
                     CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
 
+    }
+
+    override fun handleClickEntityRole(entityRole: EntityRoleWithNameAndRole) {
+        //TODO: This
+    }
+
+    override fun handleAddOrEditEntityRole(entityRole: EntityRoleWithNameAndRole) {
+        //not applicable
+    }
+
+    override fun handleRemoveEntityRole(entityRole: EntityRoleWithNameAndRole) {
+        //Not applicable
     }
 
 }

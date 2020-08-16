@@ -1,11 +1,12 @@
 package com.ustadmobile.core.db.dao
 
+import androidx.paging.DataSource
 import androidx.room.*
 import com.ustadmobile.core.db.dao.RoleDao.Companion.SELECT_ACCOUNT_IS_ADMIN
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.EntityRole
+import com.ustadmobile.lib.db.entities.*
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)", 
         updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN, 
@@ -34,6 +35,14 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
     @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId AND erEntityUid = :entityUid " + "AND erGroupUid = :groupUid")
     abstract suspend fun findByEntitiyAndPersonGroup(tableId: Int, entityUid: Long, groupUid:
         Long) : List<EntityRole>
+
+    @Query(FILTER_BY_PERSON_UId)
+    abstract fun filterByPersonWithExtra(personUid: Long)
+            : DataSource.Factory<Int, EntityRoleWithNameAndRole>
+
+    @Query(FILTER_BY_PERSON_UId)
+    abstract fun filterByPersonWithExtraAsList(personUid: Long)
+            : List<EntityRoleWithNameAndRole>
 
     @Query("SELECT * FROM EntityRole WHERE erUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : EntityRole?
@@ -66,5 +75,26 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
 
         const val ROLE_ASSIGNMENT_BY_PERSONGROUP_WHERE =
                 " AND groupPersonUid = :groupPersonUid "
+
+
+        const val FILTER_BY_PERSON_UId =
+                """
+        SELECT  
+        (CASE 
+            WHEN EntityRole.erTableId = ${Clazz.TABLE_ID}	THEN (SELECT Clazz.clazzName FROM Clazz WHERE Clazz.clazzUid = EntityRole.erEntityUid)
+            WHEN EntityRole.erTableId = ${Person.TABLE_ID}	THEN (SELECT Person.firstNames||' '||Person.lastName FROM Person WHERE Person.personUid = EntityRole.erEntityUid)
+            WHEN EntityRole.erTableId = ${School.TABLE_ID}	THEN (SELECT School.schoolName FROM School WHERE School.schoolUid = EntityRole.erEntityUid)
+            ELSE '' 
+        END) as entityRoleScopeName,
+        Role.*, EntityRole.* FROM EntityRole
+        LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
+        LEFT JOIN Person AS fromPerson ON fromPerson.personUid = :personUid
+        WHERE EntityRole.erGroupUid IN (
+        SELECT PersonGroup.groupUid FROM PersonGroupMember 
+        LEFT JOIN PersonGroup ON PersonGroupMember.groupMemberGroupUid = PersonGroup.groupUid
+        WHERE PersonGroupMember.groupMemberPersonUid = fromPerson.personUid 
+        )
+        
+        """
     }
 }

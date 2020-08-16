@@ -727,4 +727,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="question_type">Question type</string>
     <string name="add_option">Add option</string>
 
+    <string name="roles_and_permissions">Roles and permissions</string>
+    <string name="add_role_permission">Add Role \/ Permission</string>
 </resources>
