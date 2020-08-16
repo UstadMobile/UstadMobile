@@ -828,4 +828,10 @@
     <string name="lets_get_started_label">لنبدأ</string>
     <string name="accounts">حسابات</string>
     <string name="register_now">سجل الان</string>
+    <string name="license_type_cc_0">الحقوق غير محفوظة</string>
+    <string name="ask_your_teacher_for_code">اطلب من معلمتك رمز الصف و ادخله هنا:</string>
+    <string name="reject">رفض</string>
+    <string name="join_existing">الانضمام ل %1$s الموجود</string>
+    <string name="pending_requests">الطلبات المعلقة</string>
+    <string name="class_code">رمز الصف</string>
 </resources>
