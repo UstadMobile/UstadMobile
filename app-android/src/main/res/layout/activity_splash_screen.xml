@@ -27,9 +27,10 @@
        android:layout_width="@dimen/dimen_150dp"
        android:layout_height="@dimen/dimen_150dp"
        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintTop_toBottomOf="@+id/textView"
-       app:srcCompat="@drawable/ic_lamsustad_char"
-       tools:layout_editor_absoluteX="130dp" />
+       app:srcCompat="@drawable/ic_lamsustad_char" />
 
 
    <LinearLayout
