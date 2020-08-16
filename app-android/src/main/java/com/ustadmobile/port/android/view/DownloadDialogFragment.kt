@@ -8,12 +8,9 @@ import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
+import androidx.annotation.Keep
 import androidx.appcompat.app.AlertDialog
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMStorageDir
@@ -21,14 +18,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.kodein.di.instance
-import org.kodein.di.on
 import java.util.*
 
-
+//It would be nice to move this to proguard-rules.pro and allow obfuscation of the contents of the class
+@Keep
 class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         DialogInterface.OnClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
         AdapterView.OnItemSelectedListener {

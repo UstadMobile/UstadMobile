@@ -87,7 +87,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     @VisibleForTesting
     var navController: NavController? = null
 
-    @Deprecated("This is deprecated since we switched to using NavController. Add the screen to ViewNameToDestMap.kt instead.")
     private val viewNameToAndroidImplMap = mapOf<String, String>(
             "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
             ContentEditorView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorActivity",
