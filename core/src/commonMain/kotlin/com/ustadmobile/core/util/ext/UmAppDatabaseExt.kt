@@ -38,6 +38,8 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
         clazz.clazzTeachersPersonGroupUid, Role.ROLE_TEACHER_UID.toLong()))
     entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
         clazz.clazzStudentsPersonGroupUid, Role.ROLE_STUDENT_UID.toLong()))
+    entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
+        clazz.clazzPendingStudentsPersonGroupUid, Role.ROLE_STUDENT_PENDING_UID.toLong()))
 }
 
 /**

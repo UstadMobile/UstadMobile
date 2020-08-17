@@ -135,6 +135,9 @@ class Role() {
 
         const val PERMISSION_SCHOOL_UPDATE: Long = 2147483648L
 
+        //Permission to actually open and enter the class (eg. available to accept members, not those with pending requests)
+        const val PERMISSION_CLAZZ_OPEN: Long = 4294967296L
+
         //Predefined roles that are added by the system
         const val ROLE_TEACHER_NAME = "Teacher"
 
@@ -143,6 +146,7 @@ class Role() {
         const val ROLE_TEACHER_PERMISSIONS_DEFAULT: Long =
                 PERMISSION_CLAZZ_SELECT or
                 PERMISSION_CLAZZ_UPDATE or
+                PERMISSION_CLAZZ_OPEN or
                 PERMISSION_CLAZZ_ADD_STUDENT or
                 PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or
                 PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT or
@@ -163,12 +167,13 @@ class Role() {
 
         const val ROLE_STUDENT_PERMISSIONS_DEFAULT: Long =
                 PERMISSION_CLAZZ_SELECT or
+                PERMISSION_CLAZZ_OPEN or
                 PERMISSION_PERSON_SELECT or
                 PERMISSION_CLAZZ_ASSIGNMENT_VIEW
 
         const val ROLE_STUDENT_PENDING_NAME = "Student Pending"
 
-        const val ROLE_STUDENT_PENDING_UID = 1001
+        const val ROLE_STUDENT_PENDING_UID = 1002
 
         const val ROLE_STUDENT_PENDING_PERMISSION_DEFAULT: Long = PERMISSION_CLAZZ_SELECT
 
