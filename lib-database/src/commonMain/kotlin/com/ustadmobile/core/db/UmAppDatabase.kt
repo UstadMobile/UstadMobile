@@ -2780,6 +2780,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        /**
+         * Add fields required for class and school codes for students to join a class or school
+         */
         val MIGRATION_36_37 = object : DoorMigration(36, 37) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE Clazz ADD COLUMN clazzPendingStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL")
