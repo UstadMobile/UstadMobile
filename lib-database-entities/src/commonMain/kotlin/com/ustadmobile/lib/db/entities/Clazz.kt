@@ -63,6 +63,12 @@ open class Clazz() {
 
     var clazzTeachersPersonGroupUid: Long = 0
 
+    var clazzPendingStudentsPersonGroupUid: Long = 0
+
+    /**
+     * Code that can be used to join the class
+     */
+    var clazzCode: String? = null
 
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
