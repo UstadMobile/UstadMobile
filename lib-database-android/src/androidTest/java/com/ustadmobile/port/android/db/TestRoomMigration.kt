@@ -18,16 +18,6 @@ class TestRoomMigration {
     var helper: MigrationTestHelper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(),
             UmAppDatabase::class.java.canonicalName, FrameworkSQLiteOpenHelperFactory())
 
-    @Test
-    fun migrate27To28() {
-        helper.createDatabase(TEST_DB, 27).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 28, true,
-                UmAppDatabase.MIGRATION_27_28)
-    }
-
 //    @Test
 //    fun migrate28to29() {
 //        helper.createDatabase(TEST_DB, 28).apply {
@@ -38,35 +28,6 @@ class TestRoomMigration {
 //                UmAppDatabase.MIGRATION_28_29)
 //    }
 
-    @Test
-    fun migrate29to30() {
-        helper.createDatabase(TEST_DB, 29).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 30, true,
-                UmAppDatabase.MIGRATION_29_30)
-    }
-
-    @Test
-    fun migrate30to31() {
-        helper.createDatabase(TEST_DB, 30).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 31, true,
-                UmAppDatabase.MIGRATION_30_31)
-    }
-
-    @Test
-    fun migrate31to32() {
-        helper.createDatabase(TEST_DB, 31).apply {
-            close()
-        }
-
-        helper.runMigrationsAndValidate(TEST_DB, 32, true,
-                UmAppDatabase.MIGRATION_31_32)
-    }
 
 
 //    @Test
@@ -98,6 +59,39 @@ class TestRoomMigration {
 //        helper.runMigrationsAndValidate(TEST_DB, 35, true,
 //                UmAppDatabase.MIGRATION_34_35)
 //    }
+
+    @Test
+    fun migrate32to33() {
+        helper.createDatabase(TEST_DB, 32).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 33, true,
+                UmAppDatabase.MIGRATION_32_33)
+    }
+
+
+    @Test
+    fun migrate33to34() {
+        helper.createDatabase(TEST_DB, 33).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 34, true,
+                UmAppDatabase.MIGRATION_33_34)
+    }
+
+
+
+    @Test
+    fun migrate35to36() {
+        helper.createDatabase(TEST_DB, 36).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 37, true,
+                UmAppDatabase.MIGRATION_35_36)
+    }
 
     @Test
     fun migrate36to37() {
