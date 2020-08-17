@@ -8,13 +8,13 @@ import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.randomString
 
 fun UmAppDatabase.runPreload() {
     preload()
     timeZoneEntityDao.insertSystemTimezones()
     personDetailPresenterFieldDao.preloadCoreFields()
 }
-
 
 /**
  * Insert a new class and
@@ -26,6 +26,11 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
 
     clazz.clazzStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
             impl.getString(MessageID.students, context)))
+
+    clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
+            impl.getString(MessageID.pending_requests, context)))
+
+    clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
     clazz.clazzUid = clazzDao.insertAsync(clazz)
 
@@ -61,6 +66,7 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     val personGroupUid = when(role) {
         ClazzMember.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
         ClazzMember.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
+        ClazzMember.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
         else -> null
     }
 

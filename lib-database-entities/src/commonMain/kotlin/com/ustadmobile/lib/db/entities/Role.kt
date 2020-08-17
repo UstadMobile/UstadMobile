@@ -166,6 +166,11 @@ class Role() {
                 PERMISSION_PERSON_SELECT or
                 PERMISSION_CLAZZ_ASSIGNMENT_VIEW
 
+        const val ROLE_STUDENT_PENDING_NAME = "Student Pending"
+
+        const val ROLE_STUDENT_PENDING_UID = 1001
+
+        const val ROLE_STUDENT_PENDING_PERMISSION_DEFAULT: Long = PERMISSION_CLAZZ_SELECT
 
 
     }

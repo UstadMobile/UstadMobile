@@ -23,6 +23,9 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     @Query("SELECT * From Clazz WHERE clazzUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Clazz?>
 
+    @Query("SELECT * FROM Clazz WHERE clazzCode = :code")
+    abstract fun findByClazzCode(code: String): Clazz?
+
     @Query(SELECT_ACTIVE_CLAZZES)
     abstract fun findAllLive(): DoorLiveData<List<Clazz>>
 
