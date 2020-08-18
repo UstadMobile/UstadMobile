@@ -211,10 +211,6 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         //TODO: This
     }
 
-    override fun handleAddOrEditEntityRole(entityRole: EntityRoleWithNameAndRole) {
-        //not applicable
-    }
-
     override fun handleRemoveEntityRole(entityRole: EntityRoleWithNameAndRole) {
         //Not applicable
     }

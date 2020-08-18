@@ -36,16 +36,30 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
     abstract suspend fun findByEntitiyAndPersonGroup(tableId: Int, entityUid: Long, groupUid:
         Long) : List<EntityRole>
 
-    @Query(FILTER_BY_PERSON_UId)
+    @Query(FILTER_BY_PERSON_UID2)
     abstract fun filterByPersonWithExtra(personUid: Long)
             : DataSource.Factory<Int, EntityRoleWithNameAndRole>
 
-    @Query(FILTER_BY_PERSON_UId)
+    @Query(FILTER_BY_PERSON_UID2)
     abstract fun filterByPersonWithExtraAsList(personUid: Long)
             : List<EntityRoleWithNameAndRole>
 
     @Query("SELECT * FROM EntityRole WHERE erUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : EntityRole?
+
+
+    @Query("""SELECT EntityRole.*, Role.*, 
+            (CASE 
+                WHEN EntityRole.erTableId = ${Clazz.TABLE_ID}	THEN (SELECT Clazz.clazzName FROM Clazz WHERE Clazz.clazzUid = EntityRole.erEntityUid)
+                WHEN EntityRole.erTableId = ${Person.TABLE_ID}	THEN (SELECT Person.firstNames||' '||Person.lastName FROM Person WHERE Person.personUid = EntityRole.erEntityUid)
+                WHEN EntityRole.erTableId = ${School.TABLE_ID}	THEN (SELECT School.schoolName FROM School WHERE School.schoolUid = EntityRole.erEntityUid)
+                ELSE '' 
+            END) as entityRoleScopeName,
+        
+            FROM EntityRole 
+            LEFT JOIN Role on Role.roleUid = EntityRole.erRoleUid 
+            WHERE erUid = :uid """)
+    abstract suspend fun findWithNameAndRoleByUidAsync(uid: Long): EntityRoleWithNameAndRole
 
     @Query("SELECT * FROM EntityRole WHERE erUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<EntityRole?>
@@ -96,5 +110,22 @@ abstract class EntityRoleDao : BaseDao<EntityRole> {
         )
         
         """
+
+        const val FILTER_BY_PERSON_UID2 =
+                """
+                    SELECT  
+                    (CASE 
+                        WHEN EntityRole.erTableId = ${Clazz.TABLE_ID}	THEN (SELECT Clazz.clazzName FROM Clazz WHERE Clazz.clazzUid = EntityRole.erEntityUid)
+                        WHEN EntityRole.erTableId = ${Person.TABLE_ID}	THEN (SELECT Person.firstNames||' '||Person.lastName FROM Person WHERE Person.personUid = EntityRole.erEntityUid)
+                        WHEN EntityRole.erTableId = ${School.TABLE_ID}	THEN (SELECT School.schoolName FROM School WHERE School.schoolUid = EntityRole.erEntityUid)
+                        ELSE '' 
+                    END) as entityRoleScopeName,
+                    Role.*, EntityRole.* FROM EntityRole
+                    LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
+                    LEFT JOIN Person AS fromPerson ON fromPerson.personUid = :personUid
+                    WHERE EntityRole.erGroupUid = (
+                        SELECT PersonGroup.groupUid FROM PersonGroup WHERE PersonGroup.groupPersonUid = fromPerson.personUid 
+                    )
+                """
     }
 }

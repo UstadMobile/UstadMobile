@@ -46,6 +46,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
+            android:paddingBottom="@dimen/dimen_116dp"
             android:layout_height="wrap_content">
 
             <androidx.appcompat.widget.AppCompatImageView

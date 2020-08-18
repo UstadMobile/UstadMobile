@@ -175,9 +175,17 @@ class PersonEditPresenter(context: Any,
             }else{
                 if(entity.personUid == 0L) {
                     entity.personUid = repo.personDao.insertAsync(entity)
+
+                    //Create person's group
+                    repo.personGroupDao.insertAsync(PersonGroup().apply {
+                        groupPersonUid = entity.personUid
+                        groupName = "Person individual group"
+                    })
                 }else {
                     repo.personDao.updateAsync(entity)
                 }
+
+
 
 
                 rolesAndPermissionEditHelper.entitiesToInsert.forEach {

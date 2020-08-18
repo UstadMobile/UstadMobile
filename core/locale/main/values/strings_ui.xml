@@ -729,4 +729,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="roles_and_permissions">Roles and permissions</string>
     <string name="add_role_permission">Add Role \/ Permission</string>
+    <string name="scope">Scope</string>
+    <string name="scope_description">Select the scope(e.g. class, school or a specific person) over which permissions will be applied.</string>
+    <string name="role_description">A role(e.g. teacher, student, etc) gives a set of permissions (e.g. view person details, record attendance, etc) that apply to the scope selected above.</string>
+
 </resources>

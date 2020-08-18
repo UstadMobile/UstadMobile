@@ -133,9 +133,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         //TODO: This
     }
 
-    override fun handleAddOrEditEntityRole(entityRole: EntityRoleWithNameAndRole) {
-        mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
-    }
 
     override fun handleRemoveEntityRole(entityRole: EntityRoleWithNameAndRole) {
         mPresenter?.handleRemoveRoleAndPermission(entityRole)
@@ -340,6 +337,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 })
             }
         }
+
+        //TODO: Add block for Roles and Assignment and use
+        // mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
+
+
 
     }
 

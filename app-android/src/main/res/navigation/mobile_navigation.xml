@@ -242,4 +242,9 @@
         android:name="com.ustadmobile.port.android.view.PersonAccountEditFragment"
         android:label="" />
 
+    <fragment
+        android:id="@+id/entityrole_edit_dest"
+        android:name="com.ustadmobile.port.android.view.EntityRoleEditFragment"
+        android:label="" />
+
 </navigation>

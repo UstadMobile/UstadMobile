@@ -12,7 +12,6 @@ import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 interface EntityRoleItemHandler {
 
     fun handleClickEntityRole(entityRole: EntityRoleWithNameAndRole)
-    fun handleAddOrEditEntityRole(entityRole: EntityRoleWithNameAndRole)
     fun handleRemoveEntityRole(entityRole: EntityRoleWithNameAndRole)
 }
 
