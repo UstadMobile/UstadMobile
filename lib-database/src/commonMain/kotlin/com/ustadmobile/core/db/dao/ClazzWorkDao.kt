@@ -73,17 +73,15 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                 AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
                 ) as totalStudents, 
             (
-                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE
                 clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
             ) as submittedStudents, 
             0 as notSubmittedStudents,
             0 as completedStudents, 
             (
-                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
                 ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
                 AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
-                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
             ) as markedStudents,
             0 as firstContentEntryUid,
             Clazz.clazzTimeZone as clazzTimeZone
@@ -131,17 +129,15 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                 AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
                 ) as totalStudents, 
             (
-                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
                 clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
             ) as submittedStudents, 
             0 as notSubmittedStudents,
             0 as completedStudents, 
             (
-                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
+                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
                 ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
-                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
+                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0)
             ) as markedStudents,
 
              0 as firstContentEntryUid,
