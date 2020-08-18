@@ -38,7 +38,6 @@ import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
-import kotlinx.android.synthetic.main.fragment_video_content.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
@@ -126,7 +125,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     override var entry: ContentEntry? = null
         set(value) {
             field = value
-            clazzWorkTitle = value?.title
+            ustadFragmentTitle = value?.title
             mBinding?.entry = value
         }
 

@@ -81,6 +81,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         ClazzMember
         LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
         WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberRole = :roleId
+        AND CAST(clazzMemberActive AS INT) = 1
         ORDER BY Person.firstNames
     """)
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int): DataSource.Factory<Int, ClazzMemberWithPerson>

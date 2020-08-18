@@ -1,6 +1,7 @@
 package com.ustadmobile.door
 
 import com.github.aakira.napier.Napier
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -145,6 +146,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
     }
 
     suspend fun doRequest(resetAttemptCount: Boolean = false, runAgain: Boolean = false) : T = withContext(Dispatchers.Default){
+        val doRequestStart = systemTimeInMillis()
         requestLock.withLock {
             Napier.d("$logPrefix doRequest: resetAttemptCount = $resetAttemptCount")
             if(resetAttemptCount) {
@@ -228,7 +230,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                         statusLiveData.sendValue(RepoLoadStatus(status))
 
 
-                        Napier.d({"$logPrefix doRequest: completed successfully from $endpointToUse ."})
+                        Napier.d({"$logPrefix doRequest: completed successfully from $endpointToUse in ${systemTimeInMillis() - doRequestStart}ms"})
                         return@withContext t
                     }else {
                         Napier.e({"$logPrefix doRequest: loadFn completed from $endpointToUse but " +
