@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 37,
-    "identityHash": "aabd173dcae9ab77540b5b10cef69bce",
+    "identityHash": "bfa5aa0ed2aa97c858145dae09ef8772",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -2407,7 +2407,7 @@
       },
       {
         "tableName": "PersonAuth",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personAuthUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `passwordHash` TEXT, `personAuthStatus` INTEGER NOT NULL, `personAuthLocalChangeSeqNum` INTEGER NOT NULL, `personAuthMasterChangeSeqNum` INTEGER NOT NULL, `lastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personAuthUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `passwordHash` TEXT, `personAuthStatus` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personAuthUid",
@@ -2424,24 +2424,6 @@
           {
             "fieldPath": "personAuthStatus",
             "columnName": "personAuthStatus",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personAuthLocalChangeSeqNum",
-            "columnName": "personAuthLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "personAuthMasterChangeSeqNum",
-            "columnName": "personAuthMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "lastChangedBy",
-            "columnName": "lastChangedBy",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -8714,7 +8696,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'aabd173dcae9ab77540b5b10cef69bce')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bfa5aa0ed2aa97c858145dae09ef8772')"
     ]
   }
 }
