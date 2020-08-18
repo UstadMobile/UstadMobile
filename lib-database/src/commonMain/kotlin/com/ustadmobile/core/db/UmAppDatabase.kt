@@ -356,30 +356,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         ADD COLUMN isClazzActive  BOOL
                         """.trimMargin())
 
+                // TODO clazzMember
 
-                database.execSQL("""ALTER TABLE ClazzLog 
-                        ADD COLUMN clazzLogNumPresent INTEGER DEFAULT 0 NOT NULL""".trimMargin())
-                database.execSQL("""ALTER TABLE ClazzLog 
-                        ADD COLUMN clazzLogNumAbsent INTEGER DEFAULT 0 NOT NULL""".trimMargin())
-                database.execSQL("""ALTER TABLE ClazzLog 
-                        ADD COLUMN clazzLogNumPartial INTEGER DEFAULT 0 NOT NULL""".trimMargin())
-                database.execSQL("""ALTER TABLE ClazzLog 
-                        ADD COLUMN clazzLogDone BOOL""".trimMargin())
-                database.execSQL("""ALTER TABLE ClazzLog 
-                        ADD COLUMN clazzLogCancelled BOOL""".trimMargin())
-                database.execSQL("""ALTER TABLE ClazzLog 
-                        ADD COLUMN clazzLogScheduleUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
-
-
-                database.execSQL("""ALTER TABLE ClazzMember 
-                        RENAME COLUMN dateJoined to clazzMemberDateJoined,
-                    """.trimMargin())
-                database.execSQL("""ALTER TABLE ClazzMember 
-                        RENAME COLUMN dateLeft to clazzMemberDateLeft
-                    """.trimMargin())
-                database.execSQL("""ALTER TABLE ClazzMember 
-                        RENAME COLUMN role to clazzMemberRole
-                    """.trimMargin())
                 database.execSQL("""ALTER TABLE ClazzMember 
                         ADD COLUMN clazzMemberActive  BOOL
                     """.trimMargin())
@@ -428,6 +406,59 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
 
                 if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog (  clazzLogClazzUid  BIGINT , logDate  BIGINT , timeRecorded  BIGINT , clazzLogDone  BOOL  , clazzLogCancelled  BOOL , clazzLogNumPresent  INTEGER , clazzLogNumAbsent  INTEGER , clazzLogNumPartial  INTEGER , clazzLogScheduleUid  BIGINT , clazzLogStatusFlag  INTEGER , clazzLogMSQN  BIGINT , clazzLogLCSN  BIGINT , clazzLogLCB  INTEGER , clazzLogUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_14
+          |AFTER UPDATE ON ClazzLog FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzLogMSQN = 0 
+          |OR OLD.clazzLogMSQN = NEW.clazzLogMSQN
+          |)
+          |ELSE
+          |(NEW.clazzLogLCSN = 0  
+          |OR OLD.clazzLogLCSN = NEW.clazzLogLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzLog SET clazzLogLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+          |ELSE (SELECT MAX(MAX(clazzLogLCSN), OLD.clazzLogLCSN) + 1 FROM ClazzLog) END),
+          |clazzLogMSQN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzLogMSQN), OLD.clazzLogMSQN) + 1 FROM ClazzLog)
+          |ELSE NEW.clazzLogMSQN END)
+          |WHERE clazzLogUid = NEW.clazzLogUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_14
+          |AFTER INSERT ON ClazzLog FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzLogMSQN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzLogLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzLog SET clazzLogLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+          |ELSE (SELECT MAX(clazzLogLCSN) + 1 FROM ClazzLog) END),
+          |clazzLogMSQN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzLogMSQN) + 1 FROM ClazzLog)
+          |ELSE NEW.clazzLogMSQN END)
+          |WHERE clazzLogUid = NEW.clazzLogUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_ClazzLog_trk_clientId_epk_rx_csn 
+          |ON ClazzLog_trk (clientId, epk, rx, csn)
+          """.trimMargin())
+                    //End: Create table ClazzLog for SQLite
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord (  clazzLogAttendanceRecordClazzLogUid  BIGINT , clazzLogAttendanceRecordClazzMemberUid  BIGINT , attendanceStatus  INTEGER , clazzLogAttendanceRecordMasterChangeSeqNum  BIGINT , clazzLogAttendanceRecordLocalChangeSeqNum  BIGINT , clazzLogAttendanceRecordLastChangedBy  INTEGER , clazzLogAttendanceRecordUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
@@ -1022,7 +1053,60 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
           """.trimMargin())
                     //End: Create table ScheduledCheck for SQLite
 
+
+                    //clazzMember rename columns, delete old and add new
+                    database.execSQL("ALTER TABLE ClazzMember RENAME to ClazzMember_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzMember` (`clazzMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzMemberPersonUid` INTEGER NOT NULL DEFAULT 0, `clazzMemberClazzUid` INTEGER NOT NULL DEFAULT 0, `clazzMemberDateJoined` INTEGER NOT NULL, `clazzMemberDateLeft` INTEGER NOT NULL, `clazzMemberRole` INTEGER NOT NULL, `clazzMemberAttendancePercentage` REAL NOT NULL, `clazzMemberActive` INTEGER NOT NULL, `clazzMemberLocalChangeSeqNum` INTEGER NOT NULL, `clazzMemberMasterChangeSeqNum` INTEGER NOT NULL, `clazzMemberLastChangedBy` INTEGER NOT NULL)")
+                    //database.execSQL("CREATE TABLE IF NOT EXISTS ClazzMember (  clazzMemberPersonUid  BIGINT , clazzMemberClazzUid  BIGINT , clazzMemberDateJoined  BIGINT , clazzMemberDateLeft  BIGINT , clazzMemberRole  INTEGER , clazzMemberAttendancePercentage  FLOAT , clazzMemberActive  BOOL , clazzMemberLocalChangeSeqNum  BIGINT , clazzMemberMasterChangeSeqNum  BIGINT , clazzMemberLastChangedBy  INTEGER , clazzMemberUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS index_ClazzMember_clazzMemberPersonUid ON ClazzMember (clazzMemberPersonUid)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS index_ClazzMember_clazzMemberClazzUid ON ClazzMember (clazzMemberClazzUid)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzMember_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzMember_trk_clientId_epk_rx_csn` ON `ClazzMember_trk` (`clientId`, `epk`, `rx`, `csn`)")
+                    database.execSQL("INSERT INTO ClazzMember (clazzMemberUid, clazzMemberPersonUid, clazzMemberClazzUid, clazzMemberDateJoined, clazzMemberDateLeft, clazzMemberRole, clazzMemberAttendancePercentage, clazzMemberActive, clazzMemberLocalChangeSeqNum, clazzMemberMasterChangeSeqNum, clazzMemberLastChangedBy) SELECT clazzMemberUid, clazzMemberPersonUid, clazzMemberClazzUid, dateJoined, dateLeft, role, clazzMemberAttendancePercentage, clazzMemberActive, clazzMemberLocalChangeSeqNum, clazzMemberMasterChangeSeqNum, clazzMemberLastChangedBy FROM ClazzMember_OLD")
+                    database.execSQL("DROP TABLE ClazzMember_OLD")
+
                 } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""ALTER TABLE ClazzMember RENAME COLUMN dateJoined to clazzMemberDateJoined
+                    """.trimMargin())
+                    database.execSQL("""ALTER TABLE ClazzMember RENAME COLUMN dateLeft to clazzMemberDateLeft
+                    """.trimMargin())
+                    database.execSQL("""ALTER TABLE ClazzMember RENAME COLUMN role to clazzMemberRole
+                    """.trimMargin())
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog (  clazzLogClazzUid  BIGINT , logDate  BIGINT , timeRecorded  BIGINT , clazzLogDone  BOOL , clazzLogCancelled  BOOL , clazzLogNumPresent  INTEGER , clazzLogNumAbsent  INTEGER , clazzLogNumPartial  INTEGER , clazzLogScheduleUid  BIGINT , clazzLogStatusFlag  INTEGER , clazzLogMSQN  BIGINT , clazzLogLCSN  BIGINT , clazzLogLCB  INTEGER , clazzLogUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLog_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLog_lcsn_seq")
+                    database.execSQL("""
+          |CREATE OR REPLACE FUNCTION 
+          | inccsn_14_fn() RETURNS trigger AS ${'$'}${'$'}
+          | BEGIN  
+          | UPDATE ClazzLog SET clazzLogLCSN =
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+          | ELSE NEXTVAL('ClazzLog_lcsn_seq') END),
+          | clazzLogMSQN = 
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+          | THEN NEXTVAL('ClazzLog_mcsn_seq') 
+          | ELSE NEW.clazzLogMSQN END)
+          | WHERE clazzLogUid = NEW.clazzLogUid;
+          | RETURN null;
+          | END ${'$'}${'$'}
+          | LANGUAGE plpgsql
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER inccsn_14_trig 
+          |AFTER UPDATE OR INSERT ON ClazzLog 
+          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+          |EXECUTE PROCEDURE inccsn_14_fn()
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_ClazzLog_trk_clientId_epk_rx_csn 
+          |ON ClazzLog_trk (clientId, epk, rx, csn)
+          """.trimMargin())
+                    //End: Create table ClazzLog for PostgreSQL
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord (  clazzLogAttendanceRecordClazzLogUid  BIGINT , clazzLogAttendanceRecordClazzMemberUid  BIGINT , attendanceStatus  INTEGER , clazzLogAttendanceRecordMasterChangeSeqNum  BIGINT , clazzLogAttendanceRecordLocalChangeSeqNum  BIGINT , clazzLogAttendanceRecordLastChangedBy  INTEGER , clazzLogAttendanceRecordUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLogAttendanceRecord_mcsn_seq")
@@ -1405,10 +1489,16 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             override fun migrate(database: DoorSqlDatabase) {
 
                 database.execSQL("""ALTER TABLE Clazz 
-                        ADD COLUMN clazzStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL,
-                        ADD COLUMN clazzTeachersPersonGroupUid  BIGINT DEFAULT 0 NOT NULL,
-                        ADD COLUMN clazzSchoolUid  BIGINT DEFAULT 0 NOT NULL,
                         ADD COLUMN clazzTimeZone TEXT
+                        """.trimMargin())
+                database.execSQL("""ALTER TABLE Clazz 
+                        ADD COLUMN clazzStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL
+                        """.trimMargin())
+                database.execSQL("""ALTER TABLE Clazz 
+                        ADD COLUMN clazzTeachersPersonGroupUid  BIGINT DEFAULT 0 NOT NULL
+                        """.trimMargin())
+                database.execSQL("""ALTER TABLE Clazz 
+                        ADD COLUMN clazzSchoolUid  BIGINT DEFAULT 0 NOT NULL
                         """.trimMargin())
 
                 database.execSQL("""ALTER TABLE ClazzLog
@@ -1419,11 +1509,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 database.execSQL("""ALTER TABLE PersonPicture 
                         ADD COLUMN personPictureActive BOOL""".trimMargin())
-
-                database.execSQL("""ALTER TABLE StatementEntity 
-                        RENAME COLUMN personuid to statementPersonUid, 
-                        RENAME COLUMN verbUid to statementVerbUid
-                        """.trimMargin())
 
                 database.execSQL("DROP TABLE IF EXISTS FeedEntry")
                 database.execSQL("DROP TABLE IF EXISTS Location")
@@ -2138,6 +2223,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 } else if (database.dbType() == DoorDbType.POSTGRES) {
 
+                    database.execSQL("""ALTER TABLE StatementEntity RENAME COLUMN personuid to statementPersonUid
+                        """.trimMargin())
+                    database.execSQL("""ALTER TABLE StatementEntity RENAME COLUMN verbUid to statementVerbUid
+                        """.trimMargin())
+
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS SchoolMember (  schoolMemberPersonUid  BIGINT , schoolMemberSchoolUid  BIGINT , schoolMemberJoinDate  BIGINT , schoolMemberLeftDate  BIGINT , schoolMemberRole  INTEGER , schoolMemberActive  BOOL , schoolMemberLocalChangeSeqNum  BIGINT , schoolMemberMasterChangeSeqNum  BIGINT , schoolMemberLastChangedBy  INTEGER , schoolMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS SchoolMember_mcsn_seq")
@@ -2594,20 +2684,28 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         val MIGRATION_36_37 = object : DoorMigration(36, 37) {
             override fun migrate(database: DoorSqlDatabase) {
 
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""ALTER TABLE PersonAuth DROP COLUMN personAuthLocalChangeSeqNum
+                        """.trimMargin())
+                    database.execSQL("""ALTER TABLE PersonAuth DROP COLUMN personAuthMasterChangeSeqNum
+                        """.trimMargin())
+                    database.execSQL("""ALTER TABLE PersonAuth DROP COLUMN lastChangedBy
+                        """.trimMargin())
+                }
 
                 database.execSQL("""ALTER TABLE Clazz 
-                        ADD COLUMN clazzPendingStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL,
+                        ADD COLUMN clazzPendingStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
+                database.execSQL("""ALTER TABLE Clazz 
                         ADD COLUMN clazzCode TEXT""".trimMargin())
 
                 database.execSQL("ALTER TABLE School ADD COLUMN " +
                         "schoolPendingStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL")
                 database.execSQL("ALTER TABLE School ADD COLUMN schoolCode TEXT")
-
-                database.execSQL("""ALTER TABLE PersonAuth 
-                        DROP COLUMN personAuthLocalChangeSeqNum, 
-                        DROP COLUMN personAuthMasterChangeSeqNum, 
-                        DROP COLUMN lastChangedBy, 
-                        """.trimMargin())
 
             }
         }

@@ -51,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 
 import org.kodein.di.*
+import java.io.File
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -66,6 +67,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
+            File(applicationContext.filesDir,"UmAppDatabase")
+                    .renameTo(File(applicationContext.filesDir, sanitizeDbNameFromUrl(context.url)))
             val dbName = sanitizeDbNameFromUrl(context.url)
             getInstance(applicationContext, dbName).also {
                 val networkManager: NetworkManagerBle = di.direct.instance()
