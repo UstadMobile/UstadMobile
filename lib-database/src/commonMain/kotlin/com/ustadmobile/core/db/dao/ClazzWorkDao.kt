@@ -68,10 +68,12 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
         const val FIND_CLAZZWORKWITHMETRICS_QUERY = """
             SELECT ClazzWork.*, 
-            (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
+            (
+                SELECT COUNT(*) FROM ClazzMember WHERE 
+                ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
                 AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
                 AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
-                ) as totalStudents, 
+            ) as totalStudents, 
             (
                 SELECT COUNT(*) FROM ClazzWorkSubmission WHERE
                 clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
@@ -91,43 +93,14 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             AND CAST(ClazzWork.clazzWorkActive AS INTEGER) = 1
         """
 
-
-        const val FIND_WITH_METRICS_BY_CLAZZUID = """
-            SELECT ClazzWork.*, 
-            
-            (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
-                AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
-                AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
-                ) as totalStudents, 
-            (
-                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
-                clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
-            ) as submittedStudents, 
-            0 as notSubmittedStudents,
-            0 as completedStudents, 
-            (
-                SELECT COUNT(*) FROM ( SELECT * FROM ClazzWorkSubmission WHERE 
-                ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
-                GROUP BY ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid)
-            ) as markedStudents,
-
-             0 as firstContentEntryUid,
-             Clazz.clazzTimeZone as clazzTimeZone 
-             FROM ClazzWork 
-             LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
-             WHERE clazzWorkClazzUid = :clazzUid
-            AND CAST(clazzWorkActive as INTEGER) = 1
-        """
-
         const val FIND_WITH_METRICS_BY_CLAZZUID_WITH_ROLE = """
             SELECT ClazzWork.*, 
             
-            (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
+            (
+                SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
                 AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
                 AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
-                ) as totalStudents, 
+            ) as totalStudents, 
             (
                 SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
                 clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
@@ -137,7 +110,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             (
                 SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
                 ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0)
+                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
             ) as markedStudents,
 
              0 as firstContentEntryUid,
