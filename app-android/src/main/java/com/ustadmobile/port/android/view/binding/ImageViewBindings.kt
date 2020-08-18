@@ -158,3 +158,8 @@ private val ICON_ID_MAP : Map<Int, Int> by lazy {
         CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
 }
 
+@BindingAdapter("imageResIdInt")
+fun ImageView.setImageResIdInt(resId: Int) {
+    setImageResource(resId)
+}
+

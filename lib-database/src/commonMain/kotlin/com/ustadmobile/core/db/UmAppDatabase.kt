@@ -40,7 +40,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 36)
+], version = 37)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -320,6 +320,19 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             return db
         }
 
+        val MIGRATION_25_26 = object:  DoorMigration(25, 26) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
+            }
+        }
+
+
+        val MIGRATION_26_27 = object:  DoorMigration(26, 27) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer (  laContainerUid  BIGINT  PRIMARY KEY  NOT NULL )")
+            }
+        }
+
 
         val MIGRATION_27_28 = object : DoorMigration(27, 28) {
             override fun migrate(database: DoorSqlDatabase) {
@@ -327,30 +340,99 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_30_31 = object : DoorMigration(30, 31) {
+        val MIGRATION_29_30 = object : DoorMigration(29, 30) {
             override fun migrate(database: DoorSqlDatabase) {
-                if (database.dbType() == DoorDbType.SQLITE) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
-                } else if (database.dbType() == DoorDbType.POSTGRES){
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
-                }
-            }
-        }
 
-        val MIGRATION_31_32 = object : DoorMigration(31, 32) {
-            override fun migrate(database: DoorSqlDatabase) {
                 if (database.dbType() == DoorDbType.SQLITE) {
-                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (  
-                        |tableId  INTEGER NOT NULL, status  INTEGER NOT NULL, localCsn  INTEGER NOT NULL, 
-                        |remoteCsn  INTEGER NOT NULL, syncType  INTEGER NOT NULL, timestamp  INTEGER NOT NULL, 
-                        |sent  INTEGER NOT NULL, received  INTEGER NOT NULL, 
-                        |srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
-                } else if (database.dbType() == DoorDbType.POSTGRES){
-                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (
-                        |  tableId  INTEGER , status  INTEGER , localCsn  INTEGER , 
-                        |  remoteCsn  INTEGER , syncType  INTEGER , 
-                        |  timestamp  BIGINT , sent  INTEGER , received  INTEGER , 
-                        |  srUid  SERIAL  PRIMARY KEY  NOT NULL )""".trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE TRIGGER IF NOT EXISTS UPD_66
+                    |AFTER UPDATE ON ContextXObjectStatementJoin FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.verbMasterChangeSeqNum = 0 
+                    |OR OLD.verbMasterChangeSeqNum = NEW.verbMasterChangeSeqNum
+                    |)
+                    |ELSE
+                    |(NEW.verbLocalChangeSeqNum = 0  
+                    |OR OLD.verbLocalChangeSeqNum = NEW.verbLocalChangeSeqNum
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(MAX(verbLocalChangeSeqNum), OLD.verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
+                    |verbMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(MAX(verbMasterChangeSeqNum), OLD.verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
+                    |ELSE NEW.verbMasterChangeSeqNum END)
+                    |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER IF NOT EXISTS INS_66
+                    |AFTER INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(NEW.verbMasterChangeSeqNum = 0 
+                    |
+                    |)
+                    |ELSE
+                    |(NEW.verbLocalChangeSeqNum = 0  
+                    |
+                    |) END)
+                    |BEGIN 
+                    |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+                    |ELSE (SELECT MAX(verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
+                    |verbMasterChangeSeqNum = 
+                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                    |(SELECT MAX(verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
+                    |ELSE NEW.verbMasterChangeSeqNum END)
+                    |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
+                    |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX  IF NOT EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn 
+                    |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_lcsn_seq")
+                    database.execSQL("""
+                    |CREATE OR REPLACE FUNCTION 
+                    | inccsn_66_fn() RETURNS trigger AS ${'$'}${'$'}
+                    | BEGIN  
+                    | UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+                    | ELSE NEXTVAL('ContextXObjectStatementJoin_lcsn_seq') END),
+                    | verbMasterChangeSeqNum = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('ContextXObjectStatementJoin_mcsn_seq') 
+                    | ELSE NEW.verbMasterChangeSeqNum END)
+                    | WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid;
+                    | RETURN null;
+                    | END ${'$'}${'$'}
+                    | LANGUAGE plpgsql
+                    """.trimMargin())
+                    database.execSQL("""DROP TRIGGER IF EXISTS inccsn_66_trig ON ContextXObjectStatementJoin""".trimMargin())
+                    database.execSQL("""
+                    |CREATE TRIGGER inccsn_66_trig 
+                    |AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin 
+                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                    |EXECUTE PROCEDURE inccsn_66_fn()
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                    |CREATE 
+                    | INDEX IF NOT EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn 
+                    |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
+                    """.trimMargin())
+
                 }
             }
         }
@@ -2670,100 +2752,43 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_29_30 = object : DoorMigration(29, 30) {
+        val MIGRATION_30_31 = object : DoorMigration(30, 31) {
             override fun migrate(database: DoorSqlDatabase) {
-
                 if (database.dbType() == DoorDbType.SQLITE) {
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-                    database.execSQL("""
-                    |CREATE TRIGGER IF NOT EXISTS UPD_66
-                    |AFTER UPDATE ON ContextXObjectStatementJoin FOR EACH ROW WHEN
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(NEW.verbMasterChangeSeqNum = 0 
-                    |OR OLD.verbMasterChangeSeqNum = NEW.verbMasterChangeSeqNum
-                    |)
-                    |ELSE
-                    |(NEW.verbLocalChangeSeqNum = 0  
-                    |OR OLD.verbLocalChangeSeqNum = NEW.verbLocalChangeSeqNum
-                    |) END)
-                    |BEGIN 
-                    |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
-                    |ELSE (SELECT MAX(MAX(verbLocalChangeSeqNum), OLD.verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
-                    |verbMasterChangeSeqNum = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(SELECT MAX(MAX(verbMasterChangeSeqNum), OLD.verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
-                    |ELSE NEW.verbMasterChangeSeqNum END)
-                    |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
-                    |; END
-                    """.trimMargin())
-                    database.execSQL("""
-                    |CREATE TRIGGER IF NOT EXISTS INS_66
-                    |AFTER INSERT ON ContextXObjectStatementJoin FOR EACH ROW WHEN
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(NEW.verbMasterChangeSeqNum = 0 
-                    |
-                    |)
-                    |ELSE
-                    |(NEW.verbLocalChangeSeqNum = 0  
-                    |
-                    |) END)
-                    |BEGIN 
-                    |UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
-                    |ELSE (SELECT MAX(verbLocalChangeSeqNum) + 1 FROM ContextXObjectStatementJoin) END),
-                    |verbMasterChangeSeqNum = 
-                    |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                    |(SELECT MAX(verbMasterChangeSeqNum) + 1 FROM ContextXObjectStatementJoin)
-                    |ELSE NEW.verbMasterChangeSeqNum END)
-                    |WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid
-                    |; END
-                    """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-                    database.execSQL("""
-                    |CREATE 
-                    | INDEX  IF NOT EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn 
-                    |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
-                    """.trimMargin())
-
-
-                } else if (database.dbType() == DoorDbType.POSTGRES) {
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin (  contextActivityFlag  INTEGER , contextStatementUid  BIGINT , contextXObjectUid  BIGINT , verbMasterChangeSeqNum  BIGINT , verbLocalChangeSeqNum  BIGINT , verbLastChangedBy  INTEGER , contextXObjectStatementJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContextXObjectStatementJoin_lcsn_seq")
-                    database.execSQL("""
-                    |CREATE OR REPLACE FUNCTION 
-                    | inccsn_66_fn() RETURNS trigger AS ${'$'}${'$'}
-                    | BEGIN  
-                    | UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum =
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
-                    | ELSE NEXTVAL('ContextXObjectStatementJoin_lcsn_seq') END),
-                    | verbMasterChangeSeqNum = 
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                    | THEN NEXTVAL('ContextXObjectStatementJoin_mcsn_seq') 
-                    | ELSE NEW.verbMasterChangeSeqNum END)
-                    | WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid;
-                    | RETURN null;
-                    | END ${'$'}${'$'}
-                    | LANGUAGE plpgsql
-                    """.trimMargin())
-                    database.execSQL("""DROP TRIGGER IF EXISTS inccsn_66_trig ON ContextXObjectStatementJoin""".trimMargin())
-                    database.execSQL("""
-                    |CREATE TRIGGER inccsn_66_trig 
-                    |AFTER UPDATE OR INSERT ON ContextXObjectStatementJoin 
-                    |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                    |EXECUTE PROCEDURE inccsn_66_fn()
-                    """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContextXObjectStatementJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-                    |CREATE 
-                    | INDEX IF NOT EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn 
-                    |ON ContextXObjectStatementJoin_trk (clientId, epk, rx, csn)
-                    """.trimMargin())
-
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerETag (  ceContainerUid  BIGINT  PRIMARY KEY  NOT NULL , cetag  TEXT )")
                 }
+            }
+        }
+
+        val MIGRATION_31_32 = object : DoorMigration(31, 32) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (  
+                        |tableId  INTEGER NOT NULL, status  INTEGER NOT NULL, localCsn  INTEGER NOT NULL, 
+                        |remoteCsn  INTEGER NOT NULL, syncType  INTEGER NOT NULL, timestamp  INTEGER NOT NULL, 
+                        |sent  INTEGER NOT NULL, received  INTEGER NOT NULL, 
+                        |srUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )""".trimMargin())
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS SyncResult (
+                        |  tableId  INTEGER , status  INTEGER , localCsn  INTEGER , 
+                        |  remoteCsn  INTEGER , syncType  INTEGER , 
+                        |  timestamp  BIGINT , sent  INTEGER , received  INTEGER , 
+                        |  srUid  SERIAL  PRIMARY KEY  NOT NULL )""".trimMargin())
+                }
+            }
+        }
+
+        /**
+         * Add fields required for class and school codes for students to join a class or school
+         */
+        val MIGRATION_36_37 = object : DoorMigration(36, 37) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Clazz ADD COLUMN clazzPendingStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL")
+                database.execSQL("ALTER TABLE Clazz ADD COLUMN clazzCode TEXT")
+                database.execSQL("ALTER TABLE School ADD COLUMN schoolPendingStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL")
+                database.execSQL("ALTER TABLE School ADD COLUMN schoolCode TEXT")
             }
         }
 
@@ -3847,21 +3872,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             })
 
-            builder.addMigrations(object : DoorMigration(25, 26) {
-                override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("ALTER TABLE ContentEntry DROP COLUMN imported, ADD COLUMN status INTEGER NOT NULL DEFAULT 1")
-                }
 
-            })
 
-            builder.addMigrations(object : DoorMigration(26, 27) {
-                override fun migrate(database: DoorSqlDatabase) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS LocallyAvailableContainer (  laContainerUid  BIGINT  PRIMARY KEY  NOT NULL )")
-                }
-            })
-
-            builder.addMigrations(MIGRATION_27_28, MIGRATION_29_30_TRIGGERS, MIGRATION_29_30,
-                    MIGRATION_30_31, MIGRATION_31_32)
+            builder.addMigrations( MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28,
+                    MIGRATION_29_30_TRIGGERS, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32,
+                    MIGRATION_36_37)
 
             return builder
         }

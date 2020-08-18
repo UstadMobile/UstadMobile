@@ -9,6 +9,8 @@ interface ClazzDetailOverviewView: UstadDetailView<ClazzWithDisplayDetails> {
 
     var scheduleList: DataSource.Factory<Int, Schedule>?
 
+    var clazzCodeVisible: Boolean
+
     companion object {
 
         const val VIEW_NAME = "ClazzDetailOverviewView"

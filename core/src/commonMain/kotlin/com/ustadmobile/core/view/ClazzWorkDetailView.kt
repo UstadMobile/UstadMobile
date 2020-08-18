@@ -7,7 +7,7 @@ interface ClazzWorkDetailView: UstadDetailView<ClazzWork> {
 
     var isStudent : Boolean
 
-    var clazzWorkTitle: String?
+    var ustadFragmentTitle: String?
 
     companion object {
 

@@ -28,7 +28,7 @@ class ClazzWorkDetailPresenter(context: Any,
             db.clazzWorkDao.findByUidAsync(entityUid)
         } ?: ClazzWork()
 
-        view.clazzWorkTitle = clazzWork.clazzWorkTitle
+        view.ustadFragmentTitle = clazzWork.clazzWorkTitle
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
