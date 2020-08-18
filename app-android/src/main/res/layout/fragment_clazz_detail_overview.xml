@@ -20,7 +20,11 @@
 
         <variable
             name="fragmentEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzDetailFragmentEventHandler" />
+            type="com.ustadmobile.port.android.view.ClazzDetailOverviewEventListener" />
+
+        <variable
+            name="clazzCodeVisible"
+            type="boolean" />
 
     </data>
 
@@ -97,7 +101,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_num_members_label"
-                android:background="@drawable/bg_listitem">
+                android:background="@drawable/bg_listitem"
+                android:onClick="@{() -> fragmentEventHandler.onClickClassCode(clazz.clazzCode)}"
+                android:visibility="@{clazzCodeVisible ? View.VISIBLE : View.GONE}"
+                >
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/fragment_clazz_detail_join_icon"
@@ -143,7 +150,12 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/clazzcode_bottom_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fragment_clazz_detail_classcode_layout,fragment_clazz_detail_num_members_label"/>
 
             <LinearLayout
                 android:id="@+id/fragment_clazz_detail_overview_school_linlayout"
@@ -156,7 +168,7 @@
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_classcode_layout">
+                app:layout_constraintTop_toBottomOf="@+id/clazzcode_bottom_barrier">
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:tint="?colorOnIconTint"

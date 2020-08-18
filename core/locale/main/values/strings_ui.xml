@@ -746,4 +746,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="ask_your_teacher_for_code">Ask your teacher for the class code, then enter it below:</string>
 
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+
 </resources>

@@ -13,11 +13,15 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ClazzMemberDao
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.ext.createNewClazzAndGroups
+import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertPersonWithRole
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -134,4 +138,77 @@ class ClazzMemberListPresenterTest {
         verify(mockView, timeout(5000)).addStudentVisible = true
         verify(mockView, timeout(5000)).addTeacherVisible = true
     }
+
+    @Test
+    fun givenActiveAccountHasAddPermissions_whenPendingStudentApproved_thenShouldUpdate() {
+        val testClazz = Clazz("Test clazz")
+        runBlocking { db.createNewClazzAndGroups(testClazz, di.direct.instance(), context) }
+
+        val activePerson = Person().apply {
+            firstNames = "Test"
+            lastName = "User"
+            username = "testuser"
+            personUid = db.personDao.insert(this)
+        }
+
+        val pendingPerson = Person().apply {
+            firstNames = "Pending"
+            lastName = "Student"
+            username = "pending"
+            personUid = db.personDao.insert(this)
+        }
+
+        var pendingMember: ClazzMember? = null
+        runBlocking {
+            pendingMember = db.enrolPersonIntoClazzAtLocalTimezone(pendingPerson, testClazz.clazzUid,
+                    ClazzMember.ROLE_STUDENT_PENDING)
+
+            db.insertPersonWithRole(activePerson,
+                    Role().apply {
+                        rolePermissions = Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER
+                    }, EntityRole().apply {
+                erTableId = Clazz.TABLE_ID
+                erEntityUid = testClazz.clazzUid
+            })
+        }
+
+        val endpointUrl = accountManager.activeAccount.endpointUrl
+        accountManager.activeAccount = UmAccount(activePerson.personUid, activePerson.username,
+                "", endpointUrl, activePerson.firstNames, activePerson.lastName)
+
+        val presenterArgs = mapOf<String,String>(ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString())
+        val presenter = ClazzMemberListPresenter(context,
+                presenterArgs, mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        //wait for it to load
+        verify(mockView, timeout(5000)).addStudentVisible = true
+
+        presenter.handleClickPendingRequest(pendingMember!!, true)
+
+        runBlocking {
+            db.waitUntil(5000, listOf("ClazzMember", "PersonGroupMember")) {
+                db.clazzMemberDao.findByPersonUidAndClazzUid(pendingMember!!.clazzMemberPersonUid,
+                    testClazz.clazzUid)?.clazzMemberRole == ClazzMember.ROLE_STUDENT
+                && runBlocking {
+                    db.personGroupMemberDao.findAllGroupWherePersonIsIn(pendingMember!!.clazzMemberPersonUid).any {
+                        it.groupMemberGroupUid == testClazz.clazzStudentsPersonGroupUid
+                    }
+                }
+            }
+        }
+
+        val clazzMember = db.clazzMemberDao.findByPersonUidAndClazzUid(pendingMember!!.clazzMemberPersonUid,
+                testClazz.clazzUid)
+        Assert.assertEquals("Clazz member approved is now a student", ClazzMember.ROLE_STUDENT,
+            clazzMember?.clazzMemberRole)
+
+        runBlocking {
+            val personInStudentGroup = db.personGroupMemberDao.findAllGroupWherePersonIsIn(pendingMember!!.clazzMemberPersonUid).any {
+                it.groupMemberGroupUid == testClazz.clazzStudentsPersonGroupUid
+            }
+            Assert.assertTrue("Pending member is now in student group", personInStudentGroup)
+        }
+    }
+
 }
