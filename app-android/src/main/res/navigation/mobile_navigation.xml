@@ -160,8 +160,7 @@
 
     <fragment
         android:id="@+id/content_entry_list_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment"
-        android:label="@string/content" />
+        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
 
     <fragment
         android:id="@+id/content_entry_edit_dest"

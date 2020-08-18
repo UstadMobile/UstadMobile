@@ -40,6 +40,12 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         }
     }
 
+    override var title: String? = null
+        set(value) {
+            ustadFragmentTitle = value
+            field = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         val mTitle = arguments?.get(ARG_PARENT_ENTRY_TITLE)
