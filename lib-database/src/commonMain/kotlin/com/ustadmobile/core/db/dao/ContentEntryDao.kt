@@ -162,7 +162,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             AND (ContentEntry.publik OR :personUid != 0)
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
-            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntry.title ASC , ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
+            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntryParentChildJoin.childIndex, ContentEntry.title ASC , ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameAsc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
@@ -181,7 +181,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             AND (ContentEntry.publik OR :personUid != 0)
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
-            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntry.title DESC , ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
+            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY  ContentEntryParentChildJoin.childIndex, ContentEntry.title DESC, ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameDesc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
