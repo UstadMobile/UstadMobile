@@ -100,6 +100,30 @@ suspend fun UmAppDatabase.insertPersonAndGroup(entity: PersonWithAccount): Perso
 }
 
 /**
+ * Inserts the person, sets its group and groupmember. Does not check if its an update
+ */
+suspend fun UmAppDatabase.insertPersonOnlyAndGroup(entity: Person): Person{
+
+    val groupPerson = PersonGroup().apply {
+        groupName = "Person individual group"
+        personGroupFlag = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
+    }
+    //Create person's group
+    groupPerson.groupUid = personGroupDao.insertAsync(groupPerson)
+
+    //Assign to person
+    entity.personGroupUid = groupPerson.groupUid
+    entity.personUid = personDao.insertAsync(entity)
+
+    //Assign person to PersonGroup ie: Create PersonGroupMember
+    personGroupMemberDao.insertAsync(
+            PersonGroupMember(entity.personUid, entity.personGroupUid))
+
+    return entity
+
+}
+
+/**
  * Insert a new school
  */
 suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,

@@ -30,8 +30,6 @@ class PersonDetailPresenter(context: Any,
         view.clazzes = repo.clazzMemberDao.findAllClazzesByPersonWithClazz(entityUid,
                 getSystemTimeInMillis())
 
-
-
         GlobalScope.launch(doorMainDispatcher()) {
             val activePersonUid = accountManager.activeAccount.personUid
 
