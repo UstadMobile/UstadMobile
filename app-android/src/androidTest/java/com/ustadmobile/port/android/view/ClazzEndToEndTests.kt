@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.widget.DatePicker
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.*
 import androidx.test.espresso.action.ViewActions.click
@@ -47,7 +49,8 @@ class ClazzEndToEndTests {
 
     @AdbScreenRecord("Given an empty class list, when the user clicks add class and " +
             "fills in form, then it should go to the new class")
-    @Test fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndGoneInto() {
+    @Test
+    fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndGoneInto() {
         val calendarUid = dbRule.db.holidayCalendarDao.insert(HolidayCalendar().apply {
             this.umCalendarName = "Test Calendar"
         })
@@ -63,8 +66,12 @@ class ClazzEndToEndTests {
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val newClazzText = context.getString(R.string.add_a_new,
+                context.getString(R.string.clazz).toLowerCase())
         onView(withId(R.id.home_clazzlist_dest)).perform(click())
         onView(withText(R.string.clazz)).perform(click())
+        onView(withText(newClazzText)).perform(click())
         onView(withId(R.id.activity_clazz_edit_name_text)).perform(typeText("Test Class"))
         closeSoftKeyboard()
 

@@ -9,6 +9,8 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 
@@ -30,6 +32,12 @@ class ClazzDetailOverviewPresenter(context: Any,
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<ClazzWithDisplayDetails?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         view.scheduleList = repo.scheduleDao.findAllSchedulesByClazzUid(entityUid)
+        GlobalScope.launch {
+            view.clazzCodeVisible = repo.clazzDao.personHasPermissionWithClazz(
+                    accountManager.activeAccount.personUid, entityUid,
+                    Role.PERMISSION_CLAZZ_ADD_STUDENT)
+        }
+
         return repo.clazzDao.getClazzWithDisplayDetails(entityUid)
     }
 

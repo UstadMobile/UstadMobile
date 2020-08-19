@@ -1,12 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 37,
-<<<<<<< HEAD
-    "identityHash": "62cfb53b92af9886761c20e0c21762e2",
-=======
-    "identityHash": "aabd173dcae9ab77540b5b10cef69bce",
->>>>>>> primary
+    "version": 38,
+    "identityHash": "75c3147c54c525eedacad68e6aefbec8",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1149,11 +1145,7 @@
       },
       {
         "tableName": "Person",
-<<<<<<< HEAD
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
-=======
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
->>>>>>> primary
         "fields": [
           {
             "fieldPath": "personUid",
@@ -1214,7 +1206,6 @@
             "columnName": "personNotes",
             "affinity": "TEXT",
             "notNull": false
-<<<<<<< HEAD
           },
           {
             "fieldPath": "fatherName",
@@ -1249,65 +1240,22 @@
           {
             "fieldPath": "personAddress",
             "columnName": "personAddress",
-=======
-          },
-          {
-            "fieldPath": "fatherName",
-            "columnName": "fatherName",
->>>>>>> primary
             "affinity": "TEXT",
             "notNull": false
           },
           {
-<<<<<<< HEAD
             "fieldPath": "personOrgId",
             "columnName": "personOrgId",
-=======
-            "fieldPath": "fatherNumber",
-            "columnName": "fatherNumber",
->>>>>>> primary
             "affinity": "TEXT",
             "notNull": false
           },
           {
-<<<<<<< HEAD
             "fieldPath": "personGroupUid",
             "columnName": "personGroupUid",
-=======
-            "fieldPath": "motherName",
-            "columnName": "motherName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "motherNum",
-            "columnName": "motherNum",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "dateOfBirth",
-            "columnName": "dateOfBirth",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-=======
-            "fieldPath": "personAddress",
-            "columnName": "personAddress",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "personOrgId",
-            "columnName": "personOrgId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
->>>>>>> primary
             "fieldPath": "personMasterChangeSeqNum",
             "columnName": "personMasterChangeSeqNum",
             "affinity": "INTEGER",
@@ -1564,11 +1512,7 @@
       },
       {
         "tableName": "Clazz",
-<<<<<<< HEAD
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzTimeZone` TEXT, `clazzStudentsPersonGroupUid` INTEGER NOT NULL, `clazzTeachersPersonGroupUid` INTEGER NOT NULL)",
-=======
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzTimeZone` TEXT, `clazzStudentsPersonGroupUid` INTEGER NOT NULL, `clazzTeachersPersonGroupUid` INTEGER NOT NULL, `clazzPendingStudentsPersonGroupUid` INTEGER NOT NULL, `clazzCode` TEXT)",
->>>>>>> primary
         "fields": [
           {
             "fieldPath": "clazzUid",
@@ -1669,26 +1613,18 @@
           {
             "fieldPath": "clazzStudentsPersonGroupUid",
             "columnName": "clazzStudentsPersonGroupUid",
-<<<<<<< HEAD
-=======
             "affinity": "INTEGER",
             "notNull": true
           },
           {
             "fieldPath": "clazzTeachersPersonGroupUid",
             "columnName": "clazzTeachersPersonGroupUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "clazzTeachersPersonGroupUid",
-            "columnName": "clazzTeachersPersonGroupUid",
-=======
             "fieldPath": "clazzPendingStudentsPersonGroupUid",
             "columnName": "clazzPendingStudentsPersonGroupUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1976,8 +1912,6 @@
           {
             "fieldPath": "contentTypeFlag",
             "columnName": "contentTypeFlag",
-<<<<<<< HEAD
-=======
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2202,125 +2136,24 @@
           {
             "fieldPath": "cerejRelLanguageUid",
             "columnName": "cerejRelLanguageUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "contentEntryLocalChangeSeqNum",
-            "columnName": "contentEntryLocalChangeSeqNum",
-=======
             "fieldPath": "cerejLocalChangeSeqNum",
             "columnName": "cerejLocalChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "contentEntryMasterChangeSeqNum",
-            "columnName": "contentEntryMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "contentEntryLastChangedBy",
-            "columnName": "contentEntryLastChangedBy",
-=======
             "fieldPath": "cerejMasterChangeSeqNum",
             "columnName": "cerejMasterChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
-            "contentEntryUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ContentEntry_primaryLanguageUid",
-            "unique": false,
-            "columnNames": [
-              "primaryLanguageUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntry_primaryLanguageUid` ON `${TABLE_NAME}` (`primaryLanguageUid`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ContentEntryContentCategoryJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ceccjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ceccjContentEntryUid` INTEGER NOT NULL, `ceccjContentCategoryUid` INTEGER NOT NULL, `ceccjLocalChangeSeqNum` INTEGER NOT NULL, `ceccjMasterChangeSeqNum` INTEGER NOT NULL, `ceccjLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "ceccjUid",
-            "columnName": "ceccjUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ceccjContentEntryUid",
-            "columnName": "ceccjContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ceccjContentCategoryUid",
-            "columnName": "ceccjContentCategoryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ceccjLocalChangeSeqNum",
-            "columnName": "ceccjLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ceccjMasterChangeSeqNum",
-            "columnName": "ceccjMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ceccjLastChangedBy",
-            "columnName": "ceccjLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "ceccjUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ContentEntryContentCategoryJoin_ceccjContentEntryUid",
-            "unique": false,
-            "columnNames": [
-              "ceccjContentEntryUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoin_ceccjContentEntryUid` ON `${TABLE_NAME}` (`ceccjContentEntryUid`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ContentEntryParentChildJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cepcjLocalChangeSeqNum` INTEGER NOT NULL, `cepcjMasterChangeSeqNum` INTEGER NOT NULL, `cepcjLastChangedBy` INTEGER NOT NULL, `cepcjParentContentEntryUid` INTEGER NOT NULL, `cepcjChildContentEntryUid` INTEGER NOT NULL, `childIndex` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "cepcjUid",
-            "columnName": "cepcjUid",
-=======
             "cerejUid"
           ],
           "autoGenerate": true
@@ -2335,15 +2168,10 @@
           {
             "fieldPath": "contentCategorySchemaUid",
             "columnName": "contentCategorySchemaUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "cepcjLocalChangeSeqNum",
-            "columnName": "cepcjLocalChangeSeqNum",
-=======
             "fieldPath": "schemaName",
             "columnName": "schemaName",
             "affinity": "TEXT",
@@ -2358,250 +2186,16 @@
           {
             "fieldPath": "contentCategorySchemaLocalChangeSeqNum",
             "columnName": "contentCategorySchemaLocalChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "cepcjMasterChangeSeqNum",
-            "columnName": "cepcjMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjLastChangedBy",
-            "columnName": "cepcjLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjParentContentEntryUid",
-            "columnName": "cepcjParentContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjChildContentEntryUid",
-            "columnName": "cepcjChildContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "childIndex",
-            "columnName": "childIndex",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "cepcjUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "parent_child",
-            "unique": false,
-            "columnNames": [
-              "cepcjChildContentEntryUid",
-              "cepcjParentContentEntryUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `parent_child` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`, `cepcjParentContentEntryUid`)"
-          },
-          {
-            "name": "index_ContentEntryParentChildJoin_cepcjParentContentEntryUid",
-            "unique": false,
-            "columnNames": [
-              "cepcjParentContentEntryUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjParentContentEntryUid` ON `${TABLE_NAME}` (`cepcjParentContentEntryUid`)"
-          },
-          {
-            "name": "index_ContentEntryParentChildJoin_cepcjChildContentEntryUid",
-            "unique": false,
-            "columnNames": [
-              "cepcjChildContentEntryUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjChildContentEntryUid` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ContentEntryRelatedEntryJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cerejUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cerejContentEntryUid` INTEGER NOT NULL, `cerejRelatedEntryUid` INTEGER NOT NULL, `cerejLastChangedBy` INTEGER NOT NULL, `relType` INTEGER NOT NULL, `comment` TEXT, `cerejRelLanguageUid` INTEGER NOT NULL, `cerejLocalChangeSeqNum` INTEGER NOT NULL, `cerejMasterChangeSeqNum` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "cerejUid",
-            "columnName": "cerejUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cerejContentEntryUid",
-            "columnName": "cerejContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cerejRelatedEntryUid",
-            "columnName": "cerejRelatedEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cerejLastChangedBy",
-            "columnName": "cerejLastChangedBy",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "relType",
-            "columnName": "relType",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "comment",
-            "columnName": "comment",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "cerejRelLanguageUid",
-            "columnName": "cerejRelLanguageUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cerejLocalChangeSeqNum",
-            "columnName": "cerejLocalChangeSeqNum",
-=======
             "fieldPath": "contentCategorySchemaMasterChangeSeqNum",
             "columnName": "contentCategorySchemaMasterChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "cerejMasterChangeSeqNum",
-            "columnName": "cerejMasterChangeSeqNum",
-=======
-            "fieldPath": "contentCategorySchemaLastChangedBy",
-            "columnName": "contentCategorySchemaLastChangedBy",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-<<<<<<< HEAD
-            "cerejUid"
-=======
-            "contentCategorySchemaUid"
->>>>>>> primary
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-<<<<<<< HEAD
-        "tableName": "ContentCategorySchema",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentCategorySchemaUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schemaName` TEXT, `schemaUrl` TEXT, `contentCategorySchemaLocalChangeSeqNum` INTEGER NOT NULL, `contentCategorySchemaMasterChangeSeqNum` INTEGER NOT NULL, `contentCategorySchemaLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "contentCategorySchemaUid",
-            "columnName": "contentCategorySchemaUid",
-=======
-        "tableName": "ContentCategory",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentCategoryUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ctnCatContentCategorySchemaUid` INTEGER NOT NULL, `name` TEXT, `contentCategoryLocalChangeSeqNum` INTEGER NOT NULL, `contentCategoryMasterChangeSeqNum` INTEGER NOT NULL, `contentCategoryLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "contentCategoryUid",
-            "columnName": "contentCategoryUid",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "schemaName",
-            "columnName": "schemaName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "schemaUrl",
-            "columnName": "schemaUrl",
-=======
-            "fieldPath": "ctnCatContentCategorySchemaUid",
-            "columnName": "ctnCatContentCategorySchemaUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
->>>>>>> primary
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "contentCategorySchemaLocalChangeSeqNum",
-            "columnName": "contentCategorySchemaLocalChangeSeqNum",
-=======
-            "fieldPath": "contentCategoryLocalChangeSeqNum",
-            "columnName": "contentCategoryLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "contentCategoryMasterChangeSeqNum",
-            "columnName": "contentCategoryMasterChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "contentCategoryLastChangedBy",
-            "columnName": "contentCategoryLastChangedBy",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "contentCategoryUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "Language",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`langUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `iso_639_1_standard` TEXT, `iso_639_2_standard` TEXT, `iso_639_3_standard` TEXT, `langLocalChangeSeqNum` INTEGER NOT NULL, `langMasterChangeSeqNum` INTEGER NOT NULL, `langLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-<<<<<<< HEAD
-            "fieldPath": "contentCategorySchemaMasterChangeSeqNum",
-            "columnName": "contentCategorySchemaMasterChangeSeqNum",
-=======
-            "fieldPath": "langUid",
-            "columnName": "langUid",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
             "fieldPath": "contentCategorySchemaLastChangedBy",
             "columnName": "contentCategorySchemaLastChangedBy",
             "affinity": "INTEGER",
@@ -2636,72 +2230,31 @@
           {
             "fieldPath": "name",
             "columnName": "name",
-=======
-            "fieldPath": "name",
-            "columnName": "name",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "iso_639_1_standard",
-            "columnName": "iso_639_1_standard",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "iso_639_2_standard",
-            "columnName": "iso_639_2_standard",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "iso_639_3_standard",
-            "columnName": "iso_639_3_standard",
->>>>>>> primary
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-<<<<<<< HEAD
             "fieldPath": "contentCategoryLocalChangeSeqNum",
             "columnName": "contentCategoryLocalChangeSeqNum",
-=======
-            "fieldPath": "langLocalChangeSeqNum",
-            "columnName": "langLocalChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "contentCategoryMasterChangeSeqNum",
             "columnName": "contentCategoryMasterChangeSeqNum",
-=======
-            "fieldPath": "langMasterChangeSeqNum",
-            "columnName": "langMasterChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "contentCategoryLastChangedBy",
             "columnName": "contentCategoryLastChangedBy",
-=======
-            "fieldPath": "langLastChangedBy",
-            "columnName": "langLastChangedBy",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
             "contentCategoryUid"
-=======
-            "langUid"
->>>>>>> primary
           ],
           "autoGenerate": true
         },
@@ -2709,26 +2262,16 @@
         "foreignKeys": []
       },
       {
-<<<<<<< HEAD
         "tableName": "Language",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`langUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `iso_639_1_standard` TEXT, `iso_639_2_standard` TEXT, `iso_639_3_standard` TEXT, `langLocalChangeSeqNum` INTEGER NOT NULL, `langMasterChangeSeqNum` INTEGER NOT NULL, `langLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "langUid",
             "columnName": "langUid",
-=======
-        "tableName": "LanguageVariant",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`langVariantUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `langUid` INTEGER NOT NULL, `countryCode` TEXT, `name` TEXT, `langVariantLocalChangeSeqNum` INTEGER NOT NULL, `langVariantMasterChangeSeqNum` INTEGER NOT NULL, `langVariantLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "langVariantUid",
-            "columnName": "langVariantUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "name",
             "columnName": "name",
             "affinity": "TEXT",
@@ -2755,15 +2298,10 @@
           {
             "fieldPath": "langLocalChangeSeqNum",
             "columnName": "langLocalChangeSeqNum",
-=======
-            "fieldPath": "langUid",
-            "columnName": "langUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "langMasterChangeSeqNum",
             "columnName": "langMasterChangeSeqNum",
             "affinity": "INTEGER",
@@ -2792,38 +2330,16 @@
           {
             "fieldPath": "langVariantUid",
             "columnName": "langVariantUid",
-=======
-            "fieldPath": "countryCode",
-            "columnName": "countryCode",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "langVariantLocalChangeSeqNum",
-            "columnName": "langVariantLocalChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "langUid",
             "columnName": "langUid",
-=======
-            "fieldPath": "langVariantMasterChangeSeqNum",
-            "columnName": "langVariantMasterChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "countryCode",
             "columnName": "countryCode",
             "affinity": "TEXT",
@@ -2844,7 +2360,10 @@
           {
             "fieldPath": "langVariantMasterChangeSeqNum",
             "columnName": "langVariantMasterChangeSeqNum",
-=======
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "langVariantLastChangedBy",
             "columnName": "langVariantLastChangedBy",
             "affinity": "INTEGER",
@@ -2861,49 +2380,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "AccessToken",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`token` TEXT NOT NULL, `accessTokenPersonUid` INTEGER NOT NULL, `expires` INTEGER NOT NULL, PRIMARY KEY(`token`))",
-        "fields": [
-          {
-            "fieldPath": "token",
-            "columnName": "token",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "accessTokenPersonUid",
-            "columnName": "accessTokenPersonUid",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "langVariantLastChangedBy",
-            "columnName": "langVariantLastChangedBy",
-=======
-            "fieldPath": "expires",
-            "columnName": "expires",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-<<<<<<< HEAD
-            "langVariantUid"
-=======
-            "token"
->>>>>>> primary
-          ],
-          "autoGenerate": false
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-<<<<<<< HEAD
         "tableName": "AccessToken",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`token` TEXT NOT NULL, `accessTokenPersonUid` INTEGER NOT NULL, `expires` INTEGER NOT NULL, PRIMARY KEY(`token`))",
         "fields": [
@@ -2942,13 +2418,6 @@
           {
             "fieldPath": "personAuthUid",
             "columnName": "personAuthUid",
-=======
-        "tableName": "PersonAuth",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personAuthUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `passwordHash` TEXT, `personAuthStatus` INTEGER NOT NULL, `personAuthLocalChangeSeqNum` INTEGER NOT NULL, `personAuthMasterChangeSeqNum` INTEGER NOT NULL, `lastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "personAuthUid",
-            "columnName": "personAuthUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2961,48 +2430,22 @@
           {
             "fieldPath": "personAuthStatus",
             "columnName": "personAuthStatus",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "passwordHash",
-            "columnName": "passwordHash",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "personAuthStatus",
-            "columnName": "personAuthStatus",
-=======
             "fieldPath": "personAuthLocalChangeSeqNum",
             "columnName": "personAuthLocalChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "personAuthLocalChangeSeqNum",
-            "columnName": "personAuthLocalChangeSeqNum",
-=======
-            "fieldPath": "personAuthMasterChangeSeqNum",
-            "columnName": "personAuthMasterChangeSeqNum",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
             "fieldPath": "personAuthMasterChangeSeqNum",
             "columnName": "personAuthMasterChangeSeqNum",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-=======
->>>>>>> primary
             "fieldPath": "lastChangedBy",
             "columnName": "lastChangedBy",
             "affinity": "INTEGER",
@@ -3033,7 +2476,6 @@
             "columnName": "roleName",
             "affinity": "TEXT",
             "notNull": false
-<<<<<<< HEAD
           },
           {
             "fieldPath": "roleActive",
@@ -3062,12 +2504,6 @@
           {
             "fieldPath": "rolePermissions",
             "columnName": "rolePermissions",
-=======
-          },
-          {
-            "fieldPath": "roleActive",
-            "columnName": "roleActive",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -3086,7 +2522,6 @@
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`erUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `erMasterCsn` INTEGER NOT NULL, `erLocalCsn` INTEGER NOT NULL, `erLastChangedBy` INTEGER NOT NULL, `erTableId` INTEGER NOT NULL, `erEntityUid` INTEGER NOT NULL, `erGroupUid` INTEGER NOT NULL, `erRoleUid` INTEGER NOT NULL, `erActive` INTEGER NOT NULL)",
         "fields": [
           {
-<<<<<<< HEAD
             "fieldPath": "erUid",
             "columnName": "erUid",
             "affinity": "INTEGER",
@@ -3101,90 +2536,42 @@
           {
             "fieldPath": "erLocalCsn",
             "columnName": "erLocalCsn",
-=======
-            "fieldPath": "roleMasterCsn",
-            "columnName": "roleMasterCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "erLastChangedBy",
             "columnName": "erLastChangedBy",
-=======
-            "fieldPath": "roleLocalCsn",
-            "columnName": "roleLocalCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "erTableId",
             "columnName": "erTableId",
-=======
-            "fieldPath": "roleLastChangedBy",
-            "columnName": "roleLastChangedBy",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "erEntityUid",
             "columnName": "erEntityUid",
-=======
-            "fieldPath": "rolePermissions",
-            "columnName": "rolePermissions",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "roleUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "EntityRole",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`erUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `erMasterCsn` INTEGER NOT NULL, `erLocalCsn` INTEGER NOT NULL, `erLastChangedBy` INTEGER NOT NULL, `erTableId` INTEGER NOT NULL, `erEntityUid` INTEGER NOT NULL, `erGroupUid` INTEGER NOT NULL, `erRoleUid` INTEGER NOT NULL, `erActive` INTEGER NOT NULL)",
-        "fields": [
+          },
           {
-<<<<<<< HEAD
             "fieldPath": "erGroupUid",
             "columnName": "erGroupUid",
-=======
-            "fieldPath": "erUid",
-            "columnName": "erUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "erRoleUid",
             "columnName": "erRoleUid",
-=======
-            "fieldPath": "erMasterCsn",
-            "columnName": "erMasterCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "erActive",
             "columnName": "erActive",
-=======
-            "fieldPath": "erLocalCsn",
-            "columnName": "erLocalCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -3205,7 +2592,6 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_erTableId` ON `${TABLE_NAME}` (`erTableId`)"
           },
           {
-<<<<<<< HEAD
             "name": "index_EntityRole_erEntityUid",
             "unique": false,
             "columnNames": [
@@ -3239,48 +2625,28 @@
           {
             "fieldPath": "groupUid",
             "columnName": "groupUid",
-=======
-            "fieldPath": "erLastChangedBy",
-            "columnName": "erLastChangedBy",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "groupMasterCsn",
             "columnName": "groupMasterCsn",
-=======
-            "fieldPath": "erTableId",
-            "columnName": "erTableId",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "groupLocalCsn",
             "columnName": "groupLocalCsn",
-=======
-            "fieldPath": "erEntityUid",
-            "columnName": "erEntityUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "groupLastChangedBy",
             "columnName": "groupLastChangedBy",
-=======
-            "fieldPath": "erGroupUid",
-            "columnName": "erGroupUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "groupName",
             "columnName": "groupName",
             "affinity": "TEXT",
@@ -3289,28 +2655,18 @@
           {
             "fieldPath": "groupActive",
             "columnName": "groupActive",
-=======
-            "fieldPath": "erRoleUid",
-            "columnName": "erRoleUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "personGroupFlag",
             "columnName": "personGroupFlag",
-=======
-            "fieldPath": "erActive",
-            "columnName": "erActive",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
             "groupUid"
           ],
           "autoGenerate": true
@@ -3325,93 +2681,28 @@
           {
             "fieldPath": "groupMemberUid",
             "columnName": "groupMemberUid",
-=======
-            "erUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_EntityRole_erTableId",
-            "unique": false,
-            "columnNames": [
-              "erTableId"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_erTableId` ON `${TABLE_NAME}` (`erTableId`)"
-          },
-          {
-            "name": "index_EntityRole_erEntityUid",
-            "unique": false,
-            "columnNames": [
-              "erEntityUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_erEntityUid` ON `${TABLE_NAME}` (`erEntityUid`)"
-          },
-          {
-            "name": "index_EntityRole_erGroupUid",
-            "unique": false,
-            "columnNames": [
-              "erGroupUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_erGroupUid` ON `${TABLE_NAME}` (`erGroupUid`)"
-          },
-          {
-            "name": "index_EntityRole_erRoleUid",
-            "unique": false,
-            "columnNames": [
-              "erRoleUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_erRoleUid` ON `${TABLE_NAME}` (`erRoleUid`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonGroup",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMasterCsn` INTEGER NOT NULL, `groupLocalCsn` INTEGER NOT NULL, `groupLastChangedBy` INTEGER NOT NULL, `groupName` TEXT, `groupActive` INTEGER NOT NULL, `groupPersonUid` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "groupUid",
-            "columnName": "groupUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "groupMemberActive",
             "columnName": "groupMemberActive",
-=======
-            "fieldPath": "groupMasterCsn",
-            "columnName": "groupMasterCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "groupMemberPersonUid",
             "columnName": "groupMemberPersonUid",
-=======
-            "fieldPath": "groupLocalCsn",
-            "columnName": "groupLocalCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "groupMemberGroupUid",
             "columnName": "groupMemberGroupUid",
-=======
-            "fieldPath": "groupLastChangedBy",
-            "columnName": "groupLastChangedBy",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "groupMemberMasterCsn",
             "columnName": "groupMemberMasterCsn",
             "affinity": "INTEGER",
@@ -3420,34 +2711,18 @@
           {
             "fieldPath": "groupMemberLocalCsn",
             "columnName": "groupMemberLocalCsn",
-=======
-            "fieldPath": "groupName",
-            "columnName": "groupName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "groupActive",
-            "columnName": "groupActive",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "groupMemberLastChangedBy",
             "columnName": "groupMemberLastChangedBy",
-=======
-            "fieldPath": "groupPersonUid",
-            "columnName": "groupPersonUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
             "groupMemberUid"
           ],
           "autoGenerate": true
@@ -3479,82 +2754,40 @@
           {
             "fieldPath": "personPictureUid",
             "columnName": "personPictureUid",
-=======
-            "groupUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonGroupMember",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMemberActive` INTEGER NOT NULL, `groupMemberPersonUid` INTEGER NOT NULL, `groupMemberGroupUid` INTEGER NOT NULL, `groupMemberMasterCsn` INTEGER NOT NULL, `groupMemberLocalCsn` INTEGER NOT NULL, `groupMemberLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "groupMemberUid",
-            "columnName": "groupMemberUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "personPicturePersonUid",
             "columnName": "personPicturePersonUid",
-=======
-            "fieldPath": "groupMemberActive",
-            "columnName": "groupMemberActive",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "personPictureMasterCsn",
             "columnName": "personPictureMasterCsn",
-=======
-            "fieldPath": "groupMemberPersonUid",
-            "columnName": "groupMemberPersonUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "personPictureLocalCsn",
             "columnName": "personPictureLocalCsn",
-=======
-            "fieldPath": "groupMemberGroupUid",
-            "columnName": "groupMemberGroupUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "personPictureLastChangedBy",
             "columnName": "personPictureLastChangedBy",
-=======
-            "fieldPath": "groupMemberMasterCsn",
-            "columnName": "groupMemberMasterCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "fileSize",
             "columnName": "fileSize",
-=======
-            "fieldPath": "groupMemberLocalCsn",
-            "columnName": "groupMemberLocalCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "picTimestamp",
             "columnName": "picTimestamp",
             "affinity": "INTEGER",
@@ -3569,17 +2802,12 @@
           {
             "fieldPath": "personPictureActive",
             "columnName": "personPictureActive",
-=======
-            "fieldPath": "groupMemberLastChangedBy",
-            "columnName": "groupMemberLastChangedBy",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
             "personPictureUid"
           ],
           "autoGenerate": true
@@ -3594,55 +2822,16 @@
           {
             "fieldPath": "sqiUid",
             "columnName": "sqiUid",
-=======
-            "groupMemberUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_PersonGroupMember_groupMemberPersonUid",
-            "unique": false,
-            "columnNames": [
-              "groupMemberPersonUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMember_groupMemberPersonUid` ON `${TABLE_NAME}` (`groupMemberPersonUid`)"
-          },
-          {
-            "name": "index_PersonGroupMember_groupMemberGroupUid",
-            "unique": false,
-            "columnNames": [
-              "groupMemberGroupUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMember_groupMemberGroupUid` ON `${TABLE_NAME}` (`groupMemberGroupUid`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "PersonPicture",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPictureUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personPicturePersonUid` INTEGER NOT NULL, `personPictureMasterCsn` INTEGER NOT NULL, `personPictureLocalCsn` INTEGER NOT NULL, `personPictureLastChangedBy` INTEGER NOT NULL, `fileSize` INTEGER NOT NULL, `picTimestamp` INTEGER NOT NULL, `mimeType` TEXT, `personPictureActive` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "personPictureUid",
-            "columnName": "personPictureUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "sqiContentEntryParentUid",
             "columnName": "sqiContentEntryParentUid",
-=======
-            "fieldPath": "personPicturePersonUid",
-            "columnName": "personPicturePersonUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "destDir",
             "columnName": "destDir",
             "affinity": "TEXT",
@@ -3657,37 +2846,22 @@
           {
             "fieldPath": "status",
             "columnName": "status",
-=======
-            "fieldPath": "personPictureMasterCsn",
-            "columnName": "personPictureMasterCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "runId",
             "columnName": "runId",
-=======
-            "fieldPath": "personPictureLocalCsn",
-            "columnName": "personPictureLocalCsn",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "itemType",
             "columnName": "itemType",
-=======
-            "fieldPath": "personPictureLastChangedBy",
-            "columnName": "personPictureLastChangedBy",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "errorCode",
             "columnName": "errorCode",
             "affinity": "INTEGER",
@@ -3702,26 +2876,16 @@
           {
             "fieldPath": "timeAdded",
             "columnName": "timeAdded",
-=======
-            "fieldPath": "fileSize",
-            "columnName": "fileSize",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "timeStarted",
             "columnName": "timeStarted",
-=======
-            "fieldPath": "picTimestamp",
-            "columnName": "picTimestamp",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "timeFinished",
             "columnName": "timeFinished",
             "affinity": "INTEGER",
@@ -3730,27 +2894,13 @@
           {
             "fieldPath": "priority",
             "columnName": "priority",
-=======
-            "fieldPath": "mimeType",
-            "columnName": "mimeType",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "personPictureActive",
-            "columnName": "personPictureActive",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
             "sqiUid"
-=======
-            "personPictureUid"
->>>>>>> primary
           ],
           "autoGenerate": true
         },
@@ -3758,44 +2908,18 @@
         "foreignKeys": []
       },
       {
-<<<<<<< HEAD
         "tableName": "ScrapeRun",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scrapeRunUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scrapeType` TEXT, `status` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "scrapeRunUid",
             "columnName": "scrapeRunUid",
-=======
-        "tableName": "ScrapeQueueItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sqiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sqiContentEntryParentUid` INTEGER NOT NULL, `destDir` TEXT, `scrapeUrl` TEXT, `status` INTEGER NOT NULL, `runId` INTEGER NOT NULL, `itemType` INTEGER NOT NULL, `errorCode` INTEGER NOT NULL, `contentType` TEXT, `timeAdded` INTEGER NOT NULL, `timeStarted` INTEGER NOT NULL, `timeFinished` INTEGER NOT NULL, `priority` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "sqiUid",
-            "columnName": "sqiUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "scrapeType",
             "columnName": "scrapeType",
-=======
-            "fieldPath": "sqiContentEntryParentUid",
-            "columnName": "sqiContentEntryParentUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "destDir",
-            "columnName": "destDir",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "scrapeUrl",
-            "columnName": "scrapeUrl",
->>>>>>> primary
             "affinity": "TEXT",
             "notNull": false
           },
@@ -3804,7 +2928,6 @@
             "columnName": "status",
             "affinity": "INTEGER",
             "notNull": true
-<<<<<<< HEAD
           }
         ],
         "primaryKey": {
@@ -3823,34 +2946,16 @@
           {
             "fieldPath": "cesUid",
             "columnName": "cesUid",
-=======
-          },
-          {
-            "fieldPath": "runId",
-            "columnName": "runId",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "itemType",
-            "columnName": "itemType",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
             "fieldPath": "totalSize",
             "columnName": "totalSize",
-=======
-            "fieldPath": "errorCode",
-            "columnName": "errorCode",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "bytesDownloadSoFar",
             "columnName": "bytesDownloadSoFar",
             "affinity": "INTEGER",
@@ -3903,32 +3008,16 @@
           {
             "fieldPath": "csUid",
             "columnName": "csUid",
-=======
-            "fieldPath": "contentType",
-            "columnName": "contentType",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "timeAdded",
-            "columnName": "timeAdded",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "connectivityState",
             "columnName": "connectivityState",
-=======
-            "fieldPath": "timeStarted",
-            "columnName": "timeStarted",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "wifiSsid",
             "columnName": "wifiSsid",
             "affinity": "TEXT",
@@ -3937,27 +3026,13 @@
           {
             "fieldPath": "connectedOrConnecting",
             "columnName": "connectedOrConnecting",
-=======
-            "fieldPath": "timeFinished",
-            "columnName": "timeFinished",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "priority",
-            "columnName": "priority",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
             "csUid"
-=======
-            "sqiUid"
->>>>>>> primary
           ],
           "autoGenerate": false
         },
@@ -3965,26 +3040,16 @@
         "foreignKeys": []
       },
       {
-<<<<<<< HEAD
         "tableName": "Container",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`containerUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cntLocalCsn` INTEGER NOT NULL, `cntMasterCsn` INTEGER NOT NULL, `cntLastModBy` INTEGER NOT NULL, `fileSize` INTEGER NOT NULL, `containerContentEntryUid` INTEGER NOT NULL, `cntLastModified` INTEGER NOT NULL, `mimeType` TEXT, `remarks` TEXT, `mobileOptimized` INTEGER NOT NULL, `cntNumEntries` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "containerUid",
             "columnName": "containerUid",
-=======
-        "tableName": "ScrapeRun",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scrapeRunUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scrapeType` TEXT, `status` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "scrapeRunUid",
-            "columnName": "scrapeRunUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
             "fieldPath": "cntLocalCsn",
             "columnName": "cntLocalCsn",
             "affinity": "INTEGER",
@@ -4011,347 +3076,22 @@
           {
             "fieldPath": "containerContentEntryUid",
             "columnName": "containerContentEntryUid",
-=======
-            "fieldPath": "scrapeType",
-            "columnName": "scrapeType",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "status",
-            "columnName": "status",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "scrapeRunUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "ContentEntryStatus",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cesUid` INTEGER NOT NULL, `totalSize` INTEGER NOT NULL, `bytesDownloadSoFar` INTEGER NOT NULL, `downloadStatus` INTEGER NOT NULL, `locallyAvailable` INTEGER NOT NULL, `downloadSpeed` INTEGER NOT NULL, `invalidated` INTEGER NOT NULL, `cesLeaf` INTEGER NOT NULL, PRIMARY KEY(`cesUid`))",
-        "fields": [
-          {
-            "fieldPath": "cesUid",
-            "columnName": "cesUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "totalSize",
-            "columnName": "totalSize",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "cntLastModified",
-            "columnName": "cntLastModified",
-=======
-            "fieldPath": "bytesDownloadSoFar",
-            "columnName": "bytesDownloadSoFar",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "mimeType",
-            "columnName": "mimeType",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "remarks",
-            "columnName": "remarks",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "mobileOptimized",
-            "columnName": "mobileOptimized",
-=======
-            "fieldPath": "downloadStatus",
-            "columnName": "downloadStatus",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "locallyAvailable",
-            "columnName": "locallyAvailable",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "downloadSpeed",
-            "columnName": "downloadSpeed",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "invalidated",
-            "columnName": "invalidated",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "cntNumEntries",
-            "columnName": "cntNumEntries",
-=======
-            "fieldPath": "cesLeaf",
-            "columnName": "cesLeaf",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-<<<<<<< HEAD
-            "containerUid"
-=======
-            "cesUid"
->>>>>>> primary
-          ],
-          "autoGenerate": false
-        },
-        "indices": [
-          {
-            "name": "cnt_uid_to_most_recent",
-            "unique": false,
-            "columnNames": [
-              "containerContentEntryUid",
-              "cntLastModified"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `cnt_uid_to_most_recent` ON `${TABLE_NAME}` (`containerContentEntryUid`, `cntLastModified`)"
-          },
-          {
-            "name": "index_Container_cntLastModified",
-            "unique": false,
-            "columnNames": [
-              "cntLastModified"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Container_cntLastModified` ON `${TABLE_NAME}` (`cntLastModified`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-<<<<<<< HEAD
-        "tableName": "ContainerEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ceUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ceContainerUid` INTEGER NOT NULL, `cePath` TEXT, `ceCefUid` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "ceUid",
-            "columnName": "ceUid",
-=======
-        "tableName": "ConnectivityStatus",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`csUid` INTEGER NOT NULL, `connectivityState` INTEGER NOT NULL, `wifiSsid` TEXT, `connectedOrConnecting` INTEGER NOT NULL, PRIMARY KEY(`csUid`))",
-        "fields": [
-          {
-            "fieldPath": "csUid",
-            "columnName": "csUid",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "ceContainerUid",
-            "columnName": "ceContainerUid",
-=======
-            "fieldPath": "connectivityState",
-            "columnName": "connectivityState",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "cePath",
-            "columnName": "cePath",
-=======
-            "fieldPath": "wifiSsid",
-            "columnName": "wifiSsid",
->>>>>>> primary
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "ceCefUid",
-            "columnName": "ceCefUid",
-=======
-            "fieldPath": "connectedOrConnecting",
-            "columnName": "connectedOrConnecting",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-<<<<<<< HEAD
-            "ceUid"
-=======
-            "csUid"
->>>>>>> primary
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ContainerEntry_ceContainerUid",
-            "unique": false,
-            "columnNames": [
-              "ceContainerUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContainerEntry_ceContainerUid` ON `${TABLE_NAME}` (`ceContainerUid`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-<<<<<<< HEAD
-        "tableName": "ContainerEntryFile",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cefUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cefMd5` TEXT, `cefPath` TEXT, `ceTotalSize` INTEGER NOT NULL, `ceCompressedSize` INTEGER NOT NULL, `compression` INTEGER NOT NULL, `lastModified` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "cefUid",
-            "columnName": "cefUid",
-=======
-        "tableName": "Container",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`containerUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cntLocalCsn` INTEGER NOT NULL, `cntMasterCsn` INTEGER NOT NULL, `cntLastModBy` INTEGER NOT NULL, `fileSize` INTEGER NOT NULL, `containerContentEntryUid` INTEGER NOT NULL, `cntLastModified` INTEGER NOT NULL, `mimeType` TEXT, `remarks` TEXT, `mobileOptimized` INTEGER NOT NULL, `cntNumEntries` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "containerUid",
-            "columnName": "containerUid",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "cefMd5",
-            "columnName": "cefMd5",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "cefPath",
-            "columnName": "cefPath",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ceTotalSize",
-            "columnName": "ceTotalSize",
-=======
-            "fieldPath": "cntLocalCsn",
-            "columnName": "cntLocalCsn",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cntMasterCsn",
-            "columnName": "cntMasterCsn",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "ceCompressedSize",
-            "columnName": "ceCompressedSize",
-=======
-            "fieldPath": "cntLastModBy",
-            "columnName": "cntLastModBy",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "compression",
-            "columnName": "compression",
-=======
-            "fieldPath": "fileSize",
-            "columnName": "fileSize",
->>>>>>> primary
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-<<<<<<< HEAD
-            "fieldPath": "lastModified",
-            "columnName": "lastModified",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "cefUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [
-          {
-            "name": "index_ContainerEntryFile_cefMd5",
-            "unique": false,
-            "columnNames": [
-              "cefMd5"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContainerEntryFile_cefMd5` ON `${TABLE_NAME}` (`cefMd5`)"
-          }
-        ],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "VerbEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`verbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `urlId` TEXT, `verbMasterChangeSeqNum` INTEGER NOT NULL, `verbLocalChangeSeqNum` INTEGER NOT NULL, `verbLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "verbUid",
-            "columnName": "verbUid",
-=======
-            "fieldPath": "containerContentEntryUid",
-            "columnName": "containerContentEntryUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
             "fieldPath": "cntLastModified",
             "columnName": "cntLastModified",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "urlId",
-            "columnName": "urlId",
-=======
             "fieldPath": "mimeType",
             "columnName": "mimeType",
->>>>>>> primary
             "affinity": "TEXT",
             "notNull": false
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "verbMasterChangeSeqNum",
-            "columnName": "verbMasterChangeSeqNum",
-=======
             "fieldPath": "remarks",
             "columnName": "remarks",
             "affinity": "TEXT",
@@ -4404,26 +3144,16 @@
           {
             "fieldPath": "ceUid",
             "columnName": "ceUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "verbLocalChangeSeqNum",
-            "columnName": "verbLocalChangeSeqNum",
-=======
             "fieldPath": "ceContainerUid",
             "columnName": "ceContainerUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "verbLastChangedBy",
-            "columnName": "verbLastChangedBy",
-=======
             "fieldPath": "cePath",
             "columnName": "cePath",
             "affinity": "TEXT",
@@ -4432,18 +3162,13 @@
           {
             "fieldPath": "ceCefUid",
             "columnName": "ceCefUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
-            "verbUid"
-=======
             "ceUid"
->>>>>>> primary
           ],
           "autoGenerate": true
         },
@@ -4460,65 +3185,16 @@
         "foreignKeys": []
       },
       {
-<<<<<<< HEAD
-        "tableName": "XObjectEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xObjectUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `objectType` TEXT, `objectId` TEXT, `definitionType` TEXT, `interactionType` TEXT, `correctResponsePattern` TEXT, `objectContentEntryUid` INTEGER NOT NULL, `xObjectMasterChangeSeqNum` INTEGER NOT NULL, `xObjectocalChangeSeqNum` INTEGER NOT NULL, `xObjectLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "xObjectUid",
-            "columnName": "xObjectUid",
-=======
         "tableName": "ContainerEntryFile",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cefUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cefMd5` TEXT, `cefPath` TEXT, `ceTotalSize` INTEGER NOT NULL, `ceCompressedSize` INTEGER NOT NULL, `compression` INTEGER NOT NULL, `lastModified` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cefUid",
             "columnName": "cefUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "objectType",
-            "columnName": "objectType",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "objectId",
-            "columnName": "objectId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "definitionType",
-            "columnName": "definitionType",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "interactionType",
-            "columnName": "interactionType",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "correctResponsePattern",
-            "columnName": "correctResponsePattern",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "objectContentEntryUid",
-            "columnName": "objectContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "xObjectMasterChangeSeqNum",
-            "columnName": "xObjectMasterChangeSeqNum",
-=======
             "fieldPath": "cefMd5",
             "columnName": "cefMd5",
             "affinity": "TEXT",
@@ -4592,40 +3268,25 @@
           {
             "fieldPath": "verbMasterChangeSeqNum",
             "columnName": "verbMasterChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "xObjectocalChangeSeqNum",
-            "columnName": "xObjectocalChangeSeqNum",
-=======
             "fieldPath": "verbLocalChangeSeqNum",
             "columnName": "verbLocalChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "xObjectLastChangedBy",
-            "columnName": "xObjectLastChangedBy",
-=======
             "fieldPath": "verbLastChangedBy",
             "columnName": "verbLastChangedBy",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
-            "xObjectUid"
-=======
             "verbUid"
->>>>>>> primary
           ],
           "autoGenerate": true
         },
@@ -4633,20 +3294,6 @@
         "foreignKeys": []
       },
       {
-<<<<<<< HEAD
-        "tableName": "StatementEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `statementId` TEXT, `statementPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `xObjectUid` INTEGER NOT NULL, `subStatementActorUid` INTEGER NOT NULL, `substatementVerbUid` INTEGER NOT NULL, `subStatementObjectUid` INTEGER NOT NULL, `agentUid` INTEGER NOT NULL, `instructorUid` INTEGER NOT NULL, `authorityUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER NOT NULL, `resultSuccess` INTEGER NOT NULL, `resultScoreScaled` INTEGER NOT NULL, `resultScoreRaw` INTEGER NOT NULL, `resultScoreMin` INTEGER NOT NULL, `resultScoreMax` INTEGER NOT NULL, `resultDuration` INTEGER NOT NULL, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistration` TEXT, `contextPlatform` TEXT, `contextStatementId` TEXT, `fullStatement` TEXT, `statementMasterChangeSeqNum` INTEGER NOT NULL, `statementLocalChangeSeqNum` INTEGER NOT NULL, `statementLastChangedBy` INTEGER NOT NULL, `extensionProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "statementUid",
-            "columnName": "statementUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "statementId",
-            "columnName": "statementId",
-=======
         "tableName": "XObjectEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xObjectUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `objectType` TEXT, `objectId` TEXT, `definitionType` TEXT, `interactionType` TEXT, `correctResponsePattern` TEXT, `objectContentEntryUid` INTEGER NOT NULL, `xObjectMasterChangeSeqNum` INTEGER NOT NULL, `xObjectocalChangeSeqNum` INTEGER NOT NULL, `xObjectLastChangedBy` INTEGER NOT NULL)",
         "fields": [
@@ -4683,54 +3330,28 @@
           {
             "fieldPath": "correctResponsePattern",
             "columnName": "correctResponsePattern",
->>>>>>> primary
             "affinity": "TEXT",
             "notNull": false
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "statementPersonUid",
-            "columnName": "statementPersonUid",
-=======
             "fieldPath": "objectContentEntryUid",
             "columnName": "objectContentEntryUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "statementVerbUid",
-            "columnName": "statementVerbUid",
-=======
             "fieldPath": "xObjectMasterChangeSeqNum",
             "columnName": "xObjectMasterChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "xObjectUid",
-            "columnName": "xObjectUid",
-=======
             "fieldPath": "xObjectocalChangeSeqNum",
             "columnName": "xObjectocalChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "subStatementActorUid",
-            "columnName": "subStatementActorUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "substatementVerbUid",
-            "columnName": "substatementVerbUid",
-=======
             "fieldPath": "xObjectLastChangedBy",
             "columnName": "xObjectLastChangedBy",
             "affinity": "INTEGER",
@@ -4753,15 +3374,10 @@
           {
             "fieldPath": "statementUid",
             "columnName": "statementUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "subStatementObjectUid",
-            "columnName": "subStatementObjectUid",
-=======
             "fieldPath": "statementId",
             "columnName": "statementId",
             "affinity": "TEXT",
@@ -4770,81 +3386,46 @@
           {
             "fieldPath": "statementPersonUid",
             "columnName": "statementPersonUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "agentUid",
-            "columnName": "agentUid",
-=======
             "fieldPath": "statementVerbUid",
             "columnName": "statementVerbUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "instructorUid",
-            "columnName": "instructorUid",
-=======
             "fieldPath": "xObjectUid",
             "columnName": "xObjectUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "authorityUid",
-            "columnName": "authorityUid",
-=======
             "fieldPath": "subStatementActorUid",
             "columnName": "subStatementActorUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "teamUid",
-            "columnName": "teamUid",
-=======
             "fieldPath": "substatementVerbUid",
             "columnName": "substatementVerbUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "resultCompletion",
-            "columnName": "resultCompletion",
-=======
             "fieldPath": "subStatementObjectUid",
             "columnName": "subStatementObjectUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "resultSuccess",
-            "columnName": "resultSuccess",
-=======
             "fieldPath": "agentUid",
             "columnName": "agentUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "resultScoreScaled",
-            "columnName": "resultScoreScaled",
-=======
             "fieldPath": "instructorUid",
             "columnName": "instructorUid",
             "affinity": "INTEGER",
@@ -4865,63 +3446,34 @@
           {
             "fieldPath": "resultCompletion",
             "columnName": "resultCompletion",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "resultScoreRaw",
-            "columnName": "resultScoreRaw",
-=======
             "fieldPath": "resultSuccess",
             "columnName": "resultSuccess",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "resultScoreMin",
-            "columnName": "resultScoreMin",
-=======
             "fieldPath": "resultScoreScaled",
             "columnName": "resultScoreScaled",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "resultScoreMax",
-            "columnName": "resultScoreMax",
-=======
             "fieldPath": "resultScoreRaw",
             "columnName": "resultScoreRaw",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "resultDuration",
-            "columnName": "resultDuration",
-=======
             "fieldPath": "resultScoreMin",
             "columnName": "resultScoreMin",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "resultResponse",
-            "columnName": "resultResponse",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-=======
             "fieldPath": "resultScoreMax",
             "columnName": "resultScoreMax",
             "affinity": "INTEGER",
@@ -4940,7 +3492,6 @@
             "notNull": false
           },
           {
->>>>>>> primary
             "fieldPath": "timestamp",
             "columnName": "timestamp",
             "affinity": "INTEGER",
@@ -5492,11 +4043,7 @@
       },
       {
         "tableName": "School",
-<<<<<<< HEAD
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolEmailAddress` TEXT, `schoolTeachersPersonGroupUid` INTEGER NOT NULL, `schoolStudentsPersonGroupUid` INTEGER NOT NULL, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL, `schoolTimeZone` TEXT)",
-=======
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolEmailAddress` TEXT, `schoolTeachersPersonGroupUid` INTEGER NOT NULL, `schoolStudentsPersonGroupUid` INTEGER NOT NULL, `schoolPendingStudentsPersonGroupUid` INTEGER NOT NULL, `schoolCode` TEXT, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL, `schoolTimeZone` TEXT)",
->>>>>>> primary
         "fields": [
           {
             "fieldPath": "schoolUid",
@@ -5583,27 +4130,12 @@
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "schoolMasterChangeSeqNum",
-            "columnName": "schoolMasterChangeSeqNum",
-=======
             "fieldPath": "schoolPendingStudentsPersonGroupUid",
             "columnName": "schoolPendingStudentsPersonGroupUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "schoolLocalChangeSeqNum",
-            "columnName": "schoolLocalChangeSeqNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolLastChangedBy",
-            "columnName": "schoolLastChangedBy",
-=======
             "fieldPath": "schoolCode",
             "columnName": "schoolCode",
             "affinity": "TEXT",
@@ -5612,43 +4144,10 @@
           {
             "fieldPath": "schoolMasterChangeSeqNum",
             "columnName": "schoolMasterChangeSeqNum",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-            "fieldPath": "schoolTimeZone",
-            "columnName": "schoolTimeZone",
-            "affinity": "TEXT",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "schoolUid"
-          ],
-          "autoGenerate": true
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "TimeZoneEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `rawOffset` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rawOffset",
-            "columnName": "rawOffset",
-            "affinity": "INTEGER",
-            "notNull": true
-=======
             "fieldPath": "schoolLocalChangeSeqNum",
             "columnName": "schoolLocalChangeSeqNum",
             "affinity": "INTEGER",
@@ -5665,33 +4164,18 @@
             "columnName": "schoolTimeZone",
             "affinity": "TEXT",
             "notNull": false
->>>>>>> primary
           }
         ],
         "primaryKey": {
           "columnNames": [
-<<<<<<< HEAD
-            "id"
-          ],
-          "autoGenerate": false
-=======
             "schoolUid"
           ],
           "autoGenerate": true
->>>>>>> primary
         },
         "indices": [],
         "foreignKeys": []
       },
       {
-<<<<<<< HEAD
-        "tableName": "SchoolMember",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolMemberPersonUid` INTEGER NOT NULL, `schoolMemberSchoolUid` INTEGER NOT NULL, `schoolMemberJoinDate` INTEGER NOT NULL, `schoolMemberLeftDate` INTEGER NOT NULL, `schoolMemberRole` INTEGER NOT NULL, `schoolMemberActive` INTEGER NOT NULL, `schoolMemberLocalChangeSeqNum` INTEGER NOT NULL, `schoolMemberMasterChangeSeqNum` INTEGER NOT NULL, `schoolMemberLastChangedBy` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "schoolMemberUid",
-            "columnName": "schoolMemberUid",
-=======
         "tableName": "TimeZoneEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `rawOffset` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
@@ -5704,7 +4188,6 @@
           {
             "fieldPath": "rawOffset",
             "columnName": "rawOffset",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -5723,26 +4206,18 @@
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolMemberPersonUid` INTEGER NOT NULL, `schoolMemberSchoolUid` INTEGER NOT NULL, `schoolMemberJoinDate` INTEGER NOT NULL, `schoolMemberLeftDate` INTEGER NOT NULL, `schoolMemberRole` INTEGER NOT NULL, `schoolMemberActive` INTEGER NOT NULL, `schoolMemberLocalChangeSeqNum` INTEGER NOT NULL, `schoolMemberMasterChangeSeqNum` INTEGER NOT NULL, `schoolMemberLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
-<<<<<<< HEAD
-            "fieldPath": "schoolMemberPersonUid",
-            "columnName": "schoolMemberPersonUid",
-=======
             "fieldPath": "schoolMemberUid",
             "columnName": "schoolMemberUid",
->>>>>>> primary
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-<<<<<<< HEAD
-=======
             "fieldPath": "schoolMemberPersonUid",
             "columnName": "schoolMemberPersonUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
->>>>>>> primary
             "fieldPath": "schoolMemberSchoolUid",
             "columnName": "schoolMemberSchoolUid",
             "affinity": "INTEGER",
@@ -10245,11 +8720,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-<<<<<<< HEAD
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '62cfb53b92af9886761c20e0c21762e2')"
-=======
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'aabd173dcae9ab77540b5b10cef69bce')"
->>>>>>> primary
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '75c3147c54c525eedacad68e6aefbec8')"
     ]
   }
 }

@@ -49,6 +49,10 @@ open class School() {
 
     var schoolStudentsPersonGroupUid: Long = 0
 
+    var schoolPendingStudentsPersonGroupUid: Long = 0
+
+    var schoolCode: String? = null
+
     @MasterChangeSeqNum
     var schoolMasterChangeSeqNum: Long = 0
 

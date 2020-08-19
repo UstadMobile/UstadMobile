@@ -8,13 +8,13 @@ import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.randomString
 
 fun UmAppDatabase.runPreload() {
     preload()
     timeZoneEntityDao.insertSystemTimezones()
     personDetailPresenterFieldDao.preloadCoreFields()
 }
-
 
 /**
  * Insert a new class and
@@ -27,12 +27,19 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
     clazz.clazzStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
             impl.getString(MessageID.students, context)))
 
+    clazz.clazzPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup("${clazz.clazzName} - " +
+            impl.getString(MessageID.pending_requests, context)))
+
+    clazz.takeIf { it.clazzCode == null }?.clazzCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
+
     clazz.clazzUid = clazzDao.insertAsync(clazz)
 
     entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
         clazz.clazzTeachersPersonGroupUid, Role.ROLE_TEACHER_UID.toLong()))
     entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
         clazz.clazzStudentsPersonGroupUid, Role.ROLE_STUDENT_UID.toLong()))
+    entityRoleDao.insertAsync(EntityRole(Clazz.TABLE_ID, clazz.clazzUid,
+        clazz.clazzPendingStudentsPersonGroupUid, Role.ROLE_STUDENT_PENDING_UID.toLong()))
 }
 
 /**
@@ -61,6 +68,7 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     val personGroupUid = when(role) {
         ClazzMember.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
         ClazzMember.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
+        ClazzMember.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
         else -> null
     }
 
@@ -73,6 +81,23 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     }
 
     return clazzMember
+}
+
+suspend fun UmAppDatabase.approvePendingClazzMember(member: ClazzMember, clazz: Clazz? = null) {
+    val effectiveClazz = clazz ?: clazzDao.findByUidAsync(member.clazzMemberClazzUid)
+        ?: throw IllegalStateException("Class does not exist")
+
+    //change the role
+    member.clazzMemberRole = ClazzMember.ROLE_STUDENT
+    clazzMemberDao.updateAsync(member)
+
+    //find the group member and update that
+    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(member.clazzMemberPersonUid,
+            effectiveClazz.clazzStudentsPersonGroupUid,
+            effectiveClazz.clazzPendingStudentsPersonGroupUid)
+    if(numGroupUpdates != 1) {
+        println("WTF: no group update?")
+    }
 }
 
 /**

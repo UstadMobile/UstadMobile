@@ -31,10 +31,8 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.sharedse.contentformats.*
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -208,7 +206,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
-        clazzWorkTitle = getString(R.string.content)
+        ustadFragmentTitle = getString(R.string.content)
 
         mPresenter = ContentEntryEdit2Presenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)

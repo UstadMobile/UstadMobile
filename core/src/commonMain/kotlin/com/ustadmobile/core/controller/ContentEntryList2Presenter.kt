@@ -10,9 +10,12 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CO
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
@@ -66,11 +69,17 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                         parentEntryUid, 0, 0, loggedPersonUid)
             }
             ARG_DOWNLOADED_CONTENT -> when(sortOrder){
-                SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.downloadedRootItemsAsc(loggedPersonUid)
-                SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.downloadedRootItemsDesc(loggedPersonUid)
+                SortOrder.ORDER_NAME_ASC -> db.contentEntryDao.downloadedRootItemsAsc(loggedPersonUid)
+                SortOrder.ORDER_NAME_DSC -> db.contentEntryDao.downloadedRootItemsDesc(loggedPersonUid)
             }
             ARG_RECYCLED_CONTENT -> repo.contentEntryDao.recycledItems(personUid = loggedPersonUid)
             else -> null
+        }
+
+        GlobalScope.launch(doorMainDispatcher()) {
+            db.takeIf {parentEntryUid != 0L } ?.contentEntryDao?.findTitleByUidAsync(parentEntryUid)?.let {titleStr ->
+                view.takeIf { titleStr.isNotBlank() }?.title = titleStr
+            }
         }
     }
 
