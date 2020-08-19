@@ -56,6 +56,8 @@ open class Person() {
      */
     var personOrgId: String? = null
 
+    //This person's groupUid
+    var personGroupUid: Long = 0L
 
     @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0

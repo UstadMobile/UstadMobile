@@ -6,13 +6,16 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListTabsView
+import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
@@ -115,7 +118,8 @@ class PersonEditPresenter(context: Any,
 
 
         val rolesAndPermissionList = withTimeoutOrNull(2000){
-            db.takeIf{entityUid != 0L}?.entityRoleDao?.filterByPersonWithExtraAsList(entityUid)
+            db.takeIf{entityUid != 0L}?.entityRoleDao?.filterByPersonWithExtraAsList(
+                    entity?.personGroupUid?:0L)
         }?:listOf()
         rolesAndPermissionEditHelper.liveList.sendValue(rolesAndPermissionList)
 
@@ -174,31 +178,27 @@ class PersonEditPresenter(context: Any,
                 }
             }else{
                 if(entity.personUid == 0L) {
-                    entity.personUid = repo.personDao.insertAsync(entity)
 
-                    //Create person's group
-                    repo.personGroupDao.insertAsync(PersonGroup().apply {
-                        groupPersonUid = entity.personUid
-                        groupName = "Person individual group"
-                    })
+                    val personWithGroup = repo.insertPersonAndGroup(entity)
+                    entity.personGroupUid = personWithGroup.personGroupUid
+                    entity.personUid = personWithGroup.personUid
+
                 }else {
                     repo.personDao.updateAsync(entity)
                 }
 
+//                rolesAndPermissionEditHelper.commitToDatabase(repo.entityRoleDao){
+//                    it.erGroupUid = entity.personGroupUid
+//                }
+                repo.entityRoleDao.insertListAsync(rolesAndPermissionEditHelper.entitiesToInsert.also { it.forEach {
+                    it.erGroupUid = entity.personGroupUid
+                }  })
+                repo.entityRoleDao.updateListAsync(rolesAndPermissionEditHelper.entitiesToUpdate.also { it.forEach{
+                    it.erGroupUid = entity.personGroupUid
+                } })
 
+                repo.entityRoleDao.deactivateByUids(rolesAndPermissionEditHelper.primaryKeysToDeactivate)
 
-
-                rolesAndPermissionEditHelper.entitiesToInsert.forEach {
-                    //TODO: This
-                }
-
-                rolesAndPermissionEditHelper.entitiesToUpdate.forEach {
-                    //TODO: This
-                }
-
-                rolesAndPermissionEditHelper.primaryKeysToDeactivate.forEach {
-                    //TODO: This
-                }
 
 
                 clazzMemberJoinEditHelper.entitiesToInsert.forEach {
@@ -210,7 +210,8 @@ class PersonEditPresenter(context: Any,
 
                 var personPicture = db.personPictureDao.findByPersonUidAsync(entity.personUid)
                 val viewPicturePath = view.personPicturePath
-                val currentPath = if(personPicture != null) repo.personPictureDao.getAttachmentPath(personPicture) else null
+                val currentPath = if(personPicture != null)
+                    repo.personPictureDao.getAttachmentPath(personPicture) else null
 
                 if(personPicture != null && viewPicturePath != null && currentPath != viewPicturePath) {
                     repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
@@ -232,5 +233,4 @@ class PersonEditPresenter(context: Any,
             }
         }
     }
-
 }

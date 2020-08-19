@@ -356,13 +356,14 @@
                 app:layout_constraintTop_toBottomOf="@+id/clazzlist_recyclerview" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
-                android:layout_marginTop="@dimen/dimen_8dp"
                 android:id="@+id/roles_and_permissions_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/roles_and_permissions_header_textview"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/roles_and_permissions_header_textview" />
 
 
 

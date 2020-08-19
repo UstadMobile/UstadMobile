@@ -19,9 +19,11 @@ import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzEditBinding
+import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -31,8 +33,10 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import kotlinx.serialization.builtins.list
 import org.kodein.di.instance
 import java.io.File
 
@@ -83,6 +87,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
     }
 
+
     override var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>? = null
         get() = field
         set(value) {
@@ -126,11 +131,17 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
     }
 
     override fun onClickNewRoleAndAssignment() {
-        //TODO: This
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(null, R.id.entityrole_edit_dest,
+                EntityRoleWithNameAndRole::class.java, argBundle = bundleOf(
+                    UstadView.ARG_FILTER_BY_PERSONGROUPUID to entity?.personGroupUid))
+
     }
 
     override fun handleClickEntityRole(entityRole: EntityRoleWithNameAndRole) {
-        //TODO: This
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(entityRole, R.id.entityrole_edit_dest,
+                EntityRoleWithNameAndRole::class.java)
     }
 
 
@@ -338,9 +349,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             }
         }
 
-        //TODO: Add block for Roles and Assignment and use
-        // mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
-
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                EntityRoleWithNameAndRole::class.java ) {
+            val entityRole = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
+        }
 
 
     }

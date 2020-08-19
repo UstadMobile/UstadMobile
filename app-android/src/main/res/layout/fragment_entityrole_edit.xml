@@ -65,10 +65,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_entityrole_edit_scope_tiet"
                     android:onClick="@{() -> activityEventHandler.handleClickScope(entityRole)}"
-                    android:text="@{entityRole?entityRole.entityRoleScopeName +
-                    `(`+ entityRole.erTableId== com.ustadmobile.lib.db.entities.Clazz.TABLE_ID?@string/clazz:
-                    entityRole.erTableId== com.ustadmobile.lib.db.entities.School.TABLE_ID?@string/school:
-                    entityRole.erTableId== com.ustadmobile.lib.db.entities.Person.TABLE_ID?@string/person:@string/none + `)`:``}"
+                    app:entityRoleText = "@{entityRole}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:layout_width="match_parent"
@@ -131,7 +128,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_entityrole_edit_role_tiet"
                     android:onClick="@{() -> activityEventHandler.handleClickRole(entityRole)}"
-                    android:text="@{entityRole?entityRole.entityRoleRole?entityRole.entityRoleRole.roleName:``:``}"
+                    android:text="@{entityRole.entityRoleRole.roleName}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:layout_width="match_parent"

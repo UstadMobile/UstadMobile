@@ -36,6 +36,10 @@
         android:name="com.ustadmobile.port.android.view.SchoolListFragment"
         android:label="@string/schools" />
 
+    <fragment
+        android:id="@+id/schoollist_dest"
+        android:name="com.ustadmobile.port.android.view.SchoolListFragment"
+        android:label="@string/schools" />
 
     <fragment
         android:id="@+id/personlist_dest"

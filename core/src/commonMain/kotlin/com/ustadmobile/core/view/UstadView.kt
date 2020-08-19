@@ -105,6 +105,8 @@ interface UstadView {
 
         const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
 
+        const val ARG_FILTER_BY_PERSONGROUPUID = "filterByPersonGroupUid"
+
         const val ARG_CLAZZWORK_UID = "clazzworkUid"
 
         const val ARG_CLAZZMEMBER_UID = "clazzMemberUid"

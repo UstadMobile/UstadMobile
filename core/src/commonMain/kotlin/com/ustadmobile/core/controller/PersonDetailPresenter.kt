@@ -30,7 +30,7 @@ class PersonDetailPresenter(context: Any,
         view.clazzes = repo.clazzMemberDao.findAllClazzesByPersonWithClazz(entityUid,
                 getSystemTimeInMillis())
 
-        view.rolesAndPermissions = repo.entityRoleDao.filterByPersonWithExtra(entityUid)
+
 
         GlobalScope.launch(doorMainDispatcher()) {
             val activePersonUid = accountManager.activeAccount.personUid
@@ -47,6 +47,9 @@ class PersonDetailPresenter(context: Any,
                     && (activePersonUid == entityUid || activePerson.admin)
 
             view.showCreateAccountVisible =  person.username == null && activePerson.admin
+
+            view.rolesAndPermissions = repo.entityRoleDao.filterByPersonWithExtra(
+                    person.personGroupUid?:0L)
         }
         return repo.personDao.findByUidWithDisplayDetailsLive(entityUid)
     }

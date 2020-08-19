@@ -33,10 +33,6 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-interface PersonDetailFragmentEventHandler {
-
-}
-
 class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), PersonDetailView,
         EntityRoleItemHandler{
 
