@@ -67,8 +67,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UmAppDatabase>(tag = TAG_DB) with scoped(EndpointScope.Default).singleton {
-            File(applicationContext.filesDir,"UmAppDatabase")
-                    .renameTo(File(applicationContext.filesDir, sanitizeDbNameFromUrl(context.url)))
             val dbName = sanitizeDbNameFromUrl(context.url)
             getInstance(applicationContext, dbName).also {
                 val networkManager: NetworkManagerBle = di.direct.instance()
@@ -161,6 +159,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         super.onCreate()
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         initPicasso(applicationContext)
+
     }
 
     override fun attachBaseContext(base: Context) {
