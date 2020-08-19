@@ -51,8 +51,8 @@ class ClazzDetailPresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Clazz? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        val clazz = withTimeoutOrNull(2000) {
-             db.clazzDao.findByUid(entityUid)
+        val clazz = withContext(Dispatchers.Default) {
+            withTimeoutOrNull(2000) { db.clazzDao.findByUidAsync(entityUid) }
         } ?: Clazz()
 
         setupTabs()
