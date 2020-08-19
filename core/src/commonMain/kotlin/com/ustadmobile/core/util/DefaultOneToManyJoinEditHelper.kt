@@ -35,7 +35,7 @@ class DefaultOneToManyJoinEditHelper<T>(pkGetter: (T) -> Long,
     override val fakePkGenerator: () -> Long
         get() = { atomicLong.decrementAndGet() }
 
-    override suspend fun commitToDatabase(dao: OneToManyJoinDao<T>, fkSetter: (T) -> Unit) {
+    override suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
         super.commitToDatabase(dao, fkSetter)
         dao.deactivateByUids(primaryKeysToDeactivate)
     }
