@@ -1,9 +1,10 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ClazzWithNumStudents() : Clazz() {
+class ClazzWithListDisplayDetails() : Clazz() {
 
     var numStudents: Int = 0
 
@@ -13,12 +14,14 @@ class ClazzWithNumStudents() : Clazz() {
 
     var lastRecorded: Long = 0
 
+    @Embedded
+    var clazzActiveMember: ClazzMember? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
 
-        other as ClazzWithNumStudents
+        other as ClazzWithListDisplayDetails
 
         if (numStudents != other.numStudents) return false
         if (numTeachers != other.numTeachers) return false

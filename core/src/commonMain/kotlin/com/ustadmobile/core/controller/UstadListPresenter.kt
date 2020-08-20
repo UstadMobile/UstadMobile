@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -20,7 +21,7 @@ import org.kodein.di.on
 abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>,
                                                                view: V, di: DI,
                                                     val lifecycleOwner: DoorLifecycleOwner)
-    : UstadBaseController<V>(context, arguments, view, di), DIAware {
+    : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected, OnSearchSubmitted {
 
     protected var mListMode = ListViewMode.BROWSER
 
@@ -35,6 +36,11 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
 
     val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+
+    open val sortOptions: List<SortOrderOption>
+        get() = listOf()
+
+    protected var selectedSortOption: SortOrderOption? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -87,7 +93,15 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
         return listOf()
     }
 
+    @Deprecated("Use onSortOptionSelected")
     open fun handleClickSortOrder(sortOption: MessageIdOption) {
+
+    }
+
+    override fun onClickSort(sortOption: SortOrderOption) {
+        selectedSortOption = sortOption
+    }
+    override fun onSearchSubmitted(text: String?) {
 
     }
 

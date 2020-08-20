@@ -40,18 +40,24 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         }
     }
 
+    override var title: String? = null
+        set(value) {
+            ustadFragmentTitle = value
+            field = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         val mTitle = arguments?.get(ARG_PARENT_ENTRY_TITLE)
         if(mTitle != null){
-            clazzWorkTitle = mTitle.toString()
+            ustadFragmentTitle = mTitle.toString()
         }
         mPresenter = ContentEntryList2Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
                 arguments?.get(UstadView.ARG_LISTMODE).toString())
-        val createNewText = requireContext().getString(R.string.create_new,
+        val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.content_editor_create_new_title))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view

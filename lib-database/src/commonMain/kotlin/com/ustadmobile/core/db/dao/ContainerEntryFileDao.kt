@@ -3,6 +3,10 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
+import androidx.room.Transaction
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.DoorDbType
+import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 
@@ -13,6 +17,20 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     //TODO: split this to handle very large queries
     @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 IN (:md5Sums)")
     abstract fun findEntriesByMd5Sums(md5Sums: List<String>): List<ContainerEntryFile>
+
+    @Transaction
+    open fun findEntriesByMd5SumsSafe(md5Sums: List<String>, db: UmAppDatabase): List<ContainerEntryFile> {
+        return if (db.dbType() == DoorDbType.SQLITE) {
+            val chunkedList = md5Sums.chunked(90)
+            val mutableList = mutableListOf<ContainerEntryFile>()
+            chunkedList.forEach {
+                findEntriesByMd5Sums(it).map { entryFile -> mutableList.add(entryFile) }
+            }
+            mutableList.toList()
+        } else {
+            findEntriesByMd5Sums(md5Sums)
+        }
+    }
 
     @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefUid IN (:uidList)")
     abstract fun findEntriesByUids(uidList: List<Long>): List<ContainerEntryFile>

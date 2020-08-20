@@ -1,10 +1,11 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.widget.DatePicker
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
-import androidx.test.espresso.Espresso.closeSoftKeyboard
-import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.*
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -16,6 +17,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.HolidayCalendar
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.rules.*
@@ -53,12 +55,23 @@ class ClazzEndToEndTests {
             this.umCalendarName = "Test Calendar"
         })
 
+        dbRule.insertPersonForActiveUser(Person().apply {
+            firstNames = "Bob"
+            lastName = "Jones"
+            admin = true
+        })
+
+
         val activityScenario = launchActivity<MainActivity>()
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val newClazzText = context.getString(R.string.add_a_new,
+                context.getString(R.string.clazz).toLowerCase())
         onView(withId(R.id.home_clazzlist_dest)).perform(click())
         onView(withText(R.string.clazz)).perform(click())
+        onView(withText(newClazzText)).perform(click())
         onView(withId(R.id.activity_clazz_edit_name_text)).perform(typeText("Test Class"))
         closeSoftKeyboard()
 
@@ -84,6 +97,8 @@ class ClazzEndToEndTests {
 
         val createdClazz = dbRule.db.clazzDao.findByClazzName("Test Class").first()
         onView(withText("Test Class")).perform(click())
+
+        onView(allOf(withParent(withId(R.id.toolbar)), withText(createdClazz.clazzName))).check(matches(isDisplayed()))
     }
 
 }

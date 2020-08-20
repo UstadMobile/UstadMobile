@@ -20,14 +20,22 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
+    buildTypes {
+        release {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+    }
+
     defaultConfig {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
         missingDimensionStrategy 'api', 'api18'
+        multiDexEnabled true
     }
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
+        coreLibraryDesugaringEnabled true
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
@@ -35,6 +43,10 @@ android {
             jvmTarget = "1.8"
         }
     }
+}
+
+dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 }
 
 sourceCompatibility = '1.8'

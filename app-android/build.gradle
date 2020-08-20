@@ -17,7 +17,7 @@ buildscript {
 }
 
 plugins {
-    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha04"
+    id "com.ustadmobile.adbscreenrecorder" version "0.1-alpha05"
 }
 
 apply plugin: 'com.android.library'
@@ -86,6 +86,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
     testOptions {
@@ -124,6 +125,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.version_android_min_sdk
         targetSdkVersion rootProject.ext.version_android_target_sdk
+        multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
@@ -163,7 +165,6 @@ android {
         vanillamultidex {
             dimension "config"
             minSdkVersion 18
-            multiDexEnabled true
             multiDexKeepProguard file('multidex-config.pro')
         }
 
@@ -296,6 +297,8 @@ configurations.all {
 }
 
 dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+
     implementation project(':core')
     implementation project(':sharedse')
 

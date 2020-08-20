@@ -63,6 +63,12 @@ open class Clazz() {
 
     var clazzTeachersPersonGroupUid: Long = 0
 
+    var clazzPendingStudentsPersonGroupUid: Long = 0
+
+    /**
+     * Code that can be used to join the class
+     */
+    var clazzCode: String? = null
 
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
@@ -83,5 +89,8 @@ open class Clazz() {
         const val CLAZZ_FEATURE_ATTENDANCE = 1L
         const val CLAZZ_FEATURE_ACTIVITY = 4L
         const val CLAZZ_FEATURE_ASSIGNMENT = 8L
+
+        const val CLAZZ_CODE_DEFAULT_LENGTH = 6
+
     }
 }

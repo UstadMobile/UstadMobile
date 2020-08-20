@@ -33,7 +33,7 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
             }
 
             val md5SumList = md5sumListStr.split(";")
-            val foundEntries = db.containerEntryFileDao.findEntriesByMd5Sums(md5SumList).map { it.cefMd5 }
+            val foundEntries = db.containerEntryFileDao.findEntriesByMd5SumsSafe(md5SumList, db).map { it.cefMd5 }
 
             val nonExistingMd5SumList = md5SumList.filterNot { it in foundEntries }
             call.respond(nonExistingMd5SumList)
@@ -66,7 +66,7 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
 
                 var containerFromDb = db.containerDao.findByUid(container.containerUid)
                 if (containerFromDb == null) {
-                    db.containerDao.insert(container)
+                    db.containerDao.insertWithReplace(container)
                     containerFromDb = container
                 }
 
@@ -86,6 +86,7 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
                 }else{
                     call.respond(HttpStatusCode.NoContent)
                 }
+                sessionFile.delete()
             }
 
         }

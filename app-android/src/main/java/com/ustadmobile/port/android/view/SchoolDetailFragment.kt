@@ -17,16 +17,16 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
 class CustomViewNameListFragmentPageAdapter(fm: FragmentManager, behavior: Int,
-                                            val vl: List<String>,
-                                            val vntfcm: Map<String, Class<out Fragment>>,
-                                            val vntptm: Map<String, String>,val f: Fragment)
-    : ViewNameListFragmentPagerAdapter(fm, behavior, vl, vntfcm, vntptm ) {
+                val vl: List<String>, viewNameToFragmentClass: Map<String, Class<out Fragment>>,
+                viewNameToPageTitle: Map<String, String>, val f: Fragment)
+    : ViewNameListFragmentPagerAdapter(fm, behavior, vl, viewNameToFragmentClass, viewNameToPageTitle ) {
 
     override fun getPageTitle(position: Int): CharSequence? {
         when (position) {
@@ -58,6 +58,10 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
+
+        //The fab will be managed by the underlying tabs
+        fabManagementEnabled = false
+
         mBinding = FragmentSchoolDetailBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
@@ -73,8 +77,6 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //The fab will be managed by the underlying tabs
-        fabManagementEnabled = false
 
         val navController = findNavController()
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -85,11 +87,13 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
                 SchoolDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
                         entityUidValue
                 ,
-                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF}=" +
-                        entityUidValue + "&${UstadView.ARG_SCHOOL_UID}=" + entityUidValue
+                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_FILTER_BY_ROLE}=" +
+                        SchoolMember.SCHOOL_ROLE_TEACHER +
+                        "&${UstadView.ARG_FILTER_BY_SCHOOLUID}=" + entityUidValue
                 ,
-                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_SCHOOLMEMBER_FILTER_STUDENTS}=" +
-                        entityUidValue + "&${UstadView.ARG_SCHOOL_UID}=" + entityUidValue
+                SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_FILTER_BY_ROLE}=" +
+                        SchoolMember.SCHOOL_ROLE_STUDENT +
+                        "&${UstadView.ARG_FILTER_BY_SCHOOLUID}=" + entityUidValue
         )
         val viewNameToTitle = mapOf(
                 SchoolDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
@@ -109,20 +113,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         }
     }
 
-    override fun setSettingsVisible(visible: Boolean){
-
-        if(!visible){
-            editButtonMode = EditButtonMode.GONE
-        }else{
-            editButtonMode = EditButtonMode.FAB
-        }
-    }
-
     override var title: String? = null
-        get() = field
-        set(value) {
-            field = value
-        }
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -134,23 +125,17 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
     }
 
     override var entity: School? = null
-        get() = field
         set(value) {
             field = value
             mBinding?.school = value
-            clazzWorkTitle = value?.schoolName
+            ustadFragmentTitle = value?.schoolName
         }
 
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
-        }
 
 
     companion object{
-        private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String, Class<out Fragment>>(
+        private val VIEW_NAME_TO_FRAGMENT_CLASS =
+                mapOf<String, Class<out Fragment>>(
                 SchoolDetailOverviewView.VIEW_NAME to
                         SchoolDetailOverviewFragment::class.java,
                 PersonListView.VIEW_NAME to

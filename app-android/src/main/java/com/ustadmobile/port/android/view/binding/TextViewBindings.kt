@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
+import com.ustadmobile.core.util.ext.roleToString
 
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
@@ -239,4 +240,9 @@ fun TextView.setResponseTextFilled(responseText: String?){
     }else{
         text = responseText
     }
+}
+
+@BindingAdapter("memberRoleName")
+fun TextView.setMemberRoleName(clazzMember: ClazzMember?) {
+    text = clazzMember?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
 }

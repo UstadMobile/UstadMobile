@@ -71,6 +71,9 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("findBySourceUrl")
     abstract fun findBySourceUrl(sourceUrl: String): ContentEntry?
 
+    @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :contentEntryUid")
+    abstract fun findTitleByUidAsync(contentEntryUid: Long): String?
+
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
             "WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid")

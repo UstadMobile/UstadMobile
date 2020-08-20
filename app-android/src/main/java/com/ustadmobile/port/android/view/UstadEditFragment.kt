@@ -44,7 +44,7 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
     protected fun setEditFragmentTitle(entityTitleId: Int)  {
         val entityUid = arguments?.getString(ARG_ENTITY_UID)?.toLong() ?: 0L
         val entityJsonStr = arguments?.getString(UstadEditView.ARG_ENTITY_JSON)
-        clazzWorkTitle = if(entityUid != 0L || entityJsonStr != null){
+        ustadFragmentTitle = if(entityUid != 0L || entityJsonStr != null){
             getString(R.string.edit_entity, getString(entityTitleId))
         }else {
             getString(R.string.new_entity, getString(entityTitleId))

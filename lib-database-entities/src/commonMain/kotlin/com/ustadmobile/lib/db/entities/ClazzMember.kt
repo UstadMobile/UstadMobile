@@ -80,6 +80,11 @@ open class ClazzMember()  {
 
         const val ROLE_TEACHER = 1001
 
+        /**
+         * The role given to someone who has the class code, however their registration is not yet approved.
+         */
+        const val ROLE_STUDENT_PENDING = 1002
+
         const val TABLE_ID = 13
     }
 }

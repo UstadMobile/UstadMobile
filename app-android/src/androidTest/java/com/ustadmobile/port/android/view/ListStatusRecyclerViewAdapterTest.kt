@@ -119,13 +119,15 @@ class ListStatusRecyclerViewAdapterTest {
                                   val loadingStatusLiveData: MutableLiveData<RepositoryLoadHelper.RepoLoadStatus>)
 
     private fun createScenario(
-            loadingStatus: RepositoryLoadHelper.RepoLoadStatus = RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA)): ListStatusScenario {
+            loadingStatus: RepositoryLoadHelper.RepoLoadStatus = RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA),
+            excludePersonUids: List<Long> = listOf()): ListStatusScenario {
 
         val adminPerson = Person().apply {
             firstNames = "Admin"
             lastName = "Admin"
             admin = true
-            personUid = dbRule.db.personDao.insert(this)
+            personUid = dbRule.account.personUid
+            dbRule.db.personDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
@@ -135,7 +137,7 @@ class ListStatusRecyclerViewAdapterTest {
         lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
         val loadingStatusLiveData = MutableLiveData(loadingStatus)
         fragmentScenario.onFragment { fragment ->
-            val dataSource = dbRule.db.personDao.findPersonsWithPermission(0, 0, 0, listOf(),
+            val dataSource = dbRule.db.personDao.findPersonsWithPermission(0, 0, 0, excludePersonUids,
                 adminPerson.personUid, PersonDao.SORT_NAME_ASC)
             val livePagedList = LivePagedListBuilder(dataSource, 20).build()
             fragment.listStatusAdapter?.pagedListLiveData = livePagedList
@@ -153,7 +155,8 @@ class ListStatusRecyclerViewAdapterTest {
 
     @Test
     fun givenEmptyList_whenDisplayed_thenShouldShowEmptyMessage() {
-        val (scenario, recyclerViewIdlingResource) = createScenario()
+        val (scenario, recyclerViewIdlingResource) = createScenario(excludePersonUids =
+            listOf(dbRule.account.personUid))
 
         onView(withText(R.string.nothing_here)).check(matches(isDisplayed()))
 

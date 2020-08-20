@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZ_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -27,15 +26,6 @@ class ClazzDetailPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    /*
-     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
-     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
-     */
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-
-        //TODO: Set any additional fields (e.g. joinlist) on the view
-    }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         return false //This has no effect because the button is controlled by the overview presenter
@@ -61,8 +51,8 @@ class ClazzDetailPresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Clazz? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        val clazz = withTimeoutOrNull(2000) {
-             db.clazzDao.findByUid(entityUid)
+        val clazz = withContext(Dispatchers.Default) {
+            withTimeoutOrNull(2000) { db.clazzDao.findByUidAsync(entityUid) }
         } ?: Clazz()
 
         setupTabs()

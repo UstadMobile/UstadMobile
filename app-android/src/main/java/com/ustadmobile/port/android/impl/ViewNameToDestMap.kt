@@ -49,7 +49,8 @@ class ViewNameToDestMap: DestinationProvider {
             Login2View.VIEW_NAME to UstadDestination(R.id.login_dest),
             GetStartedView.VIEW_NAME to UstadDestination(R.id.account_get_started_dest),
             AccountListView.VIEW_NAME to UstadDestination(R.id.account_list_dest),
-            PersonAccountEditView.VIEW_NAME to UstadDestination(R.id.person_account_edit_dest)
+            PersonAccountEditView.VIEW_NAME to UstadDestination(R.id.person_account_edit_dest),
+            JoinWithCodeView.VIEW_NAME to UstadDestination(R.id.join_with_code_dest)
     )
 
     override val navControllerViewId: Int
