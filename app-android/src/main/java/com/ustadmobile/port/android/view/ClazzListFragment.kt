@@ -12,26 +12,26 @@ import com.ustadmobile.core.controller.ClazzListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
+import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
+class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDetails>(),
         ClazzList2View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
         BottomSheetOptionSelectedListener{
 
     private var mPresenter: ClazzListPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in ClazzWithNumStudents>?
+    override val listPresenter: UstadListPresenter<*, in ClazzWithListDisplayDetails>?
         get() = mPresenter
+
+    override var newClazzListOptionVisible: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -54,7 +54,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
 
         //override this to show our own bottom sheet
         fabManager?.onClickListener = {
-            val optionList = if(addMode == ListViewAddMode.FAB || addMode == ListViewAddMode.FIRST_ITEM) {
+            val optionList = if(newClazzListOptionVisible) {
                 listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
                         requireContext().getString(R.string.add_a_new,
                                 requireContext().getString(R.string.clazz).toLowerCase()), NEW_CLAZZ))
@@ -72,6 +72,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithNumStudents>(),
     override fun onBottomSheetOptionSelected(optionSelected: BottomSheetOption) {
         when(optionSelected.optionCode) {
             NEW_CLAZZ -> mPresenter?.handleClickCreateNewFab()
+            JOIN_CLAZZ -> mPresenter?.handleClickJoinClazz()
         }
     }
 

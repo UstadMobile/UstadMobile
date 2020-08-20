@@ -98,7 +98,7 @@ class ClazzDetailFragment: UstadDetailFragment<Clazz>(), ClazzDetailView, ClazzD
         get() = field
         set(value) {
             field = value
-            clazzWorkTitle = value?.clazzName
+            ustadFragmentTitle = value?.clazzName
             mBinding?.clazz = value
         }
 

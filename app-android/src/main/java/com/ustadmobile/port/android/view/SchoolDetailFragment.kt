@@ -128,7 +128,7 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
         set(value) {
             field = value
             mBinding?.school = value
-            clazzWorkTitle = value?.schoolName
+            ustadFragmentTitle = value?.schoolName
         }
 
 

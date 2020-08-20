@@ -8,6 +8,8 @@ interface ClazzMemberListView: UstadListView<ClazzMember, ClazzMemberWithPerson>
 
     var studentList: DataSource.Factory<Int, ClazzMemberWithPerson>?
 
+    var pendingStudentList: DataSource.Factory<Int, ClazzMemberWithPerson>?
+
     var addTeacherVisible: Boolean
 
     var addStudentVisible: Boolean

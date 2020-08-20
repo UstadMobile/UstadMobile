@@ -70,12 +70,12 @@ subprojects {
 
 
 //Major.minor.database version
-version = "1.0.0"
+version = "0.3.3"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 200
+    ustadVersionCode = 182
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.5"
@@ -149,7 +149,7 @@ ext {
     version_androidx_coordinatorlayout = "1.1.0"
     version_androidx_lifecycle = "2.3.0-alpha03"
     version_androidx_legacy = "1.0.0"
-    version_android_room = "2.3.0-alpha02"
+    version_android_room = "2.2.5"
     version_androidx_arch = "2.1.0"
     version_androidx_recyclerview = "1.2.0-alpha03"
     version_android_multidex = "2.0.1"

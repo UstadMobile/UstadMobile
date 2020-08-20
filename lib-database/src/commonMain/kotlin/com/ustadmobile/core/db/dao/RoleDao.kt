@@ -62,6 +62,13 @@ abstract class RoleDao : BaseDao<Role> {
                 roleUid = Role.ROLE_STUDENT_UID.toLong()
             })
         }
+
+        val studentPendingRole = findByUidAsync(Role.ROLE_STUDENT_PENDING_UID.toLong())
+        if(studentPendingRole == null) {
+            insertOrReplace(Role(Role.ROLE_STUDENT_PENDING_NAME, Role.ROLE_STUDENT_PENDING_PERMISSION_DEFAULT).apply {
+                roleUid = Role.ROLE_STUDENT_PENDING_UID.toLong()
+            })
+        }
     }
 
 

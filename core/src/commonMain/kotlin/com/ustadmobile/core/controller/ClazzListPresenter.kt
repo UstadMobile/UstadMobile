@@ -3,11 +3,8 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.ClazzEdit2View
-import com.ustadmobile.core.view.ClazzList2View
-import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
@@ -55,7 +52,9 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
+        //All user should be able to see the plus button - but only those with permission can create a new class
+        view.newClazzListOptionVisible = repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
+        return true
     }
 
     private fun getAndSetList(sortOrder: SortOrder) {
@@ -65,6 +64,10 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     override fun handleClickCreateNewFab() {
         systemImpl.go(ClazzEdit2View.VIEW_NAME, mapOf(), context)
+    }
+
+    fun handleClickJoinClazz() {
+        systemImpl.go(JoinWithCodeView.VIEW_NAME, mapOf(), context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {

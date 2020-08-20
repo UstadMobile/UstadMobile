@@ -19,7 +19,7 @@ import java.lang.IllegalArgumentException
 class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
                                  createNewText: String? = null,
                                  var headerStringId: Int = 0,
-                                 var headerLayoutId: Int = 0,
+                                 headerLayoutId: Int = 0,
                                  onClickSort: View.OnClickListener? = null,
                                  val sortOrderOption: SortOrderOption? = null) : ListAdapter<Int, RecyclerView.ViewHolder>(DIFFUTIL_NEWITEM) {
 
@@ -30,6 +30,12 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
 
 
     var newItemVisible: Boolean = false
+        set(value) {
+            field = value
+            submitList(currentHolderList)
+        }
+
+    var headerLayoutId: Int = headerLayoutId
         set(value) {
             field = value
             submitList(currentHolderList)

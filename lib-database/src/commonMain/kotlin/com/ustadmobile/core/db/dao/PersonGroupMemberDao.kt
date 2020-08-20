@@ -15,4 +15,12 @@ abstract class PersonGroupMemberDao : BaseDao<PersonGroupMember> {
     @Query("SELECT * FROM PersonGroupMember WHERE groupMemberPersonUid = :personUid")
     abstract suspend fun findAllGroupWherePersonIsIn(personUid: Long) : List<PersonGroupMember>
 
+    /**
+     * Updates an existing group membership to a new group
+     */
+    @Query("""UPDATE PersonGroupMember SET groupMemberGroupUid = :newGroup,
+            groupMemberLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0)
+            WHERE groupMemberPersonUid = :personUid AND groupMemberGroupUid = :oldGroup""")
+    abstract suspend fun moveGroupAsync(personUid: Long, newGroup: Long, oldGroup: Long): Int
+
 }

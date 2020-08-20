@@ -108,7 +108,9 @@ class ContentEntryList2PresenterTest {
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         verify(systemImpl, timeout(defaultTimeout)).go(eq(ContentEntry2DetailView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to createdEntries?.get(0)?.contentEntryUid.toString())), any())
+                argWhere {
+                    it.get(ARG_ENTITY_UID) == createdEntries?.get(0)?.contentEntryUid.toString()
+                }, any())
     }
 
     @Test

@@ -6,11 +6,12 @@
     <data>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="com.ustadmobile.core.util.ext.ClazzExtKt"/>
+        <import type="com.ustadmobile.core.util.ext.ClazzMemberExtKt"/>
         <import type="android.view.View"/>
 
         <variable
             name="clazz"
-            type="com.ustadmobile.lib.db.entities.ClazzWithNumStudents" />
+            type="com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails" />
         <variable
             name="itemListener"
             type="com.ustadmobile.core.controller.ClazzListItemListener" />
@@ -26,6 +27,35 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_listitem"
         android:onClick="@{() -> itemListener.onClickClazz(clazz)}">
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_clazzlist_badge_icon"
+            android:layout_width="@dimen/dimen_16dp"
+            android:layout_height="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
+            android:contentDescription="@string/people"
+            android:tint="?colorOnIconTint"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_clazzlist_role_text"
+            android:visibility="@{clazz.clazzActiveMember != null ? View.VISIBLE : View.GONE}"
+            app:srcCompat="@drawable/ic_badge_24dp" />
+
+        <TextView
+            android:id="@+id/item_clazzlist_role_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:minWidth="@dimen/dimen_64dp"
+            android:gravity="center"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            app:memberRoleName="@{clazz.clazzActiveMember}"
+            android:visibility="@{clazz.clazzActiveMember != null ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Student - (Pending)"
+            />
+
 
         <TextView
             android:id="@+id/item_clazzlist_clazz_title"
