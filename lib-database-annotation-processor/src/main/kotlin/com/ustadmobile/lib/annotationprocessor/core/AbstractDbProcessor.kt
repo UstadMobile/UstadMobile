@@ -1367,7 +1367,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      *
      */
     fun generateKtorRouteSelectCodeBlock(daoMethod: FunSpec, daoTypeEl: TypeElement? = null,
-                                         syncHelperDaoVarName: String = "_syncHelper",
+                                         syncHelperDaoVarName: String = "_syncHelper(_db)",
                                          serverType: Int = DbProcessorKtorServer.SERVER_TYPE_KTOR) : CodeBlock {
         val codeBlock = CodeBlock.builder()
         val resultType = resolveQueryResultType(daoMethod.returnType!!)
@@ -1402,7 +1402,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 ?.addModifiers(KModifier.SUSPEND)
 
         codeBlock.add(generateHttpServerPassToDaoCodeBlock(modifiedQueryFunSpec.build(),
-                daoVarName = "_ktorHelperDao", preexistingVarNames = listOf("clientId"),
+                daoVarName = "_ktorHelperDao(_db)", preexistingVarNames = listOf("clientId"),
                 serverType = serverType, addRespondCall = false))
 
         codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
@@ -1434,7 +1434,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
     fun generateHttpServerPassToDaoCodeBlock(daoMethod: FunSpec, mutlipartHelperVarName: String? = null,
                                              beforeDaoCallCode: CodeBlock = CodeBlock.of(""),
                                              afterDaoCallCode: CodeBlock = CodeBlock.of(""),
-                                             daoVarName: String = "_dao",
+                                             daoVarName: String = "_dao(_db)",
                                              preexistingVarNames: List<String> = listOf(),
                                              serverType: Int = DbProcessorKtorServer.SERVER_TYPE_KTOR,
                                              addRespondCall: Boolean = true): CodeBlock {

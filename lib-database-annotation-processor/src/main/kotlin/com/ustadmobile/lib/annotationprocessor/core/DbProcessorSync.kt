@@ -9,6 +9,9 @@ import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_MEMBER
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_ON_MEMBER
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.InputProvider
 import io.ktor.content.TextContent
@@ -187,14 +190,16 @@ class DbProcessorSync: AbstractDbProcessor() {
         specs.ktorRoute.fileSpec.addImport("io.ktor.response", "header")
 
 
+        val ktorHelperDaoClassName = ClassName(packageName, "$abstractDaoClassName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}")
         val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
                 .receiver(Route::class)
-                .addParameter("_dao", abstractDaoClassName)
-                .addParameter("_db", DoorDatabase::class)
-                .addParameter("_gson", Gson::class)
-                .addParameter("_attachmentsDir", String::class)
-                .addParameter("_ktorHelperDao",
-                        ClassName(packageName, "$abstractDaoClassName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}"))
+                .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class).copy(reified = true))
+                .addModifiers(KModifier.INLINE)
+                .addParameter("_dao", LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
+                    returnType = abstractDaoClassName), KModifier.CROSSINLINE)
+                .addParameter("_ktorHelperDao", LambdaTypeName.get(
+                        parameters = *arrayOf(TypeVariableName("T")),
+                        returnType = ktorHelperDaoClassName), KModifier.CROSSINLINE)
 
         val codeBlock = CodeBlock.builder()
         codeBlock.beginControlFlow("%M(%S)",
@@ -212,7 +217,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .build()
             codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER,
                     "_findMasterUnsent${entityType.simpleName}")
-                .add(generateKtorRouteSelectCodeBlock(getAllFunSpec, syncHelperDaoVarName = "_dao"))
+                    .addRequestDi()
+                .add(generateKtorRouteSelectCodeBlock(getAllFunSpec, syncHelperDaoVarName = "_dao(_db)"))
                 .endControlFlow()
             val helperFunSpec = getAllFunSpec.toBuilder()
             helperFunSpec.annotations.clear()
@@ -226,12 +232,16 @@ class DbProcessorSync: AbstractDbProcessor() {
 
             codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.POST_MEMBER,
                     "_replace${entityType.simpleName}")
+                    .addRequestDi()
+                    .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
             val hasAttachments = findEntitiesWithAnnotation(entityType.asClassName(), EntityWithAttachment::class.java,
                     processingEnv).isNotEmpty()
 
             if(hasAttachments) {
                 val multipartHelperVarName = "_multipartHelper"
-                codeBlock.add("val $multipartHelperVarName = %T()\n",
+                codeBlock.add("val _attachmentsDir: String by _di.%M(call).%M(tag = %T.TAG_ATTACHMENT_DIR)\n",
+                                DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
+                        .add("val $multipartHelperVarName = %T()\n",
                         ClassName("com.ustadmobile.door", "DoorAttachmentsMultipartHelper"))
                         .add("_multipartHelper.digestMultipart(%M.%M())\n",
                                 DbProcessorKtorServer.CALL_MEMBER,
@@ -261,7 +271,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             }
 
             codeBlock.add(generateUpdateTrackerReceivedKtorRoute(syncableEntityInfo.tracker,
-                    syncHelperVarName = "_dao"))
+                    syncHelperVarName = "_dao(_db)"))
 
         }
         codeBlock.endControlFlow()

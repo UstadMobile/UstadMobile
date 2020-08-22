@@ -128,6 +128,9 @@ dependencies {
 
     implementation "ch.qos.logback:logback-classic:$version_logback"
 
+    implementation "org.kodein.di:kodein-di:$version_kodein_di"
+    implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+
     //KaptTest does not
     //kaptTest project(":lib-database-annotation-processor")
     kaptTest files("build/libs/lib-database-annotation-processor.jar")
