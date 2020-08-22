@@ -6,10 +6,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzListBinding
 import com.ustadmobile.core.controller.ClazzListItemListener
-import com.ustadmobile.lib.db.entities.ClazzWithNumStudents
+import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?): SelectablePagedListAdapter<ClazzWithNumStudents, ClazzListRecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
+class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?): SelectablePagedListAdapter<ClazzWithListDisplayDetails, ClazzListRecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
 
     class ClazzList2ViewHolder(val itemBinding: ItemClazzListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -30,15 +30,15 @@ class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?): Select
     }
 
     companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzWithNumStudents> = object
-            : DiffUtil.ItemCallback<ClazzWithNumStudents>() {
-            override fun areItemsTheSame(oldItem: ClazzWithNumStudents,
-                                         newItem: ClazzWithNumStudents): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzWithListDisplayDetails> = object
+            : DiffUtil.ItemCallback<ClazzWithListDisplayDetails>() {
+            override fun areItemsTheSame(oldItem: ClazzWithListDisplayDetails,
+                                         newItem: ClazzWithListDisplayDetails): Boolean {
                 return oldItem.clazzUid == newItem.clazzUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzWithNumStudents,
-                                            newItem: ClazzWithNumStudents): Boolean {
+            override fun areContentsTheSame(oldItem: ClazzWithListDisplayDetails,
+                                            newItem: ClazzWithListDisplayDetails): Boolean {
                 return oldItem == newItem
             }
         }

@@ -15,6 +15,7 @@ import com.toughra.ustadmobile.databinding.FragmentXapiPackageContentBinding
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.XapiPackageContentView
 
 class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
@@ -31,7 +32,7 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
     override var contentTitle: String = ""
         set(value) {
             field = value
-            clazzWorkTitle = value
+            ustadFragmentTitle = value
         }
 
     override var url: String = ""

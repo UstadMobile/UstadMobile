@@ -23,6 +23,9 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     @Query("SELECT * From Clazz WHERE clazzUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Clazz?>
 
+    @Query("SELECT * FROM Clazz WHERE clazzCode = :code")
+    abstract fun findByClazzCode(code: String): Clazz?
+
     @Query(SELECT_ACTIVE_CLAZZES)
     abstract fun findAllLive(): DoorLiveData<List<Clazz>>
 
@@ -68,13 +71,18 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     }
 
     @Query("""
-        SELECT Clazz.*,
+        SELECT Clazz.*, ClazzMember.*,
         (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = ${ClazzMember.ROLE_STUDENT}) AS numStudents,
         (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = ${ClazzMember.ROLE_TEACHER}) AS numTeachers,
         '' AS teacherNames,
         0 AS lastRecorded
         FROM 
         Clazz
+        LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid =
+            COALESCE((SELECT ClazzMember.clazzMemberUid FROM ClazzMember
+             WHERE
+             ClazzMember.clazzMemberPersonUid = :personUid
+             AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid LIMIT 1), 0)
         WHERE
         CAST(Clazz.isClazzActive AS INTEGER) = 1
         AND Clazz.clazzName like :searchQuery
@@ -100,7 +108,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             ELSE ''
         END DESC
     """)
-    abstract fun findClazzesWithPermission(searchQuery: String, personUid: Long, excludeSchoolUid: Long, sortOrder: Int): DataSource.Factory<Int, ClazzWithNumStudents>
+    abstract fun findClazzesWithPermission(searchQuery: String, personUid: Long, excludeSchoolUid: Long, sortOrder: Int): DataSource.Factory<Int, ClazzWithListDisplayDetails>
 
     @Query("SELECT * FROM Clazz WHERE clazzName = :name and CAST(isClazzActive AS INTEGER) = 1")
     abstract fun findByClazzName(name: String): List<Clazz>

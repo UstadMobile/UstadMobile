@@ -12,6 +12,8 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
      */
     fun showDownloadDialog(args: Map<String, String>)
 
+    var title: String?
+
     companion object {
 
         const val ARG_DOWNLOADED_CONTENT = "downloaded"

@@ -727,4 +727,25 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="question_type">Question type</string>
     <string name="add_option">Add option</string>
 
+    <!-- This is a code that the teacher can give to students to allow them to join the class -->
+    <string name="class_code">Class code</string>
+
+    <!-- Pending requests - use on classes / schools to list people who have requested to join a class / school -->
+    <string name="pending_requests">Pending requests</string>
+
+    <!-- Used to indicate that something is pending e.g. "Student (Pending)" when the student has not yet been approved -->
+    <string name="pending">Pending</string>
+
+    <!-- Substitution to show users the choice to join an existing entity. %1$s will be replaced by the app.
+    e.g. "Join existing class". -->
+    <string name="join_existing">Join existing %1$s</string>
+
+    <string name="please_wait_for_approval">Please wait for your request to be approved by your teacher or admin.</string>
+
+    <string name="reject">Reject</string>
+
+    <string name="ask_your_teacher_for_code">Ask your teacher for the class code, then enter it below:</string>
+
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+
 </resources>
