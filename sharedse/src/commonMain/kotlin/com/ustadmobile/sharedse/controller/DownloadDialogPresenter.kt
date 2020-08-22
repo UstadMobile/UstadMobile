@@ -111,7 +111,9 @@ class DownloadDialogPresenter(context: Any,
                     contentEntryUid)
             val isWifiOnly = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
             wifiOnlyChecked.value = isWifiOnly
-            view.setDownloadOverWifiOnly(isWifiOnly)
+
+            //Lamsustad deployment change
+            view.setDownloadOverWifiOnly(false)
             downloadJobItemLiveData.observe(lifecycleOwner, downloadJobItemObserver)
 
             val storageDirs = impl.getStorageDirsAsync(context)
