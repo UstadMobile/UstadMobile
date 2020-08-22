@@ -418,7 +418,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                             useMultipartPartsVarName = multipartPartsVarName))
                     .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",
                             entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
-                            reqIdVarName = "0", processingEnv = processingEnv))
+                            reqIdVarName = "0", processingEnv = processingEnv, isPrimaryDb = false))
                     .endControlFlow()
 
             entitySyncCodeBlock.add("""return %T(tableId = ${syncableEntityInfo.tableId},

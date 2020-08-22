@@ -91,7 +91,7 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
     /**
      * Commits the results of the editing to the database
      */
-    open suspend fun commitToDatabase(dao: OneToManyJoinDao<T>, fkSetter: (T) -> Unit) {
+    open suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
         dao.insertListAsync(entitiesToInsert.also { it.forEach {
             fkSetter(it)
             pkSetter(it, newPk)
