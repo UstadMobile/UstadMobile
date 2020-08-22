@@ -9,9 +9,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
 import db2.ExampleDatabase2SyncDao_JdbcKt
 import db2.ExampleSyncableDao_Repo
 import db2.ExampleDatabase2_KtorRoute
@@ -24,7 +21,6 @@ import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import org.junit.After
 import java.util.concurrent.TimeUnit
 import io.ktor.application.call
 import io.ktor.client.engine.okhttp.OkHttp
@@ -39,6 +35,8 @@ import io.ktor.routing.post
 import io.ktor.server.engine.stop
 import io.netty.handler.codec.http.HttpResponse
 import kotlinx.coroutines.runBlocking
+import org.junit.*
+import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.assertEquals
@@ -56,6 +54,10 @@ class TestDbRepo {
 
     var tmpAttachmentsDir: File? = null
 
+    @JvmField
+    @Rule
+    var temporaryFolder = TemporaryFolder()
+
     fun createSyncableDaoServer(db: ExampleDatabase2) = embeddedServer(Netty, 8089) {
         install(ContentNegotiation) {
             register(ContentType.Application.Json, GsonConverter())
@@ -64,7 +66,7 @@ class TestDbRepo {
 
         val syncDao = ExampleDatabase2SyncDao_JdbcKt(db)
         val gson = Gson()
-        tmpAttachmentsDir = Files.createTempDirectory("testdbrepoattachments").toFile()
+        tmpAttachmentsDir = temporaryFolder.newFolder("testdbrepoattachments")
         install(Routing) {
             ExampleDatabase2_KtorRoute(db, gson, tmpAttachmentsDir!!.absolutePath)
         }
