@@ -11,9 +11,11 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import com.ustadmobile.door.*
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbVersionHeader
 import db2.*
 import db2.ExampleDatabase2.Companion.DB_VERSION
+import io.ktor.application.ApplicationCall
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.engine.okhttp.OkHttp
@@ -29,6 +31,14 @@ import io.ktor.server.engine.ApplicationEngine
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert
+import org.kodein.di.bind
+import org.kodein.di.bindings.Scope
+import org.kodein.di.bindings.ScopeRegistry
+import org.kodein.di.bindings.StandardScopeRegistry
+import org.kodein.di.ktor.DIFeature
+import org.kodein.di.registerContextTranslator
+import org.kodein.di.scoped
+import org.kodein.di.singleton
 import java.util.concurrent.TimeUnit
 import java.io.File
 import java.nio.file.Files
@@ -43,21 +53,40 @@ class TestDbRoute  {
 
     private lateinit var httpClient: HttpClient
 
+    class VirtualHostScope(): Scope<String> {
+
+        private val activeHosts = mutableMapOf<String, ScopeRegistry>()
+
+        override fun getRegistry(context: String): ScopeRegistry = activeHosts.getOrPut(context) { StandardScopeRegistry() }
+
+    }
+
     @Before
     fun setup() {
         exampleDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         exampleDb.clearAllTables()
 
-        val gson = Gson()
+        val virtualHostScope = VirtualHostScope()
+
         server = embeddedServer(Netty, port = 8089) {
             install(ContentNegotiation) {
                 register(ContentType.Application.Json, GsonConverter())
                 register(ContentType.Any, GsonConverter())
             }
 
+            install(DIFeature) {
+                bind<ExampleDatabase2>(tag = DoorTag.TAG_DB) with scoped(virtualHostScope).singleton {
+                    exampleDb
+                }
+
+                bind<Gson>() with singleton { Gson() }
+
+                registerContextTranslator { call: ApplicationCall -> "localhost" }
+            }
+
             tmpAttachmentsDir = Files.createTempDirectory("TestDbRoute").toFile()
             install(Routing) {
-                ExampleDatabase2_KtorRoute(exampleDb, gson, tmpAttachmentsDir!!.absolutePath)
+                ExampleDatabase2_KtorRoute(true)
             }
         }
 
