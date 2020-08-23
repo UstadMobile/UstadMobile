@@ -108,8 +108,6 @@ class EntityRoleEditFragmentTest {
 
         val scenario = launchFragment(true)
 
-        //scenario.clickOptionMenu(R.menu.menu_done)
-
 
         onView(withId(R.id.fragment_entityrole_edit_role_tiet)).check(matches(isDisplayed()))
 
