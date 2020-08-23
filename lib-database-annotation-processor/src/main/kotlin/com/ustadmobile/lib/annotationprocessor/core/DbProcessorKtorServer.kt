@@ -279,24 +279,30 @@ fun CodeBlock.Builder.addRequestDi(diVarName: String = "_di", dbVarName: String 
                     DoorTag::class)
 }
 
-internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper(_db)",
+internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper",
+                                                    syncHelperFnName: String = "_syncHelperFn",
+                                                    dbVarName: String = "_db",
                                                     serverType: Int = SERVER_TYPE_KTOR) =
     CodeBlock.builder()
             .addGetClientIdHeader("_clientId", serverType)
             .add(generateGetParamFromRequestCodeBlock(INT, "reqId", "_requestId",
                     serverType = serverType))
-            .addRequestDi(serverType = serverType)
+            .addRequestDi(serverType = serverType, dbVarName = dbVarName)
+            .apply { takeIf { serverType == SERVER_TYPE_KTOR }?.add("val $syncHelperVarName = $syncHelperFnName($dbVarName)\n") }
             //TODO: Add the clientId to this query (to prevent other clients interfering)
             .add("$syncHelperVarName._update${trackerClassName.simpleName}Received(true, _requestId)\n")
             .apply { takeIf { serverType == SERVER_TYPE_KTOR }?.add(CODEBLOCK_KTOR_NO_CONTENT_RESPOND) }
             .apply { takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE) }
             .build()
 
-internal fun generateUpdateTrackerReceivedKtorRoute(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper(_db)")=
+internal fun generateUpdateTrackerReceivedKtorRoute(trackerClassName: ClassName,
+                                                    syncHelperFnName: String = "_syncHelperFn",
+                                                    dbVarName: String = "_db",
+                                                    syncHelperVarName: String = "_syncHelper")=
     CodeBlock.builder().beginControlFlow("%M(%S)",
                 DbProcessorKtorServer.GET_MEMBER, "_update${trackerClassName.simpleName}Received")
             .add(generateUpdateTrackerReceivedCodeBlock(trackerClassName, syncHelperVarName,
-                    serverType = SERVER_TYPE_KTOR))
+                    serverType = SERVER_TYPE_KTOR, syncHelperFnName = syncHelperFnName))
             .endControlFlow()
             .build()
 
@@ -543,7 +549,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 .addImport("io.ktor.response", "header")
 
         val daoParams = mutableListOf(
-                ParameterSpec.builder("_dao",
+                ParameterSpec.builder("_daoFn",
                         LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
                         returnType = daoTypeElement.asType().asTypeName()))
                             .addModifiers(KModifier.CROSSINLINE)
@@ -562,12 +568,12 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         if(daoHasSyncableEntities) {
             val syncHelperClassName = ClassName(pkgNameOfElement(daoTypeElement, processingEnv),
                     "${daoTypeElement.simpleName}_SyncHelper")
-            daoParams += ParameterSpec.builder("_syncHelper",
+            daoParams += ParameterSpec.builder("_syncHelperFn",
                     LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
                             returnType = syncHelperClassName))
                     .addModifiers(KModifier.CROSSINLINE)
                     .build()
-            daoParams += ParameterSpec.builder("_ktorHelperDao",
+            daoParams += ParameterSpec.builder("_ktorHelperDaoFn",
                     LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
                         returnType = ktorHelperClassName))
                     .addModifiers(KModifier.CROSSINLINE)
@@ -620,6 +626,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
             ktorCodeBlock.beginControlFlow("%M(%S)", memberFn, daoSubEl.simpleName)
                     .addRequestDi()
+                    .add("val _dao = _daoFn(_db)\n")
                     .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
 
             val funSpec = FunSpec.builder(daoMethodEl.simpleName.toString())
@@ -642,7 +649,10 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 funSpec.addAnnotation(AnnotationSpec.builder(Query::class.asClassName())
                         .addMember(CodeBlock.of("%S", queryAnnotation.value)).build())
                 val funSpecBuilt = funSpec.build()
-                ktorCodeBlock.add(generateKtorRouteSelectCodeBlock(funSpecBuilt,
+                ktorCodeBlock
+                        .add("val _ktorHelperDao = _ktorHelperDaoFn(_db)\n")
+                        .add("val _syncHelper = _syncHelperFn(_db)\n")
+                        .add(generateKtorRouteSelectCodeBlock(funSpecBuilt,
                         daoTypeElement, serverType = SERVER_TYPE_KTOR))
                 nanoHttpdCodeBlock.add(generateKtorRouteSelectCodeBlock(funSpecBuilt,
                         daoTypeElement, serverType = SERVER_TYPE_NANOHTTPD))

@@ -195,9 +195,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .receiver(Route::class)
                 .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class).copy(reified = true))
                 .addModifiers(KModifier.INLINE)
-                .addParameter("_dao", LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
+                .addParameter("_daoFn", LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
                     returnType = abstractDaoClassName), KModifier.CROSSINLINE)
-                .addParameter("_ktorHelperDao", LambdaTypeName.get(
+                .addParameter("_ktorHelperDaoFn", LambdaTypeName.get(
                         parameters = *arrayOf(TypeVariableName("T")),
                         returnType = ktorHelperDaoClassName), KModifier.CROSSINLINE)
 
@@ -218,7 +218,9 @@ class DbProcessorSync: AbstractDbProcessor() {
             codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER,
                     "_findMasterUnsent${entityType.simpleName}")
                     .addRequestDi()
-                .add(generateKtorRouteSelectCodeBlock(getAllFunSpec, syncHelperDaoVarName = "_dao(_db)"))
+                    .add("val _dao = _daoFn(_db)\n")
+                    .add("val _ktorHelperDao = _ktorHelperDaoFn(_db)\n")
+                .add(generateKtorRouteSelectCodeBlock(getAllFunSpec, syncHelperDaoVarName = "_dao"))
                 .endControlFlow()
             val helperFunSpec = getAllFunSpec.toBuilder()
             helperFunSpec.annotations.clear()
@@ -233,6 +235,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.POST_MEMBER,
                     "_replace${entityType.simpleName}")
                     .addRequestDi()
+                    .add("val _dao = _daoFn(_db)\n")
                     .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
             val hasAttachments = findEntitiesWithAnnotation(entityType.asClassName(), EntityWithAttachment::class.java,
                     processingEnv).isNotEmpty()
@@ -271,7 +274,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             }
 
             codeBlock.add(generateUpdateTrackerReceivedKtorRoute(syncableEntityInfo.tracker,
-                    syncHelperVarName = "_dao(_db)"))
+                    syncHelperVarName = "_dao", syncHelperFnName = "_daoFn"))
 
         }
         codeBlock.endControlFlow()
