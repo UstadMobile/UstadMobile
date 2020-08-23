@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.EntityRoleEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -42,7 +43,13 @@ class EntityRoleEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: EntityRoleWithNameAndRole) {
-        view.finishWithResult(listOf(entity))
+
+        if(entity.entityRoleRole == null){
+            view.errorText = systemImpl.getString(MessageID.role_not_selected_error,
+                    context)
+        }else {
+            view.finishWithResult(listOf(entity))
+        }
     }
 
 

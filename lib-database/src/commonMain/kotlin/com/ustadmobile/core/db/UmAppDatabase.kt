@@ -2797,6 +2797,77 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        /**
+         * Add fields required for class and school codes for students to join a class or school
+         *  Changes from 37-38:
+            1. Added personGroupUid to Person
+            2. Added personGroupFlag to PersonGroup
+            3. Removed groupPersonUid from PersonGroup
+         */
+        val MIGRATION_37_38 = object : DoorMigration(37, 38) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    //Person
+                    database.execSQL("ALTER TABLE Person ADD COLUMN personGroupUid BIGINT DEFAULT 0 NOT NULL")
+
+                    //PersonGroup
+                    database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup (  " +
+                            "groupMasterCsn  BIGINT NOT NULL , groupLocalCsn  BIGINT NOT NULL, " +
+                            "groupLastChangedBy  INTEGER NOT NULL, groupName  TEXT , " +
+                            "groupActive  INTEGER NOT NULL , personGroupFlag  INTEGER NOT NULL, " +
+                            "groupUid  INTEGER NOT NULL PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonGroup (" +
+                            "groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy, " +
+                            "groupName, groupActive) SELECT groupUid, groupMasterCsn, " +
+                            "groupLocalCsn, groupLastChangedBy, groupName, groupActive " +
+                            "FROM PersonGroup_OLD")
+                    database.execSQL("DROP TABLE PersonGroup_OLD")
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    //Person
+                    database.execSQL("ALTER TABLE Person RENAME to Person_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Person (  " +
+                            "username  TEXT , firstNames  TEXT , lastName  TEXT , " +
+                            "emailAddr  TEXT , phoneNum  TEXT , gender  INTEGER NOT NULL, " +
+                            "active  BOOL , admin  BOOL , personNotes  TEXT , fatherName  TEXT , " +
+                            "fatherNumber  TEXT , motherName  TEXT , motherNum  TEXT , " +
+                            "dateOfBirth  BIGINT , personAddress  TEXT , personOrgId  TEXT , " +
+                            "personGroupUid  BIGINT , personMasterChangeSeqNum  BIGINT , " +
+                            "personLocalChangeSeqNum  BIGINT , " +
+                            "personLastChangedBy  INTEGER NOT NULL, " +
+                            "personUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("INSERT INTO Person (personUid, username, firstNames, " +
+                            "lastName, emailAddr, phoneNum, gender, active, admin, personNotes, " +
+                            "fatherName, fatherNumber, motherName, motherNum, dateOfBirth, " +
+                            "personAddress, personOrgId, personGroupUid, " +
+                            "personMasterChangeSeqNum, personLocalChangeSeqNum, " +
+                            "personLastChangedBy) SELECT personUid, username, firstNames, " +
+                            "lastName, emailAddr, phoneNum, gender, active, admin, personNotes, " +
+                            "fatherName, fatherNumber, motherName, motherNum, dateOfBirth, " +
+                            "personAddress, personOrgId, personGroupUid, " +
+                            "personMasterChangeSeqNum, personLocalChangeSeqNum, " +
+                            "personLastChangedBy FROM Person_OLD")
+                    database.execSQL("DROP TABLE Person_OLD")
+
+                    //PersonGroup
+                    database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup (  " +
+                            "groupMasterCsn  BIGINT , groupLocalCsn  BIGINT , " +
+                            "groupLastChangedBy  INTEGER , groupName  TEXT , " +
+                            "groupActive  BOOL , personGroupFlag  INTEGER , " +
+                            "groupUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonGroup (groupUid, " +
+                            "groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupName, " +
+                            "groupActive) SELECT groupUid, groupMasterCsn, groupLocalCsn, " +
+                            "groupLastChangedBy, groupName, groupActive FROM PersonGroup_OLD")
+                    database.execSQL("DROP TABLE PersonGroup_OLD")
+                }
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -3881,7 +3952,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             builder.addMigrations( MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28,
                     MIGRATION_29_30_TRIGGERS, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32,
-                    MIGRATION_36_37)
+                    MIGRATION_36_37, MIGRATION_37_38)
 
             return builder
         }

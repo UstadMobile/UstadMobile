@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
@@ -16,7 +15,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.EntityRoleEditView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
 
@@ -39,6 +37,12 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
     override var entity: EntityRoleWithNameAndRole? = null
         set(value) {
             mDataBinding?.entityRole = value
+            field = value
+        }
+
+    override var errorText: String? = null
+        set(value) {
+            mDataBinding?.errorText = value
             field = value
         }
 

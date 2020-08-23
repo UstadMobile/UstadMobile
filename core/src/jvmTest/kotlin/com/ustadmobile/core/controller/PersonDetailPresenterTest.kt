@@ -115,9 +115,9 @@ class PersonDetailPresenterTest {
             //repo.personDao.insert(this)
         }
 
-        GlobalScope.launch {
+        //GlobalScope.launch {
             repo.insertPersonOnlyAndGroup(person)
-        }
+        //}
 
         if(!sameUser){
             Person().apply {
