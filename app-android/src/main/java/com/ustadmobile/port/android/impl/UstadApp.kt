@@ -51,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 
 import org.kodein.di.*
+import java.io.File
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -158,6 +159,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         super.onCreate()
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         initPicasso(applicationContext)
+
     }
 
     override fun attachBaseContext(base: Context) {
