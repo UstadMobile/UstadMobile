@@ -117,6 +117,7 @@ dependencies {
     kapt "io.ktor:ktor-client-okhttp:$version_ktor"
     kapt "org.nanohttpd:nanohttpd:$version_nanohttpd"
     kapt "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+    kapt "org.kodein.di:kodein-di:$version_kodein_di"
 }
 
 compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")

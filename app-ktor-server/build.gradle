@@ -56,6 +56,9 @@ kotlin {
                   implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
                   implementation "ch.qos.logback:logback-classic:$version_logback"
 
+                  implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                  implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+
                   implementation project(":core")
                   implementation project(":sharedse")
                   implementation project(":lib-database")
