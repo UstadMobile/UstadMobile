@@ -30,6 +30,7 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -150,6 +151,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+
+        registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound")}
 
         onReady {
             instance<BleGattServer>()

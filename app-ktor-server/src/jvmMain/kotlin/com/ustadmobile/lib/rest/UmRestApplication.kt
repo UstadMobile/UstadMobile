@@ -1,17 +1,16 @@
 package com.ustadmobile.lib.rest
 
 import com.google.gson.Gson
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
-import com.ustadmobile.core.db.dao.PersonAuthDao
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.encryptPassword
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.lib.rest.ext.ktorInit
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
-import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
 import io.ktor.features.CallLogging
@@ -21,55 +20,33 @@ import io.ktor.gson.gson
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
+import io.ktor.request.header
 import io.ktor.routing.Routing
-import io.ktor.routing.get
-import kotlinx.coroutines.runBlocking
-import org.apache.commons.lang3.RandomStringUtils
+import org.kodein.di.*
+import org.kodein.di.ktor.DIFeature
+import org.kodein.type.TypeToken
 import java.io.File
 import java.nio.file.Files
-import java.util.zip.ZipFile
 import javax.naming.InitialContext
 
+const val TAG_UPLOAD_DIR = 10
 
-private val _restApplicationDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
+const val TAG_CONTAINER_DIR = 11
 
+const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 
-fun Application.umRestApplication(devMode: Boolean = false, db: UmAppDatabase = _restApplicationDb) {
+const val CONF_DBMODE_SINGLETON = "singleton"
 
-    val adminuser = db.personDao.findByUsername("admin")
-    val iContext = InitialContext()
-    val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as? String
-            ?: "./build/container"
+/**
+ *
+ */
+private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBMODE_SINGLETON) = if(dbMode == CONF_DBMODE_SINGLETON) {
+    singletonName
+}else {
+    sanitizeDbNameFromUrl(url)
+}
 
-    val workSpace = WorkSpace().apply {
-        name = "UstadmobileWorkspace"
-        guestLogin = true
-        registrationAllowed = true
-    }
-    db.workSpaceDao.insert(workSpace)
-
-    if (adminuser == null) {
-        val adminPerson = Person("admin", "Admin", "User")
-        adminPerson.admin = true
-        adminPerson.personUid = db.personDao.insert(adminPerson)
-        val adminPass = RandomStringUtils.randomAlphanumeric(8)
-
-        db.personAuthDao.insert(PersonAuth(adminPerson.personUid,
-                PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(adminPass)))
-
-
-        val adminPassFile = File(containerDirPath, "admin.txt")
-        if (!adminPassFile.parentFile.isDirectory) {
-            adminPassFile.parentFile.mkdirs()
-        }
-
-        adminPassFile.writeText(adminPass)
-        println("Saved admin password to ${adminPassFile.absolutePath}")
-    }
-
-    runBlocking { db.roleDao.insertDefaultRolesIfRequired() }
+fun Application.umRestApplication(devMode: Boolean = false) {
 
     if (devMode) {
         install(CORS) {
@@ -91,72 +68,61 @@ fun Application.umRestApplication(devMode: Boolean = false, db: UmAppDatabase = 
         }
     }
 
-    install(Routing) {
-        ContainerDownload(db)
-        H5PImportRoute(db) { url: String, entryUid: Long, urlContent: String, containerUid: Long ->
-            downloadH5PUrl(db, url, entryUid, Files.createTempDirectory("h5p").toFile(), urlContent, containerUid)
+    val tmpRootDir = Files.createTempDirectory("upload").toFile()
+    val iContext = InitialContext()
+    val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as? String
+            ?: "./build/container"
+
+    val autoCreateDb = environment.config.propertyOrNull("ktor.ustad.autocreatedb")?.getString()?.toBoolean() ?: false
+    println("auto create = $autoCreateDb")
+    val dbMode = environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+    val storageRoot = File(environment.config.propertyOrNull("ktor.ustad.storagedir")?.getString() ?: "build/storage")
+    storageRoot.takeIf { !it.exists() }?.mkdirs()
+
+    install(DIFeature) {
+        bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
+            File(tmpRootDir, context.identifier(dbMode)).also {
+                it.takeIf { !it.exists() }?.mkdirs()
+            }
         }
-        PersonAuthRegisterRoute(db)
-        ContainerMountRoute(db)
-        val uploadFolder = Files.createTempDirectory("upload").toFile()
-        ResumableUploadRoute(uploadFolder)
-        ContainerUpload(db, uploadFolder)
-        UmAppDatabase_KtorRoute(db, Gson(), File("attachments/UmAppDatabase").absolutePath)
-        WorkSpaceRoute(db)
-        db.preload()
+
+        bind<File>(tag = TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+            File(File(storageRoot, context.identifier(dbMode)), "container").also {
+                it.takeIf { !it.exists() }?.mkdirs()
+            }
+        }
+
+        bind<Gson>() with singleton { Gson() }
+
+        bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
+            val dbName = context.identifier(dbMode, "UmAppDatabase")
+
+            if(autoCreateDb) {
+                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName,
+                        isPrimary = true, sqliteDir = File(storageRoot, context.identifier(dbMode)))
+            }
+
+            UmAppDatabase.getInstance(Any(), dbName).also {
+                it.preload()
+                it.ktorInit(File(storageRoot, context.identifier(dbMode)).absolutePath)
+            }
+        }
+
+        registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }
+    }
+
+    install(Routing) {
+        ContainerDownload()
+        PersonAuthRegisterRoute()
+        ContainerMountRoute()
+        ResumableUploadRoute()
+        ContainerUpload()
+        UmAppDatabase_KtorRoute(true)
+        WorkSpaceRoute()
 
         if (devMode) {
-
-            get("UmAppDatabase/clearAllTables") {
-                db.clearAllTables()
-                call.respond("OK - cleared")
-            }
-
-            get("UmContainer/addContainer") {
-                val resourceName = call.request.queryParameters["resource"]
-                val entryUid = call.request.queryParameters["entryUid"]
-                val contentTye = call.request.queryParameters["type"]
-                val mimeType = when (contentTye) {
-                    "tincan" -> "application/tincan+zip"
-                    "epub" -> "application/epub+zip"
-                    else -> null
-                }
-
-                if (resourceName == null || entryUid == null || mimeType == null) {
-                    call.respond(HttpStatusCode.BadRequest,
-                            "Invalid request make sure you have included all resource param")
-                    return@get
-                }
-
-                val preparedRes = prepareResources(db, resourceName, contentTye!!, entryUid, mimeType)
-
-                val containerManager = ContainerManager(preparedRes.tmpContainer, db, db,
-                        preparedRes.tempDir.absolutePath)
-
-                addEntriesFromZipToContainer(preparedRes.tempFile.absolutePath, containerManager)
-                val containerUid = preparedRes.tmpContainer.containerUid
-                call.respond(containerUid)
-            }
+            DevModeRoute()
         }
     }
 }
 
-data class PreparedResource(val tempDir: File, val tempFile: File, val tmpContainer: Container)
-
-private fun prepareResources(db: UmAppDatabase, resourceName: String?, path: String, entryId: String?, mimetype: String): PreparedResource {
-    val epubContainer = Container()
-
-    if (entryId != null && entryId.isNotEmpty()) {
-        epubContainer.containerContentEntryUid = entryId.toLong()
-    }
-
-    val tempFile = File.createTempFile("testFile", "tempFile$entryId")
-
-    epubContainer.cntLastModified = tempFile.lastModified()
-    epubContainer.mimeType = mimetype
-    epubContainer.containerUid = db.containerDao.insert(epubContainer)
-
-    UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/$path/${resourceName}", tempFile)
-    val tempDir = UmFileUtilSe.makeTempDir("testFile", "containerDirTmp")
-    return PreparedResource(tempDir, tempFile, epubContainer)
-}

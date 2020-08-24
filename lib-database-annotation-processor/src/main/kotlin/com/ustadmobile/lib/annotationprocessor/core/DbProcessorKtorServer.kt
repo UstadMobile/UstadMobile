@@ -302,11 +302,11 @@ fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int =
 
 
 fun CodeBlock.Builder.addRequestDi(diVarName: String = "_di", dbVarName: String = "_db",
-    serverType: Int = SERVER_TYPE_KTOR) : CodeBlock.Builder {
+    typeTokenVarName: String = "_typeToken", serverType: Int = SERVER_TYPE_KTOR) : CodeBlock.Builder {
     if(serverType == SERVER_TYPE_KTOR) {
         add("val ${diVarName} = %M()\n", MemberName("org.kodein.di.ktor", "di"))
-                .add("val ${dbVarName}: %T by _di.%M(call).%M(tag = %T.TAG_DB)\n",
-                        TypeVariableName.invoke("T"), DbProcessorKtorServer.DI_ON_MEMBER, DbProcessorKtorServer.DI_INSTANCE_MEMBER,
+                .add("val ${dbVarName}: %T by _di.%M(call).%M($typeTokenVarName, tag = %T.TAG_DB)\n",
+                        TypeVariableName.invoke("T"), DI_ON_MEMBER, DI_INSTANCE_TYPETOKEN_MEMBER,
                         DoorTag::class)
     }
 
@@ -543,6 +543,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         }
 
 
+        codeBlock.add("val _typeToken: %T<%T> = %M()\n", org.kodein.type.TypeToken::class.java,
+            dbTypeElement, DI_ERASED_MEMBER)
         if(isSyncableDb) {
             val syncDaoBaseName = "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}"
             val helperClasses = listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL)
@@ -550,7 +552,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                         ClassName(dbTypeClassName.packageName,
                                 "${syncDaoBaseName}$it${DbProcessorJdbcKotlin.SUFFIX_JDBC_KT}")
                     }
-            codeBlock.add("%M<%T>({ %T(it) }, ",
+            codeBlock.add("%M<%T>(_typeToken, { %T(it) }, ",
                     MemberName(dbTypeClassName.packageName, "${syncDaoBaseName}$SUFFIX_KTOR_ROUTE"),
                     dbTypeElement, syncDaoImplClassName)
                     .add("{ if(_isPrimary)·{·%T(it)·}·else·{·%T(it)·} }", helperClasses[0],
@@ -564,9 +566,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             val daoFromDbGetter = it.second
             val daoTypeClassName = daoTypeEl.asClassName()
 
-            codeBlock.add("%M<%T>({it.$daoFromDbGetter }",
-                    MemberName(daoTypeClassName.packageName, "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE"),
-                    dbTypeElement)
+            codeBlock.add("%M(_typeToken, {it.$daoFromDbGetter }",
+                    MemberName(daoTypeClassName.packageName, "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE"))
             if(syncableEntitiesOnDao(daoTypeClassName, processingEnv).isNotEmpty()) {
                 val helperClasses = listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL)
                         .map {
@@ -599,10 +600,11 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 .addImport("io.ktor.response", "header")
 
         val ktorDaoParams = mutableListOf(
+                ParameterSpec.builder("_typeToken",
+                org.kodein.type.TypeToken::class.asClassName().parameterizedBy(TypeVariableName("T"))).build(),
                 ParameterSpec.builder("_daoFn",
                         LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
                         returnType = daoTypeElement.asType().asTypeName()))
-                            .addModifiers(KModifier.CROSSINLINE)
                             .build())
         val nanoHttpdDaoParams = mutableListOf(
                 ParameterSpec.builder("_dao", daoTypeElement.asClassName()).build(),
@@ -610,8 +612,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
 
         val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}$SUFFIX_KTOR_ROUTE")
-                .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class).copy(reified = true))
-                .addModifiers(KModifier.INLINE)
+                .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class))
                 .receiver(Route::class)
 
         val ktorHelperClassName = ClassName(daoTypeElement.asClassName().packageName,
@@ -626,12 +627,10 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             ktorDaoParams += ParameterSpec.builder("_syncHelperFn",
                     LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
                             returnType = syncHelperClassName))
-                    .addModifiers(KModifier.CROSSINLINE)
                     .build()
             ktorDaoParams += ParameterSpec.builder("_ktorHelperDaoFn",
                     LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
                         returnType = ktorHelperClassName))
-                    .addModifiers(KModifier.CROSSINLINE)
                     .build()
 
             nanoHttpdDaoParams += ParameterSpec.builder("_syncHelper",
@@ -809,6 +808,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         val DI_INSTANCE_MEMBER = MemberName("org.kodein.di", "instance")
 
         val DI_INSTANCE_TYPETOKEN_MEMBER = MemberName("org.kodein.di", "Instance")
+
+        val DI_ERASED_MEMBER = MemberName("org.kodein.type", "erased")
 
         const val SERVER_TYPE_KTOR = 1
 

@@ -19,6 +19,7 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Route
+import org.kodein.type.TypeToken
 import java.io.File
 import java.io.FileInputStream
 import javax.annotation.processing.ProcessingEnvironment
@@ -193,13 +194,13 @@ class DbProcessorSync: AbstractDbProcessor() {
         val ktorHelperDaoClassName = ClassName(packageName, "$abstractDaoClassName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}")
         val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
                 .receiver(Route::class)
-                .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class).copy(reified = true))
-                .addModifiers(KModifier.INLINE)
+                .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class))
+                .addParameter("_typeToken", TypeToken::class.asClassName().parameterizedBy(TypeVariableName("T")))
                 .addParameter("_daoFn", LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
-                    returnType = abstractDaoClassName), KModifier.CROSSINLINE)
+                    returnType = abstractDaoClassName))
                 .addParameter("_ktorHelperDaoFn", LambdaTypeName.get(
                         parameters = *arrayOf(TypeVariableName("T")),
-                        returnType = ktorHelperDaoClassName), KModifier.CROSSINLINE)
+                        returnType = ktorHelperDaoClassName))
 
         val codeBlock = CodeBlock.builder()
         codeBlock.beginControlFlow("%M(%S)",

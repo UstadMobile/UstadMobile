@@ -97,6 +97,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-server-core:$version_ktor"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
+                compileOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
             }
         }
 

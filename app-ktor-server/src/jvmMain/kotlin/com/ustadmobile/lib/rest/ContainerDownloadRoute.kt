@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import io.ktor.application.call
 import io.ktor.http.*
@@ -14,12 +15,15 @@ import io.ktor.routing.get
 import io.ktor.routing.route
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.close
+import org.kodein.di.instance
 import java.io.File
+import org.kodein.di.ktor.di
+import org.kodein.di.on
 
-
-fun Route.ContainerDownload(db: UmAppDatabase) {
+fun Route.ContainerDownload() {
     route("ContainerEntryList") {
         get("findByContainerWithMd5") {
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val containerUid = call.request.queryParameters["containerUid"]?.toLong() ?: 0L
             val entryList = db.containerEntryDao.findByContainerWithMd5(containerUid)
             if(entryList.isNotEmpty()) {
@@ -31,6 +35,7 @@ fun Route.ContainerDownload(db: UmAppDatabase) {
     }
 
     get("ContainerEntryFile/{entryFileUid}") {
+        val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
         val entryFileUid = call.parameters["entryFileUid"]?.toLong() ?: 0L
         val entryFile = db.containerEntryFileDao.findByUid(entryFileUid)
         val filePath = entryFile?.cefPath
@@ -43,6 +48,7 @@ fun Route.ContainerDownload(db: UmAppDatabase) {
     }
 
     get("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES}/{entryFileList}") {
+        val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
         val entryFileListStr = call.parameters["entryFileList"]
         if(entryFileListStr == null) {
             call.respond(HttpStatusCode.BadRequest, "Entry file list not provided")
