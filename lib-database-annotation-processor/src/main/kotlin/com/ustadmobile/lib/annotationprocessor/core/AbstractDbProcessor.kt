@@ -324,6 +324,8 @@ internal val CLIENT_HTTPSTMT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.ca
  * will not automatically handle .receive<List<Entity>>
  * @param kotlinxSerializationJsonVarName if useKotlinxListSerialization, thne this is the variable
  * name that will be used to access the Json object to serialize or deserialize.
+ * @param isPrimary if true, we will use the primary change sequence number when inserting tracker
+ * entities. If false, we will use the local change sequence number.
  */
 internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String = "_endpoint",
                                                    dbPathVarName: String,
@@ -463,6 +465,7 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
                                                     syncHelperDaoVarName: String = "_syncHelper",
                                                     clientIdVarName: String = "__clientId",
                                                     reqIdVarName: String = "_reqId",
+                                                    isPrimaryDb: Boolean = true,
                                                     processingEnv: ProcessingEnvironment): CodeBlock {
     val codeBlock = CodeBlock.builder()
     val resultComponentType = resolveEntityFromResultType(resultType)
@@ -508,10 +511,16 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
             ""
         }
 
+        val csnField = if(isPrimaryDb) {
+            sEntityInfo.entityMasterCsnField
+        }else {
+            sEntityInfo.entityLocalCsnField
+        }
+
         codeBlock.add("""$syncHelperDaoVarName._replace${sEntityInfo.tracker.simpleName}( ${wrapperFnName.first} %T(
                              |${sEntityInfo.trackerPkField.name} = $varName.${sEntityInfo.entityPkField.name},
                              |${sEntityInfo.trackerDestField.name} = $clientIdVarName,
-                             |${sEntityInfo.trackerCsnField.name} = $varName.${sEntityInfo.entityMasterCsnField.name}$entityCsnSuffix,
+                             |${sEntityInfo.trackerCsnField.name} = $varName.${csnField.name}$entityCsnSuffix,
                              |${sEntityInfo.trackerReqIdField.name} = $reqIdVarName
                              |) ${wrapperFnName.second} )
                              |""".trimMargin(), sEntityInfo.tracker)

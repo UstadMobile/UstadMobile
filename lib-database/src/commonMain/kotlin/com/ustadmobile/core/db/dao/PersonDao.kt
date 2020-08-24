@@ -217,11 +217,11 @@ abstract class PersonDao : BaseDao<Person> {
             AND Person.firstNames LIKE :searchText
             ORDER BY CASE(:sortOrder)
                 WHEN $SORT_NAME_ASC THEN Person.firstNames
-                ELSE 0
+                ELSE ''
             END ASC,
             CASE(:sortOrder)
                 WHEN $SORT_NAME_DESC THEN Person.firstNames
-                ELSE 0
+                ELSE ''
             END DESC
     """)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
