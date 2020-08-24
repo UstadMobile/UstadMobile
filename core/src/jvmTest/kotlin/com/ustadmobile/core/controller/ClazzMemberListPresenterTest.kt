@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.dao.ClazzMemberDao
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
@@ -113,7 +114,7 @@ class ClazzMemberListPresenterTest {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
-            personUid = db.personDao.insert(this)
+            personUid = db.insertPersonOnlyAndGroup(this).personUid
         }
 
         runBlocking {
@@ -148,14 +149,14 @@ class ClazzMemberListPresenterTest {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
-            personUid = db.personDao.insert(this)
+            personUid = db.insertPersonOnlyAndGroup(this).personUid
         }
 
         val pendingPerson = Person().apply {
             firstNames = "Pending"
             lastName = "Student"
             username = "pending"
-            personUid = db.personDao.insert(this)
+            personUid = db.insertPersonOnlyAndGroup(this).personUid
         }
 
         var pendingMember: ClazzMember? = null
