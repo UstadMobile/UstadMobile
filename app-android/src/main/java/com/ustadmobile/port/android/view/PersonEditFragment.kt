@@ -242,6 +242,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             mBinding?.errorText?.visibility = if(value != null) View.VISIBLE else View.GONE
             mBinding?.errorText?.text = value
         }
+    override var isAdmin: Boolean? = false
+        set(value) {
+            mBinding?.isAdmin = value?:false
+            field = value
+        }
 
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
         val impl: UstadMobileSystemImpl by instance()

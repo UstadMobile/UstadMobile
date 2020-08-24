@@ -27,6 +27,10 @@
             type="boolean" />
 
         <variable
+            name="isAdmin"
+            type="boolean"/>
+
+        <variable
             name="genderOptions"
             type="List&lt;MessageIdOption&gt;" />
 
@@ -345,10 +349,11 @@
                 app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
-                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
+                android:visibility="@{isAdmin ?  View.GONE: View.VISIBLE}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/roles_and_permissions_header_textview"
                 android:layout_width="match_parent"
+
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_16dp"
                 android:text="@string/roles_and_permissions"
@@ -360,7 +365,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
+                android:visibility="@{isAdmin ?  View.GONE: View.VISIBLE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/roles_and_permissions_header_textview" />
