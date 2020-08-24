@@ -94,6 +94,7 @@ class PersonEditPresenter(context: Any,
                 ContentEntryListTabsView.VIEW_NAME
 
         view.registrationMode = registrationMode
+
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount? {
@@ -123,6 +124,12 @@ class PersonEditPresenter(context: Any,
         }?:listOf()
         rolesAndPermissionEditHelper.liveList.sendValue(rolesAndPermissionList)
 
+
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+        val loggedInPerson = withTimeoutOrNull(2000){
+            db.personDao.findByUidAsync(loggedInPersonUid)
+        }
+        view.isAdmin = loggedInPerson?.admin?:false
 
         return person
     }
@@ -187,11 +194,6 @@ class PersonEditPresenter(context: Any,
                     repo.personDao.updateAsync(entity)
                 }
 
-                val loggedInPersonUid = accountManager.activeAccount.personUid
-                val loggedInPerson = withTimeoutOrNull(2000){
-                    db.personDao.findByUidAsync(loggedInPersonUid)
-                }
-                view.isAdmin = loggedInPerson?.admin?:false
 
                 repo.entityRoleDao.insertListAsync(rolesAndPermissionEditHelper.entitiesToInsert.also { it.forEach {
                     it.erGroupUid = entity.personGroupUid
