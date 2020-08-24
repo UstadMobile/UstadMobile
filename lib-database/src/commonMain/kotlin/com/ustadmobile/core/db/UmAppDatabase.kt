@@ -40,7 +40,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 37)
+], version = 38)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -427,23 +427,23 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         """.trimMargin())
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (`feedEntryUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `feedEntryPersonUid` INTEGER NOT NULL, `title` TEXT, `description` TEXT, `link` TEXT, `feedEntryClazzName` TEXT, `deadline` INTEGER NOT NULL, `feedEntryHash` INTEGER NOT NULL, `feedEntryDone` INTEGER NOT NULL, `feedEntryClazzLogUid` INTEGER NOT NULL, `dateCreated` INTEGER NOT NULL, `feedEntryCheckType` INTEGER NOT NULL, `feedEntryLocalChangeSeqNum` INTEGER NOT NULL, `feedEntryMasterChangeSeqNum` INTEGER NOT NULL, `feedEntryLastChangedBy` INTEGER NOT NULL)")
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion (`selQuestionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `questionText` TEXT, `selQuestionSelQuestionSetUid` INTEGER NOT NULL, `questionIndex` INTEGER NOT NULL, `assignToAllClasses` INTEGER NOT NULL, `multiNominations` INTEGER NOT NULL, `questionType` INTEGER NOT NULL, `questionActive` INTEGER NOT NULL, `selQuestionMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionLastChangedBy` INTEGER NOT NULL)" )
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion (`selQuestionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `questionText` TEXT, `selQuestionSelQuestionSetUid` INTEGER NOT NULL, `questionIndex` INTEGER NOT NULL, `assignToAllClasses` INTEGER NOT NULL, `multiNominations` INTEGER NOT NULL, `questionType` INTEGER NOT NULL, `questionActive` INTEGER NOT NULL, `selQuestionMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponse (`selQuestionResponseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `selQuestionResponseSelQuestionSetResponseUid` INTEGER NOT NULL, `selQuestionResponseSelQuestionUid` INTEGER NOT NULL, `selQuestionResponseMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionResponseLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionResponseLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponseNomination (`selqrnUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `selqrnClazzMemberUid` INTEGER NOT NULL, `selqrnSelQuestionResponseUId` INTEGER NOT NULL, `nominationActive` INTEGER NOT NULL, `selqrnMCSN` INTEGER NOT NULL, `selqrnMCSNLCSN` INTEGER NOT NULL, `selqrnMCSNLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSet (`selQuestionSetUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `selQuestionSetMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionSetLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionSetLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetRecognition (`selQuestionSetRecognitionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `selqsrSelQuestionSetResponseUid` INTEGER NOT NULL, `selQuestionSetRecognitionClazzMemberUid` INTEGER NOT NULL, `isSelQuestionSetRecognitionRecognized` INTEGER NOT NULL, `selQuestionSetRecognitionMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionSetRecognitionLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionSetRecognitionLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionSetResponse (`selQuestionSetResposeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `selQuestionSetResponseSelQuestionSetUid` INTEGER NOT NULL, `selQuestionSetResponseClazzMemberUid` INTEGER NOT NULL, `selQuestionSetResponseStartTime` INTEGER NOT NULL, `selQuestionSetResponseFinishTime` INTEGER NOT NULL, `selQuestionSetResponseRecognitionPercentage` REAL NOT NULL, `selQuestionSetResponseMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionSetResponseLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionSetResponseLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity (`clazzActivityUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzActivityClazzActivityChangeUid` INTEGER NOT NULL, `isClazzActivityGoodFeedback` INTEGER NOT NULL, `clazzActivityNotes` TEXT, `clazzActivityLogDate` INTEGER NOT NULL, `clazzActivityClazzUid` INTEGER NOT NULL, `clazzActivityDone` INTEGER NOT NULL, `clazzActivityQuantity` INTEGER NOT NULL, `clazzActivityMasterChangeSeqNum` INTEGER NOT NULL, `clazzActivityLocalChangeSeqNum` INTEGER NOT NULL, `clazzActivityLastChangedBy` INTEGER NOT NULL)")
-                    database.execSQL( "CREATE TABLE IF NOT EXISTS ClazzActivityChange (`clazzActivityChangeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzActivityChangeTitle` TEXT, `clazzActivityDesc` TEXT, `clazzActivityUnitOfMeasure` INTEGER NOT NULL, `isClazzActivityChangeActive` INTEGER NOT NULL, `clazzActivityChangeLastChangedBy` INTEGER NOT NULL, `clazzActivityChangeMasterChangeSeqNum` INTEGER NOT NULL, `clazzActivityChangeLocalChangeSeqNum` INTEGER NOT NULL, `clazzActivityLastChangedBy` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivityChange (`clazzActivityChangeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzActivityChangeTitle` TEXT, `clazzActivityDesc` TEXT, `clazzActivityUnitOfMeasure` INTEGER NOT NULL, `isClazzActivityChangeActive` INTEGER NOT NULL, `clazzActivityChangeLastChangedBy` INTEGER NOT NULL, `clazzActivityChangeMasterChangeSeqNum` INTEGER NOT NULL, `clazzActivityChangeLocalChangeSeqNum` INTEGER NOT NULL, `clazzActivityLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS UMCalendar (`umCalendarUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `umCalendarName` TEXT, `umCalendarCategory` INTEGER NOT NULL, `umCalendarActive` INTEGER NOT NULL, `isUmCalendarFlag` INTEGER NOT NULL, `umCalendarMasterChangeSeqNum` INTEGER NOT NULL, `umCalendarLocalChangeSeqNum` INTEGER NOT NULL, `umCalendarLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignment (`clazzAssignmentUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzAssignmentTitle` TEXT, `clazzAssignmentClazzUid` INTEGER NOT NULL, `clazzAssignmentInactive` INTEGER NOT NULL, `clazzAssignmentStartDate` INTEGER NOT NULL, `clazzAssignmentDueDate` INTEGER NOT NULL, `clazzAssignmentCreationDate` INTEGER NOT NULL, `clazzAssignmentUpdateDate` INTEGER NOT NULL, `clazzAssignmentInstructions` TEXT, `clazzAssignmentGrading` INTEGER NOT NULL, `clazzAssignmentRequireAttachment` INTEGER NOT NULL, `clazzAssignmentMCSN` INTEGER NOT NULL, `clazzAssignmentLCSN` INTEGER NOT NULL, `clazzAssignmentLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS ClazzAssignmentContentJoin(`clazzAssignmentContentJoinUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzAssignmentContentJoinContentUid` INTEGER NOT NULL, `clazzAssignmentContentJoinClazzAssignmentUid` INTEGER NOT NULL, `clazzAssignmentContentJoinInactive` INTEGER NOT NULL, `clazzAssignmentContentJoinDateAdded` INTEGER NOT NULL, `clazzAssignmentContentJoinMCSN` INTEGER NOT NULL, `clazzAssignmentContentJoinLCSN` INTEGER NOT NULL, `clazzAssignmentContentJoinLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionOption (`selQuestionOptionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `optionText` TEXT, `selQuestionOptionQuestionUid` INTEGER NOT NULL, `selQuestionOptionMasterChangeSeqNum` INTEGER NOT NULL, `selQuestionOptionLocalChangeSeqNum` INTEGER NOT NULL, `selQuestionOptionLastChangedBy` INTEGER NOT NULL, `optionActive` INTEGER NOT NULL)")
 
-                    database.execSQL( "CREATE TABLE IF NOT EXISTS FeedEntry_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
-                    database.execSQL( "CREATE INDEX IF NOT EXISTS `index_FeedEntry_trk_clientId_epk_rx_csn` ON FeedEntry_trk (`clientId`, `epk`, `rx`, `csn`)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_FeedEntry_trk_clientId_epk_rx_csn` ON FeedEntry_trk (`clientId`, `epk`, `rx`, `csn`)")
 
-                    database.execSQL( "CREATE TABLE IF NOT EXISTS SelQuestion_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestion_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_SelQuestion_trk_clientId_epk_rx_csn` ON SelQuestion_trk (`clientId`, `epk`, `rx`, `csn`)")
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS SelQuestionResponse_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
@@ -462,7 +462,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_SelQuestionSetResponse_trk_clientId_epk_rx_csn` ON SelQuestionSetResponse_trk (`clientId`, `epk`, `rx`, `csn`)")
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivity_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
-                    database.execSQL( "CREATE INDEX IF NOT EXISTS `index_ClazzActivity_trk_clientId_epk_rx_csn` ON ClazzActivity_trk (`clientId`, `epk`, `rx`, `csn`)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzActivity_trk_clientId_epk_rx_csn` ON ClazzActivity_trk (`clientId`, `epk`, `rx`, `csn`)")
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS ClazzActivityChange_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzActivityChange_trk_clientId_epk_rx_csn` ON ClazzActivityChange_trk (`clientId`, `epk`, `rx`, `csn`)")
@@ -480,7 +480,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_SelQuestionOption_trk_clientId_epk_rx_csn` ON SelQuestionOption_trk (`clientId`, `epk`, `rx`, `csn`)")
 
 
-                            //clazzMember rename columns, delete old and add new
+                    //clazzMember rename columns, delete old and add new
                     database.execSQL("ALTER TABLE ClazzMember RENAME to ClazzMember_OLD")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzMember` (`clazzMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzMemberPersonUid` INTEGER NOT NULL DEFAULT 0, `clazzMemberClazzUid` INTEGER NOT NULL DEFAULT 0, `clazzMemberDateJoined` INTEGER NOT NULL, `clazzMemberDateLeft` INTEGER NOT NULL, `clazzMemberRole` INTEGER NOT NULL, `clazzMemberAttendancePercentage` REAL NOT NULL, `clazzMemberActive` INTEGER NOT NULL, `clazzMemberLocalChangeSeqNum` INTEGER NOT NULL, `clazzMemberMasterChangeSeqNum` INTEGER NOT NULL, `clazzMemberLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("INSERT INTO ClazzMember (clazzMemberUid, clazzMemberPersonUid, clazzMemberClazzUid, clazzMemberDateJoined, clazzMemberDateLeft, clazzMemberRole, clazzMemberAttendancePercentage, clazzMemberActive, clazzMemberLocalChangeSeqNum, clazzMemberMasterChangeSeqNum, clazzMemberLastChangedBy) SELECT clazzMemberUid, clazzMemberPersonUid, clazzMemberClazzUid, dateJoined, dateLeft, role, clazzMemberAttendancePercentage, clazzMemberActive, clazzMemberLocalChangeSeqNum, clazzMemberMasterChangeSeqNum, clazzMemberLastChangedBy FROM ClazzMember_OLD")
@@ -695,539 +695,36 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ReportFilter_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ReportFilter_trk_clientId_epk_rx_csn` ON `ReportFilter_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
-                }
-                else
+                } else
                     if (database.dbType() == DoorDbType.POSTGRES) {
 
-                    // from 34 - 35
-                    database.execSQL("""ALTER TABLE Clazz
-                        ADD COLUMN clazzHolidayUMCalendarUid  BIGINT DEFAULT 0 NOT NULL
-                        """.trimMargin())
-
-                    database.execSQL("""ALTER TABLE Clazz
-                        ADD COLUMN clazzScheuleUMCalendarUid  BIGINT DEFAULT 0 NOT NULL
-                        """.trimMargin())
-
-                    database.execSQL("""ALTER TABLE Clazz
-                        ADD COLUMN clazzStartTime  BIGINT DEFAULT 0 NOT NULL
-                        """.trimMargin())
-                    database.execSQL("""ALTER TABLE Clazz
-                        ADD COLUMN clazzEndTime  BIGINT DEFAULT 0 NOT NULL
-                        """.trimMargin())
-                    database.execSQL("""ALTER TABLE Clazz
-                        ADD COLUMN clazzFeatures  BIGINT DEFAULT 0 NOT NULL
-                        """.trimMargin())
-
-                    database.execSQL("""ALTER TABLE PersonAuth 
-                        ADD COLUMN personAuthLocalChangeSeqNum BIGINT DEFAULT 0 NOT NULL""".trimMargin())
-
-                    database.execSQL("""ALTER TABLE PersonAuth 
-                        ADD COLUMN personAuthMasterChangeSeqNum BIGNINT DEFAULT 0 NOT NULL""".trimMargin())
-
-                    database.execSQL("""ALTER TABLE ClazzMember 
-                        ADD COLUMN clazzMemberAttendancePercentage FLOAT 0 NOT NULL
-                    """.trimMargin())
-
-                    database.execSQL("""ALTER TABLE ClazzMember 
-                        ADD COLUMN clazzMemberActive  BOOL DEFAULT false
-                    """.trimMargin())
-
-                    database.execSQL("""ALTER TABLE Clazz
-                        ADD COLUMN isClazzActive  BOOL DEFAULT false
-                        """.trimMargin())
-
-                    database.execSQL("""ALTER TABLE Person 
-                        ADD COLUMN dateOfBirth BIGINT DEFAULT 0 NOT NULL""".trimMargin())
-
-                    database.execSQL("ALTER TABLE EntityRole ADD COLUMN erActive BOOL DEFAULT false")
-
-                    database.execSQL("""ALTER TABLE Role 
-                        ADD COLUMN roleActive BOOL DEFAULT true""".trimMargin())
-
-                    database.execSQL("""ALTER TABLE PersonGroup 
-                        ADD COLUMN groupActive BOOL DEFAULT true""".trimMargin())
-
-                    database.execSQL("""ALTER TABLE PersonGroupMember 
-                        ADD COLUMN groupMemberActive BOOL DEFAULT true""".trimMargin())
-
-                    database.execSQL("""ALTER TABLE ClazzMember RENAME COLUMN dateJoined to clazzMemberDateJoined
-                    """.trimMargin())
-                    database.execSQL("""ALTER TABLE ClazzMember RENAME COLUMN dateLeft to clazzMemberDateLeft
-                    """.trimMargin())
-                    database.execSQL("""ALTER TABLE ClazzMember RENAME COLUMN role to clazzMemberRole
-                    """.trimMargin())
-
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog (  clazzLogClazzUid  BIGINT , logDate  BIGINT , timeRecorded  BIGINT , clazzLogDone  BOOL , clazzLogCancelled  BOOL , clazzLogNumPresent  INTEGER , clazzLogNumAbsent  INTEGER , clazzLogNumPartial  INTEGER , clazzLogScheduleUid  BIGINT , clazzLogMSQN  BIGINT , clazzLogLCSN  BIGINT , clazzLogLCB  INTEGER , clazzLogUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLog_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLog_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_14_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE ClazzLog SET clazzLogLCSN =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
-          | ELSE NEXTVAL('ClazzLog_lcsn_seq') END),
-          | clazzLogMSQN = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('ClazzLog_mcsn_seq') 
-          | ELSE NEW.clazzLogMSQN END)
-          | WHERE clazzLogUid = NEW.clazzLogUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_14_trig 
-          |AFTER UPDATE OR INSERT ON ClazzLog 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_14_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_ClazzLog_trk_clientId_epk_rx_csn 
-          |ON ClazzLog_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table ClazzLog for PostgreSQL
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord (  clazzLogAttendanceRecordClazzLogUid  BIGINT , clazzLogAttendanceRecordClazzMemberUid  BIGINT , attendanceStatus  INTEGER , clazzLogAttendanceRecordMasterChangeSeqNum  BIGINT , clazzLogAttendanceRecordLocalChangeSeqNum  BIGINT , clazzLogAttendanceRecordLastChangedBy  INTEGER , clazzLogAttendanceRecordUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLogAttendanceRecord_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzLogAttendanceRecord_lcsn_seq")
-                    database.execSQL("""
-                       |CREATE OR REPLACE FUNCTION 
-                       | inccsn_15_fn() RETURNS trigger AS ${'$'}${'$'}
-                       | BEGIN  
-                       | UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum =
-                       | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum 
-                       | ELSE NEXTVAL('ClazzLogAttendanceRecord_lcsn_seq') END),
-                       | clazzLogAttendanceRecordMasterChangeSeqNum = 
-                       | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                       | THEN NEXTVAL('ClazzLogAttendanceRecord_mcsn_seq') 
-                       | ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END)
-                       | WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid;
-                       | RETURN null;
-                       | END ${'$'}${'$'}
-                       | LANGUAGE plpgsql
-                       """.trimMargin())
-                    database.execSQL("""
-                       |CREATE TRIGGER inccsn_15_trig 
-                       |AFTER UPDATE OR INSERT ON ClazzLogAttendanceRecord 
-                       |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                       |EXECUTE PROCEDURE inccsn_15_fn()
-                       """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzLogAttendanceRecord_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-                       |CREATE 
-                       | INDEX index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn 
-                       |ON ClazzLogAttendanceRecord_trk (clientId, epk, rx, csn)
-                       """.trimMargin())
-
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS School (  schoolName  TEXT , schoolDesc  TEXT , schoolAddress  TEXT , schoolActive  BOOL , schoolGender  INTEGER , schoolFeatures  BIGINT , schoolLocationLong  DOUBLE PRECISION , schoolLocationLatt  DOUBLE PRECISION , schoolMasterChangeSeqNum  BIGINT , schoolLocalChangeSeqNum  BIGINT , schoolLastChangedBy  INTEGER ,schoolUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS School_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS School_lcsn_seq")
-                    database.execSQL("""
-                          |CREATE OR REPLACE FUNCTION 
-                          | inccsn_164_fn() RETURNS trigger AS ${'$'}${'$'}
-                          | BEGIN  
-                          | UPDATE School SET schoolLocalChangeSeqNum =
-                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolLocalChangeSeqNum 
-                          | ELSE NEXTVAL('School_lcsn_seq') END),
-                          | schoolMasterChangeSeqNum = 
-                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                          | THEN NEXTVAL('School_mcsn_seq') 
-                          | ELSE NEW.schoolMasterChangeSeqNum END)
-                          | WHERE schoolUid = NEW.schoolUid;
-                          | RETURN null;
-                          | END ${'$'}${'$'}
-                          | LANGUAGE plpgsql
-                          """.trimMargin())
-                    database.execSQL("""
-                          |CREATE TRIGGER inccsn_164_trig 
-                          |AFTER UPDATE OR INSERT ON School 
-                          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                          |EXECUTE PROCEDURE inccsn_164_fn()
-                          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS School_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-                          |CREATE 
-                          | INDEX index_School_trk_clientId_epk_rx_csn 
-                          |ON School_trk (clientId, epk, rx, csn)
-                          """.trimMargin())
-                    //End: Create table School for PostgreSQL
-
-
-                    database.execSQL("ALTER TABLE PersonCustomFieldValue RENAME to PersonCustomFieldValue_OLD")
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonCustomFieldValue (  personCustomFieldValuePersonCustomFieldUid  BIGINT , personCustomFieldValuePersonUid  BIGINT , fieldValue  TEXT , personCustomFieldValueMasterChangeSeqNum  BIGINT , personCustomFieldValueLocalChangeSeqNum  BIGINT , personCustomFieldValueLastChangedBy  INTEGER , personCustomFieldValueUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("INSERT INTO PersonCustomFieldValue (personCustomFieldValueUid, personCustomFieldValuePersonCustomFieldUid, personCustomFieldValuePersonUid, fieldValue, personCustomFieldValueMasterChangeSeqNum, personCustomFieldValueLocalChangeSeqNum, personCustomFieldValueLastChangedBy) SELECT personCustomFieldValueUid, personCustomFieldValuePersonCustomFieldUid, personCustomFieldValuePersonUid, fieldValue, 0, 0, 0 FROM PersonCustomFieldValue_OLD")
-                    database.execSQL("DROP TABLE PersonCustomFieldValue_OLD")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonCustomFieldValue_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonCustomFieldValue_lcsn_seq")
-                    database.execSQL("""
-                          |CREATE OR REPLACE FUNCTION 
-                          | inccsn_178_fn() RETURNS trigger AS ${'$'}${'$'}
-                          | BEGIN  
-                          | UPDATE PersonCustomFieldValue SET personCustomFieldValueLocalChangeSeqNum =
-                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personCustomFieldValueLocalChangeSeqNum 
-                          | ELSE NEXTVAL('PersonCustomFieldValue_lcsn_seq') END),
-                          | personCustomFieldValueMasterChangeSeqNum = 
-                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                          | THEN NEXTVAL('PersonCustomFieldValue_mcsn_seq') 
-                          | ELSE NEW.personCustomFieldValueMasterChangeSeqNum END)
-                          | WHERE personCustomFieldValueUid = NEW.personCustomFieldValueUid;
-                          | RETURN null;
-                          | END ${'$'}${'$'}
-                          | LANGUAGE plpgsql
-                          """.trimMargin())
-                    database.execSQL("""
-                          |CREATE TRIGGER inccsn_178_trig 
-                          |AFTER UPDATE OR INSERT ON PersonCustomFieldValue 
-                          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                          |EXECUTE PROCEDURE inccsn_178_fn()
-                          """.trimMargin())
-                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_178_fn")
-                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_178")
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonCustomFieldValue_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-                          |CREATE 
-                          | INDEX index_PersonCustomFieldValue_trk_clientId_epk_rx_csn 
-                          |ON PersonCustomFieldValue_trk (clientId, epk, rx, csn)
-                          """.trimMargin())
-                    //End: Create table PersonCustomFieldValue for PostgreSQL
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS AuditLog (  auditLogMasterChangeSeqNum  BIGINT , auditLogLocalChangeSeqNum  BIGINT , auditLogLastChangedBy  INTEGER , auditLogActorPersonUid  BIGINT , auditLogTableUid  INTEGER , auditLogEntityUid  BIGINT , auditLogDate  BIGINT , notes  TEXT , auditLogUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS AuditLog_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS AuditLog_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_53_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE AuditLog SET auditLogLocalChangeSeqNum =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.auditLogLocalChangeSeqNum 
-          | ELSE NEXTVAL('AuditLog_lcsn_seq') END),
-          | auditLogMasterChangeSeqNum = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('AuditLog_mcsn_seq') 
-          | ELSE NEW.auditLogMasterChangeSeqNum END)
-          | WHERE auditLogUid = NEW.auditLogUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_53_trig 
-          |AFTER UPDATE OR INSERT ON AuditLog 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_53_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS AuditLog_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_AuditLog_trk_clientId_epk_rx_csn 
-          |ON AuditLog_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table AuditLog for PostgreSQL
-
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField (  customFieldName  TEXT , customFieldNameAlt  TEXT , customFieldLabelMessageID  INTEGER , customFieldIcon  TEXT , customFieldIconId  INTEGER , actionOnClick  TEXT , customFieldType  INTEGER , customFieldEntityType  INTEGER , customFieldActive  BOOL , customFieldDefaultValue  TEXT , customFieldMCSN  BIGINT , customFieldLCSN  BIGINT , customFieldLCB  INTEGER , customFieldInputType  INTEGER , customFieldUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomField_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomField_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_56_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE CustomField SET customFieldLCSN =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldLCSN 
-          | ELSE NEXTVAL('CustomField_lcsn_seq') END),
-          | customFieldMCSN = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('CustomField_mcsn_seq') 
-          | ELSE NEW.customFieldMCSN END)
-          | WHERE customFieldUid = NEW.customFieldUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_56_trig 
-          |AFTER UPDATE OR INSERT ON CustomField 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_56_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomField_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_CustomField_trk_clientId_epk_rx_csn 
-          |ON CustomField_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table CustomField for PostgreSQL
-
-                    //Begin: Create table CustomFieldValue for PostgreSQL
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue (  customFieldValueFieldUid  BIGINT , customFieldValueEntityUid  BIGINT , customFieldValueValue  TEXT , customFieldValueCustomFieldValueOptionUid  BIGINT , customFieldValueMCSN  BIGINT , customFieldValueLCSN  BIGINT , customFieldValueLCB  INTEGER , customFieldValueUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomFieldValue_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomFieldValue_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_57_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE CustomFieldValue SET customFieldValueLCSN =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueLCSN 
-          | ELSE NEXTVAL('CustomFieldValue_lcsn_seq') END),
-          | customFieldValueMCSN = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('CustomFieldValue_mcsn_seq') 
-          | ELSE NEW.customFieldValueMCSN END)
-          | WHERE customFieldValueUid = NEW.customFieldValueUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_57_trig 
-          |AFTER UPDATE OR INSERT ON CustomFieldValue 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_57_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValue_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_CustomFieldValue_trk_clientId_epk_rx_csn 
-          |ON CustomFieldValue_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table CustomFieldValue for PostgreSQL
-
-                    //Begin: Create table CustomFieldValueOption for PostgreSQL
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption (  customFieldValueOptionName  TEXT , customFieldValueOptionFieldUid  BIGINT , customFieldValueOptionIcon  TEXT , customFieldValueOptionMessageId  INTEGER , customFieldValueOptionActive  BOOL , customFieldValueOptionMCSN  BIGINT , customFieldValueOptionLCSN  BIGINT , customFieldValueOptionLCB  INTEGER , customFieldValueOptionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomFieldValueOption_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS CustomFieldValueOption_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_55_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE CustomFieldValueOption SET customFieldValueOptionLCSN =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueOptionLCSN 
-          | ELSE NEXTVAL('CustomFieldValueOption_lcsn_seq') END),
-          | customFieldValueOptionMCSN = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('CustomFieldValueOption_mcsn_seq') 
-          | ELSE NEW.customFieldValueOptionMCSN END)
-          | WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_55_trig 
-          |AFTER UPDATE OR INSERT ON CustomFieldValueOption 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_55_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS CustomFieldValueOption_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_CustomFieldValueOption_trk_clientId_epk_rx_csn 
-          |ON CustomFieldValueOption_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table CustomFieldValueOption for PostgreSQL
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange (  dateRangeLocalChangeSeqNum  BIGINT , dateRangeMasterChangeSeqNum  BIGINT , dateRangLastChangedBy  INTEGER , dateRangeFromDate  BIGINT , dateRangeToDate  BIGINT , dateRangeUMCalendarUid  BIGINT , dateRangeName  TEXT , dateRangeDesc  TEXT , dateRangeActive  BOOL , dateRangeUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS DateRange_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS DateRange_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_17_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE DateRange SET dateRangeLocalChangeSeqNum =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.dateRangeLocalChangeSeqNum 
-          | ELSE NEXTVAL('DateRange_lcsn_seq') END),
-          | dateRangeMasterChangeSeqNum = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('DateRange_mcsn_seq') 
-          | ELSE NEW.dateRangeMasterChangeSeqNum END)
-          | WHERE dateRangeUid = NEW.dateRangeUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_17_trig 
-          |AFTER UPDATE OR INSERT ON DateRange 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_17_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS DateRange_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_DateRange_trk_clientId_epk_rx_csn 
-          |ON DateRange_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table DateRange for PostgreSQL
-
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField (  fieldName  TEXT , labelMessageId  INTEGER , fieldIcon  TEXT , personFieldMasterChangeSeqNum  BIGINT , personFieldLocalChangeSeqNum  BIGINT , personFieldLastChangedBy  INTEGER , personCustomFieldUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonField_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonField_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_20_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE PersonField SET personFieldLocalChangeSeqNum =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personFieldLocalChangeSeqNum 
-          | ELSE NEXTVAL('PersonField_lcsn_seq') END),
-          | personFieldMasterChangeSeqNum = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('PersonField_mcsn_seq') 
-          | ELSE NEW.personFieldMasterChangeSeqNum END)
-          | WHERE personCustomFieldUid = NEW.personCustomFieldUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_20_trig 
-          |AFTER UPDATE OR INSERT ON PersonField 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_20_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonField_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_PersonField_trk_clientId_epk_rx_csn 
-          |ON PersonField_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table PersonField for PostgreSQL
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonDetailPresenterField (  personDetailPresenterFieldMasterChangeSeqNum  BIGINT , personDetailPresenterFieldLocalChangeSeqNum  BIGINT , personDetailPresenterFieldLastChangedBy  INTEGER , fieldUid  BIGINT , fieldType  INTEGER , fieldIndex  INTEGER , labelMessageId  INTEGER , fieldIcon  TEXT , headerMessageId  INTEGER , viewModeVisible  BOOL , editModeVisible  BOOL , isReadyOnly  BOOL , personDetailPresenterFieldUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonDetailPresenterField_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonDetailPresenterField_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_19_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE PersonDetailPresenterField SET personDetailPresenterFieldLocalChangeSeqNum =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personDetailPresenterFieldLocalChangeSeqNum 
-          | ELSE NEXTVAL('PersonDetailPresenterField_lcsn_seq') END),
-          | personDetailPresenterFieldMasterChangeSeqNum = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('PersonDetailPresenterField_mcsn_seq') 
-          | ELSE NEW.personDetailPresenterFieldMasterChangeSeqNum END)
-          | WHERE personDetailPresenterFieldUid = NEW.personDetailPresenterFieldUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_19_trig 
-          |AFTER UPDATE OR INSERT ON PersonDetailPresenterField 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_19_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonDetailPresenterField_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_PersonDetailPresenterField_trk_clientId_epk_rx_csn 
-          |ON PersonDetailPresenterField_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table PersonDetailPresenterField for PostgreSQL
-
-                    //Begin: Create table Schedule for PostgreSQL
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule (  sceduleStartTime  BIGINT , scheduleEndTime  BIGINT , scheduleDay  INTEGER , scheduleMonth  INTEGER , scheduleFrequency  INTEGER , umCalendarUid  BIGINT , scheduleClazzUid  BIGINT , scheduleMasterChangeSeqNum  BIGINT , scheduleLocalChangeSeqNum  BIGINT , scheduleLastChangedBy  INTEGER , scheduleActive  BOOL , scheduleUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Schedule_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Schedule_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_21_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE Schedule SET scheduleLocalChangeSeqNum =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduleLocalChangeSeqNum 
-          | ELSE NEXTVAL('Schedule_lcsn_seq') END),
-          | scheduleMasterChangeSeqNum = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('Schedule_mcsn_seq') 
-          | ELSE NEW.scheduleMasterChangeSeqNum END)
-          | WHERE scheduleUid = NEW.scheduleUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_21_trig 
-          |AFTER UPDATE OR INSERT ON Schedule 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_21_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Schedule_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_Schedule_trk_clientId_epk_rx_csn 
-          |ON Schedule_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table Schedule for PostgreSQL
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ScheduledCheck (  checkTime  BIGINT , checkType  INTEGER , checkUuid  TEXT , checkParameters  TEXT , scClazzLogUid  BIGINT , scheduledCheckMasterCsn  BIGINT , scheduledCheckLocalCsn  BIGINT , scheduledCheckLastChangedBy  INTEGER , scheduledCheckUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ScheduledCheck_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ScheduledCheck_lcsn_seq")
-                    database.execSQL("""
-          |CREATE OR REPLACE FUNCTION 
-          | inccsn_173_fn() RETURNS trigger AS ${'$'}${'$'}
-          | BEGIN  
-          | UPDATE ScheduledCheck SET scheduledCheckLocalCsn =
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduledCheckLocalCsn 
-          | ELSE NEXTVAL('ScheduledCheck_lcsn_seq') END),
-          | scheduledCheckMasterCsn = 
-          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-          | THEN NEXTVAL('ScheduledCheck_mcsn_seq') 
-          | ELSE NEW.scheduledCheckMasterCsn END)
-          | WHERE scheduledCheckUid = NEW.scheduledCheckUid;
-          | RETURN null;
-          | END ${'$'}${'$'}
-          | LANGUAGE plpgsql
-          """.trimMargin())
-                    database.execSQL("""
-          |CREATE TRIGGER inccsn_173_trig 
-          |AFTER UPDATE OR INSERT ON ScheduledCheck 
-          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-          |EXECUTE PROCEDURE inccsn_173_fn()
-          """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ScheduledCheck_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_ScheduledCheck_trk_clientId_epk_rx_csn 
-          |ON ScheduledCheck_trk (clientId, epk, rx, csn)
-          """.trimMargin())
-                    //End: Create table ScheduledCheck for PostgreSQL
-
-
-                    // from 35 - 36
-                    database.execSQL("""ALTER TABLE Clazz 
+                        // from 35 - 36
+                        database.execSQL("""ALTER TABLE Clazz 
                         ADD COLUMN clazzStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL
                         """.trimMargin())
-                    database.execSQL("""ALTER TABLE Clazz 
+                        database.execSQL("""ALTER TABLE Clazz 
                         ADD COLUMN clazzTeachersPersonGroupUid  BIGINT DEFAULT 0 NOT NULL
                         """.trimMargin())
-                    database.execSQL("""ALTER TABLE Clazz 
+                        database.execSQL("""ALTER TABLE Clazz 
                         ADD COLUMN clazzSchoolUid  BIGINT DEFAULT 0 NOT NULL
                         """.trimMargin())
 
-                    database.execSQL("""ALTER TABLE School ADD COLUMN schoolHolidayCalendarUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
-                    database.execSQL("""ALTER TABLE School ADD COLUMN schoolStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
-                    database.execSQL("""ALTER TABLE School ADD COLUMN schoolTeachersPersonGroupUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
+                        database.execSQL("""ALTER TABLE School ADD COLUMN schoolHolidayCalendarUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
+                        database.execSQL("""ALTER TABLE School ADD COLUMN schoolStudentsPersonGroupUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
+                        database.execSQL("""ALTER TABLE School ADD COLUMN schoolTeachersPersonGroupUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
 
-                    database.execSQL("""ALTER TABLE PersonPicture 
+                        database.execSQL("""ALTER TABLE PersonPicture 
                         ADD COLUMN personPictureActive BOOL DEFAULT true NOT NULL""".trimMargin())
 
-                    database.execSQL("""ALTER TABLE StatementEntity RENAME COLUMN personuid to statementPersonUid
+                        database.execSQL("""ALTER TABLE StatementEntity RENAME COLUMN personuid to statementPersonUid
                         """.trimMargin())
-                    database.execSQL("""ALTER TABLE StatementEntity RENAME COLUMN verbUid to statementVerbUid
+                        database.execSQL("""ALTER TABLE StatementEntity RENAME COLUMN verbUid to statementVerbUid
                         """.trimMargin())
 
-                    database.execSQL("ALTER TABLE StatementEntity ALTER COLUMN resultScoreScaled TYPE BIGINT")
-
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SchoolMember (  schoolMemberPersonUid  BIGINT , schoolMemberSchoolUid  BIGINT , schoolMemberJoinDate  BIGINT , schoolMemberLeftDate  BIGINT , schoolMemberRole  INTEGER , schoolMemberActive  BOOL , schoolMemberLocalChangeSeqNum  BIGINT , schoolMemberMasterChangeSeqNum  BIGINT , schoolMemberLastChangedBy  INTEGER , schoolMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SchoolMember_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SchoolMember_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS SchoolMember (  schoolMemberPersonUid  BIGINT , schoolMemberSchoolUid  BIGINT , schoolMemberJoinDate  BIGINT , schoolMemberLeftDate  BIGINT , schoolMemberRole  INTEGER , schoolMemberActive  BOOL , schoolMemberLocalChangeSeqNum  BIGINT , schoolMemberMasterChangeSeqNum  BIGINT , schoolMemberLastChangedBy  INTEGER , schoolMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS SchoolMember_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS SchoolMember_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_200_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1243,24 +740,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_200_trig 
                           |AFTER UPDATE OR INSERT ON SchoolMember 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_200_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS SchoolMember_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS SchoolMember_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_SchoolMember_trk_clientId_epk_rx_csn 
                           |ON SchoolMember_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table SchoolMember for PostgreSQL
+                        //End: Create table SchoolMember for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWork (  clazzWorkCreatorPersonUid  BIGINT , clazzWorkClazzUid  BIGINT , clazzWorkTitle  TEXT , clazzWorkCreatedDate  BIGINT , clazzWorkStartDateTime  BIGINT , clazzWorkStartTime  BIGINT , clazzWorkDueTime  BIGINT , clazzWorkDueDateTime  BIGINT , clazzWorkSubmissionType  INTEGER , clazzWorkCommentsEnabled  BOOL , clazzWorkMaximumScore  INTEGER , clazzWorkInstructions  TEXT , clazzWorkActive  BOOL , clazzWorkLocalChangeSeqNum  BIGINT , clazzWorkMasterChangeSeqNum  BIGINT , clazzWorkLastChangedBy  INTEGER , clazzWorkUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWork_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWork_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWork (  clazzWorkCreatorPersonUid  BIGINT , clazzWorkClazzUid  BIGINT , clazzWorkTitle  TEXT , clazzWorkCreatedDate  BIGINT , clazzWorkStartDateTime  BIGINT , clazzWorkStartTime  BIGINT , clazzWorkDueTime  BIGINT , clazzWorkDueDateTime  BIGINT , clazzWorkSubmissionType  INTEGER , clazzWorkCommentsEnabled  BOOL , clazzWorkMaximumScore  INTEGER , clazzWorkInstructions  TEXT , clazzWorkActive  BOOL , clazzWorkLocalChangeSeqNum  BIGINT , clazzWorkMasterChangeSeqNum  BIGINT , clazzWorkLastChangedBy  INTEGER , clazzWorkUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWork_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWork_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_201_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1276,24 +773,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_201_trig 
                           |AFTER UPDATE OR INSERT ON ClazzWork 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_201_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWork_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWork_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_ClazzWork_trk_clientId_epk_rx_csn 
                           |ON ClazzWork_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table ClazzWork for PostgreSQL
+                        //End: Create table ClazzWork for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestion (  clazzWorkQuestionText  TEXT , clazzWorkQuestionClazzWorkUid  BIGINT , clazzWorkQuestionIndex  INTEGER , clazzWorkQuestionType  INTEGER , clazzWorkQuestionActive  BOOL , clazzWorkQuestionMCSN  BIGINT , clazzWorkQuestionLCSN  BIGINT , clazzWorkQuestionLCB  INTEGER , clazzWorkQuestionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestion_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestion_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestion (  clazzWorkQuestionText  TEXT , clazzWorkQuestionClazzWorkUid  BIGINT , clazzWorkQuestionIndex  INTEGER , clazzWorkQuestionType  INTEGER , clazzWorkQuestionActive  BOOL , clazzWorkQuestionMCSN  BIGINT , clazzWorkQuestionLCSN  BIGINT , clazzWorkQuestionLCB  INTEGER , clazzWorkQuestionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestion_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestion_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_202_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1309,24 +806,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_202_trig 
                           |AFTER UPDATE OR INSERT ON ClazzWorkQuestion 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_202_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestion_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestion_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_ClazzWorkQuestion_trk_clientId_epk_rx_csn 
                           |ON ClazzWorkQuestion_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table ClazzWorkQuestion for PostgreSQL
+                        //End: Create table ClazzWorkQuestion for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionOption (  clazzWorkQuestionOptionText  TEXT , clazzWorkQuestionOptionQuestionUid  BIGINT , clazzWorkQuestionOptionMasterChangeSeqNum  BIGINT , clazzWorkQuestionOptionLocalChangeSeqNum  BIGINT , clazzWorkQuestionOptionLastChangedBy  INTEGER , clazzWorkQuestionOptionActive  BOOL , clazzWorkQuestionOptionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestionOption_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestionOption_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionOption (  clazzWorkQuestionOptionText  TEXT , clazzWorkQuestionOptionQuestionUid  BIGINT , clazzWorkQuestionOptionMasterChangeSeqNum  BIGINT , clazzWorkQuestionOptionLocalChangeSeqNum  BIGINT , clazzWorkQuestionOptionLastChangedBy  INTEGER , clazzWorkQuestionOptionActive  BOOL , clazzWorkQuestionOptionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestionOption_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestionOption_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_203_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1342,25 +839,25 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_203_trig 
                           |AFTER UPDATE OR INSERT ON ClazzWorkQuestionOption 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_203_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionOption_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionOption_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn 
                           |ON ClazzWorkQuestionOption_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table ClazzWorkQuestionOption for PostgreSQL
+                        //End: Create table ClazzWorkQuestionOption for PostgreSQL
 
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionResponse (  clazzWorkQuestionResponseClazzWorkUid  BIGINT , clazzWorkQuestionResponseQuestionUid  BIGINT , clazzWorkQuestionResponseText  TEXT , clazzWorkQuestionResponseOptionSelected  BIGINT , clazzWorkQuestionResponsePersonUid  BIGINT , clazzWorkQuestionResponseClazzMemberUid  BIGINT , clazzWorkQuestionResponseInactive  BOOL , clazzWorkQuestionResponseDateResponded  BIGINT , clazzWorkQuestionResponseMCSN  BIGINT , clazzWorkQuestionResponseLCSN  BIGINT , clazzWorkQuestionResponseLCB  INTEGER , clazzWorkQuestionResponseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestionResponse_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestionResponse_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionResponse (  clazzWorkQuestionResponseClazzWorkUid  BIGINT , clazzWorkQuestionResponseQuestionUid  BIGINT , clazzWorkQuestionResponseText  TEXT , clazzWorkQuestionResponseOptionSelected  BIGINT , clazzWorkQuestionResponsePersonUid  BIGINT , clazzWorkQuestionResponseClazzMemberUid  BIGINT , clazzWorkQuestionResponseInactive  BOOL , clazzWorkQuestionResponseDateResponded  BIGINT , clazzWorkQuestionResponseMCSN  BIGINT , clazzWorkQuestionResponseLCSN  BIGINT , clazzWorkQuestionResponseLCB  INTEGER , clazzWorkQuestionResponseUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestionResponse_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkQuestionResponse_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_209_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1376,24 +873,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_209_trig 
                           |AFTER UPDATE OR INSERT ON ClazzWorkQuestionResponse 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_209_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionResponse_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkQuestionResponse_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn 
                           |ON ClazzWorkQuestionResponse_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table ClazzWorkQuestionResponse for PostgreSQL
+                        //End: Create table ClazzWorkQuestionResponse for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkSubmission (  clazzWorkSubmissionClazzWorkUid  BIGINT , clazzWorkSubmissionClazzMemberUid  BIGINT , clazzWorkSubmissionMarkerClazzMemberUid  BIGINT , clazzWorkSubmissionMarkerPersonUid  BIGINT , clazzWorkSubmissionPersonUid  BIGINT , clazzWorkSubmissionInactive  BOOL , clazzWorkSubmissionDateTimeStarted  BIGINT , clazzWorkSubmissionDateTimeUpdated  BIGINT , clazzWorkSubmissionDateTimeFinished  BIGINT , clazzWorkSubmissionDateTimeMarked  BIGINT , clazzWorkSubmissionText  TEXT , clazzWorkSubmissionScore  INTEGER , clazzWorkSubmissionMCSN  BIGINT , clazzWorkSubmissionLCSN  BIGINT , clazzWorkSubmissionLCB  INTEGER , clazzWorkSubmissionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkSubmission_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkSubmission_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkSubmission (  clazzWorkSubmissionClazzWorkUid  BIGINT , clazzWorkSubmissionClazzMemberUid  BIGINT , clazzWorkSubmissionMarkerClazzMemberUid  BIGINT , clazzWorkSubmissionMarkerPersonUid  BIGINT , clazzWorkSubmissionPersonUid  BIGINT , clazzWorkSubmissionInactive  BOOL , clazzWorkSubmissionDateTimeStarted  BIGINT , clazzWorkSubmissionDateTimeUpdated  BIGINT , clazzWorkSubmissionDateTimeFinished  BIGINT , clazzWorkSubmissionDateTimeMarked  BIGINT , clazzWorkSubmissionText  TEXT , clazzWorkSubmissionScore  INTEGER , clazzWorkSubmissionMCSN  BIGINT , clazzWorkSubmissionLCSN  BIGINT , clazzWorkSubmissionLCB  INTEGER , clazzWorkSubmissionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkSubmission_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkSubmission_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_206_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1409,24 +906,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_206_trig 
                           |AFTER UPDATE OR INSERT ON ClazzWorkSubmission 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_206_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkSubmission_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkSubmission_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_ClazzWorkSubmission_trk_clientId_epk_rx_csn 
                           |ON ClazzWorkSubmission_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table ClazzWorkSubmission for PostgreSQL
+                        //End: Create table ClazzWorkSubmission for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Comments (  commentsText  TEXT , commentsEntityType  INTEGER , commentsEntityUid  BIGINT , commentsPublic  BOOL , commentsStatus  INTEGER , commentsPersonUid  BIGINT , commentsToPersonUid  BIGINT , commentsFlagged  BOOL , commentsInActive  BOOL , commentsDateTimeAdded  BIGINT , commentsDateTimeUpdated  BIGINT , commentsMCSN  BIGINT , commentsLCSN  BIGINT , commentsLCB  INTEGER , commentsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Comments_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Comments_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS Comments (  commentsText  TEXT , commentsEntityType  INTEGER , commentsEntityUid  BIGINT , commentsPublic  BOOL , commentsStatus  INTEGER , commentsPersonUid  BIGINT , commentsToPersonUid  BIGINT , commentsFlagged  BOOL , commentsInActive  BOOL , commentsDateTimeAdded  BIGINT , commentsDateTimeUpdated  BIGINT , commentsMCSN  BIGINT , commentsLCSN  BIGINT , commentsLCB  INTEGER , commentsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS Comments_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS Comments_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_208_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1442,27 +939,27 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_208_trig 
                           |AFTER UPDATE OR INSERT ON Comments 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_208_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Comments_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS Comments_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_Comments_trk_clientId_epk_rx_csn 
                           |ON Comments_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table Comments for PostgreSQL
+                        //End: Create table Comments for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerUploadJob (  cujContainerUid  BIGINT , sessionId  TEXT , jobStatus  INTEGER , bytesSoFar  BIGINT , contentLength  BIGINT , containerEntryFileUids  TEXT , cujUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    //End: Create table ContainerUploadJob for PostgreSQL
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ContainerUploadJob (  cujContainerUid  BIGINT , sessionId  TEXT , jobStatus  INTEGER , bytesSoFar  BIGINT , contentLength  BIGINT , containerEntryFileUids  TEXT , cujUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        //End: Create table ContainerUploadJob for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContentEntryProgress (  contentEntryProgressActive  BOOL , contentEntryProgressContentEntryUid  BIGINT , contentEntryProgressPersonUid  BIGINT , contentEntryProgressProgress  INTEGER , contentEntryProgressStatusFlag  INTEGER , contentEntryProgressLocalChangeSeqNum  BIGINT , contentEntryProgressMasterChangeSeqNum  BIGINT , contentEntryProgressLastChangedBy  INTEGER , contentEntryProgressUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContentEntryProgress_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContentEntryProgress_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ContentEntryProgress (  contentEntryProgressActive  BOOL , contentEntryProgressContentEntryUid  BIGINT , contentEntryProgressPersonUid  BIGINT , contentEntryProgressProgress  INTEGER , contentEntryProgressStatusFlag  INTEGER , contentEntryProgressLocalChangeSeqNum  BIGINT , contentEntryProgressMasterChangeSeqNum  BIGINT , contentEntryProgressLastChangedBy  INTEGER , contentEntryProgressUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContentEntryProgress_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ContentEntryProgress_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_210_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1478,30 +975,30 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_210_trig 
                           |AFTER UPDATE OR INSERT ON ContentEntryProgress 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_210_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContentEntryProgress_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ContentEntryProgress_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_ContentEntryProgress_trk_clientId_epk_rx_csn 
                           |ON ContentEntryProgress_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table ContentEntryProgress for PostgreSQL
+                        //End: Create table ContentEntryProgress for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS DeviceSession (  dsDeviceId  INTEGER , dsPersonUid  BIGINT , expires  BIGINT , deviceSessionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    //End: Create table DeviceSession for PostgreSQL
+                        database.execSQL("CREATE TABLE IF NOT EXISTS DeviceSession (  dsDeviceId  INTEGER , dsPersonUid  BIGINT , expires  BIGINT , deviceSessionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        //End: Create table DeviceSession for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS TimeZoneEntity (  id  TEXT  PRIMARY KEY  NOT NULL , rawOffset  INTEGER )")
-                    //End: Create table TimeZoneEntity for PostgreSQL
+                        database.execSQL("CREATE TABLE IF NOT EXISTS TimeZoneEntity (  id  TEXT  PRIMARY KEY  NOT NULL , rawOffset  INTEGER )")
+                        //End: Create table TimeZoneEntity for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Holiday (  holMasterCsn  BIGINT , holLocalCsn  BIGINT , holLastModBy  INTEGER , holActive  BOOL , holHolidayCalendarUid  BIGINT , holStartTime  BIGINT , holEndTime  BIGINT , holName  TEXT , holUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Holiday_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Holiday_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS Holiday (  holMasterCsn  BIGINT , holLocalCsn  BIGINT , holLastModBy  INTEGER , holActive  BOOL , holHolidayCalendarUid  BIGINT , holStartTime  BIGINT , holEndTime  BIGINT , holName  TEXT , holUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS Holiday_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS Holiday_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_99_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1517,25 +1014,25 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_99_trig 
                           |AFTER UPDATE OR INSERT ON Holiday 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_99_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Holiday_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS Holiday_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_Holiday_trk_clientId_epk_rx_csn 
                           |ON Holiday_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table Holiday for PostgreSQL
+                        //End: Create table Holiday for PostgreSQL
 
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS HolidayCalendar (  umCalendarName  TEXT , umCalendarCategory  INTEGER , umCalendarActive  BOOL , umCalendarMasterChangeSeqNum  BIGINT , umCalendarLocalChangeSeqNum  BIGINT , umCalendarLastChangedBy  INTEGER , umCalendarUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS HolidayCalendar_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS HolidayCalendar_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS HolidayCalendar (  umCalendarName  TEXT , umCalendarCategory  INTEGER , umCalendarActive  BOOL , umCalendarMasterChangeSeqNum  BIGINT , umCalendarLocalChangeSeqNum  BIGINT , umCalendarLastChangedBy  INTEGER , umCalendarUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS HolidayCalendar_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS HolidayCalendar_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_28_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1551,28 +1048,28 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_28_trig 
                           |AFTER UPDATE OR INSERT ON HolidayCalendar 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_28_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS HolidayCalendar_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS HolidayCalendar_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_HolidayCalendar_trk_clientId_epk_rx_csn 
                           |ON HolidayCalendar_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table HolidayCalendar for PostgreSQL
+                        //End: Create table HolidayCalendar for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS WorkSpace (  name  TEXT , guestLogin  BOOL , registrationAllowed  BOOL , uid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    //End: Create table WorkSpace for PostgreSQL
+                        database.execSQL("CREATE TABLE IF NOT EXISTS WorkSpace (  name  TEXT , guestLogin  BOOL , registrationAllowed  BOOL , uid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        //End: Create table WorkSpace for PostgreSQL
 
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkContentJoin (  clazzWorkContentJoinContentUid  BIGINT , clazzWorkContentJoinClazzWorkUid  BIGINT , clazzWorkContentJoinInactive  BOOL , clazzWorkContentJoinDateAdded  BIGINT , clazzWorkContentJoinMCSN  BIGINT , clazzWorkContentJoinLCSN  BIGINT , clazzWorkContentJoinLCB  INTEGER , clazzWorkContentJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkContentJoin_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkContentJoin_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkContentJoin (  clazzWorkContentJoinContentUid  BIGINT , clazzWorkContentJoinClazzWorkUid  BIGINT , clazzWorkContentJoinInactive  BOOL , clazzWorkContentJoinDateAdded  BIGINT , clazzWorkContentJoinMCSN  BIGINT , clazzWorkContentJoinLCSN  BIGINT , clazzWorkContentJoinLCB  INTEGER , clazzWorkContentJoinUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkContentJoin_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ClazzWorkContentJoin_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_204_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1588,24 +1085,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_204_trig 
                           |AFTER UPDATE OR INSERT ON ClazzWorkContentJoin 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_204_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkContentJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ClazzWorkContentJoin_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn 
                           |ON ClazzWorkContentJoin_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table ClazzWorkContentJoin for PostgreSQL
+                        //End: Create table ClazzWorkContentJoin for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Report (  reportOwnerUid  BIGINT , chartType  INTEGER , xAxis  INTEGER , yAxis  INTEGER , subGroup  INTEGER , fromDate  BIGINT , toDate  BIGINT , reportTitle  TEXT , reportInactive  BOOL , reportMasterChangeSeqNum  BIGINT , reportLocalChangeSeqNum  BIGINT , reportLastChangedBy  INTEGER , reportUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Report_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Report_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS Report (  reportOwnerUid  BIGINT , chartType  INTEGER , xAxis  INTEGER , yAxis  INTEGER , subGroup  INTEGER , fromDate  BIGINT , toDate  BIGINT , reportTitle  TEXT , reportInactive  BOOL , reportMasterChangeSeqNum  BIGINT , reportLocalChangeSeqNum  BIGINT , reportLastChangedBy  INTEGER , reportUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS Report_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS Report_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_101_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1621,24 +1118,24 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_101_trig 
                           |AFTER UPDATE OR INSERT ON Report 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_101_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Report_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS Report_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_Report_trk_clientId_epk_rx_csn 
                           |ON Report_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table Report for PostgreSQL
+                        //End: Create table Report for PostgreSQL
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ReportFilter (  reportFilterReportUid  BIGINT , entityUid  BIGINT , entityType  INTEGER , filterInactive  BOOL , reportFilterMasterChangeSeqNum  BIGINT , reportFilterLocalChangeSeqNum  BIGINT , reportFilterLastChangedBy  INTEGER , reportFilterUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ReportFilter_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ReportFilter_lcsn_seq")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ReportFilter (  reportFilterReportUid  BIGINT , entityUid  BIGINT , entityType  INTEGER , filterInactive  BOOL , reportFilterMasterChangeSeqNum  BIGINT , reportFilterLocalChangeSeqNum  BIGINT , reportFilterLastChangedBy  INTEGER , reportFilterUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ReportFilter_mcsn_seq")
+                        database.execSQL("CREATE SEQUENCE IF NOT EXISTS ReportFilter_lcsn_seq")
+                        database.execSQL("""
                           |CREATE OR REPLACE FUNCTION 
                           | inccsn_102_fn() RETURNS trigger AS ${'$'}${'$'}
                           | BEGIN  
@@ -1654,20 +1151,20 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           | END ${'$'}${'$'}
                           | LANGUAGE plpgsql
                           """.trimMargin())
-                    database.execSQL("""
+                        database.execSQL("""
                           |CREATE TRIGGER inccsn_102_trig 
                           |AFTER UPDATE OR INSERT ON ReportFilter 
                           |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                           |EXECUTE PROCEDURE inccsn_102_fn()
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ReportFilter_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                        database.execSQL("CREATE TABLE IF NOT EXISTS ReportFilter_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                        database.execSQL("""
                           |CREATE 
                           | INDEX index_ReportFilter_trk_clientId_epk_rx_csn 
                           |ON ReportFilter_trk (clientId, epk, rx, csn)
                           """.trimMargin())
-                    //End: Create table ReportFilter for PostgreSQL
-                }
+                        //End: Create table ReportFilter for PostgreSQL
+                    }
 
 
                 database.execSQL("""ALTER TABLE School 
@@ -1710,7 +1207,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("INSERT INTO PersonAuth (personAuthUid, passwordHash, personAuthStatus) SELECT personAuthUid, passwordHash, 0 FROM PersonAuth_OLD")
                     database.execSQL("DROP TABLE PersonAuth_OLD")
 
-
                     database.execSQL("""ALTER TABLE Clazz 
                         ADD COLUMN clazzPendingStudentsPersonGroupUid INTEGER DEFAULT 0 NOT NULL""".trimMargin())
 
@@ -1743,11 +1239,31 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_37_38 = object : DoorMigration(37, 38) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE StatementEntity RENAME to StatementEntity_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS StatementEntity (`statementUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `statementId` TEXT, `statementPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `xObjectUid` INTEGER NOT NULL, `subStatementActorUid` INTEGER NOT NULL, `substatementVerbUid` INTEGER NOT NULL, `subStatementObjectUid` INTEGER NOT NULL, `agentUid` INTEGER NOT NULL, `instructorUid` INTEGER NOT NULL, `authorityUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER NOT NULL, `resultSuccess` INTEGER NOT NULL, `resultScoreScaled` REAL NOT NULL, `resultScoreRaw` INTEGER NOT NULL, `resultScoreMin` INTEGER NOT NULL, `resultScoreMax` INTEGER NOT NULL, `resultDuration` INTEGER NOT NULL, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistration` TEXT, `contextPlatform` TEXT, `contextStatementId` TEXT, `fullStatement` TEXT, `statementMasterChangeSeqNum` INTEGER NOT NULL, `statementLocalChangeSeqNum` INTEGER NOT NULL, `statementLastChangedBy` INTEGER NOT NULL, `extensionProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL)")
+                    database.execSQL("INSERT INTO StatementEntity (statementUid, statementId, statementPersonUid, statementVerbUid, xObjectUid, subStatementActorUid, substatementVerbUid, subStatementObjectUid, agentUid, instructorUid, authorityUid, teamUid, resultCompletion, resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, resultScoreMax, resultDuration, resultResponse, timestamp, stored, contextRegistration, contextPlatform, contextStatementId, fullStatement, statementMasterChangeSeqNum, statementLocalChangeSeqNum, statementLastChangedBy, extensionProgress, statementContentEntryUid) SELECT statementUid, statementId, statementPersonUid, statementVerbUid, xObjectUid, subStatementActorUid, substatementVerbUid, subStatementObjectUid, agentUid, instructorUid, authorityUid, teamUid, resultCompletion, resultSuccess, resultScoreScaled, resultScoreRaw, resultScoreMin, resultScoreMax, resultDuration, resultResponse, timestamp, stored, contextRegistration, contextPlatform, contextStatementId, fullStatement, statementMasterChangeSeqNum, statementLocalChangeSeqNum, statementLastChangedBy, extensionProgress, statementContentEntryUid FROM StatementEntity_OLD")
+                    database.execSQL("DROP TABLE StatementEntity_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS `StatementEntity_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_trk_clientId_epk_rx_csn` ON `StatementEntity_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("ALTER TABLE StatementEntity ALTER COLUMN resultScoreScaled TYPE FLOAT")
+                }
+
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
-                    MIGRATION_35_36, MIGRATION_36_37)
+                    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38)
 
 
 
