@@ -169,7 +169,6 @@ class PersonEditFragmentTest {
         sleep(5000)
 
         scrollToBottom()
-
         onView(withId(R.id.username_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.person_exists))))
     }
@@ -257,7 +256,6 @@ class PersonEditFragmentTest {
                 onView(withId(R.id.password_text)).perform(replaceText(password))
                 onView(withId(R.id.confirm_password_text)).perform(replaceText(confirmedPassword))
             }
-
 
             scenario.clickOptionMenu(R.id.menu_done)
         }

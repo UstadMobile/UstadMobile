@@ -108,7 +108,7 @@ fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: Inve
     val builder = AlertDialog.Builder(context)
 
     val systemImpl = UstadMobileSystemImpl.instance
-    val dialogView = (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.dialog_date_picker,
+    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_date_picker,
             null, false)
 
     builder.setView(dialogView)
