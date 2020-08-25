@@ -32,9 +32,11 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
                                       private var lifecycleOwner: LifecycleOwner?, di: DI)
     : SelectablePagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerAdapter.ContentEntryListViewHolder>(ContentEntryList2Fragment.DIFF_CALLBACK) {
 
-    val accountManager: UstadAccountManager by di.instance()
+    private val accountManager: UstadAccountManager by di.instance()
 
-    val containerDownloadManager: ContainerDownloadManager by di.on(accountManager.activeAccount).instance()
+    private val containerDownloadManager: ContainerDownloadManager by di.on(accountManager.activeAccount).instance()
+
+    private val boundViewHolders = mutableSetOf<ContentEntryListViewHolder>()
 
     inner class ContentEntryListViewHolder(val itemBinding: ItemContentEntryListBinding): RecyclerView.ViewHolder(itemBinding.root),
         DoorObserver<DownloadJobItem?>{
@@ -53,6 +55,13 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
         }
     }
 
+    fun onLocalAvailabilityUpdated(localAvailabilityMap: Map<Long, Boolean>) {
+        boundViewHolders.forEach {
+            it.itemBinding.locallyAvailable = localAvailabilityMap.getOrElse(
+                    it.itemBinding.contentEntry?.mostRecentContainer?.containerUid ?: -1) { false }
+        }
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentEntryListViewHolder {
         val itemBinding = ItemContentEntryListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -64,16 +73,19 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
 
     override fun onBindViewHolder(holder: ContentEntryListViewHolder, position: Int) {
         val item = getItem(position)
+        boundViewHolders += holder
         holder.itemBinding.contentEntry = item
         holder.itemView.setSelectedIfInList(item, selectedItems, ContentEntryList2Fragment.DIFF_CALLBACK)
-        //holder.downloadJobItemLiveData = null
         if(item != null) {
             GlobalScope.launch(Dispatchers.Main.immediate) {
                 holder.downloadJobItemLiveData = containerDownloadManager
                         .getDownloadJobItemByContentEntryUid(item.contentEntryUid )
             }
         }
+    }
 
+    override fun onViewRecycled(holder: ContentEntryListViewHolder) {
+        boundViewHolders -= holder
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
