@@ -167,8 +167,13 @@ class PersonEditPresenter(context: Any,
                         accountManager.activeAccount = umAccount
                         view.navigateToNextDestination(umAccount, nextDestination)
                     } catch (e: Exception) {
-                        view.showSnackBar(impl.getString(if (e is IllegalArgumentException) MessageID.person_exists
-                        else MessageID.login_network_error, context))
+
+                        if (e is IllegalArgumentException) {
+                            view.usernameError = impl.getString(MessageID.person_exists, context)
+                        } else {
+                            view.showSnackBar(impl.getString(MessageID.login_network_error, context))
+                        }
+
                         return@launch
                     }
                 }

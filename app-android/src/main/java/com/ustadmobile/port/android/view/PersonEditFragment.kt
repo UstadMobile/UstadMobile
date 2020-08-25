@@ -199,12 +199,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             handleInputError(mBinding?.birthdayTextinputlayout, value != null, value)
         }
 
-    override var errorMessage: String? = null
-        set(value) {
-            field = value
-            mBinding?.errorText?.visibility = if(value != null) View.VISIBLE else View.GONE
-            mBinding?.errorText?.text = value
-        }
 
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
         val impl: UstadMobileSystemImpl by instance()

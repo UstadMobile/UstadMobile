@@ -170,7 +170,8 @@ class PersonEditFragmentTest {
 
         scrollToBottom()
 
-        onView(withId(R.id.error_text)).check(matches(isDisplayed()))
+        onView(withId(R.id.username_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.person_exists))))
     }
 
 
