@@ -130,6 +130,7 @@ kotlin {
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-metadata:$version_kmp"
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation("io.ktor:ktor-client-serialization:$version_ktor")
 
 
                 implementation project(':lib-door-runtime')
@@ -160,6 +161,7 @@ kotlin {
                 implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation("io.ktor:ktor-client-serialization-jvm:$version_ktor")
 
             }
         }
@@ -226,6 +228,7 @@ kotlin {
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.google.code.gson:gson:$version_gson"
+
                 //end Android and JVM dependencies
             }
         }

@@ -194,6 +194,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation project(':lib-door-runtime')
+                implementation("io.ktor:ktor-client-serialization:$version_ktor")
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
                 compileOnly project(":lib-room-annotations")
@@ -212,6 +213,7 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "io.ktor:ktor-io-jvm:$version_ktor"
+                implementation("io.ktor:ktor-client-serialization-jvm:$version_ktor")
                 implementation project(':lib-door-runtime')
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')

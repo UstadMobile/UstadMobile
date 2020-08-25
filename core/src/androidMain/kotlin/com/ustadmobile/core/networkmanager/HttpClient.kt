@@ -11,6 +11,8 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
+import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import java.lang.RuntimeException
@@ -37,7 +39,7 @@ private val okHttpClient = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
     null
 }
 
-private val defaultGsonSerializer = GsonSerializer()
+private val defaultKotlinXSeralizer = KotlinxSerializer()
 
 private val defaultGson: Gson by lazy {Gson()}
 
@@ -50,7 +52,7 @@ private val httpClient = if(Build.VERSION.SDK_INT < OK_HTTP_MIN_SDKVERSION) {
 }else {
     HttpClient(OkHttp) {
         install(JsonFeature) {
-            serializer = defaultGsonSerializer
+            serializer = defaultKotlinXSeralizer
         }
 
         val dispatcher = Dispatcher()
@@ -72,7 +74,7 @@ fun defaultOkHttpClient() = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) 
     throw RuntimeException("OKHttp Min SDK Version is $OK_HTTP_MIN_SDKVERSION")
 }
 
-fun defaultGsonSerializer() = defaultGsonSerializer
+fun defaultGsonSerializer() = defaultKotlinXSeralizer
 
 fun initPicasso(context: Context) {
     /**
