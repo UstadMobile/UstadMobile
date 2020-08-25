@@ -26,6 +26,8 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var errorMessage: String?
 
+    var dateOfBirthError: String?
+
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 
     companion object {

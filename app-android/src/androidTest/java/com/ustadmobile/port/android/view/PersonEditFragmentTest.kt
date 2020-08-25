@@ -65,10 +65,10 @@ class PersonEditFragmentTest {
 
     private lateinit var serverUrl: String
 
-    val impl =  UstadMobileSystemImpl.instance
+    val impl = UstadMobileSystemImpl.instance
 
     @Before
-    fun setUp(){
+    fun setUp() {
         impl.messageIdMap = MessageIDMap.ID_MAP
         mockWebServer = MockWebServer()
         mockWebServer.start()
@@ -83,7 +83,7 @@ class PersonEditFragmentTest {
 
     @AdbScreenRecord("given person edit opened in normal mode classes should be shown")
     @Test
-    fun givenPersonEditOpened_whenInNoRegistrationMode_thenClassesShouldBeShown(){
+    fun givenPersonEditOpened_whenInNoRegistrationMode_thenClassesShouldBeShown() {
         launchFragment(false, fillForm = false)
 
         scrollToBottom()
@@ -94,7 +94,7 @@ class PersonEditFragmentTest {
 
     @AdbScreenRecord("given person edit opened in normal mode username and password should be hidden")
     @Test
-    fun givenPersonEditOpened_whenInNoRegistrationMode_thenUsernameAndPasswordShouldBeHidden(){
+    fun givenPersonEditOpened_whenInNoRegistrationMode_thenUsernameAndPasswordShouldBeHidden() {
         launchFragment(false, fillForm = false)
 
         scrollToBottom()
@@ -106,7 +106,7 @@ class PersonEditFragmentTest {
 
     @AdbScreenRecord("given person edit opened in registration mode classes should be hidden")
     @Test
-    fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden(){
+    fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden() {
         launchFragment(true, fillForm = false)
 
         scrollToBottom()
@@ -117,8 +117,8 @@ class PersonEditFragmentTest {
 
     @AdbScreenRecord("given person edit opened in registration mode when username and password are not filled and save is clicked should show errors")
     @Test
-    fun givenPersonEditOpenedInRegistrationMode_whenUserNameAndPasswordAreNotFilled_thenShouldShowErrors(){
-        launchFragment(registrationMode = true,leftOutPassword = true, leftOutUsername = true)
+    fun givenPersonEditOpenedInRegistrationMode_whenUserNameAndPasswordAreNotFilled_thenShouldShowErrors() {
+        launchFragment(registrationMode = true, leftOutPassword = true, leftOutUsername = true)
 
         scrollToBottom()
 
@@ -129,10 +129,27 @@ class PersonEditFragmentTest {
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
     }
 
+    @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth is not filled and save is clicked should show errors")
+    @Test
+    fun givenPersonEditOpenedInRegistrationMode_whenDateOfBirthAreNotFilled_thenShouldShowErrors() {
+        launchFragment(registrationMode = true, leftOutDateOfBirth = true)
+        onView(withId(R.id.birthday_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.field_required_prompt))))
+    }
+
+    @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth is less than 13 years of age and save is clicked should show errors")
+    @Test
+    fun givenPersonEditOpenedInRegistrationMode_whenDateOfBirthIsLessThan13YearsOfAge_thenShouldShowErrors() {
+        launchFragment(registrationMode = true, selectedDateOfBirth = DateTime(2010, 10, 24).unixMillisLong)
+        onView(withId(R.id.birthday_textinputlayout)).check(matches(
+                hasInputLayoutError(context.getString(R.string.underRegistrationAgeError))))
+    }
+
+
     @AdbScreenRecord("given person edit opened in registration mode when password doesn't match and save is clicked should show errors")
     @Test
-    fun givenPersonEditOpenedInRegistrationMode_whenPasswordDoNotMatch_thenShouldShowErrors(){
-        launchFragment(registrationMode = true,misMatchPassword = true)
+    fun givenPersonEditOpenedInRegistrationMode_whenPasswordDoNotMatch_thenShouldShowErrors() {
+        launchFragment(registrationMode = true, misMatchPassword = true)
 
         scrollToBottom()
 
@@ -145,9 +162,9 @@ class PersonEditFragmentTest {
 
     @AdbScreenRecord("given person edit opened in registration mode when try to register existing person should show errors")
     @Test
-    fun givenPersonEditOpenedInRegistrationMode_whenTryToRegisterExistingPerson_thenShouldShowErrors(){
+    fun givenPersonEditOpenedInRegistrationMode_whenTryToRegisterExistingPerson_thenShouldShowErrors() {
         mockWebServer.enqueue(MockResponse().setResponseCode(409))
-        launchFragment(registrationMode = true,misMatchPassword = false, leftOutUsername = false)
+        launchFragment(registrationMode = true, misMatchPassword = false, leftOutUsername = false)
 
         sleep(5000)
 
@@ -157,12 +174,13 @@ class PersonEditFragmentTest {
     }
 
 
-
     private fun launchFragment(registrationMode: Boolean = false, misMatchPassword: Boolean = false,
-                               leftOutPassword: Boolean = false, leftOutUsername: Boolean = false, fillForm: Boolean = true){
+                               leftOutPassword: Boolean = false, leftOutUsername: Boolean = false,
+                               leftOutDateOfBirth: Boolean = false, fillForm: Boolean = true,
+                                selectedDateOfBirth: Long = DateTime(1990,10,18).unixMillisLong) {
 
         val password = "password"
-        val confirmedPassword = if(misMatchPassword) "password1" else password
+        val confirmedPassword = if (misMatchPassword) "password1" else password
 
         val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to registrationMode.toString(),
                 ARG_SERVER_URL to serverUrl)
@@ -176,20 +194,19 @@ class PersonEditFragmentTest {
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         //Soft keyboard tend to hide views, when try to type will throw exception so instead of type we'll replace text
-        if(fillForm){
+        if (fillForm) {
 
-            val personOnForm = scenario.letOnFragment { it.entity}
+            val personOnForm = scenario.letOnFragment { it.entity }
 
             val person = Person().apply {
                 firstNames = "Jane"
                 lastName = "Doe"
                 phoneNum = "00000000000"
                 gender = Person.GENDER_MALE
-                dateOfBirth = (DateTime.now().toOffsetByTimezone("Asia/Dubai").localMidnight - 7.days)
-                        .utc.unixMillisLong
+                dateOfBirth = selectedDateOfBirth
                 emailAddr = "email@dummy.com"
                 personAddress = "dummy address, 101 dummy"
-                if(!leftOutUsername){
+                if (!leftOutUsername) {
                     username = "jane.doe"
                 }
             }
@@ -203,11 +220,7 @@ class PersonEditFragmentTest {
             }
 
             person.gender.takeIf { it != personOnForm?.gender }?.also {
-                setMessageIdOption(R.id.gender_value,impl.getString(MessageID.male,context))
-            }
-
-            person.dateOfBirth.takeIf { it != personOnForm?.dateOfBirth }?.also {
-                setDateField(R.id.birthday_text,it)
+                setMessageIdOption(R.id.gender_value, impl.getString(MessageID.male, context))
             }
 
             person.phoneNum.takeIf { it != personOnForm?.phoneNum }?.also {
@@ -223,7 +236,13 @@ class PersonEditFragmentTest {
                 onView(withId(R.id.address_text)).perform(replaceText(it))
             }
 
-            if(!leftOutUsername){
+            if (!leftOutDateOfBirth) {
+                person.dateOfBirth.takeIf { it != personOnForm?.dateOfBirth }?.also {
+                    setDateField(R.id.birthday_text, it)
+                }
+            }
+
+            if (!leftOutUsername) {
                 //scroll
                 scrollToBottom()
                 person.username.takeIf { it != personOnForm?.username }?.also {
@@ -231,19 +250,19 @@ class PersonEditFragmentTest {
                 }
             }
 
-
-            if(!leftOutPassword){
+            if (!leftOutPassword) {
                 //scroll
                 scrollToBottom()
                 onView(withId(R.id.password_text)).perform(replaceText(password))
                 onView(withId(R.id.confirm_password_text)).perform(replaceText(confirmedPassword))
             }
 
+
             scenario.clickOptionMenu(R.id.menu_done)
         }
     }
 
-    private fun scrollToBottom(){
+    private fun scrollToBottom() {
         onView(withId(R.id.nested_view)).perform(swipeUp())
         //make sure scroll animation is completed
         sleep(500)

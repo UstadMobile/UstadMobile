@@ -193,6 +193,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             handleInputError(mBinding?.confirmPasswordTextinputlayout, value != null, value)
         }
 
+    override var dateOfBirthError: String? = null
+        set(value) {
+            field = value
+            handleInputError(mBinding?.birthdayTextinputlayout, value != null, value)
+        }
+
     override var errorMessage: String? = null
         set(value) {
             field = value
@@ -273,6 +279,17 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 handleInputError(mBinding?.confirmPasswordTextinputlayout, false, null)
             }
         })
+
+        mBinding?.birthdayText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.birthdayTextinputlayout, false, null)
+            }
+        })
+
 
         return rootView
     }
