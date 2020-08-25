@@ -56,7 +56,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
-                arguments?.get(UstadView.ARG_LISTMODE).toString())
+                arguments?.get(UstadView.ARG_LISTMODE).toString(), viewLifecycleOwner, di)
         val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.content_editor_create_new_title))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
