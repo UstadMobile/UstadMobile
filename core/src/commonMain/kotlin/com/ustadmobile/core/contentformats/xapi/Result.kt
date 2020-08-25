@@ -16,7 +16,7 @@ class Result {
 
     inner class Score {
 
-        var scaled: Long = 0
+        var scaled: Float = 0f
 
         var raw: Long = 0
 
