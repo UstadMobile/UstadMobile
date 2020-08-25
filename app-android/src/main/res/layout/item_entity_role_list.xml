@@ -49,7 +49,7 @@
             android:layout_marginStart="@dimen/dimen_64dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="@dimen/dimen_16dp"
-            android:text="@{entityRole.entityRoleRole.roleName + ` @ ` + entityRole.entityRoleScopeName}"
+            app:rolesAndPermissionsText="@{entityRole}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintEnd_toStartOf="@+id/item_entity_role_list_delete"
             app:layout_constraintStart_toStartOf="parent"

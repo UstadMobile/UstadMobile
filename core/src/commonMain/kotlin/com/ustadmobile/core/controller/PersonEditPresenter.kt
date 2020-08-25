@@ -45,6 +45,8 @@ class PersonEditPresenter(context: Any,
 
     private var registrationMode: Boolean = false
 
+    private var loggedInPerson: Person? = null
+
     private val clazzMemberJoinEditHelper =
             DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
@@ -124,9 +126,8 @@ class PersonEditPresenter(context: Any,
         }?:listOf()
         rolesAndPermissionEditHelper.liveList.sendValue(rolesAndPermissionList)
 
-
         val loggedInPersonUid = accountManager.activeAccount.personUid
-        val loggedInPerson = withTimeoutOrNull(2000){
+        loggedInPerson = withTimeoutOrNull(2000){
             db.personDao.findByUidAsync(loggedInPersonUid)
         }
         view.isAdmin = loggedInPerson?.admin?:false

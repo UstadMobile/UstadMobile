@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -15,7 +13,9 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.RoleListView
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -25,7 +25,7 @@ import org.kodein.di.on
 
 
 class RoleListFragment(): UstadListViewFragment<Role, Role>(),
-        RoleListView, View.OnClickListener{
+        RoleListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     override val listPresenter: UstadListPresenter<*, in Role>?
         get() = mPresenter
@@ -72,7 +72,8 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
         mDataBinding?.presenter = mPresenter
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_a_new,
-                        requireContext().getString(R.string.role)))
+                        requireContext().getString(R.string.role)),
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         mDataRecyclerViewAdapter = RoleListRecyclerAdapter(mPresenter)
         return view
     }
@@ -83,8 +84,14 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
                 requireContext().getString(R.string.role)
     }
 
-    override fun onClick(view: View?) {
-        mPresenter?.handleClickCreateNewFab()
+    override fun onClick(v: View?) {
+
+        if (v?.id == R.id.item_createnew_layout)
+            mPresenter?.handleClickCreateNewFab()
+        else {
+            super.onClick(v)
+        }
+
     }
 
     override fun onDestroyView() {

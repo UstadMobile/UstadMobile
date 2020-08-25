@@ -63,12 +63,16 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
                     requireContext().getString(R.string.person)
                 ).toTypedArray()) { dialog, which ->
                     onSaveStateToBackStackStateHandle()
-                    if(which == 0) {
-                        navigateToPickEntityFromList(School::class.java, R.id.schoollist_dest)
-                    }else if(which == 1){
-                        navigateToPickEntityFromList(Clazz::class.java, R.id.clazz_list_dest)
-                    }else if(which == 2){
-                        navigateToPickEntityFromList(Person::class.java, R.id.person_list_dest)
+                    when (which) {
+                        0 -> {
+                            navigateToPickEntityFromList(School::class.java, R.id.schoollist_dest)
+                        }
+                        1 -> {
+                            navigateToPickEntityFromList(Clazz::class.java, R.id.clazz_list_dest)
+                        }
+                        2 -> {
+                            navigateToPickEntityFromList(Person::class.java, R.id.person_list_dest)
+                        }
                     }
                 }.show()
     }
@@ -81,7 +85,8 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
 
-        mDataBinding = FragmentEntityroleEditBinding.inflate(inflater, container, false).also {
+        mDataBinding = FragmentEntityroleEditBinding.inflate(inflater, container,
+                false).also {
             rootView = it.root
             it.activityEventHandler = this
         }
@@ -89,7 +94,6 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
         mPresenter = EntityRoleEditPresenter(requireContext(), arguments.toStringMap(),
                 this@EntityRoleEditFragment,
                  di, viewLifecycleOwner)
-        //mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
         return rootView
     }
 
@@ -115,10 +119,10 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
             val school = it.firstOrNull() ?: return@observeResult
             entity?.erEntityUid = school.schoolUid
             entity?.entityRoleScopeName =
-                    school.schoolName + " (" + getString(R.string.school) + ")"
+                    school.schoolName
             entity?.erTableId = School.TABLE_ID
             mDataBinding?.fragmentEntityroleEditScopeTiet?.setText(
-                    school.schoolName + " (" + getString(R.string.school) + ")")
+                    school.schoolName )
             mDataBinding?.entityRole = entity
         }
 
@@ -128,9 +132,9 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
             entity?.erEntityUid = clazz.clazzUid
             entity?.erTableId = Clazz.TABLE_ID
             entity?.entityRoleScopeName =
-                    clazz.clazzName + " (" + getString(R.string.clazz) + ")"
+                    clazz.clazzName
             mDataBinding?.fragmentEntityroleEditScopeTiet?.setText(
-                    clazz.clazzName + " (" + getString(R.string.clazz) + ")")
+                    clazz.clazzName )
             mDataBinding?.entityRole = entity
         }
 
@@ -140,9 +144,9 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
             entity?.erEntityUid = person.personUid
             entity?.erTableId = Person.TABLE_ID
             entity?.entityRoleScopeName =
-                    person.firstNames + ' ' + person.lastName + " (" + getString(R.string.person) + ")"
+                    person.firstNames + ' ' + person.lastName
             mDataBinding?.fragmentEntityroleEditScopeTiet?.setText(
-                    person.firstNames + ' ' + person.lastName + " (" + getString(R.string.person) + ")")
+                    person.firstNames + ' ' + person.lastName )
             mDataBinding?.entityRole = entity
         }
 

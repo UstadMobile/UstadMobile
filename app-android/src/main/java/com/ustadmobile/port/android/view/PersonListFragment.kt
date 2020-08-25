@@ -25,13 +25,15 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
     override val listPresenter: UstadListPresenter<*, in PersonWithDisplayDetails>?
         get() = mPresenter
 
-    class PersonListViewHolder(val itemBinding: ItemPersonListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
+    class PersonListViewHolder(val itemBinding: ItemPersonListItemBinding)
+        : RecyclerView.ViewHolder(itemBinding.root)
 
     class PersonListRecyclerAdapter(var presenter: PersonListPresenter?)
         : SelectablePagedListAdapter<PersonWithDisplayDetails, PersonListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersonListViewHolder {
-            val itemBinding = ItemPersonListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val itemBinding = ItemPersonListItemBinding.inflate(LayoutInflater.from(parent.context),
+                    parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
             return PersonListViewHolder(itemBinding)
@@ -59,7 +61,8 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
         menu.findItem(R.id.menu_search).isVisible = true
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = PersonListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)

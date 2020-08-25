@@ -19,11 +19,9 @@ import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzEditBinding
-import com.ustadmobile.core.controller.ClazzEdit2Presenter
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -36,7 +34,6 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
-import kotlinx.serialization.builtins.list
 import org.kodein.di.instance
 import java.io.File
 
@@ -188,7 +185,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                     }catch(e: Exception) {
                         e.printStackTrace()
                     }
-
                     return null
                 }
             }
@@ -280,6 +276,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             rootView = it.root
             it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.rolesAndPermissionsRv.layoutManager = LinearLayoutManager(requireContext())
+            it.isAdmin = isAdmin?:false
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
