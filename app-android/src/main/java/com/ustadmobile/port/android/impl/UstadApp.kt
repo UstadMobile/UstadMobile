@@ -50,6 +50,7 @@ import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderManag
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
+import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 
 import org.kodein.di.*
 
@@ -83,6 +84,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<EmbeddedHTTPD>() with singleton {
             EmbeddedHTTPD(0, di).also {
+                it.UmAppDatabase_AddUriMapping(false, "/:endpoint/UmAppDatabase", di)
                 it.start()
                 Napier.i("EmbeddedHTTPD started on port ${it.listeningPort}")
             }
@@ -157,6 +159,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         onReady {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
+            instance<EmbeddedHTTPD>()
         }
     }
 

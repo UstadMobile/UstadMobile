@@ -486,7 +486,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                     "${daoTypeClassName.simpleName}$SUFFIX_NANOHTTPD_URIRESPONDER")
 
             val minClientDbVersion = dbTypeElement.getAnnotation(MinSyncVersion::class.java)?.value ?: -1
-            codeBlock.add("addRoute(\"\$_mappingPrefix/${daoTypeClassName.simpleName}/(.)+\",\n " +
+            codeBlock.add("addRoute(\"\$_mappingPrefix/${daoTypeClassName.simpleName}/.*\",\n " +
                     "%T::class.java, _di,\n %T(){ it.$daoFromDbGetter }, _typeToken",
                     responderUriClassName, DoorDaoProvider::class.asTypeName().parameterizedBy(
                         dbTypeClassName, daoTypeClassName))

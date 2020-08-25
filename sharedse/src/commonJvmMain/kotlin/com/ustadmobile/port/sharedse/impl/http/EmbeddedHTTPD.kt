@@ -22,7 +22,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
  *
