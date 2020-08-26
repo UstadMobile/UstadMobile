@@ -52,7 +52,7 @@ class PersonDetailPresenterField(
     var isReadyOnly: Boolean = false){
 
     @MasterChangeSeqNum
-    var personDetailPresenterFieldMastrChangeSeqNum: Long = 0
+    var personDetailPresenterFieldMasterChangeSeqNum: Long = 0
 
     @LocalChangeSeqNum
     var personDetailPresenterFieldLocalChangeSeqNum: Long = 0
@@ -133,7 +133,7 @@ class PersonDetailPresenterField(
         if (viewModeVisible != other.viewModeVisible) return false
         if (editModeVisible != other.editModeVisible) return false
         if (isReadyOnly != other.isReadyOnly) return false
-        if (personDetailPresenterFieldMastrChangeSeqNum != other.personDetailPresenterFieldMastrChangeSeqNum) return false
+        if (personDetailPresenterFieldMasterChangeSeqNum != other.personDetailPresenterFieldMasterChangeSeqNum) return false
         if (personDetailPresenterFieldLocalChangeSeqNum != other.personDetailPresenterFieldLocalChangeSeqNum) return false
         if (personDetailPresenterFieldLastChangedBy != other.personDetailPresenterFieldLastChangedBy) return false
 
@@ -151,7 +151,7 @@ class PersonDetailPresenterField(
         result = 31 * result + viewModeVisible.hashCode()
         result = 31 * result + editModeVisible.hashCode()
         result = 31 * result + isReadyOnly.hashCode()
-        result = 31 * result + personDetailPresenterFieldMastrChangeSeqNum.hashCode()
+        result = 31 * result + personDetailPresenterFieldMasterChangeSeqNum.hashCode()
         result = 31 * result + personDetailPresenterFieldLocalChangeSeqNum.hashCode()
         result = 31 * result + personDetailPresenterFieldLastChangedBy
         return result

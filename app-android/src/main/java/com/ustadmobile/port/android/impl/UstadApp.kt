@@ -53,6 +53,7 @@ import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 
 import org.kodein.di.*
+import java.io.File
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -172,6 +173,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
         initPicasso(applicationContext)
+
     }
 
     override fun attachBaseContext(base: Context) {
