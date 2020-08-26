@@ -37,7 +37,6 @@ import com.ustadmobile.sharedse.network.containerfetcher.AbstractContainerFetche
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherRequest
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.coroutineContext
