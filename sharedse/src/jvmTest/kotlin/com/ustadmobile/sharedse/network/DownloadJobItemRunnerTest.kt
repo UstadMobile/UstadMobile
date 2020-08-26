@@ -21,6 +21,7 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadMana
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTED_LOCAL
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTING_LOCAL
@@ -37,7 +38,6 @@ import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
 import com.ustadmobile.util.test.ReverseProxyDispatcher
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.util.test.extractTestResourceToFile
 import io.ktor.server.engine.ApplicationEngine
 import kotlinx.coroutines.CoroutineDispatcher

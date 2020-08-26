@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.util.parse8601Duration
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -27,7 +28,6 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
 import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.util.test.extractTestResourceToFile
 import org.junit.Assert
 import org.junit.Before
