@@ -31,8 +31,11 @@ class AboutActivity : UstadBaseActivity(), AboutView, DIAware {
         mAboutPresenter.onCreate(bundleToMap(savedInstanceState))
 
         setUMToolbar(R.id.toolbar)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        (findViewById<View>(R.id.about_html) as WebView)
+                .loadUrl("file:///android_asset/about.html")
     }
 
     override fun setVersionInfo(versionInfo: String) {

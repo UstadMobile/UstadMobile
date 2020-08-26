@@ -11,10 +11,8 @@ import com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
 @BindingAdapter(value=["messageIdOptions", "selectedMessageIdOption"], requireAll =  false)
 fun MessageIdAutoCompleteTextView.setMessageIdOptions(messageIdOptions: MutableList<MessageIdOption>?, selectedMessageIdOption: Int?) {
     val sortOptionsToUse = messageIdOptions ?: mutableListOf()
-    if(sortOptionsToUse == this.dropDownOptions)
-        return
 
-    this.dropDownOptions = sortOptionsToUse
+    this.takeIf { sortOptionsToUse != this.dropDownOptions}?.dropDownOptions = sortOptionsToUse
 
     if(selectedMessageIdOption != null)
         this.selectedDropDownOptionId = selectedMessageIdOption.toLong()

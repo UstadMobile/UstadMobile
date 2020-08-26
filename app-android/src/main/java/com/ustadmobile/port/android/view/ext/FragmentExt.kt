@@ -23,7 +23,7 @@ import com.ustadmobile.port.android.view.UstadEditFragment
  * BackStack SavedStateHandle as specified by ARG_RESULT_DEST_ID and ARG_RESULT_DEST_KEY
  */
 fun Fragment.saveResultToBackStackSavedStateHandle(result: List<*>) {
-    val saveToDestination = arguments?.getString(UstadBaseFragment.ARG_RESULT_DEST_ID)
+    val saveToDestination = arguments?.getString(UstadView.ARG_RESULT_DEST_ID)
     val saveToKey = arguments?.getString(UstadBaseFragment.ARG_RESULT_DEST_KEY)
     val navController = findNavController()
     if(saveToDestination != null && saveToKey != null) {
@@ -66,9 +66,9 @@ private val fragmentNavDefaultOptions: NavOptions by lazy {
 fun <T> Fragment.navigateToEditEntity(entity: T?, destinationId: Int, entityClass: Class<T>,
                                            destinationResultKey: String = entityClass.simpleName,
                                            overwriteDestination: Boolean? = null,
-                                            navOptions: NavOptions? = fragmentNavDefaultOptions) {
+                                            navOptions: NavOptions? = fragmentNavDefaultOptions,
+                                            argBundle:Bundle = Bundle()) {
     val navController = findNavController()
-    val argBundle = Bundle()
     val backStateEntryVal = navController.currentBackStackEntry
 
     if(backStateEntryVal != null) {

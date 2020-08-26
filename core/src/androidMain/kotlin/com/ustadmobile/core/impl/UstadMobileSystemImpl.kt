@@ -46,9 +46,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
-import androidx.navigation.navOptions
+import androidx.navigation.*
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
@@ -58,7 +56,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
 import java.util.*
-import java.util.concurrent.Executors
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -90,7 +87,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     @VisibleForTesting
     var navController: NavController? = null
 
-    @Deprecated("This is deprecated since we switched to using NavController. Add the screen to ViewNameToDestMap.kt instead.")
     private val viewNameToAndroidImplMap = mapOf<String, String>(
             "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
             ContentEditorView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorActivity",
@@ -131,7 +127,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         init(mContext)
     }
 
-    fun handleActivityDestroy(mContext: Activity) {}
 
 
     /**
@@ -202,11 +197,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
-    actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
+    actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
+                           flags: Int, ustadGoOptions: UstadGoOptions) {
         val ustadDestination = destinationProvider.lookupDestinationName(viewName)
-        if (ustadDestination != null) {
-            val navController = navController
-                    ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
+        if(ustadDestination != null) {
+            val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
             //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
             val options = navOptions {
@@ -216,9 +211,22 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                     popEnter = androidx.navigation.ui.R.anim.fragment_open_enter
                     popExit = androidx.navigation.ui.R.anim.fragment_close_exit
                 }
+
+                val popUpToViewName = ustadGoOptions.popUpToViewName
+                if(popUpToViewName != null) {
+                    val popUpToDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
+                        navController.currentDestination?.id ?: 0
+                    }else {
+                        destinationProvider.lookupDestinationName(popUpToViewName)
+                                ?.destinationId ?: 0
+                    }
+
+                    popUpTo(popUpToDestId) { inclusive = ustadGoOptions.popUpToInclusive }
+                }
             }
+
             navController.navigate(ustadDestination.destinationId, args.toBundleWithNullableValues(),
-                    options)
+                options)
 
             return
         }
@@ -229,7 +237,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         val ctx = context as Context
         try {
             androidImplClass = Class.forName(androidImplClassName)
-        } catch (e: Exception) {
+        }catch(e: Exception) {
             Log.wtf(TAG, "No activity for $viewName found")
             Toast.makeText(ctx, "ERROR: No Activity found for view: $viewName",
                     Toast.LENGTH_LONG).show()
@@ -339,7 +347,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO) {
+    actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO){
         val dirList = ArrayList<UMStorageDir>()
         val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
         val contentDirName = getContentDirName(context)
@@ -486,7 +494,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             var prefIn: InputStream? = null
 
             try {
-                prefIn = (context as Context).assets.open(appPrefResource)
+                prefIn =  (context as Context).assets.open(appPrefResource)
                 appConfig!!.load(prefIn)
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)

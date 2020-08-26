@@ -11,18 +11,6 @@ package com.ustadmobile.core.catalog.contenttype
  */
 interface ContentTypePlugin {
 
-    //    /**
-    //     *
-    //     */
-    //    public interface EntryResult {
-    //
-    //        UstadJSOPDSFeed getFeed();
-    //
-    //        InputStream getThumbnail() throws IOException;
-    //
-    //        String getThumbnailMimeType();
-    //    }
-
     /**
      * Return a String that will match the VIEW_NAME for the view that should be opened for this
      * type of content

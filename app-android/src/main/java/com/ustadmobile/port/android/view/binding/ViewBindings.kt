@@ -165,12 +165,19 @@ private var viewAnimationEnabled: Boolean? = null
  * Unfortunately using selectableItemBackground on Espresso tests seems to cause a nullpointerexception
  * See:
  * https://stackoverflow.com/questions/56817825/android-graphics-drawable-drawable-isprojected-on-a-null-object-reference
+ *
+ * Previously we looked at settings to see if animations were enabled. This caused a super-crash
+ * on some devices and emulators that appeared to be impossible to catch.
  */
 @BindingAdapter("backgroundIfAnimationEnabled")
 fun View.backgroundIfAnimated(drawable: Drawable) {
     if(viewAnimationEnabled == null) {
-        viewAnimationEnabled = Settings.Global.getFloat(context.contentResolver,
-                Settings.Global.WINDOW_ANIMATION_SCALE) != 0f
+        try {
+            Class.forName("com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule")
+            viewAnimationEnabled = false
+        }catch(e: ClassNotFoundException) {
+            viewAnimationEnabled = true
+        }
     }
 
     if(viewAnimationEnabled == true)

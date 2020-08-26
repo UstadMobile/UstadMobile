@@ -1,13 +1,15 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.*
-import com.ustadmobile.door.DoorLiveData
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
-import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
+import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 
 @UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzMemberClazzUid",
         inheritPermissionJoinedPrimaryKey = "clazzUid")
@@ -26,6 +28,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             updateDateLeftByUid(it, endDate)
         }
     }
+
+    @Query("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " + "AND clazzMemberClazzUid = :clazzUid")
+    abstract fun findByPersonUidAndClazzUid(personUid: Long, clazzUid: Long): ClazzMember?
 
     @Query("UPDATE ClazzMember SET clazzMemberDateLeft = :endDate WHERE clazzMemberUid = :clazzMemberUid")
     abstract fun updateDateLeftByUid(clazzMemberUid: Long, endDate: Long)
@@ -76,6 +81,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         ClazzMember
         LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
         WHERE ClazzMember.clazzMemberClazzUid = :clazzUid AND ClazzMember.clazzMemberRole = :roleId
+        AND CAST(clazzMemberActive AS INT) = 1
         ORDER BY Person.firstNames
     """)
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int): DataSource.Factory<Int, ClazzMemberWithPerson>

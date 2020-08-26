@@ -20,18 +20,17 @@ import kotlinx.serialization.Serializable
 @Entity(indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
-class ContentEntryParentChildJoin() {
+class ContentEntryParentChildJoin(
+    @ColumnInfo(index = true)
+    var cepcjParentContentEntryUid: Long = 0,
+
+    @ColumnInfo(index = true)
+    var cepcjChildContentEntryUid: Long = 0,
+
+    var childIndex: Int = 0) {
 
     @PrimaryKey(autoGenerate = true)
     var cepcjUid: Long = 0
-
-    @ColumnInfo(index = true)
-    var cepcjChildContentEntryUid: Long = 0
-
-    @ColumnInfo(index = true)
-    var cepcjParentContentEntryUid: Long = 0
-
-    var childIndex: Int = 0
 
     @LocalChangeSeqNum
     var cepcjLocalChangeSeqNum: Long = 0
@@ -42,13 +41,12 @@ class ContentEntryParentChildJoin() {
     @LastChangedBy
     var cepcjLastChangedBy: Int = 0
 
-    constructor(parentEntry: ContentEntry, childEntry: ContentEntry,
-                childIndex: Int) : this() {
-        this.cepcjParentContentEntryUid = parentEntry.contentEntryUid
-        this.cepcjChildContentEntryUid = childEntry.contentEntryUid
-        this.childIndex = childIndex
-    }
 
+    constructor(parentEntry: ContentEntry, childEntry: ContentEntry, index: Int) : this(){
+        cepcjParentContentEntryUid = parentEntry.contentEntryUid
+        cepcjChildContentEntryUid = childEntry.contentEntryUid
+        childIndex = index
+    }
 
     companion object {
 
@@ -61,16 +59,24 @@ class ContentEntryParentChildJoin() {
 
         other as ContentEntryParentChildJoin
 
-        if (cepcjChildContentEntryUid != other.cepcjChildContentEntryUid) return false
+        if (cepcjUid != other.cepcjUid) return false
+        if (cepcjLocalChangeSeqNum != other.cepcjLocalChangeSeqNum) return false
+        if (cepcjMasterChangeSeqNum != other.cepcjMasterChangeSeqNum) return false
+        if (cepcjLastChangedBy != other.cepcjLastChangedBy) return false
         if (cepcjParentContentEntryUid != other.cepcjParentContentEntryUid) return false
+        if (cepcjChildContentEntryUid != other.cepcjChildContentEntryUid) return false
         if (childIndex != other.childIndex) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = cepcjChildContentEntryUid.hashCode()
+        var result = cepcjUid.hashCode()
+        result = 31 * result + cepcjLocalChangeSeqNum.hashCode()
+        result = 31 * result + cepcjMasterChangeSeqNum.hashCode()
+        result = 31 * result + cepcjLastChangedBy
         result = 31 * result + cepcjParentContentEntryUid.hashCode()
+        result = 31 * result + cepcjChildContentEntryUid.hashCode()
         result = 31 * result + childIndex
         return result
     }

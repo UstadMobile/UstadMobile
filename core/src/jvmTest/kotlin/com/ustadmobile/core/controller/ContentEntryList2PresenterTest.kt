@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.util.test.ext.insertContentEntryWithParentChildJoinAndMostRecentContainer
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
@@ -46,7 +47,7 @@ class ContentEntryList2PresenterTest {
 
     private val parentEntryUid = 100001L
 
-    private var createdEntries: List<ContentEntry>? = null
+    private var createdEntries: List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
 
     val presenterArgs = mapOf(ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT,
             ARG_PARENT_ENTRY_UID to parentEntryUid.toString())
@@ -102,12 +103,14 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         verify(systemImpl, timeout(defaultTimeout)).go(eq(ContentEntry2DetailView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to createdEntries?.get(0)?.contentEntryUid.toString())), any())
+                argWhere {
+                    it.get(ARG_ENTITY_UID) == createdEntries?.get(0)?.contentEntryUid.toString()
+                }, any())
     }
 
     @Test
@@ -119,7 +122,7 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<List<ContentEntry>>().apply{
             verify(mockView, timeout(defaultTimeout).times(1)).finishWithResult(capture())
@@ -142,7 +145,7 @@ class ContentEntryList2PresenterTest {
                 args , mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<Long>().apply{
             verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(2)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
@@ -167,11 +170,11 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         mockView.waitForListToBeSet()
 
-        createdChildEntries[0].let { presenter.handleClickEntry(it) }
+        createdChildEntries[0].let { presenter.onClickContentEntry(it) }
 
         argumentCaptor<List<ContentEntry>>().apply{
             verify(mockView, timeout(defaultTimeout).times(1)).finishWithResult(capture())
@@ -196,7 +199,7 @@ class ContentEntryList2PresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        createdEntries?.get(0)?.let { presenter.handleClickEntry(it) }
+        createdEntries?.get(0)?.let { presenter.onClickContentEntry(it) }
 
         mockView.waitForListToBeSet()
 

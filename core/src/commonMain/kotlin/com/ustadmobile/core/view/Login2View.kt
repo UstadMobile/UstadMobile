@@ -1,5 +1,7 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.lib.db.entities.UmAccount
+
 interface Login2View : UstadView {
 
     var isEmptyPassword: Boolean
@@ -13,6 +15,8 @@ interface Login2View : UstadView {
     var connectAsGuestVisible: Boolean
 
     fun clearFields()
+
+    fun navigateToNextDestination(account: UmAccount?,fromDestination: String, nextDestination: String)
 
     var errorMessage: String
 

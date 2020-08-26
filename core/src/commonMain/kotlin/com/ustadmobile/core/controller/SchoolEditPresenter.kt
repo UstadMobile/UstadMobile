@@ -4,7 +4,10 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -103,7 +106,7 @@ class SchoolEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.schoolUid == 0L) {
                 entity.schoolActive = true
-                entity.schoolUid = repo.schoolDao.insertAsync(entity)
+                entity.schoolUid = repo.createNewSchoolAndGroups(entity, systemImpl, context)
             }else {
                 repo.schoolDao.updateAsync(entity)
             }
@@ -114,7 +117,7 @@ class SchoolEditPresenter(context: Any,
             repo.clazzDao.assignClassesToSchool(
                     clazzOneToManyJoinEditHelper.primaryKeysToDeactivate, 0L)
 
-            view.finishWithResult(listOf(entity))
+            onFinish(SchoolDetailView.VIEW_NAME, entity.schoolUid, entity)
         }
     }
 

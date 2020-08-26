@@ -67,7 +67,7 @@ class ReportDetailFragmentTest(val report: Report){
     fun givenReportExists_whenLaunched_thenShouldShowReport() {
         val reportUid = dbRule.db.reportDao.insert(report)
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(ARG_ENTITY_UID to reportUid)) {
             ReportDetailFragment().also {
                 it.installNavController(systemImplNavRule.navController)

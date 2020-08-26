@@ -6,11 +6,12 @@ import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEntryListTabsView
+import com.ustadmobile.core.view.GetStartedView
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
@@ -87,6 +88,17 @@ class Login2PresenterTest {
         return args
     }
 
+    private fun enQueueLoginResponse(success: Boolean = true){
+        if(success){
+            mockWebServer.enqueue(MockResponse()
+                    .setResponseCode(200)
+                    .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", "")))
+                    .setHeader("Content-Type", "application/json"))
+        }else{
+            mockWebServer.enqueue(MockResponse().setResponseCode(403))
+        }
+    }
+
 
     @Test
     fun givenRegistrationIsAllowed_whenLogin_shouldShowRegisterButton(){
@@ -126,12 +138,7 @@ class Login2PresenterTest {
         val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()
-        argumentCaptor<String>{
-            verify(impl).go(capture(), any(), any())
-            Assert.assertEquals("Account creation screen was opened",
-                    PersonEditView.VIEW_NAME, firstValue)
-        }
-
+        verify(impl).go(eq(PersonEditView.VIEW_NAME_REGISTER), any(), any())
     }
 
     @Test
@@ -149,11 +156,10 @@ class Login2PresenterTest {
     }
 
     @Test
-    fun givenValidUsernameAndPassword_whenHandleLoginClicked_shouldCallSystemImplGo() {
-        val destination = "dummyDestination"
-        mockWebServer.enqueue(MockResponse()
-                .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", "")))
-                .setHeader("Content-Type", "application/json"))
+    fun givenValidUsernameAndPassword_whenFromDestinationArgumentIsProvidedAndHandleLoginClicked_shouldGoToNextScreen() {
+        val nextDestination = "nextDummyDestination"
+        val fromDestination = "fromDummyDestination"
+        enQueueLoginResponse()
 
         val httpUrl = mockWebServer.url("/").toString()
 
@@ -161,15 +167,82 @@ class Login2PresenterTest {
 
         val presenter = Login2Presenter(context,
                 createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl,
-                        ARG_NEXT to destination)), view, di)
+                        ARG_FROM to fromDestination, ARG_NEXT to nextDestination)), view, di)
         presenter.onCreate(null)
 
         presenter.handleLogin(VALID_USER, VALID_PASS)
 
         argumentCaptor<String>{
-            verify(impl, timeout(defaultTimeout)).go(capture(), any())
+            verify(view, timeout(defaultTimeout)).navigateToNextDestination(anyOrNull(),capture(), capture())
             Assert.assertEquals("Next destination was opened",
-                    destination, firstValue)
+                    nextDestination, secondValue)
+
+            Assert.assertEquals("Back stack was popped up to the provided from-destination",
+                    fromDestination, firstValue)
+        }
+
+        verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
+    }
+
+    @Test
+    fun givenServerSelectionIsNotAllowedOnValidUsernameAndPassword_whenFromDestinationArgumentNotProvidedAndHandleLoginClicked_shouldGoToNextScreen() {
+
+        impl = mock {
+            on{getAppConfigBoolean(any(), any())}.thenReturn(false)
+        }
+
+        val nextDestination = "nextDummyDestination"
+        enQueueLoginResponse()
+
+        val httpUrl = mockWebServer.url("/").toString()
+
+        InitialContext().bindJndiForActiveEndpoint(httpUrl)
+
+        val presenter = Login2Presenter(context,
+                createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl,
+                        ARG_NEXT to nextDestination)), view, di)
+        presenter.onCreate(null)
+
+        presenter.handleLogin(VALID_USER, VALID_PASS)
+
+        argumentCaptor<String>{
+            verify(view, timeout(defaultTimeout)).navigateToNextDestination(anyOrNull(),capture(), capture())
+            Assert.assertEquals("Next destination was opened",
+                    nextDestination, secondValue)
+            Assert.assertEquals("Back stack was popped up to the default from-destination",
+                    Login2View.VIEW_NAME, firstValue)
+        }
+
+        verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
+    }
+
+
+    @Test
+    fun givenServerSelectionIsAllowedOnValidUsernameAndPassword_whenFromDestinationArgumentNotProvidedAndHandleLoginClicked_shouldGoToNextScreen() {
+
+        impl = mock {
+            on{getAppConfigBoolean(any(), any())}.thenReturn(true)
+        }
+        val nextDestination = "nextDummyDestination"
+
+
+        val httpUrl = mockWebServer.url("/").toString()
+
+        InitialContext().bindJndiForActiveEndpoint(httpUrl)
+
+        val presenter = Login2Presenter(context,
+                createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl,
+                        ARG_NEXT to nextDestination)), view, di)
+        presenter.onCreate(null)
+
+        presenter.handleLogin(VALID_USER, VALID_PASS)
+
+        argumentCaptor<String>{
+            verify(view, timeout(defaultTimeout)).navigateToNextDestination(anyOrNull(),capture(), capture())
+            Assert.assertEquals("Next destination was opened",
+                    nextDestination, secondValue)
+            Assert.assertEquals("Back stack was popped up to the default from-destination",
+                    GetStartedView.VIEW_NAME, firstValue)
         }
 
         verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
@@ -182,7 +255,7 @@ class Login2PresenterTest {
                 throw UnauthorizedException("Access denied")
             }
         }
-        mockWebServer.enqueue(MockResponse().setResponseCode(403))
+        enQueueLoginResponse(false)
         val httpUrl = mockWebServer.url("/").toString()
         val presenter = Login2Presenter(context, createParams(extraParam =
         mapOf(ARG_SERVER_URL to httpUrl)), view, di)

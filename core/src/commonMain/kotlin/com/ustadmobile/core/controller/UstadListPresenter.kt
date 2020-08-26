@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -20,7 +21,7 @@ import org.kodein.di.on
 abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>,
                                                                view: V, di: DI,
                                                     val lifecycleOwner: DoorLifecycleOwner)
-    : UstadBaseController<V>(context, arguments, view, di), DIAware {
+    : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected, OnSearchSubmitted {
 
     protected var mListMode = ListViewMode.BROWSER
 
@@ -36,26 +37,32 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
+    open val sortOptions: List<SortOrderOption>
+        get() = listOf()
+
+    protected var selectedSortOption: SortOrderOption? = null
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         mListMode = ListViewMode.valueOf(
                 arguments[UstadView.ARG_LISTMODE] ?: ListViewMode.BROWSER.toString())
-        accountManager.activeAccountLive.observeWithLifecycleOwner(lifecycleOwner, this::onAccountChanged)
+        view.loading = true
+        GlobalScope.launch(doorMainDispatcher()) {
+            onLoadFromDb()
+            view.loading = false
+        }
     }
 
-    protected open fun onAccountChanged(account: UmAccount?) {
+    suspend open fun onLoadFromDb() {
         val listView = (view as? UstadListView<*, *>) ?: return
-
-        GlobalScope.launch(doorMainDispatcher()) {
-            val hasAddPermission = onCheckAddPermission(account)
-            listView.addMode = when {
-                hasAddPermission && mListMode == ListViewMode.BROWSER -> ListViewAddMode.FAB
-                hasAddPermission && mListMode == ListViewMode.PICKER -> ListViewAddMode.FIRST_ITEM
-                else -> ListViewAddMode.NONE
-            }
-
-            listView.selectionOptions = onCheckListSelectionOptions(account)
+        val hasAddPermission = onCheckAddPermission(accountManager.activeAccount)
+        listView.addMode = when {
+            hasAddPermission && mListMode == ListViewMode.BROWSER -> ListViewAddMode.FAB
+            hasAddPermission && mListMode == ListViewMode.PICKER -> ListViewAddMode.FIRST_ITEM
+            else -> ListViewAddMode.NONE
         }
+
+        listView.selectionOptions = onCheckListSelectionOptions(accountManager.activeAccount)
     }
 
     /**
@@ -86,7 +93,15 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
         return listOf()
     }
 
+    @Deprecated("Use onSortOptionSelected")
     open fun handleClickSortOrder(sortOption: MessageIdOption) {
+
+    }
+
+    override fun onClickSort(sortOption: SortOrderOption) {
+        selectedSortOption = sortOption
+    }
+    override fun onSearchSubmitted(text: String?) {
 
     }
 

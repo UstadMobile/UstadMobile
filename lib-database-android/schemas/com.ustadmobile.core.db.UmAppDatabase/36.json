@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "b2f1f75c2d60e9f05343b1d408268447",
+    "identityHash": "9f5f95c11e26b2b61e901fdcd2335f53",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -399,11 +399,11 @@
       },
       {
         "tableName": "PersonDetailPresenterField",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personDetailPresenterFieldMastrChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLocalChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLastChangedBy` INTEGER NOT NULL, `personDetailPresenterFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fieldUid` INTEGER NOT NULL, `fieldType` INTEGER NOT NULL, `fieldIndex` INTEGER NOT NULL, `labelMessageId` INTEGER NOT NULL, `fieldIcon` TEXT, `headerMessageId` INTEGER NOT NULL, `viewModeVisible` INTEGER NOT NULL, `editModeVisible` INTEGER NOT NULL, `isReadyOnly` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personDetailPresenterFieldMasterChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLocalChangeSeqNum` INTEGER NOT NULL, `personDetailPresenterFieldLastChangedBy` INTEGER NOT NULL, `personDetailPresenterFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fieldUid` INTEGER NOT NULL, `fieldType` INTEGER NOT NULL, `fieldIndex` INTEGER NOT NULL, `labelMessageId` INTEGER NOT NULL, `fieldIcon` TEXT, `headerMessageId` INTEGER NOT NULL, `viewModeVisible` INTEGER NOT NULL, `editModeVisible` INTEGER NOT NULL, `isReadyOnly` INTEGER NOT NULL)",
         "fields": [
           {
-            "fieldPath": "personDetailPresenterFieldMastrChangeSeqNum",
-            "columnName": "personDetailPresenterFieldMastrChangeSeqNum",
+            "fieldPath": "personDetailPresenterFieldMasterChangeSeqNum",
+            "columnName": "personDetailPresenterFieldMasterChangeSeqNum",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1506,7 +1506,7 @@
       },
       {
         "tableName": "Clazz",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzTimeZone` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzName` TEXT, `clazzDesc` TEXT, `attendanceAverage` REAL NOT NULL, `clazzHolidayUMCalendarUid` INTEGER NOT NULL, `clazzScheuleUMCalendarUid` INTEGER NOT NULL, `isClazzActive` INTEGER NOT NULL, `clazzLocationUid` INTEGER NOT NULL, `clazzStartTime` INTEGER NOT NULL, `clazzEndTime` INTEGER NOT NULL, `clazzFeatures` INTEGER NOT NULL, `clazzSchoolUid` INTEGER NOT NULL, `clazzMasterChangeSeqNum` INTEGER NOT NULL, `clazzLocalChangeSeqNum` INTEGER NOT NULL, `clazzLastChangedBy` INTEGER NOT NULL, `clazzTimeZone` TEXT, `clazzStudentsPersonGroupUid` INTEGER NOT NULL, `clazzTeachersPersonGroupUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "clazzUid",
@@ -1603,6 +1603,18 @@
             "columnName": "clazzTimeZone",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "clazzStudentsPersonGroupUid",
+            "columnName": "clazzStudentsPersonGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzTeachersPersonGroupUid",
+            "columnName": "clazzTeachersPersonGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -1983,29 +1995,11 @@
       },
       {
         "tableName": "ContentEntryParentChildJoin",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cepcjChildContentEntryUid` INTEGER NOT NULL, `cepcjParentContentEntryUid` INTEGER NOT NULL, `childIndex` INTEGER NOT NULL, `cepcjLocalChangeSeqNum` INTEGER NOT NULL, `cepcjMasterChangeSeqNum` INTEGER NOT NULL, `cepcjLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cepcjUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cepcjLocalChangeSeqNum` INTEGER NOT NULL, `cepcjMasterChangeSeqNum` INTEGER NOT NULL, `cepcjLastChangedBy` INTEGER NOT NULL, `cepcjParentContentEntryUid` INTEGER NOT NULL, `cepcjChildContentEntryUid` INTEGER NOT NULL, `childIndex` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "cepcjUid",
             "columnName": "cepcjUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjChildContentEntryUid",
-            "columnName": "cepcjChildContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cepcjParentContentEntryUid",
-            "columnName": "cepcjParentContentEntryUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "childIndex",
-            "columnName": "childIndex",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2024,6 +2018,24 @@
           {
             "fieldPath": "cepcjLastChangedBy",
             "columnName": "cepcjLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cepcjParentContentEntryUid",
+            "columnName": "cepcjParentContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cepcjChildContentEntryUid",
+            "columnName": "cepcjChildContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "childIndex",
+            "columnName": "childIndex",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -2045,20 +2057,20 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `parent_child` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`, `cepcjParentContentEntryUid`)"
           },
           {
-            "name": "index_ContentEntryParentChildJoin_cepcjChildContentEntryUid",
-            "unique": false,
-            "columnNames": [
-              "cepcjChildContentEntryUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjChildContentEntryUid` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`)"
-          },
-          {
             "name": "index_ContentEntryParentChildJoin_cepcjParentContentEntryUid",
             "unique": false,
             "columnNames": [
               "cepcjParentContentEntryUid"
             ],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjParentContentEntryUid` ON `${TABLE_NAME}` (`cepcjParentContentEntryUid`)"
+          },
+          {
+            "name": "index_ContentEntryParentChildJoin_cepcjChildContentEntryUid",
+            "unique": false,
+            "columnNames": [
+              "cepcjChildContentEntryUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_cepcjChildContentEntryUid` ON `${TABLE_NAME}` (`cepcjChildContentEntryUid`)"
           }
         ],
         "foreignKeys": []
@@ -3339,7 +3351,7 @@
       },
       {
         "tableName": "StatementEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `statementId` TEXT, `statementPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `xObjectUid` INTEGER NOT NULL, `subStatementActorUid` INTEGER NOT NULL, `substatementVerbUid` INTEGER NOT NULL, `subStatementObjectUid` INTEGER NOT NULL, `agentUid` INTEGER NOT NULL, `instructorUid` INTEGER NOT NULL, `authorityUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER NOT NULL, `resultSuccess` INTEGER NOT NULL, `resultScoreScaled` REAL NOT NULL, `resultScoreRaw` INTEGER NOT NULL, `resultScoreMin` INTEGER NOT NULL, `resultScoreMax` INTEGER NOT NULL, `resultDuration` INTEGER NOT NULL, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistration` TEXT, `contextPlatform` TEXT, `contextStatementId` TEXT, `fullStatement` TEXT, `statementMasterChangeSeqNum` INTEGER NOT NULL, `statementLocalChangeSeqNum` INTEGER NOT NULL, `statementLastChangedBy` INTEGER NOT NULL, `extensionProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `statementId` TEXT, `statementPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `xObjectUid` INTEGER NOT NULL, `subStatementActorUid` INTEGER NOT NULL, `substatementVerbUid` INTEGER NOT NULL, `subStatementObjectUid` INTEGER NOT NULL, `agentUid` INTEGER NOT NULL, `instructorUid` INTEGER NOT NULL, `authorityUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER NOT NULL, `resultSuccess` INTEGER NOT NULL, `resultScoreScaled` INTEGER NOT NULL, `resultScoreRaw` INTEGER NOT NULL, `resultScoreMin` INTEGER NOT NULL, `resultScoreMax` INTEGER NOT NULL, `resultDuration` INTEGER NOT NULL, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistration` TEXT, `contextPlatform` TEXT, `contextStatementId` TEXT, `fullStatement` TEXT, `statementMasterChangeSeqNum` INTEGER NOT NULL, `statementLocalChangeSeqNum` INTEGER NOT NULL, `statementLastChangedBy` INTEGER NOT NULL, `extensionProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "statementUid",
@@ -3428,7 +3440,7 @@
           {
             "fieldPath": "resultScoreScaled",
             "columnName": "resultScoreScaled",
-            "affinity": "REAL",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -4013,7 +4025,7 @@
       },
       {
         "tableName": "School",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolEmailAddress` TEXT, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL, `schoolTimeZone` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolPhoneNumber` TEXT, `schoolGender` INTEGER NOT NULL, `schoolHolidayCalendarUid` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolEmailAddress` TEXT, `schoolTeachersPersonGroupUid` INTEGER NOT NULL, `schoolStudentsPersonGroupUid` INTEGER NOT NULL, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL, `schoolTimeZone` TEXT)",
         "fields": [
           {
             "fieldPath": "schoolUid",
@@ -4088,6 +4100,18 @@
             "notNull": false
           },
           {
+            "fieldPath": "schoolTeachersPersonGroupUid",
+            "columnName": "schoolTeachersPersonGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "schoolStudentsPersonGroupUid",
+            "columnName": "schoolStudentsPersonGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "schoolMasterChangeSeqNum",
             "columnName": "schoolMasterChangeSeqNum",
             "affinity": "INTEGER",
@@ -4149,7 +4173,7 @@
       },
       {
         "tableName": "SchoolMember",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolMemberPersonUid` INTEGER NOT NULL, `schoolMemberSchoolUid` INTEGER NOT NULL, `schoolMemberCreateDate` INTEGER NOT NULL, `schoolMemberJoinDate` INTEGER NOT NULL, `schoolMemberLeftDate` INTEGER NOT NULL, `schoolMemberRole` INTEGER NOT NULL, `schoolMemberActive` INTEGER NOT NULL, `schoolMemberLocalChangeSeqNum` INTEGER NOT NULL, `schoolMemberMasterChangeSeqNum` INTEGER NOT NULL, `schoolMemberLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`schoolMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolMemberPersonUid` INTEGER NOT NULL, `schoolMemberSchoolUid` INTEGER NOT NULL, `schoolMemberJoinDate` INTEGER NOT NULL, `schoolMemberLeftDate` INTEGER NOT NULL, `schoolMemberRole` INTEGER NOT NULL, `schoolMemberActive` INTEGER NOT NULL, `schoolMemberLocalChangeSeqNum` INTEGER NOT NULL, `schoolMemberMasterChangeSeqNum` INTEGER NOT NULL, `schoolMemberLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "schoolMemberUid",
@@ -4166,12 +4190,6 @@
           {
             "fieldPath": "schoolMemberSchoolUid",
             "columnName": "schoolMemberSchoolUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "schoolMemberCreateDate",
-            "columnName": "schoolMemberCreateDate",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -4242,6 +4260,676 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_SchoolMember_schoolMemberSchoolUid` ON `${TABLE_NAME}` (`schoolMemberSchoolUid`)"
           }
         ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWork",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkCreatorPersonUid` INTEGER NOT NULL, `clazzWorkClazzUid` INTEGER NOT NULL, `clazzWorkTitle` TEXT, `clazzWorkCreatedDate` INTEGER NOT NULL, `clazzWorkStartDateTime` INTEGER NOT NULL, `clazzWorkStartTime` INTEGER NOT NULL, `clazzWorkDueTime` INTEGER NOT NULL, `clazzWorkDueDateTime` INTEGER NOT NULL, `clazzWorkSubmissionType` INTEGER NOT NULL, `clazzWorkCommentsEnabled` INTEGER NOT NULL, `clazzWorkMaximumScore` INTEGER NOT NULL, `clazzWorkInstructions` TEXT, `clazzWorkActive` INTEGER NOT NULL, `clazzWorkLocalChangeSeqNum` INTEGER NOT NULL, `clazzWorkMasterChangeSeqNum` INTEGER NOT NULL, `clazzWorkLastChangedBy` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "clazzWorkUid",
+            "columnName": "clazzWorkUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkCreatorPersonUid",
+            "columnName": "clazzWorkCreatorPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkClazzUid",
+            "columnName": "clazzWorkClazzUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkTitle",
+            "columnName": "clazzWorkTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "clazzWorkCreatedDate",
+            "columnName": "clazzWorkCreatedDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkStartDateTime",
+            "columnName": "clazzWorkStartDateTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkStartTime",
+            "columnName": "clazzWorkStartTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkDueTime",
+            "columnName": "clazzWorkDueTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkDueDateTime",
+            "columnName": "clazzWorkDueDateTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionType",
+            "columnName": "clazzWorkSubmissionType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkCommentsEnabled",
+            "columnName": "clazzWorkCommentsEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkMaximumScore",
+            "columnName": "clazzWorkMaximumScore",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkInstructions",
+            "columnName": "clazzWorkInstructions",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "clazzWorkActive",
+            "columnName": "clazzWorkActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkLocalChangeSeqNum",
+            "columnName": "clazzWorkLocalChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkMasterChangeSeqNum",
+            "columnName": "clazzWorkMasterChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkLastChangedBy",
+            "columnName": "clazzWorkLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "clazzWorkUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkContentJoin",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkContentJoinUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkContentJoinContentUid` INTEGER NOT NULL, `clazzWorkContentJoinClazzWorkUid` INTEGER NOT NULL, `clazzWorkContentJoinInactive` INTEGER NOT NULL, `clazzWorkContentJoinDateAdded` INTEGER NOT NULL, `clazzWorkContentJoinMCSN` INTEGER NOT NULL, `clazzWorkContentJoinLCSN` INTEGER NOT NULL, `clazzWorkContentJoinLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "clazzWorkContentJoinUid",
+            "columnName": "clazzWorkContentJoinUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkContentJoinContentUid",
+            "columnName": "clazzWorkContentJoinContentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkContentJoinClazzWorkUid",
+            "columnName": "clazzWorkContentJoinClazzWorkUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkContentJoinInactive",
+            "columnName": "clazzWorkContentJoinInactive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkContentJoinDateAdded",
+            "columnName": "clazzWorkContentJoinDateAdded",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkContentJoinMCSN",
+            "columnName": "clazzWorkContentJoinMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkContentJoinLCSN",
+            "columnName": "clazzWorkContentJoinLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkContentJoinLCB",
+            "columnName": "clazzWorkContentJoinLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "clazzWorkContentJoinUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Comments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`commentsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `commentsText` TEXT, `commentsEntityType` INTEGER NOT NULL, `commentsEntityUid` INTEGER NOT NULL, `commentsPublic` INTEGER NOT NULL, `commentsStatus` INTEGER NOT NULL, `commentsPersonUid` INTEGER NOT NULL, `commentsToPersonUid` INTEGER NOT NULL, `commentsFlagged` INTEGER NOT NULL, `commentsInActive` INTEGER NOT NULL, `commentsDateTimeAdded` INTEGER NOT NULL, `commentsDateTimeUpdated` INTEGER NOT NULL, `commentsMCSN` INTEGER NOT NULL, `commentsLCSN` INTEGER NOT NULL, `commentsLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "commentsUid",
+            "columnName": "commentsUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsText",
+            "columnName": "commentsText",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "commentsEntityType",
+            "columnName": "commentsEntityType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsEntityUid",
+            "columnName": "commentsEntityUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsPublic",
+            "columnName": "commentsPublic",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsStatus",
+            "columnName": "commentsStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsPersonUid",
+            "columnName": "commentsPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsToPersonUid",
+            "columnName": "commentsToPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsFlagged",
+            "columnName": "commentsFlagged",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsInActive",
+            "columnName": "commentsInActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsDateTimeAdded",
+            "columnName": "commentsDateTimeAdded",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsDateTimeUpdated",
+            "columnName": "commentsDateTimeUpdated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsMCSN",
+            "columnName": "commentsMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsLCSN",
+            "columnName": "commentsLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentsLCB",
+            "columnName": "commentsLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "commentsUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkQuestion",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkQuestionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkQuestionText` TEXT, `clazzWorkQuestionClazzWorkUid` INTEGER NOT NULL, `clazzWorkQuestionIndex` INTEGER NOT NULL, `clazzWorkQuestionType` INTEGER NOT NULL, `clazzWorkQuestionActive` INTEGER NOT NULL, `clazzWorkQuestionMCSN` INTEGER NOT NULL, `clazzWorkQuestionLCSN` INTEGER NOT NULL, `clazzWorkQuestionLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "clazzWorkQuestionUid",
+            "columnName": "clazzWorkQuestionUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionText",
+            "columnName": "clazzWorkQuestionText",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "clazzWorkQuestionClazzWorkUid",
+            "columnName": "clazzWorkQuestionClazzWorkUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionIndex",
+            "columnName": "clazzWorkQuestionIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionType",
+            "columnName": "clazzWorkQuestionType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionActive",
+            "columnName": "clazzWorkQuestionActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionMCSN",
+            "columnName": "clazzWorkQuestionMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionLCSN",
+            "columnName": "clazzWorkQuestionLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionLCB",
+            "columnName": "clazzWorkQuestionLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "clazzWorkQuestionUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkQuestionOption",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkQuestionOptionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkQuestionOptionText` TEXT, `clazzWorkQuestionOptionQuestionUid` INTEGER NOT NULL, `clazzWorkQuestionOptionMasterChangeSeqNum` INTEGER NOT NULL, `clazzWorkQuestionOptionLocalChangeSeqNum` INTEGER NOT NULL, `clazzWorkQuestionOptionLastChangedBy` INTEGER NOT NULL, `clazzWorkQuestionOptionActive` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "clazzWorkQuestionOptionUid",
+            "columnName": "clazzWorkQuestionOptionUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionOptionText",
+            "columnName": "clazzWorkQuestionOptionText",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "clazzWorkQuestionOptionQuestionUid",
+            "columnName": "clazzWorkQuestionOptionQuestionUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionOptionMasterChangeSeqNum",
+            "columnName": "clazzWorkQuestionOptionMasterChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionOptionLocalChangeSeqNum",
+            "columnName": "clazzWorkQuestionOptionLocalChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionOptionLastChangedBy",
+            "columnName": "clazzWorkQuestionOptionLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionOptionActive",
+            "columnName": "clazzWorkQuestionOptionActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "clazzWorkQuestionOptionUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkSubmission",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkSubmissionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkSubmissionClazzWorkUid` INTEGER NOT NULL, `clazzWorkSubmissionClazzMemberUid` INTEGER NOT NULL, `clazzWorkSubmissionMarkerClazzMemberUid` INTEGER NOT NULL, `clazzWorkSubmissionMarkerPersonUid` INTEGER NOT NULL, `clazzWorkSubmissionPersonUid` INTEGER NOT NULL, `clazzWorkSubmissionInactive` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeStarted` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeUpdated` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeFinished` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeMarked` INTEGER NOT NULL, `clazzWorkSubmissionText` TEXT, `clazzWorkSubmissionScore` INTEGER NOT NULL, `clazzWorkSubmissionMCSN` INTEGER NOT NULL, `clazzWorkSubmissionLCSN` INTEGER NOT NULL, `clazzWorkSubmissionLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "clazzWorkSubmissionUid",
+            "columnName": "clazzWorkSubmissionUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionClazzWorkUid",
+            "columnName": "clazzWorkSubmissionClazzWorkUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionClazzMemberUid",
+            "columnName": "clazzWorkSubmissionClazzMemberUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionMarkerClazzMemberUid",
+            "columnName": "clazzWorkSubmissionMarkerClazzMemberUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionMarkerPersonUid",
+            "columnName": "clazzWorkSubmissionMarkerPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionPersonUid",
+            "columnName": "clazzWorkSubmissionPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionInactive",
+            "columnName": "clazzWorkSubmissionInactive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionDateTimeStarted",
+            "columnName": "clazzWorkSubmissionDateTimeStarted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionDateTimeUpdated",
+            "columnName": "clazzWorkSubmissionDateTimeUpdated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionDateTimeFinished",
+            "columnName": "clazzWorkSubmissionDateTimeFinished",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionDateTimeMarked",
+            "columnName": "clazzWorkSubmissionDateTimeMarked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionText",
+            "columnName": "clazzWorkSubmissionText",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionScore",
+            "columnName": "clazzWorkSubmissionScore",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionMCSN",
+            "columnName": "clazzWorkSubmissionMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionLCSN",
+            "columnName": "clazzWorkSubmissionLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkSubmissionLCB",
+            "columnName": "clazzWorkSubmissionLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "clazzWorkSubmissionUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkQuestionResponse",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzWorkQuestionResponseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkQuestionResponseClazzWorkUid` INTEGER NOT NULL, `clazzWorkQuestionResponseQuestionUid` INTEGER NOT NULL, `clazzWorkQuestionResponseText` TEXT, `clazzWorkQuestionResponseOptionSelected` INTEGER NOT NULL, `clazzWorkQuestionResponsePersonUid` INTEGER NOT NULL, `clazzWorkQuestionResponseClazzMemberUid` INTEGER NOT NULL, `clazzWorkQuestionResponseInactive` INTEGER NOT NULL, `clazzWorkQuestionResponseDateResponded` INTEGER NOT NULL, `clazzWorkQuestionResponseMCSN` INTEGER NOT NULL, `clazzWorkQuestionResponseLCSN` INTEGER NOT NULL, `clazzWorkQuestionResponseLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "clazzWorkQuestionResponseUid",
+            "columnName": "clazzWorkQuestionResponseUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseClazzWorkUid",
+            "columnName": "clazzWorkQuestionResponseClazzWorkUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseQuestionUid",
+            "columnName": "clazzWorkQuestionResponseQuestionUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseText",
+            "columnName": "clazzWorkQuestionResponseText",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseOptionSelected",
+            "columnName": "clazzWorkQuestionResponseOptionSelected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponsePersonUid",
+            "columnName": "clazzWorkQuestionResponsePersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseClazzMemberUid",
+            "columnName": "clazzWorkQuestionResponseClazzMemberUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseInactive",
+            "columnName": "clazzWorkQuestionResponseInactive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseDateResponded",
+            "columnName": "clazzWorkQuestionResponseDateResponded",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseMCSN",
+            "columnName": "clazzWorkQuestionResponseMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseLCSN",
+            "columnName": "clazzWorkQuestionResponseLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clazzWorkQuestionResponseLCB",
+            "columnName": "clazzWorkQuestionResponseLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "clazzWorkQuestionResponseUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContentEntryProgress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contentEntryProgressUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `contentEntryProgressActive` INTEGER NOT NULL, `contentEntryProgressContentEntryUid` INTEGER NOT NULL, `contentEntryProgressPersonUid` INTEGER NOT NULL, `contentEntryProgressProgress` INTEGER NOT NULL, `contentEntryProgressStatusFlag` INTEGER NOT NULL, `contentEntryProgressLocalChangeSeqNum` INTEGER NOT NULL, `contentEntryProgressMasterChangeSeqNum` INTEGER NOT NULL, `contentEntryProgressLastChangedBy` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "contentEntryProgressUid",
+            "columnName": "contentEntryProgressUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressActive",
+            "columnName": "contentEntryProgressActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressContentEntryUid",
+            "columnName": "contentEntryProgressContentEntryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressPersonUid",
+            "columnName": "contentEntryProgressPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressProgress",
+            "columnName": "contentEntryProgressProgress",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressStatusFlag",
+            "columnName": "contentEntryProgressStatusFlag",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressLocalChangeSeqNum",
+            "columnName": "contentEntryProgressLocalChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressMasterChangeSeqNum",
+            "columnName": "contentEntryProgressMasterChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentEntryProgressLastChangedBy",
+            "columnName": "contentEntryProgressLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "contentEntryProgressUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
         "foreignKeys": []
       },
       {
@@ -4468,6 +5156,62 @@
         "primaryKey": {
           "columnNames": [
             "uid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContainerUploadJob",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cujUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cujContainerUid` INTEGER NOT NULL, `sessionId` TEXT, `jobStatus` INTEGER NOT NULL, `bytesSoFar` INTEGER NOT NULL, `contentLength` INTEGER NOT NULL, `containerEntryFileUids` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "cujUid",
+            "columnName": "cujUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cujContainerUid",
+            "columnName": "cujContainerUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "jobStatus",
+            "columnName": "jobStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytesSoFar",
+            "columnName": "bytesSoFar",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentLength",
+            "columnName": "contentLength",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "containerEntryFileUids",
+            "columnName": "containerEntryFileUids",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "cujUid"
           ],
           "autoGenerate": true
         },
@@ -7263,6 +8007,550 @@
         "foreignKeys": []
       },
       {
+        "tableName": "ClazzWork_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzWork_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWork_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkContentJoin_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Comments_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Comments_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Comments_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkQuestion_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzWorkQuestion_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestion_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkQuestionOption_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkSubmission_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzWorkSubmission_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkSubmission_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ClazzWorkQuestionResponse_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ContentEntryProgress_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ContentEntryProgress_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryProgress_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
         "tableName": "Report_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -7402,7 +8690,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b2f1f75c2d60e9f05343b1d408268447')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9f5f95c11e26b2b61e901fdcd2335f53')"
     ]
   }
 }

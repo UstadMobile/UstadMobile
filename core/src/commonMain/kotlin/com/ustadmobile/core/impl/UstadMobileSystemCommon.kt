@@ -34,6 +34,9 @@ abstract class UstadMobileSystemCommon {
 
     internal data class LastGoToDest(val viewName: String, val args: Map<String, String?>)
 
+    data class UstadGoOptions(val popUpToViewName: String? = null,
+                              val popUpToInclusive: Boolean = false)
+
     /**
      * The last destination that was called via the go method. This is used for testing purposes.
      */
@@ -131,7 +134,11 @@ abstract class UstadMobileSystemCommon {
     }
 
     open fun go(viewName: String, args: Map<String, String?>, context: Any) {
-        go(viewName, args, context, 0)
+        go(viewName, args, context, 0, UstadGoOptions("", false))
+    }
+
+    open fun go(viewName: String, args: Map<String, String?>, context: Any, ustadGoOptions: UstadGoOptions) {
+        go(viewName, args, context, 0, ustadGoOptions)
     }
 
     /**
@@ -145,7 +152,8 @@ abstract class UstadMobileSystemCommon {
      * @param context System context object
      */
     @JsName("go")
-    abstract fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int)
+    abstract fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
+                    ustadGoOptions: UstadGoOptions)
 
     /**
      * Provides the currently active locale
@@ -441,6 +449,10 @@ abstract class UstadMobileSystemCommon {
         const val GO_FLAG_CLEAR_TOP = 67108864
 
         const val TAG_DOWNLOAD_ENABLED = "dlenabled"
+
+        const val TAG_MAIN_COROUTINE_CONTEXT = 16
+
+        const val TAG_DLMGR_SINGLETHREAD_CONTEXT = 32
 
     }
 }

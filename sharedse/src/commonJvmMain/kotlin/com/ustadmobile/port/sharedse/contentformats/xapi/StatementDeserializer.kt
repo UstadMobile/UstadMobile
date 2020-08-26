@@ -5,7 +5,7 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
 import com.google.gson.reflect.TypeToken
-import com.ustadmobile.port.sharedse.contentformats.xapi.Actor
+import com.ustadmobile.core.contentformats.xapi.*
 
 import java.lang.reflect.Type
 import java.util.ArrayList

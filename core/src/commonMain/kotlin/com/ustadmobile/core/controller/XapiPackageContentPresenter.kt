@@ -5,6 +5,7 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
@@ -73,7 +74,8 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     accountManager.activeAccount.toXapiActorJsonObject(context))
             val launchMethodParams = mapOf(
                     "actor" to actorJsonStr,
-                    "endpoint" to UMFileUtil.resolveLink(mountedPath, "/xapi/$contentEntryUid/"),
+                    "endpoint" to UMFileUtil.resolveLink(mountedPath,
+                            "/${UMURLEncoder.encodeUTF8(activeEndpoint)}/xapi/$contentEntryUid/"),
                     "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
                     "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
             if(launchHref != null) {

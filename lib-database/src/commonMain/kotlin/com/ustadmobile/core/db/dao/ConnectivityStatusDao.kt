@@ -2,10 +2,22 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Dao
 abstract class ConnectivityStatusDao {
+
+    val conenctivityStatusObserver = object : DoorObserver<ConnectivityStatus> {
+        override fun onChanged(t: ConnectivityStatus) {
+            GlobalScope.launch {
+                insertAsync(t)
+            }
+        }
+    }
 
     @Query("SELECT ConnectivityStatus.* FROM ConnectivityStatus LIMIT 1")
     abstract fun statusLive(): DoorLiveData<ConnectivityStatus?>
@@ -36,4 +48,11 @@ abstract class ConnectivityStatusDao {
         connectivityStatus.wifiSsid = wifiSsid
         insertAsync(connectivityStatus)
     }
+
+    fun commitLiveConnectivityStatus(connectivityStatusLive: DoorLiveData<ConnectivityStatus>) {
+        GlobalScope.launch(doorMainDispatcher()) {
+            connectivityStatusLive.observeForever(conenctivityStatusObserver)
+        }
+    }
+
 }

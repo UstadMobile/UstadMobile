@@ -4,14 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentLogin2Binding
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.Login2Presenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.UmAccount
+import org.kodein.di.instance
 
 
 class Login2Fragment : UstadBaseFragment(), Login2View {
@@ -72,6 +76,19 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
     override fun clearFields() {
         mBinding?.password = ""
         mBinding?.username = ""
+    }
+
+    override fun navigateToNextDestination(account: UmAccount?,fromDestination: String, nextDestination: String) {
+        val impl: UstadMobileSystemImpl by instance()
+        val navController = findNavController()
+        val umNextDestination = impl.destinationProvider.lookupDestinationName(nextDestination)
+        val umFromDestination = impl.destinationProvider.lookupDestinationName(fromDestination)
+        navController.currentBackStackEntry?.savedStateHandle?.set(UstadView.ARG_SNACK_MESSAGE,
+                String.format(getString(R.string.logged_in_as),account?.username,account?.endpointUrl))
+        if(umNextDestination != null && umFromDestination != null){
+            val navOptions = NavOptions.Builder().setPopUpTo(umFromDestination.destinationId, true).build()
+            navController.navigate(umNextDestination.destinationId,null, navOptions)
+        }
     }
 
 

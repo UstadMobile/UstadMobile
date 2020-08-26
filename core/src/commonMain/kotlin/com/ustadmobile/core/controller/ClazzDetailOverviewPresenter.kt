@@ -7,7 +7,10 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 
@@ -21,23 +24,20 @@ class ClazzDetailOverviewPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.LIVEDATA
 
-    /*
-     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
-     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
-     */
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-
-        //TODO: Set any additional fields (e.g. joinlist) on the view
-    }
-
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        return true
+        return db.clazzDao.personHasPermissionWithClazz(account?.personUid ?: 0L,
+                arguments[ARG_ENTITY_UID]?.toLong() ?: 0L, Role.PERMISSION_CLAZZ_UPDATE)
     }
 
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<ClazzWithDisplayDetails?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         view.scheduleList = repo.scheduleDao.findAllSchedulesByClazzUid(entityUid)
+        GlobalScope.launch {
+            view.clazzCodeVisible = repo.clazzDao.personHasPermissionWithClazz(
+                    accountManager.activeAccount.personUid, entityUid,
+                    Role.PERMISSION_CLAZZ_ADD_STUDENT)
+        }
+
         return repo.clazzDao.getClazzWithDisplayDetails(entityUid)
     }
 
@@ -47,10 +47,5 @@ class ClazzDetailOverviewPresenter(context: Any,
             context)
     }
 
-    companion object {
-
-        //TODO: Add constants for keys that would be used for any One To Many Join helpers
-
-    }
 
 }

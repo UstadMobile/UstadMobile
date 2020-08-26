@@ -31,37 +31,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.google.android.material.progressindicator.ProgressIndicator
-            android:id="@+id/progressBar"
-            android:layout_marginTop="@dimen/dimen_20dp"
-            style="@style/Widget.MaterialComponents.ProgressIndicator.Linear.Indeterminate"
-            app:indicatorColor="?colorPrimary"
-            app:trackColor="@color/primaryLightVariantColor"
-            android:layout_marginStart="@dimen/dimen_8dp"
-            android:layout_marginEnd="@dimen/dimen_8dp"
-            android:visibility="@{showProgress ? View.VISIBLE: View.GONE}"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminateOnly="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/workspace_link_view"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:hint="@{String.format(@string/organisation,@string/link.toLowerCase())}"
             app:errorEnabled="@{linkError}"
             app:errorTextColor="?colorError"
             app:hintEnabled="true"
-            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/progressBar">
+            app:layout_constraintTop_toTopOf="parent">
 
             <!-- android:inputType="textCapWords" -->
             <com.google.android.material.textfield.TextInputEditText
@@ -72,19 +57,35 @@
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.progressindicator.ProgressIndicator
+            android:id="@+id/progressBar"
+            style="@style/Widget.MaterialComponents.ProgressIndicator.Circular.Indeterminate"
+            app:indicatorColor="?colorPrimary"
+            app:trackColor="@color/primaryLightVariantColor"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_8dp"
+            android:visibility="@{showProgress ? View.VISIBLE: View.GONE}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateOnly="true"
+            android:layout_marginTop="@dimen/dimen_25dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/workspace_link_view"
+            />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/next_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_16dp"
-            android:layout_marginStart="@dimen/dimen_8dp"
-            android:layout_marginEnd="@dimen/dimen_8dp"
-            android:visibility="@{showButton ? View.VISIBLE: View.GONE}"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:backgroundTint="?colorSecondary"
-            android:textColor="?colorOnSecondary"
             android:onClick="@{() -> presenter.handleClickNext()}"
             android:padding="@dimen/dimen_20dp"
             android:text="@string/next"
+            android:layout_marginTop="@dimen/dimen_20dp"
+            android:textColor="?colorOnSecondary"
+            android:visibility="@{showButton ? View.VISIBLE: View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/workspace_link_view"

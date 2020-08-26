@@ -120,52 +120,8 @@ open class ContentEntry() {
         this.publik = publik
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
 
-        val entry = other as ContentEntry?
 
-        if (contentEntryUid != entry!!.contentEntryUid) return false
-        if (licenseType != entry.licenseType) return false
-        if (primaryLanguageUid != entry.primaryLanguageUid) return false
-        if (languageVariantUid != entry.languageVariantUid) return false
-        if (leaf != entry.leaf) return false
-        if (contentTypeFlag != entry.contentTypeFlag) return false
-        if (if (title != null) title != entry.title else entry.title != null) return false
-        if (if (description != null) description != entry.description else entry.description != null)
-            return false
-        if (if (entryId != null) entryId != entry.entryId else entry.entryId != null) return false
-        if (if (author != null) author != entry.author else entry.author != null) return false
-        if (if (publisher != null) publisher != entry.publisher else entry.publisher != null)
-            return false
-        if (if (licenseName != null) licenseName != entry.licenseName else entry.licenseName != null)
-            return false
-        if (if (licenseUrl != null) licenseUrl != entry.licenseUrl else entry.licenseUrl != null)
-            return false
-        if (if (sourceUrl != null) sourceUrl != entry.sourceUrl else entry.sourceUrl != null)
-            return false
-
-        return if (thumbnailUrl != null) thumbnailUrl == entry.thumbnailUrl else entry.thumbnailUrl == null
-    }
-
-    override fun hashCode(): Int {
-        var result = (contentEntryUid xor contentEntryUid.ushr(32)).toInt()
-        result = 31 * result + if (title != null) title!!.hashCode() else 0
-        result = 31 * result + if (description != null) description!!.hashCode() else 0
-        result = 31 * result + if (entryId != null) entryId!!.hashCode() else 0
-        result = 31 * result + if (author != null) author!!.hashCode() else 0
-        result = 31 * result + if (publisher != null) publisher!!.hashCode() else 0
-        result = 31 * result + licenseType
-        result = 31 * result + if (licenseName != null) licenseName!!.hashCode() else 0
-        result = 31 * result + if (licenseUrl != null) licenseUrl!!.hashCode() else 0
-        result = 31 * result + if (sourceUrl != null) sourceUrl!!.hashCode() else 0
-        result = 31 * result + if (thumbnailUrl != null) thumbnailUrl!!.hashCode() else 0
-        result = 31 * result + (primaryLanguageUid xor primaryLanguageUid.ushr(32)).toInt()
-        result = 31 * result + (languageVariantUid xor languageVariantUid.ushr(32)).toInt()
-        result = 31 * result + contentTypeFlag
-        result = 31 * result + if (leaf) 1 else 0
-        return result
-    }
 
     companion object {
 
@@ -187,31 +143,89 @@ open class ContentEntry() {
 
         const val LICENSE_TYPE_OTHER = 8
 
-        const val LICENSE_TYPE_CC_BY_ND = 9
+        const val LICENSE_TYPE_CC_BY_ND = 10
 
-        const val LICENSE_TYPE_CC_BY_NC_ND = 10
+        const val LICENSE_TYPE_CC_BY_NC_ND = 11
 
-        const val UNDEFINED_TYPE = 0
+        const val LICENSE_TYPE_CC_0 = 9
 
-        const val COLLECTION_TYPE = 1
+        const val TYPE_UNDEFINED = 0
 
-        const val EBOOK_TYPE = 2
+        const val TYPE_COLLECTION = 1
 
-        const val INTERACTIVE_EXERICSE_TYPE = 3
+        const val TYPE_EBOOK = 2
 
-        const val VIDEO_TYPE = 4
+        const val TYPE_INTERACTIVE_EXERCISE = 3
 
-        const val AUDIO_TYPE = 5
+        const val TYPE_VIDEO = 4
 
-        const val DOCUMENT_TYPE = 6
+        const val TYPE_AUDIO = 5
 
-        const val ARTICLE_TYPE = 7
+        const val TYPE_DOCUMENT = 6
+
+        const val TYPE_ARTICLE = 7
 
         const val FLAG_IMPORTED = 1
 
         const val FLAG_CONTENT_EDITOR = 2
 
         const val FLAG_SCRAPPED = 4
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ContentEntry) return false
+
+        if (contentEntryUid != other.contentEntryUid) return false
+        if (title != other.title) return false
+        if (description != other.description) return false
+        if (entryId != other.entryId) return false
+        if (author != other.author) return false
+        if (publisher != other.publisher) return false
+        if (licenseType != other.licenseType) return false
+        if (licenseName != other.licenseName) return false
+        if (licenseUrl != other.licenseUrl) return false
+        if (sourceUrl != other.sourceUrl) return false
+        if (thumbnailUrl != other.thumbnailUrl) return false
+        if (lastModified != other.lastModified) return false
+        if (primaryLanguageUid != other.primaryLanguageUid) return false
+        if (languageVariantUid != other.languageVariantUid) return false
+        if (contentFlags != other.contentFlags) return false
+        if (leaf != other.leaf) return false
+        if (publik != other.publik) return false
+        if (ceInactive != other.ceInactive) return false
+        if (contentTypeFlag != other.contentTypeFlag) return false
+        if (contentEntryLocalChangeSeqNum != other.contentEntryLocalChangeSeqNum) return false
+        if (contentEntryMasterChangeSeqNum != other.contentEntryMasterChangeSeqNum) return false
+        if (contentEntryLastChangedBy != other.contentEntryLastChangedBy) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = contentEntryUid.hashCode()
+        result = 31 * result + (title?.hashCode() ?: 0)
+        result = 31 * result + (description?.hashCode() ?: 0)
+        result = 31 * result + (entryId?.hashCode() ?: 0)
+        result = 31 * result + (author?.hashCode() ?: 0)
+        result = 31 * result + (publisher?.hashCode() ?: 0)
+        result = 31 * result + licenseType
+        result = 31 * result + (licenseName?.hashCode() ?: 0)
+        result = 31 * result + (licenseUrl?.hashCode() ?: 0)
+        result = 31 * result + (sourceUrl?.hashCode() ?: 0)
+        result = 31 * result + (thumbnailUrl?.hashCode() ?: 0)
+        result = 31 * result + lastModified.hashCode()
+        result = 31 * result + primaryLanguageUid.hashCode()
+        result = 31 * result + languageVariantUid.hashCode()
+        result = 31 * result + contentFlags
+        result = 31 * result + leaf.hashCode()
+        result = 31 * result + publik.hashCode()
+        result = 31 * result + ceInactive.hashCode()
+        result = 31 * result + contentTypeFlag
+        result = 31 * result + contentEntryLocalChangeSeqNum.hashCode()
+        result = 31 * result + contentEntryMasterChangeSeqNum.hashCode()
+        result = 31 * result + contentEntryLastChangedBy
+        return result
     }
 
 }

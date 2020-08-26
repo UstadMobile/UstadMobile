@@ -22,6 +22,8 @@ import com.ustadmobile.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
@@ -43,6 +45,8 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
 
     private var mPresenter: PersonDetailPresenter? = null
 
+    private var canManageAccount: Boolean = false
+
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
@@ -54,12 +58,11 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             class ClazzMemberWithClazzViewHolder(val binding: ItemClazzMemberWithClazzDetailBinding): RecyclerView.ViewHolder(binding.root)
 
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzMemberWithClazzViewHolder {
-                val viewHolder = ClazzMemberWithClazzViewHolder(ItemClazzMemberWithClazzDetailBinding.inflate(
+
+                return ClazzMemberWithClazzViewHolder(ItemClazzMemberWithClazzDetailBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false).apply {
                     mPresenter = presenter
                 })
-
-                return viewHolder
             }
 
             override fun onBindViewHolder(holder: ClazzMemberWithClazzViewHolder, position: Int) {
@@ -77,6 +80,20 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             clazzesLiveData?.observe(viewLifecycleOwner, clazzMemberWithClazzObserver)
         }
 
+    override var changePasswordVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.changePasswordVisibility = if(value && canManageAccount)
+                View.VISIBLE else View.GONE
+        }
+
+    override var showCreateAccountVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.createAccountVisibility = if(value && canManageAccount)
+                View.VISIBLE else View.GONE
+        }
+
     private var clazzesLiveData: LiveData<PagedList<ClazzMemberWithClazz>>? = null
 
     private var clazzMemberWithClazzRecyclerAdapter: ClazzMemberWithClazzRecyclerAdapter? = null
@@ -88,11 +105,15 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
 
+        val impl: UstadMobileSystemImpl by instance()
+        canManageAccount = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_ACCOUNT_MANAGEMENT, requireContext())
         clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this,
             null)
         mBinding = FragmentPersonDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.fragmentEventHandler = this
+            it.createAccountVisibility = View.GONE
+            it.changePasswordVisibility = View.GONE
             it.classesRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.classesRecyclerview.adapter = clazzMemberWithClazzRecyclerAdapter
         }
@@ -103,7 +124,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
                 di, viewLifecycleOwner)
         clazzMemberWithClazzRecyclerAdapter?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-
+        mBinding?.presenter = mPresenter
         return rootView
     }
 

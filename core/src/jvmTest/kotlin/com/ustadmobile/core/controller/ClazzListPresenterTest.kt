@@ -15,8 +15,11 @@ import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.util.test.ext.insertPersonWithRole
+import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 
 class ClazzListPresenterTest {
@@ -70,13 +73,12 @@ class ClazzListPresenterTest {
         //TODO: add any arguments required for the presenter here e.g.
         // ClazzList2View.ARG_SOME_FILTER to "filterValue"
         val presenterArgs = mapOf<String,String>()
-        val presenter = ClazzListPresenter(context,
-                presenterArgs, mockView, di, mockLifecycleOwner)
+        val presenter = ClazzListPresenter(context, presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoClazzDaoSpy, timeout(5000)).findAllActiveClazzesSortByNameAsc(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(0))
+        verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(0), any())
         verify(mockView, timeout(5000)).list = any()
 
         //TODO: verify any other properties that the presenter should set on the view
@@ -94,8 +96,8 @@ class ClazzListPresenterTest {
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoClazzDaoSpy, timeout(5000)).findAllActiveClazzesSortByNameAsc(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(excludeFromSchool))
+        verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(excludeFromSchool), any())
         verify(mockView, timeout(5000)).list = any()
     }
 
@@ -105,11 +107,34 @@ class ClazzListPresenterTest {
         val db: UmAppDatabase by di.activeDbInstance()
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
+        val activePerson = Person().apply {
+            firstNames = "Test"
+            lastName = "User"
+            username = "testuser"
+            personUid = db.personDao.insert(this)
+        }
+
         val presenterArgs = mapOf<String,String>()
         val testEntity = Clazz().apply {
             //set variables here
             clazzUid = db.clazzDao.insert(this)
         }
+
+        runBlocking {
+            db.insertPersonWithRole(activePerson,
+                    Role().apply {
+                        rolePermissions = Role.PERMISSION_CLAZZ_OPEN
+                    }, EntityRole().apply {
+                erTableId = Clazz.TABLE_ID
+                erEntityUid = testEntity.clazzUid
+            })
+        }
+
+        val accountManager = di.direct.instance<UstadAccountManager>()
+        val endpointUrl = accountManager.activeAccount.endpointUrl
+        accountManager.activeAccount = UmAccount(activePerson.personUid, activePerson.username,
+                "", endpointUrl, activePerson.firstNames, activePerson.lastName)
+
         val presenter = ClazzListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)

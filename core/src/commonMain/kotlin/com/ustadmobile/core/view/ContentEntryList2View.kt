@@ -7,7 +7,12 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
     fun showContentEntryAddOptions(parentEntryUid: Long)
 
-    var downloadOptions: Map<String, String>?
+    /**
+     * Show the download dialog button. If required by the OS, show a permission dialog first
+     */
+    fun showDownloadDialog(args: Map<String, String>)
+
+    var title: String?
 
     companion object {
 
@@ -19,7 +24,10 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_RECYCLED_CONTENT = "recycled"
 
+        const val ARG_CLAZZWORK_FILTER = "clazzworkFilter"
+
         const val VIEW_NAME = "ContentEntryListView"
+
     }
 
 }

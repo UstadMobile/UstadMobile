@@ -28,14 +28,7 @@ class InputStreamWithCloseListener(inputStream: InputStream, @field:Volatile pri
     @Throws(IOException::class)
     override fun close() {
         super.close()
-        if (onCloseListener != null) {
-            onCloseListener!!.onStreamClosed()
-
-            /*
-              As per the java spec an already closed input stream can be closed again, with no
-              effect. Therefor this event should be delivered once, and only once.
-             */
-            onCloseListener = null
-        }
+        onCloseListener?.onStreamClosed()
+        onCloseListener = null
     }
 }

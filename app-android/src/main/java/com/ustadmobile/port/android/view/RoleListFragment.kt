@@ -69,9 +69,8 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
         mPresenter = RoleListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this,  di, viewLifecycleOwner)
         mDataBinding?.presenter = mPresenter
-        mDataBinding?.onSortSelected = this
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
-                requireContext().getString(R.string.create_new,
+                requireContext().getString(R.string.add_a_new,
                         requireContext().getString(R.string.role)))
         mDataRecyclerViewAdapter = RoleListRecyclerAdapter(mPresenter)
         mPresenter?.onCreate(savedInstanceState.toStringMap())

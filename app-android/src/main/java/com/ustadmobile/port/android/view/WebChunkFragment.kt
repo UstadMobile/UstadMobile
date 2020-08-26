@@ -61,7 +61,7 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
         get() = field
         set(value) {
             field = value
-            title = value?.title
+            //title = value?.title
         }
 
     override var containerManager: ContainerManager? = null

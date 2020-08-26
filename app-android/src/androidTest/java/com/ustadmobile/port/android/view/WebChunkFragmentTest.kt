@@ -4,8 +4,6 @@ import android.Manifest
 import android.os.Build
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso.onIdle
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isJavascriptEnabled
 import androidx.test.espresso.web.sugar.Web.onWebView
@@ -24,15 +22,11 @@ import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
-import kotlinx.android.synthetic.main.fragment_web_chunk.*
-import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
-import org.hamcrest.CoreMatchers
 import org.hamcrest.core.AllOf.allOf
 import org.junit.Assume
 import org.junit.Before
@@ -111,7 +105,7 @@ class WebChunkFragmentTest {
 
         Assume.assumeTrue(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container.containerUid)) {
             WebChunkFragment().also {
                 it.installNavController(systemImplNavRule.navController)

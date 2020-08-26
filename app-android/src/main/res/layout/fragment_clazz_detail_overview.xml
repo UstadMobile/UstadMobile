@@ -19,12 +19,12 @@
             type="boolean" />
 
         <variable
-            name="editButtonMode"
-            type="com.ustadmobile.core.view.EditButtonMode"/>
+            name="fragmentEventHandler"
+            type="com.ustadmobile.port.android.view.ClazzDetailOverviewEventListener" />
 
         <variable
-            name="fragmentEventHandler"
-            type="com.ustadmobile.port.android.view.ClazzDetailFragmentEventHandler" />
+            name="clazzCodeVisible"
+            type="boolean" />
 
     </data>
 
@@ -54,20 +54,6 @@
                 tools:layout_editor_absoluteX="@dimen/layout_dimen_16dp"
                 tools:text="Description" />
 
-            <TextView
-                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-                android:id="@+id/fragment_clazz_detail_overview_num_members"
-                android:text="@{@string/x_teachers_y_students(clazz.numTeachers, clazz.numStudents)}"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/dimen_8dp"
-                android:layout_marginTop="@dimen/dimen_8dp"
-                android:layout_marginEnd="@dimen/dimen_16dp"
-
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/fragment_clazz_detail_overview_membersicon"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_description_text"
-                tools:text="X teacher, 1 students" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:tint="?colorOnIconTint"
@@ -81,6 +67,96 @@
                 app:srcCompat="@drawable/ic_group_black_24dp"
                 android:contentDescription="@string/users" />
 
+            <TextView
+                android:id="@+id/fragment_clazz_detail_overview_num_members"
+                android:text="@{@string/x_teachers_y_students(clazz.numTeachers, clazz.numStudents)}"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginEnd="@dimen/dimen_16dp"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fragment_clazz_detail_overview_membersicon"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_description_text"
+                tools:text="X teacher, 1 students" />
+
+
+
+
+            <TextView
+                android:id="@+id/fragment_clazz_detail_num_members_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+
+                android:text="@string/members"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_num_members"
+                app:layout_constraintStart_toEndOf="@+id/fragment_clazz_detail_overview_membersicon"/>
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/fragment_clazz_detail_classcode_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_num_members_label"
+                android:background="@drawable/bg_listitem"
+                android:onClick="@{() -> fragmentEventHandler.onClickClassCode(clazz.clazzCode)}"
+                android:visibility="@{clazzCodeVisible ? View.VISIBLE : View.GONE}"
+                >
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/fragment_clazz_detail_join_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:tint="?colorOnIconTint"
+                    android:layout_marginStart="@dimen/dimen_16dp"
+                    android:layout_marginTop="@dimen/dimen_10dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_login_24px" />
+
+                <TextView
+                    android:id="@+id/fragment_clazz_detail_clazzcode_text"
+                    android:text="@{clazz.clazzCode}"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginEnd="@dimen/dimen_16dp"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_clazz_detail_join_icon"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="abc123" />
+
+                <TextView
+                    android:id="@+id/fragment_clazz_detail_clazzcode_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+
+
+                    android:text="@string/class_code"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_clazzcode_text"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_clazz_detail_join_icon"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
+
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/clazzcode_bottom_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fragment_clazz_detail_classcode_layout,fragment_clazz_detail_num_members_label"/>
+
             <LinearLayout
                 android:id="@+id/fragment_clazz_detail_overview_school_linlayout"
                 android:visibility="@{clazz.clazzSchoolUid != 0 ? View.VISIBLE : View.GONE}"
@@ -92,7 +168,7 @@
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_detail_overview_membersicon">
+                app:layout_constraintTop_toBottomOf="@+id/clazzcode_bottom_barrier">
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:tint="?colorOnIconTint"
@@ -177,6 +253,15 @@
                     android:text="@{clazz.clazzHolidayCalendar.umCalendarName}"
                     tools:text="Holiday Calendar" />
             </LinearLayout>
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fragment_clazz_start_holidaycalendar_linearlayout"/>
+
+
 
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"

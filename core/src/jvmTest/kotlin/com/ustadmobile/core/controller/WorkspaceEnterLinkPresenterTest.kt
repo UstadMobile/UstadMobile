@@ -4,10 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
 import com.ustadmobile.lib.db.entities.WorkSpace
-import io.ktor.http.ContentType
-import io.ktor.http.cio.HttpHeadersMap
 import kotlinx.serialization.json.Json
-import okhttp3.internal.http.HttpHeaders
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
@@ -71,7 +68,7 @@ class WorkspaceEnterLinkPresenterTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(Buffer().write(workSpace.toByteArray())))
 
-        val workSpacelink = "${mockWebServer.url("/")}workspace"
+        val workSpacelink = "${mockWebServer.url("/")}"
 
         val presenter = WorkspaceEnterLinkPresenter(context,
                 mapOf(), view, di)
@@ -83,7 +80,7 @@ class WorkspaceEnterLinkPresenterTest {
     @Test
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         mockWebServer.enqueue(MockResponse().setResponseCode(404))
-        val workSpacelink = "${mockWebServer.url("/")}workspace"
+        val workSpacelink = "${mockWebServer.url("/")}"
         val presenter = WorkspaceEnterLinkPresenter(context,
                 mapOf(), view, di)
 

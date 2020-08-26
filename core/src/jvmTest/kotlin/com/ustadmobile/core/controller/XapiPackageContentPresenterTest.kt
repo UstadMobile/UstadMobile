@@ -13,6 +13,7 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
@@ -60,10 +61,12 @@ class XapiPackageContentPresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var endpoint: Endpoint
+
     @Before
     fun setup() {
         val endpointUrl = account.endpointUrl!!
-        val endpoint = Endpoint(endpointUrl)
+        endpoint = Endpoint(endpointUrl)
 
         di = DI {
             import(ustadTestRule.diModule)
@@ -125,8 +128,8 @@ class XapiPackageContentPresenterTest {
             val umAccountActor = Json.parse(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
                     account.username, umAccountActor.account.name)
-            val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/xapi/$contentEntryUid/")
-            Assert.assertEquals("Received expected Xapi endpoint: /xapi/contentEntryUid",
+            val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/")
+            Assert.assertEquals("Received expected Xapi endpoint: /endpoint/xapi/contentEntryUid",
                     expectedEndpoint, paramsProvided["endpoint"])
             Assert.assertEquals("Received expected activity id",
                     "http://id.tincanapi.com/activity/tincan-prototypes/tetris",

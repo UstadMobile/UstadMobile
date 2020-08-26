@@ -6,6 +6,8 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParseException
 import com.google.gson.reflect.TypeToken
+import com.ustadmobile.core.contentformats.xapi.ContextActivity
+import com.ustadmobile.core.contentformats.xapi.XObject
 
 import java.lang.reflect.Type
 import java.util.ArrayList

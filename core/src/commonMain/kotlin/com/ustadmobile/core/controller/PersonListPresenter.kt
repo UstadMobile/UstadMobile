@@ -1,23 +1,23 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS_LIST
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import org.kodein.di.DI
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
                           di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<PersonListView, Person>(context, arguments, view, di,  lifecycleOwner) {
-
-
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
+    : UstadListPresenter<PersonListView, Person>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
     private var filterExcludeMembersOfClazz: Long = 0
 
@@ -25,45 +25,38 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     private var filterAlreadySelectedList = listOf<Long>()
 
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
-
-    class PersonListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         filterExcludeMembersOfClazz = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
         filterExcludeMemberOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
-        filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() } ?: listOf()
+        filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() }
+                ?: listOf()
 
+        selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { PersonListSortOption(it, context) }
+
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //TODO: update this
-        return true
+        return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0L,
+                Person.TABLE_ID, Role.PERMISSION_PERSON_INSERT)
     }
 
-    private fun updateListOnView() {
-        val timestamp = getSystemTimeInMillis()
-        view.list = when(currentSortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.personDao
-                    .findAllPeopleWithDisplayDetailsSortNameAsc(timestamp,
-                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool, filterAlreadySelectedList)
-            SortOrder.ORDER_NAME_DSC -> repo.personDao
-                    .findAllPeopleWithDisplayDetailsSortNameDesc(timestamp,
-                            filterExcludeMembersOfClazz, filterExcludeMemberOfSchool, filterAlreadySelectedList)
-        }
+    private fun updateListOnView(searchText: String? = null) {
+        view.list = repo.personDao.findPersonsWithPermission(getSystemTimeInMillis(), filterExcludeMembersOfClazz,
+                filterExcludeMemberOfSchool, filterAlreadySelectedList,
+                accountManager.activeAccount.personUid, selectedSortOption?.flag ?: 0,
+                if(searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
     }
 
     override fun handleClickEntry(entry: Person) {
-        when(mListMode) {
+        when (mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> systemImpl.go(PersonDetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to entry.personUid.toString()), context)
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.personUid.toString()), context)
         }
     }
 
@@ -71,11 +64,22 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         systemImpl.go(PersonEditView.VIEW_NAME, mapOf(), context)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? PersonListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
+
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        updateListOnView()
+    }
+
+
+    override fun onSearchSubmitted(text: String?) {
+        updateListOnView(text)
+    }
+
+    companion object {
+
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.name, PersonDao.SORT_NAME_ASC, true),
+                SortOrderOption(MessageID.name, PersonDao.SORT_NAME_DESC, false)
+        )
     }
 }

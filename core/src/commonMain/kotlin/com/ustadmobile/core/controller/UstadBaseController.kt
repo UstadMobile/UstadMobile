@@ -77,7 +77,7 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
     /**
      * Handle when the presenter is about to become visible. Analogous to Android's onStart
      */
-    fun onStart() {
+    open fun onStart() {
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {
                 listener.onLifecycleStart(this)
@@ -104,7 +104,7 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
     /**
      * Handle when the presenter is no longer visible. Analogous to Android's onStop
      */
-    fun onStop() {
+    open fun onStop() {
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {
                 listener.onLifecycleStop(this)

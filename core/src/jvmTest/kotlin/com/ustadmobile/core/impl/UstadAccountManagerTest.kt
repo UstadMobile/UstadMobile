@@ -1,19 +1,16 @@
 package com.ustadmobile.core.impl
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_PREFKEY
-import com.ustadmobile.core.account.UstadAccountManager.Companion.MANIFEST_DEFAULT_SERVER
 import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -52,7 +49,7 @@ class UstadAccountManagerTest {
     @Before
     fun setup() {
         mockSystemImpl = mock {
-            on { getManifestPreference(eq(MANIFEST_DEFAULT_SERVER), any()) }
+            on { getAppConfigString(eq(AppConfig.KEY_API_URL), any(), any()) }
                     .thenReturn("http://app.ustadmobile.com/")
         }
 
@@ -100,6 +97,12 @@ class UstadAccountManagerTest {
                 loggedInAccount.userAtServer, accountManager.activeAccount.userAtServer)
         Assert.assertEquals("There is one stored account", 1,
                 accountManager.storedAccounts.size)
+        argumentCaptor<String> {
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
+            val accountSaved = Json.parse(UstadAccounts.serializer(), firstValue)
+            Assert.assertEquals("Saved account as active", loggedInAccount.userAtServer,
+                    accountSaved.currentAccount)
+        }
     }
 
     @Test
@@ -122,6 +125,15 @@ class UstadAccountManagerTest {
                 accountManager.storedAccounts.size)
         Assert.assertEquals("Active account is the newly logged in account",
                 loggedInAccount.userAtServer, accountManager.activeAccount.userAtServer)
+
+        argumentCaptor<String> {
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
+            val accountSaved = Json.parse(UstadAccounts.serializer(), firstValue)
+            Assert.assertEquals("Saved account as active", loggedInAccount.userAtServer,
+                    accountSaved.currentAccount)
+            Assert.assertEquals("Two accounts were saved", 2,
+                accountSaved.storedAccounts.size)
+        }
     }
 
     @Test
@@ -178,6 +190,12 @@ class UstadAccountManagerTest {
                 "joe@$mockServerUrl", accountManager.activeAccount.userAtServer)
         Assert.assertEquals("AccountManager still has both accounts stored", 2,
             accountManager.storedAccounts.size)
+        argumentCaptor<String> {
+            verify(mockSystemImpl).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
+            val accountSaved = Json.parse(UstadAccounts.serializer(), firstValue)
+            Assert.assertEquals("Saved account as active", "joe@$mockServerUrl",
+                    accountSaved.currentAccount)
+        }
     }
 
     @Test
@@ -199,6 +217,12 @@ class UstadAccountManagerTest {
 
         Assert.assertEquals("Most recently used account after account that was removed is now active",
             "harry@$mockServerUrl", accountManager.activeAccount.userAtServer)
+        argumentCaptor<String> {
+            verify(mockSystemImpl, atLeastOnce()).setAppPref(eq(ACCOUNTS_PREFKEY), capture(), any())
+            val accountSaved = Json.parse(UstadAccounts.serializer(), lastValue)
+            Assert.assertEquals("Fallback account is saved as active acount", "harry@$mockServerUrl",
+                    accountSaved.currentAccount)
+        }
     }
 
     @Test
@@ -222,12 +246,13 @@ class UstadAccountManagerTest {
     fun givenValidRegistrationRequest_whenNewAccountRequested_thenShouldBeRequestedOnServerAndActive() {
         val accountManager = UstadAccountManager(mockSystemImpl, appContext, di)
 
-        val personToRegister = Person().apply {
+        val personToRegister = PersonWithAccount().apply {
             firstNames = "Mary"
             lastName = "Poppins"
             phoneNum = "1234567"
             emailAddr = "mary@email.com"
             username = "mary"
+            newPassword = "password"
         }
 
         val accountResponse = UmAccount(42L, "mary", "", "")
@@ -236,7 +261,7 @@ class UstadAccountManagerTest {
                 .addHeader("Content-Type", "application/json; charset=utf-8"))
 
         val accountRegistered = runBlocking {
-            accountManager.register(personToRegister, "password", mockServerUrl)
+            accountManager.register(personToRegister, mockServerUrl)
         }
 
         Assert.assertEquals("Active account is the account registered",
