@@ -83,7 +83,7 @@ kapt {
 }
 
 tasks.whenTaskAdded { task ->
-    if(task.name.startsWith("assemble") || task.name.startsWith("build")) {
+    if(task.name.startsWith("compile") || task.name.startsWith("build")) {
         task.dependsOn(":lib-database:jvmJar")
     }
 }

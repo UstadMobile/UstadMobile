@@ -46,7 +46,7 @@ private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBM
     sanitizeDbNameFromUrl(url)
 }
 
-fun Application.umRestApplication(devMode: Boolean = false) {
+fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null) {
 
     if (devMode) {
         install(CORS) {
@@ -75,7 +75,8 @@ fun Application.umRestApplication(devMode: Boolean = false) {
 
     val autoCreateDb = environment.config.propertyOrNull("ktor.ustad.autocreatedb")?.getString()?.toBoolean() ?: false
     println("auto create = $autoCreateDb")
-    val dbMode = environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
+    val dbMode = dbModeOverride ?:
+        environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
     val storageRoot = File(environment.config.propertyOrNull("ktor.ustad.storagedir")?.getString() ?: "build/storage")
     storageRoot.takeIf { !it.exists() }?.mkdirs()
 
