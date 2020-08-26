@@ -7,8 +7,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.goToContentEntry
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.HarView
 import com.ustadmobile.core.view.UstadView
@@ -37,6 +37,8 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
     val dbRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
     val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+
+    private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -83,10 +85,8 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                 try {
                     val entry = dbRepo.contentEntryDao.findBySourceUrlWithContentEntryStatusAsync(params.getValue("sourceUrl"))
                             ?: throw IllegalArgumentException("No File found")
-                    goToContentEntry(entry.contentEntryUid, dbRepo, context, impl, true,
-                            true,
-                            arguments[ARG_NO_IFRAMES]?.toBoolean()
-                                    ?: false)
+                    contentEntryOpener.openEntry(context, entry.contentEntryUid, downloadRequired = true, goToContentEntryDetailViewIfNotDownloaded = true,
+                            noIframe = arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
                         view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),

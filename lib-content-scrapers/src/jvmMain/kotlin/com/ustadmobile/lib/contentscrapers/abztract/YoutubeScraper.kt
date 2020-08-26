@@ -158,7 +158,7 @@ open class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
                 entry?.publisher ?: "", entry?.licenseType ?: 0,
                 entry?.primaryLanguageUid ?: 0, entry?.languageVariantUid,
                 data.description, true, "", data.thumbnail, "", "",
-                ContentEntry.VIDEO_TYPE, contentEntryDao)
+                ContentEntry.TYPE_VIDEO, contentEntryDao)
 
         scrapeYoutubeVideo(sourceUrl)
 

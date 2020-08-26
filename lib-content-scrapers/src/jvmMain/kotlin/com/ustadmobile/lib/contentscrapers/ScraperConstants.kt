@@ -192,6 +192,8 @@ object ScraperConstants {
     const val INDEX_HTML = "index.html"
     const val JQUERY_JS = "jquery-3.3.1.min.js"
 
+    const val MIMETPYE_MPEG = "audio/mpeg"
+    const val MIMETYPE_MKV = "video/x-matroska"
     const val MIMETYPE_ZIP = "application/zip"
     const val MIMETYPE_EPUB = "application/epub+zip"
     const val MIMETYPE_JSON = "application/json"
@@ -238,14 +240,14 @@ object ScraperConstants {
     const val CK12_READ_WORLD = "real world"
 
     val CONTENT_MAP_CK12 = mapOf(
-            CK12_VIDEO to ContentEntry.VIDEO_TYPE,
-            CK12_PLIX to ContentEntry.INTERACTIVE_EXERICSE_TYPE,
-            CK12_PRACTICE to ContentEntry.INTERACTIVE_EXERICSE_TYPE,
-            CK12_READ to ContentEntry.ARTICLE_TYPE,
-            CK12_ACTIVITIES to ContentEntry.ARTICLE_TYPE,
-            CK12_STUDY_AIDS to ContentEntry.ARTICLE_TYPE,
-            CK12_LESSONS to ContentEntry.ARTICLE_TYPE,
-            CK12_READ_WORLD to ContentEntry.ARTICLE_TYPE)
+            CK12_VIDEO to ContentEntry.TYPE_VIDEO,
+            CK12_PLIX to ContentEntry.TYPE_INTERACTIVE_EXERCISE,
+            CK12_PRACTICE to ContentEntry.TYPE_INTERACTIVE_EXERCISE,
+            CK12_READ to ContentEntry.TYPE_ARTICLE,
+            CK12_ACTIVITIES to ContentEntry.TYPE_ARTICLE,
+            CK12_STUDY_AIDS to ContentEntry.TYPE_ARTICLE,
+            CK12_LESSONS to ContentEntry.TYPE_ARTICLE,
+            CK12_READ_WORLD to ContentEntry.TYPE_ARTICLE)
 
     val IMAGE_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg")
     val VIDEO_EXTENSIONS = Arrays.asList("mp4")

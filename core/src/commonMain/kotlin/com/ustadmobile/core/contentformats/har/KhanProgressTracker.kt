@@ -2,7 +2,6 @@ package com.ustadmobile.core.contentformats.har
 
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.UmAccountActor
-import com.ustadmobile.core.util.MimeType
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject

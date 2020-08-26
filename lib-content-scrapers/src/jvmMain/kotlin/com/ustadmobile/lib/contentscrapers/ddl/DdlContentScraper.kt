@@ -178,7 +178,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
                 contentEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, doc.title(),
                         sourceUrl, publisher, licenseType, langEntity.langUid, null, description, true, author,
-                        thumbnail, EMPTY_STRING, EMPTY_STRING, ContentEntry.ARTICLE_TYPE, contentEntryDao)
+                        thumbnail, EMPTY_STRING, EMPTY_STRING, ContentEntry.TYPE_ARTICLE, contentEntryDao)
 
                 if (licenseType == 0) {
                     hideContentEntry()

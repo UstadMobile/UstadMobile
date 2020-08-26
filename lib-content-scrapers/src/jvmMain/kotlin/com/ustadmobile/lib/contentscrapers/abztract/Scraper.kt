@@ -2,7 +2,14 @@ package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.util.MimeType
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETPYE_MPEG
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_KHAN
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_MKV
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_MP4
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_PDF
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEBM
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import java.io.File
@@ -13,14 +20,14 @@ import java.net.URL
 abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var contentEntryUid: Long, val sqiUid: Int) {
 
     val mimeTypeToContentFlag: Map<String, Int> = mapOf(
-            MimeType.PDF to ContentEntry.DOCUMENT_TYPE,
-            MimeType.MPEG to ContentEntry.AUDIO_TYPE,
-            MimeType.WEB_CHUNK to ContentEntry.INTERACTIVE_EXERICSE_TYPE,
-            MimeType.KHAN_VIDEO to ContentEntry.VIDEO_TYPE,
-            MimeType.MP4 to ContentEntry.VIDEO_TYPE,
-            MimeType.MKV to ContentEntry.VIDEO_TYPE,
-            MimeType.WEBM to ContentEntry.VIDEO_TYPE,
-            MimeType.EPUB to ContentEntry.EBOOK_TYPE
+            MIMETYPE_PDF to ContentEntry.TYPE_DOCUMENT,
+            MIMETPYE_MPEG to ContentEntry.TYPE_AUDIO,
+            MIMETYPE_WEB_CHUNK to ContentEntry.TYPE_INTERACTIVE_EXERCISE,
+            MIMETYPE_KHAN to ContentEntry.TYPE_VIDEO,
+            MIMETYPE_MP4 to ContentEntry.TYPE_VIDEO,
+            MIMETYPE_MKV to ContentEntry.TYPE_VIDEO,
+            MIMETYPE_WEBM to ContentEntry.TYPE_VIDEO,
+            MIMETYPE_EPUB to ContentEntry.TYPE_EBOOK
     )
 
     val contentEntryParentChildJoinDao = db.contentEntryParentChildJoinDao

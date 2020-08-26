@@ -89,7 +89,7 @@ class TestHarContainer {
         targetEntry.contentEntryUid = db.contentEntryDao.insert(targetEntry)
 
         container = Container()
-        container?.mimeType = MimeType.HAR
+        container?.mimeType = "application/har+zip"
         container?.containerContentEntryUid = targetEntry.contentEntryUid
         container?.containerUid = db.containerDao.insert(container!!)
 

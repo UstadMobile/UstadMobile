@@ -85,7 +85,7 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
                         parentEntry.languageVariantUid, "", true,
                         ScraperConstants.EMPTY_STRING, "",
                         ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                        ContentEntry.VIDEO_TYPE, contentEntryDao)
+                        ContentEntry.TYPE_VIDEO, contentEntryDao)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, headerEntry, entry, contentCount)
 
