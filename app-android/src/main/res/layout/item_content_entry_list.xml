@@ -92,6 +92,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="start"
+            app:constraint_referenced_ids="download_status_button,action_btn_holder"/>
+
         <TextView
             android:id="@+id/content_entry_item_title"
             android:layout_width="0dp"
@@ -102,7 +109,7 @@
             android:text="@{contentEntry.title}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
+            app:layout_constraintEnd_toStartOf="@id/barrier_end"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Content Title" />
@@ -118,7 +125,7 @@
             android:maxLines="2"
             android:text="@{contentEntry.description}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-            app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
+            app:layout_constraintEnd_toStartOf="@id/barrier_end"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
             tools:text="Content Description" />
