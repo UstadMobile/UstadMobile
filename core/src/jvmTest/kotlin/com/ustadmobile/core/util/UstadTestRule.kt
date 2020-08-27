@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -11,10 +12,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
@@ -68,6 +70,8 @@ class UstadTestRule: TestWatcher() {
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope!!).singleton {
                 spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
             }
+
+            bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle> { } }
 
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
 
