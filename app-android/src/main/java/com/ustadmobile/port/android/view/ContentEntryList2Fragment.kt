@@ -30,8 +30,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         get() = mPresenter
 
 
-
-
     override fun onHostBackPressed() = mPresenter?.handleOnBackPressed() ?: false
 
     override fun showDownloadDialog(args: Map<String, String>) {
@@ -103,24 +101,24 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
         @JvmField
         val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
-                ContentEntry.EBOOK_TYPE to R.drawable.ic_book_black_24dp,
-                ContentEntry.VIDEO_TYPE to R.drawable.video_youtube,
-                ContentEntry.DOCUMENT_TYPE to R.drawable.text_doc_24px,
-                ContentEntry.ARTICLE_TYPE to R.drawable.article_24px,
-                ContentEntry.COLLECTION_TYPE to R.drawable.collections_24px,
-                ContentEntry.INTERACTIVE_EXERICSE_TYPE to 0,
-                ContentEntry.AUDIO_TYPE to R.drawable.ic_audiotrack_24px
+                ContentEntry.TYPE_EBOOK to R.drawable.ic_book_black_24dp,
+                ContentEntry.TYPE_VIDEO to R.drawable.video_youtube,
+                ContentEntry.TYPE_DOCUMENT to R.drawable.text_doc_24px,
+                ContentEntry.TYPE_ARTICLE to R.drawable.article_24px,
+                ContentEntry.TYPE_COLLECTION to R.drawable.collections_24px,
+                ContentEntry.TYPE_INTERACTIVE_EXERCISE to 0,
+                ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
         )
 
         @JvmField
         val CONTENT_ENTRY_TYPE_LABEL_MAP = mapOf(
-                ContentEntry.EBOOK_TYPE to MessageID.ebook,
-                ContentEntry.VIDEO_TYPE to MessageID.video,
-                ContentEntry.DOCUMENT_TYPE to MessageID.document,
-                ContentEntry.ARTICLE_TYPE to MessageID.article,
-                ContentEntry.COLLECTION_TYPE to MessageID.collection,
-                ContentEntry.INTERACTIVE_EXERICSE_TYPE to MessageID.interactive,
-                ContentEntry.AUDIO_TYPE to MessageID.audio
+                ContentEntry.TYPE_EBOOK to MessageID.ebook,
+                ContentEntry.TYPE_VIDEO to MessageID.video,
+                ContentEntry.TYPE_DOCUMENT to MessageID.document,
+                ContentEntry.TYPE_ARTICLE to MessageID.article,
+                ContentEntry.TYPE_COLLECTION to MessageID.collection,
+                ContentEntry.TYPE_INTERACTIVE_EXERCISE to MessageID.interactive,
+                ContentEntry.TYPE_AUDIO to MessageID.audio
         )
 
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> = object
