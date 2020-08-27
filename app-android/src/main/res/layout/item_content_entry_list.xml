@@ -24,6 +24,10 @@
         <variable
             name="selectablePagedListAdapter"
             type="ContentEntryListRecyclerAdapter" />
+
+        <variable
+            name="locallyAvailable"
+            type="boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -128,10 +132,10 @@
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:tint="?colorOnIconTint"
-            android:visibility="gone"
+            android:visibility="@{locallyAvailable ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
-            app:srcCompat="@drawable/ic_location_pin_24dp"
+            app:srcCompat="@drawable/ic_nearby_black_24px"
             tools:visibility="gone" />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -168,26 +172,26 @@
             app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}" />
 
 
+        <com.ustadmobile.port.android.view.DownloadStatusButton
+            android:id="@+id/download_status_button"
+            android:visibility="@{isPickerMode ? View.GONE: View.VISIBLE}"
+            style="?android:attr/borderlessButtonStyle"
+            android:onClick="@{() -> itemListener.onClickDownloadContentEntry(contentEntry)}"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:padding="@dimen/dimen_8dp"
+            android:contentDescription="@string/download"
+            android:tint="?colorOnIconTint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_file_download_black_24dp" />
+
         <FrameLayout
             android:id="@+id/action_btn_holder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-
-            <com.ustadmobile.port.android.view.DownloadStatusButton
-                android:id="@+id/content_entry_item_download"
-                style="?android:attr/borderlessButtonStyle"
-                android:onClick="@{() -> itemListener.onClickDownloadContentEntry(contentEntry)}"
-                android:layout_width="@dimen/dimen_40dp"
-                android:layout_height="@dimen/dimen_40dp"
-                android:padding="@dimen/dimen_8dp"
-                android:contentDescription="@string/download"
-                android:tint="?colorOnIconTint"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_file_download_black_24dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/content_entry_select_btn"

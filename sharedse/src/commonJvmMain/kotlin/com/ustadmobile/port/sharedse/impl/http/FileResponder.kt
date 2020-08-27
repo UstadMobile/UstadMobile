@@ -147,7 +147,7 @@ abstract class FileResponder {
                     return r
                 }
 
-                val rangeHeader = session.headers["range"] as String?
+                val rangeHeader = session.headers["content-range"] as String?
                 range = if(rangeHeader != null) {
                     parseRangeRequestHeader(rangeHeader, totalLength)
                 }else {

@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
+import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import com.ustadmobile.sharedse.util.UstadTestRule
@@ -29,7 +30,15 @@ class LocalAvailabilityManagerImplTest  {
 
     val TEST_NODE1_ADDR = "aa:bb:cc:dd:ee:ff"
 
+    val TEST_NODE1 = NetworkNode().apply {
+        bluetoothMacAddress = TEST_NODE1_ADDR
+    }
+
     val TEST_NODE2_ADDR = "00:12:12:13:aa:bb"
+
+    val TEST_NODE2 = NetworkNode().apply {
+        bluetoothMacAddress = TEST_NODE2_ADDR
+    }
 
     private lateinit var db: UmAppDatabase
 
@@ -80,7 +89,7 @@ class LocalAvailabilityManagerImplTest  {
             })
 
             managerImpl.addMonitoringRequest(monitorRequest)
-            managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
+            managerImpl.onNewNodeDiscovered(TEST_NODE1)
 
             countdownLatch.await(10, TimeUnit.SECONDS)
 
@@ -103,8 +112,8 @@ class LocalAvailabilityManagerImplTest  {
     fun givenNodesAlreadyDiscovered_whenAvailabilityStatusRequested_shouldCreateStatusTasks() {
         runBlocking {
             val managerImpl = LocalAvailabilityManagerImpl(di, activeEndpoint)
-            managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
-            managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
+            managerImpl.onNewNodeDiscovered(TEST_NODE1)
+            managerImpl.onNewNodeDiscovered(TEST_NODE2)
 
             val countDownLatch = CountDownLatch(1)
             val availabilityRequest = AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1), {
@@ -135,8 +144,8 @@ class LocalAvailabilityManagerImplTest  {
     fun givenStatusAlreadyKnown_whenAvailabilityStatusRequested_noTasksAreCreated() {
         runBlocking {
             val managerImpl = LocalAvailabilityManagerImpl(di, activeEndpoint)
-            managerImpl.handleNodeDiscovered(TEST_NODE1_ADDR)
-            managerImpl.handleNodeDiscovered(TEST_NODE2_ADDR)
+            managerImpl.onNewNodeDiscovered(TEST_NODE1)
+            managerImpl.onNewNodeDiscovered(TEST_NODE2)
             managerImpl.addMonitoringRequest(AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1)))
 
             verifyBlocking(mockNetworkManager, timeout(5000).times(2)) { sendBleMessage(any(), any())}

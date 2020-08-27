@@ -129,7 +129,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         contentRecyclerAdapter = ContentEntryListRecyclerAdapter(
                 DefaultContentEntryListItemListener(context = requireContext(), di = di),
-                ListViewMode.BROWSER.toString())
+                ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
 
         quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA(
                 isStudent)

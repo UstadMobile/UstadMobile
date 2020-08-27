@@ -100,6 +100,8 @@
     <string name="article">Article</string>
     <string name="audio">Audio</string>
 
+    <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
+
 
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>

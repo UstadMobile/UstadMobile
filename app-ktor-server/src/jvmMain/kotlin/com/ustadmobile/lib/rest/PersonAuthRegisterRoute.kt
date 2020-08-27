@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -13,13 +14,17 @@ import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
 import kotlinx.serialization.json.Json
+import org.kodein.di.instance
+import org.kodein.di.ktor.di
+import org.kodein.di.on
 
 private const val DEFAULT_SESSION_LENGTH = (1000L * 60 * 60 * 24 * 365)//One year
 
-fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
+fun Route.PersonAuthRegisterRoute() {
 
     route("auth") {
         post("login") {
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val username = call.request.queryParameters["username"]
             val password = call.request.queryParameters["password"]
             val deviceId = call.request.header("X-nid")?.toInt()
@@ -46,6 +51,7 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
         }
 
         post("register"){
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val personString = call.request.queryParameters["person"]
             if(personString == null){
                 call.respond(HttpStatusCode.BadRequest, "No person information provided")
@@ -100,6 +106,7 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
 
     route("password") {
         post("change") {
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val username = call.request.queryParameters["username"]
             val currentPassword = call.request.queryParameters["currentPassword"]
             val newPassword = call.request.queryParameters["newPassword"]

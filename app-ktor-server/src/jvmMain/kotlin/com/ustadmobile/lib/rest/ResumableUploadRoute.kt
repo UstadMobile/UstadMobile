@@ -13,6 +13,9 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.put
 import io.ktor.routing.route
+import org.kodein.di.instance
+import org.kodein.di.ktor.di
+import org.kodein.di.on
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -24,18 +27,19 @@ import java.util.*
  *  endpoint to return status
  *
  */
-fun Route.ResumableUploadRoute(folder: File) {
+fun Route.ResumableUploadRoute() {
 
     route("upload") {
 
         get("createSession") {
+            val folder: File by di().on(call).instance(tag = TAG_UPLOAD_DIR)
             val randomUuid = UUID.randomUUID()
             File(folder, randomUuid.toString())
             call.respondText(randomUuid.toString())
         }
 
         put("receiveData") {
-
+            val folder: File by di().on(call).instance(tag = TAG_UPLOAD_DIR)
             val sessionId = call.request.header(SESSIONID) ?: ""
 
             val (isValid, message) = call.request.isValidRequest(folder)

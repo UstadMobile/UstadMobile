@@ -17,6 +17,8 @@ interface ContentEntry2DetailView: UstadDetailView<ContentEntryWithMostRecentCon
 
     var contentEntryProgress: ContentEntryProgress?
 
+    var locallyAvailable: Boolean
+
     companion object {
 
         const val VIEW_NAME = "ContentEntryDetailView"

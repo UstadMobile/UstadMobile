@@ -7,6 +7,7 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -14,7 +15,6 @@ import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Companion.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBle
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
