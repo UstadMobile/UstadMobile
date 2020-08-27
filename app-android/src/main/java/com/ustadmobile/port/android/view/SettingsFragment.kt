@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import com.toughra.ustadmobile.databinding.FragmentSettingsBinding
 import com.ustadmobile.core.controller.SettingsPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SettingsView
 
@@ -25,7 +24,7 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
         }
 
         mPresenter = SettingsPresenter(requireContext(), arguments.toStringMap(),
-                this, UstadMobileSystemImpl.instance)
+                this, di)
         mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState))
 
         dataBinding.presenter = mPresenter

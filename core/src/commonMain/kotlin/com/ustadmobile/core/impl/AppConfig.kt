@@ -35,7 +35,13 @@ object AppConfig {
 
     const val KEY_SUPPORTED_LANGUAGES = "app.ui_languages"
 
-    const val KEY_SHOW_REGISTER = "app.register_before_open"
+    const val KEY_ALLOW_GUEST_LOGIN= "app.guest_allowed"
+
+    const val KEY_ALLOW_REGISTRATION = "app.register_allowed"
+
+    const val KEY_ALLOW_SERVER_SELECTION = "app.select_server"
+
+    const val KEY_ALLOW_ACCOUNT_MANAGEMENT = "app.account_management"
 
     const val BULK_UPLOAD_VISIBILITY = "bulk_upload_visibility"
 

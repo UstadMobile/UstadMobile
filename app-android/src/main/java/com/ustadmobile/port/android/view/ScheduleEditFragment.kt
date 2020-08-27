@@ -1,13 +1,13 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentScheduleEditBinding
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ScheduleEditView
@@ -29,10 +29,7 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
         }
 
         mPresenter = ScheduleEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                di, viewLifecycleOwner)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView

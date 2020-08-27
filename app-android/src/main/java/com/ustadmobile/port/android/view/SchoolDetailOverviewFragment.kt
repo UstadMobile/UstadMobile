@@ -15,11 +15,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolOverviewBinding
 import com.toughra.ustadmobile.databinding.ItemClazzSimpleDetailBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzDao
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.SchoolDetailOverviewView
@@ -27,6 +27,9 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 interface SchoolWithHolidayCalendarDetailFragmentEventHandler {}
 
@@ -91,10 +94,7 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
         clazzRecyclerView = rootView.findViewById(R.id.fragment_school_detail_overview_detail_clazz_rv)
 
         mPresenter = SchoolDetailOverviewPresenter(requireContext(), arguments.toStringMap(),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this,  di, viewLifecycleOwner)
 
         clazzRecyclerAdapter = ClazzRecyclerAdapter(mPresenter)
         clazzRecyclerView?.adapter = clazzRecyclerAdapter
@@ -126,12 +126,6 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
             mBinding?.schoolWithHolidayCalendar = value
         }
 
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
-        }
 
     override fun onChanged(t: PagedList<Clazz>?) {
         clazzRecyclerAdapter?.submitList(t)

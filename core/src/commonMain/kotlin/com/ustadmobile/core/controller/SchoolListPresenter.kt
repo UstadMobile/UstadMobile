@@ -1,24 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.http.parseAndSortContentTypeHeader
+import org.kodein.di.DI
 
 class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: SchoolListView,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>)
-    : UstadListPresenter<SchoolListView, School>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
-
+                          di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<SchoolListView, School>(context, arguments, view, di, lifecycleOwner) {
 
     var searchQuery = "%%"
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
@@ -28,7 +21,8 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    class SchoolListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    class SchoolListSortOption(val sortOrder: SortOrder, context: Any)
+        : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -37,16 +31,16 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //TODO: This
-        return true
+        return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0,
+            School.TABLE_ID, Role.PERMISSION_SCHOOL_INSERT)
     }
 
     private fun updateListOnView() {
         view.list = when(currentSortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameAsc(
-                    searchQuery)
-            SortOrder.ORDER_NAME_DSC -> repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameDesc(
-                    searchQuery)
+            SortOrder.ORDER_NAME_ASC ->
+                repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameAsc(searchQuery)
+            SortOrder.ORDER_NAME_DSC ->
+                repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameDesc(searchQuery)
         }
     }
 

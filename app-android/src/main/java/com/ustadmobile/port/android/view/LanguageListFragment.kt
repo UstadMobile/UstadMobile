@@ -11,8 +11,6 @@ import com.toughra.ustadmobile.databinding.ItemLanguageListBinding
 import com.ustadmobile.core.controller.LanguageListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -54,13 +52,10 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = LanguageListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = LanguageListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.create_new,
+        val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.language))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view

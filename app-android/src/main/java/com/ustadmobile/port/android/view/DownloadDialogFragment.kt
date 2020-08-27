@@ -8,22 +8,20 @@ import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
+import androidx.annotation.Keep
 import androidx.appcompat.app.AlertDialog
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.util.*
 
-
+//It would be nice to move this to proguard-rules.pro and allow obfuscation of the contents of the class
+@Keep
 class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         DialogInterface.OnClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
         AdapterView.OnItemSelectedListener {
@@ -81,9 +79,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         wifiOnlyHolder = rootView.findViewById(R.id.wifi_only_option_holder)
 
 
-
-
-        val builder = AlertDialog.Builder(context!!)
+        val builder = AlertDialog.Builder(requireContext())
         builder.setPositiveButton(R.string.ok, this)
         builder.setNegativeButton(R.string.cancel, this)
         builder.setView(rootView)
@@ -99,16 +95,9 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
 
 
-
-        GlobalScope.launch(Dispatchers.Main) {
-            val networkManager = activity.networkManagerBle.await()
-            mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
-                    this@DownloadDialogFragment, this@DownloadDialogFragment,
-                    UmAccountManager.getActiveDatabase(context as Context),
-                    UmAccountManager.getRepositoryForActiveAccount(context as Context),
-                    networkManager.containerDownloadManager).also {
-                it.onCreate(null)
-            }
+        mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
+                this@DownloadDialogFragment, di, this).also {
+            it.onCreate(null)
         }
 
         return mDialog
@@ -120,7 +109,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         this.storageDirs = storageOptions
         for (umStorageDir in storageOptions) {
             val deviceStorageLabel = String.format(impl.getString(
-                    MessageID.download_storage_option_device, context!!), umStorageDir.name,
+                    MessageID.download_storage_option_device, requireContext()), umStorageDir.name,
                     UMFileUtil.formatFileSize(umStorageDir.usableSpace))
             options.add(deviceStorageLabel)
         }

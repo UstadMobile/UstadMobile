@@ -40,6 +40,12 @@ abstract class PersonDao : BaseDao<Person> {
         var passwordHash: String = ""
 
         var personUid: Long = 0
+
+        var firstNames: String? = null
+
+        var lastName: String? = null
+
+        var admin: Boolean = false
     }
 
     inner class PersonWithGroup internal constructor(var personUid: Long, var personGroupUid: Long)
@@ -132,7 +138,7 @@ abstract class PersonDao : BaseDao<Person> {
         accessToken.token = KmpUuid.randomUUID().toString()
 
         insertAccessToken(accessToken)
-        return UmAccount(personUid, username, accessToken.token, null)
+        return UmAccount(personUid, username, accessToken.token, "")
     }
 
     fun authenticate(token: String, personUid: Long): Boolean {
@@ -147,7 +153,7 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun insertAccessToken(token: AccessToken)
 
 
-    @Query("SELECT Person.personUid, PersonAuth.passwordHash " +
+    @Query("SELECT Person.personUid,Person.admin,Person.firstNames, Person.lastName, PersonAuth.passwordHash " +
             " FROM Person LEFT JOIN PersonAuth ON Person.personUid = PersonAuth.personAuthUid " +
             "WHERE Person.username = :username")
     abstract suspend fun findUidAndPasswordHashAsync(username: String): PersonUidAndPasswordHash?
@@ -155,34 +161,19 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract fun insertPersonAuth(personAuth: PersonAuth)
 
-    @JsName("getAllPersons")
-    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name " +
-            " FROM Person WHERE name LIKE :name AND Person.personUid NOT IN (:uidList)")
-    abstract suspend fun getAllPersons(name: String, uidList: List<Long>): List<PersonNameAndUid>
-
-
-    @JsName("getAllPersonsInList")
-    @Query("SELECT Person.personUid, (Person.firstNames || ' ' || Person.lastName) AS name " +
-            " FROM Person WHERE Person.personUid IN (:uidList)")
-    abstract suspend fun getAllPersonsInList(uidList: List<Long>): List<PersonNameAndUid>
-
-
     /**
      * Checks if a user has the given permission over a given person in the database
      *
      * @param accountPersonUid the personUid of the person who wants to perform the operation
      * @param personUid the personUid of the person object in the database to perform the operation on
      * @param permission permission to check for
-     * @param callback result callback
      */
-    @Query("SELECT 1 FROM Person WHERE Person.personUid = :personUid AND (" +
-            ENTITY_LEVEL_PERMISSION_CONDITION1 + " :permission " + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") ")
+    @Query("SELECT EXISTS(SELECT 1 FROM Person WHERE " +
+            "Person.personUid = :personUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PARAM))")
     abstract fun personHasPermission(accountPersonUid: Long, personUid: Long, permission: Long): Boolean
 
-    @Query("SELECT 1 FROM Person WHERE Person.personUid = :personUid AND (" +
-            ENTITY_LEVEL_PERMISSION_CONDITION1 + " :permission " + ENTITY_LEVEL_PERMISSION_CONDITION2 + ") ")
-    abstract fun personHasPermissionLive(accountPersonUid: Long, personUid: Long, permission: Long)
-            : DoorLiveData<Boolean>
+    @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
+    abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean
 
     @Query("SELECT Person.* FROM PERSON Where Person.username = :username")
     abstract fun findByUsername(username: String?): Person?
@@ -191,12 +182,13 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * FROM PERSON WHERE Person.personUid = :uid")
     abstract suspend fun findByUid(uid: Long): Person?
 
+    @JsName("findPersonAccountByUid")
+    @Query("SELECT Person.*, null as newPassword, null as currentPassword,null as confirmedPassword" +
+            " FROM PERSON WHERE Person.personUid = :uid")
+    abstract suspend fun findPersonAccountByUid(uid: Long): PersonWithAccount?
+
     @Query("SELECT * From Person WHERE personUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Person?>
-
-    @Query("SELECT * FROM Clazz")
-    abstract fun findAllClazzes(): List<Clazz>
-
 
     @Query("SELECT * FROM Person WHERE personUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long) : Person?
@@ -211,18 +203,31 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
 
+    @Query("""
+        SELECT Person.* FROM Person 
+            WHERE
+            (:excludeClazz = 0 OR :excludeClazz NOT IN
+            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
+            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
+            (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
+            AND (Person.personUid NOT IN (:excludeSelected))
+            AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_SELECT_PERMISSION) 
+            AND Person.firstNames LIKE :searchText
+            ORDER BY CASE(:sortOrder)
+                WHEN $SORT_NAME_ASC THEN Person.firstNames
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_NAME_DESC THEN Person.firstNames
+                ELSE ''
+            END DESC
+    """)
+    abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
+                                                 excludeSchool: Long, excludeSelected: List<Long>,
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%%"): DataSource.Factory<Int, PersonWithDisplayDetails>
 
-    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_DESC)
-    abstract fun findAllPeopleWithDisplayDetailsSortNameDesc(timestamp: Long, excludeClazz: Long,
-                                                             excludeSchool: Long,
-                                                             excludeSelected: List<Long>)
-            : DataSource.Factory<Int, PersonWithDisplayDetails>
-
-    @Query(QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_ASC)
-    abstract fun findAllPeopleWithDisplayDetailsSortNameAsc(timestamp: Long, excludeClazz: Long,
-                                                            excludeSchool: Long,
-                                                            excludeSelected: List<Long>)
-            : DataSource.Factory<Int, PersonWithDisplayDetails>
 
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
     abstract fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?>
@@ -305,30 +310,32 @@ abstract class PersonDao : BaseDao<Person> {
 
     companion object {
 
-        const val QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_DESC =
-            """SELECT Person.* FROM Person 
-            WHERE 
-              
-            (:excludeClazz = 0 OR :excludeClazz NOT IN
-            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
-            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
-            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
-            (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
-            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
-            AND (Person.personUid NOT IN (:excludeSelected)) 
-            ORDER BY Person.firstNames DESC"""
+        const val SORT_NAME_ASC = 1
 
+        const val SORT_NAME_DESC = 2
 
-        const val QUERY_FIND_ALL_WITH_DISPLAY_DETAILS_ASC =
-                """SELECT Person.* FROM Person
-            WHERE (:excludeClazz = 0 OR :excludeClazz NOT IN
-            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
-            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
-            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
-            (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
-            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
-             AND (Person.personUid NOT IN (:excludeSelected)) 
-            ORDER BY Person.firstNames ASC"""
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
+            SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm
+            LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
+            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
+            WHERE
+            CAST(Person_Perm.admin AS INTEGER) = 1
+            OR
+            (Person_Perm.personUid = Person.personUid)
+            OR
+            (
+            ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
+            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
+            ) 
+            AND (Role.rolePermissions & 
+        """
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
+
+        const val ENTITY_PERSONS_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT2"
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :permission $ENTITY_PERSONS_WITH_PERMISSION_PT2"
 
         const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR " +
                 " CAST((SELECT admin FROM Person WHERE personUid = :accountPersonUid) AS INTEGER) = 1 OR " +

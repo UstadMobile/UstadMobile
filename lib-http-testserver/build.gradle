@@ -1,7 +1,7 @@
 plugins {
     id 'application'
     id 'kotlin'
-    id 'com.github.psxpaul.execfork' version '0.1.11'
+    id 'com.github.psxpaul.execfork' version '0.1.13'
     id 'com.github.johnrengelman.shadow'
 }
 
@@ -62,6 +62,32 @@ task appRunDebug(type: JavaExec) {
     jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005'
 }
 
+/*
+ * Unfortunately there is a bug on JavaExecFork and Gradle 5.6+
+ */
+task appRunFork(type: com.github.psxpaul.task.JavaExecFork) {
+    //outputs.upToDateWhen { false }
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'io.ktor.server.netty.EngineMain'
+    args = [ "-port=${rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"]}", "-host=${rootProject.ext.buildConfigProperties["test.um_http_testserver"]}" ]
+    waitForPort = 8400
+    workingDir = "$projectDir/"
+    standardOutput = "$projectDir/build/tmp/daemon.log"
+    errorOutput = "$projectDir/build/tmp/daemon-error.log"
+}
+
+task startServer(type: Exec) {
+    workingDir = "$projectDir/"
+    commandLine "./start.sh"
+    args = [ "${rootProject.ext.buildConfigProperties["test.um_http_testserver_controlport"]}", "${rootProject.ext.buildConfigProperties["test.um_http_testserver"]}" ]
+}
+
+
+task stopServer(type: Exec) {
+    workingDir = "$projectDir"
+    commandLine "./stop.sh"
+}
 
 appRun.dependsOn(shadowJar)
 appRunDebug.dependsOn(shadowJar)
+startServer.dependsOn(shadowJar)

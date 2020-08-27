@@ -31,7 +31,6 @@
 package com.ustadmobile.core.util
 
 import com.soywiz.klock.ISO8601
-import com.ustadmobile.core.impl.UmAccountManager
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.content
 import kotlinx.serialization.json.json
@@ -155,7 +154,6 @@ object UMTinCanUtil {
         return "PT" + hours + "H" + mins + "M" + secs + "S"
     }
 
-
     fun parse8601Duration(duration: String): Long {
         val time = ISO8601.INTERVAL_COMPLETE0.tryParse(duration, false)
         return time?.totalMilliseconds?.toLong() ?: 0L
@@ -194,28 +192,6 @@ object UMTinCanUtil {
             "account" to accountObj
             "objectType" to "Agent"
         }
-    }
-
-    /**
-     * Make an actor JSON as per makeActorFromuserAccount for the currently
-     * logged in user against the server that they logged in using
-     *
-     * @see UMTinCanUtil.makeActorFromUserAccount
-     * @param context Current context object
-     * @return JSON Object representing the currently logged in user.
-     */
-    fun makeActorFromActiveUser(context: Any): JsonObject {
-        val account = UmAccountManager.getActiveAccount(context)
-        val accountUsername = account?.username
-        val accountEndpoint = account?.endpointUrl
-        return if (accountUsername != null && accountEndpoint != null) {
-            makeActorFromUserAccount(accountUsername,
-                    accountEndpoint)
-        } else {
-            makeActorFromUserAccount("anonymous",
-                    UmAccountManager.getActiveEndpoint(context)!!)
-        }
-
     }
 
 

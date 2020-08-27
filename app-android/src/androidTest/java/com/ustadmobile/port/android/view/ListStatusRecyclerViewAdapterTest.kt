@@ -26,14 +26,17 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentListBinding
 import com.toughra.ustadmobile.databinding.ItemSimplepersonBinding
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_NODATA
-import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADED_WITHDATA
 import com.ustadmobile.door.RepositoryLoadHelper.Companion.STATUS_LOADING_CLOUD
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
-import com.ustadmobile.test.rules.*
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
+import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assume
 import org.junit.Rule
@@ -116,7 +119,16 @@ class ListStatusRecyclerViewAdapterTest {
                                   val loadingStatusLiveData: MutableLiveData<RepositoryLoadHelper.RepoLoadStatus>)
 
     private fun createScenario(
-            loadingStatus: RepositoryLoadHelper.RepoLoadStatus = RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA)): ListStatusScenario {
+            loadingStatus: RepositoryLoadHelper.RepoLoadStatus = RepositoryLoadHelper.RepoLoadStatus(STATUS_LOADED_NODATA),
+            excludePersonUids: List<Long> = listOf()): ListStatusScenario {
+
+        val adminPerson = Person().apply {
+            firstNames = "Admin"
+            lastName = "Admin"
+            admin = true
+            personUid = dbRule.account.personUid
+            dbRule.db.personDao.insert(this)
+        }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
             ListStatusRecyclerViewAdapterTestFragment()
@@ -125,7 +137,8 @@ class ListStatusRecyclerViewAdapterTest {
         lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
         val loadingStatusLiveData = MutableLiveData(loadingStatus)
         fragmentScenario.onFragment { fragment ->
-            val dataSource = dbRule.db.personDao.findAllPeopleWithDisplayDetailsSortNameDesc(0, 0, 0, listOf())
+            val dataSource = dbRule.db.personDao.findPersonsWithPermission(0, 0, 0, excludePersonUids,
+                adminPerson.personUid, PersonDao.SORT_NAME_ASC)
             val livePagedList = LivePagedListBuilder(dataSource, 20).build()
             fragment.listStatusAdapter?.pagedListLiveData = livePagedList
             livePagedList.observe(fragment.viewLifecycleOwner, Observer {
@@ -142,7 +155,8 @@ class ListStatusRecyclerViewAdapterTest {
 
     @Test
     fun givenEmptyList_whenDisplayed_thenShouldShowEmptyMessage() {
-        val (scenario, recyclerViewIdlingResource) = createScenario()
+        val (scenario, recyclerViewIdlingResource) = createScenario(excludePersonUids =
+            listOf(dbRule.account.personUid))
 
         onView(withText(R.string.nothing_here)).check(matches(isDisplayed()))
 

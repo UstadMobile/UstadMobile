@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -13,8 +15,6 @@ import com.toughra.ustadmobile.databinding.FragmentHolidaycalendarEditBinding
 import com.toughra.ustadmobile.databinding.ItemHolidayBinding
 import com.ustadmobile.core.controller.HolidayCalendarEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
@@ -91,9 +91,7 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
         holidayRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         mPresenter = HolidayCalendarEditPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()))
+                this, di)
         holidayRecyclerAdapter?.presenter = mPresenter
 
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.door
 
 import com.github.aakira.napier.Napier
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -144,7 +145,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
         }
     }
 
-    suspend fun doRequest(resetAttemptCount: Boolean = false, runAgain: Boolean = false) : T{
+    suspend fun doRequest(resetAttemptCount: Boolean = false, runAgain: Boolean = false) : T = withContext(Dispatchers.Default){
+        val doRequestStart = systemTimeInMillis()
         requestLock.withLock {
             Napier.d("$logPrefix doRequest: resetAttemptCount = $resetAttemptCount")
             if(resetAttemptCount) {
@@ -158,7 +160,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             }
 
             var mirrorToUse: MirrorEndpoint? = null
-            while(!completed.value && coroutineContext.isActive && attemptCount <= maxAttempts) {
+            while(!completed.value && isActive && attemptCount <= maxAttempts) {
                 var endpointToUse: String? = null
                 try {
                     attemptCount++
@@ -228,8 +230,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                         statusLiveData.sendValue(RepoLoadStatus(status))
 
 
-                        Napier.d({"$logPrefix doRequest: completed successfully from $endpointToUse ."})
-                        return t
+                        Napier.d({"$logPrefix doRequest: completed successfully from $endpointToUse in ${systemTimeInMillis() - doRequestStart}ms"})
+                        return@withContext t
                     }else {
                         Napier.e({"$logPrefix doRequest: loadFn completed from $endpointToUse but " +
                                 "not successful. IsNullOrEmpty=$isNullOrEmpty, " +
@@ -257,7 +259,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
             Napier.d("$logPrefix doRequest: over. Is completed=${loadedVal.isCompleted}")
             if(loadedVal.isCompleted) {
-                return loadedVal.getCompleted()
+                return@withContext loadedVal.getCompleted()
             }else {
                 val isConnected = repository.connectivityStatus == DoorDatabaseRepository.STATUS_CONNECTED
                 val newStatus = if(isConnected || mirrorToUse != null) {

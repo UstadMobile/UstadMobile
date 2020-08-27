@@ -3,28 +3,42 @@ package com.ustadmobile.test.core.impl
 import android.app.Activity
 import android.os.Handler
 import android.view.View
+import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.lifecycle.Lifecycle
 import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingResource
+import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.UstadBaseFragment
 import com.ustadmobile.port.android.view.UstadDetailFragment
 import com.ustadmobile.port.android.view.UstadEditFragment
 import com.ustadmobile.test.rules.ScenarioIdlingResource
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Note: There is a lot of overlap between this and DataBindingIdlingResource. DataBindingIdlingResource
  * closely tracks example repositories from Google. That is why there is no common parent class
  * between the two.
+ *
+ * Crud Idling Resource will helps monitor:
+ *  RecyclerViews: all visible recycler views must meet the following criteria to be deemed idle:
+ *    a) there are no pending updates
+ *    b) any datasource.factory sources have been set for any adapters using paging
+ *
+ *  ProgressBar: all visible progressbars must meet the following criteria to be deemed idle:
+ *    a) the progress bar has the tag value tag_crudidlingresource_ignore
+ *    b) the progress bar is determinate and the progress bar show full completion
+ *
+ *  Views can be excluded from checking for idle status by adding them to the excludedViewIds list
  */
 class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     // list of registered callbacks
@@ -42,7 +56,13 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
 
     private var activityScenario: ActivityScenario<out Activity>? = null
 
-    override fun getName() = "DataBinding $id"
+    /**
+     * View IDs that will not be considered when checking for idle progress bars and recyclerviews
+     */
+    val excludedViewIds : MutableList<Int> = CopyOnWriteArrayList()
+
+
+    override fun getName() = "CrudIdlingResource $id"
 
     /**
      * Sets the fragment from a [FragmentScenario] to be used from [DataBindingIdlingResource].
@@ -130,8 +150,10 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
             return false
         }
 
-        //look for recyclerviews
-        if(this.view?.flattenHierarchy()?.any { (it as? RecyclerView)?.isIdle() == false } ?: false) {
+        //look for recyclerviews or progressbar
+        if(this.view?.flattenHierarchy()?.filter { it.id !in excludedViewIds }?.any {
+                    (it as? RecyclerView)?.isIdle() ?: (it as? ProgressBar)?.isIdle() == false
+                } == true) {
             return false
         }
 
@@ -140,6 +162,10 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
 
     override fun registerIdleTransitionCallback(callback: IdlingResource.ResourceCallback) {
         idlingCallbacks.add(callback)
+    }
+
+    private fun ProgressBar.isIdle(): Boolean {
+        return visibility != VISIBLE ||  tag == R.id.tag_crudidlingresource_ignore || (!isIndeterminate && progress >= max)
     }
 
     private fun RecyclerView.isIdle() : Boolean{
@@ -161,7 +187,7 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
     }
 
     private fun View.flattenHierarchy(): List<View> = if (this is ViewGroup) {
-        listOf(this) + children.map { it.flattenHierarchy() }.flatten()
+        listOf(this) + children.filter { it.visibility == View.VISIBLE }.map { it.flattenHierarchy() }.flatten()
     } else {
         listOf(this)
     }

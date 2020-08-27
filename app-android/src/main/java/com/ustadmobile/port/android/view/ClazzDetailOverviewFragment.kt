@@ -1,5 +1,8 @@
 package com.ustadmobile.port.android.view
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,26 +15,31 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzDetailOverviewBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleSimpleBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ClazzDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Schedule
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
-interface ClazzDetailOverviewEventHandler {
-
+interface ClazzDetailOverviewEventListener {
+    fun onClickClassCode(code: String?)
 }
 
 class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(),
-        ClazzDetailOverviewView, ClazzDetailFragmentEventHandler, Observer<PagedList<Schedule>> {
+        ClazzDetailOverviewView, ClazzDetailFragmentEventHandler, Observer<PagedList<Schedule>>,
+        ClazzDetailOverviewEventListener {
 
     private var mBinding: FragmentClazzDetailOverviewBinding? = null
 
@@ -83,12 +91,12 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
                 layoutManager = LinearLayoutManager(requireContext())
             }
         }
+        mBinding?.fragmentEventHandler = this
 
-        repo = UmAccountManager.getRepositoryForActiveAccount(requireContext())
+        val accountManager: UstadAccountManager by instance()
+        repo = di.direct.on(accountManager.activeAccount).instance(tag = TAG_REPO)
         mPresenter = ClazzDetailOverviewPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()), UmAccountManager.activeAccountLiveData)
+                 di, viewLifecycleOwner)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
@@ -104,11 +112,6 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         entity = null
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        //TODO: Set title here
-    }
 
     override var entity: ClazzWithDisplayDetails? = null
         get() = field
@@ -116,6 +119,19 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
             field = value
             mBinding?.clazz = value
         }
+
+    override var clazzCodeVisible: Boolean
+        get() = mBinding?.clazzCodeVisible ?: false
+        set(value) {
+            mBinding?.clazzCodeVisible = value
+        }
+
+    override fun onClickClassCode(code: String?) {
+        val codeStr = code ?: return
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("clazzcode", codeStr)))
+        showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
+    }
 
     companion object {
 

@@ -22,7 +22,6 @@ import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.OnDownloadJobItemChangeListener
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
@@ -32,18 +31,20 @@ import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.test.port.android.UmAndroidTestUtil
 import com.ustadmobile.test.port.android.UmViewActions
-import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.Matchers.allOf
 import org.json.JSONException
 import org.json.JSONObject
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assume
+import org.junit.Before
+import org.junit.Rule
 import java.io.IOException
-import java.net.URL
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
 
 
@@ -124,9 +125,9 @@ class DownloadDialogAndNotificationEspressoTest {
 
         val testAccount = UmAccount(0, "test", "",testEndpoint)
 
-        UmAccountManager.setActiveAccount(testAccount, mContext)
+        //UmAccountManager.setActiveAccount(testAccount, mContext)
 
-        umRepo = UmAccountManager.getRepositoryForActiveAccount(mContext)
+        //umRepo = UmAccountManager.getRepositoryForActiveAccount(mContext)
 
 
         prepareContentEntries()
@@ -234,17 +235,17 @@ class DownloadDialogAndNotificationEspressoTest {
         val channel = Channel<Boolean>(1)
         val networkManager = UstadMobileSystemImpl.instance.networkManager as NetworkManagerBle
 
-        networkManager.addDownloadChangeListener(object : OnDownloadJobItemChangeListener{
-            override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
-                if(status != null){
-                    if(status.status == checkerStatus)
-                        channel.offer(status.status == checkerStatus)
-                }
-            }
-
-        })
-
-        withTimeoutOrNull(timeout) { channel.receive() }
+//        networkManager.addDownloadChangeListener(object : OnDownloadJobItemChangeListener{
+//            override fun onDownloadJobItemChange(status: DownloadJobItemStatus?, downloadJobUid: Int) {
+//                if(status != null){
+//                    if(status.status == checkerStatus)
+//                        channel.offer(status.status == checkerStatus)
+//                }
+//            }
+//
+//        })
+//
+//        withTimeoutOrNull(timeout) { channel.receive() }
     }
 
     //@Test

@@ -30,19 +30,16 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenter
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.VideoPlayerView
-import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.InputStream
 import java.io.BufferedInputStream
 import java.io.IOException
 
@@ -85,6 +82,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             val isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
             it.isPortrait = isPortrait
             it.activityVideoPlayerView.useController = !isPortrait
+            (context as? MainActivity)?.slideBottomNavigation(isPortrait)
         }
 
         if (savedInstanceState != null) {
@@ -94,9 +92,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         }
 
         mPresenter = VideoContentPresenter(viewContext,
-                arguments.toStringMap(), this,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()))
+                arguments.toStringMap(), this, di)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
@@ -112,6 +108,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         val isPortrait = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
         mBinding?.isPortrait = isPortrait
         mBinding?.activityVideoPlayerView?.useController = !isPortrait
+        (context as? MainActivity)?.slideBottomNavigation(isPortrait)
     }
 
     override fun onDestroyView() {
@@ -128,7 +125,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     override var entry: ContentEntry? = null
         set(value) {
             field = value
-            title = value?.title
+            ustadFragmentTitle = value?.title
             mBinding?.entry = value
         }
 
@@ -207,9 +204,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         val subtitleFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
                 C.SELECTION_FLAG_DEFAULT, null)
 
-        val repoAppDatabase = UmAccountManager.getRepositoryForActiveAccount(viewContext)
-        val appDatabase = UmAccountManager.getActiveDatabase(viewContext)
-
         GlobalScope.launch {
             try {
                 val containerManager = containerManager
@@ -243,9 +237,20 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private var videoListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-            if (playbackState == Player.STATE_READY) {
+            if (playWhenReady && playbackState == Player.STATE_READY) {
+                // media is now playing
+                mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
+                        ?: 100L, true)
+            } else if (playbackState == Player.STATE_ENDED) {
+                mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
+                        ?: 100L)
+            }else if (playbackState == Player.STATE_READY) {
+                // player is ready or paused
                 loading = false
+                mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
+                        ?: 100L)
             }
+
         }
     }
 
@@ -289,7 +294,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         playWhenReady = player?.playWhenReady ?: false
         player?.removeListener(videoListener)
         player?.release()
-
+        mPresenter?.updateProgress(playbackPosition, player?.contentDuration ?: 100)
         player = null
     }
 

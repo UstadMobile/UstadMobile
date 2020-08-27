@@ -60,10 +60,15 @@
  */
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavDocument
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
@@ -71,6 +76,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.client.request.get
 import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.GlobalScope
@@ -78,7 +84,12 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.io.ByteArrayInputStream
 import org.kmp.io.KMPXmlParser
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 import kotlin.js.JsName
+import kotlin.math.max
 
 /**
  * Shows an EPUB with a table of contents, and page by page swipe navigation
@@ -87,27 +98,65 @@ import kotlin.js.JsName
  */
 class EpubContentPresenter(context: Any,
                            args: Map<String, String>,
-                           private val epubContentView: EpubContentView,
-                           private val mountHandler: ContainerMounter)
-    : UstadBaseController<EpubContentView>(context, args, epubContentView) {
+                           private val epubContentView: EpubContentView, di: DI)
+    : UstadBaseController<EpubContentView>(context, args, epubContentView, di) {
 
     private var ocf: OcfDocument? = null
 
     private var mountedPath: String = ""
 
+    private var mountedEndpoint: String = ""
+
     private var opfBaseUrl: String? = null
 
     private var linearSpineUrls: Array<String> = arrayOf()
 
+    private val accountManager: UstadAccountManager by instance()
+
+    private val mountHandler: ContainerMounter by instance()
+
+    //The time that the
+    private var startTime: Long = 0L
+
+    private val xapiStatementEndpoint: XapiStatementEndpoint by on(accountManager.activeAccount).instance()
+
+    var contentEntryUid: Long = 0L
+
+    var maxPageReached: Int = 0
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
+        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
         view.progressValue = -1
         view.progressVisible = true
+        mountedEndpoint = accountManager.activeAccount.endpointUrl
         GlobalScope.launch {
-            mountedPath = mountHandler.mountContainer(containerUid)
+            mountedPath = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,
+                    containerUid)
             handleMountedContainer()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        startTime = getSystemTimeInMillis()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        val duration = getSystemTimeInMillis() - startTime
+        if(accountManager.activeAccount.personUid == 0L)
+            return //no one is really logged in
+
+        GlobalScope.launch {
+            val db: UmAppDatabase = on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
+            val contentEntry =  db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
+            val progress = ((maxPageReached + 1) * 100) / max(linearSpineUrls.size, 1)
+            xapiStatementEndpoint.storeProgressStatement(accountManager.activeAccount,
+                    contentEntry, progress, duration)
+        }
+
     }
 
     private suspend fun handleMountedContainer(){
@@ -155,7 +204,7 @@ class EpubContentPresenter(context: Any,
 
             epubContentView.runOnUiThread(Runnable {
                 epubContentView.containerTitle = opf.title
-                epubContentView.setSpineUrls(linearSpineUrls, if(position >= 0) position else 0)
+                epubContentView.spineUrls = linearSpineUrls.toList()
                 if (opfCoverImageItem != null) {
                     epubContentView.coverImageUrl = opfCoverImageItem.href?.let {
                         opfBaseUrl?.let { url -> UMFileUtil.resolveLink(url, it) }
@@ -205,11 +254,15 @@ class EpubContentPresenter(context: Any,
         }
     }
 
+    fun handlePageChanged(index: Int) {
+        maxPageReached = max(index, maxPageReached)
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
         if (mountedPath.isNotEmpty()) suspend {
-            mountHandler.unMountContainer(mountedPath)
+            mountHandler.unMountContainer(mountedEndpoint, mountedPath)
         }
     }
 

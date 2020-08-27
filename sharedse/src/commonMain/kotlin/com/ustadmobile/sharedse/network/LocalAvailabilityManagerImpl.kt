@@ -1,7 +1,8 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.Napier
-import com.ustadmobile.core.db.dao.LocallyAvailableContainerDao
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
@@ -12,21 +13,12 @@ import com.ustadmobile.lib.db.entities.NetworkNodeWithStatusResponsesAndHistory
 import com.ustadmobile.lib.util.copyOnWriteListOf
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.*
+import org.kodein.di.*
 
-typealias StatusTaskMakerFn = suspend (context: Any, containerUidsToCheck: List<Long>, networkNode: NetworkNode) -> BleEntryStatusTask?
 
-typealias OnNodeStatusChangeFn = suspend (bluetoothAddr: String) -> Unit
-
-typealias OnNodeReputationChanged = suspend (bluetoothAddr: String, reputation: Int) -> Unit
-
-class LocalAvailabilityManagerImpl(private val context: Any,
-                                   private val entryStatusTaskMaker: StatusTaskMakerFn,
-                                   private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default,
-                                   private val onNewNodeDiscovered: OnNodeStatusChangeFn = { },
-                                   private val onNodeLost: OnNodeStatusChangeFn = { },
-                                   private val onNodeReputationChanged: OnNodeReputationChanged = { addr, evtType -> Unit },
-                                   private val locallyAvailableContainerDao: LocallyAvailableContainerDao)
-    : LocalAvailabilityManager{
+class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: Endpoint,
+                                   private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default)
+    : LocalAvailabilityManager, DIAware, NetworkNodeListener{
 
     private val activeMonitoringRequests: MutableList<AvailabilityMonitorRequest> = copyOnWriteListOf()
 
@@ -38,39 +30,18 @@ class LocalAvailabilityManagerImpl(private val context: Any,
 
     private var availablilityLastChanged: Long = 0
 
-    val nodeHistoryHandler: NodeHistoryHandler = {nodeAddr, evtType ->
-        val node = activeNodes.find { it.bluetoothMacAddress == nodeAddr }
-        if(node != null && evtType == NODE_EVT_TYPE_FAIL) {
-            val timeNow = getSystemTimeInMillis()
-            node.nodeFailures.add(timeNow)
-            val forgiveThreshold = timeNow - NODE_HISTORY_TIMEOUT
-            node.nodeFailures.removeAll { it < forgiveThreshold}
-            val reputation = node.nodeFailures.size * -1
-            GlobalScope.launch(coroutineDispatcher) {
-                onNodeReputationChanged.invoke(nodeAddr, reputation)
-            }
-        }
-    }
+    private val db: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
+
+    private val networkManager: NetworkManagerBle by di.instance()
 
     init {
+        val networkNodes = networkManager.networkNodes
+        networkManager.addNetworkNodeListener(this)
+
         GlobalScope.launch(coroutineDispatcher) {
-            locallyAvailableContainerDao.deleteAll()
-            while(true) {
-                delay(10000)
-                val timeNow = getSystemTimeInMillis()
-                val lostNodes = activeNodes.filter { timeNow -it.lastUpdateTimeStamp > NODE_ACTIVITY_TIMEOUT }
-                if(lostNodes.isNotEmpty()) {
-                    Napier.d({"Mirrors lost: ${lostNodes.joinToString { it.bluetoothMacAddress ?: "nulladdr" }}"})
-                    activeNodes.removeAll(lostNodes)
-                    val lostContainers = activeNodes.flatMap { it.statusResponses.filter { it.value.available }
-                            .map { it.value.erContainerUid } }.toSet().toList()
-                    fireAvailabilityChanged(lostContainers)
-                    lostNodes.forEach {
-                        val btAddr = it.bluetoothMacAddress
-                        if(btAddr != null)
-                            onNodeLost.invoke(btAddr)
-                    }
-                }
+            db.locallyAvailableContainerDao.deleteAll()
+            networkNodes.forEach {
+                onNewNodeDiscovered(it)
             }
         }
     }
@@ -83,14 +54,15 @@ class LocalAvailabilityManagerImpl(private val context: Any,
             }.toSet()
             val entriesLost = dbAvailableContainerUids.filter { it !in containersAvailableNow}
             val newEntries = containersAvailableNow.filter { it !in dbAvailableContainerUids }
-            locallyAvailableContainerDao.takeIf { entriesLost.isNotEmpty() }
+            db.locallyAvailableContainerDao.takeIf { entriesLost.isNotEmpty() }
                     ?.deleteList(entriesLost.map { LocallyAvailableContainer(it) })
-            locallyAvailableContainerDao.takeIf{newEntries.isNotEmpty() }
+            db.locallyAvailableContainerDao.takeIf{newEntries.isNotEmpty() }
                     ?.insertList(newEntries.map { LocallyAvailableContainer(it) })
         }
     }
 
-    override suspend fun handleNodeDiscovered(bluetoothAddr: String) {
+    override suspend fun onNewNodeDiscovered(node: NetworkNode) {
+        val bluetoothAddr = node.bluetoothMacAddress ?: return
         withContext(coroutineDispatcher) {
             val existingNode = activeNodes.firstOrNull { it.bluetoothMacAddress == bluetoothAddr }
             if(existingNode != null) {
@@ -100,30 +72,54 @@ class LocalAvailabilityManagerImpl(private val context: Any,
                 val networkNode = NetworkNodeWithStatusResponsesAndHistory()
                 networkNode.bluetoothMacAddress = bluetoothAddr
                 activeNodes.add(networkNode)
-                val statusRequestUids = activeMonitoringRequests.flatMap { it.entryUidsToMonitor }.toSet()
+                val statusRequestUids = activeMonitoringRequests.flatMap { it.containerUidsToMonitor }.toSet()
                 if(statusRequestUids.isNotEmpty()) {
                     sendRequest(networkNode, statusRequestUids.toList())
                 }
-                onNewNodeDiscovered(bluetoothAddr)
             }
         }
     }
 
+    override suspend fun onNodeLost(node: NetworkNode) {
+
+    }
+
+    override suspend fun onNodeReputationChanged(node: NetworkNode, reputation: Int) {
+
+    }
+
+    override suspend fun handleNodesLost(bluetoothAddrs: List<String>) {
+        val lostNodes = activeNodes.filter { it.bluetoothMacAddress in bluetoothAddrs }
+        activeNodes.removeAll(lostNodes)
+        val lostContainers = activeNodes.flatMap { it.statusResponses.filter { it.value.available }
+                .map { it.value.erContainerUid } }.toSet().toList()
+        fireAvailabilityChanged(lostContainers)
+    }
+
     suspend fun sendRequest(networkNode: NetworkNode, containerUids: List<Long>) = withContext(coroutineDispatcher) {
-        val statusTask = entryStatusTaskMaker.invoke(context, containerUids, networkNode)
-        if(statusTask != null) {
-            statusTask.statusResponseListener = this@LocalAvailabilityManagerImpl::handleBleTaskResponseReceived
-            statusTask.sendRequest()
+        val destAddr = networkNode.bluetoothMacAddress ?: return@withContext
+        GlobalScope.launch {
+            val request = BleMessage.newEntryStatusRequestMessage(destAddr, endpoint.url,
+                    containerUids.toLongArray())
+            val response = networkManager.sendBleMessage(request, destAddr)
+            val responsePayload = response?.payload ?: return@launch
+            val responseLongArr = BleMessageUtil.bleMessageBytesToLong(responsePayload)
+            val entryResponses = containerUids.mapIndexed {index, containerUid ->
+                val availableContainer = if(index < responseLongArr.size) responseLongArr[index] else 0
+                EntryStatusResponse(erContainerUid = containerUids[index], available = availableContainer != 0L)
+            }
+
+            handleBleTaskResponseReceived(entryResponses, networkNode)
         }
     }
 
-    fun handleBleTaskResponseReceived(entryStatusResponses: MutableList<EntryStatusResponse>, statusTask: BleEntryStatusTask) {
+    fun handleBleTaskResponseReceived(entryStatusResponses: List<EntryStatusResponse>, networkNode: NetworkNode) {
         GlobalScope.launch(coroutineDispatcher) {
-            val networkNode = activeNodes.firstOrNull { it.bluetoothMacAddress == statusTask.networkNode.bluetoothMacAddress }
-            if(networkNode == null)
+            val activeNode = activeNodes.firstOrNull { it.bluetoothMacAddress == networkNode.bluetoothMacAddress }
+            if(activeNode == null)
                 return@launch
 
-            networkNode.statusResponses.putAll(entryStatusResponses.map { it.erContainerUid to it}.toMap())
+            activeNode.statusResponses.putAll(entryStatusResponses.map { it.erContainerUid to it}.toMap())
             val entryStatusResponseContainerUids = entryStatusResponses.map { it.erContainerUid }
             fireAvailabilityChanged(entryStatusResponseContainerUids)
 
@@ -137,17 +133,17 @@ class LocalAvailabilityManagerImpl(private val context: Any,
 
     suspend fun fireAvailabilityChanged(entryStatusResponseContainerUids: List<Long>) {
         activeMonitoringRequests.filter { monitorRequest ->
-            monitorRequest.entryUidsToMonitor.any { it in entryStatusResponseContainerUids }
+            monitorRequest.containerUidsToMonitor.any { it in entryStatusResponseContainerUids }
         }.forEach {
-            val intersecting = it.entryUidsToMonitor.intersect(entryStatusResponseContainerUids)
-            it.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
+            val intersecting = it.containerUidsToMonitor.intersect(entryStatusResponseContainerUids)
+            it.onContainerAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
         }
     }
 
     override fun addMonitoringRequest(request: AvailabilityMonitorRequest) {
         //compute what we don't know here
         activeMonitoringRequests.add(request)
-        val allMonitoredUids = activeMonitoringRequests.flatMap { it.entryUidsToMonitor }.toSet()
+        val allMonitoredUids = activeMonitoringRequests.flatMap { it.containerUidsToMonitor }.toSet()
 
         //provide an immediate callback to provide statuses as far as we know for this request
         GlobalScope.launch {
@@ -157,7 +153,7 @@ class LocalAvailabilityManagerImpl(private val context: Any,
                 sendRequest(responseNeeded.key, responseNeeded.value)
             }
 
-            request.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(request.entryUidsToMonitor))
+            request.onContainerAvailabilityChanged(areContentEntriesLocallyAvailable(request.containerUidsToMonitor))
         }
     }
 
@@ -176,9 +172,4 @@ class LocalAvailabilityManagerImpl(private val context: Any,
                 sortedBy { it.nodeFailures.size }.firstOrNull()
     }
 
-    companion object {
-        val NODE_ACTIVITY_TIMEOUT = 30000L
-
-        val NODE_HISTORY_TIMEOUT = 60000 * 5L
-    }
 }

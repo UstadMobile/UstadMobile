@@ -32,9 +32,10 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UmLifecycleListener
 import com.ustadmobile.core.impl.UmLifecycleOwner
-import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import kotlinx.atomicfu.atomic
+import org.kodein.di.DI
+import org.kodein.di.DIAware
 import kotlin.js.JsName
 
 /**
@@ -45,8 +46,8 @@ import kotlin.js.JsName
  * @author mike
  */
 abstract class UstadBaseController<V : UstadView>(override val context: Any,
-                                                  protected val arguments: Map<String, String>, val view: V)
-    : UmLifecycleOwner {
+                                                  protected val arguments: Map<String, String>,
+                                                  val view: V, override val di: DI): UmLifecycleOwner, DIAware {
 
     private val lifecycleListeners = mutableListOf<UmLifecycleListener>()
 
@@ -76,7 +77,7 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
     /**
      * Handle when the presenter is about to become visible. Analogous to Android's onStart
      */
-    fun onStart() {
+    open fun onStart() {
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {
                 listener.onLifecycleStart(this)
@@ -103,7 +104,7 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
     /**
      * Handle when the presenter is no longer visible. Analogous to Android's onStop
      */
-    fun onStop() {
+    open fun onStop() {
         synchronized(lifecycleListeners) {
             for (listener in lifecycleListeners) {
                 listener.onLifecycleStop(this)

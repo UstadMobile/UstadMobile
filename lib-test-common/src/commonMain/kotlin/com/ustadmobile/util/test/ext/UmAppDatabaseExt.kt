@@ -5,13 +5,320 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_TRANSLATED_VERSION
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlin.random.Random
 
-data class TestClazzAndMembers(val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
+data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
+data class TestClazzWork(val clazzAndMembers: TestClazzAndMembers, val clazzWork: ClazzWork,
+            val quizQuestionsAndOptions: TestClazzWorkWithQuestionAndOptionsAndResponse? = null,
+                         val submissions: List<ClazzWorkSubmission>? = mutableListOf())
+data class TestClazzWorkWithQuestionAndOptionsAndResponse(val clazzWork: ClazzWork,
+      val questionsAndOptions: List<ClazzWorkQuestionAndOptions>, val responses: List<ClazzWorkQuestionResponse?>)
+data class TestContentAndJoin(val contentList : List<ContentEntry> ,
+                               val joinList: List<ClazzWorkContentJoin>)
+
 
 private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime: Long): ClazzMember {
     return ClazzMember(clazzUid, this.personUid, clazzMemberRole).apply {
         clazzMemberDateJoined = joinTime
     }
+}
+
+suspend fun UmAppDatabase.insertTestClazzWork(clazzWork: ClazzWork):TestClazzWork {
+    val clazzAndMembers = insertTestClazzAndMembers(5, 2)
+    clazzWork.apply{
+        clazzWorkClazzUid = clazzAndMembers.clazz.clazzUid
+        clazzWorkUid = clazzWorkDao.insertAsync(this)
+    }
+
+    return TestClazzWork(clazzAndMembers, clazzWork)
+}
+
+suspend fun UmAppDatabase.insertPublicAndPrivateComments(dateNow: Long, clazzWork:
+                ClazzWork, clazzAndMembers: TestClazzAndMembers){
+    //Public+Private comments
+    for(studentWithIndex in clazzAndMembers.studentList.withIndex()){
+        val index = studentWithIndex.index
+        val student = studentWithIndex.value
+        Comments().apply {
+            commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
+            commentsEntityUid = clazzWork.clazzWorkUid
+            commentsPublic = index%2 ==0
+            if(commentsPublic){
+                commentsText = "Public comment $index"
+            }else{
+                commentsText = "Private comment $index"
+            }
+            commentsPersonUid = student.clazzMemberPersonUid
+            commentsInActive = false
+            commentsDateTimeAdded = dateNow
+            commentsUid = commentsDao.insertAsync(this)
+
+        }
+    }
+
+}
+
+suspend fun UmAppDatabase.insertQuizQuestionsAndOptions(
+        clazzWork: ClazzWork, responded: Boolean = false, clazzMemberUid: Long = 0, personUid: Long = 0,
+        quizQuestionType: Int, quizQuestionTypeMixed: Boolean = false,
+        partialFilled: Boolean = false, clazzMember2Uid: Long = 0, person2Uid: Long = 0): TestClazzWorkWithQuestionAndOptionsAndResponse {
+
+    clazzWork.apply {
+        clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
+        if(clazzWorkUid != 0L){
+            clazzWorkDao.updateAsync(this)
+        }else {
+            clazzWorkUid = clazzWorkDao.insertAsync(this)
+        }
+    }
+
+    var  clazzWorkQuestionsAndOptions = listOf<ClazzWorkQuestionAndOptions>()
+    val responses = mutableListOf<ClazzWorkQuestionResponse>()
+    if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
+        //Create questions
+        val questionNamer: (Int) -> String = { "Question $it" }
+        var qn = 0
+        clazzWorkQuestionsAndOptions = (1..5).map {
+            qn++
+            ClazzWorkQuestionAndOptions(ClazzWorkQuestion(), mutableListOf(), mutableListOf())
+                    .apply {
+                        clazzWorkQuestion.clazzWorkQuestionActive = true
+                        clazzWorkQuestion.clazzWorkQuestionText = questionNamer(it)
+                        clazzWorkQuestion.clazzWorkQuestionClazzWorkUid = clazzWork.clazzWorkUid
+                        clazzWorkQuestion.clazzWorkQuestionIndex = it
+                        if (!quizQuestionTypeMixed) {
+                            clazzWorkQuestion.clazzWorkQuestionType = quizQuestionType
+                        } else {
+                            clazzWorkQuestion.clazzWorkQuestionType = if (it % 2 == 0) {
+                                ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
+                            } else {
+                                ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
+                            }
+                        }
+                        clazzWorkQuestion.clazzWorkQuestionUid = clazzWorkQuestionDao.insertAsync(clazzWorkQuestion)
+                        if (clazzWorkQuestion.clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE) {
+                            //Add options
+                            val optionsToPut = (1..3).map {
+                                ClazzWorkQuestionOption().apply {
+                                    clazzWorkQuestionOptionText = "Question $qn Option $it"
+                                    clazzWorkQuestionOptionQuestionUid = clazzWorkQuestion.clazzWorkQuestionUid
+                                    clazzWorkQuestionOptionActive = true
+
+                                    clazzWorkQuestionOptionUid = clazzWorkQuestionOptionDao.insertAsync(this)
+                                }
+                            }
+                            options = optionsToPut
+                        }else if(clazzWorkQuestion.clazzWorkQuestionType ==
+                                ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT){
+
+                        }
+                    }
+        }
+
+
+        if (responded && clazzMemberUid != 0L && personUid != 0L ) {
+            //Create question response
+            for ((index, question) in clazzWorkQuestionsAndOptions.withIndex()) {
+
+                //Skip some
+                if(index == 2 && partialFilled){
+                    continue
+                }
+                if(index == 3 && partialFilled){
+                    continue
+                }
+                val response =
+                        ClazzWorkQuestionResponse().apply {
+                            clazzWorkQuestionResponseClazzWorkUid = question.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid
+                            clazzWorkQuestionResponseQuestionUid = question.clazzWorkQuestion.clazzWorkQuestionUid
+                            if (question.clazzWorkQuestion.clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT) {
+                                clazzWorkQuestionResponseText = "Answer $index"
+                            } else {
+                                val size = question.options.size
+                                if (size > 0) {
+                                    val r = Random.nextInt(0, size)
+                                    clazzWorkQuestionResponseOptionSelected =
+                                            question.options.get(r).clazzWorkQuestionOptionUid
+                                }
+                            }
+                            clazzWorkQuestionResponsePersonUid = personUid
+                            clazzWorkQuestionResponseClazzMemberUid = clazzMemberUid
+                            clazzWorkQuestionResponseInactive = false
+                            //TODO: Dates
+                            clazzWorkQuestionResponseDateResponded = 0
+
+                            clazzWorkQuestionResponseUid = clazzWorkQuestionResponseDao.insertAsync(this)
+                        }
+                responses.add(response)
+
+
+                if(clazzMember2Uid != 0L && person2Uid != 0L ) {
+                    val response2 =
+                            ClazzWorkQuestionResponse().apply {
+                                clazzWorkQuestionResponseClazzWorkUid = question.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid
+                                clazzWorkQuestionResponseQuestionUid = question.clazzWorkQuestion.clazzWorkQuestionUid
+                                if (question.clazzWorkQuestion.clazzWorkQuestionType == ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT) {
+                                    clazzWorkQuestionResponseText = "Answer for 2nd student $index"
+                                } else {
+                                    val size = question.options.size
+                                    if (size > 0) {
+                                        val r = Random.nextInt(0, size)
+                                        clazzWorkQuestionResponseOptionSelected =
+                                                question.options.get(r).clazzWorkQuestionOptionUid
+                                    }
+                                }
+                                clazzWorkQuestionResponsePersonUid = person2Uid
+                                clazzWorkQuestionResponseClazzMemberUid = clazzMember2Uid
+                                clazzWorkQuestionResponseInactive = false
+                                //TODO: Dates
+                                clazzWorkQuestionResponseDateResponded = 0
+
+                                clazzWorkQuestionResponseUid = clazzWorkQuestionResponseDao.insertAsync(this)
+                            }
+
+                    responses.add(response2)
+                }
+            }
+        }
+    }
+
+    return TestClazzWorkWithQuestionAndOptionsAndResponse(clazzWork, clazzWorkQuestionsAndOptions,
+            responses)
+
+}
+
+suspend fun UmAppDatabase.createTestContentEntriesAndJoinToClazzWork(clazzWork: ClazzWork,
+                                 numContentEntries: Int): TestContentAndJoin{
+
+    val joinList = mutableListOf<ClazzWorkContentJoin>()
+    val contentList = (1 .. numContentEntries).map {
+        ContentEntry().apply {
+            title = "Content  $it"
+            description = "Content description $it"
+            entryId = "42$it"
+            author = "Mr.Tester McTestface"
+            publik = true
+            publisher = "TestCorp"
+            leaf = true
+            contentEntryUid = contentEntryDao.insertAsync(this)
+
+            joinList.add(ClazzWorkContentJoin().apply {
+
+                clazzWorkContentJoinContentUid = contentEntryUid
+                clazzWorkContentJoinClazzWorkUid = clazzWork.clazzWorkUid
+                clazzWorkContentJoinInactive = false
+                clazzWorkContentJoinUid = clazzWorkContentJoinDao.insertAsync(this)
+            })
+        }
+    }
+
+    return TestContentAndJoin(contentList, joinList)
+}
+
+suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+        clazzWork: ClazzWork, responded : Boolean = false, submissionType: Int = -1 ,
+        quizQuestionTypeMixed: Boolean = false, quizQuestionType: Int = 0,
+        submitted: Boolean = false, isStudentToClazz : Boolean = false, dateNow: Long = 0,
+        marked: Boolean = true, partialFilled: Boolean = false, multipleSubmissions:Boolean = false
+    ):TestClazzWork {
+    val clazzAndMembers = insertTestClazzAndMembers(5, 2)
+    clazzWork.apply{
+        clazzWorkTitle = "Espresso Clazz Work A"
+        clazzWorkClazzUid = clazzAndMembers.clazz.clazzUid
+        if(submissionType < 0){
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
+        }else{
+            clazzWorkSubmissionType = submissionType
+        }
+        clazzWorkMaximumScore = 120
+        if(clazzWorkUid != 0L){
+            clazzWorkDao.updateAsync(this)
+        }else {
+            clazzWorkUid = clazzWorkDao.insertAsync(this)
+        }
+
+        clazzWorkInstructions = "Pass espresso test for ClazzWork"
+        clazzWorkCommentsEnabled = true
+    }
+
+    //Getting member
+    val clazzMember: ClazzMember
+
+    val studentClazzMember = clazzAndMembers.studentList.get(1)
+    val student2ClazzMember = clazzAndMembers.studentList.get(3)
+    val teacherClazzMember = clazzAndMembers.teacherList.get(0)
+
+    if(isStudentToClazz){
+        clazzMember = clazzAndMembers.studentList.get(0)
+    }else{
+        clazzMember = clazzAndMembers.teacherList.get(0)
+    }
+
+    var quizQuestionsAndOptions: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
+    if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
+        if(multipleSubmissions){
+            quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzMemberUid,
+                    studentClazzMember.clazzMemberPersonUid, quizQuestionType, quizQuestionTypeMixed, partialFilled,
+            student2ClazzMember.clazzMemberUid, student2ClazzMember.clazzMemberPersonUid)
+        }else {
+            quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzMemberUid,
+                    studentClazzMember.clazzMemberPersonUid, quizQuestionType, quizQuestionTypeMixed, partialFilled)
+
+        }
+
+    }
+
+    val submissions : MutableList<ClazzWorkSubmission> = mutableListOf()
+    //Create Submission
+    if(submitted ){
+        ClazzWorkSubmission().apply {
+            clazzWorkSubmissionClazzWorkUid = clazzWork.clazzWorkUid
+            clazzWorkSubmissionClazzMemberUid = studentClazzMember.clazzMemberUid
+            clazzWorkSubmissionPersonUid = studentClazzMember.clazzMemberPersonUid
+            if(marked) {
+                clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzMemberPersonUid
+                clazzWorkSubmissionMarkerClazzMemberUid = teacherClazzMember.clazzMemberUid
+                clazzWorkSubmissionScore = 89
+                clazzWorkSubmissionDateTimeMarked = dateNow
+            }
+            clazzWorkSubmissionInactive = false
+            clazzWorkSubmissionDateTimeStarted = dateNow - 7000
+            clazzWorkSubmissionDateTimeUpdated = dateNow - 7000
+            clazzWorkSubmissionDateTimeFinished = dateNow - 7000
+            if(submissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT){
+                clazzWorkSubmissionText = "This is the test submission"
+            }
+
+            clazzWorkSubmissionUid = clazzWorkSubmissionDao.insertAsync(this)
+            submissions.add(this)
+        }
+
+        if(multipleSubmissions){
+            ClazzWorkSubmission().apply {
+                clazzWorkSubmissionClazzWorkUid = clazzWork.clazzWorkUid
+                clazzWorkSubmissionClazzMemberUid = student2ClazzMember.clazzMemberUid
+                clazzWorkSubmissionPersonUid = student2ClazzMember.clazzMemberPersonUid
+                if(marked) {
+                    clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzMemberPersonUid
+                    clazzWorkSubmissionMarkerClazzMemberUid = teacherClazzMember.clazzMemberUid
+                    clazzWorkSubmissionDateTimeMarked = dateNow
+                }
+                clazzWorkSubmissionInactive = false
+                clazzWorkSubmissionDateTimeStarted = dateNow - 7000
+                clazzWorkSubmissionDateTimeUpdated = dateNow - 7000
+                clazzWorkSubmissionDateTimeFinished = dateNow - 7000
+                if(submissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT){
+                    clazzWorkSubmissionText = "This is the test submission2"
+                }
+
+                clazzWorkSubmissionUid = clazzWorkSubmissionDao.insertAsync(this)
+                submissions.add(this)
+            }
+        }
+    }
+
+
+    return TestClazzWork(clazzAndMembers, clazzWork, quizQuestionsAndOptions, submissions.toList())
 }
 
 suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numClazzTeachers: Int = 1,
@@ -95,7 +402,7 @@ suspend fun UmAppDatabase.insertContentEntryWithTranslations(numTranslations: In
 }
 
 suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentContainer(
-        numEntries: Int, parentEntryUid: Long, nonLeafIndexes: MutableList<Int> = mutableListOf()): List<ContentEntry> {
+        numEntries: Int, parentEntryUid: Long, nonLeafIndexes: MutableList<Int> = mutableListOf()): List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
     return (1 .. numEntries).map {
         val entry = ContentEntry().apply {
             leaf = !(nonLeafIndexes.isNotEmpty() && nonLeafIndexes.indexOf(it - 1) != -1)
@@ -103,20 +410,30 @@ suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentCont
             description = "Dummy description $it"
             contentEntryUid = contentEntryDao.insertAsync(this)
         }
-        ContentEntryParentChildJoin().apply {
+        val parentChildJoin = ContentEntryParentChildJoin().apply {
             cepcjChildContentEntryUid = entry.contentEntryUid
             cepcjParentContentEntryUid = parentEntryUid
             cepcjUid = contentEntryParentChildJoinDao.insertAsync(this)
         }
 
-        Container().apply {
+        val container = Container().apply {
             fileSize = 10000
             cntLastModified = getSystemTimeInMillis()
             containerContentEntryUid = entry.contentEntryUid
             containerUid = containerDao.insertAsync(this)
-
         }
-        entry
+
+
+
+        ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer().apply {
+            mostRecentContainer = container
+            contentEntryParentChildJoin = parentChildJoin
+            contentEntryUid = entry.contentEntryUid
+            leaf = entry.leaf
+            title = entry.title
+            description = entry.description
+            contentEntryUid = entry.contentEntryUid
+        }
     }
 }
 
@@ -262,7 +579,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var firstStatement = StatementEntity()
     firstStatement.statementPersonUid = firstPerson.personUid
     firstStatement.resultDuration = 2400000
-    firstStatement.resultScoreScaled = 50
+    firstStatement.resultScoreScaled = 50f
     firstStatement.statementVerbUid = firstVerb.verbUid
     firstStatement.xObjectUid = firstObject.xObjectUid
     firstStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -273,7 +590,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var secondStaement = StatementEntity()
     secondStaement.statementPersonUid = firstPerson.personUid
     secondStaement.resultDuration = 7200000
-    secondStaement.resultScoreScaled = 100
+    secondStaement.resultScoreScaled = 100f
     secondStaement.statementVerbUid = secondVerb.verbUid
     secondStaement.xObjectUid = firstObject.xObjectUid
     secondStaement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -284,7 +601,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var thirdStatement = StatementEntity()
     thirdStatement.statementPersonUid = secondPerson.personUid
     thirdStatement.resultDuration = 600000
-    thirdStatement.resultScoreScaled = 50
+    thirdStatement.resultScoreScaled = 50f
     thirdStatement.statementVerbUid = firstVerb.verbUid
     thirdStatement.xObjectUid = secondObject.xObjectUid
     thirdStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -294,7 +611,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var fourthStatement = StatementEntity()
     fourthStatement.statementPersonUid = thirdPerson.personUid
     fourthStatement.resultDuration = 120000
-    fourthStatement.resultScoreScaled = 20
+    fourthStatement.resultScoreScaled = 20f
     fourthStatement.statementVerbUid = firstVerb.verbUid
     fourthStatement.xObjectUid = secondObject.xObjectUid
     fourthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -305,7 +622,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var fifthStatement = StatementEntity()
     fifthStatement.statementPersonUid = fourthPerson.personUid
     fifthStatement.resultDuration = 100000
-    fifthStatement.resultScoreScaled = 85
+    fifthStatement.resultScoreScaled = 85f
     fifthStatement.statementVerbUid = thirdVerb.verbUid
     fifthStatement.xObjectUid = firstObject.xObjectUid
     fifthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -316,7 +633,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var sixthStatement = StatementEntity()
     sixthStatement.statementPersonUid = thirdPerson.personUid
     sixthStatement.resultDuration = 60000
-    sixthStatement.resultScoreScaled = 25
+    sixthStatement.resultScoreScaled = 25f
     sixthStatement.statementVerbUid = firstVerb.verbUid
     sixthStatement.resultSuccess = StatementEntity.RESULT_FAILURE
     sixthStatement.xObjectUid = secondObject.xObjectUid
@@ -327,7 +644,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var seventhStatement = StatementEntity()
     seventhStatement.statementPersonUid = secondPerson.personUid
     seventhStatement.resultDuration = 30000
-    seventhStatement.resultScoreScaled = 5
+    seventhStatement.resultScoreScaled = 5f
     seventhStatement.statementVerbUid = firstVerb.verbUid
     seventhStatement.xObjectUid = firstObject.xObjectUid
     seventhStatement.resultSuccess = StatementEntity.RESULT_FAILURE
@@ -339,7 +656,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
         var statement = StatementEntity()
         statement.statementPersonUid = secondPerson.personUid
         statement.resultDuration = 30000
-        statement.resultScoreScaled = 5
+        statement.resultScoreScaled = 5f
         statement.statementVerbUid = firstVerb.verbUid
         statement.xObjectUid = firstObject.xObjectUid
         statement.resultSuccess = StatementEntity.RESULT_SUCCESS
@@ -366,4 +683,49 @@ suspend fun UmAppDatabase.insertVideoContent(): Container {
     container.containerUid = containerUid
 
     return container
+}
+
+suspend fun UmAppDatabase.insertPersonWithRole(person: Person, role: Role,
+    entityRole: EntityRole = EntityRole()) {
+    person.also {
+        if(it.personUid == 0L) {
+            it.personUid = personDao.insertAsync(it)
+        }else {
+            personDao.insertOrReplace(it)
+        }
+    }
+
+    role.also {
+        if(it.roleUid == 0L) {
+            it.roleUid = roleDao.insert(it)
+        }else {
+            roleDao.insertOrReplace(it)
+        }
+    }
+
+    //Create and insert PersonGroup and PersonGroupmember
+    val personGroup = PersonGroup().also {
+        it.groupActive = true
+        it.groupName = "${person.firstNames} group"
+        it.groupPersonUid = person.personUid
+        it.groupUid = personGroupDao.insert(it)
+    }
+
+    val personGroupMember = PersonGroupMember().also {
+        it.groupMemberGroupUid = personGroup.groupUid
+        it.groupMemberActive = true
+        it.groupMemberPersonUid = person.personUid
+        it.groupMemberPersonUid = personGroupMemberDao.insertAsync(it)
+    }
+
+    entityRole.also {
+        it.erGroupUid = personGroup.groupUid
+        it.erRoleUid = role.roleUid
+        it.erActive = true
+        if(it.erUid == 0L) {
+            it.erUid = entityRoleDao.insertAsync(it)
+        }else {
+            entityRoleDao.insertOrReplace(it)
+        }
+    }
 }

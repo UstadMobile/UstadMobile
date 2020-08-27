@@ -9,6 +9,11 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.util.ext.isStatusCompleted
+import com.ustadmobile.core.util.ext.isStatusCompletedSuccessfully
+import com.ustadmobile.core.util.ext.isStatusPaused
+import com.ustadmobile.core.util.ext.isStatusQueuedOrDownloading
+import com.ustadmobile.lib.db.entities.DownloadJobItem
 
 /**
  * A button that shows the download status of an item. It consists of an icon (a download icon or
@@ -18,6 +23,47 @@ import com.toughra.ustadmobile.R
 class DownloadStatusButton : RelativeLayout {
 
     private var mProgressBar: ProgressBar? = null
+
+    private var currentDownloadStatus: Int = -1
+
+    var downloadJobItem: DownloadJobItem? = null
+        set(value) {
+            field = value
+
+            val statusChanged = currentDownloadStatus != value?.djiStatus ?: -1
+
+            when {
+                statusChanged && value.isStatusPaused() -> {
+                    setImageResource(R.drawable.ic_baseline_pause_24)
+                    contentDescription = context.getString(R.string.download_entry_state_paused)
+                }
+
+                statusChanged && value.isStatusCompletedSuccessfully() -> {
+                    setImageResource(R.drawable.ic_baseline_offline_pin_24)
+                    contentDescription = context.getString(R.string.downloaded)
+                }
+
+                statusChanged -> {
+                    setImageResource(R.drawable.ic_file_download_black_24dp)
+                    contentDescription = context.getString(R.string.download)
+                }
+            }
+
+            takeIf { statusChanged }?.progressVisibility = if(!value.isStatusCompleted()) {
+                View.VISIBLE
+            }else {
+                View.INVISIBLE
+            }
+
+            val downloadLength = value?.downloadLength ?: 0
+            val downloadedSoFar = value?.downloadedSoFar ?: 0
+            progress = if(downloadLength > 0) {
+                (downloadedSoFar * 100 / downloadLength).toInt()
+            }else {
+                0
+            }
+        }
+
 
     var imageResource: ImageView? = null
         private set
@@ -50,7 +96,7 @@ class DownloadStatusButton : RelativeLayout {
      * @param visibility visibility flag e.g. View.GONE, View.VISIBLE, etc
      */
     var progressVisibility: Int
-        get() = mProgressBar!!.visibility
+        get() = mProgressBar?.visibility ?: View.GONE
         set(visibility) {
             mProgressBar!!.visibility = visibility
         }

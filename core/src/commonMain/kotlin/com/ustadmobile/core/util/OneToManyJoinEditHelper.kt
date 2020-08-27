@@ -27,9 +27,9 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
 
     val liveList: DoorMutableLiveData<List<T>> = DoorMutableLiveData(listOf())
 
-    private val pksToInsert = mutableListOf<K>()
+    protected val pksToInsert = mutableListOf<K>()
 
-    private val pksToDeactivate = mutableListOf<K>()
+    protected val pksToDeactivate = mutableListOf<K>()
 
     init {
         editPresenter?.addJsonLoadListener(this)
@@ -91,7 +91,7 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
     /**
      * Commits the results of the editing to the database
      */
-    open suspend fun commitToDatabase(dao: OneToManyJoinDao<T>, fkSetter: (T) -> Unit) {
+    open suspend fun commitToDatabase(dao: OneToManyJoinDao<in T>, fkSetter: (T) -> Unit) {
         dao.insertListAsync(entitiesToInsert.also { it.forEach {
             fkSetter(it)
             pkSetter(it, newPk)
@@ -101,6 +101,14 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
 
     open protected fun doesNewEntityRequireFakePk(pk: K): Boolean {
         return true
+    }
+
+    companion object {
+
+        const val SUFFIX_PKS_TO_INSERT = "_pksToInsert"
+
+        const val SUFFIX_PKS_TO_DEACTIVATE = "_pksToDeactivate"
+
     }
 
 }

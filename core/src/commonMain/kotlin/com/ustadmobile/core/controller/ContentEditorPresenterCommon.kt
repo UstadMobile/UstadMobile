@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
+import org.kodein.di.DI
 
 /**
  * Interface which acts as delegate between UI and editor
@@ -60,9 +61,10 @@ interface ContentEditorPageActionDelegate {
  */
 
 abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String, String>, view: ContentEditorView,
+                                            di: DI,
                                             private val storage: String?, val umDatabase :UmAppDatabase,
                                             internal val mountContainer: suspend (Long) -> String)
-    : UstadBaseController<ContentEditorView>(context, arguments, view) , ContentEditorPageActionDelegate{
+    : UstadBaseController<ContentEditorView>(context, arguments, view, di) , ContentEditorPageActionDelegate{
 
     internal var contentEntryUid: Long = 0L
 

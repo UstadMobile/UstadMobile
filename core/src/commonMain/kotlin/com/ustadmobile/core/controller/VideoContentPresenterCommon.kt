@@ -1,28 +1,45 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.*
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.generated.locale.MessageID.loading
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.ARG_REFERRER
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.view.*
+import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.InputStream
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 
-abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>?, view: VideoPlayerView,
-                                           private val db: UmAppDatabase, private val repo: UmAppDatabase)
-    : UstadBaseController<VideoPlayerView>(context, arguments!!, view) {
+abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, String>, view: VideoPlayerView,
+                                           di: DI)
+    : UstadBaseController<VideoPlayerView>(context, arguments, view, di) {
 
 
+    private var entry: ContentEntry? = null
+    private var entryUuid: Long = 0
     internal var containerUid: Long = 0
-    private var navigation: String? = null
+
+    val accountManager: UstadAccountManager by instance()
+
+    val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_DB)
+
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+
+    val statementEndpoint by on(accountManager.activeAccount).instance<XapiStatementEndpoint>()
+
+    var timeVideoPlayed = 0L
 
     internal lateinit var contentEntryDao: ContentEntryDao
     internal lateinit var containerDao: ContainerDao
@@ -47,13 +64,13 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         containerDao = db.containerDao
         contentEntryDao = db.contentEntryDao
 
-        navigation = arguments[ARG_REFERRER] ?: ""
-        val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
+        entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
         view.loading = true
-        GlobalScope.launch {
-            view.entry = contentEntryDao.getContentByUuidAsync(entryUuid)
+        GlobalScope.launch(doorMainDispatcher()) {
+            entry = contentEntryDao.getContentByUuidAsync(entryUuid)
+            view.entry = entry
         }
 
     }
@@ -63,10 +80,38 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         handleOnResume()
     }
 
-    fun handleUpNavigation() {
-        //This is now handled by jetpack navigation
-    }
+    fun updateProgress(position: Long, videoLength: Long, playerStarted: Boolean = false) {
 
+        if(accountManager.activeAccount.personUid == 0L){
+            return
+        }
+
+
+        var playerPlayedVideoDuration = 0L
+        if(playerStarted){
+            // player pressed play, record start time
+            timeVideoPlayed = systemTimeInMillis()
+        }else if(timeVideoPlayed == 0L){
+            // video never started, dont send statement
+            return
+        }else if(!playerStarted && timeVideoPlayed > 0){
+            // player pressed paused or video ended, so calc duration
+            playerPlayedVideoDuration = systemTimeInMillis() - timeVideoPlayed
+            timeVideoPlayed = 0
+        }else {
+            // unhandled cases
+            return
+        }
+
+        val progress = (position.toFloat() / videoLength * 100).toInt()
+        val flag = if (progress == 100) ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED or ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED else 0
+        repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
+
+        entry?.also {
+            statementEndpoint.storeProgressStatement(accountManager.activeAccount, it, progress,
+                    playerPlayedVideoDuration)
+        }
+    }
 
     companion object {
 

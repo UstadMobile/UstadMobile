@@ -89,17 +89,13 @@ interface UstadView {
 
         const val ARG_NO_IFRAMES = "noiframe"
 
-        const val ARG_CLAZZ_UID = "clazzUid"
-
         const val ARG_SCHOOL_UID = "schoolUid"
 
         const val ARG_LEAF = "content_type"
 
-        const val ARG_SCHOOLMEMBER_FILTER_STUDENTS ="schoolMemberFilterStudents"
+        const val ARG_FILTER_BY_SCHOOLUID = "filterBySchoolUid"
 
-        const val ARG_SCHOOLMEMBER_FILTER_STAFF = "schoolMemberFilterStaff"
-
-        const val ARG_CLAZZ_ASSIGNMENT_UID = "clazzAssignmentUid"
+        const val ARG_FILTER_BY_ROLE = "filterByRole"
 
         const val ARG_LISTMODE = "listMode"
 
@@ -108,6 +104,39 @@ interface UstadView {
         const val ARG_LISTADDMODE = "listAddMode"
 
         const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
+
+        const val ARG_CLAZZWORK_UID = "clazzworkUid"
+
+        const val ARG_CLAZZMEMBER_UID = "clazzMemberUid"
+
+        const val ARG_NEXT = "next"
+
+        const val ARG_WORKSPACE = "workspace"
+
+        const val ARG_SERVER_URL = "serverUrl"
+
+        const val ARG_FROM = "from"
+
+        const val ARG_SNACK_MESSAGE = "snack_message"
+
+        const val CURRENT_DEST = ""
+
+        /**
+         * Argument to pass to tell a fragment where on the back stack a result (e.g. entity selected
+         * from a list or newly created) should be saved. This works along the principles outlined
+         * here: https://developer.android.com/guide/navigation/navigation-programmatic#returning_a_result .
+         *
+         * The difference between the approach taken here and the approach in the link above is that
+         * we do not automatically save the result to the previous entry in the back stack. When the
+         * user goes from fragment a to a list to pick an entity, and then selects to create a new
+         * entity, we want to go back directly back from the new entity edit fragment to fragment a
+         * (e.g. skip the intermediary list).
+         *
+         * @see com.ustadmobile.port.android.view.ext.FragmentExtKt#saveResultToBackStackSavedStateHandle
+         */
+        const val ARG_RESULT_DEST_ID = "result_dest"
+
+        const val ARG_REGISTRATION_ALLOWED = "registration_allowed"
 
         @JsName("MASTER_SERVER_ROOT_ENTRY_UID")
         const val MASTER_SERVER_ROOT_ENTRY_UID = -4103245208651563007L

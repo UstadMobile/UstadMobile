@@ -13,6 +13,7 @@ import java.net.URISyntaxException
 import java.util.*
 import java.util.regex.Pattern
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.UMURLEncoder
 
 class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
@@ -74,13 +75,11 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         try {
-
             var requestUri = RouterNanoHTTPD.normalizeUri(session.uri)
             requestUri = URI(requestUri).normalize().toString()
+            val containerUid = uriResource.initParameter(PARAM_CONTAINERUID_INDEX, String::class.java).toLong()
             val pathInContainer = requestUri.substring(
                     uriResource.uri.length - URI_ROUTE_POSTFIX.length)
-            val containerUid = uriResource.uri.split("/")[CONTAINER_UID_INDEX].toLong()
-            val context = uriResource.initParameter(PARAM_CONTEXT_INDEX, Any::class.java)
             val appDb = uriResource.initParameter(PARAM_DB_INDEX, UmAppDatabase::class.java)
             val entryFile = appDb.containerEntryDao
                     .findByPathInContainer(containerUid, pathInContainer)
@@ -134,11 +133,13 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
 
         private val HTML_EXTENSIONS = ArrayList<String>()
 
-        const val PARAM_CONTEXT_INDEX = 0
 
-        const val PARAM_FILTERS_INDEX = 1
+        const val PARAM_CONTAINERUID_INDEX = 0
 
-        const val PARAM_DB_INDEX = 2
+        const val PARAM_DB_INDEX = 1
+
+        const val PARAM_FILTERS_INDEX = 2
+
 
         init {
             HTML_EXTENSIONS.add("xhtml")

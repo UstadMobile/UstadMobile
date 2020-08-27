@@ -13,8 +13,6 @@ import com.toughra.ustadmobile.databinding.ItemSchoolmemberListItemBinding
 import com.ustadmobile.core.controller.SchoolMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
@@ -29,9 +27,8 @@ import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
-        SchoolMemberListView, MessageIdSpinner.OnMessageIdOptionSelectedListener,
-        View.OnClickListener{
+class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
+        SchoolMemberListView, View.OnClickListener{
 
     private var mPresenter: SchoolMemberListPresenter? = null
 
@@ -39,8 +36,12 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
 
     private var filterBySchoolUid : Long = 0
 
+    private var filterByRole: Int = 0
+
     override val listPresenter: UstadListPresenter<*, in SchoolMemberWithPerson>?
         get() = mPresenter
+
+    private lateinit var addPersonKeyName: String
 
     class SchoolMemberListViewHolder(val itemBinding: ItemSchoolmemberListItemBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
@@ -73,29 +74,27 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
+        addPersonKeyName = "Person_${arguments?.get(UstadView.ARG_FILTER_BY_ROLE)}"
         addMode = ListViewAddMode.FAB
 
-        addNewStringId =
-            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
-                R.string.teacher
-            }else{
-                R.string.student
-            }
+        filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt()?:0
 
-        filterBySchoolUid = arguments?.getString(UstadView.ARG_SCHOOL_UID)?.toLong()?:0
+        addNewStringId = if(filterByRole == SchoolMember.SCHOOL_ROLE_TEACHER){
+            R.string.teacher
+        }else{
+            R.string.student
+        }
+
+        filterBySchoolUid = arguments?.getString(UstadView.ARG_FILTER_BY_SCHOOLUID)?.toLong()?:0
 
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = SchoolMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = SchoolMemberListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_new,
                 requireContext().getString(addNewStringId))
 
-        //mDataBinding?.presenter = mPresenter
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
 
         return view
@@ -107,30 +106,23 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
         val navController = findNavController()
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Person::class.java, KEY_MEMBER_SELECTED_STAFF) {
-            val memberAdded = it.firstOrNull() ?: return@observeResult
-           mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid,
-                   SchoolMember.SCHOOL_ROLE_TEACHER)
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Person::class.java, KEY_MEMBER_SELECTED_STUDENT) {
+                Person::class.java, addPersonKeyName) {
             val memberAdded = it.firstOrNull() ?: return@observeResult
             mPresenter?.handleEnrolMember(filterBySchoolUid, memberAdded.personUid,
-                    SchoolMember.SCHOOL_ROLE_STUDENT)
+                   arguments?.getString(UstadView.ARG_FILTER_BY_ROLE)?.toInt() ?: 0)
         }
     }
 
     override fun onResume() {
         super.onResume()
 
-        addNewStringId =
-            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF)
-                == true){
-                R.string.teacher
-            }else{
-                R.string.student
-            }
+        filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt()?:0
+
+        addNewStringId = if(filterByRole == SchoolMember.SCHOOL_ROLE_TEACHER){
+            R.string.teacher
+        }else{
+            R.string.student
+        }
         addMode = ListViewAddMode.FAB
 
         mActivityWithFab?.activityFloatingActionButton?.text =
@@ -140,7 +132,8 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
-    override fun onClick(view: View?) {       if(view?.id == R.id.item_createnew_layout)
+    override fun onClick(v: View?) {
+        if(v?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.person_detail_dest, Person::class.java)
     }
 
@@ -157,9 +150,6 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
 
     companion object {
 
-        const val KEY_MEMBER_SELECTED_STAFF = "member_list_staff"
-        const val KEY_MEMBER_SELECTED_STUDENT = "member_list_student"
-
         val DIFF_CALLBACK: DiffUtil.ItemCallback<SchoolMemberWithPerson> = object
             : DiffUtil.ItemCallback<SchoolMemberWithPerson>() {
             override fun areItemsTheSame(oldItem: SchoolMemberWithPerson,
@@ -175,14 +165,8 @@ class SchoolMemberListFragment(): UstadListViewFragment<SchoolMember, SchoolMemb
     }
 
     override fun addMember() {
-        val memberSelected =
-            if(arguments?.containsKey(UstadView.ARG_SCHOOLMEMBER_FILTER_STAFF) == true){
-                KEY_MEMBER_SELECTED_STAFF
-            }else{
-                KEY_MEMBER_SELECTED_STUDENT
-            }
         navigateToPickEntityFromList(Person::class.java,  R.id.person_list_dest,
                 bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString()),
-                memberSelected,true)
+                addPersonKeyName,true)
     }
 }

@@ -12,8 +12,10 @@ import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert
@@ -49,9 +51,17 @@ class ClazzListFragmentTest  {
             clazzUid = dbRule.db.clazzDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer<ClazzListFragment>(
-            bundleOf(), themeResId = R.style.UmTheme_App
-        ).withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+        dbRule.insertPersonForActiveUser(Person().apply {
+            admin = true
+            firstNames = "Test"
+            lastName = "User"
+        })
+
+        val fragmentScenario = launchFragmentInContainer(
+            bundleOf(), themeResId = R.style.UmTheme_App){
+            ClazzListFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            } }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         fragmentScenario.onFragment {

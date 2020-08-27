@@ -2,32 +2,37 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.singleton
 import java.lang.Thread.sleep
 
 class ContentEntry2DetailPresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ContentEntry2DetailView
 
@@ -39,11 +44,17 @@ class ContentEntry2DetailPresenterTest {
 
     private var createdEntry: ContentEntry? = null
 
+    private lateinit var entryContainer: Container
+
     private val defaultTimeout = 3000L
 
     private lateinit var containerManager: ContainerDownloadManager
 
     private var presenterArgs: Map<String, String>? = null
+
+    private lateinit var localAvailabilityManager: LocalAvailabilityManager
+
+    private lateinit var di: DI
 
     @Before
     fun setup() {
@@ -52,24 +63,38 @@ class ContentEntry2DetailPresenterTest {
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
+        localAvailabilityManager = mock {  }
         context = Any()
-        repoContentEntrySpyDao = spy(clientDbRule.db.contentEntryDao)
-        whenever(clientDbRule.db.contentEntryDao).thenReturn(repoContentEntrySpyDao)
+
+        di = DI {
+            import(ustadTestRule.diModule)
+            bind<LocalAvailabilityManager>() with singleton { localAvailabilityManager }
+        }
+
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeDbInstance()
+
+        repoContentEntrySpyDao = spy(repo.contentEntryDao)
+        whenever(repo.contentEntryDao).thenReturn(repoContentEntrySpyDao)
         createdEntry = ContentEntry().apply {
             title = "Dummy Entry"
             leaf = true
-            contentEntryUid = clientDbRule.db.contentEntryDao.insert(this)
+            contentEntryUid = db.contentEntryDao.insert(this)
+        }
+
+        entryContainer = Container().apply {
+            containerContentEntryUid = createdEntry?.contentEntryUid ?: 0L
+            cntLastModified = getSystemTimeInMillis()
+            containerUid = db.containerDao.insert(this)
         }
 
         presenterArgs = mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString())
     }
 
     @Test
-    fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntry(){
+    fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryAndMonitorAvailability(){
         val presenter = ContentEntry2DetailPresenter(context,
-                presenterArgs!!, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, true,clientDbRule.db, clientDbRule.repo,
-                containerManager, clientDbRule.accountLiveData)
+                presenterArgs!!, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
@@ -78,16 +103,20 @@ class ContentEntry2DetailPresenterTest {
             Assert.assertEquals("Expected entry was set on view",
                     createdEntry?.contentEntryUid, lastValue!!.contentEntryUid)
         }
+
+        presenter.onStart()
+
+        verify(localAvailabilityManager, timeout(5000)).addMonitoringRequest(argWhere {
+            entryContainer.containerUid in it.containerUidsToMonitor
+        })
     }
 
 
     @Test
     fun givenContentEntryExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled(){
-
         val presenter = ContentEntry2DetailPresenter(context,
-                presenterArgs!!, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, true,clientDbRule.db, clientDbRule.repo,
-                containerManager, clientDbRule.accountLiveData)
+                presenterArgs!!, mockView, di, mockLifecycleOwner)
+        val systemImpl: UstadMobileSystemImpl by di.instance()
 
         presenter.onCreate(null)
 
@@ -95,7 +124,7 @@ class ContentEntry2DetailPresenterTest {
 
         presenter.handleClickEdit()
 
-        verify(systemImplRule.systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
+        verify(systemImpl).go(eq(ContentEntryEdit2View.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString())), any())
     }
 

@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,10 +17,6 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.XapiPackageContentView
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
 
@@ -35,7 +32,7 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
     override var contentTitle: String = ""
         set(value) {
             field = value
-            title = value
+            ustadFragmentTitle = value
         }
 
     override var url: String = ""
@@ -47,8 +44,6 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
     private var mBinding: FragmentXapiPackageContentBinding? = null
 
     private var mPresenter: XapiPackageContentPresenter? = null
-
-    private var networkManagerBle: NetworkManagerBle ? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -63,6 +58,8 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
             it.activityXapiPackageWebview.settings.domStorageEnabled = true
             it.activityXapiPackageWebview.settings.cacheMode = WebSettings.LOAD_DEFAULT
             it.activityXapiPackageWebview.webViewClient = WebViewClient()
+            val isPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+            (context as? MainActivity)?.onAppBarExpand(isPortrait)
         }
 
         mBinding?.activityXapiPackageWebview?.webChromeClient = object : WebChromeClient() {
@@ -86,19 +83,20 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        GlobalScope.launch(Dispatchers.Main) {
-            val thisFrag = this@XapiPackageContentFragment
-            val networkManagerBle = networkManagerProvider?.networkManager?.await()
-            mPresenter = XapiPackageContentPresenter(requireContext(), arguments.toStringMap(),
-                    thisFrag, networkManagerBle?.httpd as ContainerMounter)
-            mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-        }
+        mPresenter = XapiPackageContentPresenter(requireContext(), arguments.toStringMap(),
+                this, di)
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
     }
 
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val isPortrait = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
+        (context as? MainActivity)?.onAppBarExpand(isPortrait)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        networkManagerBle = null
         mPresenter?.onDestroy()
         mPresenter = null
         mBinding = null

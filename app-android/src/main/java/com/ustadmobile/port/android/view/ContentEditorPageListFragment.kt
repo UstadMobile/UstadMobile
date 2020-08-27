@@ -23,19 +23,23 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.controller.ContentEditorPageActionDelegate
 import com.ustadmobile.core.controller.ContentEditorPageListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UMAndroidUtil.getDirectionality
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContentEditorPageListView
 import com.ustadmobile.port.android.umeditor.UmOnStartDragListener
 import com.ustadmobile.port.android.umeditor.UmPageItemTouchAdapter
 import com.ustadmobile.port.android.umeditor.UmPageItemTouchCallback
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.util.*
 
 
@@ -171,9 +175,10 @@ class ContentEditorPageListFragment : UstadDialogFragment(),
 
     fun setUmFileHelper(pageDelegate: ContentEditorPageActionDelegate) {
         adapter = PageListAdapter(this)
-        umDb = UmAccountManager.getRepositoryForActiveAccount(context!!)
-        presenter = ContentEditorPageListPresenter(this,
-                UMAndroidUtil.bundleToMap(arguments), this,umDb.contentEntryDao, pageDelegate)
+        val accountManager: UstadAccountManager by instance()
+        umDb = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+//        presenter = ContentEditorPageListPresenter(this,
+//                UMAndroidUtil.bundleToMap(arguments), this, di, umDb.contentEntryDao, pageDelegate)
         presenter!!.onCreate(UMAndroidUtil.bundleToMap(savedInstanceState))
     }
 

@@ -2,36 +2,32 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 
 class SchoolEditPresenter(context: Any,
-                          arguments: Map<String, String>, view: SchoolEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<SchoolEditView, SchoolWithHolidayCalendar>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          arguments: Map<String, String>, view: SchoolEditView, di: DI,
+                          lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<SchoolEditView, SchoolWithHolidayCalendar>(context, arguments, view, di, lifecycleOwner) {
 
     enum class GenderOptions(val optionVal: Int, val messageId: Int){
         MIXED(School.SCHOOL_GENDER_MIXED,
@@ -110,7 +106,7 @@ class SchoolEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.schoolUid == 0L) {
                 entity.schoolActive = true
-                entity.schoolUid = repo.schoolDao.insertAsync(entity)
+                entity.schoolUid = repo.createNewSchoolAndGroups(entity, systemImpl, context)
             }else {
                 repo.schoolDao.updateAsync(entity)
             }
@@ -121,7 +117,7 @@ class SchoolEditPresenter(context: Any,
             repo.clazzDao.assignClassesToSchool(
                     clazzOneToManyJoinEditHelper.primaryKeysToDeactivate, 0L)
 
-            view.finishWithResult(listOf(entity))
+            onFinish(SchoolDetailView.VIEW_NAME, entity.schoolUid, entity)
         }
     }
 

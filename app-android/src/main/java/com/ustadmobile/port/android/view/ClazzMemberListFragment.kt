@@ -5,22 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.paging.DataSource
 import androidx.paging.PagedList
+import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemClazzmemberListItemBinding
+import com.toughra.ustadmobile.databinding.ItemClazzmemberPendingListItemBinding
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
@@ -55,6 +54,30 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
             mCurrentStudentListLiveData?.observe(viewLifecycleOwner, studentObserverVal)
         }
 
+    private val pendingStudentsObserver = object: Observer<PagedList<ClazzMemberWithPerson>> {
+        override fun onChanged(t: PagedList<ClazzMemberWithPerson>?) {
+            mPendingStudentListRecyclerViewAdapter?.submitList(t)
+            mPendingStudentsHeaderRecyclerViewAdapter?.headerLayoutId = if(t != null && !t.isEmpty()) {
+                R.layout.item_simple_list_header
+            }else {
+                0
+            }
+        }
+    }
+
+    override var pendingStudentList: DataSource.Factory<Int, ClazzMemberWithPerson>? = null
+        get() = field
+        set(value) {
+            val repoDao = displayTypeRepo ?: return
+
+            mCurrentPendingStudentListLiveData?.removeObserver(pendingStudentsObserver)
+            mCurrentStudentListLiveData = value?.asRepositoryLiveData(repoDao)
+            mCurrentStudentListLiveData?.observe(viewLifecycleOwner, pendingStudentsObserver)
+            field = value
+        }
+
+
+
     private var mNewStudentListRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
 
     private var mStudentListRecyclerViewAdapter: ClazzMemberListRecyclerAdapter? = null
@@ -62,6 +85,14 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
     private var mStudentListObserver: Observer<PagedList<ClazzMemberWithPerson>>? = null
 
     private var mCurrentStudentListLiveData: LiveData<PagedList<ClazzMemberWithPerson>>? = null
+
+    private var mPendingStudentsHeaderRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+
+    private var mPendingStudentListRecyclerViewAdapter: PendingClazzMemberListRecyclerAdapter? = null
+
+    //private var mPendingStudentListObserver: Observer<PagedList<ClazzMemberWithPerson>>? = null
+
+    private var mCurrentPendingStudentListLiveData: LiveData<PagedList<ClazzMemberWithPerson>>? = null
 
     private var filterByClazzUid: Long = 0
 
@@ -105,14 +136,31 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
         }
     }
 
+    class PendingClazzMemberListViewHolder(val itemBinding: ItemClazzmemberPendingListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
+
+    class PendingClazzMemberListRecyclerAdapter(var presenter: ClazzMemberListPresenter?) : PagedListAdapter<ClazzMemberWithPerson, PendingClazzMemberListViewHolder>(DIFF_CALLBACK) {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PendingClazzMemberListViewHolder {
+            val itemBinding = ItemClazzmemberPendingListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            itemBinding.presenter = presenter
+            return PendingClazzMemberListViewHolder(itemBinding)
+        }
+
+        override fun onBindViewHolder(holder: PendingClazzMemberListViewHolder, position: Int) {
+            holder.itemBinding.clazzMember = getItem(position)
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            presenter = null
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         filterByClazzUid = arguments?.getString(ARG_FILTER_BY_CLAZZUID)?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this,  di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_a,
@@ -128,9 +176,15 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
         mNewStudentListRecyclerViewAdapter = NewItemRecyclerViewAdapter(mOnClickAddStudent,
                 addStudentText, headerStringId = R.string.students,
                 headerLayoutId = R.layout.item_simple_list_header)
+
+        mPendingStudentListRecyclerViewAdapter = PendingClazzMemberListRecyclerAdapter(mPresenter)
+        mPendingStudentsHeaderRecyclerViewAdapter = NewItemRecyclerViewAdapter(null,
+                "", R.string.pending_requests, headerLayoutId = 0)
+
         mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
             mDataRecyclerViewAdapter, mNewStudentListRecyclerViewAdapter,
-            mStudentListRecyclerViewAdapter)
+            mStudentListRecyclerViewAdapter, mPendingStudentsHeaderRecyclerViewAdapter,
+            mPendingStudentListRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
         return view
     }

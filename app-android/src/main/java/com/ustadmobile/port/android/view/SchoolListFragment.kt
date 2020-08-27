@@ -11,8 +11,6 @@ import com.toughra.ustadmobile.databinding.ItemSchoolListItemBinding
 import com.ustadmobile.core.controller.SchoolListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SchoolListView
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
@@ -21,8 +19,8 @@ import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountAndLocation>(),
-        SchoolListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAndLocation>(),
+        SchoolListView, View.OnClickListener{
 
     private var mPresenter: SchoolListPresenter? = null
 
@@ -59,13 +57,10 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
                               savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = SchoolListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+                this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = SchoolListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.create_new,
+        val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.schools))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view
@@ -73,7 +68,6 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         fabManager?.text = requireContext().getText(R.string.school)
     }
 
@@ -86,8 +80,8 @@ class SchoolListFragment(): UstadListViewFragment<School, SchoolWithMemberCountA
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
-    override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout) {
+    override fun onClick(v: View?) {
+        if(v?.id == R.id.item_createnew_layout) {
             navigateToEditEntity(null, R.id.school_edit_dest, School::class.java)
         }
     }

@@ -2,33 +2,26 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.RoleEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 
 class RoleEditPresenter(context: Any,
-                          arguments: Map<String, String>, view: RoleEditView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<RoleEditView, Role>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+                          arguments: Map<String, String>, view: RoleEditView, di: DI,
+                          lifecycleOwner: DoorLifecycleOwner)
+    : UstadEditPresenter<RoleEditView, Role>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -147,7 +140,7 @@ class RoleEditPresenter(context: Any,
 
         BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW , MessageID.permission_clazz_assignment_view , false),
 
-        BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_READ_WRITE , MessageID.permission_clazz_asignment_edit , false)
+        BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit , false)
         )
 
     }
