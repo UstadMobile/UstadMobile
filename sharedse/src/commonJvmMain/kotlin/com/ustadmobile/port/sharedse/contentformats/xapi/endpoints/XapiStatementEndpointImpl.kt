@@ -28,20 +28,9 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
 
     private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
+    private val repo: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+
     private val gson: Gson by di.instance()
-
-    private val verbDao: VerbDao = db.verbDao
-    private val statementDao: StatementDao = db.statementDao
-    private val progressDao: ContentEntryProgressDao = db.contentEntryProgressDao
-    private val personDao: PersonDao = db.personDao
-    private val xobjectDao: XObjectDao = db.xObjectDao
-    private val contextJoinDao: ContextXObjectStatementJoinDao = db.contextXObjectStatementJoinDao
-    private val agentDao: AgentDao = db.agentDao
-    private val xLangMapEntryDao: XLangMapEntryDao = db.xLangMapEntryDao
-    private val languageDao: LanguageDao = db.languageDao
-    private val langVariantDao = db.languageVariantDao
-    private val contentEntryDao = db.contentEntryDao
-
     /**
      * @param contentEntryUid - the contentEntryUid when it is already known. E.g. when the xapi
      * endpoint is used by the XapiPackagePresenter then the contentEntryUid is known.
@@ -240,12 +229,13 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
 
         checkValidStatement(statement, false)
 
-        val verbEntity = insertOrUpdateVerb(verbDao, statement.verb!!)
-        val person = getPerson(personDao, statement.actor!!)
-        val agentEntity = getAgent(agentDao, personDao, statement.actor!!)
+        val verbEntity = insertOrUpdateVerb(repo.verbDao, statement.verb!!)
+        val person = getPerson(repo.personDao, statement.actor!!)
+        val agentEntity = getAgent(repo.agentDao, repo.personDao, statement.actor!!)
         val agentUid = agentEntity.agentUid
 
-        insertOrUpdateVerbLangMap(xLangMapEntryDao, statement.verb!!, verbEntity, languageDao, langVariantDao)
+        insertOrUpdateVerbLangMap(repo.xLangMapEntryDao, statement.verb!!, verbEntity,
+                repo.languageDao, repo.languageVariantDao)
 
         var authorityUid: Long = 0
         if (statement.authority != null) {
@@ -260,17 +250,18 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
                     }
                 }
             }
-            val authorityEntity = getAgent(agentDao, personDao, authority!!)
+            val authorityEntity = getAgent(repo.agentDao, repo.personDao, authority!!)
             authorityUid = authorityEntity.agentUid
         }
 
         var xObjectEntity: XObjectEntity? = null
         val xObjectVal = statement.`object`
         if (xObjectVal != null) {
-            xObjectEntity = insertOrUpdateXObject(xobjectDao, xObjectVal, gson,
-                    contentEntryDao, contentEntryUid)
+            xObjectEntity = insertOrUpdateXObject(repo.xObjectDao, xObjectVal, gson,
+                    repo.contentEntryDao, contentEntryUid)
 
-            insertOrUpdateXObjectLangMap(xLangMapEntryDao, xObjectVal, xObjectEntity, languageDao, langVariantDao)
+            insertOrUpdateXObjectLangMap(repo.xLangMapEntryDao, xObjectVal, xObjectEntity,
+                    repo.languageDao, repo.languageVariantDao)
         }
 
         var subActorUid: Long = 0
@@ -280,20 +271,22 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
         if (statement.subStatement != null) {
             val subStatement = statement.subStatement
 
-            val subAgent = getAgent(agentDao, personDao, subStatement!!.actor!!)
+            val subAgent = getAgent(repo.agentDao, repo.personDao, subStatement!!.actor!!)
             subActorUid = subAgent.agentUid
 
-            val subVerb = insertOrUpdateVerb(verbDao, subStatement.verb!!)
+            val subVerb = insertOrUpdateVerb(repo.verbDao, subStatement.verb!!)
             subVerbUid = subVerb.verbUid
 
-            insertOrUpdateVerbLangMap(xLangMapEntryDao, subStatement.verb!!, subVerb, languageDao, langVariantDao)
+            insertOrUpdateVerbLangMap(repo.xLangMapEntryDao, subStatement.verb!!, subVerb,
+                    repo.languageDao, repo.languageVariantDao)
 
-            val subObject = insertOrUpdateXObject(xobjectDao, subStatement.`object`!!, gson,
-                    contentEntryDao, contentEntryUid)
+            val subObject = insertOrUpdateXObject(repo.xObjectDao, subStatement.`object`!!, gson,
+                    repo.contentEntryDao, contentEntryUid)
 
             subObjectUid = subObject.xObjectUid
 
-            insertOrUpdateXObjectLangMap(xLangMapEntryDao, subStatement.`object`!!, subObject, languageDao, langVariantDao)
+            insertOrUpdateXObjectLangMap(repo.xLangMapEntryDao, subStatement.`object`!!, subObject,
+                    repo.languageDao, repo.languageVariantDao)
 
         }
 
@@ -306,20 +299,20 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
 
             val contextInstructor = statementContext.instructor
             if (contextInstructor != null) {
-                val instructorAgent = getAgent(agentDao, personDao, contextInstructor)
+                val instructorAgent = getAgent(repo.agentDao, repo.personDao, contextInstructor)
                 instructorUid = instructorAgent.agentUid
             }
 
             val contextTeam = statementContext.team
             if (contextTeam != null) {
-                val teamAgent = getAgent(agentDao, personDao, contextTeam)
+                val teamAgent = getAgent(repo.agentDao, repo.personDao, contextTeam)
                 teamUid = teamAgent.agentUid
             }
 
             contextStatementId = statementContext.statement?.id ?: ""
         }
 
-        val statementEntity = insertOrUpdateStatementEntity(statementDao, statement, gson,
+        val statementEntity = insertOrUpdateStatementEntity(repo.statementDao, statement, gson,
                 person?.personUid ?: 0,
                 verbEntity.verbUid,
                 xObjectEntity?.xObjectUid ?: 0,
@@ -328,9 +321,11 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
                 subActorUid, subVerbUid, subObjectUid,
                 contentEntryUid = contentEntryUid)
 
-        val entry = contentEntryDao.findByUid(contentEntryUid)
+        //ContentEntry should be available locally
+        val entry = db.contentEntryDao.findByUid(contentEntryUid)
         if (xObjectEntity?.objectId == entry?.entryId) {
-            XapiUtil.insertOrUpdateEntryProgress(statementEntity, progressDao, verbEntity)
+            XapiUtil.insertOrUpdateEntryProgress(statementEntity, repo.contentEntryProgressDao,
+                    verbEntity)
         }
 
         if (statement.context != null && statement.context!!.contextActivities != null) {
@@ -360,8 +355,9 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
 
     fun createAllContextActivities(list: List<XObject>?, statementUid: Long, flag: Int) {
         for (`object` in list!!) {
-            val xobjectEntity = insertOrUpdateXObject(xobjectDao, `object`, gson, contentEntryDao)
-            insertOrUpdateContextStatementJoin(contextJoinDao, statementUid, xobjectEntity.xObjectUid, flag)
+            val xobjectEntity = insertOrUpdateXObject(repo.xObjectDao, `object`, gson, repo.contentEntryDao)
+            insertOrUpdateContextStatementJoin(repo.contextXObjectStatementJoinDao,
+                    statementUid, xobjectEntity.xObjectUid, flag)
         }
     }
 
@@ -397,7 +393,7 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
     fun hasExistingStatements(statements: List<Statement>): Boolean {
 
         val ids = statements.filter { it.id != null }.map { it.id }
-        val statementList = statementDao.findByStatementIdList(ids as List<String>)
+        val statementList = db.statementDao.findByStatementIdList(ids as List<String>)
 
         for (statement in statementList) {
             throw StatementRequestException("Has Existing Statements", 409)

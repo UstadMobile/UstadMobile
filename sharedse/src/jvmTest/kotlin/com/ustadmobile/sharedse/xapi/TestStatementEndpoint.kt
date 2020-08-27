@@ -15,7 +15,9 @@ import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.parse8601Duration
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
@@ -72,6 +74,11 @@ class TestStatementEndpoint {
                     it.preload()
                 })
             }
+
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
+                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+            }
+
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
                 builder.registerTypeAdapter(Statement::class.java, StatementSerializer())

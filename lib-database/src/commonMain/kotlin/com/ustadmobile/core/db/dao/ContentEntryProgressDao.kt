@@ -23,7 +23,9 @@ abstract class ContentEntryProgressDao : BaseDao<ContentEntryProgress> {
 
 
     @Query("""UPDATE ContentEntryProgress SET contentEntryProgressProgress = :progress, 
-                    contentEntryProgressStatusFlag = :status WHERE 
+                    contentEntryProgressStatusFlag = :status,
+                    contentEntryProgressLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0)
+                    WHERE 
                     contentEntryProgressPersonUid = :personUid AND 
                     contentEntryProgressContentEntryUid = :contentEntryUid
                     """)
