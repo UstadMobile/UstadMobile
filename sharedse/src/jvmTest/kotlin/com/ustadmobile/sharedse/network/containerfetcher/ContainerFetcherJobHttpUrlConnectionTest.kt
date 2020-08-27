@@ -121,7 +121,7 @@ class ContainerDownloaderJobHttpUrlConnectionTest {
                     destFile.absolutePath)
 
 
-            val containerFetcher = ContainerFetcherJobHttpUrlConnection(request, null, di)
+            val containerFetcher = ContainerDownloaderJobHttpUrlConnection(request, null, di)
             val resultDeferred = async(Dispatchers.Default) { containerFetcher.download() }
             delay (2000)
             resultDeferred.cancelAndJoin()
