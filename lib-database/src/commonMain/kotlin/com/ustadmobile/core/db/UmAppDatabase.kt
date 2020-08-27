@@ -1252,12 +1252,58 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS `StatementEntity_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_trk_clientId_epk_rx_csn` ON `StatementEntity_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+                      |CREATE TRIGGER UPD_60
+                      |AFTER UPDATE ON StatementEntity FOR EACH ROW WHEN
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(NEW.statementMasterChangeSeqNum = 0 
+                      |OR OLD.statementMasterChangeSeqNum = NEW.statementMasterChangeSeqNum
+                      |)
+                      |ELSE
+                      |(NEW.statementLocalChangeSeqNum = 0  
+                      |OR OLD.statementLocalChangeSeqNum = NEW.statementLocalChangeSeqNum
+                      |) END)
+                      |BEGIN 
+                      |UPDATE StatementEntity SET statementLocalChangeSeqNum = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLocalChangeSeqNum 
+                      |ELSE (SELECT MAX(MAX(statementLocalChangeSeqNum), OLD.statementLocalChangeSeqNum) + 1 FROM StatementEntity) END),
+                      |statementMasterChangeSeqNum = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(SELECT MAX(MAX(statementMasterChangeSeqNum), OLD.statementMasterChangeSeqNum) + 1 FROM StatementEntity)
+                      |ELSE NEW.statementMasterChangeSeqNum END)
+                      |WHERE statementUid = NEW.statementUid
+                      |; END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER INS_60
+                      |AFTER INSERT ON StatementEntity FOR EACH ROW WHEN
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(NEW.statementMasterChangeSeqNum = 0 
+                      |
+                      |)
+                      |ELSE
+                      |(NEW.statementLocalChangeSeqNum = 0  
+                      |
+                      |) END)
+                      |BEGIN 
+                      |UPDATE StatementEntity SET statementLocalChangeSeqNum = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLocalChangeSeqNum 
+                      |ELSE (SELECT MAX(statementLocalChangeSeqNum) + 1 FROM StatementEntity) END),
+                      |statementMasterChangeSeqNum = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(SELECT MAX(statementMasterChangeSeqNum) + 1 FROM StatementEntity)
+                      |ELSE NEW.statementMasterChangeSeqNum END)
+                      |WHERE statementUid = NEW.statementUid
+                      |; END
+                      """.trimMargin())
+
 
                     //Lamsustad Only to deal with incorrect version on database deployed
                     database.execSQL("ALTER TABLE PersonAuth RENAME to PersonAuth_OLD")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `PersonAuth` (`personAuthUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `passwordHash` TEXT, `personAuthStatus` INTEGER NOT NULL)")
                     database.execSQL("INSERT INTO PersonAuth (personAuthUid, passwordHash, personAuthStatus) SELECT personAuthUid, passwordHash, 0 FROM PersonAuth_OLD")
                     database.execSQL("DROP TABLE PersonAuth_OLD")
+
 
                 } else if (database.dbType() == DoorDbType.POSTGRES) {
 
