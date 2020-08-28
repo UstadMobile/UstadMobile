@@ -11,6 +11,7 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.util.copyOnWriteListOf
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.sharedMutableMapOf
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineDispatcher
@@ -191,12 +192,15 @@ abstract class NetworkManagerBleCommon(
      */
     @Synchronized
     fun handleNodeDiscovered(node: NetworkNode) {
-        if(! knownNetworkNodes.any { it.bluetoothMacAddress == node.bluetoothMacAddress}) {
+        val knownNetworkNode = knownNetworkNodes.firstOrNull { it.bluetoothMacAddress == node.bluetoothMacAddress }
+        if(knownNetworkNode == null) {
             Napier.i("NetworkManagerBle: Discovered new node on ${node.bluetoothMacAddress} ")
             knownNetworkNodes += node
             GlobalScope.launch {
                 networkNodeListeners.forEach { it.onNewNodeDiscovered(node) }
             }
+        }else {
+            knownNetworkNode.lastUpdateTimeStamp = getSystemTimeInMillis()
         }
     }
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.port.sharedse.impl.http
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.util.UMFileUtil
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
@@ -116,9 +117,8 @@ class BleProxyResponder: RouterNanoHTTPD.UriResponder {
             val bleMessage = BleMessage(BleMessage.MESSAGE_TYPE_HTTP, messageId,
                     bleRequestSerialized.toUtf8Bytes())
             val destDevice = NetworkNode().also { it.bluetoothMacAddress = destDeviceAddr }
-            UMLog.l(UMLog.DEBUG, 691,
-                    "BLEProxyResponder: Request ID# ${bleMessage.messageId} " +
-                            "TO ${destDevice.bluetoothMacAddress} - ${bleRequest.reqUri} ")
+            Napier.d({"BLEProxyResponder: Request ID# ${bleMessage.messageId} "
+                "SEND: ${destDevice.bluetoothMacAddress} - ${bleRequest.reqUri} "})
 
             try {
                 val messageReceived = withTimeout(20000) {
@@ -137,9 +137,8 @@ class BleProxyResponder: RouterNanoHTTPD.UriResponder {
                         //Thread.sleep(1000)
                         return@runBlocking bleHttpResponse.asNanoHttpdResponse()
                     }catch(e: Exception) {
-                        UMLog.l(UMLog.ERROR, 691,
-                                "BLEProxyResponder: Exception parsing ID# ${bleMessage.messageId} \n" +
-                                        "==Payload received ${payload.size} bytes==\n$payloadStr\n\n")
+                        Napier.e("BLEProxyResponder: Exception parsing ID# ${bleMessage.messageId} \n" +
+                            "==Payload received ${payload.size} bytes==\n$payloadStr\n\n", e)
                     }
 
                 }

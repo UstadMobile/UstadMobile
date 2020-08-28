@@ -3,9 +3,13 @@ package com.ustadmobile.sharedse.network
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
+import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.LocallyAvailableContainer
 import com.ustadmobile.lib.db.entities.NetworkNode
@@ -32,7 +36,11 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
 
+    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = TAG_REPO)
+
     private val networkManager: NetworkManagerBle by di.instance()
+
+    private val localHttpPort: Int by di.instance(tag = TAG_LOCAL_HTTP_PORT)
 
     init {
         val networkNodes = networkManager.networkNodes
@@ -76,6 +84,10 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
                 if(statusRequestUids.isNotEmpty()) {
                     sendRequest(networkNode, statusRequestUids.toList())
                 }
+
+                (repo as? DoorDatabaseRepository)?.addMirror(
+                        "http://localhost:$localHttpPort/bleproxy/${networkNode.bluetoothMacAddress}/${UMURLEncoder.encodeUTF8(endpoint.url)}/",
+                        100)
             }
         }
     }

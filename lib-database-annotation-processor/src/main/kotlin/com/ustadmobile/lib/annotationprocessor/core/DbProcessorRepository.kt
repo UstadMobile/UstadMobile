@@ -453,7 +453,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                             httpResultType = resultType,
                             requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
                                     MemberName("io.ktor.client.request", "header"),
-                                    "X-nid"),
+                                    "x-nid"),
                             params = daoFunSpecBuilt.parameters))
                         .add("_httpResult\n")
                         .endControlFlow()
