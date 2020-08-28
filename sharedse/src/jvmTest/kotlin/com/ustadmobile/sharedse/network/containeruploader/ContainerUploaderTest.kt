@@ -82,7 +82,6 @@ class ContainerUploaderTest {
         containerManager = ContainerManager(epubContainer, appDb, appDb, tmpFolder.absolutePath)
         runBlocking {
             addEntriesFromZipToContainer(fileToUpload.absolutePath, containerManager)
-            containerManager.addEntries(ContainerManager.FileEntrySource(fileToUpload, fileToUpload.name))
             val entryList = containerManager.allEntries.distinctBy { it.containerEntryFile!!.cefMd5 }
             entryListStr = entryList.joinToString(separator = ";") { it.ceCefUid.toString() }
         }

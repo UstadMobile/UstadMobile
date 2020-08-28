@@ -9,6 +9,7 @@
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryListRecyclerAdapter"/>
         <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <variable
             name="contentEntry"
@@ -116,6 +117,7 @@
 
         <TextView
             android:id="@+id/content_entry_item_description"
+            android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(contentEntry.description)}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_10dp"
@@ -145,6 +147,13 @@
             app:srcCompat="@drawable/ic_nearby_black_24px"
             tools:visibility="gone" />
 
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/content_entry_desc_bottom_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="content_entry_item_description,content_entry_item_title"/>
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/content_entry_mimetype_icon"
             android:layout_width="@dimen/dimen_16dp"
@@ -157,7 +166,7 @@
             app:imageLookupKey="@{contentEntry.contentTypeFlag}"
             app:imageLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP}"
             app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
-            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_desc_bottom_barrier" />
 
 
         <TextView
@@ -174,7 +183,7 @@
             android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
             app:layout_constraintStart_toEndOf="@id/content_entry_mimetype_icon"
-            app:layout_constraintTop_toBottomOf="@id/content_entry_item_description"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_desc_bottom_barrier"
             app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
             app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}" />
 
