@@ -12,6 +12,7 @@ import com.ustadmobile.core.contentformats.xapi.State
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
@@ -19,7 +20,6 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil
 import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.util.test.extractTestResourceToFile
 import org.junit.Assert
 import org.junit.Before

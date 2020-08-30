@@ -30,9 +30,9 @@ data class RangeResponse(
          */
         val responseHeaders: Map<String, String>)
 
-private val RANGE_CONTENT_LENGTH_HEADER = "Content-Length"
-private val RANGE_CONTENT_RANGE_HEADER = "Content-Range"
-private val RANGE_CONTENT_ACCEPT_RANGE_HEADER = "Accept-Ranges"
+val RANGE_CONTENT_LENGTH_HEADER = "Content-Length"
+val RANGE_CONTENT_RANGE_HEADER = "Content-Range"
+val RANGE_CONTENT_ACCEPT_RANGE_HEADER = "Accept-Ranges"
 
 
 fun parseRangeRequestHeader(rangeHeader: String, totalLength: Long): RangeResponse {

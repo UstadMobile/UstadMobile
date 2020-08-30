@@ -3,6 +3,7 @@ package com.ustadmobile.lib.annotationprocessor.core
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.ustadmobile.door.*
+import com.ustadmobile.door.ext.DoorTag
 import db2.ExampleDatabase2
 import db2.ExampleSyncableEntity
 import io.ktor.client.HttpClient
@@ -13,6 +14,7 @@ import db2.ExampleDatabase2SyncDao_JdbcKt
 import db2.ExampleSyncableDao_Repo
 import db2.ExampleDatabase2_KtorRoute
 import db2.ExampleDatabase2_Repo
+import io.ktor.application.ApplicationCall
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
@@ -37,6 +39,11 @@ import io.netty.handler.codec.http.HttpResponse
 import kotlinx.coroutines.runBlocking
 import org.junit.*
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.bind
+import org.kodein.di.ktor.DIFeature
+import org.kodein.di.registerContextTranslator
+import org.kodein.di.scoped
+import org.kodein.di.singleton
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.assertEquals
@@ -52,23 +59,37 @@ class TestDbRepo {
 
     lateinit var httpClient: HttpClient
 
-    var tmpAttachmentsDir: File? = null
+    lateinit var tmpAttachmentsDir: File
 
     @JvmField
     @Rule
     var temporaryFolder = TemporaryFolder()
 
     fun createSyncableDaoServer(db: ExampleDatabase2) = embeddedServer(Netty, 8089) {
+        val virtualHostScope = TestDbRoute.VirtualHostScope()
         install(ContentNegotiation) {
             register(ContentType.Application.Json, GsonConverter())
             register(ContentType.Any, GsonConverter())
         }
 
-        val syncDao = ExampleDatabase2SyncDao_JdbcKt(db)
-        val gson = Gson()
         tmpAttachmentsDir = temporaryFolder.newFolder("testdbrepoattachments")
+
+        install(DIFeature) {
+            bind<ExampleDatabase2>(tag = DoorTag.TAG_DB) with scoped(virtualHostScope).singleton {
+                db
+            }
+
+            bind<Gson>() with singleton { Gson() }
+
+            bind<String>(tag = DoorTag.TAG_ATTACHMENT_DIR) with scoped(virtualHostScope).singleton {
+                tmpAttachmentsDir.absolutePath
+            }
+
+            registerContextTranslator { call: ApplicationCall -> "localhost" }
+        }
+
         install(Routing) {
-            ExampleDatabase2_KtorRoute(db, gson, tmpAttachmentsDir!!.absolutePath)
+            ExampleDatabase2_KtorRoute(true)
         }
 
         install(CallLogging)
@@ -102,8 +123,6 @@ class TestDbRepo {
     fun tearDown() {
         server?.stop(0, 10000)
         httpClient.close()
-        tmpAttachmentsDir?.deleteRecursively()
-        tmpAttachmentsDir = null
     }
 
     @Test
@@ -403,8 +422,5 @@ class TestDbRepo {
 
         Assert.assertEquals(HttpStatusCode.BadRequest, httpStatusErr)
     }
-
-
-
 
 }

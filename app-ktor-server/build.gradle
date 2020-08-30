@@ -56,6 +56,9 @@ kotlin {
                   implementation "org.apache.commons:commons-lang3:$version_apache_commons_lang"
                   implementation "ch.qos.logback:logback-classic:$version_logback"
 
+                  implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                  implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+
                   implementation project(":core")
                   implementation project(":sharedse")
                   implementation project(":lib-database")
@@ -232,7 +235,7 @@ task appRun(type: JavaExec) {
 task appRunDebug(type: JavaExec) {
     classpath = files("$buildDir/libs/app-ktor-server-all.jar")
     main = 'io.ktor.server.netty.EngineMain'
-    args '-port=8087'
+    args '-port=8087', '-config=devmode.conf'
     jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
 }
 

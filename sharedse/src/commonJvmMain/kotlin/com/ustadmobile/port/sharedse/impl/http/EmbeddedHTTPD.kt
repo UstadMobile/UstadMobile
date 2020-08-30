@@ -21,7 +21,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
  *
@@ -40,6 +40,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
     private val responseListeners = Vector<ResponseListener>()
 
     private val mountedContainers = Hashtable<String, ContainerManager>()
+
+    private val networkManager: NetworkManagerBle by instance()
 
     /**
      * Returns the local URL in the form of http://localhost;PORT/
@@ -72,9 +74,9 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
         id = idCounter
         idCounter++
 
-        addRoute("/:${ContainerEntryListResponder.PATH_VAR_ENDPOINT}/ContainerEntryList/findByContainerWithMd5(.*)+",
+        addRoute("/:${ContainerEntryListResponder.PATH_VAR_ENDPOINT}/ContainerEntryList/findByContainerWithMd5",
                 ContainerEntryListResponder::class.java, di)
-        addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/(.*)+",
+        addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/:entryList",
                 ConcatenatedContainerEntryFileResponder::class.java, di)
         addRoute("/:${XapiStatementResponder.URI_PARAM_ENDPOINT}/xapi/:contentEntryUid/statements",
                 XapiStatementResponder::class.java, di)
@@ -82,10 +84,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
                 XapiStateResponder::class.java, di)
 
         //TODO: This should provide NetworkManager to the responder, or BleProxyResponder could use DI itself
-        //httpd.addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, this)
-
-//        addRoute("/xapi/:contentEntryUid/statements", XapiStatementResponder::class.java, repository)
-//        addRoute("/xapi/:contentEntryUid/activities/state", XapiStateResponder::class.java, repository)
+        addRoute("/bleproxy/:bleaddr/.*", BleProxyResponder::class.java, networkManager)
     }
 
 

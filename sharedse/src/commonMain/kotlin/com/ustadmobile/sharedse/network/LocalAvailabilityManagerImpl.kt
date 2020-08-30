@@ -18,7 +18,7 @@ import org.kodein.di.*
 
 class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: Endpoint,
                                    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default)
-    : LocalAvailabilityManager, DIAware{
+    : LocalAvailabilityManager, DIAware, NetworkNodeListener{
 
     private val activeMonitoringRequests: MutableList<AvailabilityMonitorRequest> = copyOnWriteListOf()
 
@@ -35,8 +35,14 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
     private val networkManager: NetworkManagerBle by di.instance()
 
     init {
+        val networkNodes = networkManager.networkNodes
+        networkManager.addNetworkNodeListener(this)
+
         GlobalScope.launch(coroutineDispatcher) {
             db.locallyAvailableContainerDao.deleteAll()
+            networkNodes.forEach {
+                onNewNodeDiscovered(it)
+            }
         }
     }
 
@@ -55,7 +61,8 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
         }
     }
 
-    override suspend fun handleNodeDiscovered(bluetoothAddr: String) {
+    override suspend fun onNewNodeDiscovered(node: NetworkNode) {
+        val bluetoothAddr = node.bluetoothMacAddress ?: return
         withContext(coroutineDispatcher) {
             val existingNode = activeNodes.firstOrNull { it.bluetoothMacAddress == bluetoothAddr }
             if(existingNode != null) {
@@ -65,12 +72,20 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
                 val networkNode = NetworkNodeWithStatusResponsesAndHistory()
                 networkNode.bluetoothMacAddress = bluetoothAddr
                 activeNodes.add(networkNode)
-                val statusRequestUids = activeMonitoringRequests.flatMap { it.entryUidsToMonitor }.toSet()
+                val statusRequestUids = activeMonitoringRequests.flatMap { it.containerUidsToMonitor }.toSet()
                 if(statusRequestUids.isNotEmpty()) {
                     sendRequest(networkNode, statusRequestUids.toList())
                 }
             }
         }
+    }
+
+    override suspend fun onNodeLost(node: NetworkNode) {
+
+    }
+
+    override suspend fun onNodeReputationChanged(node: NetworkNode, reputation: Int) {
+
     }
 
     override suspend fun handleNodesLost(bluetoothAddrs: List<String>) {
@@ -89,9 +104,11 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
             val response = networkManager.sendBleMessage(request, destAddr)
             val responsePayload = response?.payload ?: return@launch
             val responseLongArr = BleMessageUtil.bleMessageBytesToLong(responsePayload)
-            val entryResponses = responseLongArr.mapIndexed {index, response ->
-                EntryStatusResponse(erContainerUid = containerUids[index], available = response != 0L)
+            val entryResponses = containerUids.mapIndexed {index, containerUid ->
+                val availableContainer = if(index < responseLongArr.size) responseLongArr[index] else 0
+                EntryStatusResponse(erContainerUid = containerUids[index], available = availableContainer != 0L)
             }
+
             handleBleTaskResponseReceived(entryResponses, networkNode)
         }
     }
@@ -116,17 +133,17 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
 
     suspend fun fireAvailabilityChanged(entryStatusResponseContainerUids: List<Long>) {
         activeMonitoringRequests.filter { monitorRequest ->
-            monitorRequest.entryUidsToMonitor.any { it in entryStatusResponseContainerUids }
+            monitorRequest.containerUidsToMonitor.any { it in entryStatusResponseContainerUids }
         }.forEach {
-            val intersecting = it.entryUidsToMonitor.intersect(entryStatusResponseContainerUids)
-            it.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
+            val intersecting = it.containerUidsToMonitor.intersect(entryStatusResponseContainerUids)
+            it.onContainerAvailabilityChanged(areContentEntriesLocallyAvailable(intersecting.toList()))
         }
     }
 
     override fun addMonitoringRequest(request: AvailabilityMonitorRequest) {
         //compute what we don't know here
         activeMonitoringRequests.add(request)
-        val allMonitoredUids = activeMonitoringRequests.flatMap { it.entryUidsToMonitor }.toSet()
+        val allMonitoredUids = activeMonitoringRequests.flatMap { it.containerUidsToMonitor }.toSet()
 
         //provide an immediate callback to provide statuses as far as we know for this request
         GlobalScope.launch {
@@ -136,7 +153,7 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
                 sendRequest(responseNeeded.key, responseNeeded.value)
             }
 
-            request.onEntityAvailabilityChanged(areContentEntriesLocallyAvailable(request.entryUidsToMonitor))
+            request.onContainerAvailabilityChanged(areContentEntriesLocallyAvailable(request.containerUidsToMonitor))
         }
     }
 

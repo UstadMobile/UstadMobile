@@ -47,6 +47,9 @@ abstract class NetworkManagerBleCommon(
 
     private val knownNetworkNodes: MutableList<NetworkNode> = copyOnWriteListOf()
 
+    val networkNodes: List<NetworkNode>
+        get() = knownNetworkNodes.toList()
+
     /**
      * Android 5+ requires using a bound socketFactory from the network object to route traffic over
      * a WiFi network that has no Internet.

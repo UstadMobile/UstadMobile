@@ -71,6 +71,9 @@ android {
         }
     }
 
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
 }
 
 kapt {
@@ -80,7 +83,7 @@ kapt {
 }
 
 tasks.whenTaskAdded { task ->
-    if(task.name.startsWith("assemble") || task.name.startsWith("build")) {
+    if(task.name.startsWith("compile") || task.name.startsWith("build")) {
         task.dependsOn(":lib-database:jvmJar")
     }
 }
@@ -126,6 +129,11 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
+
+    //dependency injection
+    implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
+    implementation "org.kodein.di:kodein-di:$version_kodein_di"
+
 
     testImplementation "junit:junit:$version_junit"
     androidTestImplementation "androidx.room:room-testing:$version_android_room"

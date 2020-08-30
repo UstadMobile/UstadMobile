@@ -27,7 +27,7 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var confirmError: String?
 
-    var errorMessage: String?
+    var dateOfBirthError: String?
 
     var isAdmin: Boolean?
 
