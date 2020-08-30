@@ -31,6 +31,7 @@ class EntityRoleEditPresenter(context: Any,
             entityRole = EntityRoleWithNameAndRole()
         }
         entityRole.erGroupUid = personGroupUid
+        entityRole.erActive = true
 
         return entityRole
     }

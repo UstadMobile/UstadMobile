@@ -76,6 +76,7 @@ abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole>
                     Role.*, EntityRole.* FROM EntityRole
                     LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
                     WHERE EntityRole.erGroupUid = :personGroupUid
+                    AND CAST(EntityRole.erActive AS INTEGER) = 1 
                 """
     }
 }

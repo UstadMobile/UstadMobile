@@ -79,7 +79,8 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
 
     override fun handleClickRole(entityRole: EntityRoleWithNameAndRole) {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Role::class.java,  R.id.role_list_dest)
+        navigateToPickEntityFromList(Role::class.java, R.id.role_list_dest)
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

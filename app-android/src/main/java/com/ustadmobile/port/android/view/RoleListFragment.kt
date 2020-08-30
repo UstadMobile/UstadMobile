@@ -13,7 +13,6 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.RoleListView
-import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -96,8 +95,9 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
 
     override fun onClick(v: View?) {
 
-        if (v?.id == R.id.item_createnew_layout)
-            mPresenter?.handleClickCreateNewFab()
+        if (v?.id == R.id.item_createnew_layout) {
+            navigateToEditEntity(null, R.id.role_edit_dest, Role::class.java)
+        }
         else {
             super.onClick(v)
         }

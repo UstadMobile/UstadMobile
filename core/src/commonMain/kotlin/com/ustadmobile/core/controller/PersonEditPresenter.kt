@@ -197,7 +197,9 @@ class PersonEditPresenter(context: Any,
 
 
                 repo.entityRoleDao.insertListAsync(rolesAndPermissionEditHelper.entitiesToInsert.also { it.forEach {
+                    it.erUid = 0
                     it.erGroupUid = entity.personGroupUid
+                    it.erActive = true
                 }  })
                 repo.entityRoleDao.updateListAsync(rolesAndPermissionEditHelper.entitiesToUpdate.also { it.forEach{
                     it.erGroupUid = entity.personGroupUid

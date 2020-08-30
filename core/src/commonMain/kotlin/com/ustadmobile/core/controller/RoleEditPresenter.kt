@@ -26,11 +26,6 @@ class RoleEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-
-    }
-
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Role? {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         val role = withTimeoutOrNull(2000) {
