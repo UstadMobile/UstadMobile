@@ -2,18 +2,65 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemContentEntryListBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryListItemListener
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.view.ListViewMode
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 
-class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemListener?, private val pickerMode: String?)
+class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemListener?,
+                                      private val pickerMode: String?,
+                                      /**
+                                       * The lifecycle owner is needed for use of livedata observers
+                                       * Unfortunately findViewTreeLifecycleOwner is flaky when used
+                                       * with a recyclerview item
+                                       */
+                                      private var lifecycleOwner: LifecycleOwner?, di: DI)
     : SelectablePagedListAdapter<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer, ContentEntryListRecyclerAdapter.ContentEntryListViewHolder>(ContentEntryList2Fragment.DIFF_CALLBACK) {
 
-    class ContentEntryListViewHolder(val itemBinding: ItemContentEntryListBinding): RecyclerView.ViewHolder(itemBinding.root)
+    private val accountManager: UstadAccountManager by di.instance()
+
+    private val containerDownloadManager: ContainerDownloadManager by di.on(accountManager.activeAccount).instance()
+
+    private val boundViewHolders = mutableSetOf<ContentEntryListViewHolder>()
+
+    inner class ContentEntryListViewHolder(val itemBinding: ItemContentEntryListBinding): RecyclerView.ViewHolder(itemBinding.root),
+        DoorObserver<DownloadJobItem?>{
+        var downloadJobItemLiveData: DoorLiveData<DownloadJobItem?>? = null
+            set(value) {
+                field?.removeObserver(this)
+                field = value
+                lifecycleOwner?.also {
+                    value?.observe(it, this)
+                }
+            }
+
+
+        override fun onChanged(t: DownloadJobItem?) {
+            itemBinding.downloadStatusButton.downloadJobItem = t
+        }
+    }
+
+    fun onLocalAvailabilityUpdated(localAvailabilityMap: Map<Long, Boolean>) {
+        boundViewHolders.forEach {
+            it.itemBinding.locallyAvailable = localAvailabilityMap.getOrElse(
+                    it.itemBinding.contentEntry?.mostRecentContainer?.containerUid ?: -1) { false }
+        }
+    }
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentEntryListViewHolder {
@@ -26,12 +73,24 @@ class ContentEntryListRecyclerAdapter(var itemListener: ContentEntryListItemList
 
     override fun onBindViewHolder(holder: ContentEntryListViewHolder, position: Int) {
         val item = getItem(position)
+        boundViewHolders += holder
         holder.itemBinding.contentEntry = item
         holder.itemView.setSelectedIfInList(item, selectedItems, ContentEntryList2Fragment.DIFF_CALLBACK)
+        if(item != null) {
+            GlobalScope.launch(Dispatchers.Main.immediate) {
+                holder.downloadJobItemLiveData = containerDownloadManager
+                        .getDownloadJobItemByContentEntryUid(item.contentEntryUid )
+            }
+        }
+    }
+
+    override fun onViewRecycled(holder: ContentEntryListViewHolder) {
+        boundViewHolders -= holder
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         itemListener = null
+        lifecycleOwner = null
     }
 }

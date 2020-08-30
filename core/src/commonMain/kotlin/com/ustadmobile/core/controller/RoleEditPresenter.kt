@@ -26,11 +26,6 @@ class RoleEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-
-    }
-
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Role? {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         val role = withTimeoutOrNull(2000) {
@@ -116,7 +111,10 @@ class RoleEditPresenter(context: Any,
             BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_UPDATE, MessageID.permission_person_picture_update),
             BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW , MessageID.permission_clazz_assignment_view),
             BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit),
-            BitmaskFlag(Role.PERMISSION_PERSON_DELEGATE, MessageID.permission_person_delegate)
+            BitmaskFlag(Role.PERMISSION_PERSON_DELEGATE, MessageID.permission_person_delegate),
+            BitmaskFlag(Role.PERMISSION_ROLE_SELECT, MessageID.permission_role_select),
+            BitmaskFlag(Role.PERMISSION_ROLE_INSERT, MessageID.permission_role_insert)
+
         )
 
     }

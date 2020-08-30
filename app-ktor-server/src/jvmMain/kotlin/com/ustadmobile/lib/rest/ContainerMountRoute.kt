@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.parseRangeRequestHeader
@@ -22,6 +23,9 @@ import io.ktor.routing.get
 import io.ktor.routing.head
 import io.ktor.routing.route
 import io.ktor.utils.io.ByteWriteChannel
+import org.kodein.di.instance
+import org.kodein.di.ktor.di
+import org.kodein.di.on
 import java.io.File
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
@@ -30,11 +34,12 @@ import javax.naming.InitialContext
 import kotlin.Comparator
 
 
-fun Route.ContainerMountRoute(db: UmAppDatabase) {
+fun Route.ContainerMountRoute() {
 
     route("ContainerMount"){
 
         get("VideoParams/{containerUid}"){
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
             val container = db.containerDao.findByUidAsync(containerUid)
             if(container != null){
@@ -92,6 +97,7 @@ fun Route.ContainerMountRoute(db: UmAppDatabase) {
         }
 
         head("/{containerUid}/{paths...}"){
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
             val pathInContainer = call.parameters.getAll("paths")?.joinToString("/") ?: ""
 
@@ -131,6 +137,7 @@ fun Route.ContainerMountRoute(db: UmAppDatabase) {
 
 
         get("/{containerUid}/{paths...}") {
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
             val pathInContainer = call.parameters.getAll("paths")?.joinToString("/") ?: ""
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.EntityRoleDao
@@ -101,7 +102,9 @@ class PersonEditPresenterTest  {
     }
 
 
-    private fun createPerson(matchPassword: Boolean = true, leftOutPassword: Boolean = false): PersonWithAccount {
+    private fun createPerson(matchPassword: Boolean = true, leftOutPassword: Boolean = false,
+                             leftOutDateOfBirth: Boolean = false,
+                             selectedDateOfBirth: Long = DateTime(1990, 10, 24).unixMillisLong): PersonWithAccount {
         val password = "password"
         val confirmPassword = if(matchPassword) password else "password1"
         return PersonWithAccount().apply {
@@ -111,6 +114,9 @@ class PersonEditPresenterTest  {
             if(!leftOutPassword){
                 newPassword = password
                 confirmedPassword = confirmPassword
+            }
+            if(!leftOutDateOfBirth){
+                dateOfBirth = selectedDateOfBirth
             }
         }
     }
@@ -165,6 +171,39 @@ class PersonEditPresenterTest  {
         verify(mockView, timeout(timeoutInMill)).usernameError = eq(expectedMessage)
 
     }
+
+    @Test
+    fun givenPresenterCreatedInRegistrationMode_whenDateOfBirthNotFilledClickSave_shouldShowErrors() {
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString())
+
+        val person = createPerson(leftOutDateOfBirth = true)
+        val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        presenter.handleClickSave(person)
+        val expectedMessage = impl.getString(MessageID.field_required_prompt, context)
+
+        verify(mockView, timeout(timeoutInMill)).dateOfBirthError = eq(expectedMessage)
+
+    }
+
+    @Test
+    fun givenPresenterCreatedInRegistrationMode_whenDateOfBirthIsLessThan13YearsOfAgeAndClickSave_shouldShowErrors() {
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString())
+
+        val person = createPerson(selectedDateOfBirth = DateTime(2020,11,24).unixMillisLong)
+        val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        presenter.handleClickSave(person)
+        val expectedMessage = impl.getString(MessageID.underRegistrationAgeError, context)
+
+        verify(mockView, timeout(timeoutInMill)).dateOfBirthError = eq(expectedMessage)
+
+    }
+
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenPasswordAndConfirmPasswordDoesNotMatchClickSave_shouldShowErrors() {

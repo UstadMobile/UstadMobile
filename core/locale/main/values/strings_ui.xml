@@ -100,6 +100,8 @@
     <string name="article">Article</string>
     <string name="audio">Audio</string>
 
+    <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
+
 
 
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
@@ -759,4 +761,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="role_not_selected_error">Role must be selected</string>
 
     <string name="permission_person_delegate">Delegate roles and permissions to others</string>
+
+    <string name="this_field_is_mandatory">This field is mandatory</string>
+
+    <string name="permission_role_select">View and select all roles </string>
+    <string name="permission_role_insert">Insert a new role</string>
 </resources>

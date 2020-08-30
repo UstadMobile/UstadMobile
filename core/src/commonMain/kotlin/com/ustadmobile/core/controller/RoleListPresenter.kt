@@ -28,8 +28,10 @@ class RoleListPresenter(context: Any, arguments: Map<String, String>, view: Role
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //TODO: Get permission for this access.
-        return true
+
+        return db.entityRoleDao.userHasAnySinglePermission(
+                account?.personUid ?: 0, Role.PERMISSION_ROLE_INSERT)
+
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
@@ -37,9 +39,14 @@ class RoleListPresenter(context: Any, arguments: Map<String, String>, view: Role
         updateListOnView()
     }
 
-    private fun updateListOnView() {
+    override fun onSearchSubmitted(text: String?) {
+        updateListOnView(text)
+    }
+
+    private fun updateListOnView(searchText: String? = null) {
         view.list = repo.roleDao.findAllActiveRolesSorted(
-                selectedSortOption?.flag ?: 0)
+                selectedSortOption?.flag ?: 0,
+                if(searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
     }
 
 

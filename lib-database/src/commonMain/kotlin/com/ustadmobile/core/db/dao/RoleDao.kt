@@ -26,7 +26,9 @@ abstract class RoleDao : BaseDao<Role> {
     @Query("SELECT * FROM Role WHERE CAST(roleActive AS INTEGER) = 1 ")
     abstract fun findAllActiveRoles(): DataSource.Factory<Int, Role>
 
-    @Query("""SELECT * FROM Role WHERE CAST(roleActive AS INTEGER) = 1 
+    @Query("""SELECT * FROM Role 
+        WHERE CAST(roleActive AS INTEGER) = 1
+         AND Role.roleName LIKE :searchText
         ORDER BY CASE(:sortOrder)
                 WHEN ${SORT_NAME_ASC} THEN Role.roleName
                 ELSE ''
@@ -36,7 +38,7 @@ abstract class RoleDao : BaseDao<Role> {
                 ELSE ''
             END DESC
     """)
-    abstract fun findAllActiveRolesSorted(sortOrder: Int): DataSource.Factory<Int, Role>
+    abstract fun findAllActiveRolesSorted(sortOrder: Int, searchText: String): DataSource.Factory<Int, Role>
 
     @Query("SELECT * FROM Role WHERE CAST(roleActive AS INTEGER) = 1 ")
     abstract fun findAllActiveRolesLive(): DoorLiveData<List<Role>>
@@ -91,5 +93,6 @@ abstract class RoleDao : BaseDao<Role> {
         const val SORT_NAME_DESC = 2
 
         const val SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)"
+
     }
 }

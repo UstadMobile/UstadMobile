@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
@@ -25,6 +26,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     private var filterExcludeMembersOfSchool : Long = 0
 
+    private var filterByPermission: Long = 0
+
 
     enum class SortOrder(val messageId: Int, val sortOrderCode: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc, ClazzDao.SORT_CLAZZNAME_ASC),
@@ -41,6 +44,9 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
         filterExcludeMembersOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
         clazzList2ItemListener.listViewMode = mListMode
 
+        filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
+                ?: Role.PERMISSION_CLAZZ_SELECT
+
         loggedInPersonUid = accountManager.activeAccount.personUid
         view.sortOptions = SortOrder.values().toList().map { ClazzListSortOption(it, context) }
         updateList()
@@ -48,7 +54,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     private fun updateList() {
         view.list = repo.clazzDao.findClazzesWithPermission(searchQuery,
-                loggedInPersonUid, filterExcludeMembersOfSchool, currentSortOrder.sortOrderCode)
+                loggedInPersonUid, filterExcludeMembersOfSchool,
+                currentSortOrder.sortOrderCode, filterByPermission)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {

@@ -34,6 +34,16 @@ abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole>
     abstract suspend fun userHasTableLevelPermission(accountPersonUid: Long,
              tableId: Int, permission: Long) : Boolean
 
+    @Query("""SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0) 
+            OR EXISTS(SELECT EntityRole.erUid FROM EntityRole 
+             JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
+             JOIN PersonGroupMember ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+             WHERE 
+             PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+             AND (Role.rolePermissions & :permission) > 0) AS hasPermission""")
+    abstract suspend fun userHasAnySinglePermission(accountPersonUid: Long,
+                                                     permission: Long) : Boolean
+
     @Query("SELECT * FROM EntityRole WHERE erTableId = :tableId " +
             " AND erEntityUid = :entityUid AND erGroupUid = :groupUid " +
             " AND erRoleUid = :roleUid ")
@@ -76,6 +86,7 @@ abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole>
                     Role.*, EntityRole.* FROM EntityRole
                     LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
                     WHERE EntityRole.erGroupUid = :personGroupUid
+                    AND CAST(EntityRole.erActive AS INTEGER) = 1 
                 """
     }
 }

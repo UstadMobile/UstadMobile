@@ -7,6 +7,6 @@ package com.ustadmobile.door.annotation
  * Any HTTP request that does not meet the MinSyncVersion will receive an HTTP 400 (Bad Request)
  * response.
  */
-@Retention(AnnotationRetention.BINARY)
+@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
 annotation class MinSyncVersion(val value: Int)

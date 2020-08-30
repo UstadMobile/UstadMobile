@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
@@ -14,13 +15,17 @@ import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
 import kotlinx.serialization.json.Json
+import org.kodein.di.instance
+import org.kodein.di.ktor.di
+import org.kodein.di.on
 
 private const val DEFAULT_SESSION_LENGTH = (1000L * 60 * 60 * 24 * 365)//One year
 
-fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
+fun Route.PersonAuthRegisterRoute() {
 
     route("auth") {
         post("login") {
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val username = call.request.queryParameters["username"]
             val password = call.request.queryParameters["password"]
             val deviceId = call.request.header("X-nid")?.toInt()
@@ -47,6 +52,7 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
         }
 
         post("register"){
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val personString = call.request.queryParameters["person"]
             if(personString == null){
                 call.respond(HttpStatusCode.BadRequest, "No person information provided")
@@ -67,7 +73,6 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
             if(person == null) {
                 mPerson.apply {
                     personUid = db.insertPersonAndGroup(mPerson).personUid
-//                    personUid = db.personDao.insert(mPerson)
                 }
             } else {
                 db.personDao.update(mPerson)
@@ -75,14 +80,6 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
             val personAuth = PersonAuth(mPerson.personUid,
                     PersonAuthDao.PLAIN_PASS_PREFIX+mPerson.newPassword)
             val aUid = db.personAuthDao.insert(personAuth)
-
-//            //create PersonGroup
-//            val personGroup = PersonGroup().apply {
-//                groupPersonUid = mPerson.personUid
-//                groupUid = db.personGroupDao.insert(this)
-//            }
-//
-//            db.personGroupMemberDao.insert(PersonGroupMember(mPerson.personUid, personGroup.groupUid))
 
             if(aUid != -1L){
                 val username = mPerson.username
@@ -102,6 +99,7 @@ fun Route.PersonAuthRegisterRoute(db: UmAppDatabase) {
 
     route("password") {
         post("change") {
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val username = call.request.queryParameters["username"]
             val currentPassword = call.request.queryParameters["currentPassword"]
             val newPassword = call.request.queryParameters["newPassword"]

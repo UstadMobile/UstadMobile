@@ -31,6 +31,7 @@ class EntityRoleEditPresenter(context: Any,
             entityRole = EntityRoleWithNameAndRole()
         }
         entityRole.erGroupUid = personGroupUid
+        entityRole.erActive = true
 
         return entityRole
     }
@@ -45,7 +46,7 @@ class EntityRoleEditPresenter(context: Any,
     override fun handleClickSave(entity: EntityRoleWithNameAndRole) {
 
         if(entity.entityRoleRole == null){
-            view.errorText = systemImpl.getString(MessageID.role_not_selected_error,
+            view.errorText = systemImpl.getString(MessageID.this_field_is_mandatory,
                     context)
         }else {
             view.finishWithResult(listOf(entity))

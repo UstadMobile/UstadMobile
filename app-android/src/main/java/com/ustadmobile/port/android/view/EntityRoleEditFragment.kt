@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
@@ -13,6 +14,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.EntityRoleEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
@@ -65,13 +67,19 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
                     onSaveStateToBackStackStateHandle()
                     when (which) {
                         0 -> {
-                            navigateToPickEntityFromList(School::class.java, R.id.schoollist_dest)
+                            navigateToPickEntityFromList(School::class.java, R.id.schoollist_dest,
+                                args = bundleOf(UstadView.ARG_FILTER_BY_PERMISSION to
+                                        Role.PERMISSION_PERSON_DELEGATE.toString()))
                         }
                         1 -> {
-                            navigateToPickEntityFromList(Clazz::class.java, R.id.clazz_list_dest)
+                            navigateToPickEntityFromList(Clazz::class.java, R.id.clazz_list_dest,
+                                    args = bundleOf(UstadView.ARG_FILTER_BY_PERMISSION to
+                                            Role.PERMISSION_PERSON_DELEGATE.toString()))
                         }
                         2 -> {
-                            navigateToPickEntityFromList(Person::class.java, R.id.person_list_dest)
+                            navigateToPickEntityFromList(Person::class.java, R.id.person_list_dest,
+                                    args = bundleOf(UstadView.ARG_FILTER_BY_PERMISSION to
+                                            Role.PERMISSION_PERSON_DELEGATE.toString()))
                         }
                     }
                 }.show()
@@ -79,7 +87,8 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
 
     override fun handleClickRole(entityRole: EntityRoleWithNameAndRole) {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Role::class.java,  R.id.role_list_dest)
+        navigateToPickEntityFromList(Role::class.java, R.id.role_list_dest)
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

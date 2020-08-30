@@ -16,6 +16,8 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     var searchQuery = "%%"
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
+    private var filterByPermission: Long = 0
+
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
@@ -26,6 +28,8 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
+                ?: Role.PERMISSION_SCHOOL_SELECT
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { SchoolListSortOption(it, context) }
     }
@@ -38,9 +42,9 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     private fun updateListOnView() {
         view.list = when(currentSortOrder) {
             SortOrder.ORDER_NAME_ASC ->
-                repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameAsc(searchQuery)
+                repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameAsc(searchQuery, filterByPermission)
             SortOrder.ORDER_NAME_DSC ->
-                repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameDesc(searchQuery)
+                repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationNameDesc(searchQuery, filterByPermission)
         }
     }
 
