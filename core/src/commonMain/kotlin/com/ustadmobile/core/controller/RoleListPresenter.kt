@@ -37,9 +37,14 @@ class RoleListPresenter(context: Any, arguments: Map<String, String>, view: Role
         updateListOnView()
     }
 
-    private fun updateListOnView() {
+    override fun onSearchSubmitted(text: String?) {
+        updateListOnView(text)
+    }
+
+    private fun updateListOnView(searchText: String? = null) {
         view.list = repo.roleDao.findAllActiveRolesSorted(
-                selectedSortOption?.flag ?: 0)
+                selectedSortOption?.flag ?: 0,
+                if(searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
     }
 
 

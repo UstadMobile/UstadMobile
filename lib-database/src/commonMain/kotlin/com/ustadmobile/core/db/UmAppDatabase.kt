@@ -1292,32 +1292,63 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                             "FROM PersonGroup_OLD")
                     database.execSQL("DROP TABLE PersonGroup_OLD")
 
+                    //Triggers for PersonGroup
+                    database.execSQL("""
+                      |CREATE TRIGGER UPD_43
+                      |AFTER UPDATE ON PersonGroup FOR EACH ROW WHEN
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(NEW.groupMasterCsn = 0 
+                      |OR OLD.groupMasterCsn = NEW.groupMasterCsn
+                      |)
+                      |ELSE
+                      |(NEW.groupLocalCsn = 0  
+                      |OR OLD.groupLocalCsn = NEW.groupLocalCsn
+                      |) END)
+                      |BEGIN 
+                      |UPDATE PersonGroup SET groupLocalCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+                      |ELSE (SELECT MAX(MAX(groupLocalCsn), OLD.groupLocalCsn) + 1 FROM PersonGroup) END),
+                      |groupMasterCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(SELECT MAX(MAX(groupMasterCsn), OLD.groupMasterCsn) + 1 FROM PersonGroup)
+                      |ELSE NEW.groupMasterCsn END)
+                      |WHERE groupUid = NEW.groupUid
+                      |; END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER INS_43
+                      |AFTER INSERT ON PersonGroup FOR EACH ROW WHEN
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(NEW.groupMasterCsn = 0 
+                      |
+                      |)
+                      |ELSE
+                      |(NEW.groupLocalCsn = 0  
+                      |
+                      |) END)
+                      |BEGIN 
+                      |UPDATE PersonGroup SET groupLocalCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+                      |ELSE (SELECT MAX(groupLocalCsn) + 1 FROM PersonGroup) END),
+                      |groupMasterCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(SELECT MAX(groupMasterCsn) + 1 FROM PersonGroup)
+                      |ELSE NEW.groupMasterCsn END)
+                      |WHERE groupUid = NEW.groupUid
+                      |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_PersonGroup_trk_clientId_epk_rx_csn 
+                      |ON PersonGroup_trk (clientId, epk, rx, csn)
+                      """.trimMargin())
+
 
                 } else if (database.dbType() == DoorDbType.POSTGRES){
                     //Person
-                    database.execSQL("ALTER TABLE Person RENAME to Person_OLD")
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Person (  " +
-                            "username  TEXT , firstNames  TEXT , lastName  TEXT , " +
-                            "emailAddr  TEXT , phoneNum  TEXT , gender  INTEGER NOT NULL, " +
-                            "active  BOOL , admin  BOOL , personNotes  TEXT , fatherName  TEXT , " +
-                            "fatherNumber  TEXT , motherName  TEXT , motherNum  TEXT , " +
-                            "dateOfBirth  BIGINT , personAddress  TEXT , personOrgId  TEXT , " +
-                            "personGroupUid  BIGINT , personMasterChangeSeqNum  BIGINT , " +
-                            "personLocalChangeSeqNum  BIGINT , " +
-                            "personLastChangedBy  INTEGER NOT NULL, " +
-                            "personUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("INSERT INTO Person (personUid, username, firstNames, " +
-                            "lastName, emailAddr, phoneNum, gender, active, admin, personNotes, " +
-                            "fatherName, fatherNumber, motherName, motherNum, dateOfBirth, " +
-                            "personAddress, personOrgId, personGroupUid, " +
-                            "personMasterChangeSeqNum, personLocalChangeSeqNum, " +
-                            "personLastChangedBy) SELECT personUid, username, firstNames, " +
-                            "lastName, emailAddr, phoneNum, gender, active, admin, personNotes, " +
-                            "fatherName, fatherNumber, motherName, motherNum, dateOfBirth, " +
-                            "personAddress, personOrgId, personGroupUid, " +
-                            "personMasterChangeSeqNum, personLocalChangeSeqNum, " +
-                            "personLastChangedBy FROM Person_OLD")
-                    database.execSQL("DROP TABLE Person_OLD")
+                    database.execSQL("ALTER TABLE Person ADD COLUMN personGroupUid BIGINT DEFAULT 0 NOT NULL")
+
 
                     //PersonGroup
                     database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
@@ -1331,6 +1362,42 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                             "groupActive) SELECT groupUid, groupMasterCsn, groupLocalCsn, " +
                             "groupLastChangedBy, groupName, groupActive FROM PersonGroup_OLD")
                     database.execSQL("DROP TABLE PersonGroup_OLD")
+
+                    //Triggers
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonGroup_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonGroup_lcsn_seq")
+                    database.execSQL("""
+                      |CREATE OR REPLACE FUNCTION 
+                      | inccsn_43_fn() RETURNS trigger AS ${'$'}${'$'}
+                      | BEGIN  
+                      | UPDATE PersonGroup SET groupLocalCsn =
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+                      | ELSE NEXTVAL('PersonGroup_lcsn_seq') END),
+                      | groupMasterCsn = 
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                      | THEN NEXTVAL('PersonGroup_mcsn_seq') 
+                      | ELSE NEW.groupMasterCsn END)
+                      | WHERE groupUid = NEW.groupUid;
+                      | RETURN null;
+                      | END ${'$'}${'$'}
+                      | LANGUAGE plpgsql
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER inccsn_43_trig 
+                      |AFTER UPDATE OR INSERT ON PersonGroup 
+                      |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                      |EXECUTE PROCEDURE inccsn_43_fn()
+                      """.trimMargin())
+                    /* START MIGRATION:
+                    _stmt.executeUpdate("DROP FUNCTION IF EXISTS inc_csn_43_fn")
+                    _stmt.executeUpdate("DROP SEQUENCE IF EXISTS spk_seq_43")
+                    END MIGRATION*/
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_PersonGroup_trk_clientId_epk_rx_csn 
+          |ON PersonGroup_trk (clientId, epk, rx, csn)
+          """.trimMargin())
                 }
             }
         }
