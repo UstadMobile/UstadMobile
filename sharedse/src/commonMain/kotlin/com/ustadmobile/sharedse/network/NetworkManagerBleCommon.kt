@@ -181,7 +181,6 @@ abstract class NetworkManagerBleCommon(
                 networkNodeListeners.forEach { it.onNewNodeDiscovered(node) }
             }
         }else {
-            Napier.d("NetworkManagerBle: Node updated on ${node.bluetoothMacAddress}")
             knownNetworkNode.lastUpdateTimeStamp = getSystemTimeInMillis()
         }
     }
