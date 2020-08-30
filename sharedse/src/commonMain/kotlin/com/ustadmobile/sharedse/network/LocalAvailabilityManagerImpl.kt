@@ -42,6 +42,8 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
 
     private val localHttpPort: Int by di.instance(tag = TAG_LOCAL_HTTP_PORT)
 
+    private val mirrorIdMap = mutableMapOf<String, Int>()
+
     init {
         val networkNodes = networkManager.networkNodes
         networkManager.addNetworkNodeListener(this)
@@ -77,23 +79,30 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
                 existingNode.lastUpdateTimeStamp = getSystemTimeInMillis()
             }else {
                 UMLog.l(UMLog.INFO, 0, "AvailabilityManager: discovered new node: $bluetoothAddr")
-                val networkNode = NetworkNodeWithStatusResponsesAndHistory()
-                networkNode.bluetoothMacAddress = bluetoothAddr
+                val networkNode = NetworkNodeWithStatusResponsesAndHistory().apply {
+                    bluetoothMacAddress = bluetoothAddr
+                }
                 activeNodes.add(networkNode)
                 val statusRequestUids = activeMonitoringRequests.flatMap { it.containerUidsToMonitor }.toSet()
                 if(statusRequestUids.isNotEmpty()) {
                     sendRequest(networkNode, statusRequestUids.toList())
                 }
 
-                (repo as? DoorDatabaseRepository)?.addMirror(
+                val mirrorId = (repo as? DoorDatabaseRepository)?.addMirror(
                         "http://localhost:$localHttpPort/bleproxy/${networkNode.bluetoothMacAddress}/${UMURLEncoder.encodeUTF8(endpoint.url)}/",
-                        100)
+                        100) ?: 0
+                mirrorIdMap.takeIf { mirrorId != 0 }?.put(bluetoothAddr, mirrorId)
             }
         }
     }
 
     override suspend fun onNodeLost(node: NetworkNode) {
-
+        val lostBluetoothAddr = node.bluetoothMacAddress ?: return
+        GlobalScope.launch {
+            handleNodesLost(listOf(lostBluetoothAddr))
+            val mirrorId = mirrorIdMap.get(lostBluetoothAddr) ?: 0
+            (repo as? DoorDatabaseRepository)?.takeIf { mirrorId != 0 }?.removeMirror(mirrorId)
+        }
     }
 
     override suspend fun onNodeReputationChanged(node: NetworkNode, reputation: Int) {
@@ -102,8 +111,9 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
 
     override suspend fun handleNodesLost(bluetoothAddrs: List<String>) {
         val lostNodes = activeNodes.filter { it.bluetoothMacAddress in bluetoothAddrs }
-        activeNodes.removeAll(lostNodes)
-        val lostContainers = activeNodes.flatMap { it.statusResponses.filter { it.value.available }
+        activeNodes.removeAll { it.bluetoothMacAddress in bluetoothAddrs}
+
+        val lostContainers = lostNodes.flatMap { it.statusResponses.filter { it.value.available }
                 .map { it.value.erContainerUid } }.toSet().toList()
         fireAvailabilityChanged(lostContainers)
     }

@@ -138,6 +138,40 @@ class LocalAvailabilityManagerImplTest  {
         }
     }
 
+    @Test
+    fun givenFileAvailable_whenNodeList_thenShouldFireContainerUnavailable() {
+        runBlocking {
+            val managerImpl = LocalAvailabilityManagerImpl(di, activeEndpoint)
+            managerImpl.onNewNodeDiscovered(TEST_NODE1)
+
+            val availableLatch = CountDownLatch(1)
+            val unavailableLatch = CountDownLatch(1)
+            val availabilityRequest = AvailabilityMonitorRequest(listOf(TEST_ENTRY_UID1), {
+                if(it[TEST_ENTRY_UID1] == true && availableLatch.count > 0)
+                    availableLatch.countDown()
+                else if(it[TEST_ENTRY_UID1] == false && availableLatch.count == 0L) {
+                    unavailableLatch.countDown()
+                }
+            })
+
+            managerImpl.addMonitoringRequest(availabilityRequest)
+
+            availableLatch.await(5, TimeUnit.SECONDS)
+
+            Assert.assertEquals("Container was marked as available", 0,
+                    availableLatch.count)
+
+
+            managerImpl.handleNodesLost(listOf(TEST_NODE1_ADDR))
+
+            unavailableLatch.await(5, TimeUnit.SECONDS)
+
+            Assert.assertEquals("Container was marked as unavailable after node was lost", 0,
+                unavailableLatch.count)
+        }
+    }
+
+
     //Disabled by Mike 12/08/2020: This is failing repeatedly and is not yet in production. Will be resolved with the networkdi merge
     //@Test
     fun givenStatusAlreadyKnown_whenAvailabilityStatusRequested_noTasksAreCreated() {
