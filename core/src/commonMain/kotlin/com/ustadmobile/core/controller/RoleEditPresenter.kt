@@ -115,7 +115,8 @@ class RoleEditPresenter(context: Any,
             BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_INSERT, MessageID.permission_person_picture_insert),
             BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_UPDATE, MessageID.permission_person_picture_update),
             BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW , MessageID.permission_clazz_assignment_view),
-            BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit)
+            BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit),
+            BitmaskFlag(Role.PERMISSION_PERSON_DELEGATE, MessageID.permission_person_delegate)
         )
 
     }

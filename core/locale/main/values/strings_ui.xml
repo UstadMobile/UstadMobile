@@ -757,4 +757,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="copied_to_clipboard">Copied to clipboard</string>
 
     <string name="role_not_selected_error">Role must be selected</string>
+
+    <string name="permission_person_delegate">Delegate roles and permissions to others</string>
 </resources>

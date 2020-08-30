@@ -130,7 +130,8 @@ class PersonEditPresenter(context: Any,
         loggedInPerson = withTimeoutOrNull(2000){
             db.personDao.findByUidAsync(loggedInPersonUid)
         }
-        view.isAdmin = loggedInPerson?.admin?:false
+
+        view.canDelegatePermissions = loggedInPerson?.admin?:false
 
         return person
     }

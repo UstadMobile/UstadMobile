@@ -238,7 +238,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             mBinding?.errorText?.visibility = if(value != null) View.VISIBLE else View.GONE
             mBinding?.errorText?.text = value
         }
-    override var isAdmin: Boolean? = false
+    override var canDelegatePermissions: Boolean? = false
         set(value) {
             mBinding?.isAdmin = value?:false
             field = value
@@ -276,7 +276,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             rootView = it.root
             it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.rolesAndPermissionsRv.layoutManager = LinearLayoutManager(requireContext())
-            it.isAdmin = isAdmin?:false
+            it.isAdmin = canDelegatePermissions?:false
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,

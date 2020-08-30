@@ -29,7 +29,7 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var errorMessage: String?
 
-    var isAdmin: Boolean?
+    var canDelegatePermissions: Boolean?
 
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 

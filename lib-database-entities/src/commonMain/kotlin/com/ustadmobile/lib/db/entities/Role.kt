@@ -134,6 +134,10 @@ open class Role() {
 
         const val PERMISSION_SCHOOL_UPDATE: Long = 2147483648L
 
+        const val PERMISSION_PERSON_DELEGATE: Long = 4294967296L
+
+
+
         //Permission to actually open and enter the class (eg. available to accept members, not those with pending requests)
         const val PERMISSION_CLAZZ_OPEN: Long = 4294967296L
 
