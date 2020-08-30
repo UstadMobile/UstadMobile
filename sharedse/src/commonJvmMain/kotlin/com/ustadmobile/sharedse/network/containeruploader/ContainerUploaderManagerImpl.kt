@@ -43,7 +43,7 @@ class ContainerUploaderManagerImpl(val endpoint: Endpoint, override val di: DI) 
     }
 
     override suspend fun enqueue(uploadJobId: Long) {
-        appDb.containerUploadJobDao.setStatusToQueue(uploadJobId)
+        appDb.containerUploadJobDao.setStatusToQueueAsync(uploadJobId)
     }
 
 }

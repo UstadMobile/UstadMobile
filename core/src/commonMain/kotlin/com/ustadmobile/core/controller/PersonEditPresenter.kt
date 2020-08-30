@@ -1,8 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.Date
 import com.soywiz.klock.DateTime
-import com.soywiz.klock.Year
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -118,7 +116,7 @@ class PersonEditPresenter(context: Any,
         }
 
         val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.clazzMemberDao?.findAllClazzesByPersonWithClazzAsList(entityUid, getSystemTimeInMillis())
+            db.takeIf { entityUid != 0L }?.clazzMemberDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid, getSystemTimeInMillis())
         } ?: listOf()
         clazzMemberJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
 
@@ -251,7 +249,7 @@ class PersonEditPresenter(context: Any,
                     personPicture = PersonPicture().apply {
                         personPicturePersonUid = entity.personUid
                     }
-                    personPicture.personPictureUid = repo.personPictureDao.insert(personPicture)
+                    personPicture.personPictureUid = repo.personPictureDao.insertAsync(personPicture)
                     repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
                 } else if (personPicture != null && currentPath != null && viewPicturePath == null) {
                     //picture has been removed

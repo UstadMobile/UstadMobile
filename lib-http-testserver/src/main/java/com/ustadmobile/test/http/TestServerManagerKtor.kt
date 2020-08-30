@@ -1,6 +1,7 @@
 package com.ustadmobile.test.http
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.rest.umRestApplication
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -22,17 +23,12 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockWebServer
-import org.sqlite.SQLiteConfig
-import org.sqlite.SQLiteDataSource
 import java.io.IOException
 import java.net.ServerSocket
 import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import com.ustadmobile.util.test.ReverseProxyDispatcher
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import io.ktor.server.engine.ApplicationEngineEnvironment
-import io.ktor.server.engine.commandLineEnvironment
 import java.net.InetAddress
 
 val umRestServerInstances = mutableMapOf<Int, TestApplicationHolder>()
@@ -102,7 +98,7 @@ fun Application.testServerManager() {
             umDb.clearAllTables()
 
             val umRestServer = embeddedServer(Netty, port = appPort, host= proxyHost, module = {
-                umRestApplication(devMode = true, db = umDb)
+                umRestApplication(devMode = true, singletonDbName = dbName)
             })
             umRestServer.start()
             val token = UUID.randomUUID().toString()

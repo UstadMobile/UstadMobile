@@ -1406,7 +1406,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 serverType = serverType, addRespondCall = false))
 
         codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
-                processingEnv = processingEnv, syncHelperDaoVarName = syncHelperDaoVarName))
+                processingEnv = processingEnv, syncHelperDaoVarName = syncHelperDaoVarName,
+                isPrimaryDb = (serverType == DbProcessorKtorServer.SERVER_TYPE_KTOR)))
         codeBlock.add(generateRespondCall(resultType, "_result", serverType,
                 ktorBeforeRespondCodeBlock = CodeBlock.of("%M.response.header(%S, _reqId)\n",
                         DbProcessorKtorServer.CALL_MEMBER, "X-reqid"),
@@ -1541,7 +1542,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 httpResultType = resultType,
                 requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
                         MemberName("io.ktor.client.request", "header"),
-                        "X-nid"),
+                        "x-nid"),
                 params = daoFunSpec.parameters))
         codeBlock.add("val _requestId = _httpResponseHeaders?.get(%S)?.toInt() ?: -1\n",
                 "X-reqid")

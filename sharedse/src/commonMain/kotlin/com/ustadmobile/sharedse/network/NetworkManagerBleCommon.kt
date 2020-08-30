@@ -11,12 +11,10 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.lib.util.copyOnWriteListOf
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.sharedMutableMapOf
 import io.ktor.client.HttpClient
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import kotlin.collections.set
@@ -97,6 +95,17 @@ abstract class NetworkManagerBleCommon(
         }
     }
 
+    private val nodeTimeoutChecker = GlobalScope.async {
+        while(isActive) {
+            val timeNow = getSystemTimeInMillis()
+            val lostNodes = knownNetworkNodes
+                    .filter { timeNow - it.lastUpdateTimeStamp > BLE_NODE_TIMEOUT }
+            lostNodes.forEach { handleNodeLost(it) }
+
+            delay(1000)
+        }
+    }
+
 
     /**
      * Check if WiFi is enabled / disabled on the device
@@ -122,13 +131,6 @@ abstract class NetworkManagerBleCommon(
     abstract val isVersionKitKatOrBelow: Boolean
 
 
-
-//    val localAvailabilityManager: LocalAvailabilityManagerImpl = LocalAvailabilityManagerImpl(context,
-//            this::makeEntryStatusTask, singleThreadDispatcher,
-//            this::onNewBleNodeDiscovered, this::onBleNodeLost,
-//            this::onBleNodeReputationChanged,
-//            umAppDatabase.locallyAvailableContainerDao)
-
     //private val downloadQueueLocalAvailabilityObserver = DownloadQueueLocalAvailabilityObserver(localAvailabilityManager)
 
     private val bleMirrorIdMap = mutableMapOf<String, Int>()
@@ -143,28 +145,6 @@ abstract class NetworkManagerBleCommon(
 //        nextDownloadItemsLiveData = umAppDatabase.downloadJobItemDao.findNextDownloadJobItems()
 //        nextDownloadItemsLiveData.observeForever(downloadQueueLocalAvailabilityObserver)
     }
-
-    protected suspend fun onNewBleNodeDiscovered(bluetoothAddress: String) {
-//        val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
-//        val mirrorId = dbRepo.addMirror("http://127.0.0.1:${localHttpPort}/bleproxy/$bluetoothAddress/rest/",
-//                100)
-//        bleMirrorIdMap[bluetoothAddress] = mirrorId
-    }
-
-    protected suspend fun onBleNodeLost(bluetoothAddress: String) {
-//        val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
-//        val mirrorId = bleMirrorIdMap[bluetoothAddress] ?: 0
-//        dbRepo.removeMirror(mirrorId)
-//        Napier.v({"Removed mirror $mirrorId for $bluetoothAddress"})
-    }
-
-    protected suspend fun onBleNodeReputationChanged(bluetoothAddress: String, reputation: Int) {
-//        val dbRepo = (umAppDatabaseRepo as DoorDatabaseRepository)
-//        val mirrorId = bleMirrorIdMap[bluetoothAddress] ?: 0
-//        dbRepo.updateMirrorPriorities(mapOf(mirrorId to reputation))
-//        Napier.d({"Update mirror reputation for $mirrorId [$bluetoothAddress] to $reputation"})
-    }
-
 
     protected open fun onDownloadJobItemStarted(downloadJobItem: DownloadJobItem) {
 
@@ -191,12 +171,28 @@ abstract class NetworkManagerBleCommon(
      */
     @Synchronized
     fun handleNodeDiscovered(node: NetworkNode) {
-        if(! knownNetworkNodes.any { it.bluetoothMacAddress == node.bluetoothMacAddress}) {
+        val knownNetworkNode = knownNetworkNodes.firstOrNull { it.bluetoothMacAddress == node.bluetoothMacAddress }
+        if(knownNetworkNode == null) {
             Napier.i("NetworkManagerBle: Discovered new node on ${node.bluetoothMacAddress} ")
-            knownNetworkNodes += node
+            knownNetworkNodes += node.apply {
+                lastUpdateTimeStamp = getSystemTimeInMillis()
+            }
             GlobalScope.launch {
                 networkNodeListeners.forEach { it.onNewNodeDiscovered(node) }
             }
+        }else {
+            knownNetworkNode.lastUpdateTimeStamp = getSystemTimeInMillis()
+        }
+    }
+
+    /**
+     * This will be called by the nodeTimeoutChecker
+     */
+    fun handleNodeLost(node: NetworkNode) {
+        knownNetworkNodes.removeAll { it.bluetoothMacAddress == node.bluetoothMacAddress }
+        Napier.i("NetworkManagerBle: Node lost: ${node.bluetoothMacAddress}")
+        GlobalScope.launch {
+            networkNodeListeners.forEach { it.onNodeLost(node) }
         }
     }
 
@@ -307,6 +303,7 @@ abstract class NetworkManagerBleCommon(
      * Clean up the network manager for shutdown
      */
     open fun onDestroy() {
+        nodeTimeoutChecker.cancel()
 //        nextDownloadItemsLiveData.removeObserver(downloadQueueLocalAvailabilityObserver)
 //        val downloadQueueMonitorRequest = downloadQueueLocalAvailabilityObserver.currentRequest
 //        if(downloadQueueMonitorRequest != null)
@@ -393,6 +390,11 @@ abstract class NetworkManagerBleCommon(
          * Default timeout to wait for WiFi connection
          */
         const val DEFAULT_WIFI_CONNECTION_TIMEOUT = 60 * 1000
+
+        /**
+         * The timeout after which, if a BLE node has not been heard from, it will be considered lost
+         */
+        const val BLE_NODE_TIMEOUT = 10000
     }
 
 }

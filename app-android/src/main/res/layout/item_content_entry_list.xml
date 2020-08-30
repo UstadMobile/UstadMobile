@@ -132,20 +132,7 @@
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
             tools:text="Content Description" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/content_entry_locally_available"
-            android:layout_width="@dimen/dimen_16dp"
-            android:layout_height="@dimen/dimen_16dp"
-            android:layout_marginStart="@dimen/dimen_8dp"
-            android:layout_marginTop="@dimen/dimen_4dp"
-            android:layout_marginEnd="@dimen/dimen_4dp"
-            android:layout_marginBottom="@dimen/dimen_4dp"
-            android:tint="?colorOnIconTint"
-            android:visibility="@{locallyAvailable ? View.VISIBLE : View.GONE}"
-            app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
-            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
-            app:srcCompat="@drawable/ic_nearby_black_24px"
-            tools:visibility="gone" />
+
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/content_entry_desc_bottom_barrier"
@@ -162,16 +149,21 @@
             android:layout_marginTop="@dimen/dimen_4dp"
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
+            android:tint="?colorOnIconTint"
             android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
             app:imageLookupKey="@{contentEntry.contentTypeFlag}"
             app:imageLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP}"
-            app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
-            app:layout_constraintTop_toBottomOf="@+id/content_entry_desc_bottom_barrier" />
+            app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_desc_bottom_barrier"
+            tools:visibility="visible"
+            tools:src="@drawable/ic_book_black_24dp"
+            />
 
 
         <TextView
             android:id="@+id/content_entry_item_mimetype_text"
-            android:layout_width="0dp"
+            tools:text="Content Type"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_4dp"
@@ -181,11 +173,45 @@
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             android:tint="?colorOnIconTint"
             android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
-            app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
             app:layout_constraintStart_toEndOf="@id/content_entry_mimetype_icon"
             app:layout_constraintTop_toBottomOf="@id/content_entry_desc_bottom_barrier"
             app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
             app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/content_type_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="content_entry_item_mimetype_text,content_entry_item_thumbnail"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/content_entry_locally_available"
+            android:layout_width="@dimen/dimen_16dp"
+            android:layout_height="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:tint="?colorOnIconTint"
+            android:visibility="@{locallyAvailable ? View.VISIBLE : View.GONE}"
+            app:layout_constraintStart_toEndOf="@+id/content_type_barrier"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
+            app:srcCompat="@drawable/ic_nearby_black_24px"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/content_entry_locally_available_text"
+            android:text="@string/download_locally_availability"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_desc_bottom_barrier"
+            app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
+            android:visibility="@{locallyAvailable ? View.VISIBLE : View.GONE}"
+            />
 
 
         <com.ustadmobile.port.android.view.DownloadStatusButton

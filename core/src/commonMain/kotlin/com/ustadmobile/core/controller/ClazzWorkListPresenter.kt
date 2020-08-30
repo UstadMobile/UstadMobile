@@ -5,7 +5,10 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
@@ -25,7 +28,9 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        updateListOnView()
+        GlobalScope.launch(doorMainDispatcher()) {
+            updateListOnView()
+        }
         view.sortOptions = SortOrder.values().toList().map { ClazzWorkListSortOption(it, context) }
 
     }
@@ -36,12 +41,12 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
             clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE)
     }
 
-    private fun updateListOnView() {
+    private suspend fun updateListOnView() {
 
         val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong()?:0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
         val clazzMember: ClazzMember? =
-                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid, clazzUid)
+                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
 
         view.list = when (currentSortOrder) {
             SortOrder.ORDER_NAME_ASC -> repo.clazzWorkDao.findWithMetricsByClazzUidLiveAsc(
@@ -76,7 +81,9 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
         val sortOrder = (sortOption as? ClazzWorkListSortOption)?.sortOrder ?: return
         if(sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder
-            updateListOnView()
+            GlobalScope.launch(doorMainDispatcher()) {
+                updateListOnView()
+            }
         }
     }
 }

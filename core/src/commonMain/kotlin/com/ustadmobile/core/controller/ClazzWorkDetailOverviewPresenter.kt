@@ -14,7 +14,6 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
-import kotlin.math.log
 
 
 class ClazzWorkDetailOverviewPresenter(context: Any,
@@ -59,7 +58,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         view.clazzWorkContent = contentList
 
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
-            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+            db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                     clazzWorkWithSubmission.clazzWorkClazzUid)
         }
 
@@ -122,19 +121,12 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                     DoorMutableLiveData(questionsAndOptionsWithResponseList)
         }
 
-        val publicComments = withTimeoutOrNull(2000){
-            db.commentsDao.findPublicByEntityTypeAndUidLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
+        view.clazzWorkPublicComments = db.commentsDao.findPublicByEntityTypeAndUidLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
                     clazzWorkWithSubmission.clazzWorkUid)
-        }
-        view.clazzWorkPublicComments = publicComments
-
 
         if(view.isStudent) {
-            val privateComments = withTimeoutOrNull(2000) {
-                db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(ClazzWork.CLAZZ_WORK_TABLE_ID,
-                        clazzWorkWithSubmission.clazzWorkUid, loggedInPersonUid)
-            }
-            view.clazzWorkPrivateComments = privateComments
+            view.clazzWorkPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(ClazzWork.CLAZZ_WORK_TABLE_ID,
+                    clazzWorkWithSubmission.clazzWorkUid, loggedInPersonUid)
         }
 
         newCommentItemListener.fromPerson = loggedInPersonUid
@@ -178,7 +170,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
             val loggedInPersonUid = accountManager.activeAccount.personUid
             val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
-                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                         entity?.clazzWorkClazzUid?:0L)
             }
 

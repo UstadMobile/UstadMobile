@@ -454,5 +454,7 @@ abstract class UstadMobileSystemCommon {
 
         const val TAG_DLMGR_SINGLETHREAD_CONTEXT = 32
 
+        const val TAG_LOCAL_HTTP_PORT = 64
+
     }
 }

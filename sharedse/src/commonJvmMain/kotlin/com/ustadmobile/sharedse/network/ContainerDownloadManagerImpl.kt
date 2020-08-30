@@ -402,6 +402,9 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
             }
         }else {
             onQueueEmpty()
+            if(currentConnectivityStatus?.connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
+                networkManager.restoreWifi()
+            }
         }
     }
 

@@ -31,7 +31,7 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
         ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid = :clazzWorkUid 
         AND CAST(ClazzWorkQuestion.clazzWorkQuestionActive AS INTEGER) = 1	
     """)
-    abstract fun findAllActiveQuestionsWithOptionsInClazzWorkAsList(clazzWorkUid: Long)
+    abstract suspend fun findAllActiveQuestionsWithOptionsInClazzWorkAsList(clazzWorkUid: Long)
                     : List<ClazzWorkQuestionAndOptionRow>
 
     override suspend fun deactivateByUids(uidList: List<Long>) {
