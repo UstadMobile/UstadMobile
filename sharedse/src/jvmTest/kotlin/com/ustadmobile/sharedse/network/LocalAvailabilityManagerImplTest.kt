@@ -5,17 +5,15 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
-import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_REQUEST
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.ENTRY_STATUS_RESPONSE
 import com.ustadmobile.sharedse.util.UstadTestRule
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -70,6 +68,7 @@ class LocalAvailabilityManagerImplTest  {
         di = DI {
             import(ustadTestRule.diModule)
             bind<NetworkManagerBle>() with singleton { mockNetworkManager }
+            bind<Int>(tag = UstadMobileSystemCommon.TAG_LOCAL_HTTP_PORT) with singleton { 8000 }
         }
 
         val accountManager: UstadAccountManager = di.direct.instance()
