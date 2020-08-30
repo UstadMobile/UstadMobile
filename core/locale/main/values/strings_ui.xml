@@ -766,4 +766,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="permission_role_select">View and select all roles </string>
     <string name="permission_role_insert">Insert a new role</string>
+    <string name="permission_school_select">View and select schools</string>
+    <string name="permission_school_insert">Insert a new school</string>
+    <string name="permission_school_update">Update and edit existing schools</string>
+
 </resources>

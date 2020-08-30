@@ -31,31 +31,24 @@ abstract class SchoolDao : BaseDao<School> {
                                                        schoolUid: Long,
                                                       permission: Long) : Boolean
 
-//    @Query("""SELECT School.*,
-//         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
-//         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
-//         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_STUDENT}) as numStudents,
-//         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
-//         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
-//         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_TEACHER}) as numTeachers,
-//         '' as locationName,
-//          (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
-//         FROM School WHERE CAST(schoolActive AS INTEGER) = 1
-//             AND schoolName LIKE :searchBit
-//
-//        ORDER BY
-//             CASE :sortOrder
-//            WHEN $SortOrder.ORDER_NAME_ASC THEN schoolName
-//            ELSE 0
-//        END ASC,
-//        CASE :sortOrder
-//            WHEN $SortOrder.ORDER_NAME_ASC THEN schoolName
-//            ELSE 0
-//        END DESC
-//
-//             """)
-//    abstract fun findAllActiveSchoolWithMemberCountAndLocation(searchBit: String, sortOrder: Int,
-//                        permission: Long): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+    @Query("""SELECT School.*,
+         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
+         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
+         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_STUDENT}) as numStudents,
+         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
+         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
+         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_TEACHER}) as numTeachers,
+         '' as locationName,
+          (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
+         FROM School WHERE CAST(schoolActive AS INTEGER) = 1
+             AND schoolName LIKE :searchBit
+             
+             AND :personUid IN (${ENTITY_PERSONS_WITH_PERMISSION} )
+
+             """)
+    abstract fun findAllActiveSchoolWithMemberCountAndLocation(searchBit: String,
+                        permission: Long, personUid: Long)
+            : DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
 
 
     @Query("""SELECT School.*, 
@@ -69,8 +62,7 @@ abstract class SchoolDao : BaseDao<School> {
           (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
          FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
              AND schoolName LIKE :searchBit ORDER BY schoolName ASC""")
-    abstract fun findAllActiveSchoolWithMemberCountAndLocationNameAsc(searchBit: String,
-                        permission: Long): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+    abstract fun findAllActiveSchoolWithMemberCountAndLocationNameAsc(searchBit: String): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
 
 
     @Query("""SELECT School.*, 
@@ -84,8 +76,7 @@ abstract class SchoolDao : BaseDao<School> {
           (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount 
          FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
              AND schoolName LIKE :searchBit ORDER BY schoolName DESC""")
-    abstract fun findAllActiveSchoolWithMemberCountAndLocationNameDesc(searchBit: String,
-                       permission: Long): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+    abstract fun findAllActiveSchoolWithMemberCountAndLocationNameDesc(searchBit: String): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
 
 
     @Update

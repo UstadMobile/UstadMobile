@@ -113,7 +113,12 @@ class RoleEditPresenter(context: Any,
             BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit),
             BitmaskFlag(Role.PERMISSION_PERSON_DELEGATE, MessageID.permission_person_delegate),
             BitmaskFlag(Role.PERMISSION_ROLE_SELECT, MessageID.permission_role_select),
-            BitmaskFlag(Role.PERMISSION_ROLE_INSERT, MessageID.permission_role_insert)
+            BitmaskFlag(Role.PERMISSION_ROLE_INSERT, MessageID.permission_role_insert),
+            BitmaskFlag(Role.PERMISSION_SCHOOL_SELECT, MessageID.permission_school_select),
+            BitmaskFlag(Role.PERMISSION_SCHOOL_INSERT, MessageID.permission_school_insert),
+            BitmaskFlag(Role.PERMISSION_SCHOOL_UPDATE, MessageID.permission_school_update)
+
+
 
         )
 
