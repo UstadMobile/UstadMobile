@@ -5,10 +5,13 @@ import com.ustadmobile.core.view.ClazzWorkDetailView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
@@ -33,7 +36,7 @@ class ClazzWorkDetailPresenter(context: Any,
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val clazzMember: ClazzMember? =
-                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                         entity?.clazzWorkClazzUid?: 0L)
 
         val loggedInPerson: Person? = withTimeoutOrNull(2000){
@@ -49,14 +52,14 @@ class ClazzWorkDetailPresenter(context: Any,
     }
 
     override fun onCreate(savedState: Map<String, String>?) {
-
-
         val loggedInPersonUid = accountManager.activeAccount.personUid
-        val clazzMember: ClazzMember? =
-                db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
-                        entity?.clazzWorkClazzUid?: 0L)
-
-        view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        GlobalScope.launch(doorMainDispatcher()) {
+            val clazzMember: ClazzMember? =
+                    db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+                            entity?.clazzWorkClazzUid?: 0L)
+            1
+            view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+        }
 
         super.onCreate(savedState)
 
@@ -73,7 +76,7 @@ class ClazzWorkDetailPresenter(context: Any,
         }
 
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
-            db.clazzMemberDao.findByPersonUidAndClazzUid(loggedInPersonUid,
+            db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                     entity?.clazzWorkClazzUid?: 0L)
         }
         val isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)

@@ -189,8 +189,8 @@ class ClazzMemberListPresenterTest {
 
         runBlocking {
             db.waitUntil(5000, listOf("ClazzMember", "PersonGroupMember")) {
-                db.clazzMemberDao.findByPersonUidAndClazzUid(pendingMember!!.clazzMemberPersonUid,
-                    testClazz.clazzUid)?.clazzMemberRole == ClazzMember.ROLE_STUDENT
+                runBlocking { db.clazzMemberDao.findByPersonUidAndClazzUidAsync(pendingMember!!.clazzMemberPersonUid,
+                    testClazz.clazzUid)?.clazzMemberRole == ClazzMember.ROLE_STUDENT }
                 && runBlocking {
                     db.personGroupMemberDao.findAllGroupWherePersonIsIn(pendingMember!!.clazzMemberPersonUid).any {
                         it.groupMemberGroupUid == testClazz.clazzStudentsPersonGroupUid
@@ -199,8 +199,8 @@ class ClazzMemberListPresenterTest {
             }
         }
 
-        val clazzMember = db.clazzMemberDao.findByPersonUidAndClazzUid(pendingMember!!.clazzMemberPersonUid,
-                testClazz.clazzUid)
+        val clazzMember = runBlocking { db.clazzMemberDao.findByPersonUidAndClazzUidAsync(pendingMember!!.clazzMemberPersonUid,
+                testClazz.clazzUid) }
         Assert.assertEquals("Clazz member approved is now a student", ClazzMember.ROLE_STUDENT,
             clazzMember?.clazzMemberRole)
 

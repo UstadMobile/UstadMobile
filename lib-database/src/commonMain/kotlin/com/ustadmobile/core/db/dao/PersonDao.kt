@@ -170,7 +170,7 @@ abstract class PersonDao : BaseDao<Person> {
      */
     @Query("SELECT EXISTS(SELECT 1 FROM Person WHERE " +
             "Person.personUid = :personUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PARAM))")
-    abstract fun personHasPermission(accountPersonUid: Long, personUid: Long, permission: Long): Boolean
+    abstract suspend fun personHasPermissionAsync(accountPersonUid: Long, personUid: Long, permission: Long): Boolean
 
     @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
     abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean
@@ -195,7 +195,7 @@ abstract class PersonDao : BaseDao<Person> {
 
 
     @Update
-    abstract fun updateAsync(entity: Person):Int
+    abstract suspend fun updateAsync(entity: Person):Int
 
     @Insert
     abstract suspend fun insertPersonGroup(personGroup:PersonGroup):Long
@@ -242,12 +242,6 @@ abstract class PersonDao : BaseDao<Person> {
 
     @Insert
     abstract fun insertAuditLog(entity: AuditLog): Long
-
-    fun updatePersonAsync(entity: Person, loggedInPersonUid: Long): Int  {
-        val result = updateAsync(entity)
-        createAuditLog(entity.personUid, loggedInPersonUid)
-        return result
-    }
 
     @JsName("getAllPerson")
     @Query("SELECT * FROM Person")

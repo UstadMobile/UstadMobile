@@ -114,10 +114,11 @@ dependencies {
 
     //Room persistence
     implementation "androidx.room:room-runtime:$version_android_room"
+    implementation "androidx.room:room-ktx:$version_android_room"
     kapt "androidx.room:room-compiler:$version_android_room"
     //compileOnly  "androidx.room:room-compiler:$version_android_room"
 
-    implementation "androidx.room:room-ktx:$version_android_room"
+
 
 
     // Paging

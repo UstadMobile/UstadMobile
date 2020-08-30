@@ -168,7 +168,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                     mirrorToUse = if(isConnected && !triedMainEndpoint) {
                         null as MirrorEndpoint? //use the main endpoint
                     }else {
-                        repository.activeMirrors().maxBy { it.priority }
+                        repository.activeMirrors().filter { it.mirrorId !in mirrorsTried }
+                                .maxBy { it.priority }
                     }
 
                     if(!isConnected && mirrorToUse == null) {
@@ -197,6 +198,13 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
                     Napier.d({"$logPrefix doRequest: calling loadFn using endpoint $endpointToUse ."})
                     var t = loadFn(endpointToUse)
+
+                    if(mirrorToUse == null) {
+                        triedMainEndpoint = true
+                    }else {
+                        mirrorsTried.add(mirrorToUse.mirrorId)
+                    }
+
                     val isNullOrEmpty = if(t is List<*>) {
                         t.isEmpty()
                     }else {
@@ -218,7 +226,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                         }
                     }
 
-                    if(isMainEndpointOrNotNullOrEmpty || !autoRetryEmptyMirrorResult) {
+                    if(isMainEndpointOrNotNullOrEmpty || !autoRetryEmptyMirrorResult
+                            || repository.activeMirrors().filter { it.mirrorId !in mirrorsTried }.isEmpty()) {
                         status = if(isNullOrEmpty) {
                             STATUS_LOADED_NODATA
                         }else {
@@ -248,12 +257,6 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                         Napier.d({"No connection and no mirrors available - giving up"})
                         break
                     }
-                }
-
-                if(mirrorToUse == null) {
-                    triedMainEndpoint = true
-                }else {
-                    mirrorsTried.add(mirrorToUse.mirrorId)
                 }
             }
 

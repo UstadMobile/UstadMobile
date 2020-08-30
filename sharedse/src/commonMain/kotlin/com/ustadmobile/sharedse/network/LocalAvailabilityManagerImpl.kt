@@ -3,9 +3,13 @@ package com.ustadmobile.sharedse.network
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
+import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.LocallyAvailableContainer
 import com.ustadmobile.lib.db.entities.NetworkNode
@@ -32,7 +36,13 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = TAG_DB)
 
+    private val repo: UmAppDatabase by di.on(endpoint).instance(tag = TAG_REPO)
+
     private val networkManager: NetworkManagerBle by di.instance()
+
+    private val localHttpPort: Int by di.instance(tag = TAG_LOCAL_HTTP_PORT)
+
+    private val mirrorIdMap = mutableMapOf<String, Int>()
 
     init {
         val networkNodes = networkManager.networkNodes
@@ -69,19 +79,30 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
                 existingNode.lastUpdateTimeStamp = getSystemTimeInMillis()
             }else {
                 UMLog.l(UMLog.INFO, 0, "AvailabilityManager: discovered new node: $bluetoothAddr")
-                val networkNode = NetworkNodeWithStatusResponsesAndHistory()
-                networkNode.bluetoothMacAddress = bluetoothAddr
+                val networkNode = NetworkNodeWithStatusResponsesAndHistory().apply {
+                    bluetoothMacAddress = bluetoothAddr
+                }
                 activeNodes.add(networkNode)
                 val statusRequestUids = activeMonitoringRequests.flatMap { it.containerUidsToMonitor }.toSet()
                 if(statusRequestUids.isNotEmpty()) {
                     sendRequest(networkNode, statusRequestUids.toList())
                 }
+
+                val mirrorId = (repo as? DoorDatabaseRepository)?.addMirror(
+                        "http://localhost:$localHttpPort/bleproxy/${networkNode.bluetoothMacAddress}/${UMURLEncoder.encodeUTF8(endpoint.url)}/",
+                        100) ?: 0
+                mirrorIdMap.takeIf { mirrorId != 0 }?.put(bluetoothAddr, mirrorId)
             }
         }
     }
 
     override suspend fun onNodeLost(node: NetworkNode) {
-
+        val lostBluetoothAddr = node.bluetoothMacAddress ?: return
+        GlobalScope.launch {
+            handleNodesLost(listOf(lostBluetoothAddr))
+            val mirrorId = mirrorIdMap.get(lostBluetoothAddr) ?: 0
+            (repo as? DoorDatabaseRepository)?.takeIf { mirrorId != 0 }?.removeMirror(mirrorId)
+        }
     }
 
     override suspend fun onNodeReputationChanged(node: NetworkNode, reputation: Int) {
@@ -90,8 +111,9 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
 
     override suspend fun handleNodesLost(bluetoothAddrs: List<String>) {
         val lostNodes = activeNodes.filter { it.bluetoothMacAddress in bluetoothAddrs }
-        activeNodes.removeAll(lostNodes)
-        val lostContainers = activeNodes.flatMap { it.statusResponses.filter { it.value.available }
+        activeNodes.removeAll { it.bluetoothMacAddress in bluetoothAddrs}
+
+        val lostContainers = lostNodes.flatMap { it.statusResponses.filter { it.value.available }
                 .map { it.value.erContainerUid } }.toSet().toList()
         fireAvailabilityChanged(lostContainers)
     }

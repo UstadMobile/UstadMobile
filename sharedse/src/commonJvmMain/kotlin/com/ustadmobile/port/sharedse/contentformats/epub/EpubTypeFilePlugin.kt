@@ -38,6 +38,7 @@ class EpubTypeFilePlugin : EpubTypePlugin(), ContentTypeFilePlugin {
                         opfDocument.loadFromOPF(xpp)
                         val contentEntryVal = ContentEntryWithLanguage()
                         contentEntryVal.contentFlags = ContentEntry.FLAG_IMPORTED
+                        contentEntryVal.contentTypeFlag = ContentEntry.TYPE_EBOOK
                         contentEntryVal.licenseType = LICENSE_TYPE_OTHER
                         contentEntryVal.title = opfDocument.title
                         contentEntryVal.author = opfDocument.getCreator(0)?.creator
