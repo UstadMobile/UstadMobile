@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.*
 abstract class SchoolDao : BaseDao<School> {
 
     @Query("SELECT * FROM School WHERE schoolUid = :schoolUid AND CAST(schoolActive AS INTEGER) = 1")
-    abstract fun findByUidAsync(schoolUid: Long): School?
+    abstract suspend fun findByUidAsync(schoolUid: Long): School?
 
     @Query("""SELECT School.*, HolidayCalendar.* FROM School 
             LEFT JOIN HolidayCalendar ON School.schoolHolidayCalendarUid = HolidayCalendar.umCalendarUid
