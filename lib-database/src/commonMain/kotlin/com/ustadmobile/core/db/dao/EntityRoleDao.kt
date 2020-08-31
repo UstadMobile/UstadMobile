@@ -55,7 +55,7 @@ abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole>
             : DataSource.Factory<Int, EntityRoleWithNameAndRole>
 
     @Query(FILTER_BY_PERSON_UID2)
-    abstract fun filterByPersonWithExtraAsList(personGroupUid: Long)
+    abstract suspend fun filterByPersonWithExtraAsList(personGroupUid: Long)
             : List<EntityRoleWithNameAndRole>
 
     @Query("SELECT * FROM EntityRole WHERE erUid = :uid")

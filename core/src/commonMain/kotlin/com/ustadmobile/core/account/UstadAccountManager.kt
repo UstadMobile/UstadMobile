@@ -19,6 +19,8 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.HttpStatement
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -96,7 +98,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = _storedAccountsLive
 
 
-    suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount {
+    suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount = withContext(Dispatchers.Default){
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
             parameter("person", Json.stringify(PersonWithAccount.serializer(), person))
@@ -115,7 +117,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             if(makeAccountActive){
                 activeAccount = account
             }
-            return account
+            account
         }else if(status == 409){
             throw IllegalStateException("Conflict: username already taken")
         }else {
@@ -156,7 +158,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     }
 
 
-    suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
+    suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
         val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
                 ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
@@ -197,10 +199,11 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
         activeAccount = responseAccount
 
-        return responseAccount
+        //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
+        responseAccount!!
     }
 
-    suspend fun changePassword(username: String, currentPassword: String?, newPassword: String, endpointUrl: String): UmAccount?{
+    suspend fun changePassword(username: String, currentPassword: String?, newPassword: String, endpointUrl: String): UmAccount? = withContext(Dispatchers.Default){
         val httpStmt = httpClient.post<HttpStatement> {
             url("${endpointUrl.removeSuffix("/")}/password/change")
             parameter("username", username)
@@ -225,7 +228,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
                         || changePasswordResponse.statusCode == 204)) {
             throw IllegalStateException("Server error - response ${changePasswordResponse.statusCode}")
         }
-        return responseAccount
+
+        responseAccount
     }
 
 
