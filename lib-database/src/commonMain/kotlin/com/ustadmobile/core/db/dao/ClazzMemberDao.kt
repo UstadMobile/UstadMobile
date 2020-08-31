@@ -23,17 +23,17 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     @Insert
     abstract fun insertListAsync(entityList: List<ClazzMember>)
 
-    open fun updateDateLeft(clazzMemberUidList: List<Long>, endDate: Long) {
+    open suspend fun updateDateLeft(clazzMemberUidList: List<Long>, endDate: Long) {
         clazzMemberUidList.forEach {
             updateDateLeftByUid(it, endDate)
         }
     }
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " + "AND clazzMemberClazzUid = :clazzUid")
-    abstract fun findByPersonUidAndClazzUid(personUid: Long, clazzUid: Long): ClazzMember?
+    abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long): ClazzMember?
 
     @Query("UPDATE ClazzMember SET clazzMemberDateLeft = :endDate WHERE clazzMemberUid = :clazzMemberUid")
-    abstract fun updateDateLeftByUid(clazzMemberUid: Long, endDate: Long)
+    abstract suspend fun updateDateLeftByUid(clazzMemberUid: Long, endDate: Long)
 
     @Update
     abstract override fun update(entity: ClazzMember)
@@ -63,7 +63,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         WHERE ClazzMember.clazzMemberPersonUid = :personUid
         AND (:date = 0 OR :date BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft)
     """)
-    abstract fun findAllClazzesByPersonWithClazzAsList(personUid: Long, date: Long): List<ClazzMemberWithClazz>
+    abstract suspend fun findAllClazzesByPersonWithClazzAsListAsync(personUid: Long, date: Long): List<ClazzMemberWithClazz>
 
     @Query("""SELECT ClazzMember.*, Person.*
         FROM ClazzMember
@@ -72,7 +72,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         AND :date BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft
         AND (:roleFilter = 0 OR ClazzMember.clazzMemberRole = :roleFilter)
     """)
-    abstract fun getAllClazzMembersAtTime(clazzUid: Long, date: Long, roleFilter: Int) : List<ClazzMemberWithPerson>
+    abstract suspend fun getAllClazzMembersAtTimeAsync(clazzUid: Long, date: Long, roleFilter: Int) : List<ClazzMemberWithPerson>
 
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberUid = :uid")
     abstract fun findByUid(uid: Long): ClazzMember?

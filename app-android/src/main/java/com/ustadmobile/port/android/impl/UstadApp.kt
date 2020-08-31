@@ -51,6 +51,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 
 import org.kodein.di.*
 import java.io.File
@@ -151,6 +152,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
         bind<XapiStateEndpoint>() with scoped(EndpointScope.Default).singleton {
             XapiStateEndpointImpl(endpoint = context, di = di)
+        }
+
+        bind<Int>(tag = TAG_LOCAL_HTTP_PORT) with singleton {
+            instance<EmbeddedHTTPD>().listeningPort
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

@@ -16,7 +16,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
     @Query("SELECT * FROM ClazzWork WHERE clazzWorkUid = :clazzWorkUid " +
             " AND CAST(clazzWorkActive AS INTEGER) = 1")
-    abstract fun findByUidAsync(clazzWorkUid: Long): ClazzWork?
+    abstract suspend fun findByUidAsync(clazzWorkUid: Long): ClazzWork?
 
     @Update
     abstract suspend fun updateAsync(entity: ClazzWork) : Int

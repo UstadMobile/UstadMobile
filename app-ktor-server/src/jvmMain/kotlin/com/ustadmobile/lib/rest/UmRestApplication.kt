@@ -46,7 +46,8 @@ private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBM
     sanitizeDbNameFromUrl(url)
 }
 
-fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null) {
+fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null,
+                                  singletonDbName: String = "UmAppDatabase") {
 
     if (devMode) {
         install(CORS) {
@@ -96,7 +97,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<Gson>() with singleton { Gson() }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
-            val dbName = context.identifier(dbMode, "UmAppDatabase")
+            val dbName = context.identifier(dbMode, singletonDbName)
 
             if(autoCreateDb) {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName,

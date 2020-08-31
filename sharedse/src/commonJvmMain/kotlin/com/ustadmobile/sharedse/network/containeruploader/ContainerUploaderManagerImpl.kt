@@ -22,8 +22,7 @@ class ContainerUploaderManagerImpl(val endpoint: Endpoint, override val di: DI) 
 
     private val mainCoroutineDispatcher: CoroutineDispatcher by di.instance(tag = TAG_MAIN_COROUTINE_CONTEXT)
 
-    override suspend fun enqueue(uploadJobId: Long) {
-        appDb.containerUploadJobDao.setStatusToQueue(uploadJobId)
+    init {
         LiveDataWorkQueue(appDb.containerUploadJobDao.findJobs(),
                 { item1, item2 -> item1.cujUid == item2.cujUid },
                 mainDispatcher = mainCoroutineDispatcher) {
@@ -36,7 +35,15 @@ class ContainerUploaderManagerImpl(val endpoint: Endpoint, override val di: DI) 
 
             it.jobStatus = status
             appDb.containerUploadJobDao.updateStatus(status, it.cujUid)
-        }.start()
+        }.also { workQueue ->
+            GlobalScope.launch {
+                workQueue.start()
+            }
+        }
+    }
+
+    override suspend fun enqueue(uploadJobId: Long) {
+        appDb.containerUploadJobDao.setStatusToQueueAsync(uploadJobId)
     }
 
 }
