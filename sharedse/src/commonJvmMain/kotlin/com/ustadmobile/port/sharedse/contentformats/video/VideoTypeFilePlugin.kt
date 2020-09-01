@@ -7,10 +7,13 @@ import com.ustadmobile.port.sharedse.contentformats.ContentTypeFilePlugin
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil
 
 import java.io.File
+import java.net.URI
 
 class VideoTypeFilePlugin : VideoTypePlugin(), ContentTypeFilePlugin {
 
-    override fun getContentEntry(file: File): ContentEntryWithLanguage? {
+    override fun getContentEntry(uri: String): ContentEntryWithLanguage? {
+
+        val file = File(uri)
 
         fileExtensions.find { file.name.endsWith(it) } ?: return null
 

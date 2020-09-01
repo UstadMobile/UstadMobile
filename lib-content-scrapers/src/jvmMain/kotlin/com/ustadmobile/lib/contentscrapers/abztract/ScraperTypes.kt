@@ -2,6 +2,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.YoutubeChannelIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubePlaylistIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import com.ustadmobile.lib.contentscrapers.ddl.*
+import com.ustadmobile.lib.contentscrapers.googledrive.GoogleDriveFolderIndexer
 import com.ustadmobile.lib.contentscrapers.habaybna.HabFrontPageIndexer
 import com.ustadmobile.lib.contentscrapers.khanacademy.*
 
@@ -38,6 +39,8 @@ object ScraperTypes {
 
     const val YOUTUBE_PLAYLIST_INDEXER = "youtubePlaylistIndexer"
 
+    const val GOOGLE_DRIVE_FOLDER_INDEXER = "googleDriveFolderIndexer"
+
     val indexerTypeMap = mapOf(
             DDL_FRONT_PAGE_INDEXER to IndexerMap(DdlFrontPageIndexer::class.java, "https://www.ddl.af/"),
             DDL_SUBJECT_INDEXER to IndexerMap(DdlSubjectIndexer::class.java, null),
@@ -50,7 +53,8 @@ object ScraperTypes {
             KHAN_TOPIC_INDEXER to IndexerMap(KhanTopicIndexer::class.java, null),
             KHAN_CHANNEL_INDEXER to IndexerMap(KhanYoutubeChannelIndexer::class.java, null),
             YOUTUBE_CHANNEL_INDEXER to IndexerMap(YoutubeChannelIndexer::class.java, null),
-            YOUTUBE_PLAYLIST_INDEXER to IndexerMap(YoutubePlaylistIndexer::class.java, null) )
+            YOUTUBE_PLAYLIST_INDEXER to IndexerMap(YoutubePlaylistIndexer::class.java, null),
+            GOOGLE_DRIVE_FOLDER_INDEXER to IndexerMap(GoogleDriveFolderIndexer::class.java, null))
 
 
     const val DDL_ARTICLE_SCRAPER = "ddlArticleScraper"
@@ -64,6 +68,8 @@ object ScraperTypes {
     const val KHAN_FULL_ARTICLE_SCRAPER = "khanFullArticleScraper"
 
     const val YOUTUBE_VIDEO_SCRAPER = "youtubeVideoScraper"
+
+    const val GOOGLE_DRIVER_FILE_SCRAPER = "googleDriveFileScraper"
 
     val scraperTypeMap = mapOf(
             DDL_ARTICLE_SCRAPER to DdlContentScraper::class.java,

@@ -18,16 +18,17 @@ import java.util.zip.ZipInputStream
 
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_OTHER
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.ZIPPED
+import java.net.URI
 
 /**
  * Class which handles EPUB content import tasks, creates content entry from the H5P file
  */
 class EpubTypeFilePlugin : EpubTypePlugin(), ContentTypeFilePlugin {
 
-    override fun getContentEntry(file: File): ContentEntryWithLanguage? {
+    override fun getContentEntry(file: String): ContentEntryWithLanguage? {
         var contentEntry: ContentEntryWithLanguage? = null
         try {
-            ZipInputStream(FileInputStream(file)).use {
+            ZipInputStream(FileInputStream(File(file))).use {
                 var zipEntry: ZipEntry? = null
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
 

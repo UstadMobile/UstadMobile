@@ -11,6 +11,7 @@ import org.xmlpull.v1.XmlPullParserException
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.net.URI
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
@@ -33,9 +34,10 @@ val licenseMap = mapOf(
 
 class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
 
-    override fun getContentEntry(file: File): ContentEntryWithLanguage? {
+    override fun getContentEntry(uri: String): ContentEntryWithLanguage? {
         var contentEntry: ContentEntryWithLanguage? = null
         try {
+            val file = File(uri)
             ZipInputStream(FileInputStream(file)).use {
                 var zipEntry: ZipEntry? = null
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {

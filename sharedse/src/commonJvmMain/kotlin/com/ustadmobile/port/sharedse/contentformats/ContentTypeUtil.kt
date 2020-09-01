@@ -16,9 +16,11 @@ import com.ustadmobile.port.sharedse.contentformats.video.VideoTypeFilePlugin
 import com.ustadmobile.port.sharedse.contentformats.xapi.plugin.XapiPackageTypeFilePlugin
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.IOException
 import java.lang.IllegalArgumentException
+import java.net.URI
 import java.util.zip.ZipException
 
 /**
@@ -28,9 +30,12 @@ import java.util.zip.ZipException
  */
 
 
+
 internal val CONTENT_PLUGINS = listOf(EpubTypeFilePlugin(), XapiPackageTypeFilePlugin(), VideoTypeFilePlugin(), H5PTypeFilePlugin())
 
-suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, plugins: List<ContentTypeFilePlugin> = CONTENT_PLUGINS): ImportedContentEntryMetaData? {
+val mimeTypeSupported: List<String> = CONTENT_PLUGINS.flatMap { it.mimeTypes.asList() }
+
+suspend fun extractContentEntryMetadataFromFile(file: String, db: UmAppDatabase, plugins: List<ContentTypeFilePlugin> = CONTENT_PLUGINS): ImportedContentEntryMetaData? {
     plugins.forEach {
         val pluginResult = it.getContentEntry(file)
         val languageCode = pluginResult?.language?.iso_639_1_standard
@@ -51,7 +56,7 @@ val importerMap = mapOf(ZIPPED to DefaultContainerImporter(isZipped = true),
 
 
 suspend fun importContainerFromFile(contentEntryUid: Long, mimeType: String?, containerBaseDir: String,
-                                    file: File, db: UmAppDatabase, dbRepo: UmAppDatabase, importMode: Int, context: Any): Container {
+                                    file: String, db: UmAppDatabase, dbRepo: UmAppDatabase, importMode: Int, context: Any): Container {
     try {
         val importer = importerMap[importMode] ?: throw IllegalArgumentException("no file found")
         return importer.importContentEntryFromFile(contentEntryUid, mimeType, containerBaseDir, file, db, dbRepo, importMode, context)
@@ -64,7 +69,7 @@ suspend fun importContainerFromFile(contentEntryUid: Long, mimeType: String?, co
 }
 
 
-suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: UmAppDatabase,
+suspend fun importContentEntryFromFile(file: String, db: UmAppDatabase, dbRepo: UmAppDatabase,
                                        containerBaseDir: String, context: Any, plugins: List<ContentTypeFilePlugin> = CONTENT_PLUGINS): Pair<ContentEntry, Container>? {
     val (contentEntry, mimeType, file, importMode) = extractContentEntryMetadataFromFile(file, db, plugins)
             ?: return null
@@ -79,7 +84,8 @@ suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: Um
 /**
  *
  */
-data class ImportedContentEntryMetaData(var contentEntry: ContentEntryWithLanguage, var mimeType: String, var file: File, var importMode: Int)
+@Serializable
+data class ImportedContentEntryMetaData(var contentEntry: ContentEntryWithLanguage, var mimeType: String, var fileUri: String, var importMode: Int)
 
 object ContentTypeUtil {
 
@@ -88,4 +94,6 @@ object ContentTypeUtil {
     const val FILE = 2
 
     const val H5P = 3
+
+    const val GFOLDER = 4
 }

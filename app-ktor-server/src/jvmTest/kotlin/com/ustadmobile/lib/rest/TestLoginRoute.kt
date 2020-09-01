@@ -50,7 +50,7 @@ class TestLoginRoute {
             }
 
             install(Routing) {
-                LoginRoute(db)
+                WorkSpaceRoute()
             }
         }.start(wait = false)
 

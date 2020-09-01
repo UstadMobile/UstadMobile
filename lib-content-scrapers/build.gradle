@@ -42,7 +42,6 @@ kotlin {
                 implementation project(":lib-door-runtime")
                 implementation project(":sharedse")
                 implementation project(":lib-util")
-                implementation project(":app-ktor-server")
 
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 implementation "com.google.code.gson:gson:$version_gson"
@@ -66,6 +65,9 @@ kotlin {
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
                 implementation "commons-cli:commons-cli:$version_apache_commons_cli"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+
+                implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
+                implementation "org.kodein.di:kodein-di-conf-jvm:$version_kodein_di"
 
             }
         }

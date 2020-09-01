@@ -12,7 +12,6 @@ import com.toughra.ustadmobile.databinding.FragmentHarContentBinding
 import com.ustadmobile.core.controller.HarContentPresenter
 import com.ustadmobile.core.impl.HarWebViewClient
 import com.ustadmobile.core.impl.PayloadRecorder
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
@@ -74,7 +73,7 @@ class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHand
         get() = field
         set(value) {
             field = value
-            title = value?.title
+            ustadFragmentTitle = value?.title
         }
 
     override fun setChromeClient(client: HarWebViewClient) {

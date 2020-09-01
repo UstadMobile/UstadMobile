@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers
 
+import com.soywiz.klock.DateFormat
 import com.ustadmobile.lib.db.entities.ContentEntry
 import java.util.*
 
@@ -214,6 +215,7 @@ object ScraperConstants {
     const val MIMETYPE_WOFF2 = "font/woff2"
     const val MIMETYPE_OTF = "font/opentype"
 
+    val googleDriveFormat: DateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
 
     const val ZIP_EXT = ".zip"

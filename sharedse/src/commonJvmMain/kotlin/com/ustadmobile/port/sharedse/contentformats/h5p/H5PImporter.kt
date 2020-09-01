@@ -9,16 +9,17 @@ import com.ustadmobile.port.sharedse.contentformats.DefaultContainerImporter
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import java.io.File
+import java.net.URI
 
 
 class H5PImporter(prefixContainer: String) : DefaultContainerImporter(prefixContainer, true) {
 
     override suspend fun importContentEntryFromFile(contentEntryUid: Long, mimeType: String?,
-                                                    containerBaseDir: String, file: File,
+                                                    containerBaseDir: String, uri: String,
                                                     db: UmAppDatabase, dbRepo: UmAppDatabase,
                                                     importMode: Int, context: Any): Container {
 
-        val container = super.importContentEntryFromFile(contentEntryUid, mimeType, containerBaseDir, file, db, dbRepo, importMode, context)
+        val container = super.importContentEntryFromFile(contentEntryUid, mimeType, containerBaseDir, uri, db, dbRepo, importMode, context)
         val entry = db.contentEntryDao.findByUid(contentEntryUid)
         val containerManager = ContainerManager(container, db, dbRepo, containerBaseDir)
 

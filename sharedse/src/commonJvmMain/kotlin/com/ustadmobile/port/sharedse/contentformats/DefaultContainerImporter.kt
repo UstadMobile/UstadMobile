@@ -8,16 +8,18 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.ContainerImporter
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeFilePlugin
 import java.io.File
+import java.net.URI
 
 open class DefaultContainerImporter(var prefixContainer: String = "", var isZipped: Boolean) : ContainerImporter {
 
     override suspend fun importContentEntryFromFile(contentEntryUid: Long, mimeType: String?, containerBaseDir: String,
-                                                    file: File, db: UmAppDatabase, dbRepo: UmAppDatabase, importMode: Int, context: Any): Container {
+                                                    uri: String, db: UmAppDatabase, dbRepo: UmAppDatabase, importMode: Int, context: Any): Container {
 
         val container = Container().apply {
             containerContentEntryUid = contentEntryUid
         }
 
+        val file = File(uri)
         container.cntLastModified = System.currentTimeMillis()
         container.fileSize = file.length()
         container.mimeType = mimeType

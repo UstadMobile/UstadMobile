@@ -152,7 +152,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                     GlobalScope.launch {
                         val accountManager: UstadAccountManager by instance()
                         val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
-                        val metaData = extractContentEntryMetadataFromFile(tmpFile.absoluteFile, db)
+                        val metaData = extractContentEntryMetadataFromFile(tmpFile.toURI(), db)
                         entryMetaData = metaData
                         when (entryMetaData) {
                             null -> {
@@ -185,7 +185,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
 
     override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container? {
-        val file = entryMetaData?.file
+        val file = entryMetaData?.fileUri
         val importMode = entryMetaData?.importMode
         val container = if (file != null && importMode != null) {
             withContext(Dispatchers.IO) {
