@@ -52,7 +52,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzLog? {
         val clazzLog = withTimeoutOrNull(2000) {
-             db.takeIf { currentClazzLogUid != 0L }?.clazzLogDao?.findByUid(currentClazzLogUid)
+             db.takeIf { currentClazzLogUid != 0L }?.clazzLogDao?.findByUidAsync(currentClazzLogUid)
         } ?: ClazzLog()
 
         val clazzWithSchool = withTimeoutOrNull(2000) {
@@ -62,7 +62,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
         view.clazzLogTimezone = clazzWithSchool.effectiveTimeZone()
 
         //Find all those who are members of the class at the corresponding class schedule.
-        val clazzMembersAtTime = db.clazzMemberDao.getAllClazzMembersAtTime(clazzLog.clazzLogClazzUid,
+        val clazzMembersAtTime = db.clazzMemberDao.getAllClazzMembersAtTimeAsync(clazzLog.clazzLogClazzUid,
             clazzLog.logDate, ClazzMember.ROLE_STUDENT)
         val clazzAttendanceLogsInDb = db.clazzLogAttendanceRecordDao.findByClazzLogUid(currentClazzLogUid)
 

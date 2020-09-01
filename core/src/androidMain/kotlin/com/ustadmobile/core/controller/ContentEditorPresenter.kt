@@ -167,7 +167,7 @@ actual class ContentEditorPresenter actual constructor(context: Any, arguments: 
         try {
             if (updateOpfMetadataInfo(currentTitle, description, author,
                             if (isNewDocument) UUID.randomUUID().toString() else null)) {
-                val entry = database.contentEntryDao.findEntryWithLanguageByEntryId(contentEntryUid)!!
+                val entry = database.contentEntryDao.findEntryWithLanguageByEntryIdAsync(contentEntryUid)!!
                 entry.title = currentTitle
                 entry.description = currentDescription
                 entry.author = currentAuthor

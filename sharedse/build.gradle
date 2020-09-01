@@ -257,6 +257,8 @@ kotlin {
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
                 implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
 
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+
                 api project(":sharedse")
                 api project(":lib-room-annotations")
                 api project(":lib-database-annotations")

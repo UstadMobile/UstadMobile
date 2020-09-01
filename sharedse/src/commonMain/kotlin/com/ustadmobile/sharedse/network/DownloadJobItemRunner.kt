@@ -3,7 +3,6 @@ package com.ustadmobile.sharedse.network
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
@@ -12,15 +11,12 @@ import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
 import com.ustadmobile.sharedse.io.ConcatenatedInputStream
-import com.ustadmobile.sharedse.io.ConcatenatedInputStreamEntrySource
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.ext.base64StringToByteArray
-import com.ustadmobile.core.util.ext.encodeBase64
-import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
 import com.ustadmobile.lib.db.entities.*
@@ -41,7 +37,6 @@ import com.ustadmobile.sharedse.network.containerfetcher.AbstractContainerFetche
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherRequest
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.coroutineContext
@@ -362,8 +357,10 @@ class DownloadJobItemRunner
                         " Attempts remaining= " + attemptsRemaining)
                 downloadStartTime = getSystemTimeInMillis()
 
+                val containerEntryListUrl = UMFileUtil.joinPaths(downloadEndpoint,
+                        "$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
                 val containerEntryListVal = currentHttpClient.get<List<ContainerEntryWithMd5>>(
-                        "$downloadEndpoint$CONTAINER_ENTRY_LIST_PATH?containerUid=${downloadItem.djiContainerUid}")
+                        containerEntryListUrl)
                 containerEntriesList.clear()
                 containerEntriesList.addAll(containerEntryListVal)
 
@@ -518,42 +515,12 @@ class DownloadJobItemRunner
             val acquiredEndPoint = ("http://" + lWifiDirectGroup.ipAddress + ":"
                     + lWifiDirectGroup.port + "/")
             currentNetworkNode?.apply {
-                endpointUrl = acquiredEndPoint
+                endpointUrl = UMFileUtil.joinPaths(acquiredEndPoint,
+                        UMURLEncoder.encodeUTF8(endpoint.url)) + "/"
                 groupSsid = lWifiDirectGroup.ssid
             }
         }
         connectionRequestActive.value = false
-
-//        networkManager.sendMessage(Any(), requestGroupCreation, currentNetworkNode!!, object : BleMessageResponseListener {
-//            override fun onResponseReceived(sourceDeviceAddress: String, response: BleMessage?, error: Exception?) {
-//                UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-//                        " BLE response received: from " + sourceDeviceAddress + ":" + response +
-//                        " error: " + error)
-//
-//                if (connectionRequestActive.value && response != null
-//                        && response.requestType == WIFI_GROUP_CREATION_RESPONSE) {
-//                    connectionRequestActive.value = false
-//                    val lWifiDirectGroup = WiFiDirectGroupBle(response.payload!!)
-//                    wiFiDirectGroupBle.value = lWifiDirectGroup
-//
-//                    val acquiredEndPoint = ("http://" + lWifiDirectGroup.ipAddress + ":"
-//                            + lWifiDirectGroup.port + "/")
-//                    currentNetworkNode!!.endpointUrl = acquiredEndPoint
-//                    currentNetworkNode!!.groupSsid = lWifiDirectGroup.ssid
-//                    UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
-//                            "Connecting to P2P group network with SSID " + lWifiDirectGroup.ssid)
-//                    channel.offer(true)
-//                }
-//
-//
-//            }
-//
-//        })
-//
-//        withTimeoutOrNull(20 * 1000) { channel.receive() }
-//
-//        connectionRequestActive.value = false
-
 
         //There was an exception trying to communicate with the peer to get the wifi direct group network
         if (wiFiDirectGroupBle.value == null) {

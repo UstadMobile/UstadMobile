@@ -59,6 +59,9 @@ abstract class DownloadJobItemDao {
     @Insert
     abstract fun insert(jobRunItem: DownloadJobItem): Long
 
+    @Insert
+    abstract suspend fun insertAsync(jobRunItem: DownloadJobItem): Long
+
     @Query("UPDATE DownloadJobItem SET djiStatus = :status WHERE djiUid = :djiUid")
     abstract fun updateItemStatusInt(djiUid: Int, status: Int)
 

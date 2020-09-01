@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -89,7 +88,7 @@ class ContentEntryEdit2Presenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0
         val isLeaf = arguments[ARG_LEAF]?.toBoolean()
         return withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryId(entityUid)
+            db.takeIf { entityUid != 0L }?.contentEntryDao?.findEntryWithLanguageByEntryIdAsync(entityUid)
         } ?: ContentEntryWithLanguage().apply {
             leaf = isLeaf ?: (contentFlags != ContentEntry.FLAG_IMPORTED)
         }
@@ -150,11 +149,11 @@ class ContentEntryEdit2Presenter(context: Any,
                         downloadJob.timeRequested = getSystemTimeInMillis()
                         downloadJob.bytesDownloadedSoFar = container.fileSize
                         downloadJob.totalBytesToDownload = container.fileSize
-                        downloadJob.djUid = repo.downloadJobDao.insert(downloadJob).toInt()
+                        downloadJob.djUid = repo.downloadJobDao.insertAsync(downloadJob).toInt()
 
                         val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
                                 container.containerUid, container.fileSize)
-                        downloadJobItem.djiUid = repo.downloadJobItemDao.insert(downloadJobItem).toInt()
+                        downloadJobItem.djiUid = repo.downloadJobItemDao.insertAsync(downloadJobItem).toInt()
                         downloadJobItem.djiStatus = JobStatus.COMPLETE
                         downloadJobItem.downloadedSoFar = container.fileSize
 
@@ -163,7 +162,7 @@ class ContentEntryEdit2Presenter(context: Any,
                         val uploadJob = ContainerUploadJob().apply {
                             this.jobStatus = JobStatus.NOT_QUEUED
                             this.cujContainerUid = container.containerUid
-                            this.cujUid = db.containerUploadJobDao.insert(this)
+                            this.cujUid = db.containerUploadJobDao.insertAsync(this)
                         }
 
                         containerUploadManager?.enqueue(uploadJob.cujUid)

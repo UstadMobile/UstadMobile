@@ -16,7 +16,7 @@ class ContainerFetcherJvm(override val di: DI): ContainerFetcher(), DIAware{
 
     override suspend fun enqueue(request: ContainerFetcherRequest, listener: ContainerFetcherListener?): Deferred<Int> {
         return GlobalScope.async(coroutineCtx) {
-            ContainerFetcherJobHttpUrlConnection(request, listener, di).download()
+            ContainerDownloaderJobHttpUrlConnection(request, listener, di).download()
         }
     }
 }

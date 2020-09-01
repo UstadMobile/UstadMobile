@@ -60,7 +60,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "WHERE ContentEntry.contentEntryUid=:entryUuid"
     )
     @JsName("findEntryWithLanguageByEntryId")
-    abstract suspend fun findEntryWithLanguageByEntryId(entryUuid: Long): ContentEntryWithLanguage?
+    abstract suspend fun findEntryWithLanguageByEntryIdAsync(entryUuid: Long): ContentEntryWithLanguage?
 
     @Query("SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container "+
             "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE ContentEntry.contentEntryUid=:entryUuid")
@@ -72,7 +72,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun findBySourceUrl(sourceUrl: String): ContentEntry?
 
     @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :contentEntryUid")
-    abstract fun findTitleByUidAsync(contentEntryUid: Long): String?
+    abstract suspend fun findTitleByUidAsync(contentEntryUid: Long): String?
 
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +

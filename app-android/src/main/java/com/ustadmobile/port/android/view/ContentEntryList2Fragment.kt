@@ -5,13 +5,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
@@ -20,6 +23,11 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>(),
         ContentEntryList2View, View.OnClickListener, FragmentBackHandler{
@@ -31,6 +39,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
 
     override fun onHostBackPressed() = mPresenter?.handleOnBackPressed() ?: false
+
+    private var localAvailabilityCallback: ContentEntryLocalAvailabilityPagedListCallback? = null
 
     override fun showDownloadDialog(args: Map<String, String>) {
         runAfterRequestingPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
@@ -54,14 +64,42 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
-                arguments?.get(UstadView.ARG_LISTMODE).toString())
+                arguments?.get(UstadView.ARG_LISTMODE).toString(), viewLifecycleOwner, di)
         val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.content_editor_create_new_title))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val accountManager: UstadAccountManager by di.instance()
+        val localAvailabilityManager: LocalAvailabilityManager by di.on(accountManager.activeAccount).instance()
 
+        localAvailabilityCallback = ContentEntryLocalAvailabilityPagedListCallback(localAvailabilityManager,
+                null) {availabilityMap ->
+            GlobalScope.launch(Dispatchers.Main) {
+                (mDataRecyclerViewAdapter as? ContentEntryListRecyclerAdapter)?.onLocalAvailabilityUpdated(availabilityMap)
+            }
+        }
+
+        super.onViewCreated(view, savedInstanceState)
+    }
+
+    private var mCurrentPagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
+
+    override fun onChanged(t: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?) {
+        super.onChanged(t)
+
+        val localAvailabilityCallbackVal = localAvailabilityCallback
+        if(localAvailabilityCallbackVal != null){
+            mCurrentPagedList?.removeWeakCallback(localAvailabilityCallbackVal)
+        }
+
+        if(localAvailabilityCallbackVal != null && t != null) {
+            localAvailabilityCallbackVal.pagedList = t
+            t.addWeakCallback(listOf(), localAvailabilityCallbackVal)
+        }
+    }
 
     override fun onResume() {
         super.onResume()
@@ -90,6 +128,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        localAvailabilityCallback?.onDestroy()
+        localAvailabilityCallback = null
     }
 
     override val displayTypeRepo: Any?

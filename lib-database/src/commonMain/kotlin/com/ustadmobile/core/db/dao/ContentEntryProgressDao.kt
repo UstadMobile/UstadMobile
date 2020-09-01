@@ -21,9 +21,13 @@ abstract class ContentEntryProgressDao : BaseDao<ContentEntryProgress> {
     @Query(FIND_PROGRESS_BY_CONTENT_AND_PERSON_QUERY)
     abstract fun getProgressByContentAndPerson(contentEntryUid: Long, personUid: Long): ContentEntryProgress?
 
+    @Query(FIND_PROGRESS_BY_CONTENT_AND_PERSON_QUERY)
+    abstract suspend fun getProgressByContentAndPersonAsync(contentEntryUid: Long, personUid: Long): ContentEntryProgress?
 
     @Query("""UPDATE ContentEntryProgress SET contentEntryProgressProgress = :progress, 
-                    contentEntryProgressStatusFlag = :status WHERE 
+                    contentEntryProgressStatusFlag = :status,
+                    contentEntryProgressLastChangedBy = COALESCE((SELECT nodeClientId FROM SyncNode LIMIT 1), 0)
+                    WHERE 
                     contentEntryProgressPersonUid = :personUid AND 
                     contentEntryProgressContentEntryUid = :contentEntryUid
                     """)

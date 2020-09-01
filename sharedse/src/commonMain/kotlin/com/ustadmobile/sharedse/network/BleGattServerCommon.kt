@@ -47,11 +47,13 @@ abstract class BleGattServerCommon(override val di: DI): DIAware {
                         "BLEGattServerCommon: entry status request message")
                 val payload = requestReceived.payload ?: throw IllegalArgumentException("Payload has no bytes")
                 val statusRequest = EntryStatusRequest.fromBytes(payload)
-                val endpointDb: UmAppDatabase = di.on(Endpoint(statusRequest.endpointUrl)).direct.instance(tag = TAG_DB)
+                val endpoint = Endpoint(statusRequest.endpointUrl)
+                val endpointDb: UmAppDatabase by on(endpoint).instance(tag = TAG_DB)
                 val containerDao = endpointDb.containerDao
                 val responseArr = statusRequest.entryList.map { containerDao.findLocalAvailabilityByUid(it) }
+                val responsePayload = bleMessageLongToBytes(responseArr)
 
-                return BleMessage(ENTRY_STATUS_RESPONSE, 42.toByte(), bleMessageLongToBytes(responseArr))
+                return BleMessage(ENTRY_STATUS_RESPONSE, 42.toByte(), responsePayload)
             }
 
             WIFI_GROUP_REQUEST -> {
