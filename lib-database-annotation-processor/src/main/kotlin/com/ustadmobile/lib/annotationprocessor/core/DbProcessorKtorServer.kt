@@ -15,9 +15,9 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
-import com.ustadmobile.door.DoorDatabase
 import com.google.gson.reflect.TypeToken
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_KTOR_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SERVER_TYPE_KTOR
@@ -26,9 +26,6 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import java.util.*
 import javax.lang.model.element.ElementKind
-import com.ustadmobile.door.DoorConstants
-import com.ustadmobile.door.DoorDaoProvider
-import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
@@ -170,10 +167,6 @@ fun TypeSpec.Builder.addNanoHttpdUriResponderFuns(nanoHttpdGetFns: List<String>,
                                 "${daoTypeClassName.simpleName}$SUFFIX_KTOR_HELPER")))
                 }
 
-//        initParamsList.forEachIndexed { index, parameterSpec ->
-//            fnCodeBlock.add("val ${parameterSpec.name} = _uriResource.initParameter($index, %T::class.java)\n",
-//                    parameterSpec.type)
-//        }
 
 
         fnCodeBlock.add("val _clientDbVersion = _session.headers.get(%T.HEADER_DBVERSION)?.toInt() ?: 0\n",
@@ -329,6 +322,31 @@ internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName,
             .apply { takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE) }
             .build()
 
+internal fun generateReceiveEntitiesAckCodeBlock(trackerClassName: ClassName,
+                                                 syncHelperVarName: String = "_syncHelper",
+                                                 syncHelperFnName: String = "_syncHelperFn",
+                                                 dbVarName: String = "_db",
+                                                 serverType: Int = SERVER_TYPE_KTOR) =
+    CodeBlock.builder()
+            .addGetClientIdHeader("_clientId", serverType)
+            .add(generateGetParamFromRequestCodeBlock(INT, "reqId", "_requestId",
+                    serverType = serverType))
+            .add("val _ackList: %T<%T> = ", List::class.asClassName(), EntityAck::class.asClassName())
+            .add(generateGetParamFromRequestCodeBlock(
+                    List::class.asClassName().parameterizedBy(EntityAck::class.asClassName()),
+                    "ackList", serverType = serverType))
+            .add("\n")
+            .apply { takeIf { serverType == SERVER_TYPE_KTOR }?.add("val $syncHelperVarName = $syncHelperFnName($dbVarName)\n") }
+            .beginControlFlow("$syncHelperVarName._replace${trackerClassName.simpleName}(_ackList.map  ")
+            .add("%T(clientId = _clientId, csn = it.csn, epk = it.epk, rx = true)\n", trackerClassName)
+            .endControlFlow()
+            .add(")\n")
+            .apply { takeIf { serverType == SERVER_TYPE_KTOR }?.add(CODEBLOCK_KTOR_NO_CONTENT_RESPOND) }
+            .apply { takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE) }
+            .build()
+
+
+
 internal fun generateUpdateTrackerReceivedKtorRoute(trackerClassName: ClassName,
                                                     syncHelperFnName: String = "_syncHelperFn",
                                                     dbVarName: String = "_db",
@@ -339,6 +357,24 @@ internal fun generateUpdateTrackerReceivedKtorRoute(trackerClassName: ClassName,
                     serverType = SERVER_TYPE_KTOR, syncHelperFnName = syncHelperFnName))
             .endControlFlow()
             .build()
+
+internal fun generateEntitiesAckKtorRoute(trackerClassName: ClassName,
+                                          entityClassName: ClassName,
+                                          syncHelperVarName: String = "_syncHelper",
+                                          syncHelperFnName: String = "_syncHelperFn",
+                                          dbVarName: String = "_db",
+                                          serverType: Int = SERVER_TYPE_KTOR) =
+        CodeBlock.builder().beginControlFlow("%M(%S)",
+                DbProcessorKtorServer.POST_MEMBER, "_ack${entityClassName.simpleName}Received")
+                .addRequestDi()
+                .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
+                .add(generateReceiveEntitiesAckCodeBlock(trackerClassName, syncHelperVarName,
+                        syncHelperFnName = syncHelperFnName, dbVarName = dbVarName, serverType = serverType))
+                .endControlFlow()
+                .build()
+
+
+
 
 /**
  * Generates a function for NanoHTTPD to implement the update syncable tracker received. This function
@@ -749,7 +785,9 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).forEach {
             val syncableEntityinfo = SyncableEntityInfo(it, processingEnv)
-            ktorCodeBlock.add(generateUpdateTrackerReceivedKtorRoute(syncableEntityinfo.tracker))
+            ktorCodeBlock
+                    .add(generateEntitiesAckKtorRoute(syncableEntityinfo.tracker,
+                            syncableEntityinfo.syncableEntity))
             specs.nanoHttpdResponder.typeSpec.addFunction(generateUpdateTrackerReceivedNanoHttpdFun(
                     syncableEntityinfo.tracker)
                     .addParameters(nanoHttpdDaoParams)

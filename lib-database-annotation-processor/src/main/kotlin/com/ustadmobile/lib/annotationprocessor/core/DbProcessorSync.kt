@@ -59,12 +59,16 @@ internal fun generateTrackerEntity(entityClass: TypeElement, processingEnv: Proc
                             .build()
             ))
             .addAnnotation(AnnotationSpec.builder(Entity::class)
-                    .addMember("indices = [%T(value = [%S, %S, %S, %S])]",
-                                    Index::class,
-                                    DbProcessorSync.TRACKER_DESTID_FIELDNAME,
-                                    DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
-                                    DbProcessorSync.TRACKER_RECEIVED_FIELDNAME,
-                                    DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME)
+                    .addMember("indices = [%T(value = [%S, %S, %S]),%T(value = [%S, %S], unique = true)]",
+                            //Index for query speed linking the destid, entity pk, and the change seq num
+                            Index::class,
+                            DbProcessorSync.TRACKER_DESTID_FIELDNAME,
+                            DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
+                            DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME,
+                            //Unique index to enforce that there should be one tracker per entity pk / destination id combo
+                            Index::class,
+                            DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
+                            DbProcessorSync.TRACKER_DESTID_FIELDNAME)
                     .build())
             .primaryConstructor(FunSpec.constructorBuilder()
                     .addParameter(ParameterSpec.builder(DbProcessorSync.TRACKER_PK_FIELDNAME, LONG)
@@ -273,9 +277,9 @@ class DbProcessorSync: AbstractDbProcessor() {
             if(hasAttachments) {
                 codeBlock.add(generateGetAttachmentDataCodeBlock(entityType))
             }
-
-            codeBlock.add(generateUpdateTrackerReceivedKtorRoute(syncableEntityInfo.tracker,
-                    syncHelperVarName = "_dao", syncHelperFnName = "_daoFn"))
+            codeBlock.add(generateEntitiesAckKtorRoute(syncableEntityInfo.tracker,
+                    syncableEntityInfo.syncableEntity, syncHelperVarName = "_dao",
+                    syncHelperFnName = "_daoFn"))
 
         }
         codeBlock.endControlFlow()
@@ -308,6 +312,11 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .getter(FunSpec.getterBuilder().addCode("return _findSyncNodeClientId()\n")
                         .build()).build())
+                .addProperty(PropertySpec.builder("tableIdMap",
+                    Map::class.asClassName().parameterizedBy(String::class.asClassName(), INT))
+                        .getter(FunSpec.getterBuilder().addCode("return _repo.tableIdMap\n").build())
+                        .addModifiers(KModifier.OVERRIDE)
+                    .build())
                 .addProperty(PropertySpec.builder("dbPath", String::class)
                         .addModifiers(KModifier.OVERRIDE)
                         .getter(FunSpec.getterBuilder().addCode("return _dbPath\n").build())
@@ -337,6 +346,15 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addCode("_dao._insertSyncResult(result)\n")
                 .build())
 
+        repoTypeSpec.addFunction(FunSpec.builder("dispatchPushNotifications")
+                .addParameter("tableId", INT)
+                .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("onPendingChangeLog")
+                .addParameter("tableIds", Set::class.asClassName().parameterizedBy(INT))
+                .addModifiers(KModifier.OVERRIDE)
+                .build())
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)

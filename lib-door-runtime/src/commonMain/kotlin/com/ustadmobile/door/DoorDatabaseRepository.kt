@@ -38,6 +38,27 @@ interface DoorDatabaseRepository {
 
     var connectivityStatus: Int
 
+    /**
+     * This map will be a generated map of table names (e.g. EntityName) to the corresponding TableId
+     * for all syncable entities
+     */
+    val tableIdMap: Map<String, Int>
+
+    /**
+     * This function will be generated on all repositories. It is intended for use on the primary
+     * database. This function should be called by the underlying db system (e.g. SQLite or Postgres)
+     * when there are
+     */
+    fun onPendingChangeLog(tableIds: Set<Int>)
+
+    /**
+     * This function will be generated on all repositories. It will dispatch Push Notifications for
+     * values that are in the changelog.
+     */
+    suspend fun dispatchPushNotifications(tableId: Int)
+
+
+
     companion object {
 
         const val STATUS_CONNECTED = 1

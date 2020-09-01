@@ -68,7 +68,7 @@ kotlin {
 
         jvmMain {
             //Uncomment lines below to allow debugging on generated source code
-//            kotlin.srcDirs += ["$buildDir/generated/source/doordb-jvm"]
+            kotlin.srcDirs += ["$buildDir/generated/source/doordb-jvm"]
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
@@ -111,8 +111,8 @@ kapt {
     arguments {
         arg("doordb_android_out", "$buildDir/generated/source/door-android")
         //Uncomment lines below to allow debugging on generated source code.
-//        arg("doordb_ktor_out", "$buildDir/generated/source/doordb-jvm")
-//        arg("doordb_jvm_out", "$buildDir/generated/source/doordb-jvm")
+        arg("doordb_ktor_out", "$buildDir/generated/source/doordb-jvm")
+        arg("doordb_jvm_out", "$buildDir/generated/source/doordb-jvm")
         arg("doordb_js_out", "$buildDir/generated/source/door-js")
         arg("doordb_source_path", project.file("src/commonMain/kotlin"))
     }

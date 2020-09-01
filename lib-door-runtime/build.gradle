@@ -140,6 +140,7 @@ kotlin {
             dependencies {
                 implementation "junit:junit:$version_junit"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
             }
         }
     }

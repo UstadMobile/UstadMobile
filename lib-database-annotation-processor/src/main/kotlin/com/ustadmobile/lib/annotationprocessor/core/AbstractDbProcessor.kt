@@ -18,22 +18,16 @@ import java.util.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import kotlinx.coroutines.GlobalScope
-import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorDbType
-import com.ustadmobile.door.PreparedStatementArrayProxy
-import com.ustadmobile.door.EntityInsertionAdapter
-import com.ustadmobile.door.SyncableDoorDatabase
 import io.ktor.http.HttpStatusCode
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.ustadmobile.door.*
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import kotlinx.coroutines.Runnable
 import java.io.IOException
 import kotlin.reflect.KClass
-import com.ustadmobile.door.RepositoryLoadHelper
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.Headers
 
@@ -923,7 +917,11 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         |(SELECT ${mkMaxClause(syncableEntityInfo.entityMasterCsnField.name, op_name)} + 1 FROM ${entityClass.simpleName})
                         |ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
                         |WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name}
-                        |; END
+                        |;
+                        |INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                        |VALUES(${syncableEntityInfo.tableId}, NEW.${syncableEntityInfo.entityPkField.name}, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000))
+                        |;
+                        |END
                     """.trimMargin())
                 }
 
@@ -1405,9 +1403,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 daoVarName = "_ktorHelperDao", preexistingVarNames = listOf("clientId"),
                 serverType = serverType, addRespondCall = false))
 
-        codeBlock.add(generateReplaceSyncableEntitiesTrackerCodeBlock("_result", resultType,
-                processingEnv = processingEnv, syncHelperDaoVarName = syncHelperDaoVarName,
-                isPrimaryDb = (serverType == DbProcessorKtorServer.SERVER_TYPE_KTOR)))
         codeBlock.add(generateRespondCall(resultType, "_result", serverType,
                 ktorBeforeRespondCodeBlock = CodeBlock.of("%M.response.header(%S, _reqId)\n",
                         DbProcessorKtorServer.CALL_MEMBER, "X-reqid"),
@@ -1549,18 +1544,27 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
         codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
                 afterInsertCode = {varName, entityTypeClassName, isList ->
+                    val syncableEntityInfo = SyncableEntityInfo(entityTypeClassName, processingEnv)
+                    val sendTrkEntitiesFn = FunSpec.builder("_ack${entityTypeClassName.simpleName}Received")
+                            .addParameter("_ackList", List::class.asClassName().parameterizedBy(EntityAck::class.asClassName()))
+                            .build()
                     CodeBlock.builder()
                             .beginIfNotNullOrEmptyControlFlow(varName, isList)
-                            .beginControlFlow("_httpClient.%M<Unit>",
-                            CLIENT_GET_MEMBER_NAME)
-                            .beginControlFlow("url")
-                            .add("%M(_endpointToTry)\n", MemberName("io.ktor.http", "takeFrom"))
-                            .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
-                                    "_update${SyncableEntityInfo(entityTypeClassName, processingEnv).tracker.simpleName}Received")
-                            .add("%M(_db)\n", MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
-                            .endControlFlow()
-                            .add("%M(%S, _requestId)\n", CLIENT_PARAMETER_MEMBER_NAME, "reqId")
-                            .endControlFlow()
+                            .add("val _ackList = ")
+                            .apply { add(if(!isList) "listOf($varName)" else varName) }
+                            //TODO: Check if we really want the primary CSN field here
+                            // or is this coming from a local device?
+                            .add(".map·{·%T(epk·=·it.${syncableEntityInfo.entityPkField.name},·" +
+                                    "csn·=·it.${syncableEntityInfo.entityMasterCsnField.name})·}\n", EntityAck::class)
+                            .add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
+                                    dbPathVarName = "_dbPath",
+                                    daoName = daoName, methodName = sendTrkEntitiesFn.name,
+                                    httpResultVarName = "_sendResult", httpStatementVarName = "_sendHttpResponse",
+                                    httpResultType = UNIT, params = sendTrkEntitiesFn.parameters,
+                                    requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
+                                            MemberName("io.ktor.client.request", "header"),
+                                            "x-nid")
+                            ))
                             .endControlFlow()
                             .build()
                 },

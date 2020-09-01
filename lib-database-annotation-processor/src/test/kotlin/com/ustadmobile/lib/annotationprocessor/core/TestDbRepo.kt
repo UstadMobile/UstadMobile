@@ -160,7 +160,7 @@ class TestDbRepo {
 
         val secondRequest = mockServer.takeRequest()
         Assert.assertEquals("Repo made request to acknowledge receipt of entities",
-                "/ExampleDatabase2/ExampleSyncableDao/_updateExampleSyncableEntity_trkReceived?reqId=50",
+                "/ExampleDatabase2/ExampleSyncableDao/_ackExampleSyncableEntityReceived",
                 secondRequest.path)
     }
 

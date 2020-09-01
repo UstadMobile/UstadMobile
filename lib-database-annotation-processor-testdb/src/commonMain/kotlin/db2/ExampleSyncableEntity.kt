@@ -9,7 +9,12 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = 42)
+@SyncableEntity(tableId = 42,
+    pushNotifyOnUpdate = """SELECT DISTINCT deviceId 
+                            FROM AccessGrant 
+                            WHERE entityUid = IN (SELECT chEntityPk FROM ChangeLog WHERE chTableId = 42 AND dispatched = 0)
+                            AND tableId = 42
+|                           AND deviceId = :deviceId""")
 @Serializable
 open class ExampleSyncableEntity(@PrimaryKey(autoGenerate = true) var esUid: Long = 0,
                                  @LocalChangeSeqNum var esLcsn: Int = 0,

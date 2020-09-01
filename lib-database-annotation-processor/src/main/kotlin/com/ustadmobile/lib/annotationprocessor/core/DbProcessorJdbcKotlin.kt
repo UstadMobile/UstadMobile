@@ -813,9 +813,10 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                     codeBlock.add(generateCreateIndicesCodeBlock(
                             arrayOf(IndexMirror(value = arrayOf(DbProcessorSync.TRACKER_DESTID_FIELDNAME,
                                     DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
-                                    DbProcessorSync.TRACKER_RECEIVED_FIELDNAME,
-                                    DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME))),
-                                    trackerEntityClassName.name!!, "_stmt.executeUpdate"))
+                                    DbProcessorSync.TRACKER_CHANGESEQNUM_FIELDNAME)),
+                                    IndexMirror(value = arrayOf(DbProcessorSync.TRACKER_ENTITY_PK_FIELDNAME,
+                                        DbProcessorSync.TRACKER_DESTID_FIELDNAME), unique = true)),
+                            trackerEntityClassName.name!!, "_stmt.executeUpdate"))
                 }
                 codeBlock.add("//End: Create table ${entityType.simpleName} for $dbTypeName\n\n")
             }

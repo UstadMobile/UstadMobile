@@ -17,6 +17,9 @@ abstract class ExampleSyncableDao {
     abstract fun insert(syncableEntity: ExampleSyncableEntity): Long
 
     @Insert
+    abstract fun insertList(syncableEntityLIst: List<ExampleSyncableEntity>)
+
+    @Insert
     abstract suspend fun insertAsync(syncableEntity: ExampleSyncableEntity): Long
 
     @Query("SELECT * FROM ExampleSyncableEntity")

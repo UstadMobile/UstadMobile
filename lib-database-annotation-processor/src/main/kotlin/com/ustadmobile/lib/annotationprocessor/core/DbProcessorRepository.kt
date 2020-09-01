@@ -16,6 +16,8 @@ import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.SetAttachmentData
+import com.ustadmobile.door.util.RepositoryPendingChangeLogListener
+import com.ustadmobile.door.util.RepositoryPushDispatcher
 import kotlinx.coroutines.newSingleThreadContext
 import java.io.File
 import java.util.*
@@ -131,6 +133,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
         val dbRepoType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
                 .superclass(dbTypeElement.asClassName())
                 .addSuperinterface(repoInterface)
+                .addSuperinterface(RepositoryPendingChangeLogListener::class)
                 .primaryConstructor(FunSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
                         .addParameter(ParameterSpec.builder("_endpoint", String::class.asClassName()).build())
@@ -170,17 +173,52 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                 .initializer("%T(%M(%S))", RepositoryHelper::class,
                                         MemberName("kotlinx.coroutines", "newSingleThreadContext"),
                                         "Repo-${dbTypeElement.simpleName}")
+                                .build(),
+                        PropertySpec.builder("_pushDispatcher", RepositoryPushDispatcher::class)
+                                .initializer(CodeBlock.of("%T(this)", RepositoryPushDispatcher::class))
+                                .build(),
+                        PropertySpec.builder("tableIdMap",
+                                Map::class.asClassName().parameterizedBy(String::class.asClassName(), INT))
+                                .getter(FunSpec.getterBuilder().addCode("return TABLE_ID_MAP\n").build())
+                                .addModifiers(KModifier.OVERRIDE)
                                 .build()
                 ))
                 .addFunction(FunSpec.builder("clearAllTables")
                         .addModifiers(KModifier.OVERRIDE)
                         .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to clearAllTables!")
                         .build())
+                .addFunction(FunSpec.builder("onPendingChangeLog")
+                        .addModifiers(KModifier.OVERRIDE)
+                        .addParameter("tableIdList", Set::class.asClassName().parameterizedBy(INT))
+                        .addCode("_pushDispatcher.onPendingChangeLog(tableIdList)\n")
+                        .build())
+                .addFunction(FunSpec.builder("dispatchPushNotifications")
+                        .addParameter("tableId", INT)
+                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                        .build())
                 .addType(TypeSpec.companionObjectBuilder()
                         .addProperty(PropertySpec.builder(DB_NAME_VAR, String::class)
                                 .addModifiers(KModifier.CONST)
                                 .initializer("%S", dbTypeElement.simpleName)
                                 .mutable(false).build())
+                        .addProperty(PropertySpec.builder("TABLE_ID_MAP",
+                            Map::class.asClassName().parameterizedBy(String::class.asClassName(), INT))
+                                .initializer(CodeBlock.builder()
+                                        .add("mapOf(")
+                                        .apply {
+                                    syncableEntityTypesOnDb(dbTypeElement, processingEnv).forEachIndexed {index, syncableEl ->
+                                        if(index > 0)
+                                            add(",")
+
+                                        val syncableEntityInfo = SyncableEntityInfo(syncableEl.asClassName(),
+                                                processingEnv)
+                                        add("%S to %L\n", syncableEntityInfo.syncableEntity.simpleName,
+                                                syncableEntityInfo.tableId)
+                                    }
+                                }
+                                        .add(")\n")
+                                    .build())
+                                .build())
                         .build())
 
 
