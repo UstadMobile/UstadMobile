@@ -21,7 +21,7 @@ annotation class SyncableEntity(
          * If not-blank, this query should list all the device ids that must should receive a
          * notification when this entity is inserted or updated. This is done by the primary node
          */
-        val pushNotifyOnUpdate: String = "",
+        val notifyOnUpdate: String = "",
 
 
         val syncFindAllQuery: String = "")

@@ -2,6 +2,9 @@ package db2
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.annotation.LastChangedBy
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 
 @Entity
@@ -9,12 +12,21 @@ import com.ustadmobile.door.annotation.SyncableEntity
 class AccessGrant {
 
     @PrimaryKey(autoGenerate = true)
-    val accessId: Long = 0
+    var accessId: Long = 0
 
-    val deviceId: Int = 0
+    @LocalChangeSeqNum
+    var aLcsn: Int = 0
 
-    val tableId: Int = 0
+    @MasterChangeSeqNum
+    var aPcsn: Int = 0
 
-    val entityUid: Long = 0
+    @LastChangedBy
+    var aLcb: Int = 0
+
+    var deviceId: Int = 0
+
+    var tableId: Int = 0
+
+    var entityUid: Long = 0
 
 }

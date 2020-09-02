@@ -46,18 +46,26 @@ interface DoorDatabaseRepository {
 
     /**
      * This function will be generated on all repositories. It is intended for use on the primary
-     * database. This function should be called by the underlying db system (e.g. SQLite or Postgres)
-     * when there are
+     * database (e.g. the server). This function should be called by the underlying db system
+     * (e.g. SQLite or Postgres) when changes have been made to a syncable table. The underlying
+     * database triggers should insert a row into the ChangeLog table (including the entity UID,
+     * and table ID).
+     *
+     * This function should be called periodically after a change happens (e.g. as is done by
+     * the ChangeLogMonitor) and NOT once for every single row (for performance reasons).
      */
     fun onPendingChangeLog(tableIds: Set<Int>)
 
     /**
-     * This function will be generated on all repositories. It will dispatch Push Notifications for
-     * values that are in the changelog.
+     * This function will be generated on all repositories. It will dispatch update notifications
+     * for values that are in the changelog for that table. It will use the notifyOnUpdate query
+     * that is on the SyncableEntity annotation of an entity to find which devices should be
+     * notified of changes. This will result in creating / updating the UpdateNotification table.
+     *
+     * It will also call the UpdateNotificationManager (if provided) so that any client which is
+     * currently subscribed for updates will be notified.
      */
-    suspend fun dispatchPushNotifications(tableId: Int)
-
-
+    suspend fun dispatchUpdateNotifications(tableId: Int)
 
     companion object {
 

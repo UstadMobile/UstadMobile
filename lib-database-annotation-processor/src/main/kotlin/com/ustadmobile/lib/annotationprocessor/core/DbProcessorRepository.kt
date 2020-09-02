@@ -17,13 +17,14 @@ import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.SetAttachmentData
 import com.ustadmobile.door.util.RepositoryPendingChangeLogListener
-import com.ustadmobile.door.util.RepositoryPushDispatcher
+import com.ustadmobile.door.util.RepositoryUpdateDispatcher
 import kotlinx.coroutines.newSingleThreadContext
 import java.io.File
 import java.util.*
 import kotlin.reflect.KClass
 
-internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false): TypeSpec.Builder {
+internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false,
+        extraConstructorParams: List<ParameterSpec> = listOf()): TypeSpec.Builder {
     val idGetterLambdaType = LambdaTypeName.get(
             parameters = *arrayOf(DoorDatabase::class.asClassName()), returnType = Int::class.asClassName())
     val repoClassSpec = TypeSpec.classBuilder("${daoType.simpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}")
@@ -61,6 +62,9 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
             .addParameter("_endpoint", String::class)
             .addParameter("_dbPath", String::class)
             .addParameter("_attachmentsDir", String::class)
+            .apply {
+                takeIf { extraConstructorParams.isNotEmpty() }?.addParameters(extraConstructorParams)
+            }
 
 
     if(addSyncHelperParam) {
@@ -140,6 +144,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addParameter("_accessToken", String::class)
                         .addParameter(ParameterSpec.builder("_httpClient", HttpClient::class.asClassName()).build())
                         .addParameter(ParameterSpec.builder("_attachmentsDir", String::class).build())
+                        .addParameter("_updateNotificationManager",
+                            UpdateNotificationManager::class.asClassName().copy(nullable = true))
                         .build())
                 .addProperties(listOf(
                         PropertySpec.builder("_db",
@@ -169,13 +175,17 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         PropertySpec.builder("_attachmentsDir", String::class)
                                 .initializer("_attachmentsDir")
                                 .build(),
+                        PropertySpec.builder("_updateNotificationManager",
+                                UpdateNotificationManager::class.asClassName().copy(nullable = true))
+                                .initializer("_updateNotificationManager")
+                                .build(),
                         PropertySpec.builder("_repositoryHelper", RepositoryHelper::class)
                                 .initializer("%T(%M(%S))", RepositoryHelper::class,
                                         MemberName("kotlinx.coroutines", "newSingleThreadContext"),
                                         "Repo-${dbTypeElement.simpleName}")
                                 .build(),
-                        PropertySpec.builder("_pushDispatcher", RepositoryPushDispatcher::class)
-                                .initializer(CodeBlock.of("%T(this)", RepositoryPushDispatcher::class))
+                        PropertySpec.builder("_updateDispatcher", RepositoryUpdateDispatcher::class)
+                                .initializer(CodeBlock.of("%T(this)", RepositoryUpdateDispatcher::class))
                                 .build(),
                         PropertySpec.builder("tableIdMap",
                                 Map::class.asClassName().parameterizedBy(String::class.asClassName(), INT))
@@ -190,11 +200,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 .addFunction(FunSpec.builder("onPendingChangeLog")
                         .addModifiers(KModifier.OVERRIDE)
                         .addParameter("tableIdList", Set::class.asClassName().parameterizedBy(INT))
-                        .addCode("_pushDispatcher.onPendingChangeLog(tableIdList)\n")
-                        .build())
-                .addFunction(FunSpec.builder("dispatchPushNotifications")
-                        .addParameter("tableId", INT)
-                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                        .addCode("_updateDispatcher.onPendingChangeLog(tableIdList)\n")
                         .build())
                 .addType(TypeSpec.companionObjectBuilder()
                         .addProperty(PropertySpec.builder(DB_NAME_VAR, String::class)
@@ -306,7 +312,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
             dbRepoType.addProperty(PropertySpec
                     .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
                     .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db, this, _syncDao, _httpClient, _clientIdFn, _endpoint, $DB_NAME_VAR, _attachmentsDir) ", repoImplClassName)
+                            .add("%T(_db, this, _syncDao, _httpClient, _clientIdFn, _endpoint, $DB_NAME_VAR, _attachmentsDir, _updateNotificationManager) ", repoImplClassName)
                             .endControlFlow().build())
                     .build())
             dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
@@ -315,6 +321,12 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .addParameter("entities", List::class.asClassName().parameterizedBy(
                             KClass::class.asClassName().parameterizedBy(STAR)).copy(nullable = true))
                     .addCode("_${syncableDaoClassName.simpleName}.sync(entities)\n")
+                    .build())
+
+            dbRepoType.addFunction(FunSpec.builder("dispatchUpdateNotifications")
+                    .addParameter("tableId", INT)
+                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                    .addCode("_${syncableDaoClassName.simpleName}.dispatchUpdateNotifications(tableId)\n")
                     .build())
 
         }

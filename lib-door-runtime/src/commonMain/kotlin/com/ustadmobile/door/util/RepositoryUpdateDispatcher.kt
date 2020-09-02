@@ -6,13 +6,13 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
-class RepositoryPushDispatcher(val repo: DoorDatabaseRepository, val numProcessors: Int = 5) : RepositoryPendingChangeLogListener{
+class RepositoryUpdateDispatcher(val repo: DoorDatabaseRepository, val numProcessors: Int = 5) : RepositoryPendingChangeLogListener{
 
     val channel = Channel<Int>(capacity = Channel.UNLIMITED)
 
     fun CoroutineScope.launchProcessor(id: Int, channel: Channel<Int>) = launch {
         for(tableId in channel) {
-            repo.dispatchPushNotifications(tableId)
+            repo.dispatchUpdateNotifications(tableId)
         }
     }
 

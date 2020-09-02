@@ -7,8 +7,10 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.SyncResult
+import com.ustadmobile.door.UpdateNotificationManager
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_MEMBER
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_ON_MEMBER
@@ -25,7 +27,6 @@ import java.io.FileInputStream
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.TypeElement
-import javax.tools.Diagnostic
 import kotlin.reflect.KClass
 
 /**
@@ -302,7 +303,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                 syncRepoSimpleName)
         val daoClassName = ClassName(dbClassName.packageName,
                 "${dbClassName.simpleName}$SUFFIX_SYNCDAO_ABSTRACT")
-        val repoTypeSpec = newRepositoryClassBuilder(daoClassName, false)
+        val repoTypeSpec = newRepositoryClassBuilder(daoClassName, false,
+            extraConstructorParams = listOf(ParameterSpec.builder("_updateNotificationManager",
+                UpdateNotificationManager::class.asClassName().copy(nullable = true)).build()))
                 .addSuperinterface(DoorDatabaseSyncRepository::class as KClass<*>)
                 .addProperty(PropertySpec.builder("auth", String::class)
                         .getter(FunSpec.getterBuilder().addCode("return %S\n", "").build())
@@ -329,6 +332,10 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
                         .build())
+                .addProperty(PropertySpec.builder("_updateNotificationManager",
+                    UpdateNotificationManager::class.asClassName().copy(nullable = true))
+                        .initializer("_updateNotificationManager")
+                        .build())
                 .addRepositoryHelperDelegateCalls("_repo")
 
         val syncFnCodeBlock = CodeBlock.builder()
@@ -346,13 +353,31 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addCode("_dao._insertSyncResult(result)\n")
                 .build())
 
-        repoTypeSpec.addFunction(FunSpec.builder("dispatchPushNotifications")
+        repoTypeSpec.addFunction(FunSpec.builder("dispatchUpdateNotifications")
                 .addParameter("tableId", INT)
                 .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                .addCode(CodeBlock.builder()
+                        .beginControlFlow("when(tableId)")
+                        .apply {
+                            syncableEntityTypesOnDb(dbType, processingEnv).forEach {
+                                val syncableEntityInfo = SyncableEntityInfo(it.asClassName(), processingEnv)
+                                if(syncableEntityInfo.notifyOnUpdate.isNotBlank()) {
+                                    add("%L -> _findDevicesToNotify${it.simpleName}()\n", syncableEntityInfo.tableId)
+                                }
+                            }
+                        }
+                        .endControlFlow()
+                        .build())
                 .build())
 
         repoTypeSpec.addFunction(FunSpec.builder("onPendingChangeLog")
                 .addParameter("tableIds", Set::class.asClassName().parameterizedBy(INT))
+                .addModifiers(KModifier.OVERRIDE)
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("_replaceUpdateNotifications")
+                .addParameter("entities", List::class.parameterizedBy(UpdateNotification::class))
+                .addCode(CodeBlock.of("_dao._replaceUpdateNotifications(entities)\n"))
                 .addModifiers(KModifier.OVERRIDE)
                 .build())
 
@@ -402,6 +427,24 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
                             syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
                     .add("_loadHelper.doRequest()\n")
+
+            val findDevicesSql = syncableEntityInfo.notifyOnUpdate
+            if(findDevicesSql != "") {
+                repoTypeSpec.addFunction(FunSpec.builder("_findDevicesToNotify${entityType.simpleName}")
+                        .returns(List::class.asClassName().parameterizedBy(INT))
+                        .addModifiers(KModifier.OVERRIDE)
+                        .addCode(CodeBlock.builder()
+                                .add("val _devicesToNotify = _dao._findDevicesToNotify${entityType.simpleName}()\n")
+                                .add("val _timeNow = %M()\n",
+                                        MemberName("com.ustadmobile.door.util", "systemTimeInMillis"))
+                                .add("val _updateNotifications = _devicesToNotify.map·{·%T(pnDeviceId·=·it,·pnTableId·=·${syncableEntityInfo.tableId},·pnTimestamp·=·_timeNow)·}\n",
+                                    UpdateNotification::class)
+                                .add("_replaceUpdateNotifications(_updateNotifications)\n")
+                                .add("_updateNotificationManager?.onNewUpdateNotifications(_updateNotifications)\n")
+                                .add("return _devicesToNotify\n")
+                                .build())
+                        .build())
+            }
 
             val hasAttachments = entityType.getAnnotation(EntityWithAttachment::class.java) != null
 
@@ -556,6 +599,21 @@ class DbProcessorSync: AbstractDbProcessor() {
         abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceInsertSyncResultFn)
         implDaoTypeSpec.addFunction(implInsertSyncResultFn)
 
+
+        val updateNotificationClassName = UpdateNotification::class.asClassName()
+        val updateNotificationTypeEl = processingEnv.elementUtils.getTypeElement(
+            "${updateNotificationClassName.packageName}.${updateNotificationClassName.simpleName}")
+
+        val (abstractReplaceUpdateNotification, implReplaceUpdateNotification, abstractDaoReplaceUpdateNotification) =
+                generateAbstractAndImplUpsertFuns(
+                        "_replaceUpdateNotifications",
+                        ParameterSpec.builder("entities", List::class.parameterizedBy(UpdateNotification::class)).build(),
+                        updateNotificationTypeEl.asEntityTypeSpec(),
+                        implDaoTypeSpec, abstractFunIsOverride = true)
+        abstractDaoTypeSpec.addFunction(abstractReplaceUpdateNotification)
+        implDaoTypeSpec.addFunction(implReplaceUpdateNotification)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractDaoReplaceUpdateNotification)
+
         syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
             val entityListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
@@ -616,6 +674,19 @@ class DbProcessorSync: AbstractDbProcessor() {
             abstractDaoTypeSpec.addFunction(abstractUpdateTrackerFun)
             implDaoTypeSpec.addFunction(implUpdateTrackerFun)
             abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceUpdateTrackerFun)
+
+
+            val findDevicesSql = syncableEntityInfo.notifyOnUpdate
+            if(findDevicesSql != "") {
+                val (abstractFindDevicesFun, implFindDevicesFun, abstractInterfaceFindDevicesFun) =
+                        generateAbstractAndImplQueryFunSpecs(syncableEntityInfo.notifyOnUpdate,
+                                "_findDevicesToNotify${entityType.simpleName}",
+                                List::class.asClassName().parameterizedBy(INT), listOf(),
+                                abstractFunIsOverride = true)
+                abstractDaoTypeSpec.addFunction(abstractFindDevicesFun)
+                implDaoTypeSpec.addFunction(implFindDevicesFun)
+                abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceFindDevicesFun)
+            }
         }
 
 

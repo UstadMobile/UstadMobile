@@ -13,7 +13,8 @@ import db2.ExampleDatabase2.Companion.DB_VERSION
     ExampleSyncableEntity::class,
     OtherSyncableEntity::class,
     ExampleAttachmentEntity::class,
-    ChangeLog::class
+    ChangeLog::class,
+    AccessGrant::class
     //#DOORDB_TRACKER_ENTITIES
 
 ])

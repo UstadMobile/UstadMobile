@@ -32,10 +32,14 @@ class SyncableEntityInfo {
 
     var tableId: Int = 0
 
+    var notifyOnUpdate: String = ""
+
     constructor(syncableEntityParam: ClassName, processingEnv: ProcessingEnvironment) {
         syncableEntity = syncableEntityParam
         val syncableEntityEl = processingEnv.elementUtils.getTypeElement(syncableEntity.canonicalName)
         tableId = syncableEntityEl.getAnnotation(SyncableEntity::class.java).tableId
+        notifyOnUpdate = syncableEntityEl.getAnnotation(SyncableEntity::class.java).notifyOnUpdate
+
         val entityPkFieldEl = syncableEntityEl.enclosedElements
                 .first { it.getAnnotation(PrimaryKey::class.java) != null }
         entityPkField = PropertySpec.builder("${entityPkFieldEl.simpleName}",
