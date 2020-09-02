@@ -1,19 +1,17 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.nhaarman.mockitokotlin2.argWhere
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.timeout
+import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
-import db2.ExampleDatabase2
-import db2.ExampleSyncableEntity
+import db2.*
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import db2.ExampleDatabase2SyncDao_JdbcKt
-import db2.ExampleSyncableDao_Repo
-import db2.ExampleDatabase2_KtorRoute
-import db2.ExampleDatabase2_Repo
 import io.ktor.application.ApplicationCall
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
@@ -23,7 +21,6 @@ import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import java.util.concurrent.TimeUnit
 import io.ktor.application.call
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.ClientRequestException
@@ -31,21 +28,19 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.features.CallLogging
 import io.ktor.http.HttpStatusCode
- import io.ktor.request.receiveOrNull
 import io.ktor.response.respond
-import io.ktor.routing.post
-import io.ktor.server.engine.stop
+import io.ktor.routing.get
+import io.ktor.routing.routing
 import io.netty.handler.codec.http.HttpResponse
 import kotlinx.coroutines.runBlocking
 import org.junit.*
 import org.junit.rules.TemporaryFolder
-import org.kodein.di.bind
+import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
-import org.kodein.di.registerContextTranslator
-import org.kodein.di.scoped
-import org.kodein.di.singleton
+import org.kodein.di.ktor.di
+import org.sqlite.SQLiteDataSource
 import java.io.File
-import java.nio.file.Files
+import javax.sql.DataSource
 import kotlin.test.assertEquals
 
 
@@ -61,12 +56,15 @@ class TestDbRepo {
 
     lateinit var tmpAttachmentsDir: File
 
+    lateinit var mockUpdateNotificationManager: UpdateNotificationManager
+
+    lateinit var serverDi: DI
+
     @JvmField
     @Rule
     var temporaryFolder = TemporaryFolder()
 
-    fun createSyncableDaoServer(db: ExampleDatabase2) = embeddedServer(Netty, 8089) {
-        val virtualHostScope = TestDbRoute.VirtualHostScope()
+    fun createSyncableDaoServer(di: DI) = embeddedServer(Netty, 8089) {
         install(ContentNegotiation) {
             register(ContentType.Application.Json, GsonConverter())
             register(ContentType.Any, GsonConverter())
@@ -74,18 +72,11 @@ class TestDbRepo {
 
         tmpAttachmentsDir = temporaryFolder.newFolder("testdbrepoattachments")
 
+        mockUpdateNotificationManager = mock {}
+
         install(DIFeature) {
-            bind<ExampleDatabase2>(tag = DoorTag.TAG_DB) with scoped(virtualHostScope).singleton {
-                db
-            }
+            extend(di)
 
-            bind<Gson>() with singleton { Gson() }
-
-            bind<String>(tag = DoorTag.TAG_ATTACHMENT_DIR) with scoped(virtualHostScope).singleton {
-                tmpAttachmentsDir.absolutePath
-            }
-
-            registerContextTranslator { call: ApplicationCall -> "localhost" }
         }
 
         install(Routing) {
@@ -93,17 +84,62 @@ class TestDbRepo {
         }
 
         install(CallLogging)
+
+        routing {
+            get("/initrepo") {
+                try {
+                    val repo : ExampleDatabase2 = di().direct.on(call).instance(tag = DoorTag.TAG_REPO)
+                    call.respond("OK")
+                }catch(e: Exception) {
+                    e.printStackTrace()
+                    call.respond(HttpStatusCode.InternalServerError, e.toString())
+                }
+
+            }
+        }
     }
 
     fun setupClientAndServerDb() {
         try {
-            serverDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "ExampleDatabase2")
-                    .build() as ExampleDatabase2
+            val virtualHostScope = TestDbRoute.VirtualHostScope()
+            serverDi = DI {
+                bind<ExampleDatabase2>(tag = DoorTag.TAG_DB) with scoped(virtualHostScope).singleton {
+                    DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "ExampleDatabase2")
+                            .build().also {
+                                it.clearAllTables()
+                            }
+                }
+
+                bind<ExampleDatabase2>(tag = DoorTag.TAG_REPO) with scoped(virtualHostScope).singleton {
+                    val db: ExampleDatabase2 = instance(tag = DoorTag.TAG_DB)
+                    val repo = db.asRepository(Any(), "http://localhost/", "", httpClient,
+                            tmpAttachmentsDir?.absolutePath, mockUpdateNotificationManager)
+                    ChangeLogMonitor(db, repo as DoorDatabaseRepository)
+                    repo
+                }
+
+                bind<Gson>() with singleton { Gson() }
+
+                bind<String>(tag = DoorTag.TAG_ATTACHMENT_DIR) with scoped(virtualHostScope).singleton {
+                    tmpAttachmentsDir.absolutePath
+                }
+
+                bind<DataSource>() with factory { dbName: String ->
+                    SQLiteDataSource().also {
+                        it.url = "jdbc:sqlite:${dbName}.sqlite"
+                    }
+                }
+
+                registerContextTranslator { call: ApplicationCall -> "localhost" }
+            }
+
+            serverDb = serverDi.on("localhost").direct.instance(tag = DoorTag.TAG_DB)
             clientDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1")
-                    .build() as ExampleDatabase2
-            serverDb!!.clearAllTables()
-            clientDb!!.clearAllTables()
-            server = createSyncableDaoServer(serverDb!!)
+                    .build().also {
+                        it.clearAllTables()
+                    }
+
+            server = createSyncableDaoServer(serverDi)
             server!!.start(wait = false)
         }catch(e: Exception) {
             e.printStackTrace()
@@ -141,7 +177,7 @@ class TestDbRepo {
 
         val db = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1").build()
         db.clearAllTables()
-        val dbRepo = db.asRepository<ExampleDatabase2>(Any(), mockServer.url("/").toString(),
+        val dbRepo = db.asRepository(Any(), mockServer.url("/").toString(),
                 "", httpClient, null)
                 .asConnectedRepository<ExampleDatabase2>()
 
@@ -421,6 +457,32 @@ class TestDbRepo {
 
 
         Assert.assertEquals(HttpStatusCode.BadRequest, httpStatusErr)
+    }
+
+    @Test
+    fun givenEmptyDatabase_whenChangeMadeOnServer_thenOnNewUpdateNotificationShouldBeCalledAndNotificationEntityShouldBeInserted()  {
+        setupClientAndServerDb()
+
+        val testUid = 42L
+
+        val serverDb: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_DB)
+        val serverRepo: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_REPO)
+        println(serverRepo)
+
+        serverDb.accessGrantDao().insert(AccessGrant().apply {
+            deviceId = 57
+            tableId = 42
+            entityUid = testUid
+        })
+
+        val exampleEntity = ExampleSyncableEntity().apply {
+            esUid = testUid
+            esName = "Hello Notification"
+            serverDb.exampleSyncableDao().insert(this)
+        }
+
+        verify(mockUpdateNotificationManager, timeout(5000 * 50000)).onNewUpdateNotifications(
+                argWhere { it.any { it.pnTableId ==  42 && it.pnDeviceId == 57} })
     }
 
 }

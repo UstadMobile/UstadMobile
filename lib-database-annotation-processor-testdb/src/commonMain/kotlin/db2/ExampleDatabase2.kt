@@ -33,6 +33,8 @@ abstract class ExampleDatabase2 : DoorDatabase(), SyncableDoorDatabase {
 
     abstract fun exampleAttachmentDao(): ExampleAttachmentDao
 
+    abstract fun accessGrantDao(): AccessGrantDao
+
     //#DOORDB_SYNCDAO
 
 

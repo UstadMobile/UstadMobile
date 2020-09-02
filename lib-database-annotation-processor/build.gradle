@@ -139,6 +139,7 @@ dependencies {
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     testImplementation "com.google.code.gson:gson:$version_gson"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 }
 
 sourceCompatibility = "1.8"

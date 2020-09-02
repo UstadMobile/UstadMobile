@@ -2,29 +2,30 @@ package com.ustadmobile.door
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import org.sqlite.SQLiteConnection
-import org.sqlite.SQLiteUpdateListener
 import java.util.concurrent.atomic.AtomicReference
 
-class ChangeLogMonitorSqlite(db: DoorDatabase, private val repo: DoorDatabaseRepository): SQLiteUpdateListener {
-
-    val connection: SQLiteConnection
+class ChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepository) {
 
     val channel: Channel<Int> = Channel(capacity = Channel.UNLIMITED)
 
     val dispatchJob: AtomicReference<Job?> = AtomicReference(null)
 
+    val changeListenerRequest: DoorDatabase.ChangeListenerRequest
+
     init {
-        connection = db.openConnection() as SQLiteConnection
-        connection.addUpdateListener(this)
+        changeListenerRequest = DoorDatabase.ChangeListenerRequest(listOf(), this::onTablesChanged)
+        db.addChangeListener(changeListenerRequest)
     }
 
-    override fun onUpdate(type: SQLiteUpdateListener.Type?, database: String?, table: String?, rowId: Long) {
-        if(table != null) {
+
+    fun onTablesChanged(tablesChanged: List<String>) {
+        tablesChanged.forEach {table ->
             channel.offer(repo.tableIdMap[table] ?: 0)
+
             if(dispatchJob.get() == null) {
                 dispatchJob.set(GlobalScope.async {
                     delay(100)
+                    dispatchJob.set(null)
                     val itemsToSend = mutableSetOf<Int>()
                     var tableId: Int? = null
                     do {
@@ -39,8 +40,7 @@ class ChangeLogMonitorSqlite(db: DoorDatabase, private val repo: DoorDatabaseRep
     }
 
     fun close() {
-        connection.removeUpdateListener(this)
-        connection.close()
+        db.removeChangeListener(changeListenerRequest)
     }
 
     companion object {

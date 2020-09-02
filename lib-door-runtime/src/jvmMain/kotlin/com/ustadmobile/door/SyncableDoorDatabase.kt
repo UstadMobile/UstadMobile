@@ -3,10 +3,12 @@ package com.ustadmobile.door
 import io.ktor.client.HttpClient
 import java.io.File
 
-actual inline fun <reified  T> SyncableDoorDatabase.asRepository(context: Any, endpoint: String,
-                                                                 accessToken: String,
-                                                                 httpClient: HttpClient,
-                                                                 attachmentsDir: String?): T {
+actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any,
+                                                                    endpoint: String,
+                                                                    accessToken: String,
+                                                                    httpClient: HttpClient,
+                                                                    attachmentsDir: String?,
+                                                                    updateNotificationManager: UpdateNotificationManager?): T {
     val dbClassName = this::class.java.canonicalName.replace("_JdbcKt", "")
     val dbClass = Class.forName(dbClassName)
     val repoImplClass = Class.forName("${dbClassName}_Repo") as Class<T>
@@ -17,7 +19,7 @@ actual inline fun <reified  T> SyncableDoorDatabase.asRepository(context: Any, e
     }
     val repo = repoImplClass
             .getConstructor(dbClass, String::class.java,String::class.java, HttpClient::class.java,
-                    String::class.java)
-            .newInstance(this, endpoint, accessToken, httpClient, attachmentsDirToUse)
+                    String::class.java, UpdateNotificationManager::class.java)
+            .newInstance(this, endpoint, accessToken, httpClient, attachmentsDirToUse, updateNotificationManager)
     return repo
 }

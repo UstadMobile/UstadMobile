@@ -8,8 +8,9 @@ interface SyncableDoorDatabase {
 
 }
 
-expect inline fun <reified  T> SyncableDoorDatabase.asRepository(context: Any,
+expect inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any,
                                                                  endpoint: String,
                                                                  accessToken: String,
                                                                  httpClient: HttpClient,
-                                                                 attachmentsDir: String? = null): T
+                                                                 attachmentsDir: String? = null,
+                                                                 updateNotificationManager: UpdateNotificationManager? = null): T
